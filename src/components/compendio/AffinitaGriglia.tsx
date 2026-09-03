@@ -22,11 +22,11 @@ export function AffinitaGriglia({ affinita, compatta }: Props) {
           return (
             <span
               key={a.elemento}
-              className={`inline-flex flex-col items-center justify-center w-[34px] h-[34px] rounded-md text-[10px] leading-tight ${stile.classe}`}
+              className={`inline-flex flex-col items-center justify-center w-[42px] h-[46px] rounded-md text-[11px] leading-tight ${stile.classe}`}
               title={`${a.elementoNome}: ${a.codiceNome}`}
             >
               <span style={{ color: coloreElemento(a.elemento) }} className="font-bold">{a.elementoSigla}</span>
-              <span>{a.codice === '-' ? '—' : a.codiceSigla}</span>
+              <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt={a.codiceNome} className="w-6 h-6 object-contain" fallback={<span>{a.codice === '-' ? '—' : a.codiceSigla}</span>} />
             </span>
           );
         })}
@@ -34,16 +34,15 @@ export function AffinitaGriglia({ affinita, compatta }: Props) {
     );
   }
   return (
-    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2" aria-label="Affinità">
+    <div className="grid grid-cols-5 lg:grid-cols-10 gap-2" aria-label="Affinità">
       {affinita.map((a) => {
         const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
         return (
-          <div key={a.elemento} className={`flex flex-col items-center justify-center rounded-lg py-2 px-1 ${stile.classe}`} title={`${a.elementoNome}: ${a.codiceNome}`}>
-            <span className="text-[11px] font-bold" style={{ color: coloreElemento(a.elemento) }}>{a.elementoNome}</span>
-            <span className="text-[13px] inline-flex items-center gap-1">
-              <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt="" decorativa className="w-4 h-4 object-contain" fallback={null} />
-              {a.codiceNome}
-            </span>
+          <div key={a.elemento} className={`flex flex-col items-center justify-center gap-1 rounded-lg py-2 px-1 text-center ${stile.classe}`} title={`${a.elementoNome}: ${a.codiceNome}`}>
+            <AssetImg nome={`elementi/${a.elemento}`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
+            <span className="text-[12px] font-bold leading-tight" style={{ color: coloreElemento(a.elemento) }}>{a.elementoNome}</span>
+            <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
+            <span className="text-[12px] font-semibold leading-tight">{a.codiceNome}</span>
           </div>
         );
       })}
