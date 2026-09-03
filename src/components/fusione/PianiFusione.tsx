@@ -3,14 +3,15 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { getPianiFusione, getSkills } from '../../services/api';
+import { getPianiFusione, getSkills, salvaPiano } from '../../services/api';
+import { notifica } from '../../stores/notificationStore';
+import { AlberoPiano } from './AlberoPiano';
 import { useCarica } from '../../hooks/useCarica';
 import { SelettorePersona } from './SelettorePersona';
 import { SelettoreSkill } from './SelettoreSkill';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
-import type { NodoPianoDto, PersonaRiassuntoDto, PianoFusioneDto, SkillRiassuntoDto } from '../../types';
+import type { PersonaRiassuntoDto, PianiFusioneDto, PianoFusioneDto, SkillRiassuntoDto } from '../../types';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -19,42 +20,12 @@ interface Props {
   inizialeId?: number;
   /** Skill preselezionate (id), ad esempio da un obiettivo. */
   skillInizialiIds?: number[];
-}
-
-const NOME_MODO: Record<NodoPianoDto['modo'], string> = { scorta: 'In scorta', registro: 'Dal Registro', cattura: 'Da catturare', fusione: 'Fusione' };
-const NOME_TIPO: Record<string, string> = { normale: 'normale', 'stesso-arcano': 'stesso arcano', tesoro: 'con Demone del Tesoro', speciale: 'speciale' };
-
-/** Nodo dell'albero: riga con Persona, modo (colore), costo; i figli rientrati sotto. */
-function Nodo({ nodo, radice }: { nodo: NodoPianoDto; radice?: boolean }) {
-  const p = nodo.persona;
-  const classeModo = nodo.modo === 'scorta' ? 'chip--attivo' : nodo.modo === 'cattura' ? 'text-warning' : nodo.modo === 'registro' ? 'text-text-secondary' : '';
-  return (
-    <li className="flex flex-col gap-1">
-      <div className={`flex flex-wrap items-center gap-2 py-1 ${radice ? 'text-[15px]' : 'text-[13px]'}`}>
-        <Link to={`/compendio/persona/${p.id}`} className={`chip touch no-underline ${radice ? 'chip--attivo' : ''}`} title={`${p.arcanaNome} · livello ${p.livello}`}>
-          {p.nomeIt} <span className="opacity-70">L{p.livello}</span>
-        </Link>
-        <span className={`text-[12px] ${classeModo}`}>
-          {nodo.modo === 'fusione' ? `${NOME_MODO.fusione} ${NOME_TIPO[nodo.tipo ?? 'normale']}` : NOME_MODO[nodo.modo]}
-          {nodo.modo === 'registro' && ` · ${formattaYen(nodo.costo)}`}
-        </span>
-        {nodo.skillPortate.map((s) => (
-          <span key={s.id} className={`chip text-[11px] ${nodo.skillDaLivello.some((d) => d.id === s.id) ? 'text-warning' : 'chip--attivo'}`} title={nodo.skillDaLivello.some((d) => d.id === s.id) ? 'La apprende salendo di livello' : nodo.modo === 'fusione' ? 'Da ereditare in questa fusione' : 'Posseduta'}>
-            {s.nomeIt}{nodo.skillDaLivello.some((d) => d.id === s.id) ? ' ↑' : ''}
-          </span>
-        ))}
-      </div>
-      {nodo.figli.length > 0 && (
-        <ul className="m-0 p-0 list-none pl-4 ml-2 border-l border-border-light flex flex-col">
-          {nodo.figli.map((f, i) => <Nodo key={`${f.persona.id}-${i}`} nodo={f} />)}
-        </ul>
-      )}
-    </li>
-  );
+  /** Obiettivo a cui legare i piani salvati (dal collegamento «Piano di fusione» di un obiettivo). */
+  obiettivoId?: number;
 }
 
 /** Scheda di un piano: costo totale, conteggi e albero. */
-function Piano({ piano, indice }: { piano: PianoFusioneDto; indice: number }) {
+function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; indice: number; onSalva?: () => void; salvato?: boolean }) {
   return (
     <article className="card flex flex-col gap-2">
       <div className="flex items-baseline gap-3 flex-wrap">
@@ -65,16 +36,19 @@ function Piano({ piano, indice }: { piano: PianoFusioneDto; indice: number }) {
           {piano.catture > 0 && ` · ${piano.catture} da catturare`}
         </span>
         <span className="ml-auto font-black tabular-nums text-[16px]">{formattaYen(piano.costo)}</span>
+        {onSalva && (
+          <button type="button" className={`btn btn-sm ${salvato ? 'btn-ghost' : 'btn-secondary'}`} onClick={onSalva} disabled={salvato} title="Salva questo piano nella partita: l'avanzamento verrà ricalcolato sulla scorta">
+            {salvato ? 'Salvato ✓' : 'Salva piano'}
+          </button>
+        )}
       </div>
-      <ul className="m-0 p-0 list-none">
-        <Nodo nodo={piano.radice} radice />
-      </ul>
+      <AlberoPiano radice={piano.radice} />
     </article>
   );
 }
 
 /** Selezione del bersaglio, opzioni (profondità, catture, limite di livello, alternative) e piani ordinati per costo. */
-export function PianiFusione({ persone, partitaId, livelloProtagonista, inizialeId, skillInizialiIds }: Props) {
+export function PianiFusione({ persone, partitaId, livelloProtagonista, inizialeId, skillInizialiIds, obiettivoId }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [profondita, setProfondita] = useState(3);
   const [catture, setCatture] = useState(true);
@@ -86,6 +60,19 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
   // Finché l'utente non tocca la selezione, le skill scelte sono quelle arrivate dall'URL (es. da un obiettivo).
   const skillScelte = skillModificate ?? (skillInizialiIds && tutteSkill.dati ? tutteSkill.dati.filter((s) => skillInizialiIds.includes(s.id)) : []);
   const skillIds = skillScelte.map((s) => s.id);
+  const [salvati, setSalvati] = useState<Record<string, true>>({});
+  const salva = async (d: PianiFusioneDto, piano: PianoFusioneDto, indice: number) => {
+    if (!partitaId || !scelta) return;
+    const chiave = `${scelta.id}|${indice}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;
+    try {
+      const salvato = await salvaPiano(partitaId, { personaId: scelta.id, piano, opzioni: d.opzioni, skillIds, obiettivoId: obiettivoId ?? null, nome: `Piano ${indice + 1} per ${scelta.nomeIt}` });
+      setSalvati((m) => ({ ...m, [chiave]: true }));
+      notifica('success', `Piano salvato nella partita${obiettivoId ? ' e legato all\'obiettivo' : ''}: lo trovi in Partita → Piani salvati.`);
+      return salvato;
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Salvataggio fallito.');
+    }
+  };
   const { dati, caricamento, errore } = useCarica(
     () => (scelta ? getPianiFusione(scelta.id, { partita: partitaId ?? undefined, profondita, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null, skill: skillIds, slotFortunato }) : Promise.resolve(null)),
     [scelta?.id, partitaId, profondita, alternative, catture, limitaLivello, livelloProtagonista, skillIds.join(','), slotFortunato],
@@ -132,7 +119,12 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
           ) : dati ? (
             <>
               {dati.sconto > 0 && <p className="m-0 text-[12px] text-text-muted">Costi con lo sconto del Registro ({dati.sconto}%) della partita.</p>}
-              <div className="flex flex-col gap-3">{dati.piani.map((p, i) => <Piano key={i} piano={p} indice={i} />)}</div>
+              <div className="flex flex-col gap-3">
+                {dati.piani.map((p, i) => {
+                  const chiave = `${scelta.id}|${i}|${skillIds.join(',')}|${profondita}|${alternative}|${catture}|${limitaLivello}|${slotFortunato}`;
+                  return <Piano key={i} piano={p} indice={i} onSalva={partitaId ? () => void salva(dati, p, i) : undefined} salvato={salvati[chiave] === true} />;
+                })}
+              </div>
             </>
           ) : null}
         </>

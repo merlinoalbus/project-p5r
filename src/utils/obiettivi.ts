@@ -10,7 +10,7 @@ export const PRIORITA: ReadonlyArray<{ v: number; l: string }> = [
 ];
 
 /** Collegamento al piano di fusione della Persona con le skill dell'obiettivo già selezionate. */
-export function linkPiano(o: { personaId: number; skill: Array<{ id: number }> }): string {
+export function linkPiano(o: { id?: number; personaId: number; skill: Array<{ id: number }> }): string {
   const skill = o.skill.map((s) => s.id).join(',');
-  return `/fusione?vista=piani&piani=${o.personaId}${skill ? `&skill=${skill}` : ''}`;
+  return `/fusione?vista=piani&piani=${o.personaId}${skill ? `&skill=${skill}` : ''}${o.id ? `&obiettivo=${o.id}` : ''}`;
 }

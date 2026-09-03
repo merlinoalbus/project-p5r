@@ -95,5 +95,26 @@ export const bodyCreaObiettivo = z.object({ personaId: z.number().int().positive
 export const bodyAggiornaObiettivo = z.object({ ...campiObiettivo, stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
 export const queryObiettivi = z.object({ stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
 export const paramsPartitaObiettivo = z.object({ id: z.coerce.number().int().positive(), obiettivoId: z.coerce.number().int().positive() });
+const nodoPiano: z.ZodType<unknown> = z.lazy(() => z.object({
+  persona: z.object({ id: z.number().int().positive() }).passthrough(),
+  modo: z.enum(['scorta', 'registro', 'cattura', 'fusione']),
+  costo: z.number().min(0),
+  tipo: z.enum(['normale', 'stesso-arcano', 'tesoro', 'speciale']).optional(),
+  figli: z.array(nodoPiano).max(12),
+  skillPortate: z.array(z.object({ id: z.number().int(), nome: z.string(), nomeIt: z.string() })).max(8).default([]),
+  skillDaLivello: z.array(z.object({ id: z.number().int(), nome: z.string(), nomeIt: z.string() })).max(8).default([]),
+}).passthrough());
+export const bodySalvaPiano = z.object({
+  personaId: z.number().int().positive(),
+  piano: z.object({ radice: nodoPiano, costo: z.number().min(0), profondita: z.number().int().min(0), catture: z.number().int().min(0), evocazioni: z.number().int().min(0), fusioni: z.number().int().min(0) }).passthrough(),
+  opzioni: z.object({}).passthrough().optional(),
+  skillIds: z.array(z.number().int().positive()).max(8).optional(),
+  obiettivoId: z.number().int().positive().nullable().optional(),
+  nome: z.string().max(80).optional(),
+  note: z.string().max(2000).optional(),
+});
+export const bodyAggiornaPianoSalvato = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), obiettivoId: z.number().int().positive().nullable().optional() });
+export const queryPianiSalvati = z.object({ obiettivo: z.coerce.number().int().positive().optional() });
+export const paramsPartitaPiano = z.object({ id: z.coerce.number().int().positive(), pianoId: z.coerce.number().int().positive() });
 export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);

@@ -27,7 +27,7 @@ function ob(id: number, extra: Partial<ObiettivoDto>): ObiettivoDto {
   return {
     id, personaId: 88, nome: 'Jack Frost', nomeIt: 'Jack Frost', arcana: 'Magician', arcanaNome: 'Mago', livelloBase: 11, speciale: false, rara: false, dlc: false,
     skill: [agi, dia], livelloMin: 15, priorita: 1, stato: 'aperto', note: '', possedutaId: null, livelloAttuale: null, skillMancanti: [agi, dia], livelloRaggiunto: false, soddisfatto: false,
-    raggiuntoAt: null, createdAt: '2026-09-03T10:00:00.000Z', updatedAt: '2026-09-03T10:00:00.000Z', ...extra,
+    raggiuntoAt: null, pianiSalvati: 0, createdAt: '2026-09-03T10:00:00.000Z', updatedAt: '2026-09-03T10:00:00.000Z', ...extra,
   };
 }
 
@@ -47,7 +47,7 @@ describe('ObiettiviPartita', () => {
     expect(screen.getByText(/In scorta al livello 11: 1 skill mancanti, livello insufficiente/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Agi ✗' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Dia ✓' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Piano di fusione' })).toHaveAttribute('href', '/fusione?vista=piani&piani=88&skill=1,2');
+    expect(screen.getByRole('link', { name: 'Piano di fusione' })).toHaveAttribute('href', '/fusione?vista=piani&piani=88&skill=1,2&obiettivo=1');
     aggiornaObiettivo.mockResolvedValue(ob(1, { stato: 'raggiunto', raggiuntoAt: '2026-09-03T11:00:00.000Z' }));
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Segna raggiunto' })); });
     expect(aggiornaObiettivo).toHaveBeenCalledWith(7, 1, { stato: 'raggiunto' });
@@ -61,5 +61,6 @@ describe('ObiettiviPartita', () => {
   it('linkPiano porta le skill dell\'obiettivo nei parametri', () => {
     expect(linkPiano({ personaId: 4, skill: [] })).toBe('/fusione?vista=piani&piani=4');
     expect(linkPiano({ personaId: 4, skill: [{ id: 9 }] })).toBe('/fusione?vista=piani&piani=4&skill=9');
+    expect(linkPiano({ id: 3, personaId: 4, skill: [] })).toBe('/fusione?vista=piani&piani=4&obiettivo=3');
   });
 });

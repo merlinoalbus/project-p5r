@@ -106,6 +106,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {!o.rara && <Link to={linkPiano(o)} className="btn btn-secondary btn-sm no-underline">Piano di fusione</Link>}
                   <Link to={`/fusione?vista=ricette&ricette=${o.personaId}`} className="btn btn-ghost btn-sm no-underline">Come ottenerla</Link>
+                  {o.pianiSalvati > 0 && <Link to={`/partita?scheda=piani&obiettivo=${o.id}`} className="btn btn-ghost btn-sm no-underline">{o.pianiSalvati === 1 ? '1 piano salvato' : `${o.pianiSalvati} piani salvati`}</Link>}
                   <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setModifica(o)}>Modifica</button>
                   {o.stato === 'aperto' && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => void cambiaStato(o, 'raggiunto')}>Segna raggiunto</button>}
                   {o.stato === 'aperto' && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => void cambiaStato(o, 'annullato')}>Annulla</button>}

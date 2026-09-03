@@ -130,6 +130,13 @@ transazioni di aggiunta/aggiornamento in scorta): l'avanzamento (`skillMancanti`
 ogni lettura sulla scorta attuale, la chiusura automatica scrive `raggiunto_at` e un evento nello storico. `skillDto` è condiviso in
 `compendioService`.
 
+### Piani salvati (Fase 5.3)
+Migrazione 007: `piano_salvato` (persona_id, obiettivo_id SET NULL, nome, note, opzioni_json, skill_json, piano_json, costo). Il piano
+arriva dal client (istantanea di `PianoFusioneDto`) ed è validato strutturalmente (schema zod ricorsivo + `verificaAlbero`: modi ammessi,
+fusioni con ≥2 ingredienti, foglie senza figli, Persona esistenti, profondità ≤8). `pianiSalvatiService.avanzamentoPiano` percorre l'albero
+con la scorta attuale: una fusione col risultato già in scorta chiude il sottoalbero; una fusione con tutti gli ingredienti in scorta è un
+«passo eseguibile». `AlberoPiano` (FE) è condiviso fra la vista «Piano di fusione» e i piani salvati.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

@@ -15,8 +15,9 @@ import { ScortaPersona } from '../components/partita/ScortaPersona';
 import { CompendioPersonale } from '../components/partita/CompendioPersonale';
 import { StoricoPartita } from '../components/partita/StoricoPartita';
 import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
+import { PianiSalvati } from '../components/partita/PianiSalvati';
 
-type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'storico';
+type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'doti', l: 'Doti sociali' },
@@ -24,6 +25,7 @@ const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'scorta', l: 'Scorta' },
   { k: 'compendio', l: 'Compendio personale' },
   { k: 'obiettivi', l: 'Obiettivi' },
+  { k: 'piani', l: 'Piani salvati' },
   { k: 'storico', l: 'Storico' },
   { k: 'riepilogo', l: 'Riepilogo' },
 ];
@@ -65,6 +67,7 @@ export function PartitaPage() {
           {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
           {scheda === 'obiettivi' && <ObiettiviPartita key={attiva.id} partitaId={attiva.id} />}
+          {scheda === 'piani' && <PianiSalvati key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'storico' && <StoricoPartita key={attiva.id} partitaId={attiva.id} />}
         </div>
       )}

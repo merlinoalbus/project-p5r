@@ -102,7 +102,7 @@ export function FusionePage() {
           <RicettePersona key={`per-${idParam('ricette') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="per" inizialeId={idParam('ricette')} />
         )}
         {persone.dati && vista === 'piani' && (
-          <PianiFusione key={`piani-${idParam('piani') ?? 0}-${params.get('skill') ?? ''}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inizialeId={idParam('piani')} skillInizialiIds={skillParam} />
+          <PianiFusione key={`piani-${idParam('piani') ?? 0}-${params.get('skill') ?? ''}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inizialeId={idParam('piani')} skillInizialiIds={skillParam} obiettivoId={idParam('obiettivo')} />
         )}
         {persone.dati && vista === 'skill' && (
           <CercaSkill persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} />
