@@ -4,7 +4,7 @@ Versione 2 — 2026-09-03 (step 0.6, anticipato; revisione dopo validazione). Ri
 
 Regole valide per TUTTI gli asset:
 - **Originali, ispirati allo stile**: nessuna copia delle illustrazioni ufficiali Atlus; i link servono all'IA grafica (o a chi la guida) come ispirazione di stile, palette e composizione.
-- **Ogni testo dentro l'immagine è in italiano** (nomi degli Arcani, etichette, sigle). **Per OGNI asset che contiene testo esiste la variante senza testo** con suffisso `-senza-testo` (es. `arcani/fool-senza-testo.png`): se il generatore sbaglia le lettere, consegna quella e il testo lo sovrappone l'app con il proprio font. Le sole parole non italiane ammesse dentro le immagini sono la sigla di prodotto `P5R` e l'abbreviazione `MAX`.
+- **Ogni testo dentro l'immagine è in italiano** (nomi degli Arcani, etichette, sigle). **Per OGNI asset che contiene testo esiste la variante senza testo** con suffisso `-senza-testo` (es. `arcani/fool-senza-testo.png`): se il generatore sbaglia le lettere, consegna quella e il testo lo sovrappone l'app con il proprio font. Le sole parole non italiane ammesse dentro le immagini sono le sigle `P5R`, `DLC` e l'abbreviazione `MAX`.
 - Nota sui Confidenti (§9): per scelta dell'utente i ritratti sono generati da IA "ispirati" ai personaggi del gioco (aspetto descritto a parole, link alla fonte come ispirazione), non copie delle illustrazioni ufficiali.
 - Consegna in `public/asset/<categoria>/<nome-file>` con i nomi indicati; PNG con trasparenza dove richiesto, altrimenti WEBP/PNG. Le dimensioni sono quelle di consegna: genera più grande e ridimensiona.
 - Palette dell'app (`src/tailwind.css`): nero `#0b0b0e`, superficie `#23232d`, rosso `#e5352b`, bianco `#ececf1`, grigio `#6f6f80`. Colori degli elementi: Fisico `#c9a227`, Arma da fuoco `#8f8f9a`, Fuoco `#f0552b`, Ghiaccio `#5ec8f2`, Elettricità `#f2d94e`, Vento `#5fd67a`, Psichico `#e06bd6`, Nucleare `#4dd7c9`, Sacro `#f5f0c8`, Oscurità `#a05cf0`, Quasi-divino `#ffffff`, Guarigione `#7fe0a5`, Alterazione `#d9a066`, Supporto `#8ab4f8`, Passiva `#b0b0c0`.
@@ -31,7 +31,7 @@ personaggi copiati dal gioco, watermark, firma, bordi sfocati, colori pastello, 
 ## 1. Identità dell'app
 
 ### 1.1 Logo principale — `identita/logo.png` (1024×1024, trasparente) e `identita/logo-orizzontale.png` (1600×500)
-Testo nell'immagine: **P5R** sopra e **COMPAGNO DI GIOCO** sotto (variante senza testo: `identita/logo-senza-testo.png`).
+Testo nell'immagine: **P5R** sopra e **COMPAGNO DI GIOCO** sotto (varianti senza testo: `identita/logo-senza-testo.png`, `identita/logo-orizzontale-senza-testo.png`).
 ```
 [blocco di stile] Logo originale per un'app compagno di gioco: una maschera da ladro stilizzata, bianca con
 bordi neri, tagliata in diagonale da una fiamma rossa a forma di cuore rovesciato; sotto, il lettering
@@ -47,8 +47,8 @@ Nessun testo.
 stilizzata del logo (punto 1.1) in forma semplificata leggibile anche a 32 px. Nessun testo, nessun dettaglio fine.
 ```
 
-### 1.3 Splash / schermata di caricamento — `identita/splash.webp` (1536×2048 verticale, 2048×1536 orizzontale)
-Testo: **PRENDIAMO IL TUO CUORE** in piccolo in basso (variante senza testo: `identita/splash-senza-testo.webp`).
+### 1.3 Splash / schermata di caricamento — `identita/splash-verticale.webp` (1536×2048) e `identita/splash-orizzontale.webp` (2048×1536)
+Testo: **PRENDIAMO IL TUO CUORE** in piccolo in basso (varianti senza testo: `identita/splash-verticale-senza-testo.webp`, `identita/splash-orizzontale-senza-testo.webp`).
 ```
 [blocco di stile] Schermata di apertura: esplosione di forme rosse e nere a ritaglio che convergono al centro,
 dove campeggia la maschera del logo; retino a punti sui bordi, stelle bianche a quattro punte come accenti.
@@ -95,7 +95,7 @@ piatte, retino a punti nelle ombre; in alto il numero romano, in basso su una fa
 bianco a lettere sbilenche: "<TITOLO>". Ispirazione di impostazione (NON copiare):
 https://static.wikia.nocookie.net/megamitensei/images/0/0b/P5_Fool_arcana_cooperation.png/revision/latest?cb=20160915143157
 ```
-Variante senza testo per ogni carta: `arcani/<chiave>-senza-testo.png` (l'app sovrappone il titolo).
+Variante senza testo per ogni carta: `arcani/<chiave>-senza-testo.png` (senza titolo E senza numero romano: l'app sovrappone entrambi).
 
 | File | Numero | Titolo (testo in carta) | Soggetto dell'illustrazione |
 |---|---|---|---|
@@ -246,7 +246,7 @@ Ispirazione per il taglio delle forme: https://static.wikia.nocookie.net/megamit
 | `nav-impostazioni.png` | ingranaggio con angoli tagliati |
 
 ### 7.2 Badge rango Confidente (10) — `ui/rango-<n>.png` (256×256, trasparente)
-Testo: il numero da 1 a 10 (variante `rango-max.png` con il testo "MAX"); variante senza testo `ui/rango-senza-testo.png` (tassello vuoto, il numero lo scrive l'app).
+Testo: il numero da 1 a 9 (`rango-1.png` … `rango-9.png`); il rango 10 è `rango-max.png` con il testo "MAX" (come nel gioco, non esiste `rango-10`); variante senza testo `ui/rango-senza-testo.png` (tassello vuoto, il numero lo scrive l'app).
 ```
 [blocco di stile] Tassello nero a forma di ritaglio con bordo bianco, numero enorme bianco sbilenco "<n>",
 un piccolo lampo rosso dietro. Ispirazione del lettering "RANK":
@@ -295,7 +295,7 @@ azzurro, diamante bianco, collana d'oro, corona d'oro con rubino, pietra grigia,
 amuleto d'oro, diamante blu, lingotto arancione), contorno nero, sfondo trasparente, nessun testo.
 ```
 
-Le icone dei **tipi di eredità** riusano le icone degli elementi (§4): stesse chiavi.
+Le icone dei **tipi di eredità** riusano le icone degli elementi (§4) con questa mappatura (chiave eredità → file): Physical → `phys`, Fire → `fire`, Ice → `ice`, Electric → `electric`, Wind → `wind`, Psy → `psy`, Nuclear → `nuclear`, Bless → `bless`, Curse → `curse`, Healing → `healing`, Ailment → `ailment`, Almighty → `almighty`.
 
 ## 8. Stati vuoti e messaggi (4) — `illustrazioni/<nome>.png` (1200×800, trasparente)
 Per ogni illustrazione con testo esiste la variante `illustrazioni/<nome>-senza-testo.png` (consigliata: il testo
@@ -312,7 +312,7 @@ maiuscolo a ritaglio bianco su tasselli neri: "<TESTO>". Scena: <vedi tabella>.
 | `errore.png` | QUALCOSA È ANDATO STORTO | ghigliottina inceppata con un lampo rosso e un teschio stilizzato che ride |
 | `caricamento.png` | — | maschera del logo con tre stelle che ruotano (per animazione a fotogrammi, 8 fotogrammi 256×256 in `illustrazioni/caricamento-<n>.png`) |
 
-## 9. Confidenti (23) — `confidenti/<chiave>.png` (768×1024, trasparente) + `confidenti/<chiave>-arcano.png` (icona 256×256)
+## 9. Confidenti (23) — `confidenti/<chiave>.png` (768×1024, trasparente); l'icona dell'arcano è quella di §3.1 (`arcani/icona/<arcano>.png`), nessun file aggiuntivo
 
 Stile comune del ritratto (ispirato alla schermata Confidente: ritratto bianco e nero a retino con accento rosso):
 ```
@@ -348,12 +348,12 @@ e le icone Confidente del wiki, es. https://static.wikia.nocookie.net/megamitens
 | `sae` | Sae | Giudizio | donna con lunghi capelli argentati, tailleur scuro, sguardo severo, fascicolo |
 | `maruki` | Maruki | Consigliere | uomo giovane con capelli castani scomposti, occhiali, camice da consulente, sorriso gentile |
 
-Icona-arcano del Confidente (`-arcano.png`): usare il prompt 3.1 con il simbolo dell'arcano corrispondente (tabella 3.1).
+Icona dell'arcano del Confidente: l'app usa `arcani/icona/<arcano>.png` di §3.1 (nessun file da produrre qui).
 
 ## 10. Persona del compendio (232) — `persona/<slug>.png` (768×768, trasparente) — template
 
-Prompt template (sostituire {NOME} e {DESCRIZIONE}). Regola dello slug: minuscolo, accenti rimossi, apostrofi e
-spazi sostituiti da trattini, trattini doppi compressi — es. `jack-frost`, `arsene`, `jack-o-lantern`, `izanagi-no-okami-picaro`, `kikuri-hime`:
+Prompt template (sostituire {NOME} e {DESCRIZIONE}). Regola dello slug: minuscolo, accenti rimossi, apostrofi eliminati,
+spazi sostituiti da trattini, trattini doppi compressi — es. `jack-frost`, `arsene`, `jack-o-lantern`, `izanagi-no-okami-picaro`, `kikuri-hime`, `queens-necklace` (stessa regola dei tesori in §7.7):
 ```
 [blocco di stile] Illustrazione originale di una creatura mitologica per un compendio, ispirata a {NOME}
 ({DESCRIZIONE} — mitologia di origine, attributi iconici). Posa dinamica a tre quarti, silhouette leggibile,
@@ -386,7 +386,7 @@ https://static.wikia.nocookie.net/megamitensei/images/1/1e/P5_CalendarSwitch.png
 | `polline.png` | fiore con particelle |
 | `tifone.png` | spirale con frecce |
 
-Etichette del giorno (sprite testo) — `meteo/fascia-<chiave>.png` (600×160): testi **MATTINA**, **PAUSA PRANZO**, **DOPO LA SCUOLA**, **SERA**, **NOTTE**, **GIORNATA** in lettering a ritaglio bianco su nero (variante `meteo/fascia-senza-testo.png`: sola targhetta vuota); ispirazione HUD:
+Etichette del giorno (sprite testo) — `meteo/fascia-<chiave>.png` (600×160), chiavi `mattina`, `pausa-pranzo`, `dopo-la-scuola`, `sera`, `notte`, `giornata`: testi **MATTINA**, **PAUSA PRANZO**, **DOPO LA SCUOLA**, **SERA**, **NOTTE**, **GIORNATA** in lettering a ritaglio bianco su nero (variante `meteo/fascia-senza-testo.png`: sola targhetta vuota); ispirazione HUD:
 https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_663171dc3afce8fe987e57e8659f91b69faa39bc.1920x1080.jpg
 
 ## 12. Ordine di produzione consigliato
