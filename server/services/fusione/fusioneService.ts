@@ -6,7 +6,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
-import { analisiEredita, copre, skillAlLivello, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
+import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
 import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
@@ -190,7 +190,7 @@ export function cercaPerSkillDto(skillIds: number[], opz: OpzioniContesto & { ri
     // Filtro rapido: il tipo del risultato deve ammettere ogni skill desiderata (salvo quelle che apprende da sé).
     const tipo = tipoEredita(target.id);
     const proprie = new Set(skillAlLivello(target.id, 99).map((s) => s.id));
-    if (skillInfo.some((s) => !proprie.has(s.id) && !elementoAmmesso(tipo, s.elemento))) continue;
+    if (skillInfo.some((s) => !proprie.has(s.id) && !elementoEreditabile(tipo, s.elemento))) continue;
     const ricette = ricettePer(target, ctx).filter((r) => opz.livelloMax === undefined || (r.risultato.livello <= opz.livelloMax && r.ingredienti.every((i) => i.livello <= opz.livelloMax!)));
     for (const r of ricette) {
       // Filtro rapido: ogni skill desiderata non propria deve stare nel bacino di almeno un ingrediente.
@@ -217,13 +217,6 @@ export function cercaPerSkillDto(skillIds: number[], opz: OpzioniContesto & { ri
     ricette: trovate.slice(0, limite).map((tr) => ({ ricetta: ricettaDto(tr.ricetta), slot: tr.slot, slotScelti: tr.slotScelti, daEreditare: tr.daEreditare, giaApprese: tr.giaApprese })),
     perRisultato: [...perRisultatoMap.values()].sort((x, y) => x.costoMinimo - y.costoMinimo).map((e) => ({ persona: personaDto(e.persona), ricette: e.ricette, costoMinimo: e.costoMinimo })),
   };
-}
-
-function elementoAmmesso(tipo: string | null, elemento: string): boolean {
-  if (elemento === 'support' || elemento === 'passive' || elemento === 'almighty') return true;
-  if (elemento === 'trait' || tipo === null) return false;
-  const riga = prepared('SELECT ammesso FROM eredita_matrice WHERE tipo = ? AND elemento = ?').get(tipo, elemento) as { ammesso: number } | undefined;
-  return riga?.ammesso === 1;
 }
 
 /** Fusioni in cui la Persona è ingrediente. */

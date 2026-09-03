@@ -110,7 +110,10 @@ export function CercaSkill({ persone, partitaId, livelloProtagonista, inScorta }
               <li key={r.ricetta.ingredienti.map((i) => i.id).join('-') + '>' + r.ricetta.risultato.id} className="flex flex-col">
                 <ul className="m-0 p-0 list-none"><RicettaRiga ricetta={r.ricetta} inScorta={inScorta} /></ul>
                 <div className="text-[12px] text-text-muted pb-2 -mt-1">
-                  Slot {r.slot} ({r.slotScelti} a scelta){r.giaApprese.length > 0 ? ` · ${r.giaApprese.length} già apprese dal risultato` : ''} · <Link to={`/fusione?vista=calcolatore&a=${r.ricetta.ingredienti[0].id}&b=${r.ricetta.ingredienti[1]?.id ?? ''}`} className="text-primary">Apri nel calcolatore</Link>
+                  Slot {r.slot} ({r.slotScelti} a scelta){r.giaApprese.length > 0 ? ` · ${r.giaApprese.length} già apprese dal risultato` : ''} ·{' '}
+                  {r.ricetta.ingredienti.length === 2
+                    ? <Link to={`/fusione?vista=calcolatore&a=${r.ricetta.ingredienti[0].id}&b=${r.ricetta.ingredienti[1].id}`} className="text-primary">Apri nel calcolatore</Link>
+                    : <Link to={`/compendio/persona/${r.ricetta.risultato.id}`} className="text-primary">Ricetta speciale a {r.ricetta.ingredienti.length} ingredienti: vedi la scheda</Link>}
                 </div>
               </li>
             ))}

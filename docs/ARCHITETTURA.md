@@ -126,7 +126,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 | Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave`; catalogo dei riferimenti (solo link): `GET /catalogo?ambito` (voci + `presente`), `POST /catalogo/importa {ambito, chiavi ≤20, sovrascrivi}` → `{importate, saltate, fallite[{chiave, motivo}]}` |
 Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
-## 6. Motore di fusione *(Fase 1 realizzata; fasi 2–4 previste)*
+## 6. Motore di fusione *(fasi 1–3 realizzate; fase 4 prevista)*
 - `server/services/fusione/motoreFusione.ts`: snapshot in memoria del compendio (invalidato al reseed) e contesti memoizzati per insieme di DLC posseduti;
   regole di chinhodado (speciale a due → Demone del Tesoro + normale con modificatore di rango → arcani diversi: prima Persona con livello
   ≥ 1+⌊(La+Lb)/2⌋ → stesso arcano: la più alta con livello ≤, esclusi gli ingredienti); ricette inverse per enumerazione delle coppie di arcani
@@ -142,8 +142,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 - `server/services/fusione/eredita.ts` (Fase 3): snapshot skill/apprese/tratti/tipi/matrice; `slotEreditabili(totale)`, `elementoEreditabile(tipo, elemento)`,
   `skillAlLivello`, `skillPosseduta`, `analisiEredita(risultato, ingredienti)` (candidate con motivo, slot, tratti), `copre(analisi, skillIds)`.
   `fusioneService.ereditaDto` (bacino dalla scorta se posseduta) e `cercaPerSkillDto` (filtri rapidi per tipo e bacino, poi analisi completa).
-- Previsti (fase 4, sullo stesso snapshot): `catene` (matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill
-  multi-step, bonus del Confidente, Allarme, Potenziamento).
+- Previsto (fase 4, sullo stesso snapshot): `catene` (propagazione skill multi-step, bonus del Confidente, Allarme, Potenziamento).
 
 ## 7. Frontend
 - Layout tablet-first: `MainLayout` con `Sidebar` visibile da `lg` (1024px) e `BottomNav` fissa sotto (5 voci, 64px); verificato a 375/768/1280 px.

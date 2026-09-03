@@ -48,7 +48,11 @@ describe('CercaSkill', () => {
     expect(await screen.findByText(/2 ricette · 2 Persona/)).toBeInTheDocument();
     expect(screen.getByText(/Slot 2 \(1 a scelta\)/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Apri nel calcolatore' })).toHaveAttribute('href', '/fusione?vista=calcolatore&a=10&b=11');
+    // una ricetta speciale a più ingredienti non apre il calcolatore (che gestisce solo A + B)
+    cercaPerSkill.mockResolvedValue({ ...dati, ricette: [{ ...dati.ricette[0], ricetta: { ...dati.ricette[0].ricetta, tipo: 'speciale', ingredienti: [fus(succube), fus(saki), fus(jack)] } }] });
     await act(async () => { screen.getByRole('button', { name: /Fino al livello 20/ }).click(); });
+    expect(await screen.findByRole('link', { name: /Ricetta speciale a 3 ingredienti/ })).toHaveAttribute('href', '/compendio/persona/88');
+    expect(screen.queryByRole('link', { name: 'Apri nel calcolatore' })).not.toBeInTheDocument();
     expect(cercaPerSkill).toHaveBeenLastCalledWith([1], { partita: 7, risultato: undefined, livelloMax: 20, limite: 100 });
     await act(async () => { screen.getByRole('button', { name: 'Rimuovi Tarukaja' }).click(); });
     expect(screen.getByText(/Nessuna skill scelta/)).toBeInTheDocument();
