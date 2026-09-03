@@ -86,20 +86,22 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
 
 export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
   const r = rigaPartita(id);
-  prepared(`UPDATE partita SET nome = ?, note = ?, livello_protagonista = ?, data_gioco = ?, difficolta = ?, nuova_partita_plus = ?, dlc_posseduti_json = ?, allarme_attivo = ?, updated_at = ? WHERE id = ?`).run(
-    dati.nome ?? r.nome, dati.note ?? r.note, dati.livelloProtagonista ?? r.livello_protagonista,
-    dati.dataGioco === undefined ? r.data_gioco : dati.dataGioco, dati.difficolta ?? r.difficolta,
-    dati.nuovaPartitaPlus === undefined ? r.nuova_partita_plus : dati.nuovaPartitaPlus ? 1 : 0,
-    dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
-    dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
-  );
-  if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
-    registraEvento(id, 'livello-protagonista', `Protagonista al livello ${dati.livelloProtagonista}`, `Da ${r.livello_protagonista} a ${dati.livelloProtagonista}.`, { da: r.livello_protagonista, a: dati.livelloProtagonista });
-  }
-  if (dati.allarmeAttivo !== undefined && (dati.allarmeAttivo ? 1 : 0) !== r.allarme_attivo) {
-    registraEvento(id, 'allarme', dati.allarmeAttivo ? 'Allarme delle fusioni attivo' : 'Allarme delle fusioni terminato', '', { attivo: dati.allarmeAttivo });
-  }
-  return partitaDto(rigaPartita(id));
+  return getDb().transaction(() => {
+    prepared(`UPDATE partita SET nome = ?, note = ?, livello_protagonista = ?, data_gioco = ?, difficolta = ?, nuova_partita_plus = ?, dlc_posseduti_json = ?, allarme_attivo = ?, updated_at = ? WHERE id = ?`).run(
+      dati.nome ?? r.nome, dati.note ?? r.note, dati.livelloProtagonista ?? r.livello_protagonista,
+      dati.dataGioco === undefined ? r.data_gioco : dati.dataGioco, dati.difficolta ?? r.difficolta,
+      dati.nuovaPartitaPlus === undefined ? r.nuova_partita_plus : dati.nuovaPartitaPlus ? 1 : 0,
+      dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
+      dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,
+    );
+    if (dati.livelloProtagonista !== undefined && dati.livelloProtagonista !== r.livello_protagonista) {
+      registraEvento(id, 'livello-protagonista', `Protagonista al livello ${dati.livelloProtagonista}`, `Da ${r.livello_protagonista} a ${dati.livelloProtagonista}.`, { da: r.livello_protagonista, a: dati.livelloProtagonista });
+    }
+    if (dati.allarmeAttivo !== undefined && (dati.allarmeAttivo ? 1 : 0) !== r.allarme_attivo) {
+      registraEvento(id, 'allarme', dati.allarmeAttivo ? 'Allarme delle fusioni attivo' : 'Allarme delle fusioni terminato', '', { attivo: dati.allarmeAttivo });
+    }
+    return partitaDto(rigaPartita(id));
+  })();
 }
 
 export function attivaPartita(id: number): PartitaDto {
@@ -165,12 +167,14 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDot
   const ranghi = ranghiDote(chiave);
   const prima = progressoDote(attuale, ranghi);
   const dopo = progressoDote(nuovo, ranghi);
-  prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, dote_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(partitaId, chiave, nuovo, nowIso());
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
-  if (dopo.rango !== prima.rango) {
-    registraEvento(partitaId, 'dote-rango', `${t('doteSociale', chiave)}: rango ${dopo.rango} «${dopo.nomeRango}»`, `Da «${prima.nomeRango}» (rango ${prima.rango}) con ${nuovo} punti.`, { dote: chiave, da: prima.rango, a: dopo.rango, punti: nuovo });
-  }
-  return dotiSociali(partitaId).find((d) => d.chiave === chiave)!;
+  return getDb().transaction(() => {
+    prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, dote_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(partitaId, chiave, nuovo, nowIso());
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+    if (dopo.rango !== prima.rango) {
+      registraEvento(partitaId, 'dote-rango', `${t('doteSociale', chiave)}: rango ${dopo.rango} «${dopo.nomeRango}»`, `Da «${prima.nomeRango}» (rango ${prima.rango}) con ${nuovo} punti.`, { dote: chiave, da: prima.rango, a: dopo.rango, punti: nuovo });
+    }
+    return dotiSociali(partitaId).find((d) => d.chiave === chiave)!;
+  })();
 }
 
 // ---- Confidenti ----
@@ -218,15 +222,17 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   const incremento = (dati.deltaPunti ?? 0) + puntiConfidente(dati);
   let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? 0 : attuale.punti + incremento;
   punti = round2(Math.max(0, punti));
-  prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(partita_id, confidente_chiave) DO UPDATE SET sbloccato = excluded.sbloccato, rango = excluded.rango, punti = excluded.punti, note = excluded.note, updated_at = excluded.updated_at`)
-    .run(partitaId, chiave, sbloccato ? 1 : 0, rango, punti, dati.note ?? attuale.note, nowIso());
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
-  if (sbloccato && !attuale.sbloccato) registraEvento(partitaId, 'confidente-sbloccato', `${attuale.nome} (${attuale.arcanaNome}) sbloccato`, '', { confidente: chiave });
-  if (rango !== attuale.rango) {
-    registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`, `Da rango ${attuale.rango}.`, { confidente: chiave, da: attuale.rango, a: rango });
-  }
-  return confidenti(partitaId).find((c) => c.chiave === chiave)!;
+  return getDb().transaction(() => {
+    prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(partita_id, confidente_chiave) DO UPDATE SET sbloccato = excluded.sbloccato, rango = excluded.rango, punti = excluded.punti, note = excluded.note, updated_at = excluded.updated_at`)
+      .run(partitaId, chiave, sbloccato ? 1 : 0, rango, punti, dati.note ?? attuale.note, nowIso());
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+    if (sbloccato && !attuale.sbloccato) registraEvento(partitaId, 'confidente-sbloccato', `${attuale.nome} (${attuale.arcanaNome}) sbloccato`, '', { confidente: chiave });
+    if (rango !== attuale.rango) {
+      registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`, `Da rango ${attuale.rango}.`, { confidente: chiave, da: attuale.rango, a: rango });
+    }
+    return confidenti(partitaId).find((c) => c.chiave === chiave)!;
+  })();
 }
 
 // ---- Compendio personale ----
@@ -243,15 +249,17 @@ export function aggiornaCompendio(partitaId: number, personaId: number, dati: { 
   const persona = prepared('SELECT nome FROM persona WHERE id = ?').get(personaId) as { nome: string } | undefined;
   if (!persona) throw httpErrors.notFound('persona-non-trovata', `La Persona ${personaId} non esiste.`);
   const giaRegistrata = !!prepared('SELECT 1 FROM compendio_partita WHERE partita_id = ? AND persona_id = ? AND registrata = 1').get(partitaId, personaId);
-  if (!dati.registrata) {
-    prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(partitaId, personaId);
-  } else {
-    if (!giaRegistrata) registraEvento(partitaId, 'compendio-registrata', `${t('persona', persona.nome)} registrata nel compendio`, dati.livelloRegistrato ? `Al livello ${dati.livelloRegistrato}.` : '', { livello: dati.livelloRegistrato ?? null }, personaId);
-    prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, updated_at) VALUES (?, ?, 1, ?, ?)
-      ON CONFLICT(partita_id, persona_id) DO UPDATE SET registrata = 1, livello_registrato = excluded.livello_registrato, updated_at = excluded.updated_at`).run(partitaId, personaId, dati.livelloRegistrato ?? null, nowIso());
-  }
-  prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
-  return compendioPartita(partitaId);
+  return getDb().transaction(() => {
+    if (!dati.registrata) {
+      prepared('DELETE FROM compendio_partita WHERE partita_id = ? AND persona_id = ?').run(partitaId, personaId);
+    } else {
+      if (!giaRegistrata) registraEvento(partitaId, 'compendio-registrata', `${t('persona', persona.nome)} registrata nel compendio`, dati.livelloRegistrato ? `Al livello ${dati.livelloRegistrato}.` : '', { livello: dati.livelloRegistrato ?? null }, personaId);
+      prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, updated_at) VALUES (?, ?, 1, ?, ?)
+        ON CONFLICT(partita_id, persona_id) DO UPDATE SET registrata = 1, livello_registrato = excluded.livello_registrato, updated_at = excluded.updated_at`).run(partitaId, personaId, dati.livelloRegistrato ?? null, nowIso());
+    }
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
+    return compendioPartita(partitaId);
+  })();
 }
 
 // ---- Persona possedute ----
