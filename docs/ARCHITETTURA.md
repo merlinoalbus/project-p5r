@@ -158,6 +158,12 @@ JSON), `confidente_regalo` (graditi e sconsigliati), `confidente_disponibilita` 
 cambio del seed; `regalo_partita` è tracking per partita. `compendioService.dettaglioConfidente` compone la scheda; `ConfidentePartitaDto`
 espone `regaliFatti`.
 
+### Domande in classe ed esami (Fase 6.2)
+Seed `data/seed/domande.json` (domande per data con risposte in ordine, sessioni d'esame, premi). Migrazione 011: `domanda` (id stabile
+per `ordine` nel seed: upsert, così `domanda_partita` non si perde al reseed), `esame`, `esame_premi`, `domanda_partita`.
+`domandeService.domande(partitaId?)` calcola le prossime domande dalla `data_gioco` della partita (indice aprile→marzo);
+`impostaDomandaFatta` è idempotente e, alla prima spunta, può aggiungere una nota alla Dote Conoscenza (`aggiornaDote`) e registra l'evento.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|
