@@ -62,7 +62,7 @@ export function FusionePage() {
         className={`m-0 text-2xl font-bold ${sfondoVelluto ? 'rounded-lg px-4 py-6 bg-cover bg-center [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]' : ''}`}
         style={sfondoVelluto ? { backgroundImage: `linear-gradient(rgba(11,11,14,0.35), rgba(11,11,14,0.75)), url("${sfondoVelluto}")` } : undefined}
       >
-        Fusione — regole degli Arcani
+        Fusione
       </h1>
       <p className="m-0 text-[13px] text-text-secondary">
         Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.
