@@ -3,22 +3,39 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getRegoleFusione } from '../services/api';
+import { getPersone, getPossedute, getRegoleFusione } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
+import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
 import { useAsset } from '../stores/assetStore';
+import { Calcolatore } from '../components/fusione/Calcolatore';
+import { RicettePersona } from '../components/fusione/RicettePersona';
 
-/** Consultazione delle regole di fusione: combinazione di due arcani, matrice completa, ricette speciali, Demoni del Tesoro. */
+type Vista = 'calcolatore' | 'ricette' | 'con' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
+const VISTE: Array<[Vista, string]> = [
+  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'],
+  ['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro'],
+];
+
+/** Calcolatore di fusione (A + B, ricette per ottenere una Persona, fusioni con una Persona) e regole degli Arcani. */
 export function FusionePage() {
   useDocumentTitle('Fusione');
   const glossario = useGlossarioStore((s) => s.glossario);
+  const attiva = usePartitaStore((s) => s.attiva);
+  const [params, setParams] = useSearchParams();
   const { dati, caricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), []);
+  const persone = useCarica(() => getPersone(), []);
+  const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve([])), [attiva?.id]);
+  const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
   const [a, setA] = useState('');
   const [b, setB] = useState('');
-  const [vista, setVista] = useState<'coppia' | 'matrice' | 'speciali' | 'tesori'>('coppia');
+  const vistaParam = params.get('vista');
+  const vista: Vista = VISTE.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : 'calcolatore';
+  const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
+  const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
   const sfondoVelluto = useAsset('sfondi/stanza-velluto');
 
   const nome = (chiave: string) => glossario?.arcani.find((x) => x.chiave === chiave)?.nome ?? chiave;
@@ -47,14 +64,26 @@ export function FusionePage() {
       >
         Fusione — regole degli Arcani
       </h1>
-      <p className="m-0 text-[13px] text-text-secondary">Consulta la combinazione degli arcani, le ricette speciali e i modificatori dei Demoni del Tesoro. Il calcolatore di fusione con Persona e livelli arriva con la Fase 1 della roadmap.</p>
+      <p className="m-0 text-[13px] text-text-secondary">
+        Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.
+      </p>
       <div className="flex gap-1.5 flex-wrap">
-        {([['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro']] as const).map(([k, l]) => (
+        {VISTE.map(([k, l]) => (
           <button key={k} type="button" className={`chip touch ${vista === k ? 'chip--attivo' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k}>{l}</button>
         ))}
       </div>
 
-      <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
+      <PageState isLoading={caricamento || persone.caricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
+        {persone.dati && vista === 'calcolatore' && (
+          <Calcolatore persone={persone.dati} partitaId={attiva?.id ?? null} inScorta={inScorta} inizialeA={idParam('a')} inizialeB={idParam('b')} />
+        )}
+        {persone.dati && vista === 'ricette' && (
+          <RicettePersona key={`per-${idParam('ricette') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="per" inizialeId={idParam('ricette')} />
+        )}
+        {persone.dati && vista === 'con' && (
+          <RicettePersona key={`con-${idParam('con') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="con" inizialeId={idParam('con')} />
+        )}
+
         {dati && vista === 'coppia' && (
           <div className="card flex flex-col gap-3">
             <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-2 items-center">

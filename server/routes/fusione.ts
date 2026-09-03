@@ -1,0 +1,32 @@
+// ============================================================
+// Route /api/fusione — fusione diretta, ricette per una Persona, fusioni con una Persona
+// ============================================================
+//
+// Il contesto (DLC posseduti) si prende dalla partita indicata (`partita=<id>`), oppure dall'elenco
+// esplicito `dlc=1,2,3`; senza nulla si considerano i soli contenuti base. `livelloMax` filtra i
+// risultati al livello del protagonista (nel gioco non si può fondere una Persona di livello superiore).
+// ============================================================
+
+import { Router } from 'express';
+import { validate } from '../middleware/validate.js';
+import { paramsPersonaId, queryFondi, queryRicette } from '../schemas/fusione.js';
+import { fondiDto, fusioniConDto, ricettePerDto } from '../services/fusione/fusioneService.js';
+
+const router = Router();
+
+router.get('/fondi', validate({ query: queryFondi }), (req, res) => {
+  const q = req.query as unknown as { a: number; b: number; partita?: number; dlc?: number[] };
+  res.json(fondiDto(q.a, q.b, { partitaId: q.partita, dlc: q.dlc }));
+});
+
+router.get('/ricette/:personaId', validate({ params: paramsPersonaId, query: queryRicette }), (req, res) => {
+  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
+  res.json(ricettePerDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+});
+
+router.get('/con/:personaId', validate({ params: paramsPersonaId, query: queryRicette }), (req, res) => {
+  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
+  res.json(fusioniConDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+});
+
+export default router;

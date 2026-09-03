@@ -183,6 +183,51 @@ export interface RegoleFusioneDto {
   dlc: string[][];
 }
 
+// ---- Motore di fusione ----
+
+export type TipoFusione = 'normale' | 'stesso-arcano' | 'tesoro' | 'speciale';
+
+/** Persona come compare nelle ricette di fusione. */
+export interface PersonaFusioneDto {
+  id: number;
+  nome: string;
+  nomeIt: string;
+  arcana: string;
+  arcanaNome: string;
+  livello: number;
+  speciale: boolean;
+  rara: boolean;
+  dlc: boolean;
+}
+
+export interface RicettaFusioneDto {
+  ingredienti: PersonaFusioneDto[];
+  risultato: PersonaFusioneDto;
+  tipo: TipoFusione;
+  /** Costo stimato in yen: somma sugli ingredienti di 27·L² + 126·L + 2147. */
+  costo: number;
+}
+
+/** Esito della fusione diretta A+B. */
+export interface EsitoFusioneDto {
+  a: PersonaFusioneDto;
+  b: PersonaFusioneDto;
+  ricetta: RicettaFusioneDto | null;
+  /** Spiegazione quando la fusione non è possibile. */
+  motivo: string | null;
+  dlcPosseduti: number[];
+}
+
+/** Elenco di ricette (per ottenere una Persona, o con una Persona come ingrediente). */
+export interface RicetteFusioneDto {
+  persona: PersonaFusioneDto;
+  totale: number;
+  totaleSenzaFiltri: number;
+  ricette: RicettaFusioneDto[];
+  dlcPosseduti: number[];
+  livelloMax: number | null;
+}
+
 // ---- Traduzioni ----
 
 export interface TraduzioneDto {

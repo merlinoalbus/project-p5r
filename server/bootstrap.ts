@@ -25,6 +25,7 @@ import compendioRouter from './routes/compendio.js';
 import traduzioniRouter from './routes/traduzioni.js';
 import partiteRouter from './routes/partite.js';
 import immaginiRouter from './routes/immagini.js';
+import fusioneRouter from './routes/fusione.js';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
 z.config(z.locales.it());
@@ -45,6 +46,7 @@ export function createApp(): Express {
   app.use('/api/traduzioni', traduzioniRouter);
   app.use('/api/partite', partiteRouter);
   app.use('/api/immagini', immaginiRouter);
+  app.use('/api/fusione', fusioneRouter);
 
   // ---- Health ----
   app.get('/api/health', (_req, res) => {

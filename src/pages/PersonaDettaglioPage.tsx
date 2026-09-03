@@ -2,7 +2,7 @@
 // PersonaDettaglioPage — scheda completa di una Persona
 // ============================================================
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -17,6 +17,8 @@ import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { RicettaSpecialeDto } from '../types';
 import { statistichePerLivello } from '../../shared/statistiche';
+import { getFusioniCon, getRicettePer, getPossedute } from '../services/api';
+import { RicettaRiga } from '../components/fusione/RicettaRiga';
 
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
   return (
@@ -30,6 +32,46 @@ function Ricetta({ r }: { r: RicettaSpecialeDto }) {
       <span className="text-text-muted mx-1">→</span>
       <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo no-underline">{r.risultato.nome}</Link>
     </div>
+  );
+}
+
+/** Anteprima delle ricette per ottenere la Persona e delle fusioni in cui è ingrediente, con i collegamenti al calcolatore. */
+function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { personaId: number; rara: boolean; partitaId: number | null; livelloProtagonista: number | null }) {
+  const per = useCarica(() => (rara ? Promise.resolve(null) : getRicettePer(personaId, { partita: partitaId ?? undefined, limite: 5 })), [personaId, partitaId, rara]);
+  const con = useCarica(() => getFusioniCon(personaId, { partita: partitaId ?? undefined, limite: 5 }), [personaId, partitaId]);
+  const scorta = useCarica(() => (partitaId ? getPossedute(partitaId) : Promise.resolve([])), [partitaId]);
+  const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((x) => x.personaId)), [scorta.dati]);
+  return (
+    <section className="card flex flex-col gap-3">
+      <h2 className="m-0 text-[15px] font-semibold">Fusione</h2>
+      {rara ? (
+        <p className="m-0 text-[13px] text-text-secondary">Demone del Tesoro: non si ottiene per fusione, ma fuso con una Persona normale ne sposta il rango nell'arcano.</p>
+      ) : per.dati ? (
+        <div>
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <span className="text-[13px] text-text-secondary">Come ottenerla: <strong className="text-text">{per.dati.totale}</strong> ricette{per.dati.totale > 0 ? ' (le più economiche)' : ''}</span>
+            {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="text-[13px] text-primary">Tutte le ricette →</Link>}
+          </div>
+          {per.dati.ricette.length > 0 && (
+            <ul className="m-0 p-0 list-none divide-y divide-border-light">
+              {per.dati.ricette.map((r) => <RicettaRiga key={r.ingredienti.map((i) => i.id).join('-')} ricetta={r} inScorta={inScorta} mostraRisultato={false} />)}
+            </ul>
+          )}
+        </div>
+      ) : per.caricamento ? <span className="text-[13px] text-text-muted">Calcolo delle ricette…</span> : null}
+      {con.dati && (
+        <div>
+          <div className="flex items-baseline justify-between gap-2 flex-wrap">
+            <span className="text-[13px] text-text-secondary">Come ingrediente: <strong className="text-text">{con.dati.totale}</strong> fusioni possibili</span>
+            {con.dati.totale > 5 && <Link to={`/fusione?vista=con&con=${personaId}`} className="text-[13px] text-primary">Tutte le fusioni →</Link>}
+          </div>
+          <ul className="m-0 p-0 list-none divide-y divide-border-light">
+            {con.dati.ricette.map((r) => <RicettaRiga key={r.ingredienti.map((i) => i.id).join('-') + r.risultato.id} ricetta={r} inScorta={inScorta} />)}
+          </ul>
+        </div>
+      )}
+      {livelloProtagonista !== null && <p className="m-0 text-[12px] text-text-muted">Nel calcolatore puoi limitare i risultati al livello {livelloProtagonista} del protagonista.</p>}
+    </section>
   );
 }
 
@@ -149,6 +191,8 @@ export function PersonaDettaglioPage() {
               <div className="text-[13px] text-text-secondary">{p.trattoDettaglio.effettoNome}</div>
             </section>
           )}
+
+          <SezioneFusione personaId={p.id} rara={p.rara} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} />
 
           {(p.ricettaSpeciale || p.ingredienteDi.length > 0) && (
             <section className="card flex flex-col gap-3">
