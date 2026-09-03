@@ -247,7 +247,7 @@ const SQL_POSSEDUTA = `SELECT pp.*, p.nome, p.arcana, p.livello AS livello_base,
 function skillDto(id: number): SkillRiassuntoDto | null {
   const s = prepared('SELECT * FROM skill WHERE id = ?').get(id) as { id: number; nome: string; elemento: string; costo_tipo: 'sp' | 'hp' | 'nessuno'; costo_valore: number; effetto: string } | undefined;
   if (!s) return null;
-  return { id: s.id, nome: s.nome, elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, effettoNome: t('effettoSkill', s.effetto) };
+  return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, effettoNome: t('effettoSkill', s.effetto) };
 }
 
 function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {

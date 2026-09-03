@@ -26,7 +26,7 @@ export function SkillPage() {
     const testo = q.trim().toLowerCase();
     return dati.filter((s) =>
       (!elemento || s.elemento === elemento)
-      && (!testo || s.nome.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo)),
+      && (!testo || s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo)),
     );
   }, [dati, q, elemento]);
 
@@ -63,7 +63,8 @@ export function SkillPage() {
                 <Link to={`/skill/${s.id}`} className="flex items-center gap-3 py-2.5 no-underline text-text hover:text-primary">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold">{s.nome}</span>
+                      <span className="font-semibold">{s.nomeIt}</span>
+                      {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
                       <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
                       <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
                     </div>

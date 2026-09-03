@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, ConfidenteDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto,
+  ArcanaDto, ConfidenteDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
@@ -21,6 +21,8 @@ export interface FiltriPersona {
 
 export const getArcani = (): Promise<ArcanaDto[]> => apiGet('/compendio/arcani');
 export const getGlossario = (): Promise<GlossarioDto> => apiGet('/compendio/glossario');
+export const getTermini = (): Promise<TermineDto[]> => apiGet('/compendio/termini');
+
 export const getRegoleFusione = (): Promise<RegoleFusioneDto> => apiGet('/compendio/fusione/regole');
 export const getPersone = (f: FiltriPersona = {}): Promise<PersonaRiassuntoDto[]> => apiGet(`/compendio/persona${queryString(f)}`);
 export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`/compendio/persona/${id}`);

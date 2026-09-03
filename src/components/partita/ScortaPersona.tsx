@@ -64,11 +64,11 @@ export function ScortaPersona({ partitaId }: Props) {
               <div className="flex flex-wrap gap-1">
                 {p.skill.map((s) => (
                   <Link key={s.slot} to={`/skill/${s.id}`} className="no-underline" title={s.effettoNome}>
-                    <ElementoChip elemento={s.elemento} nome={s.nome} piccolo />
+                    <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
                   </Link>
                 ))}
               </div>
-              {p.tratto && <div className="text-[12px] text-text-secondary">Tratto: <strong className="text-text">{p.tratto.nome}</strong> — {p.tratto.effettoNome}</div>}
+              {p.tratto && <div className="text-[12px] text-text-secondary">Tratto: <strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>}
               <details className="text-[13px]">
                 <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheBase ? '(stimate)' : '(registrate)'}</summary>
                 <div className="pt-2"><StatisticheBarre statistiche={p.statistiche} base={p.statisticheBaseLivello} compatta /></div>
@@ -155,7 +155,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const candidate = useMemo(() => {
     const testo = ricerca.trim().toLowerCase();
     if (!testo || !tutteSkill) return [];
-    return tutteSkill.filter((s) => s.elemento !== 'trait' && !skillIds.includes(s.id) && s.nome.toLowerCase().includes(testo)).slice(0, 8);
+    return tutteSkill.filter((s) => s.elemento !== 'trait' && !skillIds.includes(s.id) && (s.nome.toLowerCase().includes(testo) || s.nomeIt.toLowerCase().includes(testo))).slice(0, 8);
   }, [ricerca, tutteSkill, skillIds]);
 
   const salva = async () => {
@@ -227,7 +227,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               return (
                 <li key={id} className="flex items-center gap-2 text-[13px]">
                   <span className="w-5 text-text-muted">{i + 1}.</span>
-                  {s ? <ElementoChip elemento={s.elemento} nome={s.nome} piccolo /> : <span>#{id}</span>}
+                  {s ? <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo /> : <span>#{id}</span>}
                   <span className="flex-1 text-text-secondary truncate">{s?.effettoNome}</span>
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => setSkillIds(skillIds.filter((x) => x !== id))} aria-label="Rimuovi skill">×</button>
                 </li>
@@ -242,7 +242,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
                   {candidate.map((s) => (
                     <li key={s.id}>
                       <button type="button" className="w-full text-left flex items-center gap-2 px-2 py-2 rounded-md hover:bg-bg-tertiary bg-transparent border-none text-text cursor-pointer" onClick={() => { setSkillIds([...skillIds, s.id]); setRicerca(''); }}>
-                        <ElementoChip elemento={s.elemento} nome={s.nome} piccolo />
+                        <ElementoChip elemento={s.elemento} nome={s.nomeIt} piccolo />
                         <span className="text-[12px] text-text-secondary truncate">{s.effettoNome}</span>
                       </button>
                     </li>

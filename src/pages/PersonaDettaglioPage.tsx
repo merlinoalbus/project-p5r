@@ -126,7 +126,8 @@ export function PersonaDettaglioPage() {
                   <span className={`w-14 shrink-0 text-[12px] font-bold ${s.livello === 0 ? 'text-primary' : 'text-text-secondary'}`}>{s.livello === 0 ? 'Innata' : `Liv. ${s.livello}`}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link to={`/skill/${s.id}`} className="font-semibold no-underline text-text hover:text-primary">{s.nome}</Link>
+                      <Link to={`/skill/${s.id}`} className="font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
+                      {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
                       <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
                       <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
                     </div>
@@ -141,7 +142,8 @@ export function PersonaDettaglioPage() {
             <section className="card">
               <h2 className="m-0 mb-2 text-[15px] font-semibold">Tratto</h2>
               <div className="flex items-center gap-2 flex-wrap">
-                <Link to={`/skill/${p.trattoDettaglio.id}`} className="font-semibold no-underline text-text hover:text-primary">{p.trattoDettaglio.nome}</Link>
+                <Link to={`/skill/${p.trattoDettaglio.id}`} className="font-semibold no-underline text-text hover:text-primary">{p.trattoDettaglio.nomeIt}</Link>
+                {p.trattoDettaglio.nomeIt !== p.trattoDettaglio.nome && <span className="text-[12px] text-text-muted">{p.trattoDettaglio.nome}</span>}
               </div>
               <div className="text-[13px] text-text-secondary">{p.trattoDettaglio.effettoNome}</div>
             </section>

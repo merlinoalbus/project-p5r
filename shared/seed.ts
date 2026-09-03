@@ -108,6 +108,21 @@ export interface TraduzioniSeed {
   negoziazioni: Record<string, string>;
   /** Fonte carta del dataset → resa italiana (copertura 100%). */
   fontiCarta: Record<string, string>;
+  /** Nome skill EN canonico → nome italiano ufficiale (dalla guida; copertura parziale, fallback al nome canonico). */
+  skill: Record<string, string>;
+  /** Nome Persona EN → nome italiano (solo quando diverso). */
+  persone: Record<string, string>;
+  /** Termini di gioco della localizzazione italiana. */
+  termini: TermineSeed[];
+}
+
+/** Termine di gioco: chiave inglese, resa italiana ufficiale, categoria e breve definizione. */
+export interface TermineSeed {
+  chiave: string;
+  nome: string;
+  categoria: string;
+  definizione?: string;
+  fonte?: string;
 }
 
 /** Elenco delle stringhe prive di traduzione, per categoria. */

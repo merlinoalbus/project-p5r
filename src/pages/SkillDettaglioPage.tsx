@@ -16,7 +16,7 @@ export function SkillDettaglioPage() {
   const navigate = useNavigate();
   const skillId = Number(id);
   const { dati: s, caricamento, errore, ricarica } = useCarica(() => getSkill(skillId), [skillId]);
-  useDocumentTitle(s ? s.nome : 'Skill');
+  useDocumentTitle(s ? s.nomeIt : 'Skill');
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
@@ -27,7 +27,8 @@ export function SkillDettaglioPage() {
           </button>
           <div className="card flex flex-col gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="m-0 text-2xl font-bold">{s.nome}</h1>
+              <h1 className="m-0 text-2xl font-bold">{s.nomeIt}</h1>
+              {s.nomeIt !== s.nome && <span className="text-[13px] text-text-muted" title="Nome nella localizzazione inglese">{s.nome}</span>}
               <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
               <span className="chip">{s.costo.testo}</span>
             </div>

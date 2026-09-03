@@ -6,7 +6,7 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
-  dettaglioPersona, dettaglioSkill, elencaArcani, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione,
+  dettaglioPersona, dettaglioSkill, elencaArcani, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
 const router = Router();
@@ -17,6 +17,10 @@ router.get('/arcani', (_req, res) => {
 
 router.get('/glossario', (_req, res) => {
   res.json(glossario());
+});
+
+router.get('/termini', (_req, res) => {
+  res.json(terminiGlossario());
 });
 
 router.get('/fusione/regole', (_req, res) => {

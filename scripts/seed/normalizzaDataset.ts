@@ -410,6 +410,26 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
     return out;
   };
   const mancanti: Mancanti = { effetti: [], oggetti: [], negoziazioni: [], fontiCarta: [], note: [], fontiEsclusive: [] };
+  // Localizzazione italiana ufficiale (guida allgamestaff): skill, Persona e termini di gioco.
+  const loc = leggiJsonAccanto('localizzazione-it.json') as unknown as { skill?: Record<string, string>; persone?: Record<string, string>; termini?: Array<{ chiave: string; nome: string; categoria: string; definizione?: string; fonte?: string }> };
+  const nomiSkill = new Set(skill.map((s) => s.nome));
+  const skillIt: Record<string, string> = {};
+  for (const [en, it] of Object.entries(loc.skill ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+    if (!nomiSkill.has(en)) throw new Error(`localizzazione-it.json: skill sconosciuta '${en}'`);
+    if (it && it !== en) skillIt[en] = it;
+  }
+  const personeIt: Record<string, string> = {};
+  for (const [en, it] of Object.entries(loc.persone ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+    if (!nomiPersona.has(en)) throw new Error(`localizzazione-it.json: Persona sconosciuta '${en}'`);
+    if (it && it !== en) personeIt[en] = it;
+  }
+  const termini = [...(loc.termini ?? [])].sort((a, b) => a.categoria.localeCompare(b.categoria) || a.chiave.localeCompare(b.chiave));
+  const chiaviTermini = new Set<string>();
+  for (const tm of termini) {
+    if (!tm.chiave || !tm.nome || !tm.categoria) throw new Error(`localizzazione-it.json: termine incompleto ${JSON.stringify(tm)}`);
+    if (chiaviTermini.has(tm.chiave)) throw new Error(`localizzazione-it.json: termine duplicato '${tm.chiave}'`);
+    chiaviTermini.add(tm.chiave);
+  }
   const effettiSkill = copri(skill.map((s) => s.effetto), effettiIt, mancanti.effetti);
   const descrizioniOggetti = copri(oggetti.map((o) => o.descrizione), oggettiIt, mancanti.oggetti);
   // Il titolo di negoziazione è "Titolo (Persona)": si traduce il solo titolo.
@@ -447,6 +467,9 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
     descrizioniOggetti,
     negoziazioni,
     fontiCarta,
+    skill: skillIt,
+    persone: personeIt,
+    termini,
   };
 
   // Timestamp stabile: se i dati generati sono identici a quelli già su disco,
@@ -484,6 +507,9 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
       descrizioniOggettiTradotte: Object.keys(descrizioniOggetti).length,
       negoziazioniTradotte: Object.keys(negoziazioni).length,
       fontiCartaTradotte: Object.keys(fontiCarta).length,
+      skillLocalizzate: Object.keys(skillIt).length,
+      personeLocalizzate: Object.keys(personeIt).length,
+      termini: termini.length,
     },
   };
 

@@ -9,6 +9,7 @@ import { CompendioPage } from './pages/CompendioPage';
 import { PersonaDettaglioPage } from './pages/PersonaDettaglioPage';
 import { SkillPage } from './pages/SkillPage';
 import { SkillDettaglioPage } from './pages/SkillDettaglioPage';
+import { GlossarioPage } from './pages/GlossarioPage';
 import { FusionePage } from './pages/FusionePage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { path: 'home', element: <HomePage /> },
       { path: 'compendio', element: <CompendioPage /> },
       { path: 'compendio/persona/:id', element: <PersonaDettaglioPage /> },
+      { path: 'compendio/glossario', element: <GlossarioPage /> },
       { path: 'skill', element: <SkillPage /> },
       { path: 'skill/:id', element: <SkillDettaglioPage /> },
       { path: 'fusione', element: <FusionePage /> },

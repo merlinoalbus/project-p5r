@@ -262,6 +262,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const [k, v] of Object.entries(t.descrizioniOggetti)) tr('descrizioneOggetto', k, v);
     for (const [k, v] of Object.entries(t.negoziazioni)) tr('negoziazione', k, v);
     for (const [k, v] of Object.entries(t.fontiCarta)) tr('fonteCarta', k, v);
+    for (const [k, v] of Object.entries(t.skill ?? {})) tr('skill', k, v);
+    for (const [k, v] of Object.entries(t.persone ?? {})) tr('persona', k, v);
+    for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
     // ---- Meta ----
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');

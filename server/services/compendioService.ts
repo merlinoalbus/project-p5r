@@ -7,7 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
-  PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto,
+  PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../shared/types.js';
 
 // ---- Righe DB ----
@@ -35,7 +35,7 @@ export function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSk
 
 function skillRiassunto(r: RigaSkill): SkillRiassuntoDto {
   return {
-    id: r.id, nome: r.nome, elemento: r.elemento, elementoNome: t('elementoSkill', r.elemento),
+    id: r.id, nome: r.nome, nomeIt: t('skill', r.nome), elemento: r.elemento, elementoNome: t('elementoSkill', r.elemento),
     costo: costoDto(r.costo_tipo, r.costo_valore), effetto: r.effetto, effettoNome: t('effettoSkill', r.effetto),
   };
 }
@@ -55,7 +55,7 @@ function affinitaDi(personaId: number): AffinitaDto[] {
 
 function personaRiassunto(r: RigaPersona): PersonaRiassuntoDto {
   return {
-    id: r.id, nome: r.nome, arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello,
+    id: r.id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello,
     eredita: r.eredita, ereditaNome: tOpz('tipoEredita', r.eredita),
     speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1, richiedeConfidenteMax: r.richiede_confidente_max === 1,
     tratto: r.tratto,
@@ -93,6 +93,13 @@ export function glossario(): GlossarioDto {
     areeMementos: mappaAmbito('areaMementos'),
     dotiSociali: (prepared('SELECT chiave FROM dote_sociale ORDER BY ordine').all() as Array<{ chiave: string }>).map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave) })),
   };
+}
+
+/** Termini di gioco della localizzazione italiana (ambito `termine`), ordinati per categoria e nome. */
+export function terminiGlossario(): TermineDto[] {
+  return vociAmbito('termine')
+    .map((v) => ({ chiave: v.chiave, nome: v.testo, categoria: String(v.extra?.categoria ?? 'altro'), definizione: (v.extra?.definizione as string | null | undefined) ?? null, fonte: (v.extra?.fonte as string | null | undefined) ?? null }))
+    .sort((a, b) => a.categoria.localeCompare(b.categoria) || a.nome.localeCompare(b.nome, 'it'));
 }
 
 export function regoleFusione(): RegoleFusioneDto {

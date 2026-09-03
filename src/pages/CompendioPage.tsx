@@ -50,7 +50,10 @@ export function CompendioPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-baseline justify-between gap-3 flex-wrap">
         <h1 className="m-0 text-2xl font-bold">Compendio</h1>
-        <span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
+        <div className="flex items-baseline gap-3">
+          <Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link>
+          <span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-center">

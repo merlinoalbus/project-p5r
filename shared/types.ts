@@ -46,6 +46,8 @@ export interface StatisticheDto {
 export interface PersonaRiassuntoDto {
   id: number;
   nome: string;
+  /** Nome italiano (uguale a `nome` salvo eccezioni della localizzazione). */
+  nomeIt: string;
   arcana: string;
   arcanaNome: string;
   livello: number;
@@ -70,7 +72,10 @@ export interface CostoSkillDto {
 /** Riga di elenco delle skill. */
 export interface SkillRiassuntoDto {
   id: number;
+  /** Nome canonico (localizzazione inglese Royal). */
   nome: string;
+  /** Nome italiano ufficiale (dalla guida); uguale a `nome` se non localizzato. */
+  nomeIt: string;
   elemento: string;
   elementoNome: string;
   costo: CostoSkillDto;
@@ -146,6 +151,15 @@ export interface ConfidenteDto {
 }
 
 /** Glossario completo per il frontend (cache locale). */
+/** Termine di gioco della localizzazione italiana ufficiale. */
+export interface TermineDto {
+  chiave: string;
+  nome: string;
+  categoria: string;
+  definizione: string | null;
+  fonte: string | null;
+}
+
 export interface GlossarioDto {
   arcani: ArcanaDto[];
   elementiSkill: Record<string, string>;
