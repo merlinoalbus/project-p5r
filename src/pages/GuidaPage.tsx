@@ -4,7 +4,7 @@
 
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { IconBook, IconMask, IconStar } from '../components/shared/icons';
+import { IconBolt, IconBook, IconMask, IconStar } from '../components/shared/icons';
 
 export function GuidaPage() {
   useDocumentTitle('Guida');
@@ -19,6 +19,7 @@ export function GuidaPage() {
         <Link to="/guida/calendario" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Calendario di gioco</strong><br /><span className="text-[12px] text-text-secondary">Meteo, eventi, scadenze dei Palazzi, consigli per settimana</span></span></Link>
         <Link to="/guida/dungeon" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconMask size={22} className="text-primary" /><span><strong>Palazzi e Dedali</strong><br /><span className="text-[12px] text-text-secondary">Aree, punti di interesse, boss e mappe interattive con avanzamento</span></span></Link>
         <Link to="/guida/richieste" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Richieste dei Mementos</strong><br /><span className="text-[12px] text-text-secondary">33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose</span></span></Link>
+        <Link to="/guida/battaglia" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBolt size={22} className="text-primary" /><span><strong>Aiuto in battaglia</strong><br /><span className="text-[12px] text-text-secondary">Debolezze delle Ombre per area, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro</span></span></Link>
         <Link to="/partita?scheda=confidenti" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Confidenti</strong><br /><span className="text-[12px] text-text-secondary">Risposte migliori, abilità e regali per ogni Confidente</span></span></Link>
       </div>
     </div>

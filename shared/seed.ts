@@ -70,6 +70,9 @@ export interface FusioneSeed {
 }
 
 /** Confidente (dato di gioco). */
+/** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
+export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
+
 /** Richieste dei Mementos e Jose (guida allgamestaff). */
 export interface MementosSeed {
   richieste: Array<{ chiave: string; nome: string; committente: string; disponibileDal: string; scadenza: string; area: string; areaChiave: string | null; piano: string; bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean }; ricompense: string[]; confidente: { chiave: string; rango?: number | null } | null; note: string; fonte: string }>;

@@ -18,6 +18,7 @@ import { GuidaPage } from './pages/GuidaPage';
 import { DungeonPage } from './pages/DungeonPage';
 import { DungeonDettaglioPage } from './pages/DungeonDettaglioPage';
 import { RichiestePage } from './pages/RichiestePage';
+import { BattagliaPage } from './pages/BattagliaPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: 'guida/dungeon', element: <DungeonPage /> },
       { path: 'guida/dungeon/:chiave', element: <DungeonDettaglioPage /> },
       { path: 'guida/richieste', element: <RichiestePage /> },
+      { path: 'guida/battaglia', element: <BattagliaPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

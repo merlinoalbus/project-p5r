@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, DungeonDettaglioDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, BattagliaDto, DungeonDettaglioDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
@@ -29,6 +29,8 @@ export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
 export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
 export const getOggetti = (f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
+/** Aiuto in battaglia: sezioni della guida e indice delle Ombre. */
+export const getBattaglia = (): Promise<BattagliaDto> => apiGet('/compendio/battaglia');
 /** Richieste dei Mementos e dati di Jose (stato per partita se indicata). */
 export const getRichieste = (partita?: number): Promise<RichiesteDto> => apiGet(`/compendio/richieste${queryString({ partita })}`);
 /** Palazzi e Dedali con punti di interesse (stato e avanzamento se c'è la partita). */
