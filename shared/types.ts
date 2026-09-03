@@ -199,17 +199,46 @@ export interface PartitaDto {
   updatedAt: string;
 }
 
+export interface RangoDoteDto {
+  rango: number;
+  nome: string;
+  soglia: number;
+}
+
 export interface DoteSocialePartitaDto {
   chiave: string;
   nome: string;
   ordine: number;
   punti: number;
+  /** Rango attuale (1–5) e suo titolo italiano. */
+  rango: number;
+  nomeRango: string;
+  /** Soglia del rango successivo e punti mancanti; null al rango massimo. */
+  sogliaProssima: number | null;
+  mancanti: number | null;
+  ranghi: RangoDoteDto[];
   updatedAt: string | null;
+}
+
+/** Incremento di una dote: punti assoluti, delta, oppure note (1–3) con modificatori. */
+export interface ModificaDote {
+  punti?: number;
+  delta?: number;
+  note?: 1 | 2 | 3;
+  /** 3 note da libro a resa maggiorata (7 punti invece di 5). */
+  libro?: boolean;
+  /** Moltiplicatore ×1,5 (lettura della fortuna di Chihaya), arrotondato per difetto. */
+  fortuna?: boolean;
 }
 
 export interface ConfidentePartitaDto extends ConfidenteDto {
   sbloccato: boolean;
   rango: number;
+  /** Punti accumulati verso il rango successivo. */
+  punti: number;
+  /** Punti necessari per il rango successivo e mancanti; null se non documentati o al rango massimo. */
+  puntiNecessari: number | null;
+  mancanti: number | null;
   note: string;
   updatedAt: string | null;
 }

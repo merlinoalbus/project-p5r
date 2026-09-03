@@ -101,6 +101,8 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
+    /* Testi di gioco con token lunghi (es. "Fuoco/Ghiaccio/Elettricità/…"): mai scroll orizzontale su telefono. */
+    overflow-wrap: anywhere;
   }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
@@ -171,7 +173,7 @@
     border: 1px solid rgba(239, 68, 68, 0.4);
   }
   .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.12); }
-  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 36px; }
+  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; }
 
   /* ---- Modali ---- */
   .modal-overlay {

@@ -27,12 +27,20 @@ export const paramsPartitaPersona = z.object({ id: idParam, personaId: idParam }
 export const paramsPartitaPosseduta = z.object({ id: idParam, possedutaId: idParam });
 
 export const bodyDote = z
-  .object({ punti: z.number().int().min(0).max(999).optional(), delta: z.number().int().min(-999).max(999).optional() })
-  .refine((v) => v.punti !== undefined || v.delta !== undefined, { message: 'Indicare punti oppure delta.' });
+  .object({
+    punti: z.number().int().min(0).max(999).optional(),
+    delta: z.number().int().min(-999).max(999).optional(),
+    note: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
+    libro: z.boolean().optional(),
+    fortuna: z.boolean().optional(),
+  })
+  .refine((v) => v.punti !== undefined || v.delta !== undefined || v.note !== undefined, { message: 'Indicare punti, delta oppure note.' });
 
 export const bodyConfidente = z.object({
   sbloccato: z.boolean().optional(),
   rango: z.number().int().min(0).max(10).optional(),
+  punti: z.number().int().min(0).max(999).optional(),
+  deltaPunti: z.number().int().min(-999).max(999).optional(),
   note: z.string().max(2000).optional(),
 });
 

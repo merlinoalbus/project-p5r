@@ -12,6 +12,7 @@
 //   data/seed/traduzioni.json  glossario italiano (arcani, elementi, affinità,
 //                              statistiche, tipi di eredità, aree, effetti skill)
 //   data/seed/confidenti.json  i 23 Confidenti (chiave, nome, arcano)
+//   data/seed/doti.json        le 5 Doti sociali con ranghi e soglie
 //   data/seed/versione.json    versione del seed + commit delle fonti
 //
 // Chiavi JSON in italiano; i VALORI identificativi (nomi Persona/skill,
@@ -101,8 +102,8 @@ interface DatiGrezziRoyal {
 
 // ---- Tipi del seed: definiti in shared/seed.ts (usati anche dal backend) ----
 
-export type { PersonaSeed, SkillSeed, OggettoSeed, FusioneSeed, ConfidenteSeed, TraduzioniSeed, Mancanti } from '../../shared/seed.js';
-import type { PersonaSeed, SkillSeed, OggettoSeed, FusioneSeed, ConfidenteSeed, TraduzioniSeed, Mancanti } from '../../shared/seed.js';
+export type { PersonaSeed, SkillSeed, OggettoSeed, FusioneSeed, ConfidenteSeed, DoteSeed, TraduzioniSeed, Mancanti } from '../../shared/seed.js';
+import type { PersonaSeed, SkillSeed, OggettoSeed, FusioneSeed, ConfidenteSeed, DoteSeed, TraduzioniSeed, Mancanti } from '../../shared/seed.js';
 
 // ---- Caricamento sandbox ----
 
@@ -439,7 +440,7 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
     tipiOggetto: TIPI_OGGETTO,
     vincoliOggetto: VINCOLI_OGGETTO,
     areeMementos: AREE_MEMENTOS,
-    dotiSociali: DOTI_SOCIALI,
+    dotiSociali: DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome })),
     notePersona: NOTE_PERSONA,
     fontiEsclusive: FONTI_ESCLUSIVE,
     effettiSkill,
@@ -454,7 +455,12 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
   const precedente = fs.existsSync(fileVersione) ? (JSON.parse(fs.readFileSync(fileVersione, 'utf-8')) as { generatoIl?: string }) : null;
   const confidenti: ConfidenteSeed[] = CONFIDENTI.map((c) => ({ ...c }));
   for (const c of confidenti) if (!ARCANI_VALIDI.has(c.arcana)) throw new Error(`Confidente ${c.chiave}: arcana sconosciuto '${c.arcana}'`);
-  const dati: Record<string, unknown> = { 'persona.json': persone, 'skill.json': skill, 'oggetti.json': oggetti, 'fusione.json': fusione, 'traduzioni.json': traduzioni, 'confidenti.json': confidenti };
+  const doti: DoteSeed[] = DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome, ranghi: d.ranghi.map((r) => ({ ...r })) }));
+  for (const d of doti) {
+    if (d.ranghi.length !== 5 || d.ranghi[0].soglia !== 0) throw new Error(`Dote ${d.chiave}: attesi 5 ranghi con il primo a 0 punti`);
+    for (let i = 1; i < d.ranghi.length; i++) if (d.ranghi[i].soglia <= d.ranghi[i - 1].soglia) throw new Error(`Dote ${d.chiave}: soglie non crescenti`);
+  }
+  const dati: Record<string, unknown> = { 'persona.json': persone, 'skill.json': skill, 'oggetti.json': oggetti, 'fusione.json': fusione, 'traduzioni.json': traduzioni, 'confidenti.json': confidenti, 'doti.json': doti };
   const invariati = Object.entries(dati).every(([nome, d]) => {
     const f = path.join(DIR_SEED, nome);
     return fs.existsSync(f) && fs.readFileSync(f, 'utf-8') === JSON.stringify(d, null, 2) + '\n';
@@ -473,6 +479,7 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
       ricetteSpeciali: fusione.speciali.length,
       tesori: fusione.tesori.nomi.length,
       confidenti: confidenti.length,
+      doti: doti.length,
       effettiTradotti: Object.keys(effettiSkill).length,
       descrizioniOggettiTradotte: Object.keys(descrizioniOggetti).length,
       negoziazioniTradotte: Object.keys(negoziazioni).length,

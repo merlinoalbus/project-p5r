@@ -74,6 +74,15 @@ export interface ConfidenteSeed {
   chiave: string;
   nome: string;
   arcana: string;
+  /** Punti necessari per passare dal rango i+1 al successivo (indice 0 = 1→2); null = non documentato/da storia. */
+  puntiPerRango?: Array<number | null>;
+}
+
+/** Dote sociale con i 5 ranghi. */
+export interface DoteSeed {
+  chiave: string;
+  nome: string;
+  ranghi: Array<{ rango: number; nome: string; soglia: number }>;
 }
 
 /** Glossario italiano. */

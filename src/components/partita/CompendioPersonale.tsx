@@ -58,12 +58,14 @@ export function CompendioPersonale({ partitaId }: Props) {
         {lista.map((p) => {
           const r = setRegistrate.get(p.id);
           return (
-            <li key={p.id} className="flex items-center gap-3 py-2">
-              <input type="checkbox" className="w-5 h-5" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nome} registrata`} />
+            <li key={p.id} className="flex items-center gap-3 py-1">
+              <label className="touch flex items-center justify-center cursor-pointer">
+                <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nome} registrata`} />
+              </label>
               <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
               <Link to={`/compendio/persona/${p.id}`} className="font-semibold no-underline text-text hover:text-primary flex-1">{p.nome}</Link>
               <span className="chip">{p.arcanaNome}</span>
-              {r?.livelloRegistrato && <span className="text-[12px] text-text-secondary">reg. liv. {r.livelloRegistrato}</span>}
+              {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && <span className="text-[12px] text-text-secondary">reg. liv. {r.livelloRegistrato}</span>}
             </li>
           );
         })}

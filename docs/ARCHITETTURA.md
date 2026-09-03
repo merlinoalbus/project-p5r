@@ -58,7 +58,8 @@ src/
   components/layout/  MainLayout (carica glossario e partite), Topbar (+ PartitaSelettore), Sidebar (≥lg), BottomNav (<lg), navigazione.tsx
   components/shared/  ErrorBoundary, PageState/EmptyState/Spinner, Toast, icons, Modal, CampoRicerca, ImmagineEntita (carica/da URL/rimuovi)
   components/compendio/ ElementoChip, AffinitaGriglia (completa e compatta), StatisticheBarre
-  components/partita/ DotiSociali (+/−), ConfidentiPartita (rango, sblocco, note, immagine), ScortaPersona (aggiunta dal compendio,
+  components/partita/ DotiSociali (note ♪/♪♪/♪♪♪, libro, ×1,5, ±1, rango e punti mancanti), ConfidentiPartita (rango ±, punti +1/+2/+3
+                      verso il rango successivo, sblocco, note, immagine personaggio + carta dell'arcano), ScortaPersona (aggiunta dal compendio,
                       modifica livello/statistiche/skill), CompendioPersonale (spunte + completamento), RiepilogoPartita, NuovaPartitaModal
   components/impostazioni/ GestionePartite, TraduzioniEditor
   pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Skill (525, filtri), SkillDettaglio,
@@ -86,14 +87,15 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - Connessione unica better-sqlite3, pragma `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
 - Migrazioni versionate su `PRAGMA user_version`, ogni migrazione in una transazione, `foreign_key_check` dopo ogni applicazione.
 - Backup online (`db.backup`) prima delle migrazioni a ogni boot, rotazione a 7 copie in `data/backups/`.
-- Schema in due famiglie (migrazioni 001 e 002):
+- Schema in due famiglie (migrazioni 001–004; `user_version` = 4):
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
-    `confidente`, `dote_sociale`, `traduzione`, `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
+    `confidente` + `confidente_rango` (punti necessari per rango, 0 = non a punti), `dote_sociale` + `dote_sociale_rango` (5 ranghi
+    con nome e soglia), `traduzione`, `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
     `seed_meta` → reseed solo quando il seed cambia; `persona`/`skill`/`oggetto`/`confidente` in UPSERT per chiave naturale
     (id stabili, mai cancellazioni), relazioni di gioco svuotate e ricaricate, `traduzione` con `fonte='utente'` mai sovrascritta;
   - **dati utente** (`partita` con indice parziale "una sola attiva", `compendio_partita`, `persona_posseduta` +
-    `persona_posseduta_skill` (8 slot), `confidente_partita` (sbloccato, rango 0–10), `dote_sociale_partita`, `immagine`
+    `persona_posseduta_skill` (8 slot), `confidente_partita` (sbloccato, rango 0–10, punti verso il rango successivo), `dote_sociale_partita` (punti cumulativi), `immagine`
     per i file caricati in `DATA_DIR/immagini/`) sempre con `partita_id` e ON DELETE CASCADE.
   - Testi canonici (nomi Persona/skill, chiavi arcana/elementi, effetti, descrizioni) restano in inglese Royal nelle tabelle di
     gioco; la resa italiana si legge da `traduzione(ambito, chiave)`.
@@ -103,7 +105,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 |---|---|
 | Compendio | `GET /api/compendio/arcani`, `/glossario`, `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
 | Traduzioni | `GET /api/traduzioni?ambito&q&soloUtente`, `GET /ambiti`, `PUT /:ambito/:chiave {testo}` (→ fonte utente), `DELETE /:ambito/:chiave` (ripristina il seed) |
-| Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti`, `PATCH /:id/doti/:chiave {punti|delta}`; `GET /:id/confidenti`, `PUT /:id/confidenti/:chiave {sbloccato,rango,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
+| Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti` (punti, rango, nomeRango, sogliaProssima, mancanti, ranghi[]), `PATCH /:id/doti/:chiave {punti|delta|note 1–3 + libro/fortuna}`; `GET /:id/confidenti` (punti, puntiNecessari, mancanti), `PUT /:id/confidenti/:chiave {sbloccato,rango,punti|deltaPunti,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
 | Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave` |
 Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
@@ -120,7 +122,10 @@ livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondi
   stato globale in zustand: config, notifiche, glossario (rese italiane), partite (elenco + attiva, cambio dalla Topbar).
 - Elenchi Persona/skill caricati una volta e filtrati lato client (istantanei su tablet; ~360 KB per le 232 Persona).
 - Immagini: `ImmagineEntita` mostra il file caricato per (ambito, chiave) o le iniziali; caricamento file (PUT grezzo) o import da URL.
-- Tema Persona 5: nero profondo, rosso `#e5352b`, bianco; token per ogni elemento di gioco (`--color-el-*`); classi `.touch` ≥ 44px.
+- Tema Persona 5: nero profondo, rosso `#e5352b`, bianco; token per ogni elemento di gioco (`--color-el-*`); classi `.touch`/`.btn`/`.btn-sm` ≥ 44px;
+  `overflow-wrap: anywhere` sul body (testi di gioco con token lunghi non generano scroll orizzontale a 375 px).
+- Meccaniche di gioco nel tracker: Doti = note→punti (2/3/5, libro 7, fortuna ×1,5 per difetto) con soglie dei 5 ranghi; Confidenti = punti verso
+  il rango successivo con soglie per Confidente (`docs/riferimenti/confidenti-punti.md`), azzerati al cambio di rango.
 
 ## 8. Build, test, deploy
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.

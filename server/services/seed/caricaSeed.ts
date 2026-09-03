@@ -23,11 +23,11 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { ConfidenteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { ConfidenteSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -45,6 +45,7 @@ interface SeedCompleto {
   fusione: FusioneSeed;
   traduzioni: TraduzioniSeed;
   confidenti: ConfidenteSeed[];
+  doti: DoteSeed[];
   hash: string;
 }
 
@@ -67,6 +68,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     fusione: JSON.parse(contenuti['fusione.json']) as FusioneSeed,
     traduzioni: JSON.parse(contenuti['traduzioni.json']) as TraduzioniSeed,
     confidenti: JSON.parse(contenuti['confidenti.json']) as ConfidenteSeed[],
+    doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
 }
@@ -220,7 +222,18 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     const insConf = db.prepare('INSERT INTO confidente (chiave, nome, arcana, ordine) VALUES (?, ?, ?, ?) ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, arcana = excluded.arcana, ordine = excluded.ordine');
     seed.confidenti.forEach((c, i) => insConf.run(c.chiave, c.nome, c.arcana, i));
     const insDote = db.prepare('INSERT INTO dote_sociale (chiave, nome, ordine) VALUES (?, ?, ?) ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, ordine = excluded.ordine');
-    seed.traduzioni.dotiSociali.forEach((d, i) => insDote.run(d.chiave, d.nome, i));
+    seed.doti.forEach((d, i) => insDote.run(d.chiave, d.nome, i));
+    db.prepare('DELETE FROM dote_sociale_rango').run();
+    const insDoteRango = db.prepare('INSERT INTO dote_sociale_rango (dote_chiave, rango, nome, soglia) VALUES (?, ?, ?, ?)');
+    for (const d of seed.doti) for (const r of d.ranghi) insDoteRango.run(d.chiave, r.rango, r.nome, r.soglia);
+    // Punti per rango dei Confidenti: presenti solo se il seed li documenta.
+    db.prepare('DELETE FROM confidente_rango').run();
+    const insConfRango = db.prepare('INSERT INTO confidente_rango (confidente_chiave, rango, punti_necessari) VALUES (?, ?, ?)');
+    for (const c of seed.confidenti) {
+      (c.puntiPerRango ?? []).forEach((punti, i) => {
+        if (punti !== null) insConfRango.run(c.chiave, i + 1, punti);
+      });
+    }
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)
@@ -239,7 +252,10 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const [k, v] of Object.entries(t.tipiOggetto)) tr('tipoOggetto', k, v);
     for (const [k, v] of Object.entries(t.vincoliOggetto)) tr('vincoloOggetto', k, v);
     for (const [k, v] of Object.entries(t.areeMementos)) tr('areaMementos', k, v);
-    for (const d of t.dotiSociali) tr('doteSociale', d.chiave, d.nome);
+    for (const d of seed.doti) {
+      tr('doteSociale', d.chiave, d.nome);
+      for (const r of d.ranghi) tr('rangoDote', `${d.chiave}/${r.rango}`, r.nome);
+    }
     for (const [k, v] of Object.entries(t.notePersona)) tr('notaPersona', k, v);
     for (const [k, v] of Object.entries(t.fontiEsclusive)) tr('fonteEsclusiva', k, v);
     for (const [k, v] of Object.entries(t.effettiSkill)) tr('effettoSkill', k, v);

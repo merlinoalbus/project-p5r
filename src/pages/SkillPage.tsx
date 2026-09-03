@@ -38,7 +38,7 @@ export function SkillPage() {
       </div>
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o effetto…" />
       <div className="flex gap-1.5 flex-wrap">
-        <button type="button" className={`chip touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')}>Tutti</button>
+        <button type="button" className={`chip touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')} aria-pressed={elemento === ''}>Tutti</button>
         {ORDINE_ELEMENTI_SKILL.map((el) => (
           <button
             key={el}

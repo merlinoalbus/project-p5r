@@ -66,7 +66,10 @@ export function PersonaDettaglioPage() {
           </button>
 
           <div className="card flex flex-col sm:flex-row gap-4">
-            <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={120} modificabile />
+            <div className="flex sm:flex-col gap-3 items-start">
+              <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={120} modificabile />
+              <ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={56} forma="carta" />
+            </div>
             <div className="flex-1 min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="m-0 text-2xl font-bold">{p.nome}</h1>

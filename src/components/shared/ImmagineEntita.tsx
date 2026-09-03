@@ -23,8 +23,10 @@ interface Props {
   forma?: 'quadrata' | 'carta' | 'tonda';
 }
 
-/** Cache locale di esistenza per ambito (una sola richiesta di elenco per ambito). */
+/** Cache locale di esistenza per ambito (una sola richiesta di elenco per ambito, invalidata a ogni scrittura). */
 const elenchi = new Map<string, Promise<Set<string>>>();
+/** Versione per (ambito/chiave): cambia a ogni sostituzione così l'URL del file è sempre nuovo, anche fra montaggi. */
+const versioni = new Map<string, number>();
 
 function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   let p = elenchi.get(ambito);
@@ -37,7 +39,8 @@ function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
 
 /** Riquadro immagine con gestione del caricamento (file o URL). */
 export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, modificabile, forma = 'quadrata' }: Props) {
-  const [versione, setVersione] = useState(0);
+  const idImmagine = `${ambito}/${chiave}`;
+  const [versione, setVersione] = useState(() => versioni.get(idImmagine) ?? 0);
   const [presente, setPresente] = useState<boolean | null>(null);
   const [apertaUrl, setApertaUrl] = useState(false);
   const [url, setUrl] = useState('');
@@ -59,7 +62,9 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     if (esiste) set.add(chiave);
     else set.delete(chiave);
     setPresente(esiste);
-    setVersione((v) => v + 1);
+    const nuova = (versioni.get(idImmagine) ?? 0) + 1;
+    versioni.set(idImmagine, nuova);
+    setVersione(nuova);
   };
 
   const suFile = async (file: File | undefined) => {

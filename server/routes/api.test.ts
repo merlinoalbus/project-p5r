@@ -148,15 +148,37 @@ describe('API', () => {
     const meno = await request(app).patch(`/api/partite/${id}/doti/fascino`).send({ delta: -10 });
     expect(meno.body.data.punti).toBe(0);
     const set = await request(app).patch(`/api/partite/${id}/doti/conoscenza`).send({ punti: 42 });
-    expect(set.body.data).toMatchObject({ chiave: 'conoscenza', nome: 'Conoscenza', punti: 42 });
+    // 42 punti = rango 2 «Diligente» (soglia 34); al rango 3 «Studioso» (82) mancano 40
+    expect(set.body.data).toMatchObject({ chiave: 'conoscenza', nome: 'Conoscenza', punti: 42, rango: 2, nomeRango: 'Diligente', sogliaProssima: 82, mancanti: 40 });
+    expect(set.body.data.ranghi).toHaveLength(5);
+    // Note: 1 nota = 2, 2 note = 3, 3 note = 5 (7 con libro), ×1,5 per difetto con la fortuna
+    expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 1 })).body.data.punti).toBe(2);
+    expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 2 })).body.data.punti).toBe(5);
+    expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 3 })).body.data.punti).toBe(10);
+    expect((await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 3, libro: true })).body.data.punti).toBe(17);
+    const fortuna = await request(app).patch(`/api/partite/${id}/doti/coraggio`).send({ note: 2, fortuna: true });
+    expect(fortuna.body.data.punti).toBe(21); // 17 + floor(3 × 1,5) = 17 + 4
+    expect(fortuna.body.data).toMatchObject({ rango: 2, nomeRango: 'Audace', mancanti: 17 });
+    const massimo = await request(app).patch(`/api/partite/${id}/doti/perizia`).send({ punti: 90 });
+    expect(massimo.body.data).toMatchObject({ rango: 5, nomeRango: 'Migliore', sogliaProssima: null, mancanti: null });
     expect((await request(app).patch(`/api/partite/${id}/doti/inesistente`).send({ delta: 1 })).status).toBe(404);
     expect((await request(app).patch(`/api/partite/${id}/doti/fascino`).send({})).status).toBe(400);
+    expect((await request(app).patch(`/api/partite/${id}/doti/fascino`).send({ note: 4 })).status).toBe(400);
 
     // Confidenti: 23 righe, rango implica sblocco
     const conf = await request(app).get(`/api/partite/${id}/confidenti`);
     expect(conf.body.data).toHaveLength(23);
     const ryuji = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 3 });
-    expect(ryuji.body.data).toMatchObject({ chiave: 'ryuji', rango: 3, sbloccato: true, arcanaNome: 'Carro' });
+    // Ryuji al rango 3 ha bisogno di 30 punti per il rango 4
+    expect(ryuji.body.data).toMatchObject({ chiave: 'ryuji', rango: 3, sbloccato: true, arcanaNome: 'Carro', punti: 0, puntiNecessari: 30, mancanti: 30 });
+    const punti = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ deltaPunti: 12 });
+    expect(punti.body.data).toMatchObject({ punti: 12, mancanti: 18 });
+    // al cambio di rango i punti ripartono da zero (nessun riporto dell'eccedenza)
+    const salito = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 4 });
+    expect(salito.body.data).toMatchObject({ rango: 4, punti: 0, puntiNecessari: 20 });
+    // Confidenti a progressione non a punti: soglia nulla
+    const igor = (conf.body.data as Array<{ chiave: string; puntiNecessari: number | null }>).find((c) => c.chiave === 'igor')!;
+    expect(igor.puntiNecessari).toBeNull();
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 11 })).status).toBe(400);
     // Invariante: rango > 0 forza lo sblocco anche se il client manda sbloccato=false
     const forzato = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ sbloccato: false, rango: 5 });

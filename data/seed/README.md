@@ -21,6 +21,7 @@ Pipeline (in `scripts/seed/`, comandi `npm run seed:scarica | seed:normalizza | 
 | `oggetti.json` | 223 oggetti da esecuzione: categoria, vincolo d'uso, descrizione |
 | `fusione.json` | 24 arcani in ordine, tabella arcana (273 coppie), 24 ricette speciali, 9 Demoni del Tesoro con modificatori per arcano, matrice di eredità 12×12, 13 set DLC |
 | `confidenti.json` | i 23 Confidenti: chiave, nome, arcano |
+| `doti.json` | le 5 Doti sociali con i 5 ranghi (titolo italiano, soglia di punti) |
 | `traduzioni.json` | glossario italiano: arcani, elementi, affinità, tipi di eredità, statistiche, categorie/vincoli oggetti, aree Mementos, Doti sociali, note, fonti esclusive, **effetti skill (512)**, **descrizioni oggetti (223)**, **titoli di negoziazione (120)**, **fonti carta (49)** |
 | `versione.json` | versione del seed, data, commit e licenze delle fonti, conteggi |
 | `verifica-incrociata.md` | esito del confronto con aqiu384 per categoria, con l'elenco completo delle discrepanze |

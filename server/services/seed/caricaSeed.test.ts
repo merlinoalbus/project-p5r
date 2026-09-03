@@ -35,6 +35,10 @@ describe('caricaSeed', () => {
     expect(n('SELECT COUNT(*) AS n FROM eredita_matrice')).toBe(12 * 12);
     expect(n('SELECT COUNT(*) AS n FROM dlc_set')).toBe(13);
     expect(n('SELECT COUNT(*) AS n FROM dote_sociale')).toBe(5);
+    expect(n('SELECT COUNT(*) AS n FROM dote_sociale_rango')).toBe(25);
+    expect(n('SELECT COUNT(*) AS n FROM confidente_rango')).toBe(18 * 9);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'rangoDote'")).toBe(25);
+    expect((db.prepare("SELECT punti_necessari AS p FROM confidente_rango WHERE confidente_chiave = 'ryuji' AND rango = 2").get() as { p: number }).p).toBe(20);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'effettoSkill'")).toBe(512);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'descrizioneOggetto'")).toBe(223);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'negoziazione'")).toBe(120);

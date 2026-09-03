@@ -30,7 +30,8 @@ router.get('/:ambito/:chiave', validate({ params: paramsImmagine }), (req, res) 
 router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine }), (req, res) => {
   const { percorso, mime } = fileImmagine(String(req.params.ambito), String(req.params.chiave));
   res.type(mime);
-  res.setHeader('Cache-Control', 'private, max-age=3600');
+  // Rivalidazione a ogni richiesta (ETag/Last-Modified di sendFile): una sostituzione è visibile subito.
+  res.setHeader('Cache-Control', 'private, no-cache');
   res.sendFile(percorso);
 });
 

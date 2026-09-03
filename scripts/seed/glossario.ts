@@ -159,14 +159,25 @@ export const AREE_MEMENTOS: Record<string, string> = {
   "Da'at": "Dedalo di Da'at",
 };
 
-/** Doti sociali (per il tracking partita). I titoli dei ranghi arrivano con la fase 6 (fonte: guida italiana). */
-export const DOTI_SOCIALI: Array<{ chiave: string; nome: string }> = [
-  { chiave: 'conoscenza', nome: 'Conoscenza' },
-  { chiave: 'fascino', nome: 'Fascino' },
-  { chiave: 'coraggio', nome: 'Coraggio' },
-  { chiave: 'gentilezza', nome: 'Gentilezza' },
-  { chiave: 'perizia', nome: 'Perizia' },
+/**
+ * Doti sociali con i 5 ranghi (titolo italiano e soglia di punti per raggiungerlo).
+ * Fonti: https://www.allgamestaff.it/persona-5-royal/doti-sociali/ (titoli e soglie) e Megami Tensei Wiki,
+ * pagina "Social Stats", tabella Persona 5 Royal (soglie identiche). Il rango 1 parte da 0 punti.
+ * Note visualizzate → punti: 1 nota = 2, 2 note = 3, 3 note = 5 (7 con libri specifici); moltiplicatore ×1,5
+ * (lettura della fortuna di Chihaya) arrotondato per difetto, massimo 10.
+ */
+export const DOTI_SOCIALI: Array<{ chiave: string; nome: string; ranghi: Array<{ rango: number; nome: string; soglia: number }> }> = [
+  { chiave: 'conoscenza', nome: 'Conoscenza', ranghi: [{ rango: 1, nome: 'Ignorante', soglia: 0 }, { rango: 2, nome: 'Diligente', soglia: 34 }, { rango: 3, nome: 'Studioso', soglia: 82 }, { rango: 4, nome: 'Dotto', soglia: 126 }, { rango: 5, nome: 'Erudito', soglia: 192 }] },
+  { chiave: 'fascino', nome: 'Fascino', ranghi: [{ rango: 1, nome: 'Indifferente', soglia: 0 }, { rango: 2, nome: 'Interessante', soglia: 6 }, { rango: 3, nome: 'Affascinante', soglia: 52 }, { rango: 4, nome: 'Carismatico', soglia: 92 }, { rango: 5, nome: 'Irresistibile', soglia: 132 }] },
+  { chiave: 'coraggio', nome: 'Coraggio', ranghi: [{ rango: 1, nome: 'Pavido', soglia: 0 }, { rango: 2, nome: 'Audace', soglia: 11 }, { rango: 3, nome: 'Coraggioso', soglia: 38 }, { rango: 4, nome: 'Temerario', soglia: 68 }, { rango: 5, nome: 'Cuor di leone', soglia: 113 }] },
+  { chiave: 'gentilezza', nome: 'Gentilezza', ranghi: [{ rango: 1, nome: 'Inoffensivo', soglia: 0 }, { rango: 2, nome: 'Gentile', soglia: 14 }, { rango: 3, nome: 'Empatico', soglia: 47 }, { rango: 4, nome: 'Altruista', soglia: 92 }, { rango: 5, nome: 'Angelico', soglia: 136 }] },
+  { chiave: 'perizia', nome: 'Perizia', ranghi: [{ rango: 1, nome: 'Incapace', soglia: 0 }, { rango: 2, nome: 'Decente', soglia: 12 }, { rango: 3, nome: 'Bravo', soglia: 34 }, { rango: 4, nome: 'Asso', soglia: 60 }, { rango: 5, nome: 'Migliore', soglia: 87 }] },
 ];
+
+/** Punti assegnati per numero di note visualizzate (stadio normale) e con libri a resa maggiorata. */
+export const PUNTI_PER_NOTE: Record<1 | 2 | 3, number> = { 1: 2, 2: 3, 3: 5 };
+export const PUNTI_TRE_NOTE_LIBRO = 7;
+export const MOLTIPLICATORE_FORTUNA = 1.5;
 
 /** Note di disponibilità delle Persona (campo `note` del dataset). */
 export const NOTE_PERSONA: Record<string, string> = {
@@ -249,28 +260,34 @@ export function traduciFonteCarta(fonte: string): string | null {
 }
 
 /** I 23 Confidenti di Persona 5 Royal (fonte: guida allgamestaff.it), con l'arcano canonico. */
-export const CONFIDENTI: Array<{ chiave: string; nome: string; arcana: string }> = [
+/**
+ * Confidenti con i punti necessari per il passaggio di rango (indice 0 = 1→2 … indice 8 = 9→10).
+ * 0 = passaggio non legato ai punti (storia, richiesta, dote sociale, automatico); array assente = progressione
+ * senza punti (storia, richieste di Mishima, fusioni delle Gemelle). Fonti: guida Steam 2877810456 e
+ * walkthrough aqiu384 (121/122 celle concordi; Akechi 6→7 = 55 da aqiu384, Steam riporta 0). Vedi docs/riferimenti/confidenti-punti.md.
+ */
+export const CONFIDENTI: Array<{ chiave: string; nome: string; arcana: string; puntiPerRango?: number[] }> = [
   { chiave: 'igor', nome: 'Igor', arcana: 'Fool' },
   { chiave: 'morgana', nome: 'Morgana', arcana: 'Magician' },
-  { chiave: 'makoto', nome: 'Makoto Niijima', arcana: 'Priestess' },
-  { chiave: 'haru', nome: 'Haru Okumura', arcana: 'Empress' },
-  { chiave: 'yusuke', nome: 'Yusuke Kitagawa', arcana: 'Emperor' },
-  { chiave: 'sojiro', nome: 'Sojiro Sakura', arcana: 'Hierophant' },
-  { chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers' },
-  { chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot' },
-  { chiave: 'akechi', nome: 'Goro Akechi', arcana: 'Justice' },
-  { chiave: 'futaba', nome: 'Futaba Sakura', arcana: 'Hermit' },
-  { chiave: 'chihaya', nome: 'Chihaya Mifune', arcana: 'Fortune' },
+  { chiave: 'makoto', nome: 'Makoto Niijima', arcana: 'Priestess', puntiPerRango: [0, 0, 15, 20, 20, 20, 30, 20, 55] },
+  { chiave: 'haru', nome: 'Haru Okumura', arcana: 'Empress', puntiPerRango: [0, 0, 14, 28, 15, 20, 40, 22, 20] },
+  { chiave: 'yusuke', nome: 'Yusuke Kitagawa', arcana: 'Emperor', puntiPerRango: [0, 0, 25, 15, 25, 20, 26, 22, 35] },
+  { chiave: 'sojiro', nome: 'Sojiro Sakura', arcana: 'Hierophant', puntiPerRango: [0, 30, 40, 43, 20, 20, 14, 0, 40] },
+  { chiave: 'ann', nome: 'Ann Takamaki', arcana: 'Lovers', puntiPerRango: [0, 35, 25, 20, 35, 45, 30, 67, 35] },
+  { chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', puntiPerRango: [0, 20, 30, 20, 30, 45, 45, 60, 60] },
+  { chiave: 'akechi', nome: 'Goro Akechi', arcana: 'Justice', puntiPerRango: [0, 0, 23, 40, 0, 55, 0, 0, 0] },
+  { chiave: 'futaba', nome: 'Futaba Sakura', arcana: 'Hermit', puntiPerRango: [0, 0, 10, 15, 26, 21, 0, 30, 35] },
+  { chiave: 'chihaya', nome: 'Chihaya Mifune', arcana: 'Fortune', puntiPerRango: [0, 0, 15, 15, 15, 30, 20, 46, 21] },
   { chiave: 'gemelle', nome: 'Gemelle Custodi (Caroline e Justine)', arcana: 'Strength' },
-  { chiave: 'iwai', nome: 'Munehisa Iwai', arcana: 'Hanged' },
-  { chiave: 'takemi', nome: 'Tae Takemi', arcana: 'Death' },
-  { chiave: 'kawakami', nome: 'Sadayo Kawakami', arcana: 'Temperance' },
-  { chiave: 'ohya', nome: 'Ichiko Ohya', arcana: 'Devil' },
-  { chiave: 'shinya', nome: 'Shinya Oda', arcana: 'Tower' },
-  { chiave: 'hifumi', nome: 'Hifumi Togo', arcana: 'Star' },
+  { chiave: 'iwai', nome: 'Munehisa Iwai', arcana: 'Hanged', puntiPerRango: [0, 5, 15, 25, 40, 40, 0, 25, 40] },
+  { chiave: 'takemi', nome: 'Tae Takemi', arcana: 'Death', puntiPerRango: [0, 0, 11, 20, 11, 11, 0, 42, 36] },
+  { chiave: 'kawakami', nome: 'Sadayo Kawakami', arcana: 'Temperance', puntiPerRango: [0, 20, 37, 0, 11, 37, 0, 0, 0] },
+  { chiave: 'ohya', nome: 'Ichiko Ohya', arcana: 'Devil', puntiPerRango: [0, 0, 12, 15, 25, 22, 0, 21, 38] },
+  { chiave: 'shinya', nome: 'Shinya Oda', arcana: 'Tower', puntiPerRango: [0, 0, 11, 14, 20, 25, 0, 0, 30] },
+  { chiave: 'hifumi', nome: 'Hifumi Togo', arcana: 'Star', puntiPerRango: [0, 0, 10, 14, 14, 22, 0, 30, 30] },
   { chiave: 'mishima', nome: 'Yuuki Mishima', arcana: 'Moon' },
-  { chiave: 'yoshida', nome: 'Toranosuke Yoshida', arcana: 'Sun' },
+  { chiave: 'yoshida', nome: 'Toranosuke Yoshida', arcana: 'Sun', puntiPerRango: [0, 0, 0, 0, 0, 0, 0, 0, 0] },
   { chiave: 'sae', nome: 'Sae Niijima', arcana: 'Judgement' },
-  { chiave: 'kasumi', nome: 'Kasumi Yoshizawa', arcana: 'Faith' },
-  { chiave: 'maruki', nome: 'Takuto Maruki', arcana: 'Councillor' },
+  { chiave: 'kasumi', nome: 'Kasumi Yoshizawa', arcana: 'Faith', puntiPerRango: [0, 15, 51, 20, 0, 0, 55, 40, 80] },
+  { chiave: 'maruki', nome: 'Takuto Maruki', arcana: 'Councillor', puntiPerRango: [0, 0, 28, 42, 32, 28, 60, 30, 0] },
 ];

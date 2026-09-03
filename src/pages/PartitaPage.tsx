@@ -30,7 +30,8 @@ export function PartitaPage() {
   const { attiva, caricamento, caricata, errore, carica } = usePartitaStore();
   const [nuova, setNuova] = useState(false);
   const [params, setParams] = useSearchParams();
-  const scheda = (params.get('scheda') as Scheda | null) ?? 'doti';
+  const richiesta = params.get('scheda');
+  const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'doti';
 
   return (
     <PageState isLoading={caricamento && !caricata} error={errore} onRetry={() => void carica()}>
@@ -54,7 +55,7 @@ export function PartitaPage() {
               <button key={s.k} type="button" className={`chip touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}>{s.l}</button>
             ))}
           </div>
-          {scheda === 'riepilogo' && <RiepilogoPartita key={`${attiva.id}-${attiva.updatedAt}`} partita={attiva} />}
+          {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <DotiSociali partitaId={attiva.id} />}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
           {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}

@@ -7,7 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { costoDto } from './compendioService.js';
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, PartitaDto, PersonaPossedutaDto, SkillRiassuntoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto, SkillRiassuntoDto,
 } from '../../shared/types.js';
 
 interface RigaPartita {
@@ -116,20 +116,43 @@ export function eliminaPartita(id: number): void {
 
 // ---- Doti sociali ----
 
+/** Punti per numero di note (stadio normale); 3 note da libro = 7; ×1,5 arrotondato per difetto. */
+export function puntiDaNote(note: 1 | 2 | 3, libro = false, fortuna = false): number {
+  const base = note === 1 ? 2 : note === 2 ? 3 : libro ? 7 : 5;
+  return fortuna ? Math.floor(base * 1.5) : base;
+}
+
+function ranghiDote(chiave: string): RangoDoteDto[] {
+  return (prepared('SELECT rango, nome, soglia FROM dote_sociale_rango WHERE dote_chiave = ? ORDER BY rango').all(chiave) as Array<{ rango: number; nome: string; soglia: number }>)
+    .map((r) => ({ rango: r.rango, nome: t('rangoDote', `${chiave}/${r.rango}`), soglia: r.soglia }));
+}
+
+/** Rango raggiunto con `punti` e distanza dal successivo. */
+export function progressoDote(punti: number, ranghi: RangoDoteDto[]): { rango: number; nomeRango: string; sogliaProssima: number | null; mancanti: number | null } {
+  let attuale = ranghi[0] ?? { rango: 1, nome: '', soglia: 0 };
+  for (const r of ranghi) if (punti >= r.soglia) attuale = r;
+  const prossimo = ranghi.find((r) => r.rango === attuale.rango + 1) ?? null;
+  return { rango: attuale.rango, nomeRango: attuale.nome, sogliaProssima: prossimo?.soglia ?? null, mancanti: prossimo ? prossimo.soglia - punti : null };
+}
+
 export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
   rigaPartita(partitaId);
   return (prepared(`SELECT d.chiave, d.nome, d.ordine, COALESCE(dp.punti, 0) AS punti, dp.updated_at
     FROM dote_sociale d LEFT JOIN dote_sociale_partita dp ON dp.dote_chiave = d.chiave AND dp.partita_id = ? ORDER BY d.ordine`).all(partitaId) as Array<{ chiave: string; nome: string; ordine: number; punti: number; updated_at: string | null }>)
-    .map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave), ordine: d.ordine, punti: d.punti, updatedAt: d.updated_at }));
+    .map((d) => {
+      const ranghi = ranghiDote(d.chiave);
+      return { chiave: d.chiave, nome: t('doteSociale', d.chiave), ordine: d.ordine, punti: d.punti, ...progressoDote(d.punti, ranghi), ranghi, updatedAt: d.updated_at };
+    });
 }
 
-/** Imposta (`punti`) o incrementa (`delta`) il punteggio di una dote; mai sotto zero. */
-export function aggiornaDote(partitaId: number, chiave: string, mod: { punti?: number; delta?: number }): DoteSocialePartitaDto {
+/** Imposta (`punti`), incrementa (`delta`) o aggiunge le `note` visualizzate in gioco; mai sotto zero. */
+export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDote): DoteSocialePartitaDto {
   rigaPartita(partitaId);
   const dote = prepared('SELECT chiave FROM dote_sociale WHERE chiave = ?').get(chiave);
   if (!dote) throw httpErrors.notFound('dote-non-trovata', `La dote sociale '${chiave}' non esiste.`);
   const attuale = (prepared('SELECT punti FROM dote_sociale_partita WHERE partita_id = ? AND dote_chiave = ?').get(partitaId, chiave) as { punti: number } | undefined)?.punti ?? 0;
-  const nuovo = Math.max(0, mod.punti !== undefined ? mod.punti : attuale + (mod.delta ?? 0));
+  const incremento = mod.note !== undefined ? puntiDaNote(mod.note, mod.libro, mod.fortuna) : (mod.delta ?? 0);
+  const nuovo = Math.max(0, mod.punti !== undefined ? mod.punti : attuale + incremento);
   prepared('INSERT INTO dote_sociale_partita (partita_id, dote_chiave, punti, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(partita_id, dote_chiave) DO UPDATE SET punti = excluded.punti, updated_at = excluded.updated_at').run(partitaId, chiave, nuovo, nowIso());
   prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   return dotiSociali(partitaId).find((d) => d.chiave === chiave)!;
@@ -139,21 +162,32 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: { punti?: n
 
 export function confidenti(partitaId: number): ConfidentePartitaDto[] {
   rigaPartita(partitaId);
-  return (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.note, '') AS note, cp.updated_at
-    FROM confidente c LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? ORDER BY c.ordine`).all(partitaId) as Array<{ chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; note: string; updated_at: string | null }>)
-    .map((c) => ({ chiave: c.chiave, nome: c.nome, arcana: c.arcana, arcanaNome: t('arcana', c.arcana), ordine: c.ordine, sbloccato: c.sbloccato === 1, rango: c.rango, note: c.note, updatedAt: c.updated_at }));
+  return (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
+      COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari
+    FROM confidente c
+    LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ?
+    LEFT JOIN confidente_rango cr ON cr.confidente_chiave = c.chiave AND cr.rango = COALESCE(cp.rango, 0)
+    ORDER BY c.ordine`).all(partitaId) as Array<{ chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null }>)
+    .map((c) => ({
+      chiave: c.chiave, nome: c.nome, arcana: c.arcana, arcanaNome: t('arcana', c.arcana), ordine: c.ordine, sbloccato: c.sbloccato === 1, rango: c.rango,
+      punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari, mancanti: c.rango >= 10 || c.punti_necessari === null ? null : Math.max(0, c.punti_necessari - c.punti),
+      note: c.note, updatedAt: c.updated_at,
+    }));
 }
 
-export function aggiornaConfidente(partitaId: number, chiave: string, dati: { sbloccato?: boolean; rango?: number; note?: string }): ConfidentePartitaDto {
+export function aggiornaConfidente(partitaId: number, chiave: string, dati: { sbloccato?: boolean; rango?: number; punti?: number; deltaPunti?: number; note?: string }): ConfidentePartitaDto {
   rigaPartita(partitaId);
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   const attuale = confidenti(partitaId).find((c) => c.chiave === chiave)!;
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
-  prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, note, updated_at) VALUES (?, ?, ?, ?, ?, ?)
-    ON CONFLICT(partita_id, confidente_chiave) DO UPDATE SET sbloccato = excluded.sbloccato, rango = excluded.rango, note = excluded.note, updated_at = excluded.updated_at`)
-    .run(partitaId, chiave, sbloccato ? 1 : 0, rango, dati.note ?? attuale.note, nowIso());
+  // Punti verso il rango successivo: al cambio di rango ripartono da zero, salvo valore esplicito.
+  let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? 0 : attuale.punti + (dati.deltaPunti ?? 0);
+  punti = Math.max(0, punti);
+  prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(partita_id, confidente_chiave) DO UPDATE SET sbloccato = excluded.sbloccato, rango = excluded.rango, punti = excluded.punti, note = excluded.note, updated_at = excluded.updated_at`)
+    .run(partitaId, chiave, sbloccato ? 1 : 0, rango, punti, dati.note ?? attuale.note, nowIso());
   prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
   return confidenti(partitaId).find((c) => c.chiave === chiave)!;
 }

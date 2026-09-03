@@ -28,7 +28,6 @@ export const usePartitaStore = create<PartitaState>((set, get) => ({
   caricata: false,
   errore: null,
   carica: async () => {
-    if (get().caricamento) return;
     set({ caricamento: true, errore: null });
     try {
       const partite = await getPartite();
