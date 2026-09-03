@@ -43,7 +43,7 @@ Fonti: https://www.allgamestaff.it/persona-5-royal/ (guida alle doti sociali) e 
   successivo; l'eccedenza non si riporta. L'evento di salto, una volta avviato, porta sempre al rango successivo.
 - Sblocco (0→1) e 1→2 non richiedono punti per nessun Confidente.
 - Il gioco segnala il raggiungimento della soglia con stelle multicolori attorno alle note e un jingle aggiuntivo.
-- Frazioni: le fonti divergono (7,5 conservato vs troncato a 7); l'app registra interi.
+- Frazioni: le fonti divergono (7,5 conservato vs troncato a 7); l'app conserva i decimali e li mostra in formato italiano (7,5).
 
 Nell'app la scheda Confidenti replica il gioco: pulsanti ♪/♪♪/♪♪♪ (5/10/15 punti base), "Regalo" (50) e "Uscita" (10);
 il bonus ×1,5 della Persona dello stesso arcano è proposto automaticamente se la scorta della partita la contiene
