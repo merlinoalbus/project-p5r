@@ -27,8 +27,8 @@ Ogni step si chiude solo con il verdetto **APPROVATO** del galaxy-task-validator
 ## Fase 2 — Albero di fusione ricorsivo
 | Step | Contenuto | Stato |
 |---|---|---|
-| 2.1 | Motore `alberoFusione.ts`: piani ricorsivi verso il bersaglio con foglie scorta (gratis, un esemplare una volta), Registro (prezzo di evocazione 27L²+126L+2147), cattura (livello ≤ protagonista); stima ottimistica per programmazione dinamica + ricerca in profondità con potatura; vincoli di profondità, livello e DLC; ricette speciali a più ingredienti; N alternative distinte ordinate per costo; API `GET /api/fusione/piani/:id` (partita, profondita, alternative, catture, limitaLivello); test | ⏳ in validazione |
-| 2.2 | UI: vista «Piano di fusione» (bersaglio, profondità, alternative, catture, limite di livello) con albero rientrato e legenda; link «Piano di fusione →» dalla scheda Persona | ⏳ in validazione |
+| 2.1 | Motore `alberoFusione.ts`: piani ricorsivi verso il bersaglio con foglie scorta (gratis, un esemplare una volta), Registro (prezzo di evocazione 27L²+126L+2147), cattura (livello ≤ protagonista); stima ottimistica per programmazione dinamica + ricerca in profondità con potatura; vincoli di profondità, livello e DLC; ricette speciali a più ingredienti; N alternative distinte ordinate per costo; API `GET /api/fusione/piani/:id` (partita, profondita, alternative, catture, limitaLivello); test | ✅ 2026-09-03 |
+| 2.2 | UI: vista «Piano di fusione» (bersaglio, profondità, alternative, catture, limite di livello) con albero rientrato e legenda; link «Piano di fusione →» dalla scheda Persona | ✅ 2026-09-03 |
 
 ## Fase 3 — Eredità skill e ricerca per skill desiderate
 ⬜ matrice tipo-eredità × elemento, numero di slot, ricette che consentono un set di skill; tratti.

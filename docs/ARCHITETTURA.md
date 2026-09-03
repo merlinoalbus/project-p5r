@@ -46,7 +46,8 @@ server/
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/seed/      caricaSeed.ts: carica data/seed nel DB al boot (hash in seed_meta, upsert per nome, traduzioni utente intoccabili)
   services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
-                      catalogoRiferimentiService; fusione/motoreFusione.ts (motore puro su snapshot in memoria) e fusione/fusioneService.ts (DTO)
+                      catalogoRiferimentiService; fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani
+                      ricorsivi) e fusione/fusioneService.ts (DTO)
   schemas/            zod: comuni (id, booleani da query, livello), compendio, traduzioni, partite, immagini
   utils/              logger, httpError
 shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
