@@ -107,6 +107,11 @@ export function skillPosseduta(possedutaId: number): SkillEredita[] {
   return righe.map((r) => s.skill.get(r.skill_id)).filter((x): x is SkillEredita => !!x);
 }
 
+/** Skill per id (o null). */
+export function skillPerId(id: number): SkillEredita | null {
+  return carica().skill.get(id) ?? null;
+}
+
 export function trattoDi(personaId: number): SkillEredita | null {
   return carica().tratto.get(personaId) ?? null;
 }

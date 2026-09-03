@@ -2,13 +2,12 @@
 // CercaSkill — ricette che consentono di ereditare un insieme di skill (fino a 4), con risultato facoltativo
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cercaPerSkill, getSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
-import { CampoRicerca } from '../shared/CampoRicerca';
-import { ElementoChip } from '../compendio/ElementoChip';
 import { SelettorePersona } from './SelettorePersona';
+import { SelettoreSkill } from './SelettoreSkill';
 import { RicettaRiga } from './RicettaRiga';
 import { Spinner } from '../shared/PageState';
 import type { PersonaRiassuntoDto, SkillRiassuntoDto } from '../../types';
@@ -18,48 +17,6 @@ interface Props {
   partitaId: number | null;
   livelloProtagonista: number | null;
   inScorta: Set<number>;
-}
-
-/** Selettore di più skill con ricerca (nome italiano, canonico o effetto). */
-function SelettoreSkill({ skill, scelte, onCambia }: { skill: SkillRiassuntoDto[]; scelte: SkillRiassuntoDto[]; onCambia: (s: SkillRiassuntoDto[]) => void }) {
-  const [q, setQ] = useState('');
-  const candidate = useMemo(() => {
-    const testo = q.trim().toLowerCase();
-    if (!testo) return [];
-    const ids = new Set(scelte.map((s) => s.id));
-    return skill.filter((s) => s.elemento !== 'trait' && !ids.has(s.id) && (s.nomeIt.toLowerCase().includes(testo) || s.nome.toLowerCase().includes(testo) || s.effettoNome.toLowerCase().includes(testo))).slice(0, 10);
-  }, [q, skill, scelte]);
-  return (
-    <div className="card flex flex-col gap-2">
-      <span className="text-[12px] uppercase tracking-wide text-text-muted">Skill desiderate ({scelte.length}/4)</span>
-      <div className="flex flex-wrap gap-1.5">
-        {scelte.map((s) => (
-          <button key={s.id} type="button" className="chip chip--attivo touch" onClick={() => onCambia(scelte.filter((x) => x.id !== s.id))} aria-label={`Rimuovi ${s.nomeIt}`} title="Tocca per rimuovere">
-            {s.nomeIt} ×
-          </button>
-        ))}
-        {scelte.length === 0 && <span className="text-[13px] text-text-muted">Nessuna skill scelta: cerca qui sotto.</span>}
-      </div>
-      {scelte.length < 4 && (
-        <>
-          <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca una skill (nome o effetto)…" />
-          {candidate.length > 0 && (
-            <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[260px] overflow-y-auto" role="listbox" aria-label="Skill trovate">
-              {candidate.map((s) => (
-                <li key={s.id} role="option" aria-selected={false}>
-                  <button type="button" className="w-full text-left flex items-center gap-2 py-2 bg-transparent border-none text-text cursor-pointer hover:text-primary touch" onClick={() => { onCambia([...scelte, s]); setQ(''); }}>
-                    <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
-                    <span className="font-semibold">{s.nomeIt}</span>
-                    <span className="text-[12px] text-text-secondary truncate flex-1">{s.effettoNome}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
-    </div>
-  );
 }
 
 /** Ricerca delle ricette per skill: skill scelte, risultato facoltativo, limite di livello; elenco per risultato e ricette. */

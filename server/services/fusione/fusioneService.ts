@@ -6,7 +6,7 @@ import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
-import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
+import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
 import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
@@ -93,8 +93,13 @@ function disponibilitaDi(partitaId?: number): Disponibilita {
   return disp;
 }
 
+function skillBreve(id: number): { id: number; nome: string; nomeIt: string } {
+  const s = skillPerId(id);
+  return { id, nome: s?.nome ?? String(id), nomeIt: s ? t('skill', s.nome) : String(id) };
+}
+
 function nodoDto(n: NodoPiano): NodoPianoDto {
-  return { persona: personaDto(n.persona), modo: n.modo, costo: n.costo, ...(n.tipo ? { tipo: n.tipo } : {}), figli: n.figli.map(nodoDto) };
+  return { persona: personaDto(n.persona), modo: n.modo, costo: n.costo, ...(n.tipo ? { tipo: n.tipo } : {}), figli: n.figli.map(nodoDto), skillPortate: n.skillPortate.map(skillBreve), skillDaLivello: n.skillDaLivello.map(skillBreve) };
 }
 
 export interface OpzioniPiani extends OpzioniContesto {
@@ -103,6 +108,9 @@ export interface OpzioniPiani extends OpzioniContesto {
   catture?: boolean;
   /** Se true e c'è una partita, il livello massimo è quello del protagonista. */
   limitaLivello?: boolean;
+  /** Skill che il bersaglio deve avere (propagate lungo la catena). */
+  skill?: number[];
+  slotFortunato?: boolean;
 }
 
 /** Piani di fusione ricorsivi per ottenere la Persona, con scorta e Registro della partita. */
@@ -110,17 +118,33 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
   const { ctx } = contestoDa(opz);
   const target = personaOErrore(personaId);
   const disp = disponibilitaDi(opz.partitaId);
+  if (opz.partitaId !== undefined) {
+    // Skill effettive degli esemplari in scorta (unione per Persona), per la propagazione.
+    const righe = prepared('SELECT pp.persona_id, ps.skill_id FROM persona_posseduta pp JOIN persona_posseduta_skill ps ON ps.posseduta_id = pp.id WHERE pp.partita_id = ?').all(opz.partitaId) as Array<{ persona_id: number; skill_id: number }>;
+    disp.skillScorta = new Map();
+    for (const r of righe) {
+      if (!disp.skillScorta.has(r.persona_id)) disp.skillScorta.set(r.persona_id, new Set());
+      disp.skillScorta.get(r.persona_id)!.add(r.skill_id);
+    }
+  }
+  const skillRichieste = (opz.skill ?? []).map((id) => {
+    const s = skillPerId(id);
+    if (!s) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
+    if (s.elemento === 'trait') throw httpErrors.badRequest('skill-tratto', `${t('skill', s.nome)} è un tratto: non si propaga come skill (se ne eredita uno a scelta a ogni fusione).`);
+    return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento) };
+  });
   let livelloMax: number | null = opz.livelloMax ?? null;
   if (livelloMax === null && opz.limitaLivello && opz.partitaId !== undefined) {
     const r = prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(opz.partitaId) as { livello_protagonista: number } | undefined;
     livelloMax = r?.livello_protagonista ?? null;
   }
-  const opzioni = { profondita: opz.profondita ?? 3, alternative: opz.alternative ?? 3, catture: opz.catture ?? true, livelloMax };
-  const piani = pianiFusione(target, ctx, disp, opzioni);
+  const opzioni = { profondita: opz.profondita ?? 3, alternative: opz.alternative ?? 3, catture: opz.catture ?? true, livelloMax, slotFortunato: opz.slotFortunato ?? false };
+  const piani = pianiFusione(target, ctx, disp, { ...opzioni, skill: skillRichieste.map((s) => s.id) });
   return {
     persona: personaDto(target),
     piani: piani.map((p) => ({ radice: nodoDto(p.radice), costo: p.costo, profondita: p.profondita, catture: p.catture, evocazioni: p.evocazioni, fusioni: p.fusioni })),
     opzioni,
+    skillRichieste,
     disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
   };
 }

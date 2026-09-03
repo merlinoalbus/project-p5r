@@ -24,11 +24,14 @@ export interface OpzioniPiani {
   alternative?: number;
   catture?: boolean;
   limitaLivello?: boolean;
+  /** Skill che il bersaglio deve avere (propagate lungo la catena). */
+  skill?: number[];
+  slotFortunato?: boolean;
 }
 
 /** Piani di fusione ricorsivi (calcolo potenzialmente lungo: timeout esteso, nessun retry). */
 export const getPianiFusione = (personaId: number, opz: OpzioniPiani = {}): Promise<PianiFusioneDto> =>
-  apiGet(`/fusione/piani/${personaId}${queryString({ partita: opz.partita, profondita: opz.profondita, alternative: opz.alternative, catture: opz.catture, limitaLivello: opz.limitaLivello })}`, { timeoutMs: 120_000, maxRetries: 0 });
+  apiGet(`/fusione/piani/${personaId}${queryString({ partita: opz.partita, profondita: opz.profondita, alternative: opz.alternative, catture: opz.catture, limitaLivello: opz.limitaLivello, skill: opz.skill && opz.skill.length > 0 ? opz.skill.join(',') : undefined, slotFortunato: opz.slotFortunato })}`, { timeoutMs: 120_000, maxRetries: 0 });
 
 /** Analisi dell'eredità delle skill per la fusione A + B. */
 export const getEredita = (a: number, b: number, opz: { partita?: number; livelloA?: number; livelloB?: number } = {}): Promise<EreditaFusioneDto> =>

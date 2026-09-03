@@ -235,6 +235,10 @@ export interface NodoPianoDto {
   costo: number;
   tipo?: TipoFusione;
   figli: NodoPianoDto[];
+  /** Skill richieste che il nodo porta al genitore (propagazione a catena). */
+  skillPortate: Array<{ id: number; nome: string; nomeIt: string }>;
+  /** Skill richieste che il nodo apprende salendo di livello (non innate né ereditate). */
+  skillDaLivello: Array<{ id: number; nome: string; nomeIt: string }>;
 }
 
 export interface PianoFusioneDto {
@@ -249,7 +253,9 @@ export interface PianoFusioneDto {
 export interface PianiFusioneDto {
   persona: PersonaFusioneDto;
   piani: PianoFusioneDto[];
-  opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null };
+  opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null; slotFortunato: boolean };
+  /** Skill richieste (propagate lungo la catena). */
+  skillRichieste: Array<{ id: number; nome: string; nomeIt: string; elemento: string; elementoNome: string }>;
   /** Esemplari in scorta e Persona nel Registro considerati (dalla partita). */
   disponibilita: { scorta: number; registro: number };
 }

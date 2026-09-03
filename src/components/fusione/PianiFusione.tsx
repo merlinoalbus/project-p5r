@@ -4,12 +4,13 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getPianiFusione } from '../../services/api';
+import { getPianiFusione, getSkills } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { SelettorePersona } from './SelettorePersona';
+import { SelettoreSkill } from './SelettoreSkill';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
-import type { NodoPianoDto, PersonaRiassuntoDto, PianoFusioneDto } from '../../types';
+import type { NodoPianoDto, PersonaRiassuntoDto, PianoFusioneDto, SkillRiassuntoDto } from '../../types';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -35,6 +36,11 @@ function Nodo({ nodo, radice }: { nodo: NodoPianoDto; radice?: boolean }) {
           {nodo.modo === 'fusione' ? `${NOME_MODO.fusione} ${NOME_TIPO[nodo.tipo ?? 'normale']}` : NOME_MODO[nodo.modo]}
           {nodo.modo === 'registro' && ` · ${formattaYen(nodo.costo)}`}
         </span>
+        {nodo.skillPortate.map((s) => (
+          <span key={s.id} className={`chip text-[11px] ${nodo.skillDaLivello.some((d) => d.id === s.id) ? 'text-warning' : 'chip--attivo'}`} title={nodo.skillDaLivello.some((d) => d.id === s.id) ? 'La apprende salendo di livello' : nodo.modo === 'fusione' ? 'Da ereditare in questa fusione' : 'Posseduta'}>
+            {s.nomeIt}{nodo.skillDaLivello.some((d) => d.id === s.id) ? ' ↑' : ''}
+          </span>
+        ))}
       </div>
       {nodo.figli.length > 0 && (
         <ul className="m-0 p-0 list-none pl-4 ml-2 border-l border-border-light flex flex-col">
@@ -72,9 +78,13 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
   const [catture, setCatture] = useState(true);
   const [limitaLivello, setLimitaLivello] = useState(true);
   const [alternative, setAlternative] = useState(3);
+  const [skillScelte, setSkillScelte] = useState<SkillRiassuntoDto[]>([]);
+  const [slotFortunato, setSlotFortunato] = useState(false);
+  const tutteSkill = useCarica(() => getSkills(), []);
+  const skillIds = skillScelte.map((s) => s.id);
   const { dati, caricamento, errore } = useCarica(
-    () => (scelta ? getPianiFusione(scelta.id, { partita: partitaId ?? undefined, profondita, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null }) : Promise.resolve(null)),
-    [scelta?.id, partitaId, profondita, alternative, catture, limitaLivello, livelloProtagonista],
+    () => (scelta ? getPianiFusione(scelta.id, { partita: partitaId ?? undefined, profondita, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null, skill: skillIds, slotFortunato }) : Promise.resolve(null)),
+    [scelta?.id, partitaId, profondita, alternative, catture, limitaLivello, livelloProtagonista, skillIds.join(','), slotFortunato],
   );
 
   return (
@@ -82,6 +92,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
       <SelettorePersona etichetta="Persona da ottenere" persone={persone} scelta={scelta} onScegli={setScelta} senzaRare />
       {scelta && (
         <>
+          {tutteSkill.dati && <SelettoreSkill skill={tutteSkill.dati} scelte={skillScelte} onCambia={setSkillScelte} etichetta="Skill da portare sul bersaglio" />}
           <div className="flex flex-wrap items-center gap-2 text-[13px]">
             <label className="flex items-center gap-1.5 touch">Profondità
               <select className="form-input w-auto" value={profondita} onChange={(e) => setProfondita(Number(e.target.value))} aria-label="Profondità massima">
@@ -97,9 +108,15 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
             <button type="button" className={`chip touch ${limitaLivello ? 'chip--attivo' : ''}`} disabled={livelloProtagonista === null} onClick={() => setLimitaLivello((v) => !v)} aria-pressed={limitaLivello && livelloProtagonista !== null} title={livelloProtagonista !== null ? `Nessuna fusione sopra il livello ${livelloProtagonista} del protagonista` : 'Serve una partita attiva'}>
               Fino al livello {livelloProtagonista ?? '—'}
             </button>
+            {skillScelte.length > 0 && (
+              <button type="button" className={`chip touch ${slotFortunato ? 'chip--attivo' : ''}`} onClick={() => setSlotFortunato((v) => !v)} aria-pressed={slotFortunato} title="Conta anche lo slot che il gioco assegna a caso (serve fortuna o ritentare la fusione)">
+                Conta lo slot casuale
+              </button>
+            )}
           </div>
           <p className="m-0 text-[12px] text-text-muted">
             Foglie: <span className="chip chip--attivo">in scorta</span> gratis (ogni esemplare una volta), <span className="text-text-secondary">dal Registro</span> al prezzo di evocazione, <span className="text-warning">da catturare</span> in battaglia. Il costo del piano è la somma delle evocazioni.
+            {skillScelte.length > 0 && ' Le skill richieste sono propagate a catena: ogni fusione deve poterle ereditare (tipo compatibile e slot a scelta sufficienti) e le foglie devono possederle; «↑» = la Persona la apprende salendo di livello.'}
             {!partitaId && ' Senza partita attiva scorta e Registro sono considerati vuoti.'}
           </p>
           {errore ? (
@@ -107,7 +124,7 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
           ) : dati && dati.piani.length === 0 ? (
-            <p className="m-0 text-[13px] text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture o togli il limite di livello.</p>
+            <p className="m-0 text-[13px] text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello{skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.</p>
           ) : dati ? (
             <div className="flex flex-col gap-3">{dati.piani.map((p, i) => <Piano key={i} piano={p} indice={i} />)}</div>
           ) : null}

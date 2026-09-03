@@ -14,6 +14,7 @@
 // ============================================================
 
 import { costoFusione, fondi, ricettaSpeciale, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione, type TipoFusione } from './motoreFusione.js';
+import { elementoEreditabile, skillAlLivello, skillPerId, slotEreditabili, tipoEredita, type SkillEredita } from './eredita.js';
 
 export type ModoNodo = 'scorta' | 'registro' | 'cattura' | 'fusione';
 
@@ -25,6 +26,10 @@ export interface NodoPiano {
   /** Solo per 'fusione'. */
   tipo?: TipoFusione;
   figli: NodoPiano[];
+  /** Skill richieste che questo nodo deve portare al genitore (propagazione a catena). */
+  skillPortate: number[];
+  /** Skill richieste che il nodo non ha innate ma apprende salendo di livello (soddisfatte con l'allenamento). */
+  skillDaLivello: number[];
 }
 
 export interface Piano {
@@ -44,6 +49,8 @@ export interface Disponibilita {
   scorta: Map<number, number>;
   /** id Persona registrate nel Registro (evocabili a pagamento). */
   registro: Set<number>;
+  /** id Persona → skill effettivamente possedute dagli esemplari in scorta (unione), per la propagazione. */
+  skillScorta?: Map<number, Set<number>>;
 }
 
 export interface OpzioniAlbero {
@@ -57,6 +64,10 @@ export interface OpzioniAlbero {
   livelloMax: number | null;
   /** Ricette esaminate per nodo (ordinate per stima ottimistica). */
   ampiezza?: number;
+  /** Skill che il bersaglio deve avere: ogni fusione deve poterle ereditare e le foglie devono possederle. */
+  skill?: number[];
+  /** Conta anche lo slot assegnato a caso dal gioco (ottimistico); predefinito: solo gli slot a scelta. */
+  slotFortunato?: boolean;
 }
 
 const INFINITO = Number.POSITIVE_INFINITY;
@@ -73,6 +84,10 @@ interface Ricerca {
   ricette: Map<number, RicettaFusione[]>;
   /** stima ottimistica per (persona, profondità residua). */
   stima: Map<string, number>;
+  /** skill raggiungibili per (persona, profondità residua): innate/scorta più quelle ereditabili a catena. */
+  raggiungibili: Map<string, Set<number>>;
+  /** cache delle skill innate al livello base. */
+  innate: Map<number, SkillEredita[]>;
 }
 
 function ricetteDi(r: Ricerca, p: PersonaFusione): RicettaFusione[] {
@@ -82,6 +97,92 @@ function ricetteDi(r: Ricerca, p: PersonaFusione): RicettaFusione[] {
     r.ricette.set(p.id, lista);
   }
   return lista;
+}
+
+// ---- Propagazione delle skill a catena ----
+
+function innateDi(r: Ricerca, p: PersonaFusione): SkillEredita[] {
+  let s = r.innate.get(p.id);
+  if (!s) { s = skillAlLivello(p.id, p.livello); r.innate.set(p.id, s); }
+  return s;
+}
+
+/** Skill possedute da p come foglia nel modo dato. */
+function skillFoglia(r: Ricerca, p: PersonaFusione, modo: ModoNodo): Set<number> {
+  if (modo === 'scorta') {
+    const s = r.disp.skillScorta?.get(p.id);
+    if (s && s.size > 0) return s;
+  }
+  return new Set(innateDi(r, p).map((s) => s.id));
+}
+
+/** Skill che p può avere al termine di un piano entro `prof` fusioni (innate, dalla scorta, o ereditabili a catena). */
+function raggiungibili(r: Ricerca, p: PersonaFusione, prof: number, inCorso: Set<number>): Set<number> {
+  const chiave = `${p.id}|${prof}`;
+  const nota = r.raggiungibili.get(chiave);
+  if (nota) return nota;
+  const out = new Set<number>(innateDi(r, p).map((s) => s.id));
+  for (const s of r.disp.skillScorta?.get(p.id) ?? []) out.add(s);
+  // Skill apprese salendo di livello: soddisfano la richiesta con l'allenamento.
+  for (const s of skillAlLivello(p.id, 99)) out.add(s.id);
+  if (prof > 0 && !inCorso.has(p.id) && !p.rara) {
+    inCorso.add(p.id);
+    const tipo = tipoEredita(p.id);
+    for (const ric of ricetteDi(r, p)) {
+      for (const ing of ric.ingredienti) {
+        for (const sid of raggiungibili(r, ing, prof - 1, inCorso)) {
+          if (out.has(sid)) continue;
+          const sk = r.innate.get(ing.id)?.find((x) => x.id === sid) ?? skillInfo(sid);
+          if (sk && !sk.unica && elementoEreditabile(tipo, sk.elemento)) out.add(sid);
+        }
+      }
+    }
+    inCorso.delete(p.id);
+  }
+  if (inCorso.size === 0) r.raggiungibili.set(chiave, out);
+  return out;
+}
+
+function skillInfo(id: number): SkillEredita | null {
+  return skillPerId(id);
+}
+
+/**
+ * Ripartisce le skill richieste (non innate del risultato) fra gli ingredienti che possono portarle.
+ * Restituisce null se una skill non è ereditabile dal risultato o non è raggiungibile da alcun ingrediente,
+ * oppure se il numero da ereditare supera gli slot.
+ */
+function ripartisciSkill(r: Ricerca, p: PersonaFusione, ric: RicettaFusione, richieste: Set<number>, prof: number): { perIngrediente: Set<number>[]; daLivello: number[] } | null {
+  if (richieste.size === 0) return { perIngrediente: ric.ingredienti.map(() => new Set<number>()), daLivello: [] };
+  const innate = new Set(innateDi(r, p).map((s) => s.id));
+  const apprese = new Set(skillAlLivello(p.id, 99).map((s) => s.id));
+  const tipo = tipoEredita(p.id);
+  const perIngrediente = ric.ingredienti.map(() => new Set<number>());
+  const daLivello: number[] = [];
+  const reach = ric.ingredienti.map((ing) => raggiungibili(r, ing, prof, new Set()));
+  let daEreditare = 0;
+  for (const sid of richieste) {
+    if (innate.has(sid)) continue;
+    if (apprese.has(sid)) { daLivello.push(sid); continue; }
+    const sk = skillInfo(sid);
+    if (!sk || sk.unica || !elementoEreditabile(tipo, sk.elemento)) return null;
+    // Preferisci l'ingrediente che la possiede già come innata/scorta, poi quello con meno richieste.
+    let scelto = -1;
+    for (let i = 0; i < ric.ingredienti.length; i++) {
+      if (!reach[i].has(sid)) continue;
+      const innataIng = skillFoglia(r, ric.ingredienti[i], 'scorta').has(sid);
+      if (scelto < 0 || (innataIng && !skillFoglia(r, ric.ingredienti[scelto], 'scorta').has(sid)) || (innataIng === skillFoglia(r, ric.ingredienti[scelto], 'scorta').has(sid) && perIngrediente[i].size < perIngrediente[scelto].size)) scelto = i;
+    }
+    if (scelto < 0) return null;
+    perIngrediente[scelto].add(sid);
+    daEreditare++;
+  }
+  // Slot: dal totale delle skill degli ingredienti (innate/scorta più quelle che porteranno, max 8 ciascuno).
+  const totale = ric.ingredienti.reduce((tot, ing, i) => tot + Math.min(8, new Set([...skillFoglia(r, ing, 'scorta'), ...perIngrediente[i]]).size), 0);
+  const slot = slotEreditabili(totale);
+  const disponibili = r.opz.slotFortunato ? slot : Math.max(0, slot - 1);
+  if (daEreditare > disponibili) return null;
+  return { perIngrediente, daLivello };
 }
 
 /** Costo della foglia più economica disponibile per p (senza considerare il consumo della scorta), o INFINITO. */
@@ -123,14 +224,22 @@ interface Parziale {
 }
 
 /** Tutti i piani per p entro `prof` fusioni con costo < `limite`, dato l'uso corrente della scorta; ordinati per costo. */
-function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<number, number>, limite: number, antenati: Set<number>, quanti: number): Parziale[] {
+function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<number, number>, limite: number, antenati: Set<number>, quanti: number, richieste: Set<number> = new Set()): Parziale[] {
   const esiti: Parziale[] = [];
   const foglia = costoFoglia(r, p, scortaUsata);
+  const portate = [...richieste];
   if (foglia && foglia.costo < limite) {
-    const usata = new Map(scortaUsata);
-    if (foglia.modo === 'scorta') usata.set(p.id, (usata.get(p.id) ?? 0) + 1);
-    esiti.push({ nodo: { persona: p, modo: foglia.modo, costo: foglia.costo, figli: [] }, scortaUsata: usata });
-    if (foglia.costo === 0 && foglia.modo === 'scorta') return esiti; // già in scorta: nessuna fusione può fare meglio
+    // La foglia deve possedere le skill richieste (innate o, dalla scorta, quelle registrate); quelle apprese
+    // salendo di livello sono ammesse e segnalate.
+    const possedute = skillFoglia(r, p, foglia.modo);
+    const apprese = richieste.size > 0 ? new Set(skillAlLivello(p.id, 99).map((s) => s.id)) : new Set<number>();
+    const daLivello = portate.filter((sid) => !possedute.has(sid) && apprese.has(sid));
+    if (portate.every((sid) => possedute.has(sid) || apprese.has(sid))) {
+      const usata = new Map(scortaUsata);
+      if (foglia.modo === 'scorta') usata.set(p.id, (usata.get(p.id) ?? 0) + 1);
+      esiti.push({ nodo: { persona: p, modo: foglia.modo, costo: foglia.costo, figli: [], skillPortate: portate, skillDaLivello: daLivello }, scortaUsata: usata });
+      if (foglia.costo === 0 && foglia.modo === 'scorta' && daLivello.length === 0) return esiti; // già in scorta con tutto: nessuna fusione può fare meglio
+    }
   }
   if (prof === 0 || antenati.has(p.id)) return esiti;
   const ampiezza = r.opz.ampiezza ?? 12;
@@ -139,18 +248,20 @@ function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<num
     .map((ric) => ({ ric, h: ric.ingredienti.reduce((tot, i) => tot + stima(r, i, prof - 1, new Set()), 0) }))
     .filter((c) => c.h < limite)
     .sort((a, b) => a.h - b.h)
-    .slice(0, ampiezza);
+    .slice(0, richieste.size > 0 ? Math.max(ampiezza, 40) : ampiezza);
   const antenatiFigli = new Set(antenati).add(p.id);
   let soglia = limite;
   for (const { ric, h } of candidate) {
     if (h >= soglia) break;
+    const ripartizione = ripartisciSkill(r, p, ric, richieste, prof - 1);
+    if (!ripartizione) continue;
     // Combina i piani degli ingredienti in sequenza (2 per le fusioni normali, anche 3–6 per le ricette speciali),
     // propagando la scorta consumata dai precedenti.
     let combinazioni: Array<{ figli: NodoPiano[]; costo: number; scortaUsata: Map<number, number> }> = [{ figli: [], costo: 0, scortaUsata }];
-    for (const ing of ric.ingredienti) {
+    for (const [indice, ing] of ric.ingredienti.entries()) {
       const prossime: typeof combinazioni = [];
       for (const c of combinazioni) {
-        for (const pi of piani(r, ing, prof - 1, c.scortaUsata, soglia - c.costo, antenatiFigli, quanti)) {
+        for (const pi of piani(r, ing, prof - 1, c.scortaUsata, soglia - c.costo, antenatiFigli, quanti, ripartizione.perIngrediente[indice])) {
           const costo = c.costo + pi.nodo.costo;
           if (costo >= soglia) continue;
           prossime.push({ figli: [...c.figli, pi.nodo], costo, scortaUsata: pi.scortaUsata });
@@ -161,7 +272,7 @@ function piani(r: Ricerca, p: PersonaFusione, prof: number, scortaUsata: Map<num
       if (combinazioni.length === 0) break;
     }
     for (const c of combinazioni) {
-      esiti.push({ nodo: { persona: p, modo: 'fusione', tipo: ric.tipo, costo: c.costo, figli: c.figli }, scortaUsata: c.scortaUsata });
+      esiti.push({ nodo: { persona: p, modo: 'fusione', tipo: ric.tipo, costo: c.costo, figli: c.figli, skillPortate: portate, skillDaLivello: ripartizione.daLivello }, scortaUsata: c.scortaUsata });
     }
     esiti.sort((a, b) => a.nodo.costo - b.nodo.costo);
     if (esiti.length > quanti) esiti.length = quanti;
@@ -181,9 +292,10 @@ function riepilogo(nodo: NodoPiano): { profondita: number; catture: number; evoc
   };
 }
 
-/** Firma strutturale per scartare piani identici (stessi modi e stesse Persona). */
+/** Firma strutturale per scartare piani identici (stessi modi, stesse Persona, stesse skill portate). */
 function firma(nodo: NodoPiano): string {
-  return nodo.modo === 'fusione' ? `${nodo.persona.id}(${nodo.figli.map(firma).sort().join(',')})` : `${nodo.persona.id}:${nodo.modo}`;
+  const skill = nodo.skillPortate.length ? `[${[...nodo.skillPortate].sort((a, b) => a - b).join('+')}]` : '';
+  return nodo.modo === 'fusione' ? `${nodo.persona.id}${skill}(${nodo.figli.map(firma).sort().join(',')})` : `${nodo.persona.id}:${nodo.modo}${skill}`;
 }
 
 /**
@@ -191,8 +303,8 @@ function firma(nodo: NodoPiano): string {
  * Le Persona rare non hanno piani (non si fondono: solo scorta/registro); una speciale ha come unica fusione la sua ricetta.
  */
 export function pianiFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniAlbero): Piano[] {
-  const r: Ricerca = { ctx, disp, opz: { ...opz, profondita: Math.max(0, Math.min(6, opz.profondita)) }, ricette: new Map(), stima: new Map() };
-  const grezzi = piani(r, target, r.opz.profondita, new Map(), INFINITO, new Set(), Math.max(1, opz.alternative));
+  const r: Ricerca = { ctx, disp, opz: { ...opz, profondita: Math.max(0, Math.min(6, opz.profondita)) }, ricette: new Map(), stima: new Map(), raggiungibili: new Map(), innate: new Map() };
+  const grezzi = piani(r, target, r.opz.profondita, new Map(), INFINITO, new Set(), Math.max(1, opz.alternative), new Set(opz.skill ?? []));
   const visti = new Set<string>();
   const out: Piano[] = [];
   for (const g of grezzi.sort((a, b) => a.nodo.costo - b.nodo.costo)) {

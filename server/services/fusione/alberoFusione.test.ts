@@ -8,6 +8,7 @@ import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
 import { creaContesto, fondi, invalidaMotoreFusione, ricettePer, type Contesto, type PersonaFusione } from './motoreFusione.js';
 import { pianiFusione, pianoCoerente, prezzoEvocazione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
+import { elementoEreditabile, invalidaEredita, skillAlLivello, skillPerId, tipoEredita } from './eredita.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
 
@@ -28,6 +29,7 @@ describe('alberoFusione', () => {
     runMigrations(db);
     caricaSeed(db, DIR_SEED);
     invalidaMotoreFusione();
+    invalidaEredita();
     ctx = creaContesto([]);
   });
   afterAll(() => closeDb());
@@ -128,6 +130,50 @@ describe('alberoFusione', () => {
     expect(piani[0].radice.figli.map((f) => f.persona.nome).sort()).toEqual(['Belial', 'Nebiros']);
     const [belial, nebiros] = piani[0].radice.figli;
     expect(fondi(belial.persona, nebiros.persona, ctx)!.risultato.nome).toBe('Alice');
+  });
+
+  it('propagazione delle skill: ogni fusione eredita le richieste dai figli e le foglie le possiedono', () => {
+    const jack = perNome(ctx, 'Jack Frost');
+    // Tarukaja: supporto, sempre ereditabile
+    const tarukaja = ctx.ammesse.flatMap((p) => skillAlLivello(p.id, 99)).find((s) => s.nome === 'Tarukaja')!;
+    const piani = pianiFusione(jack, ctx, vuota(), { profondita: 2, alternative: 4, catture: true, livelloMax: null, skill: [tarukaja.id] });
+    expect(piani.length).toBeGreaterThan(0);
+    const verifica = (n: NodoPiano) => {
+      const richieste = new Set(n.skillPortate);
+      if (n.modo === 'fusione') {
+        const innate = new Set(skillAlLivello(n.persona.id, n.persona.livello).map((s) => s.id));
+        for (const sid of richieste) {
+          if (innate.has(sid) || n.skillDaLivello.includes(sid)) continue;
+          expect(n.figli.some((f) => f.skillPortate.includes(sid))).toBe(true);
+          expect(elementoEreditabile(tipoEredita(n.persona.id), skillPerId(sid)!.elemento)).toBe(true);
+        }
+        n.figli.forEach(verifica);
+      } else {
+        const possedute = new Set(skillAlLivello(n.persona.id, n.persona.livello).map((s) => s.id));
+        for (const sid of richieste) expect(possedute.has(sid) || n.skillDaLivello.includes(sid)).toBe(true);
+      }
+    };
+    for (const p of piani) {
+      expect(p.radice.skillPortate).toEqual([tarukaja.id]);
+      verifica(p.radice);
+      expect(pianoCoerente(p.radice, ctx)).toBe(true);
+    }
+    // Skill di fuoco su un bersaglio di tipo Ghiaccio (Jack Frost): nessun piano
+    const agi = ctx.ammesse.flatMap((p) => skillAlLivello(p.id, 99)).find((s) => s.nome === 'Agi')!;
+    expect(tipoEredita(jack.id)).toBe('Ice');
+    const nessuno = pianiFusione(jack, ctx, vuota(), { profondita: 2, alternative: 3, catture: true, livelloMax: null, skill: [agi.id] });
+    expect(nessuno.every((p) => p.radice.modo !== 'fusione' || p.radice.skillDaLivello.includes(agi.id))).toBe(true);
+    // un esemplare in scorta con la skill registrata soddisfa la richiesta come foglia
+    const disp = vuota();
+    disp.scorta.set(jack.id, 1);
+    disp.skillScorta = new Map([[jack.id, new Set([tarukaja.id])]]);
+    const inScorta = pianiFusione(jack, ctx, disp, { profondita: 2, alternative: 2, catture: false, livelloMax: null, skill: [tarukaja.id] });
+    expect(inScorta[0].radice.modo).toBe('scorta');
+    expect(inScorta[0].radice.skillPortate).toEqual([tarukaja.id]);
+    // in scorta SENZA la skill: la foglia non basta, serve una fusione (o l'apprendimento per livello)
+    disp.skillScorta = new Map([[jack.id, new Set<number>()]]);
+    const senza = pianiFusione(jack, ctx, disp, { profondita: 2, alternative: 2, catture: true, livelloMax: null, skill: [tarukaja.id] });
+    expect(senza.every((p) => p.radice.modo !== 'scorta' || p.radice.skillDaLivello.includes(tarukaja.id))).toBe(true);
   });
 
   it('più alternative distinte, tutte coerenti, in tempi ragionevoli su un bersaglio di alto livello', () => {

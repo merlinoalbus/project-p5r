@@ -60,4 +60,10 @@ export const queryPiani = z.object({
   alternative: z.coerce.number().int().min(1).max(10).optional(),
   catture: booleano,
   limitaLivello: booleano,
+  slotFortunato: booleano,
+  skill: z
+    .string()
+    .transform((s) => s.split(',').map((x) => x.trim()).filter((x) => x.length > 0).map(Number))
+    .pipe(z.array(z.number().int().positive()).max(4))
+    .optional(),
 });

@@ -30,8 +30,8 @@ router.get('/con/:personaId', validate({ params: paramsPersonaId, query: queryRi
 });
 
 router.get('/piani/:personaId', validate({ params: paramsPersonaId, query: queryPiani }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; profondita?: number; alternative?: number; catture?: boolean; limitaLivello?: boolean };
-  res.json(pianiDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, profondita: q.profondita, alternative: q.alternative, catture: q.catture, limitaLivello: q.limitaLivello }));
+  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; profondita?: number; alternative?: number; catture?: boolean; limitaLivello?: boolean; slotFortunato?: boolean; skill?: number[] };
+  res.json(pianiDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, profondita: q.profondita, alternative: q.alternative, catture: q.catture, limitaLivello: q.limitaLivello, slotFortunato: q.slotFortunato, skill: q.skill }));
 });
 
 router.get('/eredita', validate({ query: queryEredita }), (req, res) => {

@@ -122,6 +122,18 @@ describe('API fusione', () => {
       };
       controlla(piano.radice);
     }
+    // propagazione delle skill: Tarukaja (supporto) su Jack Frost; Agi (fuoco) incompatibile col tipo Ghiaccio → nessuna fusione
+    const tarukaja = ((await request(app).get('/api/compendio/skill?q=Tarukaja')).body.data as SkillRiassuntoDto[]).find((s) => s.nome === 'Tarukaja')!;
+    const conSkill = (await request(app).get(`/api/fusione/piani/${jack}?profondita=2&alternative=3&skill=${tarukaja.id}`)).body.data as PianiFusioneDto;
+    expect(conSkill.skillRichieste.map((s) => s.nome)).toEqual(['Tarukaja']);
+    expect(conSkill.piani.length).toBeGreaterThan(0);
+    expect(conSkill.piani.every((pi) => pi.radice.skillPortate.some((s) => s.nome === 'Tarukaja'))).toBe(true);
+    const agi = ((await request(app).get('/api/compendio/skill?q=Agi')).body.data as SkillRiassuntoDto[]).find((s) => s.nome === 'Agi')!;
+    const conAgi = (await request(app).get(`/api/fusione/piani/${jack}?profondita=2&alternative=3&skill=${agi.id}`)).body.data as PianiFusioneDto;
+    expect(conAgi.piani.every((pi) => pi.radice.modo !== 'fusione')).toBe(true);
+    // un tratto non si propaga come skill → 400
+    const tratto = ((await request(app).get('/api/compendio/skill?q=Pinch%20Anchor')).body.data as SkillRiassuntoDto[]).find((s) => s.nome === 'Pinch Anchor')!;
+    expect((await request(app).get(`/api/fusione/piani/${jack}?skill=${tratto.id}`)).status).toBe(400);
     // validazione
     expect((await request(app).get(`/api/fusione/piani/${jack}?profondita=9`)).status).toBe(400);
     expect((await request(app).get(`/api/fusione/piani/${jack}?catture=forse`)).status).toBe(400);
