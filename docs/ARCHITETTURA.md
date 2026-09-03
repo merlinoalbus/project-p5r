@@ -170,6 +170,13 @@ rapporto e non colmate). Migrazione 012: `giorno_calendario` (con la settimana d
 `evento_calendario`, `settimana_guida`, ricaricate integralmente. `calendarioService.calendario(partitaId?, mese?)` restituisce i giorni
 (tutti o del mese), l'«oggi» della partita (`data_gioco`), le prossime scadenze/esami con i giorni mancanti (indice aprile→marzo).
 
+### Dungeon e mappe interattive (Fase 7.1)
+Seed `data/seed/dungeon.json` (normalizzato dalle nove ricerche sui Palazzi: aree in ordine e punti tipizzati). Migrazione 013: `dungeon`,
+`dungeon_area`, `punto_interesse` (chiave stabile `<area>/<ordine>`, upsert al reseed con rimozione degli orfani), `marcatore_mappa`
+(spillo in percentuale dell'immagine, dato dell'utente condiviso fra le partite), `punto_partita` (ottenuto/esaurito per partita).
+Le piante delle aree sono immagini dell'utente nell'ambito `mappa` (tabella `immagine`, chiave = chiave dell'area), mai nel repository.
+`MappaInterattiva` (FE) fa zoom/trascinamento con trasformazioni CSS e posiziona gli spilli in percentuale.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

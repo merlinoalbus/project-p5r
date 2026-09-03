@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -50,6 +50,7 @@ interface SeedCompleto {
   confidentiDettaglio: ConfidenteDettaglioSeed[];
   domande: DomandeSeed;
   calendario: CalendarioSeed;
+  dungeon: DungeonSeed[];
   doti: DoteSeed[];
   hash: string;
 }
@@ -76,6 +77,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     confidentiDettaglio: JSON.parse(contenuti['confidenti-dettaglio.json']) as ConfidenteDettaglioSeed[],
     domande: JSON.parse(contenuti['domande.json']) as DomandeSeed,
     calendario: JSON.parse(contenuti['calendario.json']) as CalendarioSeed,
+    dungeon: JSON.parse(contenuti['dungeon.json']) as DungeonSeed[],
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -297,6 +299,35 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       insGiorno.run(g.data, i, g.giornoSettimana, g.meteo, g.tempoLibero ? JSON.stringify(g.tempoLibero) : null, sett);
       g.eventi.forEach((e, j) => insEvento.run(g.data, j, e.tipo, e.titolo, e.dettaglio ?? '', e.fonte ?? ''));
     });
+
+    // ---- Dungeon (Fase 7.1): upsert per chiave stabile, così marcatori e stati per partita sopravvivono al reseed ----
+    const insDun = db.prepare(`INSERT INTO dungeon (chiave, tipo, ordine, nome, sovrano, arcana_sovrano, data_sblocco, data_scadenza, furto_consigliato, livello_consigliato, note, fonti_json)
+      VALUES (@chiave, @tipo, @ordine, @nome, @sovrano, @arcana_sovrano, @data_sblocco, @data_scadenza, @furto_consigliato, @livello_consigliato, @note, @fonti_json)
+      ON CONFLICT(chiave) DO UPDATE SET tipo = excluded.tipo, ordine = excluded.ordine, nome = excluded.nome, sovrano = excluded.sovrano, arcana_sovrano = excluded.arcana_sovrano,
+        data_sblocco = excluded.data_sblocco, data_scadenza = excluded.data_scadenza, furto_consigliato = excluded.furto_consigliato, livello_consigliato = excluded.livello_consigliato, note = excluded.note, fonti_json = excluded.fonti_json`);
+    const insArea = db.prepare(`INSERT INTO dungeon_area (chiave, dungeon_chiave, ordine, nome, descrizione) VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(chiave) DO UPDATE SET dungeon_chiave = excluded.dungeon_chiave, ordine = excluded.ordine, nome = excluded.nome, descrizione = excluded.descrizione`);
+    const insPunto = db.prepare(`INSERT INTO punto_interesse (chiave, area_chiave, ordine, tipo, nome, descrizione, esauribile, dettagli_json, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(chiave) DO UPDATE SET area_chiave = excluded.area_chiave, ordine = excluded.ordine, tipo = excluded.tipo, nome = excluded.nome, descrizione = excluded.descrizione, esauribile = excluded.esauribile, dettagli_json = excluded.dettagli_json, fonte = excluded.fonte`);
+    const chiaviDungeon = new Set<string>();
+    const chiaviAree = new Set<string>();
+    const chiaviPunti = new Set<string>();
+    for (const d of seed.dungeon) {
+      chiaviDungeon.add(d.chiave);
+      insDun.run({ chiave: d.chiave, tipo: d.tipo, ordine: d.ordine, nome: d.nome, sovrano: d.sovrano, arcana_sovrano: d.arcanaSovrano, data_sblocco: d.date.sblocco, data_scadenza: d.date.scadenza, furto_consigliato: d.date.furtoConsigliato, livello_consigliato: d.livelloConsigliato, note: d.note, fonti_json: JSON.stringify(d.fonti) });
+      for (const a of d.aree) {
+        chiaviAree.add(a.chiave);
+        insArea.run(a.chiave, d.chiave, a.ordine, a.nome, a.descrizione);
+        for (const p of a.punti) {
+          const chiavePunto = `${a.chiave}/${p.ordine}`;
+          chiaviPunti.add(chiavePunto);
+          insPunto.run(chiavePunto, a.chiave, p.ordine, p.tipo, p.nome, p.descrizione, p.esauribile ? 1 : 0, JSON.stringify(p.dettagli ?? {}), p.fonte);
+        }
+      }
+    }
+    for (const r of db.prepare('SELECT chiave FROM punto_interesse').all() as Array<{ chiave: string }>) if (!chiaviPunti.has(r.chiave)) db.prepare('DELETE FROM punto_interesse WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare('SELECT chiave FROM dungeon_area').all() as Array<{ chiave: string }>) if (!chiaviAree.has(r.chiave)) db.prepare('DELETE FROM dungeon_area WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare('SELECT chiave FROM dungeon').all() as Array<{ chiave: string }>) if (!chiaviDungeon.has(r.chiave)) db.prepare('DELETE FROM dungeon WHERE chiave = ?').run(r.chiave);
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

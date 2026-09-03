@@ -19,6 +19,7 @@ import { migration009 } from './009_cicli.js';
 import { migration010 } from './010_confidenti_dettaglio.js';
 import { migration011 } from './011_domande.js';
 import { migration012 } from './012_calendario.js';
+import { migration013 } from './013_dungeon.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012];
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013];

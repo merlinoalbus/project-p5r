@@ -70,6 +70,21 @@ export interface FusioneSeed {
 }
 
 /** Confidente (dato di gioco). */
+/** Dungeon (Palazzi e Dedali) con aree e punti di interesse (guida allgamestaff). */
+export interface DungeonSeed {
+  chiave: string;
+  tipo: 'palazzo' | 'mementos';
+  ordine: number;
+  nome: string;
+  sovrano: string;
+  arcanaSovrano: string;
+  date: { sblocco: string; scadenza: string; furtoConsigliato: string };
+  livelloConsigliato: string;
+  note: string;
+  aree: Array<{ chiave: string; ordine: number; nome: string; descrizione: string; punti: Array<{ ordine: number; tipo: string; nome: string; descrizione: string; esauribile: boolean; dettagli: Record<string, unknown>; fonte: string }> }>;
+  fonti: string[];
+}
+
 /** Calendario di gioco (guida allgamestaff; meteo da wikiwiki.jp). */
 export interface CalendarioSeed {
   giorni: Array<{ data: string; giornoSettimana: string; meteo: string | null; eventi: Array<{ tipo: string; titolo: string; dettaglio: string; fonte: string }>; tempoLibero: { giorno: boolean; sera: boolean } | null }>;

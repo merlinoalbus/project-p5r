@@ -6,6 +6,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
 import { calendario } from '../services/calendarioService.js';
+import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -57,6 +58,12 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/dungeon', validate({ query: queryDomande }), (req, res) => {
+  res.json(elencaDungeon((req.query as unknown as { partita?: number }).partita));
+});
+router.get('/dungeon/:chiave', validate({ query: queryDomande }), (req, res) => {
+  res.json(dettaglioDungeon(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
 });
 router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
   const q = req.query as unknown as { partita?: number; mese?: string };

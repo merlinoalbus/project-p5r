@@ -727,6 +727,58 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Dungeon: Palazzi e Dedali (Fase 7.1) ----
+
+export type StatoPunto = 'ottenuto' | 'esaurito';
+
+export interface PuntoInteresseDto {
+  chiave: string;
+  ordine: number;
+  tipo: 'sicura' | 'forziere' | 'forziere-chiuso' | 'volonta' | 'puzzle' | 'miniboss' | 'boss' | 'ombra-sciagura' | 'persona' | 'oggetto' | 'scorciatoia' | 'altro';
+  nome: string;
+  descrizione: string;
+  esauribile: boolean;
+  dettagli: Record<string, unknown>;
+  fonte: string;
+  /** Stato nella partita (null = da gestire o senza partita). */
+  stato: StatoPunto | null;
+  /** Posizione dello spillo sulla mappa dell'area (percentuali), se fissato. */
+  marcatore: { x: number; y: number } | null;
+}
+
+export interface AreaDungeonDto {
+  chiave: string;
+  ordine: number;
+  nome: string;
+  descrizione: string;
+  /** L'utente ha importato la pianta dell'area (immagine ambito «mappa»). */
+  mappa: boolean;
+  punti: PuntoInteresseDto[];
+}
+
+export interface DungeonRiassuntoDto {
+  chiave: string;
+  tipo: 'palazzo' | 'mementos';
+  ordine: number;
+  nome: string;
+  sovrano: string;
+  arcanaSovrano: string;
+  arcanaSovranoNome: string;
+  date: { sblocco: string; scadenza: string; furtoConsigliato: string };
+  livelloConsigliato: string;
+  aree: number;
+  punti: number;
+  esauribili: number;
+  /** Punti con uno stato nella partita (null senza partita). */
+  gestiti: number | null;
+}
+
+export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {
+  note: string;
+  fonti: string[];
+  aree: AreaDungeonDto[];
+}
+
 // ---- Calendario di gioco (Fase 6.3) ----
 
 export interface GiornoCalendarioDto {
@@ -765,7 +817,7 @@ export interface EventoPartitaDto {
   tipo: string;
   /** Etichetta italiana del tipo e gruppo per i filtri. */
   tipoNome: string;
-  gruppo: 'partita' | 'doti' | 'confidenti' | 'persona' | 'velluto' | 'obiettivi';
+  gruppo: 'partita' | 'doti' | 'confidenti' | 'persona' | 'velluto' | 'obiettivi' | 'dungeon';
   titolo: string;
   dettaglio: string;
   dati: Record<string, unknown>;
@@ -787,7 +839,7 @@ export interface StoricoDto {
 
 /** Voce del catalogo dei riferimenti (solo link) con lo stato nella propria istanza. */
 export interface VoceCatalogoDto {
-  ambito: 'arcana' | 'confidente' | 'persona' | 'skill' | 'altro';
+  ambito: 'arcana' | 'confidente' | 'persona' | 'skill' | 'mappa' | 'altro';
   chiave: string;
   url: string;
   fonte: string | null;

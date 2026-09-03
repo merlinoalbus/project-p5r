@@ -5,9 +5,13 @@
 import type { EsitoImportazioneCatalogoDto, ImmagineDto, VoceCatalogoDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
-import { ApiError, apiDelete, apiGet, apiPost, queryString } from './_helpers';
+import { ApiError, apiDelete, apiGet, apiPut, apiPost, queryString } from './_helpers';
 
-export type AmbitoImmagine = 'arcana' | 'confidente' | 'persona' | 'skill' | 'altro';
+export type AmbitoImmagine = 'arcana' | 'confidente' | 'persona' | 'skill' | 'mappa' | 'altro';
+
+/** Spillo di un punto sulla mappa della sua area (x, y in percentuale; null rimuove). */
+export const impostaMarcatore = (punto: string, posizione: { x: number; y: number } | null): Promise<{ x: number; y: number } | null> =>
+  apiPut<{ punto: string; marcatore: { x: number; y: number } | null }>('/mappe/marcatori', { punto, x: posizione?.x ?? null, y: posizione?.y ?? null }).then((r) => r.marcatore);
 
 export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 
