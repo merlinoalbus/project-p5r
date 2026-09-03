@@ -44,6 +44,8 @@ export interface OpzioniCicli {
   livelloMax: number | null;
   /** Ventaglio massimo di partner esaminati per anello (ordinati per costo). */
   ventaglio?: number;
+  /** Budget massimo di candidati esaminati in tutta la ricerca (protezione dell'event loop). */
+  budget?: number;
 }
 
 function modoPartner(p: PersonaFusione, disp: Disponibilita, opz: OpzioniCicli): { modo: ModoPartner; costo: number } | null {
@@ -72,9 +74,12 @@ function fusioniDa(persona: PersonaFusione, ctx: Contesto, cache: Map<number, Ri
 export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniCicli): CicloFusione[] {
   const lunghezzaMax = Math.max(2, Math.min(5, opz.lunghezzaMax));
   const ventaglio = Math.max(5, Math.min(80, opz.ventaglio ?? 40));
+  const budget = Math.max(1000, Math.min(200000, opz.budget ?? 40000));
+  let esaminatiTotali = 0;
   const cache = new Map<number, RicettaFusione[]>();
   const trovati: CicloFusione[] = [];
-  const migliori = (): number => (trovati.length >= opz.alternative ? trovati[trovati.length - 1].costo : Infinity);
+  const pieno = (): boolean => trovati.length >= opz.alternative;
+  const migliori = (): number => (pieno() ? trovati[trovati.length - 1].costo : Infinity);
   const inserisci = (c: CicloFusione) => {
     trovati.push(c);
     trovati.sort((x, y) => x.costo - y.costo || x.lunghezza - y.lunghezza || x.catture - y.catture);
@@ -99,7 +104,10 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
     let esaminati = 0;
     for (const c of candidati) {
       const costoTot = costo + c.costoPartner;
-      if (costoTot > migliori()) break; // ordinati per costo: gli altri sono più cari
+      // Ordinati per costo: con l'elenco pieno un candidato pari o più caro del peggior ciclo trovato non può migliorare l'insieme
+      // (i costi non diminuiscono lungo la catena), quindi anche i partner gratuiti si fermano appena ci sono abbastanza alternative.
+      if (pieno() && costoTot >= migliori()) break;
+      if (++esaminatiTotali > budget) return;
       const anello: AnelloCiclo = { ingrediente: corrente, partner: c.partner, partnerModo: c.modo, partnerCosto: c.costoPartner, risultato: c.ric.risultato, tipo: c.ric.tipo };
       if (c.ric.risultato.id === target.id) {
         if (anelli.length + 1 >= 2) {

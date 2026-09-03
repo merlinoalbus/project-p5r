@@ -64,6 +64,11 @@ describe('cicliFusione', () => {
       expect(c.anelli.every((a) => a.partnerModo === 'cattura' && !a.partner.rara && !a.partner.speciale)).toBe(true);
       expect(c.anelli.every((a) => a.risultato.id === jack.id || a.risultato.livello <= 20)).toBe(true);
     }
+    // prestazioni: partner gratuiti e lunghezza massima non fanno esplodere la ricerca (potatura a elenco pieno + budget)
+    const inizio = Date.now();
+    const lunghi = cicliFusione(jack, ctx, { scorta: new Map(), registro: new Set() }, { lunghezzaMax: 5, alternative: 12, catture: true, livelloMax: null });
+    expect(Date.now() - inizio).toBeLessThan(3000);
+    expect(lunghi.length).toBe(12);
     // la scorta vale come partner gratuito
     const partner = conCatture[0].anelli[0].partner;
     const conScorta = cicliFusione(jack, ctx, { scorta: new Map([[partner.id, 1]]), registro: new Set() }, { lunghezzaMax: 3, alternative: 3, catture: true, livelloMax: 20 });
