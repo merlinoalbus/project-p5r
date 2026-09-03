@@ -45,8 +45,8 @@ server/
   routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/seed/      caricaSeed.ts: carica data/seed nel DB al boot (hash in seed_meta, upsert per nome, traduzioni utente intoccabili)
-  services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService;
-                      (previsto) motore di fusione puro in services/fusione/
+  services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
+                      catalogoRiferimentiService; fusione/motoreFusione.ts (motore puro su snapshot in memoria) e fusione/fusioneService.ts (DTO)
   schemas/            zod: comuni (id, booleani da query, livello), compendio, traduzioni, partite, immagini
   utils/              logger, httpError
 shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
@@ -129,11 +129,11 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   ≥ 1+⌊(La+Lb)/2⌋ → stesso arcano: la più alta con livello ≤, esclusi gli ingredienti); ricette inverse per enumerazione delle coppie di arcani
   che producono l'arcano del target + fusioni con Demone del Tesoro; costo Σ(27L²+126L+2147). `fusioneService.ts` produce i DTO con nomi
   italiani e i motivi in italiano quando la fusione non è possibile.
-Modulo TypeScript puro in `server/services/fusione/` senza I/O, alimentato da un'istantanea in memoria del compendio:
-`tabellaArcana` (24×24 + casi impossibili del Giudizio), `fusioneDiretta` (speciale → rara → normale; stesso arcana verso
-il basso, arcana diversi verso l'alto, livello `floor((a+b)/2)+1`), `fusioneInversa` (indici per arcana, ricerca binaria sui
-livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondità, cap livello protagonista), `eredita`
-(matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill multi-step, bonus Confidente, Allarme, Potenziamento).
+- API pubblica del motore: `creaContesto(dlcPosseduti)`, `fondi(a, b, ctx)`, `ricettePer(target, ctx)`, `fusioniCon(persona, ctx)`,
+  `ricettaSpeciale`, `costoFusione`, `livelloFusione`, `arcanaRisultato`, `invalidaMotoreFusione`.
+- Previsti (fasi 2–4, sullo stesso snapshot): `alberoFusione` (ricorsione dal compendio personale al target con branch-and-bound su costo,
+  profondità e livello del protagonista), `eredita` (matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill
+  multi-step, bonus del Confidente, Allarme, Potenziamento).
 
 ## 7. Frontend
 - Layout tablet-first: `MainLayout` con `Sidebar` visibile da `lg` (1024px) e `BottomNav` fissa sotto (5 voci, 64px); verificato a 375/768/1280 px.

@@ -15,7 +15,7 @@ const NOME_TIPO: Record<RicettaFusioneDto['tipo'], string> = {
 
 function ChipPersona({ p, inScorta }: { p: PersonaFusioneDto; inScorta: boolean }) {
   return (
-    <Link to={`/compendio/persona/${p.id}`} className={`chip no-underline ${inScorta ? 'chip--attivo' : ''}`} title={`${p.arcanaNome} · livello ${p.livello}${inScorta ? ' · nella scorta' : ''}`}>
+    <Link to={`/compendio/persona/${p.id}`} className={`chip touch no-underline ${inScorta ? 'chip--attivo' : ''}`} title={`${p.arcanaNome} · livello ${p.livello}${inScorta ? ' · nella scorta' : ''}`}>
       {p.nomeIt} <span className="opacity-70">L{p.livello}</span>
       {p.rara && <span aria-label="Demone del Tesoro" title="Demone del Tesoro"> ◆</span>}
     </Link>

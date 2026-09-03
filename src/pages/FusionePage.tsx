@@ -145,12 +145,12 @@ export function FusionePage() {
               <li key={r.risultato.id} className="card flex flex-wrap items-center gap-1 text-[13px]">
                 {r.ingredienti.map((i, idx) => (
                   <span key={i.id} className="flex items-center gap-1">
-                    <Link to={`/compendio/persona/${i.id}`} className="chip no-underline">{i.nome}</Link>
+                    <Link to={`/compendio/persona/${i.id}`} className="chip touch no-underline">{i.nome}</Link>
                     {idx < r.ingredienti.length - 1 && <span className="text-text-muted">+</span>}
                   </span>
                 ))}
                 <span className="text-text-muted mx-1">→</span>
-                <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo no-underline">{r.risultato.nome}</Link>
+                <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo touch no-underline">{r.risultato.nome}</Link>
               </li>
             ))}
           </ul>
