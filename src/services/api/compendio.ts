@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, DungeonDettaglioDto, DungeonRiassuntoDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
@@ -29,6 +29,9 @@ export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
 export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
 export const getOggetti = (f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
+/** Palazzi e Dedali con punti di interesse (stato e avanzamento se c'è la partita). */
+export const getDungeons = (partita?: number): Promise<DungeonRiassuntoDto[]> => apiGet(`/compendio/dungeon${queryString({ partita })}`);
+export const getDungeon = (chiave: string, partita?: number): Promise<DungeonDettaglioDto> => apiGet(`/compendio/dungeon/${encodeURIComponent(chiave)}${queryString({ partita })}`);
 /** Calendario di gioco (con oggi e scadenze se c'è la partita). */
 export const getCalendario = (partita?: number, mese?: string): Promise<CalendarioDto> => apiGet(`/compendio/calendario${queryString({ partita, mese })}`);
 /** Domande in classe ed esami (con stato «fatta» e prossime se c'è la partita). */

@@ -15,6 +15,8 @@ import { ConfidenteDettaglioPage } from './pages/ConfidenteDettaglioPage';
 import { DomandePage } from './pages/DomandePage';
 import { CalendarioPage } from './pages/CalendarioPage';
 import { GuidaPage } from './pages/GuidaPage';
+import { DungeonPage } from './pages/DungeonPage';
+import { DungeonDettaglioPage } from './pages/DungeonDettaglioPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -38,6 +40,8 @@ export const router = createBrowserRouter([
       { path: 'guida', element: <GuidaPage /> },
       { path: 'guida/domande', element: <DomandePage /> },
       { path: 'guida/calendario', element: <CalendarioPage /> },
+      { path: 'guida/dungeon', element: <DungeonPage /> },
+      { path: 'guida/dungeon/:chiave', element: <DungeonDettaglioPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

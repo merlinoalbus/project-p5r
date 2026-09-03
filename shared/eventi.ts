@@ -29,12 +29,13 @@ export const TIPI_EVENTO = [
   'ciclo-anello',
   'ciclo-iterazione',
   'domanda-risposta',
+  'punto-dungeon',
 ] as const;
 
 export type TipoEvento = (typeof TIPI_EVENTO)[number];
 
 /** Etichetta italiana e gruppo di ogni tipo (i gruppi guidano i filtri dell'interfaccia). */
-export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; gruppo: 'partita' | 'doti' | 'confidenti' | 'persona' | 'velluto' | 'obiettivi' }>> = {
+export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; gruppo: 'partita' | 'doti' | 'confidenti' | 'persona' | 'velluto' | 'obiettivi' | 'dungeon' }>> = {
   'partita-creata': { nome: 'Partita creata', gruppo: 'partita' },
   'livello-protagonista': { nome: 'Livello del protagonista', gruppo: 'partita' },
   allarme: { nome: 'Allarme delle fusioni', gruppo: 'velluto' },
@@ -57,6 +58,7 @@ export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; grupp
   'ciclo-anello': { nome: 'Anello di un ciclo eseguito', gruppo: 'velluto' },
   'ciclo-iterazione': { nome: 'Giro di un ciclo completato', gruppo: 'velluto' },
   'domanda-risposta': { nome: 'Domanda in classe risposta', gruppo: 'doti' },
+  'punto-dungeon': { nome: 'Punto di interesse gestito', gruppo: 'dungeon' },
 };
 
 export const GRUPPI_EVENTO: ReadonlyArray<{ chiave: (typeof ETICHETTE_EVENTO)[TipoEvento]['gruppo']; nome: string }> = [
@@ -66,6 +68,7 @@ export const GRUPPI_EVENTO: ReadonlyArray<{ chiave: (typeof ETICHETTE_EVENTO)[Ti
   { chiave: 'persona', nome: 'Persona' },
   { chiave: 'velluto', nome: 'Stanza di Velluto' },
   { chiave: 'obiettivi', nome: 'Obiettivi e piani' },
+  { chiave: 'dungeon', nome: 'Dungeon' },
 ];
 
 /** Tipi appartenenti a un gruppo. */
