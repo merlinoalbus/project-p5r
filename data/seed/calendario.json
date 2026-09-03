@@ -2041,9 +2041,9 @@
    "meteo": "Nuvoloso",
    "eventi": [
     {
-     "tipo": "scadenza",
-     "titolo": "Scadenza Palazzo di Okumura",
-     "dettaglio": "Scontro decisivo con l'Ombra di Okumura; infarto di Okumura reso pubblico.",
+     "tipo": "festa",
+     "titolo": "Giornata dello sport (festa nazionale)",
+     "dettaglio": "Giorno libero: uscite con Shinya (sala giochi di Akihabara) e Hifumi (Chiesa di Kanda); serata libera al Leblanc.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/"
     }
    ],
@@ -2054,6 +2054,12 @@
    "giornoSettimana": "Martedi",
    "meteo": "Nuvoloso/Sereno",
    "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza Palazzo di Okumura",
+     "dettaglio": "Scontro decisivo con l'Ombra di Okumura nel pomeriggio; la sera il protagonista è confinato al Leblanc (guida: «Gli esiti delle nostre azioni saranno noti entro stasera»).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/"
+    },
     {
      "tipo": "vacanza",
      "titolo": "Confinamento serale al Leblanc",
@@ -2111,8 +2117,18 @@
    "data": "10-16",
    "giornoSettimana": "Domenica",
    "meteo": "Sereno",
-   "eventi": [],
-   "tempoLibero": null
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Serata confinata al Leblanc",
+     "dettaglio": "Sera senza uscite in preparazione agli esami imminenti.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": true,
+    "sera": false
+   }
   },
   {
    "data": "10-17",
@@ -4015,7 +4031,7 @@
    "periodo": "01/02 - 15/02",
    "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/",
    "riassunto": "1/2: giorno libero, uscita con Sumire, jazz club. 2/2: dialogo cruciale con il dottor Maruki che determina il finale (scelte per il 'vero finale'); possibile evoluzione della Persona di Akechi in Ervardo. 3/2: scontro finale con il dottor Maruki nel suo Palazzo, boss in quattro fasi (incluso Adam Kadmon), trofeo 'Riprenditi il futuro'. 4/2: eventi automatici, sblocco dell'Arcano 'Il Mondo' nella Stanza di Velluto, salto temporale al 13/2. 13/2: ripresa della trama, incontro con Sae. 14/2 (San Valentino): scena romantica serale con il/la partner scelto/a. 15/2: ricezione dei 'giri choco' (cioccolatini di cortesia) dalle Confidenti al rango massimo rimaste amiche.",
-   "incertezze": "Nessun dettaglio per il periodo 5-12 febbraio: corrisponde a un blocco narrativo continuo secondo wikiwiki, senza indicazioni di meteo o tempo libero."
+   "incertezze": "Nessun dettaglio per il periodo 5-12 febbraio: corrisponde a un blocco narrativo continuo secondo wikiwiki, senza indicazioni di meteo o tempo libero. La guida non ha una pagina per il periodo 16 febbraio – 1 marzo (l'indice passa dalla Settimana 40 alla 41): in quei giorni nessuna settimana della guida è assegnata."
   },
   {
    "numero": 41,

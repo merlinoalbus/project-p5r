@@ -64,5 +64,13 @@ describe('API calendario', () => {
     for (let i = 1; i < c.prossimeScadenze.length; i++) expect(c.prossimeScadenze[i].giorniMancanti).toBeGreaterThanOrEqual(c.prossimeScadenze[i - 1].giorniMancanti);
     expect(c.prossimeScadenze.some((s) => s.tipo === 'esame' && s.data === '05-11')).toBe(true);
     expect(c.prossimeScadenze.find((s) => s.data === '05-11')?.giorniMancanti).toBe(10);
+    // giorni reali oltre il confine di mese (aprile ha 30 giorni): 25/4 → 11/5 = 16 giorni, non 17 come darebbe mese×31
+    await request(app).put(`/api/partite/${id}`).send({ dataGioco: '04-25' });
+    const c2 = (await request(app).get(`/api/compendio/calendario?partita=${id}&mese=04`)).body.data as CalendarioDto;
+    expect(c2.prossimeScadenze.find((s) => s.data === '05-11')?.giorniMancanti).toBe(16);
+    // Okumura: scadenza l'11 ottobre (guida, settimana 26), festa il 10
+    const ott = (await request(app).get('/api/compendio/calendario?mese=10')).body.data as CalendarioDto;
+    expect(ott.giorni.find((g) => g.data === '10-11')?.eventi.some((e) => e.tipo === 'scadenza' && /Okumura/.test(e.titolo))).toBe(true);
+    expect(ott.giorni.find((g) => g.data === '10-10')?.eventi.some((e) => e.tipo === 'scadenza')).toBe(false);
   });
 });

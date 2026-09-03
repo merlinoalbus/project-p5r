@@ -43,11 +43,14 @@ export function calendario(partitaId?: number, mese?: string): CalendarioDto {
   }
   const oggiIdx = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   const oggiRiga = dataGioco ? (prepared('SELECT * FROM giorno_calendario WHERE data = ?').get(dataGioco) as RigaGiorno | undefined) : undefined;
-  const scadenze = oggiIdx === null ? [] : eventiTutti
+  // Giorni reali fra due date: differenza di `ordine` (i giorni del seed sono consecutivi), non l'indice di ordinamento mese×31+giorno.
+  const ordineDi = new Map((prepared('SELECT data, ordine FROM giorno_calendario').all() as Array<{ data: string; ordine: number }>).map((r) => [r.data, r.ordine]));
+  const oggiOrdine = dataGioco ? ordineDi.get(dataGioco) ?? null : null;
+  const scadenze = oggiIdx === null || oggiOrdine === null ? [] : eventiTutti
     .filter((e) => (e.tipo === 'scadenza' || e.tipo === 'esame') && indiceGiornoScolastico(e.data) >= oggiIdx)
     .sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data)) // l'ordine per stringa metterebbe gennaio prima di maggio
     .slice(0, 6)
-    .map((e) => ({ data: e.data, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, giorniMancanti: indiceGiornoScolastico(e.data) - oggiIdx }));
+    .map((e) => ({ data: e.data, tipo: e.tipo, titolo: e.titolo, dettaglio: e.dettaglio, giorniMancanti: (ordineDi.get(e.data) ?? oggiOrdine) - oggiOrdine }));
   return {
     giorni: giorni.map((g) => giornoDto(g, perData.get(g.data) ?? [])),
     settimane: settimaneGuida(),
