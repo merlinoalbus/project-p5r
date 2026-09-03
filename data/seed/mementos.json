@@ -621,8 +621,11 @@
    "ricompense": [
     "Catena di perline"
    ],
-   "confidente": null,
-   "note": "Difficoltà B. Non presente esplicitamente nella tabella principale della guida Richieste, ma descritta nella pagina dedicata al Dedalo di Akzeriyyuth; nome inglese 'Upstaging the Stage Mother'. Confidente collegato: togo_stella.",
+   "confidente": {
+    "chiave": "hifumi",
+    "rango": 7
+   },
+   "note": "Difficoltà B. Non presente esplicitamente nella tabella principale della guida Richieste, ma descritta nella pagina dedicata al Dedalo di Akzeriyyuth; nome inglese 'Upstaging the Stage Mother'.",
    "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
   },
   {
@@ -731,8 +734,11 @@
    "ricompense": [
     "Soma (consumabile, cura HP e SP al 100%)"
    ],
-   "confidente": null,
-   "note": "Difficoltà A. Non presente esplicitamente nella tabella principale della guida Richieste, descritta nella pagina dedicata al Dedalo di Adyeshach; nome inglese 'A Mother's Aggression'. Confidente collegato: oda_torre.",
+   "confidente": {
+    "chiave": "shinya",
+    "rango": 8
+   },
+   "note": "Difficoltà A. Non presente esplicitamente nella tabella principale della guida Richieste, descritta nella pagina dedicata al Dedalo di Adyeshach; nome inglese 'A Mother's Aggression'.",
    "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
   },
   {
