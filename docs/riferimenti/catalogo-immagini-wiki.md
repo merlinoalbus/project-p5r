@@ -6,8 +6,9 @@ Ricerca del 2026-09-03. Solo LINK (nessuna immagine scaricata nel repository). F
 di fetch automatico, l'API MediaWiki no).
 
 ## Risultato nel repository
-I link sono confluiti in `data/riferimenti/immagini.json` (277 voci: 23 Arcani, 23 Confidenti, 231 Persona; unica
-Persona senza riferimento: Orpheus Picaro). Correzione applicata rispetto al censimento grezzo: per *Izanagi Picaro* il
+I link sono confluiti in `data/riferimenti/immagini.json` (278 voci: 24 Arcani, 23 Confidenti, 231 Persona; unica
+Persona senza riferimento: Orpheus Picaro). Arcani: 23 carte dal censimento di `docs/grafica/riferimenti-visivi.md` §4 più la
+carta dell'arcano Fede (`File:Faith.png` sulla pagina "Faith Arcana": la carta "LA FOI"; `FaithArcana.png` è la variante alterata). Correzione applicata rispetto al censimento grezzo: per *Izanagi Picaro* il
 file trovato era una tavola del fumetto, sostituito con l'artwork base di Izanagi (P5) come per le altre varianti Picaro.
 L'utente importa le immagini nella propria istanza da Impostazioni → "Immagini di riferimento dal wiki".
 

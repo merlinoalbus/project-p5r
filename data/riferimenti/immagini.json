@@ -141,6 +141,13 @@
       "fonte": "https://megamitensei.fandom.com/wiki/Category:Persona_5_Cards"
     },
     {
+      "ambito": "arcana",
+      "chiave": "Faith",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e6/Faith.png/revision/latest?cb=20200508064816",
+      "fonte": "https://megamitensei.fandom.com/wiki/Faith_Arcana",
+      "nota": "Carta dell'arcano Fede (P5R, \"LA FOI\"); il file FaithArcana.png sulla stessa pagina è la variante alterata."
+    },
+    {
       "ambito": "confidente",
       "chiave": "igor",
       "url": "https://static.wikia.nocookie.net/megamitensei/images/1/16/Persona_5_Confidant_Guides_Icon_%28Fool%29_-_Igor.png/revision/latest?cb=20180609125113",

@@ -121,7 +121,7 @@ Variante senza testo per ogni carta: `arcani/<chiave>-senza-testo.png` (senza ti
 | `sun.png` | XIX | IL SOLE | sole con volto e raggi, bambino su cavallo bianco, girasoli |
 | `judgement.png` | XX | IL GIUDIZIO | angelo con tromba, figure che si alzano dalle tombe |
 | `world.png` | XXI | IL MONDO | figura danzante dentro una corona d'alloro, quattro creature agli angoli |
-| `faith.png` | — | LA FEDE | (arcano Royal; carta non reperita fra i riferimenti) figura in piedi con il capo alto e le mani giunte al petto, fascio di stelle bianche a quattro punte che sale in spirale, dietro un cerchio raggiato; ispirazione del motivo a stelle: https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 |
+| `faith.png` | — | LA FEDE | (arcano Royal) figura papale incappucciata in trono con tiara e croce a tre bracci, mano alzata in benedizione, due accoliti incatenati in basso; ispirazione (NON copiare): https://static.wikia.nocookie.net/megamitensei/images/e/e6/Faith.png/revision/latest?cb=20200508064816 (carta ufficiale "LA FOI"); motivo a stelle dell'icona di Kasumi: https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 |
 | `councillor.png` | — | IL CONSIGLIERE | (arcano Royal) figura seduta di tre quarti con un libro aperto e una mano tesa in gesto di aiuto, sole velato alle spalle; ispirazione: https://static.wikia.nocookie.net/megamitensei/images/5/5b/P5_Royal_Consultant_Arcana.png/revision/latest?cb=20200508064739 |
 
 Prompt di esempio (Matto):
