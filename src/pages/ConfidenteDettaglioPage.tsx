@@ -93,7 +93,7 @@ export function ConfidenteDettaglioPage() {
               <h2 className="m-0 text-[15px] font-semibold">Prossimo passo: rango {prossimo}</h2>
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
-                  <DialogoRango key={d.id} d={d} aperto={aperti[d.id] !== undefined ? true : true} onToggle={() => setAperti((a) => ({ ...a, [d.id]: true }))} />
+                  <DialogoRango key={d.id} d={d} aperto onToggle={() => undefined} />
                 ))}
               </ul>
             </section>

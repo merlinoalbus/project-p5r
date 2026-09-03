@@ -817,12 +817,12 @@
    "sbloccoRequisiti": "Nessuna Dote sociale esplicitamente richiesta secondo le fonti consultate. Il rango 7 richiede che Ryuji stesso inviti tramite messaggio serale in una lista di date specifiche. Gli eventi all'aperto (ranghi 2, 3, 6, 8) non sono disponibili nei giorni di pioggia.",
    "note": "Al New Game+ (19 marzo) Ryuji regala un orologio sportivo che sblocca da subito 'Harisen rigenerativo' e 'Scatto furtivo'. Terza evoluzione della Persona (Seiten Taisei -> William) il 14 gennaio, con l'abilità 'Spirito combattivo' (80 SP, Carica per tutta la squadra)."
   },
-  "noteGenerali": "",
+  "noteGenerali": "Note sulle fonti: https://samurai-gamers.com/persona-5/confidant-gift-guide/: integrazione negozi/prezzi in inglese; https://samurai-gamers.com/persona-5/chariot-confidant-ryuji-sakamoto/: integrazione disponibilità in inglese",
   "fonti": [
    "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-ryuji-carro/",
    "https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/",
-   "https://samurai-gamers.com/persona-5/confidant-gift-guide/ (integrazione negozi/prezzi in inglese)",
-   "https://samurai-gamers.com/persona-5/chariot-confidant-ryuji-sakamoto/ (integrazione disponibilità in inglese)"
+   "https://samurai-gamers.com/persona-5/confidant-gift-guide/",
+   "https://samurai-gamers.com/persona-5/chariot-confidant-ryuji-sakamoto/"
   ]
  },
  {
@@ -1405,12 +1405,12 @@
    "sbloccoRequisiti": "Rango 2 richiede Dote Gentilezza (Kindness) almeno 2. Rango 9 presenta una scelta esclusiva che determina il percorso romantico vs amicizia.",
    "note": "Al New Game+ (19 marzo) Ann regala una 'Rivista di moda' che sblocca da subito 'Tecnica Sexy ♥' e 'Lacrime di Coccodrillo'. Terza evoluzione della Persona (in Céelestine/Célestine) il 13 gennaio, con l'abilità 'Super-energia' (80 SP)."
   },
-  "noteGenerali": "",
+  "noteGenerali": "Note sulle fonti: https://samurai-gamers.com/persona-5/confidant-gift-guide/: integrazione negozi/prezzi in inglese; https://samurai-gamers.com/persona-5/lovers-confidant-ann-takamaki/: integrazione disponibilità in inglese",
   "fonti": [
    "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-ann-amanti/",
    "https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/",
-   "https://samurai-gamers.com/persona-5/confidant-gift-guide/ (integrazione negozi/prezzi in inglese)",
-   "https://samurai-gamers.com/persona-5/lovers-confidant-ann-takamaki/ (integrazione disponibilità in inglese)"
+   "https://samurai-gamers.com/persona-5/confidant-gift-guide/",
+   "https://samurai-gamers.com/persona-5/lovers-confidant-ann-takamaki/"
   ]
  },
  {
@@ -1897,11 +1897,11 @@
    "sbloccoRequisiti": "Avere in inventario una Persona con Arcano Imperatore (es. Reggente o Eligor); al rango 4 la Persona Imperatore deve essere equipaggiata",
    "note": "I ranghi 4, 6 e 9 sono eventi all'aperto e NON disponibili se piove, tranne il rango 8 che invece richiede esplicitamente la pioggia. Nessuna diramazione romantica: Yusuke non è un interesse amoroso in P5R."
   },
-  "noteGenerali": "",
+  "noteGenerali": "Note sulle fonti: https://www.rpgsite.net/feature/9380-persona-5-yusuke-confidant-guide-emperor-choices-unlocks: integrazione disponibilità/regali, in inglese",
   "fonti": [
    "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-yusuke-imperatore/",
    "https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/",
-   "https://www.rpgsite.net/feature/9380-persona-5-yusuke-confidant-guide-emperor-choices-unlocks (integrazione disponibilità/regali, in inglese)"
+   "https://www.rpgsite.net/feature/9380-persona-5-yusuke-confidant-guide-emperor-choices-unlocks"
   ]
  },
  {
@@ -2791,7 +2791,7 @@
       "ordine": 1,
       "testo": "Possiamo farlo insieme",
       "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "puntiTesto": "+3",
       "romantica": false,
       "avviso": null
      },
@@ -2799,15 +2799,15 @@
       "ordine": 2,
       "testo": "Non puoi farti battere",
       "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "puntiTesto": "+3",
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Risposta conclusiva a scelta",
-      "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -2947,29 +2947,29 @@
    {
     "rango": 2.0,
     "etichetta": "2",
-    "note": "Richiede Perizia sufficiente secondo la fonte (livello esatto non specificato).",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!. Richiede Perizia sufficiente secondo la fonte (livello esatto non specificato).",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Vuoi aprire un caffè?",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "A me pare sospetto",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "È una questione complessa",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -2978,37 +2978,37 @@
    {
     "rango": 3.0,
     "etichetta": "3",
-    "note": "",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Andrà tutto bene",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Non voglio venire con te",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Non ancora",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Ottima risposta (telefonata)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -3017,53 +3017,53 @@
    {
     "rango": 4.0,
     "etichetta": "4",
-    "note": "Richiede Dote sociale Perizia al massimo livello (Migliore) — essenziale per procedere. Riunione di gruppo sul tetto, poi uscita al Caffè.",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!. Richiede Dote sociale Perizia al massimo livello (Migliore) — essenziale per procedere. Riunione di gruppo sul tetto, poi uscita al Caffè.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Piuttosto cara, direi",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Pago io",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Cioè dalla loro… cacca?!?",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Chiediamoglielo",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 5,
       "testo": "Non saprei dirti (riguardo Takakura)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 6,
       "testo": "Prendiamoci un caffè di nuovo (telefonata)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -3072,37 +3072,37 @@
    {
     "rango": 5.0,
     "etichetta": "5",
-    "note": "Al Big Bang Burger, Aoyama-Itchome.",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!. Al Big Bang Burger, Aoyama-Itchome.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Qualcuno dice la verità",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Dev'esserci un altro modo",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Non credo",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Pizzicati la guancia (telefonata)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -3111,45 +3111,45 @@
    {
     "rango": 6.0,
     "etichetta": "6",
-    "note": "Alla Libreria di Jinbocho.",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!. Alla Libreria di Jinbocho.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Affascinante",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Non lo sapevo",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Nera… come il caffè?",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Sii forte, Haru (dopo l'evento)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 5,
       "testo": "Puoi parlarmi quando vuoi (telefonata)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -3158,45 +3158,45 @@
    {
     "rango": 7.0,
     "etichetta": "7",
-    "note": "",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Hai l'aria esausta",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Tu cosa vuoi fare?",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Dovresti dirglielo",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Puoi farcela, Haru!",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 5,
       "testo": "Avrai sempre il mio supporto (telefonata)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -3205,37 +3205,37 @@
    {
     "rango": 8.0,
     "etichetta": "8",
-    "note": "",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1!.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Il terreno?",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Lo aiuterà a capirti",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Farò il tifo per te",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Curare la natura ti viene naturale (telefonata)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -3307,29 +3307,29 @@
    {
     "rango": 10.0,
     "etichetta": "10",
-    "note": "Due varianti in base al bivio del rango 9: AMICIZIA (2 dicembre, Tetto poi Leblanc) oppure AMORE (5 dicembre, Leblanc).",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1! (con acquisizione di 'SECONDO RISVEGLIO'). Due varianti in base al bivio del rango 9: AMICIZIA (2 dicembre, Tetto poi Leblanc) oppure AMORE (5 dicembre, Leblanc).",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Pensi che andrà tutto bene? (ramo amicizia) / Mi fa piacere sentirlo oppure Sei stata bravissima, Haru (ramo amore)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Tutto dipende dal sapore (ramo amicizia) / una delle tre opzioni proposte (ramo amore)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Sarà dura, lo sai (ramo amicizia, fa avanzare il rango) / una delle tre opzioni finali (ramo amore, fa avanzare il rango)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -4213,16 +4213,16 @@
      {
       "ordine": 3,
       "testo": "Ti amo anche io (opzione ROMANTICA)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": true,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Rimaniamo amici, va bene? (opzione amicizia, alternativa alla precedente)",
-      "punti": 3,
-      "puntiTesto": "+3",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
@@ -5813,77 +5813,77 @@
    {
     "rango": 1.0,
     "etichetta": "1",
-    "note": "Data consigliata 18 aprile. Luogo: Clinica medica Takemi, Yongen-Jaya. Bonus aggiuntivo: Coraggio +1.",
+    "note": "Esito della sequenza: RANGO CONFIDENTE +1! CONFIDENTE: MEDICO DI FORTUNA, ARCANO MORTE: RANGO 1, NUOVA ABILITÀ: RIGENERAZIONE (amplia l'assortimento di oggetti curativi della clinica); bonus aggiuntivo Coraggio +1. Data consigliata 18 aprile. Luogo: Clinica medica Takemi, Yongen-Jaya. Bonus aggiuntivo: Coraggio +1.",
     "scelte": [
      {
       "ordine": 1,
       "testo": "Hai farmaci 'speciali'?",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Ho le mie ragioni…",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Per studiare",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 4,
       "testo": "Mi serve quella medicina",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 5,
       "testo": "Non me ne vado",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 6,
       "testo": "Cosa dovrei fare?",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 7,
       "testo": "Alla goccia",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 8,
       "testo": "Non sono pazzo",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 9,
       "testo": "Vale anche per te",
-      "punti": 2,
-      "puntiTesto": "+2",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -7858,7 +7858,7 @@
       "ordine": 1,
       "testo": "Gia, diglielo!",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -7866,7 +7866,7 @@
       "ordine": 2,
       "testo": "Puoi vendicarti, sai -> Rango +1",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -8099,7 +8099,7 @@
       "ordine": 1,
       "testo": "Grazie al mio maestro",
       "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "puntiTesto": "+3",
       "romantica": false,
       "avviso": null
      },
@@ -8107,15 +8107,15 @@
       "ordine": 2,
       "testo": "Hai fatto la cosa giusta",
       "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "puntiTesto": "+3",
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 3,
       "testo": "Chiediglielo tu stesso -> Rango MAX",
-      "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      }
@@ -8292,15 +8292,15 @@
       "ordine": 1,
       "testo": "Molto interessante",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
      {
       "ordine": 2,
       "testo": "Abbi fiducia in te stessa -> Rango +1",
-      "punti": 2,
-      "puntiTesto": "♪♪",
+      "punti": null,
+      "puntiTesto": null,
       "romantica": false,
       "avviso": null
      },
@@ -8308,7 +8308,7 @@
       "ordine": 3,
       "testo": "Ma non volevi, vero?",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -8323,7 +8323,7 @@
       "ordine": 1,
       "testo": "Ti calza a pennello",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8331,7 +8331,7 @@
       "ordine": 2,
       "testo": "Ti senti sotto stress? -> Rango +1",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8339,7 +8339,7 @@
       "ordine": 3,
       "testo": "Dacci dentro (chiamata)",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -8354,7 +8354,7 @@
       "ordine": 1,
       "testo": "Sara stato il katsu curry",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8362,7 +8362,7 @@
       "ordine": 2,
       "testo": "Spaccano -> Rango +1",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8370,7 +8370,7 @@
       "ordine": 3,
       "testo": "Mi piacerebbe (chiamata)",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -8385,7 +8385,7 @@
       "ordine": 1,
       "testo": "E spaventosa",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8393,7 +8393,7 @@
       "ordine": 2,
       "testo": "Dovresti smetterla, allora -> Rango +1",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8401,7 +8401,7 @@
       "ordine": 3,
       "testo": "Hai molto a cui pensare... (chiamata)",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -8416,7 +8416,7 @@
       "ordine": 1,
       "testo": "E cosi frustrante?",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8424,7 +8424,7 @@
       "ordine": 2,
       "testo": "Fa' cio che ami -> Rango +1",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -8432,7 +8432,7 @@
       "ordine": 3,
       "testo": "Te lo stai solo immaginando (chiamata)",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -8447,7 +8447,7 @@
       "ordine": 1,
       "testo": "Potrebbe volerci fortuna",
       "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "puntiTesto": "+3",
       "romantica": false,
       "avviso": null
      },
@@ -8455,7 +8455,7 @@
       "ordine": 2,
       "testo": "Io credo in te -> Rango +1",
       "punti": 3,
-      "puntiTesto": "♪♪♪",
+      "puntiTesto": "+3",
       "romantica": false,
       "avviso": null
      }
@@ -9237,7 +9237,7 @@
       "ordine": 1,
       "testo": "Voglio fare bei discorsi",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -9245,7 +9245,7 @@
       "ordine": 2,
       "testo": "Uno con delle convinzioni",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -9253,7 +9253,7 @@
       "ordine": 3,
       "testo": "E stato utile",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -9261,7 +9261,7 @@
       "ordine": 4,
       "testo": "E stato utile (chiamata)",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
@@ -9369,7 +9369,7 @@
       "ordine": 1,
       "testo": "Sto con loro",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -9377,7 +9377,7 @@
       "ordine": 2,
       "testo": "Lascerei tutto al caso -> Rango +1",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      },
@@ -9385,7 +9385,7 @@
       "ordine": 3,
       "testo": "Ottima argomentazione (chiamata)",
       "punti": 2,
-      "puntiTesto": "♪♪",
+      "puntiTesto": "+2",
       "romantica": false,
       "avviso": null
      }
