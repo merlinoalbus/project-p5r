@@ -11,8 +11,9 @@ import { PannelloVelluto } from './PannelloVelluto';
 import { ForcaIsolamento } from './ForcaIsolamento';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 
-const { getPossedute } = vi.hoisted(() => ({ getPossedute: vi.fn() }));
-vi.mock('../../services/api', () => ({ getPossedute }));
+const { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento } = vi.hoisted(() => ({ getPossedute: vi.fn(), getSuggerimentoIsolamento: vi.fn(), eseguiIsolamento: vi.fn() }));
+vi.mock('../../services/api', () => ({ getPossedute, getSuggerimentoIsolamento, eseguiIsolamento }));
+vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
 
 const velluto: VellutoDto = {
   partitaId: 1,
@@ -65,6 +66,7 @@ describe('PannelloVelluto', () => {
 
 describe('ForcaIsolamento', () => {
   it('Forca: sacrifici ordinati per moltiplicatore con rango, Tesoro, stesso arcano e penalità; Isolamento: giorni, incenso e tier', async () => {
+    getSuggerimentoIsolamento.mockResolvedValue({ elemento: 'fire', elementoNome: 'Fuoco', tier: 'Evade', skill: { id: 5, nome: 'Evade Fire', nomeIt: 'Schiva fuoco' } });
     getPossedute.mockResolvedValue([
       posseduta(11, 1, 'Arsène', 'Fool', 'Matto', 20),
       posseduta(12, 2, 'Pixie', 'Lovers', 'Amanti', 30),
@@ -79,7 +81,7 @@ describe('ForcaIsolamento', () => {
     expect(righe[0].textContent).toMatch(/Regent/);
     expect(righe[0].textContent).toMatch(/EXP ×12/);
     expect(righe[1].textContent).toMatch(/Pixie/);
-    expect(righe[1].textContent).toMatch(/EXP ×2Confidente/);
+    expect(righe[1].textContent).toMatch(/EXP ×2Esegui/);
     expect(righe[1].textContent).toMatch(/livello superiore/);
     // Isolamento: Gemelle rango 4 → 3 giorni; incenso base 4 giorni → 2 applicazioni +2; Pixie livello 30 → Evade
     expect(screen.getByText(/Durata dell'addestramento/).textContent).toMatch(/3 giorni/);

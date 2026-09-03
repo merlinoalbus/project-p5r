@@ -74,7 +74,7 @@ function personaRiassunto(r: RigaPersona): PersonaRiassuntoDto {
 function ricettaDto(risultatoId: number): RicettaSpecialeDto {
   const ris = prepared('SELECT id, nome FROM persona WHERE id = ?').get(risultatoId) as { id: number; nome: string };
   const ingredienti = prepared('SELECT p.id, p.nome FROM fusione_speciale_ingrediente i JOIN persona p ON p.id = i.ingrediente_id WHERE i.risultato_id = ? ORDER BY i.ordine').all(risultatoId) as Array<{ id: number; nome: string }>;
-  return { risultato: ris, ingredienti };
+  return { risultato: { ...ris, nomeIt: t('persona', ris.nome) }, ingredienti: ingredienti.map((i) => ({ ...i, nomeIt: t('persona', i.nome) })) };
 }
 
 // ---- Arcani, glossario, regole ----
@@ -125,7 +125,7 @@ export function regoleFusione(): RegoleFusioneDto {
   for (const tipo of tipi) matrice[tipo] = colonne.map((el) => righeMatrice.find((r) => r.tipo === tipo && r.elemento === el)?.ammesso === 1);
   const set = prepared('SELECT id FROM dlc_set ORDER BY ordine').all() as Array<{ id: number }>;
   const dlc = set.map((s) => (prepared('SELECT p.nome FROM dlc_set_persona d JOIN persona p ON p.id = d.persona_id WHERE d.set_id = ? ORDER BY p.nome').all(s.id) as Array<{ nome: string }>).map((p) => p.nome));
-  return { arcani, tabella, speciali, tesori: { nomi: tesori.map((te) => te.nome), modificatori }, eredita: { tipi, colonne, matrice }, dlc };
+  return { arcani, tabella, speciali, tesori: { nomi: tesori.map((te) => te.nome), nomiIt: tesori.map((te) => t('persona', te.nome)), modificatori }, eredita: { tipi, colonne, matrice }, dlc };
 }
 
 // ---- Persona ----

@@ -9,6 +9,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { EmptyState, Spinner } from '../shared/PageState';
 import { AlberoPiano } from '../fusione/AlberoPiano';
+import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
 import { formattaYen } from '../../utils/punti';
 import type { PianoSalvatoDto } from '../../types';
 
@@ -17,8 +18,9 @@ interface Props {
 }
 
 /** Scheda di un piano salvato: intestazione, avanzamento, passi eseguibili adesso e albero a richiesta. */
-function SchedaPiano({ piano, inScorta, onCambiaTitolo, onElimina }: { piano: PianoSalvatoDto; inScorta: Set<number>; onCambiaTitolo: (titolo: string) => void; onElimina: () => void }) {
+function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, onElimina, onEseguito }: { piano: PianoSalvatoDto; inScorta: Set<number>; possedutaDi: Map<number, number>; partitaId: number; onCambiaTitolo: (titolo: string) => void; onElimina: () => void; onEseguito: () => void }) {
   const [aperto, setAperto] = useState(false);
+  const [passoInEsecuzione, setPassoInEsecuzione] = useState<number | null>(null);
   const [titolo, setTitolo] = useState(piano.titolo);
   const [modificaTitolo, setModificaTitolo] = useState(false);
   const av = piano.avanzamento;
@@ -57,6 +59,7 @@ function SchedaPiano({ piano, inScorta, onCambiaTitolo, onElimina }: { piano: Pi
                 <span aria-hidden="true">→</span>
                 <Link to={p.ingredienti.length === 2 ? `/fusione?vista=calcolatore&a=${p.ingredienti[0].id}&b=${p.ingredienti[1].id}` : `/fusione?vista=ricette&ricette=${p.risultato.id}`} className="chip no-underline font-semibold">{p.risultato.nomeIt}</Link>
                 <span className="text-[12px] text-text-muted">fusione {p.tipo === 'speciale' ? 'speciale' : p.tipo === 'stesso-arcano' ? 'stesso arcano' : p.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'normale'}{p.skillPortate.length ? ` · eredita ${p.skillPortate.map((s) => s.nomeIt).join(', ')}` : ''}</span>
+                {p.ingredienti.every((ing) => possedutaDi.has(ing.id)) && <button type="button" className="btn btn-primary btn-sm" onClick={() => setPassoInEsecuzione(i)}>Esegui</button>}
               </li>
             ))}
           </ul>
@@ -71,6 +74,15 @@ function SchedaPiano({ piano, inScorta, onCambiaTitolo, onElimina }: { piano: Pi
         <button type="button" className="btn btn-ghost btn-sm touch text-error" onClick={onElimina}>Elimina</button>
       </div>
       {aperto && <AlberoPiano radice={piano.piano.radice} inScorta={inScorta} />}
+      {passoInEsecuzione !== null && av.passi[passoInEsecuzione] && (
+        <EseguiFusioneModal
+          partitaId={partitaId}
+          possedutaIds={av.passi[passoInEsecuzione].ingredienti.map((ing) => possedutaDi.get(ing.id)!)}
+          risultatoId={av.passi[passoInEsecuzione].risultato.id}
+          onChiudi={() => setPassoInEsecuzione(null)}
+          onEseguita={() => { setPassoInEsecuzione(null); onEseguito(); }}
+        />
+      )}
     </article>
   );
 }
@@ -82,6 +94,7 @@ export function PianiSalvati({ partitaId }: Props) {
   const lista = useCarica(() => getPianiSalvati(partitaId, obiettivoId), [partitaId, obiettivoId]);
   const scorta = useCarica(() => getPossedute(partitaId), [partitaId]);
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
+  const possedutaDi = useMemo(() => new Map((scorta.dati ?? []).map((p) => [p.personaId, p.id])), [scorta.dati]);
 
   const rinomina = async (p: PianoSalvatoDto, titolo: string) => {
     try {
@@ -115,7 +128,7 @@ export function PianiSalvati({ partitaId }: Props) {
       )}
       {lista.dati && lista.dati.length > 0 && (
         <div className="flex flex-col gap-3">
-          {lista.dati.map((p) => <SchedaPiano key={p.id} piano={p} inScorta={inScorta} onCambiaTitolo={(t) => void rinomina(p, t)} onElimina={() => void elimina(p)} />)}
+          {lista.dati.map((p) => <SchedaPiano key={p.id} piano={p} inScorta={inScorta} possedutaDi={possedutaDi} partitaId={partitaId} onCambiaTitolo={(t) => void rinomina(p, t)} onElimina={() => void elimina(p)} onEseguito={() => { void lista.ricarica(); void scorta.ricarica(); }} />)}
         </div>
       )}
     </div>

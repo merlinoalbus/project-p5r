@@ -3,13 +3,17 @@
 // ============================================================
 
 import { Router } from 'express';
+import { prepared } from '../db/dbService.js';
+import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaObiettivo, bodyAggiornaPianoSalvato, bodyCreaObiettivo, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyAggiornaObiettivo, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
+import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
+import { t } from '../services/traduzioniService.js';
 import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
@@ -112,6 +116,27 @@ router.put('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano, body: b
 router.delete('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano }), (req, res) => {
   eliminaPianoSalvato(Number(req.params.id), Number(req.params.pianoId));
   res.status(204).end();
+});
+
+// ---- Operazioni della Stanza di Velluto dalla scorta (Fase 5.4) ----
+router.post('/:id/velluto/fusione/anteprima', validate({ params: paramsPartita, body: bodyAnteprimaFusione }), (req, res) => {
+  const b = req.body as { possedutaIds: number[]; risultatoId?: number };
+  res.json(anteprimaFusione(Number(req.params.id), b.possedutaIds, b.risultatoId));
+});
+router.post('/:id/velluto/fusione', validate({ params: paramsPartita, body: bodyFusioneScorta }), (req, res) => {
+  res.status(201).json(eseguiFusione(Number(req.params.id), req.body as Parameters<typeof eseguiFusione>[1]));
+});
+router.post('/:id/velluto/forca', validate({ params: paramsPartita, body: bodyForca }), (req, res) => {
+  res.json(eseguiForca(Number(req.params.id), req.body as Parameters<typeof eseguiForca>[1]));
+});
+router.post('/:id/velluto/isolamento', validate({ params: paramsPartita, body: bodyIsolamento }), (req, res) => {
+  res.json(eseguiIsolamento(Number(req.params.id), req.body as Parameters<typeof eseguiIsolamento>[1]));
+});
+router.get('/:id/velluto/isolamento/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
+  const r = prepared('SELECT persona_id, livello FROM persona_posseduta WHERE id = ? AND partita_id = ?').get(Number(req.params.possedutaId), Number(req.params.id)) as { persona_id: number; livello: number } | undefined;
+  if (!r) throw httpErrors.notFound('posseduta-non-trovata', 'La Persona posseduta non è nella scorta di questa partita.');
+  const s = skillResistenzaIsolamento(r.persona_id, r.livello);
+  res.json({ elemento: s.elemento, elementoNome: s.elemento ? t('elemento', s.elemento) : null, tier: s.tier, skill: s.skill });
 });
 
 // ---- Storico (Fase 5.1) ----

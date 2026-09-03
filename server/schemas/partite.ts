@@ -72,6 +72,7 @@ const campiPosseduta = {
   statistiche: statistiche.nullable().optional(),
   trattoSkillId: z.number().int().positive().nullable().optional(),
   inSquadra: z.boolean().optional(),
+  carica: z.boolean().optional(),
   note: z.string().max(2000).optional(),
   skillIds: z.array(z.number().int().positive()).max(8).optional(),
 };
@@ -116,5 +117,34 @@ export const bodySalvaPiano = z.object({
 export const bodyAggiornaPianoSalvato = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), obiettivoId: z.number().int().positive().nullable().optional() });
 export const queryPianiSalvati = z.object({ obiettivo: z.coerce.number().int().positive().optional() });
 export const paramsPartitaPiano = z.object({ id: z.coerce.number().int().positive(), pianoId: z.coerce.number().int().positive() });
+const statistichePunti = z.object({
+  forza: z.number().int().min(0).max(99).optional(), magia: z.number().int().min(0).max(99).optional(), resistenza: z.number().int().min(0).max(99).optional(),
+  agilita: z.number().int().min(0).max(99).optional(), fortuna: z.number().int().min(0).max(99).optional(),
+});
+export const bodyAnteprimaFusione = z.object({ possedutaIds: z.array(z.number().int().positive()).min(2).max(6), risultatoId: z.number().int().positive().optional() });
+export const bodyFusioneScorta = bodyAnteprimaFusione.extend({
+  skillIds: z.array(z.number().int().positive()).max(8).optional(),
+  trattoSkillId: z.number().int().positive().nullable().optional(),
+  livello: livello.optional(),
+  statistiche: statistiche.nullable().optional(),
+  note: z.string().max(2000).optional(),
+});
+export const bodyForca = z.object({
+  riceventeId: z.number().int().positive(),
+  sacrificioId: z.number().int().positive(),
+  nuovoLivello: livello.optional(),
+  skillTrasferiteIds: z.array(z.number().int().positive()).max(3).optional(),
+  skillRimosseIds: z.array(z.number().int().positive()).max(8).optional(),
+  incidente: z.boolean().optional(),
+  puntiStatistica: statistichePunti.optional(),
+});
+export const bodyIsolamento = z.object({
+  possedutaId: z.number().int().positive(),
+  incenso: z.string().max(40).optional(),
+  giorni: z.number().int().min(1).max(9),
+  statistiche: z.array(z.enum(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'])).max(3).optional(),
+  skillResistenzaId: z.number().int().positive().nullable().optional(),
+  skillRimossaId: z.number().int().positive().nullable().optional(),
+});
 export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);

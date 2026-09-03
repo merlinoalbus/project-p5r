@@ -19,7 +19,7 @@ export interface OpzioniContesto {
   limite?: number;
 }
 
-function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti: number[] } {
+export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti: number[] } {
   let dlc = opz.dlc ?? [];
   if (opz.partitaId !== undefined) {
     const r = prepared('SELECT dlc_posseduti_json FROM partita WHERE id = ?').get(opz.partitaId) as { dlc_posseduti_json: string } | undefined;
@@ -88,7 +88,7 @@ function ricettaDto(r: RicettaFusione): RicettaFusioneDto {
   return { ingredienti: r.ingredienti.map(personaDto), risultato: personaDto(r.risultato), tipo: r.tipo, costo: r.costo };
 }
 
-function personaOErrore(id: number): PersonaFusione {
+export function personaOErrore(id: number): PersonaFusione {
   const p = personaFusione(id);
   if (!p) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
   return p;
@@ -219,7 +219,7 @@ function skillDto(s: SkillEredita): { id: number; nome: string; nomeIt: string; 
 }
 
 /** Ingrediente con le skill della scorta se posseduto nella partita, altrimenti quelle al livello indicato (o base). */
-function ingredienteDa(p: PersonaFusione, partitaId: number | undefined, livello: number | undefined): IngredienteEredita & { livello: number; daScorta: boolean } {
+export function ingredienteDa(p: PersonaFusione, partitaId: number | undefined, livello: number | undefined): IngredienteEredita & { livello: number; daScorta: boolean } {
   if (partitaId !== undefined) {
     const poss = prepared('SELECT id, livello FROM persona_posseduta WHERE partita_id = ? AND persona_id = ? ORDER BY livello DESC LIMIT 1').get(partitaId, p.id) as { id: number; livello: number } | undefined;
     if (poss) {
