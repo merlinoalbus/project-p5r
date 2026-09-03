@@ -7,6 +7,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiungiPosseduta, getPersona, isApiError } from '../services/api';
+import { ObiettivoModal } from '../components/partita/ObiettiviPartita';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
@@ -88,6 +89,7 @@ export function PersonaDettaglioPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const [livello, setLivello] = useState<number | null>(null);
   const [occupato, setOccupato] = useState(false);
+  const [obiettivoAperto, setObiettivoAperto] = useState(false);
   const livelloScelto = p ? Math.min(99, Math.max(p.livello, livello ?? p.livello)) : 1;
   const statisticheAlLivello = p ? statistichePerLivello(p.statistiche, p.livello, livelloScelto) : null;
 
@@ -154,7 +156,16 @@ export function PersonaDettaglioPage() {
                   <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void aggiungi()}>
                     Aggiungi alla scorta al livello {livelloScelto}
                   </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setObiettivoAperto(true)}>Aggiungi agli obiettivi</button>
                 </div>
+              )}
+              {attiva && obiettivoAperto && (
+                <ObiettivoModal
+                  partitaId={attiva.id}
+                  personaIniziale={{ id: p.id, nomeIt: p.nomeIt, arcanaNome: p.arcanaNome, livello: p.livello }}
+                  onChiudi={() => setObiettivoAperto(false)}
+                  onSalvato={() => setObiettivoAperto(false)}
+                />
               )}
             </div>
           </div>

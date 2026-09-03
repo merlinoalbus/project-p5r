@@ -17,6 +17,8 @@ interface Props {
   partitaId: number | null;
   livelloProtagonista: number | null;
   inizialeId?: number;
+  /** Skill preselezionate (id), ad esempio da un obiettivo. */
+  skillInizialiIds?: number[];
 }
 
 const NOME_MODO: Record<NodoPianoDto['modo'], string> = { scorta: 'In scorta', registro: 'Dal Registro', cattura: 'Da catturare', fusione: 'Fusione' };
@@ -72,15 +74,17 @@ function Piano({ piano, indice }: { piano: PianoFusioneDto; indice: number }) {
 }
 
 /** Selezione del bersaglio, opzioni (profondità, catture, limite di livello, alternative) e piani ordinati per costo. */
-export function PianiFusione({ persone, partitaId, livelloProtagonista, inizialeId }: Props) {
+export function PianiFusione({ persone, partitaId, livelloProtagonista, inizialeId, skillInizialiIds }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [profondita, setProfondita] = useState(3);
   const [catture, setCatture] = useState(true);
   const [limitaLivello, setLimitaLivello] = useState(true);
   const [alternative, setAlternative] = useState(3);
-  const [skillScelte, setSkillScelte] = useState<SkillRiassuntoDto[]>([]);
+  const [skillModificate, setSkillScelte] = useState<SkillRiassuntoDto[] | null>(null);
   const [slotFortunato, setSlotFortunato] = useState(false);
   const tutteSkill = useCarica(() => getSkills(), []);
+  // Finché l'utente non tocca la selezione, le skill scelte sono quelle arrivate dall'URL (es. da un obiettivo).
+  const skillScelte = skillModificate ?? (skillInizialiIds && tutteSkill.dati ? tutteSkill.dati.filter((s) => skillInizialiIds.includes(s.id)) : []);
   const skillIds = skillScelte.map((s) => s.id);
   const { dati, caricamento, errore } = useCarica(
     () => (scelta ? getPianiFusione(scelta.id, { partita: partitaId ?? undefined, profondita, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null, skill: skillIds, slotFortunato }) : Promise.resolve(null)),

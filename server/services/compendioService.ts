@@ -28,6 +28,13 @@ interface RigaOggetto { id: number; nome: string; categoria: string; vincolo: st
 // ---- Mappature ----
 
 /** Costo in forma leggibile. */
+/** Riassunto di una skill per id (null se non esiste); usato da partite, obiettivi e storico. */
+export function skillDto(id: number): SkillRiassuntoDto | null {
+  const s = prepared('SELECT * FROM skill WHERE id = ?').get(id) as { id: number; nome: string; elemento: string; costo_tipo: 'sp' | 'hp' | 'nessuno'; costo_valore: number; effetto: string } | undefined;
+  if (!s) return null;
+  return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, effettoNome: t('effettoSkill', s.effetto) };
+}
+
 export function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSkillDto {
   const testo = tipo === 'sp' ? `${valore} SP` : tipo === 'hp' ? `${valore}% HP` : '—';
   return { tipo, valore, testo };
