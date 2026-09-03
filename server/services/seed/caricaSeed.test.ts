@@ -1,0 +1,87 @@
+// ============================================================
+// Test caricaSeed — caricamento reale di data/seed in un DB in memoria
+// ============================================================
+
+import path from 'node:path';
+import { closeDb, initDb } from '../../db/dbService.js';
+import { runMigrations } from '../../db/migrationRunner.js';
+import { caricaSeed } from './caricaSeed.js';
+
+const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
+
+function n(sql: string): number {
+  return (initDb(':memory:').prepare(sql).get() as { n: number }).n;
+}
+
+describe('caricaSeed', () => {
+  beforeEach(() => {
+    const db = initDb(':memory:');
+    runMigrations(db);
+  });
+  afterEach(() => closeDb());
+
+  it('carica il compendio completo e la seconda esecuzione è un no-op', () => {
+    const db = initDb(':memory:');
+    const esito = caricaSeed(db, DIR_SEED);
+    expect(esito.caricato).toBe(true);
+    expect(esito.conteggi).toMatchObject({ persona: 232, skill: 525, oggetti: 223, confidenti: 23 });
+    expect(n('SELECT COUNT(*) AS n FROM arcana')).toBe(24);
+    expect(n('SELECT COUNT(*) AS n FROM persona_affinita')).toBe(232 * 10);
+    expect(n('SELECT COUNT(*) AS n FROM fusione_arcana')).toBe(273);
+    expect(n('SELECT COUNT(*) AS n FROM fusione_speciale')).toBe(24);
+    expect(n('SELECT COUNT(*) AS n FROM tesoro')).toBe(9);
+    expect(n('SELECT COUNT(*) AS n FROM tesoro_modificatore')).toBe(9 * 24);
+    expect(n('SELECT COUNT(*) AS n FROM eredita_matrice')).toBe(12 * 12);
+    expect(n('SELECT COUNT(*) AS n FROM dlc_set')).toBe(13);
+    expect(n('SELECT COUNT(*) AS n FROM dote_sociale')).toBe(5);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'effettoSkill'")).toBe(512);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'descrizioneOggetto'")).toBe(223);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'negoziazione'")).toBe(120);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'fonteCarta'")).toBe(49);
+    // ogni skill delle Persona esiste (vincolo FK) e i tratti sono skill di tipo trait
+    expect(n("SELECT COUNT(*) AS n FROM persona p WHERE NOT EXISTS (SELECT 1 FROM skill s WHERE s.nome = p.tratto AND s.elemento = 'trait')")).toBe(0);
+
+    const secondo = caricaSeed(db, DIR_SEED);
+    expect(secondo.caricato).toBe(false);
+    expect(secondo.hash).toBe(esito.hash);
+  });
+
+  it('un reseed forzato mantiene gli id e non sovrascrive le traduzioni dell’utente', () => {
+    const db = initDb(':memory:');
+    caricaSeed(db, DIR_SEED);
+    const prima = db.prepare("SELECT id FROM persona WHERE nome = 'Jack Frost'").get() as { id: number };
+    const skillPrima = db.prepare("SELECT id FROM skill WHERE nome = 'Bufu'").get() as { id: number };
+    db.prepare("UPDATE traduzione SET testo = 'Il Folle', fonte = 'utente' WHERE ambito = 'arcana' AND chiave = 'Fool'").run();
+    db.prepare("UPDATE traduzione SET testo = 'testo modificato dal seed?' WHERE ambito = 'arcana' AND chiave = 'Magician'").run();
+
+    const esito = caricaSeed(db, DIR_SEED, true);
+    expect(esito.caricato).toBe(true);
+    const dopo = db.prepare("SELECT id FROM persona WHERE nome = 'Jack Frost'").get() as { id: number };
+    const skillDopo = db.prepare("SELECT id FROM skill WHERE nome = 'Bufu'").get() as { id: number };
+    expect(dopo.id).toBe(prima.id);
+    expect(skillDopo.id).toBe(skillPrima.id);
+    expect((db.prepare("SELECT testo FROM traduzione WHERE ambito = 'arcana' AND chiave = 'Fool'").get() as { testo: string }).testo).toBe('Il Folle');
+    expect((db.prepare("SELECT testo FROM traduzione WHERE ambito = 'arcana' AND chiave = 'Magician'").get() as { testo: string }).testo).toBe('Mago');
+    expect(n('SELECT COUNT(*) AS n FROM persona')).toBe(232);
+    expect(n('SELECT COUNT(*) AS n FROM persona_skill')).toBe(n('SELECT COUNT(*) AS n FROM persona_skill'));
+  });
+
+  it('i dati utente sopravvivono al reseed (FK stabili)', () => {
+    const db = initDb(':memory:');
+    caricaSeed(db, DIR_SEED);
+    const adesso = new Date().toISOString();
+    db.prepare("INSERT INTO partita (nome, attiva, created_at, updated_at) VALUES ('Prova', 1, ?, ?)").run(adesso, adesso);
+    const jf = (db.prepare("SELECT id FROM persona WHERE nome = 'Jack Frost'").get() as { id: number }).id;
+    const bufu = (db.prepare("SELECT id FROM skill WHERE nome = 'Bufu'").get() as { id: number }).id;
+    db.prepare('INSERT INTO persona_posseduta (partita_id, persona_id, livello, created_at, updated_at) VALUES (1, ?, 12, ?, ?)').run(jf, adesso, adesso);
+    db.prepare('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (1, 1, ?)').run(bufu);
+    caricaSeed(db, DIR_SEED, true);
+    const riga = db.prepare('SELECT p.nome, s.nome AS skill FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id JOIN persona_posseduta_skill ps ON ps.posseduta_id = pp.id JOIN skill s ON s.id = ps.skill_id').get() as { nome: string; skill: string };
+    expect(riga).toEqual({ nome: 'Jack Frost', skill: 'Bufu' });
+  });
+
+  it('fallisce con un errore chiaro se manca un file del seed', () => {
+    const db = initDb(':memory:');
+    expect(() => caricaSeed(db, path.join(DIR_SEED, 'inesistente'))).toThrow(/file del seed mancante/);
+  });
+});

@@ -1,6 +1,6 @@
 # Architettura — project-p5r
 
-Aggiornato allo step **0.2 (dataset)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
+Aggiornato allo step **0.3 (schema DB + seed al boot)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
 realizzeranno secondo `docs/ROADMAP.md`.
 
 ## 1. Vista d'insieme
@@ -36,17 +36,19 @@ realizzeranno secondo `docs/ROADMAP.md`.
 ## 3. Struttura del repository
 ```
 server/
-  index.ts            boot: initDb → runBootBackup → runMigrations → (caricaSeed, previsto) → listen; SIGINT/SIGTERM → server.close + closeDb
+  index.ts            boot: initDb → runBootBackup → runMigrations → caricaSeed → listen; SIGINT/SIGTERM → server.close + closeDb
   bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, LOG_LEVEL, SEED_DIR)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
   db/                 dbService (connessione + pragma + cache statement), migrationRunner (user_version), backupService (7 copie)
-  db/migrations/      NNN_nome.ts append-only, registrate in index.ts
+  db/migrations/      001_compendio (dati di gioco + traduzioni + seed_meta), 002_partita (dati utente, immagini); registro in index.ts
   routes/             (previsto) route sottili per area: compendio, skill, fusione, partita, traduzioni
-  services/           (previsto) logica: motore di fusione puro, servizi DB
+  services/seed/      caricaSeed.ts: carica data/seed nel DB al boot (hash in seed_meta, upsert per nome, traduzioni utente intoccabili)
+  services/           (previsto) motore di fusione puro, servizi DB per area
   schemas/            (previsto) schemi zod condivisi da route e validate()
   utils/              logger, httpError
 shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
+shared/seed.ts        tipi dei JSON del seed (prodotti dagli script, letti dal backend e dal frontend)
 src/
   main.tsx            boot bloccante su GET /api/config → schermata d'errore HTML se il BE non risponde
   router.tsx          react-router (createBrowserRouter)
@@ -77,12 +79,17 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - Connessione unica better-sqlite3, pragma `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.
 - Migrazioni versionate su `PRAGMA user_version`, ogni migrazione in una transazione, `foreign_key_check` dopo ogni applicazione.
 - Backup online (`db.backup`) prima delle migrazioni a ogni boot, rotazione a 7 copie in `data/backups/`.
-- *(previsto, step 0.3)* Schema in due famiglie:
-  - **dati di gioco** (`arcana`, `persona`, `persona_affinita`, `persona_skill`, `skill`, `tratto`, `fusione_arcana`,
-    `fusione_speciale`, `fusione_rara`, `eredita_matrice`, `oggetto`, `traduzione`) caricati dal seed in modo idempotente,
-    con `seed_versione` per aggiornamenti futuri;
-  - **dati utente** (`partita`, `compendio_partita`, `persona_posseduta`, `persona_posseduta_skill`, `confidente_partita`,
-    `dote_sociale_partita`, `obiettivo`, `piano_fusione`) sempre con `partita_id` e ON DELETE CASCADE; una sola partita "attiva".
+- Schema in due famiglie (migrazioni 001 e 002):
+  - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
+    `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
+    `confidente`, `dote_sociale`, `traduzione`, `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
+    `seed_meta` → reseed solo quando il seed cambia; `persona`/`skill`/`oggetto`/`confidente` in UPSERT per chiave naturale
+    (id stabili, mai cancellazioni), relazioni di gioco svuotate e ricaricate, `traduzione` con `fonte='utente'` mai sovrascritta;
+  - **dati utente** (`partita` con indice parziale "una sola attiva", `compendio_partita`, `persona_posseduta` +
+    `persona_posseduta_skill` (8 slot), `confidente_partita` (sbloccato, rango 0–10), `dote_sociale_partita`, `immagine`
+    per i file caricati in `DATA_DIR/immagini/`) sempre con `partita_id` e ON DELETE CASCADE.
+  - Testi canonici (nomi Persona/skill, chiavi arcana/elementi, effetti, descrizioni) restano in inglese Royal nelle tabelle di
+    gioco; la resa italiana si legge da `traduzione(ambito, chiave)`.
 
 ## 6. Motore di fusione *(previsto, fasi 1–4)*
 Modulo TypeScript puro in `server/services/fusione/` senza I/O, alimentato da un'istantanea in memoria del compendio:

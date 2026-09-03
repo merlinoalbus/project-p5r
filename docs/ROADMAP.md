@@ -8,7 +8,7 @@ Ogni step si chiude solo con il verdetto **APPROVATO** del galaxy-task-validator
 |---|---|---|
 | 0.1 | Scaffold: config, BE (Express+SQLite, middleware, migrazioni, backup), FE tablet-first (layout, tema P5R), script server, Docker, CI/CD GHCR, docs di bordo, repo GitHub pubblico e deploy in produzione (tunnel Cloudflare) | ✅ 2026-09-03 |
 | 0.2 | Dataset Royal: download fissato (chinhodado + aqiu384, manifest sha256), normalizzazione in `data/seed/*.json`, traduzione italiana al 100% (effetti, oggetti, negoziazioni, fonti carta), correzioni documentate (nomi Royal), verifica incrociata con arbitrato di terza fonte, `NOTICE`, test | ✅ 2026-09-03 |
-| 0.3 | Schema DB: migrazioni dati di gioco + traduzioni + dati utente (partite multiple); caricatore seed idempotente al boot | ⬜ |
+| 0.3 | Schema DB: migrazioni 001 (dati di gioco + traduzioni + seed_meta) e 002 (partite multiple, tracking, immagini); `caricaSeed` idempotente al boot con id stabili e traduzioni utente protette; 23 Confidenti nel seed; test su DB in memoria | ⏳ |
 | 0.4 | API: compendio (persona, skill, arcana, tratti, oggetti, affinità), traduzioni (lettura/modifica), partita (CRUD, attiva, compendio personale, Persona possedute, Confidenti, Doti sociali) | ⬜ |
 | 0.5 | Frontend: Compendio (lista/filtri/ricerca/dettaglio Persona), Skill, Partita (selettore partita, Persona possedute, Confidenti, Doti sociali con +/−), Impostazioni (traduzioni) | ⬜ |
 | 0.6 | Prompt per TUTTI gli asset grafici in stile P5R, testi in italiano, link di ispirazione (`docs/grafica/prompt-immagini.md`) — anticipato su richiesta | ✅ 2026-09-03 |

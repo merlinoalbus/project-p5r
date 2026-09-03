@@ -1,0 +1,117 @@
+[
+  {
+    "chiave": "igor",
+    "nome": "Igor",
+    "arcana": "Fool"
+  },
+  {
+    "chiave": "morgana",
+    "nome": "Morgana",
+    "arcana": "Magician"
+  },
+  {
+    "chiave": "makoto",
+    "nome": "Makoto Niijima",
+    "arcana": "Priestess"
+  },
+  {
+    "chiave": "haru",
+    "nome": "Haru Okumura",
+    "arcana": "Empress"
+  },
+  {
+    "chiave": "yusuke",
+    "nome": "Yusuke Kitagawa",
+    "arcana": "Emperor"
+  },
+  {
+    "chiave": "sojiro",
+    "nome": "Sojiro Sakura",
+    "arcana": "Hierophant"
+  },
+  {
+    "chiave": "ann",
+    "nome": "Ann Takamaki",
+    "arcana": "Lovers"
+  },
+  {
+    "chiave": "ryuji",
+    "nome": "Ryuji Sakamoto",
+    "arcana": "Chariot"
+  },
+  {
+    "chiave": "akechi",
+    "nome": "Goro Akechi",
+    "arcana": "Justice"
+  },
+  {
+    "chiave": "futaba",
+    "nome": "Futaba Sakura",
+    "arcana": "Hermit"
+  },
+  {
+    "chiave": "chihaya",
+    "nome": "Chihaya Mifune",
+    "arcana": "Fortune"
+  },
+  {
+    "chiave": "gemelle",
+    "nome": "Gemelle Custodi (Caroline e Justine)",
+    "arcana": "Strength"
+  },
+  {
+    "chiave": "iwai",
+    "nome": "Munehisa Iwai",
+    "arcana": "Hanged"
+  },
+  {
+    "chiave": "takemi",
+    "nome": "Tae Takemi",
+    "arcana": "Death"
+  },
+  {
+    "chiave": "kawakami",
+    "nome": "Sadayo Kawakami",
+    "arcana": "Temperance"
+  },
+  {
+    "chiave": "ohya",
+    "nome": "Ichiko Ohya",
+    "arcana": "Devil"
+  },
+  {
+    "chiave": "shinya",
+    "nome": "Shinya Oda",
+    "arcana": "Tower"
+  },
+  {
+    "chiave": "hifumi",
+    "nome": "Hifumi Togo",
+    "arcana": "Star"
+  },
+  {
+    "chiave": "mishima",
+    "nome": "Yuuki Mishima",
+    "arcana": "Moon"
+  },
+  {
+    "chiave": "yoshida",
+    "nome": "Toranosuke Yoshida",
+    "arcana": "Sun"
+  },
+  {
+    "chiave": "sae",
+    "nome": "Sae Niijima",
+    "arcana": "Judgement"
+  },
+  {
+    "chiave": "kasumi",
+    "nome": "Kasumi Yoshizawa",
+    "arcana": "Faith"
+  },
+  {
+    "chiave": "maruki",
+    "nome": "Takuto Maruki",
+    "arcana": "Councillor"
+  }
+]
