@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
@@ -29,5 +29,7 @@ export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
 export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
 export const getOggetti = (f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
+/** Domande in classe ed esami (con stato «fatta» e prossime se c'è la partita). */
+export const getDomande = (partita?: number): Promise<DomandeDto> => apiGet(`/compendio/domande${queryString({ partita })}`);
 export const getConfidenteDettaglio = (chiave: string): Promise<ConfidenteDettaglioDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}`);
 export const getConfidenti = (): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');

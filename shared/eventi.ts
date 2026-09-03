@@ -28,6 +28,7 @@ export const TIPI_EVENTO = [
   'ciclo-salvato',
   'ciclo-anello',
   'ciclo-iterazione',
+  'domanda-risposta',
 ] as const;
 
 export type TipoEvento = (typeof TIPI_EVENTO)[number];
@@ -55,6 +56,7 @@ export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; grupp
   'ciclo-salvato': { nome: 'Ciclo di fusione salvato', gruppo: 'obiettivi' },
   'ciclo-anello': { nome: 'Anello di un ciclo eseguito', gruppo: 'velluto' },
   'ciclo-iterazione': { nome: 'Giro di un ciclo completato', gruppo: 'velluto' },
+  'domanda-risposta': { nome: 'Domanda in classe risposta', gruppo: 'doti' },
 };
 
 export const GRUPPI_EVENTO: ReadonlyArray<{ chiave: (typeof ETICHETTE_EVENTO)[TipoEvento]['gruppo']; nome: string }> = [

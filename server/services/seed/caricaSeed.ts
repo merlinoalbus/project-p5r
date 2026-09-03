@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { ConfidenteDettaglioSeed, ConfidenteSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -48,6 +48,7 @@ interface SeedCompleto {
   traduzioni: TraduzioniSeed;
   confidenti: ConfidenteSeed[];
   confidentiDettaglio: ConfidenteDettaglioSeed[];
+  domande: DomandeSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -72,6 +73,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     traduzioni: JSON.parse(contenuti['traduzioni.json']) as TraduzioniSeed,
     confidenti: JSON.parse(contenuti['confidenti.json']) as ConfidenteSeed[],
     confidentiDettaglio: JSON.parse(contenuti['confidenti-dettaglio.json']) as ConfidenteDettaglioSeed[],
+    domande: JSON.parse(contenuti['domande.json']) as DomandeSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -258,6 +260,20 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       for (const g of d.regaliSconsigliati) insRe.run(d.chiave, ordine++, g, null, null, null, 1);
       insDisp.run(d.chiave, JSON.stringify(d.disponibilita.giorni), JSON.stringify(d.disponibilita.fasce), d.disponibilita.luogo, d.disponibilita.sbloccoData, d.disponibilita.sbloccoRequisiti, d.disponibilita.note, d.noteGenerali, JSON.stringify(d.fonti));
     }
+
+    // ---- Domande in classe ed esami (Fase 6.2): id stabili per (data, ordine) tramite upsert, tracking preservato ----
+    const insDom = db.prepare(`INSERT INTO domanda (ordine, data, tipo, chi, domanda, risposte_json, ricompensa, note, fonte) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+    const updDom = db.prepare(`UPDATE domanda SET data = ?, tipo = ?, chi = ?, domanda = ?, risposte_json = ?, ricompensa = ?, note = ?, fonte = ? WHERE ordine = ?`);
+    const esistenti = new Set((db.prepare('SELECT ordine FROM domanda').all() as Array<{ ordine: number }>).map((r) => r.ordine));
+    seed.domande.domande.forEach((d, i) => {
+      if (esistenti.has(i)) updDom.run(d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte, i);
+      else insDom.run(i, d.data, d.tipo, d.chi, d.domanda, JSON.stringify(d.risposte), d.ricompensa, d.note, d.fonte);
+    });
+    db.prepare('DELETE FROM domanda WHERE ordine >= ?').run(seed.domande.domande.length);
+    db.prepare('DELETE FROM esame').run();
+    const insEs = db.prepare('INSERT INTO esame (chiave, ordine, nome, date_json, data_risultati, domande_json, note) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    seed.domande.esami.forEach((e, i) => insEs.run(e.chiave, i, e.nome, JSON.stringify(e.date), e.dataRisultati, JSON.stringify(e.domande), e.note));
+    db.prepare("INSERT INTO esame_premi (chiave, json) VALUES ('premi', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.domande.premi));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

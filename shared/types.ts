@@ -689,6 +689,44 @@ export interface PianoSalvatoDto {
   updatedAt: string;
 }
 
+// ---- Domande in classe ed esami (Fase 6.2) ----
+
+export interface DomandaDto {
+  id: number;
+  /** Data di gioco «MM-GG». */
+  data: string;
+  tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'altro';
+  chi: string;
+  domanda: string;
+  /** Risposte corrette in ordine (più passi per le domande a catena). */
+  risposte: Array<{ ordine: number | null; testo: string }>;
+  ricompensa: string;
+  note: string;
+  fonte: string;
+  /** Segnata come fatta nella partita (false senza partita). */
+  fatta: boolean;
+}
+
+export interface EsameDto {
+  chiave: string;
+  nome: string;
+  date: string[];
+  dataRisultati: string | null;
+  domande: Array<{ data: string; ordine: number; domanda: string; risposta: string }>;
+  note: string;
+}
+
+export interface DomandeDto {
+  domande: DomandaDto[];
+  esami: EsameDto[];
+  premi: { fascinoPerPiazzamento?: Record<string, string>; moltiplicatoreConfidenti?: string; requisitoConoscenza?: Record<string, string>; trofeo?: string; fonte?: string; noteGenerali?: string } | null;
+  dataGioco: string | null;
+  /** Prossime domande non fatte a partire dalla data di gioco della partita (massimo 5). */
+  prossime: DomandaDto[];
+  fatte: number;
+  totale: number;
+}
+
 // ---- Storico (Fase 5.1) ----
 
 export interface EventoPartitaDto {

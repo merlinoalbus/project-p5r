@@ -3,12 +3,15 @@
 // ============================================================
 
 import { Router } from 'express';
+import { z } from 'zod';
+import { domande } from '../services/domandeService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
   dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
+const queryDomande = z.object({ partita: z.coerce.number().int().positive().optional() });
 const router = Router();
 
 router.get('/arcani', (_req, res) => {
@@ -52,6 +55,9 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/domande', validate({ query: queryDomande }), (req, res) => {
+  res.json(domande((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/confidenti/:chiave', (req, res) => {
   res.json(dettaglioConfidente(String(req.params.chiave)));

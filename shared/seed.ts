@@ -70,6 +70,13 @@ export interface FusioneSeed {
 }
 
 /** Confidente (dato di gioco). */
+/** Domande in classe ed esami (guida allgamestaff). */
+export interface DomandeSeed {
+  domande: Array<{ data: string; tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'altro'; chi: string; domanda: string; risposte: Array<{ ordine: number | null; testo: string }>; ricompensa: string; note: string; fonte: string }>;
+  esami: Array<{ chiave: string; nome: string; date: string[]; dataRisultati: string | null; domande: Array<{ data: string; ordine: number; domanda: string; risposta: string }>; note: string }>;
+  premi: Record<string, unknown>;
+}
+
 /** Dettaglio di un Confidente (guida allgamestaff): abilità, dialoghi con le risposte migliori, regali, disponibilità. */
 export interface ConfidenteDettaglioSeed {
   chiave: string;
