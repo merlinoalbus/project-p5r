@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getPersone, getPossedute, getRegoleFusione } from '../services/api';
+import { aggiornaPartita, getPersone, getPossedute, getRegoleFusione, getVelluto } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
@@ -15,10 +15,13 @@ import { Calcolatore } from '../components/fusione/Calcolatore';
 import { RicettePersona } from '../components/fusione/RicettePersona';
 import { PianiFusione } from '../components/fusione/PianiFusione';
 import { CercaSkill } from '../components/fusione/CercaSkill';
+import { PannelloVelluto } from '../components/fusione/PannelloVelluto';
+import { ForcaIsolamento } from '../components/fusione/ForcaIsolamento';
+import { notifica } from '../stores/notificationStore';
 
-type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
+type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string]> = [
-  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'], ['skill', 'Cerca per skill'],
+  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'], ['skill', 'Cerca per skill'], ['forca', 'Forca e Isolamento'],
   ['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro'],
 ];
 
@@ -27,11 +30,22 @@ export function FusionePage() {
   useDocumentTitle('Fusione');
   const glossario = useGlossarioStore((s) => s.glossario);
   const attiva = usePartitaStore((s) => s.attiva);
+  const aggiornaLocale = usePartitaStore((s) => s.aggiornaLocale);
   const [params, setParams] = useSearchParams();
   const { dati, caricamento, errore, ricarica } = useCarica(() => getRegoleFusione(), []);
   const persone = useCarica(() => getPersone(), []);
   const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve([])), [attiva?.id]);
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
+  const velluto = useCarica(() => (attiva ? getVelluto(attiva.id) : Promise.resolve(null)), [attiva?.id, attiva?.allarmeAttivo, attiva?.updatedAt]);
+  const cambiaAllarme = async (allarmeAttivo: boolean) => {
+    if (!attiva) return;
+    try {
+      aggiornaLocale(await aggiornaPartita(attiva.id, { allarmeAttivo }));
+      notifica('info', allarmeAttivo ? 'Allarme delle fusioni segnato come attivo.' : 'Allarme delle fusioni spento.');
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    }
+  };
   const [a, setA] = useState('');
   const [b, setB] = useState('');
   const vistaParam = params.get('vista');
@@ -69,6 +83,7 @@ export function FusionePage() {
       <p className="m-0 text-[13px] text-text-secondary">
         Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.
       </p>
+      <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
       <div className="flex gap-1.5 flex-wrap">
         {VISTE.map(([k, l]) => (
           <button key={k} type="button" className={`chip touch ${vista === k ? 'chip--attivo' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k}>{l}</button>
@@ -87,6 +102,9 @@ export function FusionePage() {
         )}
         {persone.dati && vista === 'skill' && (
           <CercaSkill persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} />
+        )}
+        {persone.dati && vista === 'forca' && (
+          <ForcaIsolamento persone={persone.dati} partitaId={attiva?.id ?? null} velluto={velluto.dati ?? null} />
         )}
         {persone.dati && vista === 'con' && (
           <RicettePersona key={`con-${idParam('con') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="con" inizialeId={idParam('con')} />

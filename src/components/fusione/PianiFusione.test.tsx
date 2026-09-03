@@ -35,7 +35,7 @@ beforeEach(() => {
 describe('PianiFusione', () => {
   it('chiama l\'API con le opzioni e disegna l\'albero con modi, costi e conteggi', async () => {
     const dati: PianiFusioneDto = {
-      persona: fus(jack), opzioni: { profondita: 3, alternative: 3, catture: true, livelloMax: 20, slotFortunato: false }, disponibilita: { scorta: 1, registro: 1 }, skillRichieste: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja', elemento: 'support', elementoNome: 'Supporto' }],
+      persona: fus(jack), sconto: 0, opzioni: { profondita: 3, alternative: 3, catture: true, livelloMax: 20, slotFortunato: false }, disponibilita: { scorta: 1, registro: 1 }, skillRichieste: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja', elemento: 'support', elementoNome: 'Supporto' }],
       piani: [{
         costo: 3956, profondita: 1, catture: 0, evocazioni: 1, fusioni: 1,
         radice: { persona: fus(jack), modo: 'fusione', tipo: 'normale', costo: 3956, skillPortate: [{ id: 1, nome: 'Tarukaja', nomeIt: 'Tarukaja' }], skillDaLivello: [], figli: [
@@ -59,7 +59,7 @@ describe('PianiFusione', () => {
   });
 
   it('senza piani mostra il suggerimento; senza partita il limite di livello è disabilitato', async () => {
-    getPianiFusione.mockResolvedValue({ persona: fus(jack), opzioni: { profondita: 3, alternative: 3, catture: false, livelloMax: null, slotFortunato: false }, disponibilita: { scorta: 0, registro: 0 }, piani: [], skillRichieste: [] } satisfies PianiFusioneDto);
+    getPianiFusione.mockResolvedValue({ persona: fus(jack), opzioni: { profondita: 3, alternative: 3, catture: false, livelloMax: null, slotFortunato: false }, disponibilita: { scorta: 0, registro: 0 }, piani: [], skillRichieste: [], sconto: 0 } satisfies PianiFusioneDto);
     render(<MemoryRouter><PianiFusione persone={[jack]} partitaId={null} livelloProtagonista={null} inizialeId={88} /></MemoryRouter>);
     expect(await screen.findByText(/Nessun piano trovato/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Fino al livello/ })).toBeDisabled();

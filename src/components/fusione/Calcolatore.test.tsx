@@ -57,7 +57,7 @@ async function scegli(etichetta: string, testo: string, nome: string) {
 
 describe('Calcolatore', () => {
   it('sceglie due Persona, chiama l\'API con la partita e mostra risultato, tipo e costo', async () => {
-    const esito: EsitoFusioneDto = { a: fus(arsene), b: fus(pixie), ricetta: { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227 }, motivo: null, dlcPosseduti: [] };
+    const esito: EsitoFusioneDto = { a: fus(arsene), b: fus(pixie), ricetta: { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227 }, motivo: null, dlcPosseduti: [], sconto: 0, bonusConfidente: null };
     getFondi.mockResolvedValue(esito);
     render(<MemoryRouter><Calcolatore persone={persone} partitaId={7} inScorta={new Set([1, 2])} /></MemoryRouter>);
     await scegli('Prima Persona', 'ars', 'Arsène');
@@ -78,7 +78,7 @@ describe('Calcolatore', () => {
   });
 
   it('mostra il motivo quando la fusione non è possibile', async () => {
-    getFondi.mockResolvedValue({ a: fus(arsene), b: fus(arsene), ricetta: null, motivo: 'Una Persona non può essere fusa con sé stessa.', dlcPosseduti: [] } satisfies EsitoFusioneDto);
+    getFondi.mockResolvedValue({ a: fus(arsene), b: fus(arsene), ricetta: null, motivo: 'Una Persona non può essere fusa con sé stessa.', dlcPosseduti: [], sconto: 0, bonusConfidente: null } satisfies EsitoFusioneDto);
     render(<MemoryRouter><Calcolatore persone={persone} partitaId={null} inScorta={new Set()} inizialeA={1} inizialeB={1} /></MemoryRouter>);
     expect(await screen.findByText('Fusione non possibile.')).toBeInTheDocument();
     expect(screen.getByText(/sé stessa/)).toBeInTheDocument();
@@ -90,7 +90,7 @@ describe('Calcolatore', () => {
 describe('RicettePersona', () => {
   it('elenca le ricette per ottenere una Persona, evidenzia quelle pronte e applica il filtro del livello', async () => {
     const dati: RicetteFusioneDto = {
-      persona: fus(jack), totale: 2, totaleSenzaFiltri: 3, livelloMax: null, dlcPosseduti: [],
+      persona: fus(jack), totale: 2, totaleSenzaFiltri: 3, livelloMax: null, dlcPosseduti: [], sconto: 0,
       ricette: [
         { ingredienti: [fus(arsene), fus(pixie)], risultato: fus(jack), tipo: 'normale', costo: 8227 },
         { ingredienti: [fus(regent), fus(pixie)], risultato: fus(jack), tipo: 'tesoro', costo: 9000 },
@@ -110,7 +110,7 @@ describe('RicettePersona', () => {
   });
 
   it('per un Demone del Tesoro spiega che non si ottiene per fusione', async () => {
-    getRicettePer.mockResolvedValue({ persona: fus(regent), totale: 0, totaleSenzaFiltri: 0, livelloMax: null, dlcPosseduti: [], ricette: [] } satisfies RicetteFusioneDto);
+    getRicettePer.mockResolvedValue({ persona: fus(regent), totale: 0, totaleSenzaFiltri: 0, livelloMax: null, dlcPosseduti: [], ricette: [], sconto: 0 } satisfies RicetteFusioneDto);
     render(<MemoryRouter><RicettePersona persone={persone} partitaId={null} livelloProtagonista={null} inScorta={new Set()} modalita="per" fissa={regent} /></MemoryRouter>);
     expect(await screen.findByText(/non si ottengono per fusione/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Fino al livello/ })).toBeDisabled();

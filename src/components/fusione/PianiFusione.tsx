@@ -126,7 +126,10 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
           ) : dati && dati.piani.length === 0 ? (
             <p className="m-0 text-[13px] text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello{skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.</p>
           ) : dati ? (
-            <div className="flex flex-col gap-3">{dati.piani.map((p, i) => <Piano key={i} piano={p} indice={i} />)}</div>
+            <>
+              {dati.sconto > 0 && <p className="m-0 text-[12px] text-text-muted">Costi con lo sconto del Registro ({dati.sconto}%) della partita.</p>}
+              <div className="flex flex-col gap-3">{dati.piani.map((p, i) => <Piano key={i} piano={p} indice={i} />)}</div>
+            </>
           ) : null}
         </>
       )}

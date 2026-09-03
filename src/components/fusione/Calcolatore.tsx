@@ -52,7 +52,13 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
                 <Link to={`/compendio/persona/${r.risultato.id}`} className="text-2xl font-black text-primary no-underline">{r.risultato.nomeIt}</Link>
                 {r.risultato.nomeIt !== r.risultato.nome && <span className="text-[13px] text-text-muted ml-2">{r.risultato.nome}</span>}
                 <div className="text-[13px] text-text-secondary mt-1">{r.risultato.arcanaNome} · livello {r.risultato.livello}{r.risultato.speciale ? ' · fusione speciale' : ''}</div>
-                <div className="text-[13px] text-text-secondary">Tipo: {r.tipo === 'normale' ? 'normale' : r.tipo === 'stesso-arcano' ? 'stesso arcano' : r.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'speciale'} · costo stimato <strong className="text-text">{formattaYen(r.costo)}</strong></div>
+                <div className="text-[13px] text-text-secondary">Tipo: {r.tipo === 'normale' ? 'normale' : r.tipo === 'stesso-arcano' ? 'stesso arcano' : r.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'speciale'} · costo stimato <strong className="text-text">{formattaYen(r.costo)}</strong>{(esito?.sconto ?? 0) > 0 && <span className="text-text-muted"> (sconto Registro {esito?.sconto}%)</span>}</div>
+                {esito?.bonusConfidente && (
+                  <div className="text-[13px] text-text-secondary">
+                    Bonus EXP del Confidente {esito.bonusConfidente.arcanaNome}{esito.bonusConfidente.confidenteNome ? ` (${esito.bonusConfidente.confidenteNome})` : ''}: rango {esito.bonusConfidente.rango} → <strong className="text-text">×{esito.bonusConfidente.moltiplicatoreExp.toLocaleString('it-IT')}</strong>
+                    {esito.bonusConfidente.rango === 0 && <span className="text-text-muted"> · aggiorna i ranghi nella scheda Confidenti</span>}
+                  </div>
+                )}
                 {inScorta.has(a.id) && inScorta.has(b.id) && <div className="chip chip--attivo mt-2">Hai entrambi gli ingredienti nella scorta</div>}
               </div>
               <div className="w-full border-t border-border-light pt-3">
