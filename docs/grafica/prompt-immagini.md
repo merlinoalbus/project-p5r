@@ -1,10 +1,11 @@
 # Prompt per la generazione degli asset grafici — stile Persona 5 Royal
 
-Versione 1 — 2026-09-03 (step 0.6, anticipato). Riferimenti visivi completi in `riferimenti-visivi.md`.
+Versione 2 — 2026-09-03 (step 0.6, anticipato; revisione dopo validazione). Riferimenti visivi completi in `riferimenti-visivi.md`.
 
 Regole valide per TUTTI gli asset:
 - **Originali, ispirati allo stile**: nessuna copia delle illustrazioni ufficiali Atlus; i link servono all'IA grafica (o a chi la guida) come ispirazione di stile, palette e composizione.
-- **Ogni testo dentro l'immagine è in italiano** (nomi degli Arcani, etichette, sigle). Se il tuo generatore sbaglia le lettere, usa la variante "senza testo" indicata e il testo lo sovrappone l'app.
+- **Ogni testo dentro l'immagine è in italiano** (nomi degli Arcani, etichette, sigle). **Per OGNI asset che contiene testo esiste la variante senza testo** con suffisso `-senza-testo` (es. `arcani/fool-senza-testo.png`): se il generatore sbaglia le lettere, consegna quella e il testo lo sovrappone l'app con il proprio font. Le sole parole non italiane ammesse dentro le immagini sono la sigla di prodotto `P5R` e l'abbreviazione `MAX`.
+- Nota sui Confidenti (§9): per scelta dell'utente i ritratti sono generati da IA "ispirati" ai personaggi del gioco (aspetto descritto a parole, link alla fonte come ispirazione), non copie delle illustrazioni ufficiali.
 - Consegna in `public/asset/<categoria>/<nome-file>` con i nomi indicati; PNG con trasparenza dove richiesto, altrimenti WEBP/PNG. Le dimensioni sono quelle di consegna: genera più grande e ridimensiona.
 - Palette dell'app (`src/tailwind.css`): nero `#0b0b0e`, superficie `#23232d`, rosso `#e5352b`, bianco `#ececf1`, grigio `#6f6f80`. Colori degli elementi: Fisico `#c9a227`, Arma da fuoco `#8f8f9a`, Fuoco `#f0552b`, Ghiaccio `#5ec8f2`, Elettricità `#f2d94e`, Vento `#5fd67a`, Psichico `#e06bd6`, Nucleare `#4dd7c9`, Sacro `#f5f0c8`, Oscurità `#a05cf0`, Quasi-divino `#ffffff`, Guarigione `#7fe0a5`, Alterazione `#d9a066`, Supporto `#8ab4f8`, Passiva `#b0b0c0`.
 
@@ -30,12 +31,12 @@ personaggi copiati dal gioco, watermark, firma, bordi sfocati, colori pastello, 
 ## 1. Identità dell'app
 
 ### 1.1 Logo principale — `identita/logo.png` (1024×1024, trasparente) e `identita/logo-orizzontale.png` (1600×500)
-Testo nell'immagine: **PROJECT P5R** (variante senza testo: `logo-simbolo.png`).
+Testo nell'immagine: **P5R** sopra e **COMPAGNO DI GIOCO** sotto (variante senza testo: `identita/logo-senza-testo.png`).
 ```
 [blocco di stile] Logo originale per un'app compagno di gioco: una maschera da ladro stilizzata, bianca con
 bordi neri, tagliata in diagonale da una fiamma rossa a forma di cuore rovesciato; sotto, il lettering
-"PROJECT P5R" con lettere di altezze diverse, bianche su tasselli neri e rossi ruotati, stile ritaglio di
-giornale. Composizione centrata su sfondo trasparente. Ispirazione per l'emblema (NON copiare):
+"P5R" grande e "COMPAGNO DI GIOCO" piccolo, lettere di altezze diverse, bianche su tasselli neri e rossi
+ruotati, stile ritaglio di giornale. Composizione centrata su sfondo trasparente. Ispirazione per l'emblema (NON copiare):
 https://static.wikia.nocookie.net/megamitensei/images/2/28/Phantom_Thieves_Logo.png/revision/latest?cb=20170528120634
 ```
 
@@ -47,7 +48,7 @@ stilizzata del logo (punto 1.1) in forma semplificata leggibile anche a 32 px. N
 ```
 
 ### 1.3 Splash / schermata di caricamento — `identita/splash.webp` (1536×2048 verticale, 2048×1536 orizzontale)
-Testo: **PRENDIAMO IL TUO CUORE** in piccolo in basso (variante senza testo disponibile).
+Testo: **PRENDIAMO IL TUO CUORE** in piccolo in basso (variante senza testo: `identita/splash-senza-testo.webp`).
 ```
 [blocco di stile] Schermata di apertura: esplosione di forme rosse e nere a ritaglio che convergono al centro,
 dove campeggia la maschera del logo; retino a punti sui bordi, stelle bianche a quattro punte come accenti.
@@ -103,7 +104,7 @@ Variante senza testo per ogni carta: `arcani/<chiave>-senza-testo.png` (l'app so
 | `priestess.png` | II | LA PAPESSA | figura seduta fra due colonne (una bianca, una nera) con un libro chiuso in grembo, luna ai piedi |
 | `empress.png` | III | L'IMPERATRICE | figura in trono con corona di stelle, campo di grano, scudo con simbolo di Venere |
 | `emperor.png` | IV | L'IMPERATORE | figura in trono di pietra con teste di ariete, scettro, montagne alle spalle |
-| `hierophant.png` | V | IL PAPA | figura con triregno e chiavi incrociate, due accoliti inginocchiati |
+| `hierophant.png` | V | L'IEROFANTE | figura con triregno e chiavi incrociate, due accoliti inginocchiati |
 | `lovers.png` | VI | GLI AMANTI | due figure sotto un angelo con ali spiegate, sole in alto |
 | `chariot.png` | VII | IL CARRO | guerriero su un carro trainato da due sfingi (una bianca, una nera) |
 | `justice.png` | VIII | LA GIUSTIZIA | figura in trono con spada alzata e bilancia |
@@ -120,7 +121,7 @@ Variante senza testo per ogni carta: `arcani/<chiave>-senza-testo.png` (l'app so
 | `sun.png` | XIX | IL SOLE | sole con volto e raggi, bambino su cavallo bianco, girasoli |
 | `judgement.png` | XX | IL GIUDIZIO | angelo con tromba, figure che si alzano dalle tombe |
 | `world.png` | XXI | IL MONDO | figura danzante dentro una corona d'alloro, quattro creature agli angoli |
-| `faith.png` | — | LA FEDE | (arcano Royal, nessuna carta ufficiale) figura in piedi con il capo alto e le mani giunte al petto, fascio di stelle bianche a quattro punte che sale in spirale, dietro un cerchio raggiato; ispirazione del motivo a stelle: https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 |
+| `faith.png` | — | LA FEDE | (arcano Royal; carta non reperita fra i riferimenti) figura in piedi con il capo alto e le mani giunte al petto, fascio di stelle bianche a quattro punte che sale in spirale, dietro un cerchio raggiato; ispirazione del motivo a stelle: https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 |
 | `councillor.png` | — | IL CONSIGLIERE | (arcano Royal) figura seduta di tre quarti con un libro aperto e una mano tesa in gesto di aiuto, sole velato alle spalle; ispirazione: https://static.wikia.nocookie.net/megamitensei/images/5/5b/P5_Royal_Consultant_Arcana.png/revision/latest?cb=20200508064739 |
 
 Prompt di esempio (Matto):
@@ -131,10 +132,37 @@ stilizzati in alto. Bianco e nero con accento rosso sul fagotto. Sfondo traspare
 ```
 
 ### 3.1 Icone arcano piccole (24) — `arcani/icona/<chiave>.png` (256×256, trasparente)
+Nessun testo. Usate anche come icona-arcano dei Confidenti (§9).
 ```
-[blocco di stile] Icona tonda nera con bordo bianco irregolare; dentro, il solo simbolo essenziale dell'arcano
-in bianco (es. Matto: fagotto sul bastone; Mago: stella a cinque punte; Papessa: luna crescente; …), nessun testo.
+[blocco di stile] Icona tonda nera con bordo bianco irregolare; dentro, in bianco piatto con un accento rosso,
+il solo simbolo indicato, leggibile a 32 px. Nessun testo.
 ```
+| File | Simbolo |
+|---|---|
+| `fool.png` | fagotto legato a un bastone |
+| `magician.png` | stella a cinque punte con bacchetta |
+| `priestess.png` | luna crescente su un libro chiuso |
+| `empress.png` | corona con spiga di grano |
+| `emperor.png` | scettro con testa di ariete |
+| `hierophant.png` | due chiavi incrociate |
+| `lovers.png` | due cuori intrecciati |
+| `chariot.png` | ruota con ala |
+| `justice.png` | bilancia a due piatti |
+| `hermit.png` | lanterna |
+| `fortune.png` | ruota a otto raggi |
+| `strength.png` | testa di leone frontale |
+| `hanged.png` | figura capovolta stilizzata (una gamba piegata) |
+| `death.png` | falce |
+| `temperance.png` | due calici con un filo d'acqua fra loro |
+| `devil.png` | corna con catena |
+| `tower.png` | torre spezzata da un fulmine |
+| `star.png` | stella a otto punte |
+| `moon.png` | luna con volto di profilo |
+| `sun.png` | sole a raggi ondulati |
+| `judgement.png` | tromba con stendardo |
+| `world.png` | corona d'alloro chiusa |
+| `faith.png` | tre stelle a quattro punte in spirale |
+| `councillor.png` | libro aperto con una mano tesa |
 
 ## 4. Icone degli elementi (16) — `elementi/<chiave>.png` (256×256, trasparente)
 Nessun testo. Colore di riferimento fra parentesi.
@@ -161,24 +189,26 @@ https://static.wikia.nocookie.net/megamitensei/images/a/ac/Fire_Icon_P5.png/revi
 | `ailment.png` | spirale con punto esclamativo (Alterazione, #d9a066) |
 | `support.png` | freccia in su dentro uno scudo (Supporto, #8ab4f8) |
 | `passive.png` | ingranaggio (Passiva, #b0b0c0) |
-| `trait.png` | maschera piccola (Tratto, #ececf1) |
+| `trait.png` | maschera piccola (Tratto, #ececf1 = `--color-el-tratto`) |
 
 ## 5. Icone delle affinità (6) — `affinita/<codice>.png` (256×256, trasparente)
-Testo nell'immagine: la sigla italiana indicata, maiuscola, bianca a ritaglio.
+Testo nell'immagine: la sigla italiana indicata, maiuscola, bianca a ritaglio. Variante senza testo per
+ciascuna: `affinita/<codice>-senza-testo.png`. La chiave `-` del dataset (Normale) corrisponde al file `normale.png`.
 ```
-[blocco di stile] Tassello quadrato nero ruotato di 6°, bordo bianco; dentro il simbolo e sotto la sigla.
+[blocco di stile] Tassello quadrato nero ruotato di 6°, bordo bianco; dentro il simbolo nel colore indicato e
+sotto la sigla in bianco.
 ```
 | File | Sigla | Simbolo | Colore |
 |---|---|---|---|
-| `wk.png` | DEB | freccia spezzata verso il basso | rosso |
-| `rs.png` | RES | scudo | grigio chiaro |
-| `nu.png` | ANN | cerchio barrato | bianco |
-| `rp.png` | RIF | freccia che rimbalza | giallo |
-| `ab.png` | ASS | goccia che entra in un cerchio | verde |
-| `normale.png` | — | trattino | grigio |
+| `wk.png` | DEB | freccia spezzata verso il basso | rosso `#e5352b` |
+| `rs.png` | RES | scudo | grigio chiaro `#a3a3b3` |
+| `nu.png` | ANN | cerchio barrato | bianco `#ececf1` |
+| `rp.png` | RIF | freccia che rimbalza | giallo `#f2d94e` |
+| `ab.png` | ASS | goccia che entra in un cerchio | verde `#5fd67a` |
+| `normale.png` | — | trattino | grigio `#6f6f80` |
 
 ## 6. Doti sociali (5) — `doti/<chiave>.png` (512×256, trasparente)
-Testo nell'immagine: il nome italiano indicato.
+Testo nell'immagine: il nome italiano indicato; variante senza testo `doti/<chiave>-senza-testo.png`.
 ```
 [blocco di stile] Targhetta orizzontale dorata (#c9a227) con bordo nero e riflesso bianco a ritaglio: a sinistra il
 simbolo, a destra il nome in maiuscolo nero. Ispirazione (NON copiare):
@@ -193,13 +223,19 @@ https://static.wikia.nocookie.net/megamitensei/images/e/ea/P5_Icon_Knowledge.png
 | `perizia.png` | PERIZIA | chiave inglese e pennello incrociati |
 
 Variante "grafico a stella" — `doti/stella-vuota.png` (1024×1024): pentagono a cinque assi con etichette
-CONOSCENZA, FASCINO, CORAGGIO, GENTILEZZA, PERIZIA ai vertici, griglia a 5 livelli, sfondo trasparente; ispirazione
+CONOSCENZA, FASCINO, CORAGGIO, GENTILEZZA, PERIZIA ai vertici, griglia a 5 livelli, sfondo trasparente
+(variante `doti/stella-vuota-senza-testo.png` con i soli assi e la griglia); ispirazione
 https://static.wikia.nocookie.net/megamitensei/images/f/fe/P5_SocialStats.png/revision/latest?cb=20220530130911
 
 ## 7. Navigazione e interfaccia
 
 ### 7.1 Icone di navigazione (6) — `ui/nav-<chiave>.png` (256×256, trasparente, bianco su trasparente + variante rossa `-attiva.png`)
 Nessun testo.
+```
+[blocco di stile] Icona di navigazione monocromatica (bianco pieno #ececf1; variante attiva in rosso #e5352b),
+contorno netto, angoli tagliati in diagonale, leggibile a 24 px, sfondo trasparente. Soggetto: <vedi tabella>.
+Ispirazione per il taglio delle forme: https://static.wikia.nocookie.net/megamitensei/images/3/34/Persona_5_menu.png/revision/latest?cb=20161221113959
+```
 | File | Soggetto |
 |---|---|
 | `nav-home.png` | casa a ritaglio con stella |
@@ -210,7 +246,7 @@ Nessun testo.
 | `nav-impostazioni.png` | ingranaggio con angoli tagliati |
 
 ### 7.2 Badge rango Confidente (10) — `ui/rango-<n>.png` (256×256, trasparente)
-Testo: il numero da 1 a 10 (variante `rango-max.png` con il testo "MAX").
+Testo: il numero da 1 a 10 (variante `rango-max.png` con il testo "MAX"); variante senza testo `ui/rango-senza-testo.png` (tassello vuoto, il numero lo scrive l'app).
 ```
 [blocco di stile] Tassello nero a forma di ritaglio con bordo bianco, numero enorme bianco sbilenco "<n>",
 un piccolo lampo rosso dietro. Ispirazione del lettering "RANK":
@@ -218,7 +254,7 @@ https://static.wikia.nocookie.net/megamitensei/images/e/e8/Goro-Royal-Confidant-
 ```
 
 ### 7.3 Badge di stato — `ui/badge-allarme.png`, `ui/badge-dlc.png`, `ui/badge-tesoro.png`, `ui/badge-speciale.png`, `ui/badge-nuova-partita.png` (512×192, trasparente)
-Testi: **ALLARME**, **DLC**, **TESORO**, **SPECIALE**, **NUOVA PARTITA +**.
+Testi: **ALLARME**, **DLC**, **TESORO**, **SPECIALE**, **NUOVA PARTITA +**; varianti senza testo `ui/badge-senza-testo.png` (etichetta nera vuota) e `ui/badge-allarme-senza-testo.png` (etichetta rossa vuota).
 ```
 [blocco di stile] Etichetta a parallelogramma nera con bordo rosso, testo bianco maiuscolo a ritaglio "<TESTO>";
 per ALLARME sfondo rosso pulsante e testo nero.
@@ -238,7 +274,37 @@ un'area rossa per il titolo; interno trasparente. Ispirazione della composizione
 https://static.wikia.nocookie.net/megamitensei/images/8/8b/Arsene_P5R.jpg/revision/latest?cb=20200429000427
 ```
 
+### 7.6 Icone delle statistiche (5) — `ui/stat-<chiave>.png` (256×256, trasparente)
+Nessun testo (la sigla FR/MA/RS/AG/FO la scrive l'app).
+```
+[blocco di stile] Icona monocromatica bianca con contorno nero e accento rosso, stessa famiglia di §7.1. Soggetto: <tabella>.
+```
+| File | Statistica | Soggetto |
+|---|---|---|
+| `stat-forza.png` | Forza | pugno |
+| `stat-magia.png` | Magia | stella con scia |
+| `stat-resistenza.png` | Resistenza | scudo |
+| `stat-agilita.png` | Agilità | piuma con linee di velocità |
+| `stat-fortuna.png` | Fortuna | quadrifoglio |
+
+### 7.7 Badge Demone del Tesoro (9) — `ui/tesoro-<slug>.png` (256×256, trasparente)
+Nessun testo. Slug: `crystal-skull`, `koh-i-noor`, `queens-necklace`, `regent`, `stone-of-scone`, `orlov`, `emperors-amulet`, `hope-diamond`, `orichalcum`.
+```
+[blocco di stile] Gemma stilizzata a sfaccettature piatte in due toni (bianco e un colore: teschio di cristallo
+azzurro, diamante bianco, collana d'oro, corona d'oro con rubino, pietra grigia, diamante bianco-azzurro,
+amuleto d'oro, diamante blu, lingotto arancione), contorno nero, sfondo trasparente, nessun testo.
+```
+
+Le icone dei **tipi di eredità** riusano le icone degli elementi (§4): stesse chiavi.
+
 ## 8. Stati vuoti e messaggi (4) — `illustrazioni/<nome>.png` (1200×800, trasparente)
+Per ogni illustrazione con testo esiste la variante `illustrazioni/<nome>-senza-testo.png` (consigliata: il testo
+"QUALCOSA È ANDATO STORTO" contiene una lettera accentata, spesso resa male dai generatori).
+```
+[blocco di stile] Illustrazione a due colori (bianco e nero) più rosso, tratto a inchiostro, retino nelle ombre,
+sfondo trasparente, composizione centrata con molto spazio vuoto intorno; in basso, se richiesto, il testo in
+maiuscolo a ritaglio bianco su tasselli neri: "<TESTO>". Scena: <vedi tabella>.
+```
 | File | Testo nell'immagine | Scena |
 |---|---|---|
 | `vuoto-persona.png` | NESSUNA PERSONA | maschera bianca capovolta su un tavolo con una lampada, ombra lunga |
@@ -251,8 +317,10 @@ https://static.wikia.nocookie.net/megamitensei/images/8/8b/Arsene_P5R.jpg/revisi
 Stile comune del ritratto (ispirato alla schermata Confidente: ritratto bianco e nero a retino con accento rosso):
 ```
 [blocco di stile] Ritratto a mezzo busto in bianco e nero ad alto contrasto con retino a punti, sfondo trasparente,
-un'unica campitura rossa dietro la testa a forma di ritaglio, tratto a inchiostro spesso. Personaggio ORIGINALE
-ispirato alla descrizione seguente (non riprodurre il design ufficiale né volti riconoscibili):
+un'unica campitura rossa dietro la testa a forma di ritaglio, tratto a inchiostro spesso. Personaggio ispirato
+alla descrizione seguente (reinterpretazione originale nello stile, non copia dell'illustrazione ufficiale).
+Ispirazione per impostazione e resa a retino: https://static.wikia.nocookie.net/megamitensei/images/e/e8/Goro-Royal-Confidant-Screen.png/revision/latest?cb=20191129205848
+e le icone Confidente del wiki, es. https://static.wikia.nocookie.net/megamitensei/images/5/57/Persona_5_Confidant_Guides_Icon_%28Magician%29_-_Morgana.png/revision/latest?cb=20241201203706
 ```
 | Chiave file | Confidente | Arcano | Descrizione da inserire nel prompt |
 |---|---|---|---|
@@ -266,7 +334,7 @@ ispirato alla descrizione seguente (non riprodurre il design ufficiale né volti
 | `haru` | Haru | Imperatrice | ragazza con capelli ricci castano chiaro, espressione dolce, maglione elegante con fiocco |
 | `akechi` | Akechi | Giustizia | ragazzo con capelli castano chiaro ondulati, sorriso da detective, guanti, giacca beige |
 | `kasumi` | Kasumi | Fede | ragazza con capelli rossi raccolti e fiocco, portamento da ginnasta, espressione determinata |
-| `sojiro` | Sojiro | Ierofante | uomo maturo con pizzetto, occhiali, cappello, grembiule da caffetteria, espressione burbera e gentile |
+| `sojiro` | Sojiro | Ierofante | uomo maturo con pizzetto e capelli brizzolati pettinati all'indietro, occhiali, grembiule da caffetteria, espressione burbera e gentile |
 | `takemi` | Takemi | Morte | dottoressa con caschetto nero e frangia, camice bianco, collarino, sguardo indagatore |
 | `kawakami` | Kawakami | Temperanza | insegnante con capelli castani raccolti, aria stanca ma affettuosa, cardigan |
 | `yoshida` | Yoshida | Sole | uomo anziano robusto con occhiali, giacca di tweed, megafono, sorriso paterno |
@@ -280,11 +348,12 @@ ispirato alla descrizione seguente (non riprodurre il design ufficiale né volti
 | `sae` | Sae | Giudizio | donna con lunghi capelli argentati, tailleur scuro, sguardo severo, fascicolo |
 | `maruki` | Maruki | Consigliere | uomo giovane con capelli castani scomposti, occhiali, camice da consulente, sorriso gentile |
 
-Icona-arcano del Confidente (`-arcano.png`): usare il prompt 3.1 con il simbolo dell'arcano corrispondente.
+Icona-arcano del Confidente (`-arcano.png`): usare il prompt 3.1 con il simbolo dell'arcano corrispondente (tabella 3.1).
 
 ## 10. Persona del compendio (232) — `persona/<slug>.png` (768×768, trasparente) — template
 
-Prompt template (sostituire {NOME} e {DESCRIZIONE}; lo slug è il nome in minuscolo con trattini, es. `jack-frost`):
+Prompt template (sostituire {NOME} e {DESCRIZIONE}). Regola dello slug: minuscolo, accenti rimossi, apostrofi e
+spazi sostituiti da trattini, trattini doppi compressi — es. `jack-frost`, `arsene`, `jack-o-lantern`, `izanagi-no-okami-picaro`, `kikuri-hime`:
 ```
 [blocco di stile] Illustrazione originale di una creatura mitologica per un compendio, ispirata a {NOME}
 ({DESCRIZIONE} — mitologia di origine, attributi iconici). Posa dinamica a tre quarti, silhouette leggibile,
@@ -299,6 +368,11 @@ Consiglio: generare per prime le 30 Persona di livello più basso (le prime che 
 
 ## 11. Calendario e meteo (per la fase 6) — `meteo/<chiave>.png` (256×256, trasparente)
 Nessun testo.
+```
+[blocco di stile] Icona meteo piatta bianca con contorno nero e un accento azzurro #5ec8f2 o giallo #f2d94e,
+angoli tagliati, leggibile a 24 px, sfondo trasparente. Soggetto: <vedi tabella>. Ispirazione dell'HUD data/meteo:
+https://static.wikia.nocookie.net/megamitensei/images/1/1e/P5_CalendarSwitch.png/revision/latest?cb=20220530115406
+```
 | File | Soggetto |
 |---|---|
 | `sereno.png` | sole a raggi netti |
@@ -312,7 +386,7 @@ Nessun testo.
 | `polline.png` | fiore con particelle |
 | `tifone.png` | spirale con frecce |
 
-Etichette del giorno (sprite testo) — `meteo/fascia-<chiave>.png` (600×160): testi **MATTINA**, **PAUSA PRANZO**, **DOPO LA SCUOLA**, **SERA**, **NOTTE**, **GIORNATA** in lettering a ritaglio bianco su nero; ispirazione HUD:
+Etichette del giorno (sprite testo) — `meteo/fascia-<chiave>.png` (600×160): testi **MATTINA**, **PAUSA PRANZO**, **DOPO LA SCUOLA**, **SERA**, **NOTTE**, **GIORNATA** in lettering a ritaglio bianco su nero (variante `meteo/fascia-senza-testo.png`: sola targhetta vuota); ispirazione HUD:
 https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_663171dc3afce8fe987e57e8659f91b69faa39bc.1920x1080.jpg
 
 ## 12. Ordine di produzione consigliato
