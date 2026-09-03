@@ -286,9 +286,12 @@ export interface PersonaPossedutaDto {
   arcanaNome: string;
   livelloBase: number;
   livello: number;
+  /** Statistiche al livello attuale: registrate dall'utente oppure stimate (+3 punti per livello dalla base). */
   statistiche: StatisticheDto;
-  /** true se le statistiche sono quelle base della Persona (nessun potenziamento registrato). */
+  /** true se nessun valore è stato registrato dall'utente: `statistiche` è la stima per il livello. */
   statisticheBase: boolean;
+  /** Statistiche base della Persona al suo livello base (per il confronto). */
+  statisticheBaseLivello: StatisticheDto;
   tratto: SkillRiassuntoDto | null;
   inSquadra: boolean;
   note: string;

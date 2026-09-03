@@ -1,28 +1,32 @@
 // ============================================================
-// ImmagineEntita — immagine di un'entità con caricamento/import/rimozione
+// ImmagineEntita — immagine di un'entità: riquadro leggibile, ingrandimento al tocco, gestione nella finestra
 // ============================================================
 //
 // Catena: immagine caricata dall'utente per (ambito, chiave) → asset grafico predefinito
 // (public/asset, se presente e se la preferenza è attiva) → riquadro con le iniziali.
-// In modalità modificabile offre: scegli file, importa da URL, rimuovi.
+// L'immagine non viene mai ritagliata (object-contain) e un tocco la apre a tutto schermo; in modalità
+// modificabile i comandi (scegli file, importa da URL, rimuovi) stanno nella finestra, non nella card.
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
 import { caricaImmagine, eliminaImmagine, getImmagini, importaImmagineDaUrl, urlImmagine, type AmbitoImmagine } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
-import { chiaviAssetPredefinito } from '../../utils/assetPredefiniti';
+import { altezzaPerForma, chiaviAssetPredefinito, type FormaImmagine, type FormaRiquadro } from '../../utils/assetPredefiniti';
 import { Modal } from './Modal';
 
 interface Props {
   ambito: AmbitoImmagine;
   chiave: string;
   etichetta: string;
-  /** Dimensione del riquadro in px. */
+  /** Larghezza del riquadro in px (l'altezza dipende dalla forma). */
   dimensione?: number;
   modificabile?: boolean;
-  /** Forma della cornice. */
-  forma?: 'quadrata' | 'carta' | 'tonda';
+  /** Forma del riquadro: quadrata (1:1), carta (1:2), orizzontale (4:3), tonda (1:1 con bordo circolare). */
+  forma?: FormaRiquadro;
+  /** Adattamento dell'immagine al riquadro: senza ritagli (predefinito) oppure a riempire. */
+  adatta?: 'contieni' | 'copri';
+  className?: string;
 }
 
 /** Cache locale di esistenza per ambito (una sola richiesta di elenco per ambito, invalidata a ogni scrittura). */
@@ -39,16 +43,18 @@ function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   return p;
 }
 
-/** Riquadro immagine con gestione del caricamento (file o URL). */
-export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, modificabile, forma = 'quadrata' }: Props) {
+/** Riquadro immagine con ingrandimento e gestione del caricamento (file o URL). */
+export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, modificabile, forma = 'quadrata', adatta = 'contieni', className }: Props) {
   const idImmagine = `${ambito}/${chiave}`;
   const [versione, setVersione] = useState(() => versioni.get(idImmagine) ?? 0);
   const [presente, setPresente] = useState<boolean | null>(null);
-  const [apertaUrl, setApertaUrl] = useState(false);
+  const [aperta, setAperta] = useState(false);
+  const [modalitaUrl, setModalitaUrl] = useState(false);
   const [url, setUrl] = useState('');
   const [occupato, setOccupato] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
-  const [primaria, riserva] = chiaviAssetPredefinito(ambito, chiave, forma, dimensione);
+  const formaAsset: FormaImmagine = forma === 'orizzontale' ? 'quadrata' : forma;
+  const [primaria, riserva] = chiaviAssetPredefinito(ambito, chiave, formaAsset, dimensione);
   const urlPrimario = useAsset(primaria);
   const urlRiserva = useAsset(riserva);
   const urlPredefinito = urlPrimario ?? urlRiserva;
@@ -96,7 +102,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     try {
       await importaImmagineDaUrl(ambito, chiave, url.trim());
       await dopoCambio(true);
-      setApertaUrl(false);
+      setModalitaUrl(false);
       setUrl('');
       notifica('success', 'Immagine importata.');
     } catch (err) {
@@ -119,58 +125,87 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     }
   };
 
+  const chiudi = () => {
+    setAperta(false);
+    setModalitaUrl(false);
+    setUrl('');
+  };
+
   const raggio = forma === 'tonda' ? '9999px' : 'var(--radius-lg)';
-  const altezza = forma === 'carta' ? Math.round(dimensione * 1.75) : dimensione;
+  const altezza = altezzaPerForma(forma, dimensione);
   const iniziali = etichetta.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
+  const srcUtente = presente ? `${urlImmagine(ambito, chiave)}?v=${versione}` : null;
+  const src = srcUtente ?? urlPredefinito;
+  const origine = srcUtente ? 'Immagine caricata da te' : urlPredefinito ? 'Grafica predefinita dell\'app' : 'Nessuna immagine: mostrate le iniziali';
+  const classeAdatta = adatta === 'copri' ? 'object-cover' : 'object-contain';
+
+  const immagine = (grande: boolean) =>
+    src ? (
+      <img
+        src={src}
+        alt={etichetta}
+        className={grande ? 'max-w-full max-h-[70vh] object-contain' : `w-full h-full ${classeAdatta}`}
+        loading={grande ? undefined : 'lazy'}
+        draggable={false}
+        onError={() => {
+          if (srcUtente) void dopoCambio(false);
+          else if (nomePredefinito) segnaMancante(nomePredefinito);
+        }}
+      />
+    ) : (
+      <span className="font-black text-text-muted select-none" style={{ fontSize: grande ? 96 : Math.max(14, dimensione / 3) }}>{iniziali}</span>
+    );
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div
-        className="bg-bg-tertiary border border-border overflow-hidden flex items-center justify-center text-text-muted font-bold select-none shrink-0"
-        style={{ width: dimensione, height: altezza, borderRadius: raggio, fontSize: Math.max(14, dimensione / 3) }}
-        aria-label={`Immagine di ${etichetta}`}
+    <>
+      <button
+        type="button"
+        className={`bg-bg-tertiary border border-border overflow-hidden flex items-center justify-center shrink-0 p-0 cursor-zoom-in hover:border-primary transition-colors ${className ?? ''}`}
+        style={{ width: dimensione, height: altezza, borderRadius: raggio }}
+        aria-label={`Immagine di ${etichetta}${modificabile ? ' (tocca per ingrandire o cambiare)' : ' (tocca per ingrandire)'}`}
+        onClick={() => setAperta(true)}
       >
-        {presente ? (
-          <img src={`${urlImmagine(ambito, chiave)}?v=${versione}`} alt={etichetta} className="w-full h-full object-cover" onError={() => void dopoCambio(false)} />
-        ) : urlPredefinito ? (
-          <img src={urlPredefinito} alt={etichetta} className="w-full h-full object-cover" draggable={false} onError={() => { if (nomePredefinito) segnaMancante(nomePredefinito); }} />
-        ) : (
-          <span>{iniziali}</span>
-        )}
-      </div>
-      {modificabile && (
-        <div className="flex flex-wrap gap-1 justify-center">
-          <input ref={inputFile} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" className="hidden" onChange={(e) => void suFile(e.target.files?.[0])} />
-          <button type="button" className="btn btn-secondary btn-sm" disabled={occupato} onClick={() => inputFile.current?.click()}>
-            Carica
-          </button>
-          <button type="button" className="btn btn-secondary btn-sm" disabled={occupato} onClick={() => setApertaUrl(true)}>
-            Da URL
-          </button>
-          {presente && (
-            <button type="button" className="btn btn-danger btn-sm" disabled={occupato} onClick={() => void suRimuovi()}>
-              Rimuovi
-            </button>
-          )}
-        </div>
-      )}
+        {immagine(false)}
+      </button>
       <Modal
-        titolo={`Importa immagine — ${etichetta}`}
-        aperta={apertaUrl}
-        onChiudi={() => setApertaUrl(false)}
+        titolo={etichetta}
+        aperta={aperta}
+        onChiudi={chiudi}
+        larga
         azioni={
           <>
-            <button type="button" className="btn btn-secondary" onClick={() => setApertaUrl(false)}>Annulla</button>
-            <button type="button" className="btn btn-primary" disabled={occupato || !url.trim()} onClick={() => void suImporta()}>Importa</button>
+            {modificabile && !modalitaUrl && (
+              <>
+                <input ref={inputFile} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" className="hidden" onChange={(e) => void suFile(e.target.files?.[0])} />
+                <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => inputFile.current?.click()}>Carica file</button>
+                <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => setModalitaUrl(true)}>Da URL</button>
+                {presente && (
+                  <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void suRimuovi()}>Rimuovi</button>
+                )}
+              </>
+            )}
+            {modificabile && modalitaUrl && (
+              <>
+                <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => { setModalitaUrl(false); setUrl(''); }}>Indietro</button>
+                <button type="button" className="btn btn-primary" disabled={occupato || !url.trim()} onClick={() => void suImporta()}>Importa</button>
+              </>
+            )}
+            <button type="button" className="btn btn-ghost" onClick={chiudi}>Chiudi</button>
           </>
         }
       >
-        <div>
-          <label className="form-label" htmlFor="url-immagine">Indirizzo dell'immagine (http/https)</label>
-          <input id="url-immagine" className="form-input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" autoFocus />
-          <p className="form-hint">Il file viene scaricato dal server e salvato fra le risorse dell'app (PNG, JPEG, WEBP, GIF o SVG, massimo 8 MB).</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-full flex items-center justify-center bg-bg-tertiary rounded-lg p-2 min-h-[200px]">{immagine(true)}</div>
+          <p className="m-0 text-[12px] text-text-muted">{origine}</p>
+          {modificabile && modalitaUrl && (
+            <div className="w-full">
+              <label className="form-label" htmlFor={`url-immagine-${ambito}-${chiave}`}>Indirizzo dell'immagine (http/https)</label>
+              <input id={`url-immagine-${ambito}-${chiave}`} className="form-input" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" autoFocus />
+              <p className="form-hint">Il file viene scaricato dal server e salvato fra le risorse dell'app (PNG, JPEG, WEBP, GIF o SVG, massimo 8 MB).</p>
+            </div>
+          )}
         </div>
       </Modal>
-    </div>
+    </>
   );
 }

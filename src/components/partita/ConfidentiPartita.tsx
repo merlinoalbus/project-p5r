@@ -90,12 +90,12 @@ export function ConfidentiPartita({ partitaId }: Props) {
           return (
             <li key={c.chiave} className={`card flex flex-col gap-3 ${c.sbloccato ? '' : 'opacity-75'}`}>
               <div className="flex gap-3 items-start">
-                <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={72} forma="tonda" modificabile />
+                <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={112} modificabile />
                 <div className="flex-1 min-w-0 flex flex-col gap-1">
-                  <span className="font-semibold text-[15px] leading-tight">{c.nome}</span>
+                  <span className="font-semibold text-[16px] leading-tight">{c.nome}</span>
                   <span className="chip self-start">{c.arcanaNome}</span>
                 </div>
-                <ImmagineEntita ambito="arcana" chiave={c.arcana} etichetta={c.arcanaNome} dimensione={40} forma="carta" />
+                <ImmagineEntita ambito="arcana" chiave={c.arcana} etichetta={c.arcanaNome} dimensione={56} forma="carta" />
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango</span>

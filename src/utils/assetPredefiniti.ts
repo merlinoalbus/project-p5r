@@ -6,6 +6,15 @@ import { slug } from '../../shared/slug';
 import type { AmbitoImmagine } from '../services/api';
 
 export type FormaImmagine = 'quadrata' | 'carta' | 'tonda';
+/** Forme del riquadro immagine (l'orizzontale è 4:3, usata per gli artwork di gioco). */
+export type FormaRiquadro = FormaImmagine | 'orizzontale';
+
+/** Altezza del riquadro per forma e larghezza: quadrata/tonda 1:1, carta 1:2, orizzontale 4:3. */
+export function altezzaPerForma(forma: FormaRiquadro | undefined, larghezza: number): number {
+  if (forma === 'carta') return Math.round(larghezza * 2);
+  if (forma === 'orizzontale') return Math.round(larghezza * 0.75);
+  return larghezza;
+}
 
 /**
  * Chiavi del manifest candidate per l'asset predefinito di un'entità, in ordine di preferenza

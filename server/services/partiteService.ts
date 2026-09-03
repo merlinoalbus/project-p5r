@@ -4,6 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { statistichePerLivello } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
 import { costoDto } from './compendioService.js';
 import type {
@@ -254,10 +255,15 @@ function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
   const skill = (prepared('SELECT slot, skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(r.id) as Array<{ slot: number; skill_id: number }>)
     .map((s) => ({ slot: s.slot, ...skillDto(s.skill_id)! }));
   const statisticheBase = r.forza === null && r.magia === null && r.resistenza === null && r.agilita === null && r.fortuna === null;
+  const base = { forza: r.b_forza, magia: r.b_magia, resistenza: r.b_resistenza, agilita: r.b_agilita, fortuna: r.b_fortuna };
+  const stimate = statistichePerLivello(base, r.livello_base, r.livello);
   return {
     id: r.id, personaId: r.persona_id, nome: r.nome, arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livelloBase: r.livello_base, livello: r.livello,
-    statistiche: { forza: r.forza ?? r.b_forza, magia: r.magia ?? r.b_magia, resistenza: r.resistenza ?? r.b_resistenza, agilita: r.agilita ?? r.b_agilita, fortuna: r.fortuna ?? r.b_fortuna },
-    statisticheBase, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
+    statistiche: statisticheBase
+      ? stimate
+      : { forza: r.forza ?? stimate.forza, magia: r.magia ?? stimate.magia, resistenza: r.resistenza ?? stimate.resistenza, agilita: r.agilita ?? stimate.agilita, fortuna: r.fortuna ?? stimate.fortuna },
+    statisticheBase,
+    statisticheBaseLivello: base, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 

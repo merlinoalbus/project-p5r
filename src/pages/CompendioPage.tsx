@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { getPersone } from '../services/api';
@@ -81,7 +82,8 @@ export function CompendioPage() {
             {filtrate.map((p) => (
               <li key={p.id}>
                 <Link to={`/compendio/persona/${p.id}`} className="card card--cliccabile flex items-center gap-3 no-underline text-text">
-                  <div className="w-12 h-12 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary text-[18px] shrink-0">{p.livello}</div>
+                  <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={56} /></span>
+                  <div className="w-12 h-12 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary text-[18px] shrink-0" title="Livello">{p.livello}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-[15px] truncate">{p.nome}</span>

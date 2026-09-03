@@ -208,6 +208,10 @@ describe('API', () => {
     expect(poss.skill.length).toBeGreaterThan(0);
     expect(poss.skill.length).toBeLessThanOrEqual(8);
     expect(poss.statisticheBase).toBe(true);
+    // statistiche stimate al livello 15 (base al livello 11): +3 punti per livello → +12 sul totale
+    const sommaBase = Object.values(poss.statisticheBaseLivello).reduce((a, b) => a + b, 0);
+    const sommaStimata = Object.values(poss.statistiche).reduce((a, b) => a + b, 0);
+    expect(sommaStimata - sommaBase).toBe(12);
     expect(poss.tratto?.elemento).toBe('trait');
     expect((await request(app).post(`/api/partite/${id}/persona`).send({ personaId: jf.id })).status).toBe(409);
     const comp = await request(app).get(`/api/partite/${id}/compendio`);

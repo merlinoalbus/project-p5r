@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 // ============================================================
-// Test ImmagineEntita — iniziali/immagine, modalità modificabile, rimozione, versioni
+// Test ImmagineEntita — iniziali/immagine, ingrandimento, comandi nella finestra, rimozione, versioni
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { ImmagineEntita } from './ImmagineEntita';
+import { altezzaPerForma } from '../../utils/assetPredefiniti';
 
 const { getImmagini, eliminaImmagine, importaImmagineDaUrl } = vi.hoisted(() => ({
   getImmagini: vi.fn(),
@@ -26,36 +27,57 @@ beforeEach(() => {
 });
 
 describe('ImmagineEntita', () => {
-  it('mostra le iniziali quando manca l\'immagine e nessun comando se non modificabile', async () => {
-    getImmagini.mockResolvedValue([]);
-    render(<ImmagineEntita ambito="skill" chiave="Agi" etichetta="Agi" />);
-    expect(await screen.findByText('A')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Carica' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+  it('altezza per forma: quadrata 1:1, carta 1:2, orizzontale 4:3', () => {
+    expect(altezzaPerForma('quadrata', 100)).toBe(100);
+    expect(altezzaPerForma('carta', 60)).toBe(120);
+    expect(altezzaPerForma('orizzontale', 240)).toBe(180);
+    expect(altezzaPerForma('tonda', 72)).toBe(72);
   });
 
-  it('mostra l\'immagine presente, la rimuove e aggiorna la versione dopo un import', async () => {
+  it('senza immagine mostra le iniziali; il tocco apre la finestra senza comandi se non modificabile', async () => {
+    getImmagini.mockResolvedValue([]);
+    render(<ImmagineEntita ambito="skill" chiave="Agi" etichetta="Agi" />);
+    const riquadro = await screen.findByRole('button', { name: 'Immagine di Agi (tocca per ingrandire)' });
+    expect(within(riquadro).getByText('A')).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    await act(async () => { riquadro.click(); });
+    const finestra = screen.getByRole('dialog', { name: 'Agi' });
+    expect(within(finestra).getByText('Nessuna immagine: mostrate le iniziali')).toBeInTheDocument();
+    expect(within(finestra).queryByRole('button', { name: 'Carica file' })).not.toBeInTheDocument();
+    await act(async () => { within(finestra).getByText('Chiudi', { selector: 'button.btn-ghost' }).click(); });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('immagine presente senza ritagli; dalla finestra si rimuove e si importa da URL con versione nuova', async () => {
     getImmagini.mockResolvedValue([{ id: 1, ambito: 'altro', chiave: 'prova', mime: 'image/png', byte: 10, url: '/x', createdAt: '' }]);
     eliminaImmagine.mockResolvedValue(undefined);
     importaImmagineDaUrl.mockResolvedValue({ id: 1, ambito: 'altro', chiave: 'prova', mime: 'image/png', byte: 10, url: '/x', createdAt: '' });
-    render(<ImmagineEntita ambito="altro" chiave="prova" etichetta="Prova Entità" modificabile />);
+    render(<ImmagineEntita ambito="altro" chiave="prova" etichetta="Prova Entità" modificabile dimensione={120} forma="orizzontale" />);
 
     const img = await screen.findByRole('img', { name: 'Prova Entità' });
     expect(img).toHaveAttribute('src', '/api/immagini/altro/prova/file?v=0');
-    expect(screen.getByRole('button', { name: 'Rimuovi' })).toBeInTheDocument();
+    expect(img.className).toContain('object-contain');
+    const riquadro = screen.getByRole('button', { name: /Immagine di Prova Entità/ });
+    expect(riquadro).toHaveStyle({ width: '120px', height: '90px' });
+    // nessun comando nella card
+    expect(screen.queryByRole('button', { name: 'Carica file' })).not.toBeInTheDocument();
 
-    await act(async () => { screen.getByRole('button', { name: 'Rimuovi' }).click(); });
+    await act(async () => { riquadro.click(); });
+    const finestra = screen.getByRole('dialog', { name: 'Prova Entità' });
+    expect(within(finestra).getByText('Immagine caricata da te')).toBeInTheDocument();
+    await act(async () => { within(finestra).getByRole('button', { name: 'Rimuovi' }).click(); });
     expect(eliminaImmagine).toHaveBeenCalledWith('altro', 'prova');
-    expect(await screen.findByText('PE')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Rimuovi' })).not.toBeInTheDocument();
+    expect(await within(finestra).findByText('Nessuna immagine: mostrate le iniziali')).toBeInTheDocument();
+    expect(within(finestra).queryByRole('button', { name: 'Rimuovi' })).not.toBeInTheDocument();
 
-    // import da URL: la finestra è nel portal, l'immagine torna con una versione nuova (cache invalidata)
-    await act(async () => { screen.getByRole('button', { name: 'Da URL' }).click(); });
-    const campo = screen.getByLabelText("Indirizzo dell'immagine (http/https)");
+    await act(async () => { within(finestra).getByRole('button', { name: 'Da URL' }).click(); });
+    const campo = within(finestra).getByLabelText("Indirizzo dell'immagine (http/https)");
     await act(async () => { fireEvent.change(campo, { target: { value: 'https://esempio.it/a.png' } }); });
-    await act(async () => { screen.getByRole('button', { name: 'Importa' }).click(); });
+    await act(async () => { within(finestra).getByRole('button', { name: 'Importa' }).click(); });
     expect(importaImmagineDaUrl).toHaveBeenCalledWith('altro', 'prova', 'https://esempio.it/a.png');
-    const img2 = await screen.findByRole('img', { name: 'Prova Entità' });
+    const img2 = await within(finestra).findByRole('img', { name: 'Prova Entità' });
     expect(img2.getAttribute('src')).toMatch(/\?v=[1-9]\d*$/);
+    // la card fuori dalla finestra mostra la stessa immagine aggiornata
+    expect(within(riquadro).getByRole('img').getAttribute('src')).toBe(img2.getAttribute('src'));
   });
 });

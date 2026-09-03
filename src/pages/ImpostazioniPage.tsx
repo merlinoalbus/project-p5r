@@ -48,7 +48,7 @@ export function ImpostazioniPage() {
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
           {glossario?.arcani.map((a) => (
             <div key={a.chiave} className="flex flex-col items-center gap-1">
-              <ImmagineEntita ambito="arcana" chiave={a.chiave} etichetta={a.nome} dimensione={72} forma="carta" modificabile />
+              <ImmagineEntita ambito="arcana" chiave={a.chiave} etichetta={a.nome} dimensione={88} forma="carta" modificabile />
               <span className="text-[12px] text-text-secondary">{a.nome}</span>
             </div>
           ))}

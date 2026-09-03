@@ -16,6 +16,7 @@ import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { RicettaSpecialeDto } from '../types';
+import { statistichePerLivello } from '../../shared/statistiche';
 
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
   return (
@@ -42,12 +43,14 @@ export function PersonaDettaglioPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const [livello, setLivello] = useState<number | null>(null);
   const [occupato, setOccupato] = useState(false);
+  const livelloScelto = p ? Math.min(99, Math.max(p.livello, livello ?? p.livello)) : 1;
+  const statisticheAlLivello = p ? statistichePerLivello(p.statistiche, p.livello, livelloScelto) : null;
 
   const aggiungi = async () => {
     if (!attiva || !p) return;
     setOccupato(true);
     try {
-      await aggiungiPosseduta(attiva.id, p.id, { livello: livello ?? p.livello });
+      await aggiungiPosseduta(attiva.id, p.id, { livello: livelloScelto });
       notifica('success', `${p.nome} aggiunta alla scorta di «${attiva.nome}».`);
     } catch (err) {
       if (isApiError(err, 'persona-gia-posseduta')) notifica('warning', 'Questa Persona è già nella scorta.');
@@ -67,8 +70,8 @@ export function PersonaDettaglioPage() {
 
           <div className="card flex flex-col sm:flex-row gap-4">
             <div className="flex sm:flex-col gap-3 items-start">
-              <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={120} modificabile />
-              <ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={56} forma="carta" />
+              <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={240} forma="orizzontale" modificabile className="max-w-full" />
+              <ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={72} forma="carta" />
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
@@ -88,15 +91,22 @@ export function PersonaDettaglioPage() {
                 )}
                 {p.negoziazione && <span>Ombra: <strong className="text-text">{p.negoziazione.titoloNome}</strong></span>}
               </div>
-              <StatisticheBarre statistiche={p.statistiche} />
+              <div className="flex items-center gap-3 flex-wrap">
+                <label className="text-[13px] text-text-secondary flex items-center gap-2">
+                  Livello
+                  <input type="number" min={p.livello} max={99} className="form-input w-[84px]" value={livelloScelto} onChange={(e) => setLivello(Math.min(99, Math.max(p.livello, Number(e.target.value) || p.livello)))} aria-label="Livello per la stima delle statistiche" />
+                </label>
+                <input type="range" min={p.livello} max={99} value={livelloScelto} onChange={(e) => setLivello(Number(e.target.value))} className="flex-1 min-w-[140px] touch" aria-label="Livello (cursore)" />
+              </div>
+              <StatisticheBarre
+                statistiche={statisticheAlLivello ?? p.statistiche}
+                base={livelloScelto > p.livello ? p.statistiche : undefined}
+                didascalia={livelloScelto > p.livello ? `Stima al livello ${livelloScelto}: +3 punti per livello ripartiti in proporzione alle statistiche base (livello ${p.livello}); in gioco la ripartizione varia.` : `Statistiche base al livello ${p.livello}.`}
+              />
               {attiva && !p.rara && (
                 <div className="flex items-center gap-2 flex-wrap mt-1">
-                  <label className="text-[13px] text-text-secondary flex items-center gap-2">
-                    Livello
-                    <input type="number" min={p.livello} max={99} className="form-input w-[84px]" value={livello ?? p.livello} onChange={(e) => setLivello(Number(e.target.value))} />
-                  </label>
                   <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void aggiungi()}>
-                    Aggiungi alla scorta
+                    Aggiungi alla scorta al livello {livelloScelto}
                   </button>
                 </div>
               )}

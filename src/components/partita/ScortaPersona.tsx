@@ -12,6 +12,8 @@ import { Modal } from '../shared/Modal';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
+import { ImmagineEntita } from '../shared/ImmagineEntita';
+import { statistichePerLivello } from '../../../shared/statistiche';
 import type { PersonaPossedutaDto, StatisticheDto } from '../../types';
 import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
 
@@ -49,7 +51,8 @@ export function ScortaPersona({ partitaId }: Props) {
           {dati?.map((p) => (
             <li key={p.id} className="card flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary">{p.livello}</span>
+                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={64} />
+                <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary" title="Livello">{p.livello}</span>
                 <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[15px] no-underline text-text hover:text-primary">{p.nome}</Link>
                 <span className="chip">{p.arcanaNome}</span>
                 {!p.inSquadra && <span className="chip">In deposito</span>}
@@ -66,6 +69,10 @@ export function ScortaPersona({ partitaId }: Props) {
                 ))}
               </div>
               {p.tratto && <div className="text-[12px] text-text-secondary">Tratto: <strong className="text-text">{p.tratto.nome}</strong> — {p.tratto.effettoNome}</div>}
+              <details className="text-[13px]">
+                <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheBase ? '(stimate)' : '(registrate)'}</summary>
+                <div className="pt-2"><StatisticheBarre statistiche={p.statistiche} base={p.statisticheBaseLivello} compatta /></div>
+              </details>
             </li>
           ))}
         </ul>
@@ -202,7 +209,11 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               ))}
             </div>
           ) : (
-            <StatisticheBarre statistiche={posseduta.statistiche} />
+            <StatisticheBarre
+              statistiche={statistichePerLivello(posseduta.statisticheBaseLivello, posseduta.livelloBase, livello)}
+              base={posseduta.statisticheBaseLivello}
+              didascalia={`Stima al livello ${livello} (+3 punti per livello dalla base di livello ${posseduta.livelloBase}); spunta "potenziate" per registrare i valori reali.`}
+            />
           )}
           <label className="form-label">Note
             <textarea className="form-input mt-1 min-h-[80px]" value={note} onChange={(e) => setNote(e.target.value)} />
