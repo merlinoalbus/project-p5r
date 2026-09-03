@@ -299,8 +299,8 @@
    "meteo": "Sereno",
    "eventi": [
     {
-     "tipo": "scadenza",
-     "titolo": "Scadenza furto del tesoro di Kamoshida",
+     "tipo": "consiglio",
+     "titolo": "Consigliato completare il Palazzo di Kamoshida entro oggi",
      "dettaglio": "Consigliato completare il Palazzo di Kamoshida entro questa data (vedi anche wikiwiki: scadenza 1 maggio).",
      "fonte": "https://wikiwiki.jp/persona5r/4%E6%9C%88"
     }
@@ -323,6 +323,12 @@
      "titolo": "Golden Week (vacanze di primavera giapponesi)",
      "dettaglio": "Periodo festivo giapponese; la guida segnala assenza di scuola nei giorni circostanti.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    },
+    {
+     "tipo": "scadenza",
+     "titolo": "Ultimo giorno per rubare il Tesoro di Kamoshida",
+     "dettaglio": "Scadenza di gioco del Palazzo di Kamoshida (la guida consiglia il furto il 22 aprile).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
     }
    ],
    "tempoLibero": null
@@ -693,6 +699,12 @@
      "titolo": "Kichijoji (nuova zona) e Stanza di Velluto a Kichijoji",
      "dettaglio": "Freccette e biliardo disponibili.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-8/"
+    },
+    {
+     "tipo": "scadenza",
+     "titolo": "Ultimo giorno per rubare il Tesoro di Madarame",
+     "dettaglio": "Scadenza di gioco del Palazzo di Madarame (la guida fissa la lettera di sfida entro il 2 giugno).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
     }
    ],
    "tempoLibero": null
@@ -2794,6 +2806,12 @@
      "titolo": "Elezioni generali (Sousenkyo)",
      "dettaglio": "Riferimento riportato dalla guida/wiki al giorno delle elezioni.",
      "fonte": "https://wikiwiki.jp/persona5r/12%E6%9C%88"
+    },
+    {
+     "tipo": "scadenza",
+     "titolo": "Elezioni: ultimo giorno per cambiare il cuore di Shido",
+     "dettaglio": "Scadenza di gioco del Palazzo di Shido (la guida completa tutto l'11-12 dicembre).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-34/"
     }
    ],
    "tempoLibero": null
@@ -3314,6 +3332,12 @@
      "titolo": "Scontro finale contro il dottor Maruki",
      "dettaglio": "Boss in quattro fasi (incluso Adam Kadmon); trofeo \"Riprenditi il futuro\".",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/"
+    },
+    {
+     "tipo": "scadenza",
+     "titolo": "Palazzo di Maruki: giorno delle battaglie finali",
+     "dettaglio": "Scadenza del terzo semestre; il percorso va assicurato entro il 2 febbraio.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
     }
    ],
    "tempoLibero": null
