@@ -19,3 +19,5 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 | 2026-09-03 | Documentazione di bordo obbligatoria (`CLAUDE.md`, `docs/ARCHITETTURA.md`, `docs/ROADMAP.md`, `docs/DECISIONI.md`) aggiornata a ogni step | qualsiasi IA/persona deve capire progetto, architettura e stato dal solo repo | U |
 | 2026-09-03 | Prompt per la generazione degli asset grafici in stile P5R con link di riferimento (`docs/grafica/`) | coerenza visiva con il gioco | U |
 | 2026-09-03 | Procedura: ogni step validato dal galaxy-task-validator (agent verifica-only, emulato con agent general-purpose) | CLAUDE.md globale dell'utente | U |
+| 2026-09-03 | Elementi visivi: nessuna immagine protetta (Atlus) nel repo; caricamento dall'app + import da URL + asset originali generati da IA grafica, **con ogni testo in italiano**; serve un prompt per OGNI asset (`docs/grafica/prompt-immagini.md`) | vincolo di lingua e di licenza | U/IA |
+| 2026-09-03 | Sezione Confidenti: immagine dell'arcano e del personaggio, rango raggiunto, prossime risposte ottimali per massimizzare i punti | richiesta esplicita | U |

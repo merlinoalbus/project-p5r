@@ -1,0 +1,7 @@
+# Fine riga LF ovunque (repo usato su Windows e Linux/Docker)
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.db binary
