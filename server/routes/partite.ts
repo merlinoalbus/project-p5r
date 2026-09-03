@@ -6,8 +6,10 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  paramsPartita, paramsPartitaChiave, paramsPartitaPersona, paramsPartitaPosseduta,
+  paramsPartita, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaPersona, paramsPartitaPosseduta, queryStorico,
 } from '../schemas/partite.js';
+import { eliminaEvento, storico } from '../services/storicoService.js';
+import type { TipoEvento } from '../../shared/eventi.js';
 import {
   aggiornaCompendio, aggiornaConfidente, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita,
   confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
@@ -76,6 +78,16 @@ router.put('/:id/persona/:possedutaId', validate({ params: paramsPartitaPossedut
 });
 router.delete('/:id/persona/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
   rimuoviPosseduta(Number(req.params.id), Number(req.params.possedutaId));
+  res.status(204).end();
+});
+
+// ---- Storico (Fase 5.1) ----
+router.get('/:id/storico', validate({ params: paramsPartita, query: queryStorico }), (req, res) => {
+  const q = req.query as unknown as { limite?: number; prima?: number; tipi?: string; persona?: number };
+  res.json(storico(Number(req.params.id), { limite: q.limite, prima: q.prima, tipi: q.tipi ? (q.tipi.split(',').filter(Boolean) as TipoEvento[]) : undefined, personaId: q.persona }));
+});
+router.delete('/:id/storico/:eventoId', validate({ params: paramsPartitaEvento }), (req, res) => {
+  eliminaEvento(Number(req.params.id), Number(req.params.eventoId));
   res.status(204).end();
 });
 

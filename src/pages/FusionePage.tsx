@@ -52,7 +52,10 @@ export function FusionePage() {
   const vista: Vista = VISTE.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
   const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
-  const sfondoVelluto = useAsset('sfondi/stanza-velluto');
+  const sfondoAllarme = useAsset('sfondi/stanza-velluto-allarme');
+  const sfondoBase = useAsset('sfondi/stanza-velluto');
+  // Con l'Allarme delle fusioni attivo nella partita lo sfondo passa alla variante «allarme» (se l'asset esiste).
+  const sfondoVelluto = attiva?.allarmeAttivo && sfondoAllarme ? sfondoAllarme : sfondoBase;
 
   const nome = (chiave: string) => glossario?.arcani.find((x) => x.chiave === chiave)?.nome ?? chiave;
   const risultato = useMemo(() => {

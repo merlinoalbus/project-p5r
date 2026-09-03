@@ -3,9 +3,9 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, StatisticheDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, StatisticheDto, StoricoDto,
 } from '../../types';
-import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from './_helpers';
+import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
 /** Campi modificabili di una partita. */
 export interface DatiPartita {
@@ -27,6 +27,8 @@ export interface DatiPosseduta {
   inSquadra?: boolean;
   note?: string;
   skillIds?: number[];
+  /** Origine libera (es. «fusione», «cattura»), registrata nello storico. */
+  origine?: string;
 }
 
 export const getPartite = (): Promise<PartitaDto[]> => apiGet('/partite');
@@ -54,3 +56,8 @@ export const aggiungiPosseduta = (id: number, personaId: number, dati: DatiPosse
 export const aggiornaPosseduta = (id: number, possedutaId: number, dati: DatiPosseduta): Promise<PersonaPossedutaDto> =>
   apiPut(`/partite/${id}/persona/${possedutaId}`, dati);
 export const rimuoviPosseduta = (id: number, possedutaId: number): Promise<void> => apiDelete(`/partite/${id}/persona/${possedutaId}`);
+
+/** Storico della partita dal più recente; `prima` è il cursore restituito come `prossimo`. */
+export const getStorico = (id: number, opz: { limite?: number; prima?: number; tipi?: string[]; persona?: number } = {}): Promise<StoricoDto> =>
+  apiGet(`/partite/${id}/storico${queryString({ limite: opz.limite, prima: opz.prima, tipi: opz.tipi?.join(','), persona: opz.persona })}`);
+export const eliminaEvento = (id: number, eventoId: number): Promise<void> => apiDelete(`/partite/${id}/storico/${eventoId}`);

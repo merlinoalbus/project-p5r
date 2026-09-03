@@ -43,7 +43,14 @@ Ogni step si chiude solo con il verdetto **APPROVATO** del galaxy-task-validator
 | 4.2 | Bonus della Stanza di Velluto (`shared/bonusVelluto.ts`, regole da fonti verificate in `docs/riferimenti/bonus-velluto.md`): sconto del Registro per completamento del compendio (25/50/75/100% → 10/15/25/50%) applicato ai costi di ricette, fusioni e piani; bonus EXP del Confidente per arcano del risultato (×1,15…×3) nel calcolatore; interruttore «Allarme delle fusioni» salvato nella partita con gli effetti documentati; sblocchi delle Gemelle per rango (Trattamento speciale = fusione sopra livello); vista «Forca e Isolamento» (moltiplicatori della Forca con rango/Igor/stesso arcano/Tesoro/Allarme/penalità, sacrifici ordinati; Isolamento con incensi, giorni per rango, tier di resistenza per livello); API `GET /api/fusione/velluto?partita` | ✅ |
 
 ## Fase 5 — Tracking partita avanzato
-⬜ Persona possedute con statistiche potenziate, livelli skill, obiettivi, piani salvati, storico.
+Persona possedute con statistiche potenziate e skill (già in Fase 0), più: storico, obiettivi, piani salvati, esecuzione delle operazioni della Stanza di Velluto dalla scorta.
+
+| Step | Contenuto | Stato |
+|---|---|---|
+| 5.1 | Storico della partita: migrazione 005 `evento_partita`; ogni modifica di tracking registra un evento in italiano (partita creata, livello del protagonista, Allarme, rango Dote, sblocco/rango Confidente, registrazione nel compendio, Persona aggiunta/livello/skill/statistiche/rimossa; tipi già previsti per fusioni, Forca, Isolamento, obiettivi e piani); `GET /api/partite/:id/storico` (filtri per tipi e Persona, cursore, totale) e `DELETE …/storico/:eventoId`; scheda «Storico» con filtri per gruppo e «Carica altri»; ultimi eventi nel Riepilogo; campo `origine` all'aggiunta in scorta | ⏳ in validazione |
+| 5.2 | Obiettivi: Persona da ottenere con skill desiderate e livello minimo, priorità e note; stato aperto/raggiunto/annullato con riconoscimento automatico all'ingresso in scorta; collegamenti ai piani di fusione e alla ricerca per skill; «Aggiungi agli obiettivi» dalla scheda Persona | ⬜ |
+| 5.3 | Piani salvati: salvataggio di un piano di fusione (istantanea con opzioni e skill) legato a un obiettivo; avanzamento ricalcolato sulla scorta attuale (foglie possedute, passi eseguibili) | ⬜ |
+| 5.4 | Esecuzione dalla scorta: fusione (due o più ingredienti posseduti → risultato con skill ereditate scelte, ingredienti rimossi, compendio e storico aggiornati, obiettivi verificati), Forca (sacrificio rimosso, livello/skill del ricevente) e Isolamento (skill di resistenza e statistiche) registrati; azioni dal Calcolatore, dai piani e da «Forca e Isolamento» | ⬜ |
 
 ## Fasi successive (dalla mappa della guida, `docs/riferimenti/mappa-moduli-guida.md`)
 ⬜ 6 Confidenti completi (risposte migliori per rango, regali, disponibilità) · Domande in classe/esami · Calendario

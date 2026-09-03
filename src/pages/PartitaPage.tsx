@@ -1,5 +1,5 @@
 // ============================================================
-// PartitaPage — tracking della partita attiva: riepilogo, Doti, Confidenti, scorta, compendio
+// PartitaPage — tracking della partita attiva: riepilogo, Doti, Confidenti, scorta, compendio, storico
 // ============================================================
 
 import { useState } from 'react';
@@ -13,14 +13,16 @@ import { DotiSociali } from '../components/partita/DotiSociali';
 import { ConfidentiPartita } from '../components/partita/ConfidentiPartita';
 import { ScortaPersona } from '../components/partita/ScortaPersona';
 import { CompendioPersonale } from '../components/partita/CompendioPersonale';
+import { StoricoPartita } from '../components/partita/StoricoPartita';
 
-type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio';
+type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'doti', l: 'Doti sociali' },
   { k: 'confidenti', l: 'Confidenti' },
   { k: 'scorta', l: 'Scorta' },
   { k: 'compendio', l: 'Compendio personale' },
+  { k: 'storico', l: 'Storico' },
   { k: 'riepilogo', l: 'Riepilogo' },
 ];
 
@@ -60,6 +62,7 @@ export function PartitaPage() {
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
           {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
+          {scheda === 'storico' && <StoricoPartita key={attiva.id} partitaId={attiva.id} />}
         </div>
       )}
       <NuovaPartitaModal aperta={nuova} onChiudi={() => setNuova(false)} />
