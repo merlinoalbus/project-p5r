@@ -1,8 +1,14 @@
 // ============================================================
 // Modal — finestra di dialogo, chiusura con Esc e clic esterno
 // ============================================================
+//
+// Renderizzata in un portal su <body>: così resta sopra a tutto anche quando il componente che la apre
+// vive dentro un contenitore con opacity/transform/overflow (che creano un contesto di sovrapposizione
+// e imprigionerebbero lo z-index, facendo finire la finestra sotto le card successive).
+// ============================================================
 
 import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { IconClose } from './icons';
 
 interface ModalProps {
@@ -22,11 +28,17 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
       if (e.key === 'Escape') onChiudi();
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    // Blocca lo scorrimento della pagina sotto la finestra (ripristinato alla chiusura).
+    const overflowPrecedente = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflowPrecedente;
+    };
   }, [aperta, onChiudi]);
 
   if (!aperta) return null;
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onChiudi} role="presentation">
       <div
         className="modal-content"
@@ -45,6 +57,7 @@ export function Modal({ titolo, aperta, onChiudi, children, azioni, larga }: Mod
         <div className="modal-body">{children}</div>
         {azioni && <div className="modal-footer">{azioni}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
