@@ -10,7 +10,7 @@ import type { DomandaDto, DomandeDto, EsameDto } from '../../shared/types.js';
 
 interface RigaDomanda { id: number; ordine: number; data: string; tipo: DomandaDto['tipo']; chi: string; domanda: string; risposte_json: string; ricompensa: string; note: string; fonte: string }
 
-/** Confronto fra date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo): aprile=0 … marzo=11. */
+/** Indice SOLO per ordinare/confrontare date di gioco 'MM-GG' nell'anno scolastico (aprile → marzo): mese×31+giorno, non conta i giorni reali. */
 export function indiceGiornoScolastico(data: string): number {
   const [m, g] = data.split('-').map(Number);
   if (!Number.isInteger(m) || !Number.isInteger(g)) return -1;

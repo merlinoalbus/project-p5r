@@ -15,10 +15,3 @@ export function dataGiocoTesto(data: string): string {
   const [m, g] = data.split('-').map(Number);
   return Number.isInteger(m) && Number.isInteger(g) ? `${g} ${MESI_GIOCO[(m - 4 + 12) % 12]?.toLowerCase() ?? ''}` : data;
 }
-
-/** Indice ordinabile della data nell'anno scolastico (stesso criterio del backend). */
-export function indiceGiornoScolastico(data: string): number {
-  const [m, g] = data.split('-').map(Number);
-  if (!Number.isInteger(m) || !Number.isInteger(g)) return -1;
-  return ((m - 4 + 12) % 12) * 31 + g;
-}
