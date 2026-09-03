@@ -1,6 +1,6 @@
 # Architettura — project-p5r
 
-Aggiornato allo step **0.4 (API)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
+Aggiornato allo step **0.5 (frontend)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
 realizzeranno secondo `docs/ROADMAP.md`.
 
 ## 1. Vista d'insieme
@@ -55,12 +55,17 @@ src/
   main.tsx            boot bloccante su GET /api/config → schermata d'errore HTML se il BE non risponde
   router.tsx          react-router (createBrowserRouter)
   tailwind.css        tema P5R: token colore (bg/surface/primary rosso #e5352b, colori elemento), classi .btn/.touch/.tabella/.card/.chip
-  components/layout/  MainLayout, Topbar, Sidebar (≥lg), BottomNav (<lg), navigazione.tsx (voci condivise)
-  components/shared/  ErrorBoundary, PageState/EmptyState/Spinner, Toast, icons
-  pages/              HomePage, NotFoundPage (+ Compendio/Skill/Fusione/Partita/Impostazioni previste)
-  stores/             configStore, notificationStore (zustand)
-  services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema.ts, index.ts barrel
-  hooks/, utils/      useDocumentTitle, constants
+  components/layout/  MainLayout (carica glossario e partite), Topbar (+ PartitaSelettore), Sidebar (≥lg), BottomNav (<lg), navigazione.tsx
+  components/shared/  ErrorBoundary, PageState/EmptyState/Spinner, Toast, icons, Modal, CampoRicerca, ImmagineEntita (carica/da URL/rimuovi)
+  components/compendio/ ElementoChip, AffinitaGriglia (completa e compatta), StatisticheBarre
+  components/partita/ DotiSociali (+/−), ConfidentiPartita (rango, sblocco, note, immagine), ScortaPersona (aggiunta dal compendio,
+                      modifica livello/statistiche/skill), CompendioPersonale (spunte + completamento), RiepilogoPartita, NuovaPartitaModal
+  components/impostazioni/ GestionePartite, TraduzioniEditor
+  pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Skill (525, filtri), SkillDettaglio,
+                      Fusione (due arcani, matrice 24×24, ricette speciali, Demoni del Tesoro), Partita (schede), Impostazioni, NotFound
+  stores/             configStore, notificationStore, glossarioStore (rese italiane, caricato una volta), partitaStore (partite + attiva)
+  services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema, compendio, traduzioni, partite, immagini
+  hooks/, utils/      useDocumentTitle, useCarica (stato di caricamento derivato, senza setState negli effetti), constants, elementi (colori)
 data/seed/            dataset Royal normalizzato in JSON (persona, skill, oggetti, fusione, traduzioni, versione), versionato,
                       incluso nell'immagine Docker; sorgenti/ = file grezzi delle fonti (fuori dall'immagine)
 scripts/seed/         pipeline dataset: fonti (commit fissati) → scarica (manifest sha256) → normalizza (sandbox vm,
@@ -110,9 +115,12 @@ livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondi
 (matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill multi-step, bonus Confidente, Allarme, Potenziamento).
 
 ## 7. Frontend
-- Layout tablet-first: `MainLayout` con `Sidebar` visibile da `lg` (1024px) e `BottomNav` fissa sotto (5 voci, 64px).
-- Stato remoto per pagina con `useEffect` + `PageState`; stato globale minimo in zustand.
-- Tema Persona 5: nero profondo, rosso `#e5352b`, bianco; token per ogni elemento di gioco (`--color-el-*`).
+- Layout tablet-first: `MainLayout` con `Sidebar` visibile da `lg` (1024px) e `BottomNav` fissa sotto (5 voci, 64px); verificato a 375/768/1280 px.
+- Dati remoti per pagina con `useCarica` (chiave = dipendenze serializzate + generazione; caricamento derivato) + `PageState`;
+  stato globale in zustand: config, notifiche, glossario (rese italiane), partite (elenco + attiva, cambio dalla Topbar).
+- Elenchi Persona/skill caricati una volta e filtrati lato client (istantanei su tablet; ~360 KB per le 232 Persona).
+- Immagini: `ImmagineEntita` mostra il file caricato per (ambito, chiave) o le iniziali; caricamento file (PUT grezzo) o import da URL.
+- Tema Persona 5: nero profondo, rosso `#e5352b`, bianco; token per ogni elemento di gioco (`--color-el-*`); classi `.touch` ≥ 44px.
 
 ## 8. Build, test, deploy
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.

@@ -33,4 +33,7 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 | 2026-09-03 | Eliminando la partita attiva viene promossa la più recente | non restare mai senza partita attiva | IA |
 | 2026-09-03 | Immagini: PNG/JPEG/WEBP/GIF/SVG fino a 8 MB, una per entità (la nuova sostituisce), file in `DATA_DIR/immagini/` (fuori dal git); importazione da URL indicato dall'utente | caricamento da tablet e da link della guida | U/IA |
 | 2026-09-03 | Errori 4xx di Express/body-parser mappati nell'envelope canonico in italiano (413 corpo troppo grande, 400 JSON/percorso non validi) | mai un 500 in inglese per un caso d'uso ordinario (foto da telefono) | IA |
+| 2026-09-03 | Frontend: elenchi Persona/skill caricati una volta e filtrati lato client; stato di caricamento derivato in `useCarica` (nessun setState negli effetti, regola del compilatore React) | reattività istantanea da tablet; lint pulito | IA |
+| 2026-09-03 | Pagina Fusione della Fase 0 = consultazione delle regole (due arcani, matrice, ricette speciali, Demoni del Tesoro); il calcolatore con Persona e livelli è la Fase 1 | contenuto reale e utile subito, nessun segnaposto | IA |
+| 2026-09-03 | Aggiunta alla scorta: le skill vengono precompilate con le ultime 8 apprese al livello scelto; modifica libera nella scheda | meno inserimento manuale in gioco | IA |
 
