@@ -56,7 +56,8 @@ src/
   router.tsx          react-router (createBrowserRouter)
   tailwind.css        tema P5R: token colore (bg/surface/primary rosso #e5352b, colori elemento), classi .btn/.touch/.tabella/.card/.chip
   components/layout/  MainLayout (carica glossario e partite), Topbar (+ PartitaSelettore), Sidebar (≥lg), BottomNav (<lg), navigazione.tsx
-  components/shared/  ErrorBoundary, PageState/EmptyState/Spinner, Toast, icons, Modal, CampoRicerca, ImmagineEntita (carica/da URL/rimuovi)
+  components/shared/  ErrorBoundary, PageState/EmptyState/Spinner (illustrazione predefinita), Toast, icons, Modal (portal su body),
+                      CampoRicerca, ImmagineEntita (utente → asset predefinito → iniziali; carica/da URL/rimuovi), AssetImg (asset con fallback)
   components/compendio/ ElementoChip, AffinitaGriglia (completa e compatta), StatisticheBarre
   components/partita/ DotiSociali (note ♪/♪♪/♪♪♪, libro, ×1,5, ±1, rango e punti mancanti), ConfidentiPartita (rango ±, note ♪/♪♪/♪♪♪, regalo, uscita, bonus arcano dalla scorta,
                       esami/invito, annulla ultimo, barra verso il rango successivo, sblocco, note, immagine personaggio + carta dell'arcano), ScortaPersona (aggiunta dal compendio,
@@ -64,7 +65,11 @@ src/
   components/impostazioni/ GestionePartite, TraduzioniEditor
   pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Skill (525, filtri), SkillDettaglio,
                       Fusione (due arcani, matrice 24×24, ricette speciali, Demoni del Tesoro), Partita (schede), Impostazioni, NotFound
-  stores/             configStore, notificationStore, glossarioStore (rese italiane, caricato una volta), partitaStore (partite + attiva)
+  stores/             configStore, notificationStore, glossarioStore (rese italiane, caricato una volta), partitaStore (partite + attiva),
+                      preferenzeStore (localStorage: grafica predefinita), assetStore (manifest /asset/manifest.json + hook useAsset)
+  utils/              constants, elementi, punti (formato/anteprima punti Confidente), assetPredefiniti (chiavi manifest per entità)
+vite/                 assetPredefiniti.ts — plugin: manifest degli asset in public/asset/ (dinamico in dev, emesso in build)
+public/asset/         asset grafici predefiniti (vedi README.md e docs/grafica/prompt-immagini.md); vuoto nel repo finché non consegnati
   services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema, compendio, traduzioni, partite, immagini
   hooks/, utils/      useDocumentTitle, useCarica (stato di caricamento derivato, senza setState negli effetti), constants, elementi (colori)
 data/seed/            dataset Royal normalizzato in JSON (persona, skill, oggetti, fusione, traduzioni, versione), versionato,
@@ -121,7 +126,14 @@ livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondi
 - Dati remoti per pagina con `useCarica` (chiave = dipendenze serializzate + generazione; caricamento derivato) + `PageState`;
   stato globale in zustand: config, notifiche, glossario (rese italiane), partite (elenco + attiva, cambio dalla Topbar).
 - Elenchi Persona/skill caricati una volta e filtrati lato client (istantanei su tablet; ~360 KB per le 232 Persona).
-- Immagini: `ImmagineEntita` mostra il file caricato per (ambito, chiave) o le iniziali; caricamento file (PUT grezzo) o import da URL.
+- Immagini: `ImmagineEntita` mostra il file caricato per (ambito, chiave), altrimenti l'asset predefinito (`persona/<slug>`, `arcani/<chiave>` o
+  `arcani/icona/<chiave>`, `confidenti/<chiave>`), altrimenti le iniziali; caricamento file (PUT grezzo) o import da URL.
+- Grafica predefinita (step 0.8): `public/asset/` → manifest generato dal plugin Vite → `assetStore` (caricato in `MainLayout`, fallimento = vuoto) →
+  `AssetImg`/`useAsset` con preferenza `graficaPredefinita` (localStorage, default attiva, Impostazioni → Grafica). Punti collegati: logo (Topbar),
+  icone di navigazione (`ui/nav-*`, variante `-attiva`), icone elemento (`elementi/*`), icone affinità (`affinita/*-senza-testo`), targhette doti
+  (`doti/*`), badge rango Confidente (`ui/rango-N`, `ui/rango-max`), sfondo (`sfondi/pattern-nero`), banner Fusione (`sfondi/stanza-velluto`),
+  stati vuoti (`illustrazioni/*`), icona del sito (`identita/icona-32`). Ogni punto ha un fallback testuale/SVG: l'app funziona senza alcun asset;
+  un file che non si carica viene segnato mancante per la sessione.
 - Tema Persona 5: nero profondo, rosso `#e5352b`, bianco; token per ogni elemento di gioco (`--color-el-*`); classi `.touch`/`.btn`/`.btn-sm` ≥ 44px;
   `overflow-wrap: anywhere` sul body (testi di gioco con token lunghi non generano scroll orizzontale a 375 px).
 - Meccaniche di gioco nel tracker: Doti = note→punti (2/3/5, libro 7, fortuna ×1,5 per difetto) con soglie dei 5 ranghi; Confidenti = note→punti (5/10/15, regalo 50, uscita 10) × bonus arcano 1,5 × esami × invito, verso

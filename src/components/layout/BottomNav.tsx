@@ -4,6 +4,7 @@
 
 import { NavLink } from 'react-router-dom';
 import { VOCI_NAV } from './navigazione';
+import { IconaNav } from './IconaNav';
 
 /** Barra fissa in basso con le voci principali, bersagli touch da 56px. */
 export function BottomNav() {
@@ -24,8 +25,12 @@ export function BottomNav() {
             }`
           }
         >
-          {item.icon}
-          <span>{item.label}</span>
+          {({ isActive }) => (
+            <>
+              <IconaNav voce={item} attiva={isActive} />
+              <span>{item.label}</span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

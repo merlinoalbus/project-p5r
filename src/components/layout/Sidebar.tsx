@@ -5,6 +5,7 @@
 import { NavLink } from 'react-router-dom';
 import { useConfigStore } from '../../stores/configStore';
 import { VOCI_NAV } from './navigazione';
+import { IconaNav } from './IconaNav';
 
 /** Navigazione laterale a larghezza fissa fra le aree principali dell'app. */
 export function Sidebar() {
@@ -25,8 +26,12 @@ export function Sidebar() {
               }`
             }
           >
-            {item.icon}
-            {item.label}
+            {({ isActive }) => (
+              <>
+                <IconaNav voce={item} attiva={isActive} />
+                {item.label}
+              </>
+            )}
           </NavLink>
         ))}
       </div>

@@ -9,6 +9,7 @@ import { useCarica } from '../hooks/useCarica';
 import { getRegoleFusione } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { PageState } from '../components/shared/PageState';
+import { useAsset } from '../stores/assetStore';
 
 /** Consultazione delle regole di fusione: combinazione di due arcani, matrice completa, ricette speciali, Demoni del Tesoro. */
 export function FusionePage() {
@@ -18,6 +19,7 @@ export function FusionePage() {
   const [a, setA] = useState('');
   const [b, setB] = useState('');
   const [vista, setVista] = useState<'coppia' | 'matrice' | 'speciali' | 'tesori'>('coppia');
+  const sfondoVelluto = useAsset('sfondi/stanza-velluto');
 
   const nome = (chiave: string) => glossario?.arcani.find((x) => x.chiave === chiave)?.nome ?? chiave;
   const risultato = useMemo(() => {
@@ -39,7 +41,12 @@ export function FusionePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="m-0 text-2xl font-bold">Fusione — regole degli Arcani</h1>
+      <h1
+        className={`m-0 text-2xl font-bold ${sfondoVelluto ? 'rounded-lg px-4 py-6 bg-cover bg-center [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]' : ''}`}
+        style={sfondoVelluto ? { backgroundImage: `linear-gradient(rgba(11,11,14,0.35), rgba(11,11,14,0.75)), url("${sfondoVelluto}")` } : undefined}
+      >
+        Fusione — regole degli Arcani
+      </h1>
       <p className="m-0 text-[13px] text-text-secondary">Consulta la combinazione degli arcani, le ricette speciali e i modificatori dei Demoni del Tesoro. Il calcolatore di fusione con Persona e livelli arriva con la Fase 1 della roadmap.</p>
       <div className="flex gap-1.5 flex-wrap">
         {([['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro']] as const).map(([k, l]) => (

@@ -15,6 +15,7 @@ import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { Modal } from '../shared/Modal';
+import { AssetImg } from '../shared/AssetImg';
 import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
 
@@ -99,7 +100,14 @@ export function ConfidentiPartita({ partitaId }: Props) {
               <div className="flex items-center gap-2">
                 <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango</span>
                 <button type="button" className="btn btn-secondary w-14" disabled={occ || c.rango === 0} onClick={() => void salva(c.chiave, { rango: c.rango - 1 })} aria-label={`Rango di ${c.nome} meno uno`}>−</button>
-                <span className={`text-2xl font-black w-14 text-center tabular-nums ${c.rango === 10 ? 'text-primary' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>
+                <span className="w-14 flex items-center justify-center">
+                  <AssetImg
+                    nome={c.rango === 0 ? null : c.rango === 10 ? 'ui/rango-max' : `ui/rango-${c.rango}`}
+                    alt={c.rango === 10 ? 'Rango MAX' : `Rango ${c.rango}`}
+                    className="h-11 w-11 object-contain"
+                    fallback={<span className={`text-2xl font-black tabular-nums ${c.rango === 10 ? 'text-primary' : ''}`}>{c.rango === 10 ? 'MAX' : c.rango}</span>}
+                  />
+                </span>
                 <button type="button" className="btn btn-primary w-14" disabled={occ || c.rango === 10} onClick={() => void salva(c.chiave, { rango: c.rango + 1 })} aria-label={`Rango di ${c.nome} più uno`}>+</button>
               </div>
 

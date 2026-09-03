@@ -2,14 +2,16 @@
 // ImmagineEntita — immagine di un'entità con caricamento/import/rimozione
 // ============================================================
 //
-// Mostra l'immagine caricata dall'utente per (ambito, chiave) se esiste;
-// altrimenti un riquadro con le iniziali. In modalità modificabile offre:
-// scegli file, importa da URL, rimuovi.
+// Catena: immagine caricata dall'utente per (ambito, chiave) → asset grafico predefinito
+// (public/asset, se presente e se la preferenza è attiva) → riquadro con le iniziali.
+// In modalità modificabile offre: scegli file, importa da URL, rimuovi.
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
 import { caricaImmagine, eliminaImmagine, getImmagini, importaImmagineDaUrl, urlImmagine, type AmbitoImmagine } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
+import { useAsset, useAssetStore } from '../../stores/assetStore';
+import { chiaviAssetPredefinito } from '../../utils/assetPredefiniti';
 import { Modal } from './Modal';
 
 interface Props {
@@ -46,6 +48,12 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const [url, setUrl] = useState('');
   const [occupato, setOccupato] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
+  const [primaria, riserva] = chiaviAssetPredefinito(ambito, chiave, forma, dimensione);
+  const urlPrimario = useAsset(primaria);
+  const urlRiserva = useAsset(riserva);
+  const urlPredefinito = urlPrimario ?? urlRiserva;
+  const nomePredefinito = urlPrimario ? primaria : urlRiserva ? riserva : null;
+  const segnaMancante = useAssetStore((s) => s.segnaMancante);
 
   useEffect(() => {
     let annullato = false;
@@ -124,6 +132,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
       >
         {presente ? (
           <img src={`${urlImmagine(ambito, chiave)}?v=${versione}`} alt={etichetta} className="w-full h-full object-cover" onError={() => void dopoCambio(false)} />
+        ) : urlPredefinito ? (
+          <img src={urlPredefinito} alt={etichetta} className="w-full h-full object-cover" draggable={false} onError={() => { if (nomePredefinito) segnaMancante(nomePredefinito); }} />
         ) : (
           <span>{iniziali}</span>
         )}

@@ -4,6 +4,7 @@
 
 import type { AffinitaDto } from '../../types';
 import { STILE_AFFINITA, coloreElemento } from '../../utils/elementi';
+import { AssetImg } from '../shared/AssetImg';
 
 interface Props {
   affinita: AffinitaDto[];
@@ -39,7 +40,10 @@ export function AffinitaGriglia({ affinita, compatta }: Props) {
         return (
           <div key={a.elemento} className={`flex flex-col items-center justify-center rounded-lg py-2 px-1 ${stile.classe}`} title={`${a.elementoNome}: ${a.codiceNome}`}>
             <span className="text-[11px] font-bold" style={{ color: coloreElemento(a.elemento) }}>{a.elementoNome}</span>
-            <span className="text-[13px]">{a.codiceNome}</span>
+            <span className="text-[13px] inline-flex items-center gap-1">
+              <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt="" decorativa className="w-4 h-4 object-contain" fallback={null} />
+              {a.codiceNome}
+            </span>
           </div>
         );
       })}

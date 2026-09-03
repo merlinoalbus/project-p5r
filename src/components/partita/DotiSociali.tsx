@@ -12,6 +12,7 @@ import { aggiornaDote, getDoti } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
+import { AssetImg } from '../shared/AssetImg';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 
 interface Props {
@@ -89,7 +90,7 @@ function CartaDote({ dote: d }: { dote: DoteSocialePartitaDto }) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-baseline gap-2 flex-wrap">
-        <span className="text-[12px] uppercase tracking-wide text-text-muted">{d.nome}</span>
+        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 w-auto object-contain" fallback={<span className="text-[12px] uppercase tracking-wide text-text-muted">{d.nome}</span>} />
         <span className="chip chip--attivo">Rango {d.rango} · {d.nomeRango}</span>
         <span className="ml-auto text-2xl font-black tabular-nums">{d.punti}<span className="text-[12px] font-normal text-text-muted"> punti</span></span>
       </div>

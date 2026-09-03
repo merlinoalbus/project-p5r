@@ -43,7 +43,7 @@ export function ScortaPersona({ partitaId }: Props) {
         <button type="button" className="btn btn-primary" onClick={() => setAggiunta(true)}>+ Aggiungi Persona</button>
       </div>
       {dati && dati.length === 0 ? (
-        <EmptyState title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
+        <EmptyState illustrazione="vuoto-persona" title="La scorta è vuota" hint="Aggiungi le Persona che possiedi nel gioco: livello, skill e statistiche vengono precompilati dal compendio." />
       ) : (
         <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2">
           {dati?.map((p) => (
