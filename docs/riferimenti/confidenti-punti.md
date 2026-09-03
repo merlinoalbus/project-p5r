@@ -45,8 +45,11 @@ Fonti: https://www.allgamestaff.it/persona-5-royal/ (guida alle doti sociali) e 
 - Il gioco segnala il raggiungimento della soglia con stelle multicolori attorno alle note e un jingle aggiuntivo.
 - Frazioni: le fonti divergono (7,5 conservato vs troncato a 7); l'app registra interi.
 
-Nell'app la scheda Confidenti offre pulsanti +1/+2/+3 punti e −1, la barra verso il rango successivo e il
-conteggio "mancano N"; al cambio di rango i punti ripartono da zero (salvo valore esplicito).
+Nell'app la scheda Confidenti replica il gioco: pulsanti ♪/♪♪/♪♪♪ (5/10/15 punti base), "Regalo" (50) e "Uscita" (10);
+il bonus ×1,5 della Persona dello stesso arcano è proposto automaticamente se la scorta della partita la contiene
+(forzabile per Confidente); moltiplicatori globali per esami (1º ×1,5, top 10 ×1,2) e invito via SMS (×1,2);
+"Annulla ultimo" toglie l'ultimo incremento. I decimali sono conservati (7,5) e mostrati in formato italiano.
+Barra verso il rango successivo e "mancano N"; al cambio di rango i punti ripartono da zero (salvo valore esplicito).
 
 ## 3. Punti necessari per il passaggio di rango (P5R)
 

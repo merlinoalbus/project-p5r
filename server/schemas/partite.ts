@@ -36,13 +36,23 @@ export const bodyDote = z
   })
   .refine((v) => v.punti !== undefined || v.delta !== undefined || v.note !== undefined, { message: 'Indicare punti, delta oppure note.' });
 
-export const bodyConfidente = z.object({
-  sbloccato: z.boolean().optional(),
-  rango: z.number().int().min(0).max(10).optional(),
-  punti: z.number().int().min(0).max(999).optional(),
-  deltaPunti: z.number().int().min(-999).max(999).optional(),
-  note: z.string().max(2000).optional(),
-});
+export const bodyConfidente = z
+  .object({
+    sbloccato: z.boolean().optional(),
+    rango: z.number().int().min(0).max(10).optional(),
+    punti: z.number().min(0).max(9999).optional(),
+    deltaPunti: z.number().min(-9999).max(9999).optional(),
+    noteRisposta: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
+    regalo: z.boolean().optional(),
+    uscita: z.boolean().optional(),
+    bonusArcano: z.boolean().optional(),
+    esame: z.enum(['primo', 'top10']).optional(),
+    invito: z.boolean().optional(),
+    note: z.string().max(2000).optional(),
+  })
+  .refine((v) => [v.noteRisposta !== undefined, v.regalo === true, v.uscita === true].filter(Boolean).length <= 1, {
+    message: 'Indicare una sola sorgente di punti fra note della risposta, regalo e uscita.',
+  });
 
 export const bodyCompendio = z.object({
   registrata: z.boolean(),

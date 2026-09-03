@@ -7,7 +7,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { costoDto } from './compendioService.js';
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto, SkillRiassuntoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto, SkillRiassuntoDto,
 } from '../../shared/types.js';
 
 interface RigaPartita {
@@ -160,31 +160,49 @@ export function aggiornaDote(partitaId: number, chiave: string, mod: ModificaDot
 
 // ---- Confidenti ----
 
+/** Arrotonda ai centesimi (5 × 1,5 × 1,2 = 9; 7,5 resta 7,5): evita residui binari. */
+const round2 = (n: number) => Math.round(n * 100) / 100;
+
+/**
+ * Punti Confidente come nel gioco: ogni risposta vale 5/10/15 punti base (1–3 note), un regalo gradito 50,
+ * un'uscita senza salto di rango 10; moltiplicatori cumulativi: Persona dello stesso arcano ×1,5,
+ * esami (primo ×1,5, top 10 ×1,2), invito accettato subito via SMS ×1,2.
+ */
+export function puntiConfidente(mod: ModificaConfidente): number {
+  const base = mod.regalo ? 50 : mod.uscita ? 10 : mod.noteRisposta !== undefined ? mod.noteRisposta * 5 : 0;
+  const molt = (mod.bonusArcano ? 1.5 : 1) * (mod.esame === 'primo' ? 1.5 : mod.esame === 'top10' ? 1.2 : 1) * (mod.invito ? 1.2 : 1);
+  return round2(base * molt);
+}
+
 export function confidenti(partitaId: number): ConfidentePartitaDto[] {
   rigaPartita(partitaId);
   return (prepared(`SELECT c.chiave, c.nome, c.arcana, c.ordine, COALESCE(cp.sbloccato, 0) AS sbloccato, COALESCE(cp.rango, 0) AS rango, COALESCE(cp.punti, 0) AS punti,
-      COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari
+      COALESCE(cp.note, '') AS note, cp.updated_at, cr.punti_necessari,
+      EXISTS (SELECT 1 FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ? AND p.arcana = c.arcana) AS in_scorta
     FROM confidente c
     LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ?
     LEFT JOIN confidente_rango cr ON cr.confidente_chiave = c.chiave AND cr.rango = COALESCE(cp.rango, 0)
-    ORDER BY c.ordine`).all(partitaId) as Array<{ chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null }>)
+    ORDER BY c.ordine`).all(partitaId, partitaId) as Array<{ chiave: string; nome: string; arcana: string; ordine: number; sbloccato: number; rango: number; punti: number; note: string; updated_at: string | null; punti_necessari: number | null; in_scorta: number }>)
     .map((c) => ({
       chiave: c.chiave, nome: c.nome, arcana: c.arcana, arcanaNome: t('arcana', c.arcana), ordine: c.ordine, sbloccato: c.sbloccato === 1, rango: c.rango,
-      punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari, mancanti: c.rango >= 10 || c.punti_necessari === null ? null : Math.max(0, c.punti_necessari - c.punti),
+      punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
+      mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
+      personaArcanoInScorta: c.in_scorta === 1,
       note: c.note, updatedAt: c.updated_at,
     }));
 }
 
-export function aggiornaConfidente(partitaId: number, chiave: string, dati: { sbloccato?: boolean; rango?: number; punti?: number; deltaPunti?: number; note?: string }): ConfidentePartitaDto {
+export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
   rigaPartita(partitaId);
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   const attuale = confidenti(partitaId).find((c) => c.chiave === chiave)!;
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
-  // Punti verso il rango successivo: al cambio di rango ripartono da zero, salvo valore esplicito.
-  let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? 0 : attuale.punti + (dati.deltaPunti ?? 0);
-  punti = Math.max(0, punti);
+  // Punti verso il rango successivo: al cambio di rango ripartono da zero (nessun riporto, come nel gioco), salvo valore esplicito.
+  const incremento = (dati.deltaPunti ?? 0) + puntiConfidente(dati);
+  let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? 0 : attuale.punti + incremento;
+  punti = round2(Math.max(0, punti));
   prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, punti, note, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(partita_id, confidente_chiave) DO UPDATE SET sbloccato = excluded.sbloccato, rango = excluded.rango, punti = excluded.punti, note = excluded.note, updated_at = excluded.updated_at`)
     .run(partitaId, chiave, sbloccato ? 1 : 0, rango, punti, dati.note ?? attuale.note, nowIso());

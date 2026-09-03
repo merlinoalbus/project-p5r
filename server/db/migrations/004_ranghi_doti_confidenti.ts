@@ -27,7 +27,7 @@ CREATE TABLE confidente_rango (
   PRIMARY KEY (confidente_chiave, rango)
 );
 
-ALTER TABLE confidente_partita ADD COLUMN punti INTEGER NOT NULL DEFAULT 0 CHECK (punti >= 0);
+ALTER TABLE confidente_partita ADD COLUMN punti REAL NOT NULL DEFAULT 0 CHECK (punti >= 0);
 `;
 
 /** Ranghi delle Doti e punti dei Confidenti. */

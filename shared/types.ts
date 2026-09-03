@@ -234,13 +234,37 @@ export interface ModificaDote {
 export interface ConfidentePartitaDto extends ConfidenteDto {
   sbloccato: boolean;
   rango: number;
-  /** Punti accumulati verso il rango successivo. */
+  /** Punti accumulati verso il rango successivo (possono avere decimali: 5 × 1,5 = 7,5). */
   punti: number;
-  /** Punti necessari per il rango successivo e mancanti; null se non documentati o al rango massimo. */
+  /** Punti necessari per il rango successivo e mancanti; null se non documentati o al rango massimo; 0 = passaggio non a punti. */
   puntiNecessari: number | null;
   mancanti: number | null;
+  /** True se nella scorta della partita c'è almeno una Persona dello stesso arcano (bonus ×1,5 nel gioco). */
+  personaArcanoInScorta: boolean;
   note: string;
   updatedAt: string | null;
+}
+
+/** Bonus agli esami: primo del corso ×1,5, fra i primi dieci ×1,2. */
+export type BonusEsame = 'primo' | 'top10';
+
+/**
+ * Modifica di un Confidente. I punti si possono impostare (`punti`), variare (`deltaPunti`) oppure aggiungere
+ * come nel gioco: `noteRisposta` 1–3 (5/10/15 punti base), `regalo` (50 base), `uscita` (10 base), con i
+ * moltiplicatori `bonusArcano` ×1,5, `esame` ×1,5/×1,2 e `invito` ×1,2 (cumulativi).
+ */
+export interface ModificaConfidente {
+  sbloccato?: boolean;
+  rango?: number;
+  punti?: number;
+  deltaPunti?: number;
+  noteRisposta?: 1 | 2 | 3;
+  regalo?: boolean;
+  uscita?: boolean;
+  bonusArcano?: boolean;
+  esame?: BonusEsame;
+  invito?: boolean;
+  note?: string;
 }
 
 export interface CompendioPartitaDto {

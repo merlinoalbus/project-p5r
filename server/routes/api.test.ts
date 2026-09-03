@@ -171,8 +171,16 @@ describe('API', () => {
     const ryuji = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 3 });
     // Ryuji al rango 3 ha bisogno di 30 punti per il rango 4
     expect(ryuji.body.data).toMatchObject({ chiave: 'ryuji', rango: 3, sbloccato: true, arcanaNome: 'Carro', punti: 0, puntiNecessari: 30, mancanti: 30 });
-    const punti = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ deltaPunti: 12 });
-    expect(punti.body.data).toMatchObject({ punti: 12, mancanti: 18 });
+    // Note della risposta: 2 note = 10 punti base; con Persona dell'arcano ×1,5 → 15; regalo 50 × 1,5 × 1,2 (esame top 10) = 90
+    const dueNote = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ noteRisposta: 2 });
+    expect(dueNote.body.data).toMatchObject({ punti: 10, mancanti: 20, personaArcanoInScorta: false });
+    const conArcano = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ noteRisposta: 1, bonusArcano: true });
+    expect(conArcano.body.data).toMatchObject({ punti: 17.5, mancanti: 12.5 });
+    const regalo = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ regalo: true, bonusArcano: true, esame: 'top10' });
+    expect(regalo.body.data).toMatchObject({ punti: 107.5, mancanti: 0 });
+    expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ noteRisposta: 1, regalo: true })).status).toBe(400);
+    const corretto = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ deltaPunti: -100 });
+    expect(corretto.body.data).toMatchObject({ punti: 7.5, mancanti: 22.5 });
     // al cambio di rango i punti ripartono da zero (nessun riporto dell'eccedenza)
     const salito = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 4 });
     expect(salito.body.data).toMatchObject({ rango: 4, punti: 0, puntiNecessari: 20 });
@@ -190,6 +198,10 @@ describe('API', () => {
     const jf = ((await request(app).get('/api/compendio/persona?q=Jack%20Frost')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Jack Frost')!;
     const agg = await request(app).post(`/api/partite/${id}/persona`).send({ personaId: jf.id, livello: 15 });
     expect(agg.status).toBe(201);
+    // Jack Frost è del Mago: Morgana ottiene il bonus ×1,5 (Persona dello stesso arcano in scorta), Ryuji (Carro) no
+    const dopoScorta = (await request(app).get(`/api/partite/${id}/confidenti`)).body.data as Array<{ chiave: string; personaArcanoInScorta: boolean }>;
+    expect(dopoScorta.find((c) => c.chiave === 'morgana')!.personaArcanoInScorta).toBe(true);
+    expect(dopoScorta.find((c) => c.chiave === 'ryuji')!.personaArcanoInScorta).toBe(false);
     const poss = agg.body.data as PersonaPossedutaDto;
     expect(poss.skill.length).toBeGreaterThan(0);
     expect(poss.skill.length).toBeLessThanOrEqual(8);

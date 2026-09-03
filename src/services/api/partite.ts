@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, PartitaDto, PersonaPossedutaDto, StatisticheDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, StatisticheDto,
 } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from './_helpers';
 
@@ -37,11 +37,11 @@ export const attivaPartita = (id: number): Promise<PartitaDto> => apiPost(`/part
 export const eliminaPartita = (id: number): Promise<void> => apiDelete(`/partite/${id}`);
 
 export const getDoti = (id: number): Promise<DoteSocialePartitaDto[]> => apiGet(`/partite/${id}/doti`);
-export const aggiornaDote = (id: number, chiave: string, mod: { punti?: number; delta?: number }): Promise<DoteSocialePartitaDto> =>
+export const aggiornaDote = (id: number, chiave: string, mod: ModificaDote): Promise<DoteSocialePartitaDto> =>
   apiPatch(`/partite/${id}/doti/${encodeURIComponent(chiave)}`, mod);
 
 export const getConfidentiPartita = (id: number): Promise<ConfidentePartitaDto[]> => apiGet(`/partite/${id}/confidenti`);
-export const aggiornaConfidente = (id: number, chiave: string, dati: { sbloccato?: boolean; rango?: number; note?: string }): Promise<ConfidentePartitaDto> =>
+export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaConfidente): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati);
 
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);
