@@ -28,4 +28,9 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 | 2026-09-03 | `traduzione.fonte='utente'` non viene mai sovrascritta dal seed | l'utente corregge le rese italiane dall'app e le correzioni devono sopravvivere | U/IA |
 | 2026-09-03 | Una Persona per partita in `persona_posseduta` (UNIQUE partita+persona) | nel gioco la scorta non ammette duplicati | IA |
 | 2026-09-03 | Lo health check espone `userVersion` dello schema (oggi 3) | diagnostica rapida in produzione | IA |
+| 2026-09-03 | Persona posseduta: dotazione iniziale = ultime 8 skill apprese fino al livello indicato; l'aggiunta alla scorta registra la Persona nel compendio personale col livello più alto raggiunto; una Persona per partita | riflette il comportamento del gioco, meno inserimento manuale da tablet | IA |
+| 2026-09-03 | Doti sociali: `punti` (valore assoluto) prevale su `delta` (incremento), mai sotto zero; Confidenti: rango > 0 forza lo sblocco | pulsanti +/− veloci in gioco, stato sempre coerente | U/IA |
+| 2026-09-03 | Eliminando la partita attiva viene promossa la più recente | non restare mai senza partita attiva | IA |
+| 2026-09-03 | Immagini: PNG/JPEG/WEBP/GIF/SVG fino a 8 MB, una per entità (la nuova sostituisce), file in `DATA_DIR/immagini/` (fuori dal git); importazione da URL indicato dall'utente | caricamento da tablet e da link della guida | U/IA |
+| 2026-09-03 | Errori 4xx di Express/body-parser mappati nell'envelope canonico in italiano (413 corpo troppo grande, 400 JSON/percorso non validi) | mai un 500 in inglese per un caso d'uso ordinario (foto da telefono) | IA |
 

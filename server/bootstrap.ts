@@ -14,6 +14,7 @@
 
 import express, { type Express } from 'express';
 import cors from 'cors';
+import { z } from 'zod';
 import { config } from './config.js';
 import { requestContextMiddleware } from './middleware/requestContext.js';
 import { responseShapeMiddleware } from './middleware/responseShape.js';
@@ -24,6 +25,9 @@ import compendioRouter from './routes/compendio.js';
 import traduzioniRouter from './routes/traduzioni.js';
 import partiteRouter from './routes/partite.js';
 import immaginiRouter from './routes/immagini.js';
+
+// Messaggi di validazione zod in italiano (details.issues[].message).
+z.config(z.locales.it());
 
 /** Costruisce l'applicazione HTTP senza aprire una porta di rete. */
 export function createApp(): Express {

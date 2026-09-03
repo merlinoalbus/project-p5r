@@ -212,6 +212,10 @@ describe('API', () => {
       expect(sost.body.data.mime).toBe('image/webp');
       expect(fs.readdirSync(path.join(dataDir, 'immagini', 'arcana'))).toHaveLength(1);
       expect((await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'text/plain').send('ciao')).status).toBe(400);
+      const grande = await request(app).put('/api/immagini/arcana/Grande').set('Content-Type', 'image/png').send(Buffer.alloc(9 * 1024 * 1024, 1));
+      expect(grande.status).toBe(413);
+      expect(grande.body.error.code).toBe('corpo-troppo-grande');
+      expect(grande.body.error.message).toMatch(/dimensione massima/);
       expect((await request(app).put('/api/immagini/pippo/Fool').set('Content-Type', 'image/png').send(png)).status).toBe(400);
       expect((await request(app).delete('/api/immagini/arcana/Fool')).status).toBe(204);
       expect((await request(app).get('/api/immagini/arcana/Fool')).status).toBe(404);

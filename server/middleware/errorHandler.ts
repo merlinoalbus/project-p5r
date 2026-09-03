@@ -4,13 +4,45 @@
 //
 // Montato PER ULTIMO in bootstrap.ts. Intercetta ogni `next(err)` o
 // throw negli handler async (Express 5 li propaga da solo). Per gli
-// `HttpError` serializza la forma canonica; per qualsiasi altro Error
-// logga lo stack completo e risponde 500 con la stessa forma.
+// `HttpError` serializza la forma canonica; gli errori 4xx di Express/
+// body-parser (JSON malformato, corpo oltre il limite, percorso non
+// decodificabile) diventano envelope canonici in italiano; qualsiasi
+// altro Error è loggato con lo stack e risponde 500 con la stessa forma.
 // ============================================================
 
 import type { Request, Response, NextFunction } from 'express';
 import { HttpError } from '../utils/httpError.js';
 import { getRequestLogger, getRequestId } from './requestContext.js';
+
+interface RispostaErrore {
+  status: number;
+  code: string;
+  message: string;
+}
+
+/** Riconosce gli errori 4xx generati da Express/body-parser e li traduce. */
+function mappaErroreExpress(err: unknown): RispostaErrore | null {
+  if (!(err instanceof Error)) return null;
+  const e = err as Error & { status?: number; statusCode?: number; type?: string; limit?: number };
+  const status = e.status ?? e.statusCode;
+  if (typeof status !== 'number' || status < 400 || status >= 500) return null;
+  if (e.type === 'entity.too.large' || status === 413) {
+    return { status: 413, code: 'corpo-troppo-grande', message: 'Il contenuto inviato supera la dimensione massima consentita.' };
+  }
+  if (e.type === 'entity.parse.failed' || (err instanceof SyntaxError && status === 400)) {
+    return { status: 400, code: 'json-malformato', message: 'Il corpo della richiesta non è JSON valido.' };
+  }
+  if (err instanceof URIError) {
+    return { status: 400, code: 'percorso-non-valido', message: 'Il percorso della richiesta contiene una codifica non valida.' };
+  }
+  if (e.type === 'charset.unsupported' || e.type === 'encoding.unsupported') {
+    return { status: 415, code: 'codifica-non-supportata', message: 'La codifica del contenuto inviato non è supportata.' };
+  }
+  if (e.type === 'request.aborted') {
+    return { status: 400, code: 'richiesta-interrotta', message: 'La richiesta è stata interrotta prima del completamento.' };
+  }
+  return { status, code: 'richiesta-non-valida', message: 'La richiesta non è valida.' };
+}
 
 /** Converte gli errori applicativi nell'envelope HTTP comune. */
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
@@ -29,12 +61,14 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
     return;
   }
 
-  // Body JSON malformato: express.json lancia un SyntaxError con status 400.
-  if (err instanceof SyntaxError && 'status' in err && (err as { status?: number }).status === 400) {
-    log.warn({ path: req.path, method: req.method }, 'json malformato');
+  // Errori di Express/body-parser (portano `status`/`statusCode` 4xx): JSON malformato,
+  // corpo oltre il limite, percorso non decodificabile… → envelope canonico in italiano.
+  const rispostaExpress = mappaErroreExpress(err);
+  if (rispostaExpress) {
+    log.warn({ path: req.path, method: req.method, status: rispostaExpress.status, code: rispostaExpress.code }, 'richiesta rifiutata');
     if (!res.headersSent) {
-      res.status(400).json({
-        error: { code: 'json-malformato', message: 'Il corpo della richiesta non è JSON valido.' },
+      res.status(rispostaExpress.status).json({
+        error: { code: rispostaExpress.code, message: rispostaExpress.message },
         ...(requestId ? { requestId } : {}),
       });
     }

@@ -30,7 +30,7 @@ realizzeranno secondo `docs/ROADMAP.md`.
 | Runtime | Node ≥ 22, TypeScript 5.9, ESM (`"type": "module"`) |
 | Frontend | React 19, react-router 7, zustand 5, Tailwind 4 (plugin Vite, config CSS-first), Vite 8 |
 | Backend | Express 5, better-sqlite3 12, zod 4, pino 10, tsx (esegue i `.ts` a runtime, anche in produzione) |
-| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (`server/bootstrap.test.ts`, `server/db/migrationRunner.test.ts`) |
+| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (`server/bootstrap.test.ts`, `server/routes/api.test.ts`), DB in memoria con seed reale (`server/services/seed/caricaSeed.test.ts`), migrazioni (`server/db/migrationRunner.test.ts`), pipeline seed (`scripts/seed/*.test.ts`) |
 | Qualità | ESLint 9 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
 
 ## 3. Struttura del repository
@@ -75,7 +75,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 4. Router di area (`/api/compendio`, `/api/traduzioni`, `/api/partite`, `/api/immagini`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
    un getter, quindi il middleware fa shadowing sull'istanza).
 5. `/api/health` (stato DB + `user_version`), `/api/config` (valori pubblici per il boot FE).
-6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; JSON malformato → 400; altro → 500 con stack nel log.
+6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; errori 4xx di Express/body-parser (JSON malformato 400, corpo oltre il limite 413, percorso non decodificabile 400) → envelope in italiano; altro → 500 con stack nel log.
 
 ## 5. Persistenza
 - Connessione unica better-sqlite3, pragma `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=5000`, `foreign_keys=ON`.

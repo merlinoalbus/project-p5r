@@ -120,7 +120,7 @@ export function dotiSociali(partitaId: number): DoteSocialePartitaDto[] {
   rigaPartita(partitaId);
   return (prepared(`SELECT d.chiave, d.nome, d.ordine, COALESCE(dp.punti, 0) AS punti, dp.updated_at
     FROM dote_sociale d LEFT JOIN dote_sociale_partita dp ON dp.dote_chiave = d.chiave AND dp.partita_id = ? ORDER BY d.ordine`).all(partitaId) as Array<{ chiave: string; nome: string; ordine: number; punti: number; updated_at: string | null }>)
-    .map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave) || d.nome, ordine: d.ordine, punti: d.punti, updatedAt: d.updated_at }));
+    .map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave), ordine: d.ordine, punti: d.punti, updatedAt: d.updated_at }));
 }
 
 /** Imposta (`punti`) o incrementa (`delta`) il punteggio di una dote; mai sotto zero. */
@@ -149,8 +149,8 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: { sb
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
   const attuale = confidenti(partitaId).find((c) => c.chiave === chiave)!;
   const rango = dati.rango ?? attuale.rango;
-  // Un rango > 0 implica lo sblocco.
-  const sbloccato = dati.sbloccato ?? (rango > 0 ? true : attuale.sbloccato);
+  // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
+  const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
   prepared(`INSERT INTO confidente_partita (partita_id, confidente_chiave, sbloccato, rango, note, updated_at) VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(partita_id, confidente_chiave) DO UPDATE SET sbloccato = excluded.sbloccato, rango = excluded.rango, note = excluded.note, updated_at = excluded.updated_at`)
     .run(partitaId, chiave, sbloccato ? 1 : 0, rango, dati.note ?? attuale.note, nowIso());

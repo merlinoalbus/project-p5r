@@ -91,7 +91,7 @@ export function glossario(): GlossarioDto {
     tipiOggetto: mappaAmbito('tipoOggetto'),
     vincoliOggetto: mappaAmbito('vincoloOggetto'),
     areeMementos: mappaAmbito('areaMementos'),
-    dotiSociali: (prepared('SELECT chiave, nome FROM dote_sociale ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>).map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave) || d.nome })),
+    dotiSociali: (prepared('SELECT chiave FROM dote_sociale ORDER BY ordine').all() as Array<{ chiave: string }>).map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave) })),
   };
 }
 

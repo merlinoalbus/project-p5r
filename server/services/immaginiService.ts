@@ -73,13 +73,20 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
   const dir = dirImmagini(ambito);
   fs.mkdirSync(dir, { recursive: true });
   const nomeFile = `${randomUUID()}.${estensione}`;
-  fs.writeFileSync(path.join(dir, nomeFile), contenuto);
+  const percorsoNuovo = path.join(dir, nomeFile);
+  fs.writeFileSync(percorsoNuovo, contenuto);
   const precedente = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
-  getDb().transaction(() => {
-    prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at) VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at`)
-      .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso());
-  })();
+  try {
+    getDb().transaction(() => {
+      prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at) VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at`)
+        .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso());
+    })();
+  } catch (err) {
+    // Il DB ha rifiutato la riga: nessun file orfano sul disco.
+    fs.rmSync(percorsoNuovo, { force: true });
+    throw err;
+  }
   if (precedente && precedente.nome_file !== nomeFile) {
     fs.rmSync(path.join(dirImmagini(precedente.ambito), precedente.nome_file), { force: true });
   }
