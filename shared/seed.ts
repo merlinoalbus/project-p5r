@@ -70,6 +70,18 @@ export interface FusioneSeed {
 }
 
 /** Confidente (dato di gioco). */
+/** Dettaglio di un Confidente (guida allgamestaff): abilità, dialoghi con le risposte migliori, regali, disponibilità. */
+export interface ConfidenteDettaglioSeed {
+  chiave: string;
+  abilita: Array<{ rango: number; nome: string; descrizione: string }>;
+  dialoghi: Array<{ rango: number | null; etichetta: string; note: string; scelte: Array<{ ordine: number | null; testo: string; punti: number | null; puntiTesto: string | null; romantica: boolean; avviso?: string | null }> }>;
+  regali: Array<{ nome: string; dove: string | null; costo: string | null; effetto: string | null }>;
+  regaliSconsigliati: string[];
+  disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
+  noteGenerali: string;
+  fonti: string[];
+}
+
 export interface ConfidenteSeed {
   chiave: string;
   nome: string;

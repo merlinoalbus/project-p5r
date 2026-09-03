@@ -6,7 +6,7 @@ import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
 import type {
-  AffinitaDto, ArcanaDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
+  AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../shared/types.js';
 
@@ -271,6 +271,24 @@ export function elencaOggetti(f: { q?: string; categoria?: string } = {}): Ogget
     id: o.id, nome: o.nome, categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
     vincolo: o.vincolo, vincoloNome: tOpz('vincoloOggetto', o.vincolo), descrizione: o.descrizione, descrizioneNome: t('descrizioneOggetto', o.descrizione),
   }));
+}
+
+/** Scheda completa di un Confidente: abilità, dialoghi, regali, disponibilità (dal seed allgamestaff). */
+export function dettaglioConfidente(chiave: string): ConfidenteDettaglioDto {
+  const c = prepared('SELECT chiave, nome, arcana, ordine FROM confidente WHERE chiave = ?').get(chiave) as { chiave: string; nome: string; arcana: string; ordine: number } | undefined;
+  if (!c) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
+  const abilita = (prepared('SELECT rango, nome, descrizione FROM confidente_abilita WHERE confidente_chiave = ? ORDER BY rango, ordine').all(chiave) as Array<{ rango: number; nome: string; descrizione: string }>);
+  const dialoghi = (prepared('SELECT id, rango, etichetta, note, scelte_json FROM confidente_dialogo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ id: number; rango: number | null; etichetta: string; note: string; scelte_json: string }>)
+    .map((d) => ({ id: d.id, rango: d.rango, etichetta: d.etichetta, note: d.note, scelte: (JSON.parse(d.scelte_json) as Array<Record<string, unknown>>).map((s) => ({ ordine: (s.ordine as number | null) ?? null, testo: String(s.testo ?? ''), punti: (s.punti as number | null) ?? null, puntiTesto: (s.puntiTesto as string | null) ?? null, romantica: s.romantica === true, avviso: (s.avviso as string | null) ?? null })) }));
+  const regali = prepared('SELECT nome, dove, costo, effetto, sconsigliato FROM confidente_regalo WHERE confidente_chiave = ? ORDER BY ordine').all(chiave) as Array<{ nome: string; dove: string | null; costo: string | null; effetto: string | null; sconsigliato: number }>;
+  const disp = prepared('SELECT * FROM confidente_disponibilita WHERE confidente_chiave = ?').get(chiave) as { giorni_json: string; fasce_json: string; luogo: string; sblocco_data: string; sblocco_requisiti: string; note: string; note_generali: string; fonti_json: string } | undefined;
+  return {
+    ...c, arcanaNome: t('arcana', c.arcana), abilita, dialoghi,
+    regali: regali.filter((g) => g.sconsigliato === 0).map(({ nome, dove, costo, effetto }) => ({ nome, dove, costo, effetto })),
+    regaliSconsigliati: regali.filter((g) => g.sconsigliato === 1).map((g) => g.nome),
+    disponibilita: disp ? { giorni: JSON.parse(disp.giorni_json) as string[], fasce: JSON.parse(disp.fasce_json) as string[], luogo: disp.luogo, sbloccoData: disp.sblocco_data, sbloccoRequisiti: disp.sblocco_requisiti, note: disp.note } : { giorni: [], fasce: [], luogo: '', sbloccoData: '', sbloccoRequisiti: '', note: '' },
+    noteGenerali: disp?.note_generali ?? '', fonti: disp ? (JSON.parse(disp.fonti_json) as string[]) : [],
+  };
 }
 
 export function elencaConfidenti(): ConfidenteDto[] {

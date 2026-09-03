@@ -9,6 +9,7 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { aggiornaConfidente, getConfidentiPartita } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -94,6 +95,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 <div className="flex-1 min-w-0 flex flex-col gap-1">
                   <span className="font-semibold text-[16px] leading-tight">{c.nome}</span>
                   <span className="chip self-start">{c.arcanaNome}</span>
+                  <Link to={`/confidenti/${c.chiave}`} className="text-[12px] text-primary no-underline">Scheda: risposte migliori, abilità, regali{c.regaliFatti.length ? ` (${c.regaliFatti.length} consegnati)` : ''} →</Link>
                 </div>
                 <ImmagineEntita ambito="arcana" chiave={c.arcana} etichetta={c.arcanaNome} dimensione={56} forma="carta" />
               </div>

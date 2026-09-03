@@ -151,6 +151,13 @@ per anello; risultati intermedi mai rari e sotto il livello massimo. `fusioneSer
 livello del Confidente per anello. `cicliSalvatiService` rivalida gli anelli inviati dal client (fusioni reali, catena continua, ritorno al
 bersaglio), tiene anello corrente e iterazioni: l'esecuzione dell'anello passa per `eseguiFusione` (5.4) e poi `avanzaCiclo`.
 
+### Confidenti completi (Fase 6.1)
+Seed `data/seed/confidenti-dettaglio.json` (normalizzato dalla ricerca sulla guida allgamestaff: punti «+2»/«♪♪» → numero di note, scelte
+romantiche e avvisi conservati, ranghi non numerici con etichetta). Migrazione 010: `confidente_abilita`, `confidente_dialogo` (scelte in
+JSON), `confidente_regalo` (graditi e sconsigliati), `confidente_disponibilita` (+ note generali e fonti) ricaricate integralmente a ogni
+cambio del seed; `regalo_partita` è tracking per partita. `compendioService.dettaglioConfidente` compone la scheda; `ConfidentePartitaDto`
+espone `regaliFatti`.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

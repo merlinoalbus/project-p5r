@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { ConfidenteSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { ConfidenteDettaglioSeed, ConfidenteSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -47,6 +47,7 @@ interface SeedCompleto {
   fusione: FusioneSeed;
   traduzioni: TraduzioniSeed;
   confidenti: ConfidenteSeed[];
+  confidentiDettaglio: ConfidenteDettaglioSeed[];
   doti: DoteSeed[];
   hash: string;
 }
@@ -70,6 +71,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     fusione: JSON.parse(contenuti['fusione.json']) as FusioneSeed,
     traduzioni: JSON.parse(contenuti['traduzioni.json']) as TraduzioniSeed,
     confidenti: JSON.parse(contenuti['confidenti.json']) as ConfidenteSeed[],
+    confidentiDettaglio: JSON.parse(contenuti['confidenti-dettaglio.json']) as ConfidenteDettaglioSeed[],
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -235,6 +237,26 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       (c.puntiPerRango ?? []).forEach((punti, i) => {
         if (punti !== null) insConfRango.run(c.chiave, i + 1, punti);
       });
+    }
+
+    // ---- Dettaglio dei Confidenti (Fase 6.1): sostituito integralmente a ogni ricarica del seed ----
+    db.prepare('DELETE FROM confidente_abilita').run();
+    db.prepare('DELETE FROM confidente_dialogo').run();
+    db.prepare('DELETE FROM confidente_regalo').run();
+    db.prepare('DELETE FROM confidente_disponibilita').run();
+    const insAb = db.prepare('INSERT INTO confidente_abilita (confidente_chiave, rango, ordine, nome, descrizione) VALUES (?, ?, ?, ?, ?)');
+    const insDi = db.prepare('INSERT INTO confidente_dialogo (confidente_chiave, ordine, rango, etichetta, note, scelte_json) VALUES (?, ?, ?, ?, ?, ?)');
+    const insRe = db.prepare('INSERT INTO confidente_regalo (confidente_chiave, ordine, nome, dove, costo, effetto, sconsigliato) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    const insDisp = db.prepare('INSERT INTO confidente_disponibilita (confidente_chiave, giorni_json, fasce_json, luogo, sblocco_data, sblocco_requisiti, note, note_generali, fonti_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    const chiaviConfidenti = new Set(seed.confidenti.map((c) => c.chiave));
+    for (const d of seed.confidentiDettaglio) {
+      if (!chiaviConfidenti.has(d.chiave)) throw new Error(`Seed confidenti-dettaglio: Confidente sconosciuto «${d.chiave}»`);
+      d.abilita.forEach((a, i) => insAb.run(d.chiave, a.rango, i, a.nome, a.descrizione ?? ''));
+      d.dialoghi.forEach((x, i) => insDi.run(d.chiave, i, x.rango, x.etichetta, x.note ?? '', JSON.stringify(x.scelte)));
+      let ordine = 0;
+      for (const g of d.regali) insRe.run(d.chiave, ordine++, g.nome, g.dove, g.costo, g.effetto, 0);
+      for (const g of d.regaliSconsigliati) insRe.run(d.chiave, ordine++, g, null, null, null, 1);
+      insDisp.run(d.chiave, JSON.stringify(d.disponibilita.giorni), JSON.stringify(d.disponibilita.fasce), d.disponibilita.luogo, d.disponibilita.sbloccoData, d.disponibilita.sbloccoRequisiti, d.disponibilita.note, d.noteGenerali, JSON.stringify(d.fonti));
     }
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----

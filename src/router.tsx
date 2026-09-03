@@ -11,6 +11,7 @@ import { SkillPage } from './pages/SkillPage';
 import { SkillDettaglioPage } from './pages/SkillDettaglioPage';
 import { GlossarioPage } from './pages/GlossarioPage';
 import { FusionePage } from './pages/FusionePage';
+import { ConfidenteDettaglioPage } from './pages/ConfidenteDettaglioPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: 'skill/:id', element: <SkillDettaglioPage /> },
       { path: 'fusione', element: <FusionePage /> },
       { path: 'partita', element: <PartitaPage /> },
+      { path: 'confidenti/:chiave', element: <ConfidenteDettaglioPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
