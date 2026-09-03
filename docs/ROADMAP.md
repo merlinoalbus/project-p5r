@@ -39,7 +39,7 @@ Ogni step si chiude solo con il verdetto **APPROVATO** del galaxy-task-validator
 ## Fase 4 — Catene/cicli e ottimizzatore dei bonus
 | Step | Contenuto | Stato |
 |---|---|---|
-| 4.1 | Propagazione delle skill a catena nei piani di fusione: skill richieste sul bersaglio (≤ 4) propagate a ogni fusione (tipo di eredità compatibile, slot a scelta sufficienti — opzione «Conta lo slot casuale», ripartizione fra gli ingredienti che possono portarle, insieme raggiungibile per profondità) fino alle foglie che le possiedono (scorta con skill reali, innate al livello base, apprese salendo di livello segnalate «↑»); API `piani?skill=…&slotFortunato`; selettore skill e badge per nodo nella vista «Piano di fusione»; test | ⏳ in validazione |
+| 4.1 | Propagazione delle skill a catena nei piani di fusione: skill richieste sul bersaglio (≤ 4) propagate a ogni fusione (tipo di eredità compatibile, slot a scelta sufficienti — opzione «Conta lo slot casuale», ripartizione fra gli ingredienti che possono portarle, insieme raggiungibile per profondità) fino alle foglie che le possiedono (scorta con skill reali, innate al livello base, apprese salendo di livello segnalate «↑»); API `piani?skill=…&slotFortunato`; selettore skill e badge per nodo nella vista «Piano di fusione»; test | ✅ 2026-09-03 |
 | 4.2 | Bonus della Stanza di Velluto: bonus EXP del Confidente per rango dell'arcano, Allarme delle fusioni (statistiche/skill/oggetti «R», incidenti), Forca/Potenziamento (EXP dal sacrificio, Demoni del Tesoro), Isolamento con incenso, sconti del Registro e sblocchi delle Gemelle — regole numeriche da fonti verificate, applicate nei piani e nel calcolatore | ⬜ |
 
 ## Fase 5 — Tracking partita avanzato
