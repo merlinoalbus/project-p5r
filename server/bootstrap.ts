@@ -6,7 +6,7 @@
 //   1. requestContext  — requestId + child logger per richiesta
 //   2. responseShape   — envelope { data } su ogni res.json
 //   3. cors + express.json
-//   4. router /api/*
+//   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini
 //   5. /api/health + /api/config
 //   6. 404 JSON per /api/* sconosciute
 //   7. errorHandler    — SEMPRE ultimo
@@ -20,6 +20,10 @@ import { responseShapeMiddleware } from './middleware/responseShape.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { httpErrors } from './utils/httpError.js';
 import { getDb } from './db/dbService.js';
+import compendioRouter from './routes/compendio.js';
+import traduzioniRouter from './routes/traduzioni.js';
+import partiteRouter from './routes/partite.js';
+import immaginiRouter from './routes/immagini.js';
 
 /** Costruisce l'applicazione HTTP senza aprire una porta di rete. */
 export function createApp(): Express {
@@ -31,6 +35,12 @@ export function createApp(): Express {
   app.use(responseShapeMiddleware);
   app.use(cors());
   app.use(express.json({ limit: '5mb' }));
+
+  // ---- Router di area ----
+  app.use('/api/compendio', compendioRouter);
+  app.use('/api/traduzioni', traduzioniRouter);
+  app.use('/api/partite', partiteRouter);
+  app.use('/api/immagini', immaginiRouter);
 
   // ---- Health ----
   app.get('/api/health', (_req, res) => {

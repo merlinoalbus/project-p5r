@@ -1,6 +1,6 @@
 # Architettura — project-p5r
 
-Aggiornato allo step **0.3 (schema DB + seed al boot)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
+Aggiornato allo step **0.4 (API)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
 realizzeranno secondo `docs/ROADMAP.md`.
 
 ## 1. Vista d'insieme
@@ -42,10 +42,12 @@ server/
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
   db/                 dbService (connessione + pragma + cache statement), migrationRunner (user_version), backupService (7 copie)
   db/migrations/      001_compendio (dati di gioco + traduzioni + seed_meta), 002_partita (dati utente, immagini); registro in index.ts
-  routes/             (previsto) route sottili per area: compendio, skill, fusione, partita, traduzioni
+  routes/             compendio (arcani, glossario, regole di fusione, persona, skill, oggetti, confidenti), traduzioni, partite (+ doti,
+                      confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/seed/      caricaSeed.ts: carica data/seed nel DB al boot (hash in seed_meta, upsert per nome, traduzioni utente intoccabili)
-  services/           (previsto) motore di fusione puro, servizi DB per area
-  schemas/            (previsto) schemi zod condivisi da route e validate()
+  services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService;
+                      (previsto) motore di fusione puro in services/fusione/
+  schemas/            zod: comuni (id, booleani da query, livello), compendio, traduzioni, partite, immagini
   utils/              logger, httpError
 shared/types.ts       tipi/costanti pure condivise FE/BE (nessun import Node)
 shared/seed.ts        tipi dei JSON del seed (prodotti dagli script, letti dal backend e dal frontend)
@@ -70,7 +72,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 1. `requestContextMiddleware`: genera/propaga `X-Request-Id`, crea child logger, access log a fine risposta.
 2. `responseShapeMiddleware`: monkey-patch di `res.json` → `{ data }` (idempotente su envelope già formati).
 3. `cors()` + `express.json({ limit: '5mb' })`.
-4. *(previsto)* Router di area (`/api/...`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
+4. Router di area (`/api/compendio`, `/api/traduzioni`, `/api/partite`, `/api/immagini`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
    un getter, quindi il middleware fa shadowing sull'istanza).
 5. `/api/health` (stato DB + `user_version`), `/api/config` (valori pubblici per il boot FE).
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; JSON malformato → 400; altro → 500 con stack nel log.
@@ -90,6 +92,15 @@ docs/                 documentazione di bordo e riferimenti di dominio
     per i file caricati in `DATA_DIR/immagini/`) sempre con `partita_id` e ON DELETE CASCADE.
   - Testi canonici (nomi Persona/skill, chiavi arcana/elementi, effetti, descrizioni) restano in inglese Royal nelle tabelle di
     gioco; la resa italiana si legge da `traduzione(ambito, chiave)`.
+
+## 5 bis. API (step 0.4)
+| Area | Endpoint principali |
+|---|---|
+| Compendio | `GET /api/compendio/arcani`, `/glossario`, `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
+| Traduzioni | `GET /api/traduzioni?ambito&q&soloUtente`, `GET /ambiti`, `PUT /:ambito/:chiave {testo}` (→ fonte utente), `DELETE /:ambito/:chiave` (ripristina il seed) |
+| Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti`, `PATCH /:id/doti/:chiave {punti|delta}`; `GET /:id/confidenti`, `PUT /:id/confidenti/:chiave {sbloccato,rango,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
+| Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave` |
+Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
 ## 6. Motore di fusione *(previsto, fasi 1–4)*
 Modulo TypeScript puro in `server/services/fusione/` senza I/O, alimentato da un'istantanea in memoria del compendio:

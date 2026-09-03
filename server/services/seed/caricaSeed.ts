@@ -24,6 +24,7 @@ import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
 import type { ConfidenteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
 const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json'] as const;
@@ -252,6 +253,7 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     insMeta.run('versione', String(seed.versione));
     insMeta.run('caricatoIl', adesso);
   })();
+  invalidaCacheTraduzioni();
 
   return { caricato: true, versione: seed.versione, hash: seed.hash, conteggi: conteggi() };
 }

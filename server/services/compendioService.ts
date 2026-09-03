@@ -1,0 +1,265 @@
+// ============================================================
+// compendioService — letture del compendio Royal con resa italiana
+// ============================================================
+
+import { getDb, prepared } from '../db/dbService.js';
+import { httpErrors } from '../utils/httpError.js';
+import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
+import type {
+  AffinitaDto, ArcanaDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
+  PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto,
+} from '../../shared/types.js';
+
+// ---- Righe DB ----
+
+interface RigaPersona {
+  id: number; nome: string; arcana: string; livello: number; eredita: string | null; speciale: number; rara: number; dlc: number;
+  richiede_confidente_max: number; nota: string | null; oggetto: string; oggetto_allarme: string; oggetto_e_carta: number; tratto: string;
+  forza: number; magia: number; resistenza: number; agilita: number; fortuna: number; aree_mementos_json: string; piani_mementos: string | null;
+}
+
+interface RigaSkill {
+  id: number; nome: string; elemento: string; costo_tipo: 'sp' | 'hp' | 'nessuno'; costo_valore: number; effetto: string;
+  fonte_carta: string | null; negoziazione: string | null; unica: string | null;
+}
+
+interface RigaOggetto { id: number; nome: string; categoria: string; vincolo: string | null; descrizione: string }
+
+// ---- Mappature ----
+
+/** Costo in forma leggibile. */
+export function costoDto(tipo: 'sp' | 'hp' | 'nessuno', valore: number): CostoSkillDto {
+  const testo = tipo === 'sp' ? `${valore} SP` : tipo === 'hp' ? `${valore}% HP` : '—';
+  return { tipo, valore, testo };
+}
+
+function skillRiassunto(r: RigaSkill): SkillRiassuntoDto {
+  return {
+    id: r.id, nome: r.nome, elemento: r.elemento, elementoNome: t('elementoSkill', r.elemento),
+    costo: costoDto(r.costo_tipo, r.costo_valore), effetto: r.effetto, effettoNome: t('effettoSkill', r.effetto),
+  };
+}
+
+function affinitaDi(personaId: number): AffinitaDto[] {
+  const ordine = vociAmbito('elementoAffinita');
+  const righe = prepared('SELECT elemento, codice FROM persona_affinita WHERE persona_id = ?').all(personaId) as Array<{ elemento: string; codice: string }>;
+  const perElemento = new Map(righe.map((r) => [r.elemento, r.codice]));
+  return ordine.map((e) => {
+    const codice = perElemento.get(e.chiave) ?? '-';
+    return {
+      elemento: e.chiave, elementoNome: e.testo, elementoSigla: String(e.extra?.sigla ?? ''),
+      codice, codiceNome: t('affinita', codice), codiceSigla: String(extra<{ sigla: string }>('affinita', codice)?.sigla ?? ''),
+    };
+  });
+}
+
+function personaRiassunto(r: RigaPersona): PersonaRiassuntoDto {
+  return {
+    id: r.id, nome: r.nome, arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello,
+    eredita: r.eredita, ereditaNome: tOpz('tipoEredita', r.eredita),
+    speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1, richiedeConfidenteMax: r.richiede_confidente_max === 1,
+    tratto: r.tratto,
+    statistiche: { forza: r.forza, magia: r.magia, resistenza: r.resistenza, agilita: r.agilita, fortuna: r.fortuna },
+    affinita: affinitaDi(r.id),
+  };
+}
+
+function ricettaDto(risultatoId: number): RicettaSpecialeDto {
+  const ris = prepared('SELECT id, nome FROM persona WHERE id = ?').get(risultatoId) as { id: number; nome: string };
+  const ingredienti = prepared('SELECT p.id, p.nome FROM fusione_speciale_ingrediente i JOIN persona p ON p.id = i.ingrediente_id WHERE i.risultato_id = ? ORDER BY i.ordine').all(risultatoId) as Array<{ id: number; nome: string }>;
+  return { risultato: ris, ingredienti };
+}
+
+// ---- Arcani, glossario, regole ----
+
+export function elencaArcani(): ArcanaDto[] {
+  return (prepared('SELECT chiave, ordine, numero FROM arcana ORDER BY ordine').all() as Array<{ chiave: string; ordine: number; numero: number | null }>)
+    .map((a) => ({ ...a, nome: t('arcana', a.chiave) }));
+}
+
+export function glossario(): GlossarioDto {
+  const conSigla = (ambito: string) => vociAmbito(ambito).map((v) => ({ chiave: v.chiave, nome: v.testo, sigla: String(v.extra?.sigla ?? '') }));
+  const affinita: Record<string, { nome: string; sigla: string }> = {};
+  for (const v of vociAmbito('affinita')) affinita[v.chiave] = { nome: v.testo, sigla: String(v.extra?.sigla ?? '') };
+  return {
+    arcani: elencaArcani(),
+    elementiSkill: mappaAmbito('elementoSkill'),
+    elementiAffinita: conSigla('elementoAffinita'),
+    affinita,
+    tipiEredita: mappaAmbito('tipoEredita'),
+    statistiche: conSigla('statistica'),
+    tipiOggetto: mappaAmbito('tipoOggetto'),
+    vincoliOggetto: mappaAmbito('vincoloOggetto'),
+    areeMementos: mappaAmbito('areaMementos'),
+    dotiSociali: (prepared('SELECT chiave, nome FROM dote_sociale ORDER BY ordine').all() as Array<{ chiave: string; nome: string }>).map((d) => ({ chiave: d.chiave, nome: t('doteSociale', d.chiave) || d.nome })),
+  };
+}
+
+export function regoleFusione(): RegoleFusioneDto {
+  const arcani = (prepared('SELECT chiave FROM arcana ORDER BY ordine').all() as Array<{ chiave: string }>).map((a) => a.chiave);
+  const tabella = prepared('SELECT a, b, risultato FROM fusione_arcana').all() as Array<{ a: string; b: string; risultato: string }>;
+  const speciali = (prepared('SELECT risultato_id FROM fusione_speciale').all() as Array<{ risultato_id: number }>).map((r) => ricettaDto(r.risultato_id));
+  const tesori = prepared('SELECT t.persona_id, p.nome FROM tesoro t JOIN persona p ON p.id = t.persona_id ORDER BY t.ordine').all() as Array<{ persona_id: number; nome: string }>;
+  const modificatori: Record<string, number[]> = {};
+  for (const a of arcani) {
+    modificatori[a] = tesori.map((te) => (prepared('SELECT modificatore FROM tesoro_modificatore WHERE arcana = ? AND tesoro_id = ?').get(a, te.persona_id) as { modificatore: number } | undefined)?.modificatore ?? 0);
+  }
+  const righeMatrice = prepared('SELECT tipo, elemento, ammesso FROM eredita_matrice').all() as Array<{ tipo: string; elemento: string; ammesso: number }>;
+  const colonne = vociAmbito('colonnaEredita').map((c) => c.chiave);
+  const tipi = [...new Set(righeMatrice.map((r) => r.tipo))];
+  const matrice: Record<string, boolean[]> = {};
+  for (const tipo of tipi) matrice[tipo] = colonne.map((el) => righeMatrice.find((r) => r.tipo === tipo && r.elemento === el)?.ammesso === 1);
+  const set = prepared('SELECT id FROM dlc_set ORDER BY ordine').all() as Array<{ id: number }>;
+  const dlc = set.map((s) => (prepared('SELECT p.nome FROM dlc_set_persona d JOIN persona p ON p.id = d.persona_id WHERE d.set_id = ? ORDER BY p.nome').all(s.id) as Array<{ nome: string }>).map((p) => p.nome));
+  return { arcani, tabella, speciali, tesori: { nomi: tesori.map((te) => te.nome), modificatori }, eredita: { tipi, colonne, matrice }, dlc };
+}
+
+// ---- Persona ----
+
+/** Filtri dell'elenco Persona. */
+export interface FiltroPersona {
+  q?: string;
+  arcana?: string;
+  livelloMin?: number;
+  livelloMax?: number;
+  dlc?: boolean;
+  rara?: boolean;
+  speciale?: boolean;
+  /** Filtra per skill posseduta (nome canonico). */
+  skill?: string;
+}
+
+export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
+  const cond: string[] = [];
+  const par: unknown[] = [];
+  if (f.q) {
+    cond.push('p.nome LIKE ?');
+    par.push(`%${f.q}%`);
+  }
+  if (f.arcana) {
+    cond.push('p.arcana = ?');
+    par.push(f.arcana);
+  }
+  if (f.livelloMin !== undefined) {
+    cond.push('p.livello >= ?');
+    par.push(f.livelloMin);
+  }
+  if (f.livelloMax !== undefined) {
+    cond.push('p.livello <= ?');
+    par.push(f.livelloMax);
+  }
+  if (f.dlc !== undefined) {
+    cond.push('p.dlc = ?');
+    par.push(f.dlc ? 1 : 0);
+  }
+  if (f.rara !== undefined) {
+    cond.push('p.rara = ?');
+    par.push(f.rara ? 1 : 0);
+  }
+  if (f.speciale !== undefined) {
+    cond.push('p.speciale = ?');
+    par.push(f.speciale ? 1 : 0);
+  }
+  if (f.skill) {
+    cond.push('EXISTS (SELECT 1 FROM persona_skill ps JOIN skill s ON s.id = ps.skill_id WHERE ps.persona_id = p.id AND s.nome = ?)');
+    par.push(f.skill);
+  }
+  const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
+  const righe = getDb().prepare(`SELECT p.* FROM persona p JOIN arcana a ON a.chiave = p.arcana ${where} ORDER BY p.livello, a.ordine, p.nome`).all(...par) as RigaPersona[];
+  return righe.map(personaRiassunto);
+}
+
+export function dettaglioPersona(id: number): PersonaDettaglioDto {
+  const r = prepared('SELECT * FROM persona WHERE id = ?').get(id) as RigaPersona | undefined;
+  if (!r) throw httpErrors.notFound('persona-non-trovata', `La Persona ${id} non esiste.`);
+  const base = personaRiassunto(r);
+  const skill = (prepared('SELECT s.*, ps.livello AS livello_appreso FROM persona_skill ps JOIN skill s ON s.id = ps.skill_id WHERE ps.persona_id = ? ORDER BY ps.livello, s.nome').all(id) as Array<RigaSkill & { livello_appreso: number }>)
+    .map((s): SkillAppresaDto => ({ ...skillRiassunto(s), livello: s.livello_appreso }));
+  const trattoRiga = prepared('SELECT * FROM skill WHERE nome = ?').get(r.tratto) as RigaSkill | undefined;
+  const ricetta = prepared('SELECT risultato_id FROM fusione_speciale WHERE risultato_id = ?').get(id) ? ricettaDto(id) : null;
+  const ingredienteDi = (prepared('SELECT DISTINCT risultato_id FROM fusione_speciale_ingrediente WHERE ingrediente_id = ?').all(id) as Array<{ risultato_id: number }>).map((x) => ricettaDto(x.risultato_id));
+  const dlcSet = (prepared('SELECT set_id FROM dlc_set_persona WHERE persona_id = ?').get(id) as { set_id: number } | undefined)?.set_id ?? null;
+  const carte = prepared('SELECT s.id, s.nome FROM skill_fonte_esecuzione f JOIN skill s ON s.id = f.skill_id WHERE f.persona_id = ? ORDER BY s.nome').all(id) as Array<{ id: number; nome: string }>;
+  const negoz = prepared('SELECT negoziazione FROM skill WHERE negoziazione LIKE ? LIMIT 1').get(`%(${r.nome})`) as { negoziazione: string } | undefined;
+  const titolo = negoz?.negoziazione.replace(/\s*\([^)]*\)\s*$/, '') ?? null;
+  const aree = (JSON.parse(r.aree_mementos_json) as string[]).map((a) => ({ chiave: a, nome: t('areaMementos', a) }));
+  const descrizioneOggetto = (nome: string): string | null => {
+    const o = prepared('SELECT descrizione FROM oggetto WHERE nome = ?').get(nome) as { descrizione: string } | undefined;
+    return o ? t('descrizioneOggetto', o.descrizione) : null;
+  };
+  return {
+    ...base,
+    nota: r.nota, notaNome: tOpz('notaPersona', r.nota),
+    oggetto: r.oggetto, oggettoAllarme: r.oggetto_allarme, oggettoECarta: r.oggetto_e_carta === 1,
+    oggettoDescrizione: descrizioneOggetto(r.oggetto), oggettoAllarmeDescrizione: descrizioneOggetto(r.oggetto_allarme),
+    trattoDettaglio: trattoRiga ? skillRiassunto(trattoRiga) : null,
+    skill, areeMementos: aree, pianiMementos: r.piani_mementos,
+    ricettaSpeciale: ricetta, ingredienteDi, dlcSet, carteDaEsecuzione: carte,
+    negoziazione: titolo ? { titolo, titoloNome: t('negoziazione', titolo) } : null,
+  };
+}
+
+// ---- Skill ----
+
+export interface FiltroSkill {
+  q?: string;
+  elemento?: string;
+}
+
+export function elencaSkill(f: FiltroSkill = {}): SkillRiassuntoDto[] {
+  const cond: string[] = [];
+  const par: unknown[] = [];
+  if (f.q) {
+    cond.push('(nome LIKE ? OR effetto LIKE ?)');
+    par.push(`%${f.q}%`, `%${f.q}%`);
+  }
+  if (f.elemento) {
+    cond.push('elemento = ?');
+    par.push(f.elemento);
+  }
+  const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
+  return (getDb().prepare(`SELECT * FROM skill ${where} ORDER BY nome`).all(...par) as RigaSkill[]).map(skillRiassunto);
+}
+
+export function dettaglioSkill(id: number): SkillDettaglioDto {
+  const r = prepared('SELECT * FROM skill WHERE id = ?').get(id) as RigaSkill | undefined;
+  if (!r) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
+  const persone = (prepared('SELECT p.id, p.nome, p.arcana, p.livello AS livello_persona, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY p.livello, p.nome').all(id) as Array<{ id: number; nome: string; arcana: string; livello_persona: number; livello: number }>)
+    .map((p) => ({ id: p.id, nome: p.nome, arcana: p.arcana, arcanaNome: t('arcana', p.arcana), livelloPersona: p.livello_persona, livello: p.livello }));
+  const fonti = prepared('SELECT p.id, p.nome FROM skill_fonte_esecuzione f JOIN persona p ON p.id = f.persona_id WHERE f.skill_id = ? ORDER BY p.nome').all(id) as Array<{ id: number; nome: string }>;
+  const titoloNegoz = r.negoziazione ? r.negoziazione.replace(/\s*\([^)]*\)\s*$/, '') : null;
+  const personaNegoz = r.negoziazione ? r.negoziazione.match(/\(([^)]*)\)\s*$/)?.[1] ?? null : null;
+  const unicaNome = r.unica ? (tOpz('fonteEsclusiva', r.unica) ?? r.unica) : null;
+  return {
+    ...skillRiassunto(r),
+    fonteCarta: r.fonte_carta, fonteCartaNome: tOpz('fonteCarta', r.fonte_carta),
+    negoziazione: r.negoziazione, negoziazioneNome: titoloNegoz ? `${t('negoziazione', titoloNegoz)}${personaNegoz ? ` (${personaNegoz})` : ''}` : null,
+    unica: r.unica, unicaNome,
+    persone, fontiEsecuzione: fonti,
+  };
+}
+
+// ---- Oggetti, Confidenti ----
+
+export function elencaOggetti(f: { q?: string; categoria?: string } = {}): OggettoDto[] {
+  const cond: string[] = [];
+  const par: unknown[] = [];
+  if (f.q) {
+    cond.push('nome LIKE ?');
+    par.push(`%${f.q}%`);
+  }
+  if (f.categoria) {
+    cond.push('categoria = ?');
+    par.push(f.categoria);
+  }
+  const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
+  return (getDb().prepare(`SELECT * FROM oggetto ${where} ORDER BY categoria, nome`).all(...par) as RigaOggetto[]).map((o) => ({
+    id: o.id, nome: o.nome, categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
+    vincolo: o.vincolo, vincoloNome: tOpz('vincoloOggetto', o.vincolo), descrizione: o.descrizione, descrizioneNome: t('descrizioneOggetto', o.descrizione),
+  }));
+}
+
+export function elencaConfidenti(): ConfidenteDto[] {
+  return (prepared('SELECT chiave, nome, arcana, ordine FROM confidente ORDER BY ordine').all() as Array<{ chiave: string; nome: string; arcana: string; ordine: number }>)
+    .map((c) => ({ ...c, arcanaNome: t('arcana', c.arcana) }));
+}
