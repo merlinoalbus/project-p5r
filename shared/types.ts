@@ -501,6 +501,58 @@ export interface ObiettivoDto {
   updatedAt: string;
 }
 
+// ---- Cicli di fusione (Fase 5.5) ----
+
+export interface AnelloCicloDto {
+  ingrediente: PersonaFusioneDto;
+  partner: PersonaFusioneDto;
+  partnerModo: 'scorta' | 'registro' | 'cattura';
+  partnerCosto: number;
+  risultato: PersonaFusioneDto;
+  tipo: TipoFusione;
+  /** Livelli extra del risultato per il bonus del Confidente (stima). */
+  bonusLivelli: { min: number; max: number };
+  rangoArcano: number;
+}
+
+export interface CicloFusioneDto {
+  anelli: AnelloCicloDto[];
+  /** Costo di una iterazione (evocazioni dal Registro, sconto applicato). */
+  costo: number;
+  lunghezza: number;
+  evocazioni: number;
+  catture: number;
+  dallaScorta: number;
+}
+
+export interface CicliFusioneDto {
+  persona: PersonaFusioneDto;
+  cicli: CicloFusioneDto[];
+  opzioni: { lunghezzaMax: number; alternative: number; catture: boolean; livelloMax: number | null };
+  sconto: number;
+  disponibilita: { scorta: number; registro: number };
+  /** La Persona di partenza è nella scorta della partita. */
+  inScorta: boolean;
+}
+
+export interface CicloSalvatoDto {
+  id: number;
+  personaId: number;
+  nome: string;
+  nomeIt: string;
+  arcanaNome: string;
+  titolo: string;
+  note: string;
+  anelli: AnelloCicloDto[];
+  costo: number;
+  lunghezza: number;
+  iterazioni: number;
+  anelloCorrente: number;
+  avanzamento: { ingredientePossedutaId: number | null; partnerPossedutaId: number | null; partnerRegistrato: boolean; eseguibile: boolean };
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---- Operazioni della Stanza di Velluto dalla scorta (Fase 5.4) ----
 
 export interface AnteprimaFusioneDto {

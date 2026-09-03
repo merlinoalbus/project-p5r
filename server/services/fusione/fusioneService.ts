@@ -10,6 +10,9 @@ import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId,
 import { SBLOCCHI_GEMELLE, moltiplicatoreExpConfidente, prezzoScontato, sblocchiGemelle, scontoRegistro } from '../../../shared/bonusVelluto.js';
 import type { VellutoDto } from '../../../shared/types.js';
 import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
+import { cicliFusione } from './cicliFusione.js';
+import { bonusLivelliFusione } from '../../../shared/bonusVelluto.js';
+import type { CicliFusioneDto } from '../../../shared/types.js';
 import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
 export interface OpzioniContesto {
@@ -32,7 +35,7 @@ export function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti:
 // ---- Stanza di Velluto (Fase 4.2) ----
 
 /** Percentuale di completamento del compendio personale (Persona non DLC registrate) e sconto del Registro. */
-function scontoPartita(partitaId: number | undefined): { registrate: number; totale: number; percentuale: number; sconto: number } {
+export function scontoPartita(partitaId: number | undefined): { registrate: number; totale: number; percentuale: number; sconto: number } {
   const totale = (prepared('SELECT COUNT(*) AS n FROM persona WHERE dlc = 0').get() as { n: number }).n;
   if (partitaId === undefined) return { registrate: 0, totale, percentuale: 0, sconto: 0 };
   const registrate = (prepared('SELECT COUNT(*) AS n FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? AND cp.registrata = 1 AND p.dlc = 0').get(partitaId) as { n: number }).n;
@@ -209,6 +212,47 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
     skillRichieste,
     sconto,
     disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
+  };
+}
+
+// ---- Cicli di fusione (Fase 5.5) ----
+
+export interface OpzioniCicliDto extends OpzioniContesto {
+  lunghezza?: number;
+  alternative?: number;
+  catture?: boolean;
+  limitaLivello?: boolean;
+}
+
+/** Cicli X → … → X con partner procurabili nella partita, costi scontati e bonus di livello per anello. */
+export function cicliDto(personaId: number, opz: OpzioniCicliDto): CicliFusioneDto {
+  const { ctx } = contestoDa(opz);
+  const target = personaOErrore(personaId);
+  const disp = disponibilitaDi(opz.partitaId);
+  let livelloMax: number | null = opz.livelloMax ?? null;
+  if (livelloMax === null && opz.limitaLivello && opz.partitaId !== undefined) {
+    const r = prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(opz.partitaId) as { livello_protagonista: number } | undefined;
+    livelloMax = r?.livello_protagonista ?? null;
+  }
+  const opzioni = { lunghezzaMax: opz.lunghezza ?? 3, alternative: opz.alternative ?? 5, catture: opz.catture ?? false, livelloMax };
+  const cicli = cicliFusione(target, ctx, disp, opzioni);
+  const sconto = scontoPartita(opz.partitaId).sconto;
+  const ranghi = ranghiPerArcana(opz.partitaId);
+  const rangoMatto = ranghi.get('Fool')?.rango ?? 0;
+  return {
+    persona: personaDto(target),
+    cicli: cicli.map((c) => ({
+      anelli: c.anelli.map((a) => {
+        const rango = ranghi.get(a.risultato.arcana)?.rango ?? 0;
+        const bonus = bonusLivelliFusione(rangoMatto, rango);
+        return { ingrediente: personaDto(a.ingrediente), partner: personaDto(a.partner), partnerModo: a.partnerModo, partnerCosto: prezzoScontato(a.partnerCosto, sconto), risultato: personaDto(a.risultato), tipo: a.tipo, bonusLivelli: { min: bonus.min, max: bonus.max }, rangoArcano: rango };
+      }),
+      costo: prezzoScontato(c.costo, sconto), lunghezza: c.lunghezza, evocazioni: c.evocazioni, catture: c.catture, dallaScorta: c.dallaScorta,
+    })),
+    opzioni,
+    sconto,
+    disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
+    inScorta: (disp.scorta.get(target.id) ?? 0) > 0,
   };
 }
 

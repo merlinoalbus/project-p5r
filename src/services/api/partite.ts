@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto,
 } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
@@ -77,6 +77,13 @@ export const salvaPiano = (id: number, dati: { personaId: number; piano: PianoFu
   apiPost(`/partite/${id}/piani`, dati);
 export const aggiornaPianoSalvato = (id: number, pianoId: number, dati: { nome?: string; note?: string; obiettivoId?: number | null }): Promise<PianoSalvatoDto> => apiPut(`/partite/${id}/piani/${pianoId}`, dati);
 export const eliminaPianoSalvato = (id: number, pianoId: number): Promise<void> => apiDelete(`/partite/${id}/piani/${pianoId}`);
+
+/** Cicli di fusione salvati (Fase 5.5). */
+export const getCicliSalvati = (id: number): Promise<CicloSalvatoDto[]> => apiGet(`/partite/${id}/cicli`);
+export const salvaCiclo = (id: number, dati: { personaId: number; anelli: Array<{ ingredienteId: number; partnerId: number; risultatoId: number }>; nome?: string; note?: string }): Promise<CicloSalvatoDto> => apiPost(`/partite/${id}/cicli`, dati);
+export const aggiornaCiclo = (id: number, cicloId: number, dati: { nome?: string; note?: string; anelloCorrente?: number; iterazioni?: number }): Promise<CicloSalvatoDto> => apiPut(`/partite/${id}/cicli/${cicloId}`, dati);
+export const avanzaCiclo = (id: number, cicloId: number): Promise<CicloSalvatoDto> => apiPost(`/partite/${id}/cicli/${cicloId}/avanza`);
+export const eliminaCiclo = (id: number, cicloId: number): Promise<void> => apiDelete(`/partite/${id}/cicli/${cicloId}`);
 
 /** Operazioni della Stanza di Velluto eseguite dalla scorta (Fase 5.4). */
 export const getAnteprimaFusione = (id: number, dati: { possedutaIds: number[]; risultatoId?: number }): Promise<AnteprimaFusioneDto> => apiPost(`/partite/${id}/velluto/fusione/anteprima`, dati);

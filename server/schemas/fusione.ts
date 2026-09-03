@@ -31,6 +31,15 @@ export const paramsPersonaId = z.object({ personaId: idNumerico });
 
 const booleano = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1').optional();
 
+export const queryCicli = z.object({
+  partita: z.coerce.number().int().positive().optional(),
+  dlc: z.string().optional(),
+  lunghezza: z.coerce.number().int().min(2).max(5).optional(),
+  alternative: z.coerce.number().int().min(1).max(12).optional(),
+  catture: z.enum(['true', 'false']).optional(),
+  limitaLivello: z.enum(['true', 'false']).optional(),
+  livelloMax: z.coerce.number().int().min(1).max(99).optional(),
+});
 export const queryEredita = z.object({
   a: idNumerico,
   b: idNumerico,
