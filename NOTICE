@@ -1,0 +1,23 @@
+project-p5r — Compagno di gioco per Persona 5 Royal
+====================================================
+
+Persona 5 Royal, i nomi delle Persona, delle skill, degli oggetti, degli Arcani e ogni altro
+elemento del gioco sono proprietà di ATLUS / SEGA. Questo progetto è uno strumento personale
+non ufficiale, non affiliato ad ATLUS o SEGA, e non contiene asset grafici del gioco.
+
+Il dataset del compendio Royal (data/seed/) è derivato dalle seguenti opere open source.
+
+1. chinhodado/persona5_calculator — https://github.com/chinhodado/persona5_calculator
+   Fonte primaria: data/PersonaDataRoyal.ts, data/SkillDataRoyal.ts, data/ItemDataRoyal.ts,
+   data/Data5Royal.ts; logica di fusione di riferimento in src/FusionCalculator.ts.
+   Copyright (c) Chin (chinhodado). Licenza Apache License 2.0
+   (copia in data/seed/sorgenti/chinhodado/LICENSE). I file sono stati normalizzati e tradotti
+   in italiano (scripts/seed/); le modifiche sono documentate in docs/riferimenti/dataset-fonti.md.
+
+2. aqiu384/megaten-fusion-tool — https://github.com/aqiu384/megaten-fusion-tool
+   Fonte di verifica incrociata: src/app/p5/data/roy-*.json, skill-data.json, comp-config.json.
+   Rilasciato nel pubblico dominio (The Unlicense, copia in data/seed/sorgenti/aqiu384/LICENSE.md).
+
+I riferimenti visivi citati nei prompt di generazione (docs/grafica/) rimandano a immagini
+ospitate da terzi (wiki, store ufficiali) usate esclusivamente come ispirazione: nessuna di esse
+è copiata in questo repository.

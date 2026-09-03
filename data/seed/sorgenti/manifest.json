@@ -1,0 +1,191 @@
+{
+  "generatoIl": "2026-09-03T11:13:26.817Z",
+  "fonti": [
+    {
+      "id": "chinhodado",
+      "proprietario": "chinhodado",
+      "repository": "persona5_calculator",
+      "commit": "802422dad1f5b9eee441e594e738aceaeb9e5a85",
+      "dataCommit": "2024-04-07",
+      "licenza": "Apache-2.0"
+    },
+    {
+      "id": "aqiu384",
+      "proprietario": "aqiu384",
+      "repository": "megaten-fusion-tool",
+      "commit": "e93dd1c87ca453de8fae8165bdbef220732feabc",
+      "dataCommit": "2026-08-26",
+      "licenza": "Unlicense"
+    }
+  ],
+  "file": [
+    {
+      "fonte": "chinhodado",
+      "percorso": "data/PersonaDataRoyal.ts",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/data/PersonaDataRoyal.ts",
+      "sha256": "0c400f4239923be51a0577981a255f19e315843eddcd12a3346212cb6472845d",
+      "byte": 135486,
+      "scaricatoIl": "2026-09-03T11:13:22.063Z"
+    },
+    {
+      "fonte": "chinhodado",
+      "percorso": "data/SkillDataRoyal.ts",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/data/SkillDataRoyal.ts",
+      "sha256": "67b2f2bd69b0de30135b33da87bad0e3c242fb022fdcd843de09125a18f80487",
+      "byte": 129315,
+      "scaricatoIl": "2026-09-03T11:13:22.292Z"
+    },
+    {
+      "fonte": "chinhodado",
+      "percorso": "data/ItemDataRoyal.ts",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/data/ItemDataRoyal.ts",
+      "sha256": "bb8625f5b5ca21b24d5998ac124216c253a85171eb2028b8e2d2d2f7d049adbd",
+      "byte": 28397,
+      "scaricatoIl": "2026-09-03T11:13:22.478Z"
+    },
+    {
+      "fonte": "chinhodado",
+      "percorso": "data/Data5Royal.ts",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/data/Data5Royal.ts",
+      "sha256": "c925572aa5415eb8ccc4f53def3a96071492f2e0739cb7fd8f13e7ce76956eca",
+      "byte": 25597,
+      "scaricatoIl": "2026-09-03T11:13:22.692Z"
+    },
+    {
+      "fonte": "chinhodado",
+      "percorso": "src/FusionCalculator.ts",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/src/FusionCalculator.ts",
+      "sha256": "d25c6f429875675be50c91166b0aff8c4052440f05a5073a348e3517c920c664",
+      "byte": 12142,
+      "scaricatoIl": "2026-09-03T11:13:22.885Z"
+    },
+    {
+      "fonte": "chinhodado",
+      "percorso": "src/DataUtil.ts",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/src/DataUtil.ts",
+      "sha256": "16f0ec3b9e50f79c9896a488feae125c272c19bdb5c5908dd0ab40e217aaca74",
+      "byte": 7788,
+      "scaricatoIl": "2026-09-03T11:13:23.044Z"
+    },
+    {
+      "fonte": "chinhodado",
+      "percorso": "LICENSE",
+      "url": "https://raw.githubusercontent.com/chinhodado/persona5_calculator/802422dad1f5b9eee441e594e738aceaeb9e5a85/LICENSE",
+      "sha256": "34a2924b6135fcd41db84c561c593359ec38a56d2d8321b51e119743efa9ea57",
+      "byte": 11349,
+      "scaricatoIl": "2026-09-03T11:13:23.250Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-demon-data.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-demon-data.json",
+      "sha256": "b9391c8bfcfaa105fb9963baba498072ae8d7b9bba25cad0a019747805f81086",
+      "byte": 106434,
+      "scaricatoIl": "2026-09-03T11:13:23.525Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/skill-data.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/skill-data.json",
+      "sha256": "be785994edafc662978b0400d74bfa382e377c2ef0c3a13970013b8c82705129",
+      "byte": 46527,
+      "scaricatoIl": "2026-09-03T11:13:23.737Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-skill-data.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-skill-data.json",
+      "sha256": "3a0238b2f48fd32bafd2c3ac0f17f7d62e48bcb5a4f66e1970f22ceb3ea89b67",
+      "byte": 30772,
+      "scaricatoIl": "2026-09-03T11:13:23.949Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-fusion-chart.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-fusion-chart.json",
+      "sha256": "ab28bb6d3606d5e2a082e676a68e6b9e5b1693ad6ab352099376e5ccc3b522c8",
+      "byte": 4500,
+      "scaricatoIl": "2026-09-03T11:13:24.175Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-element-chart.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-element-chart.json",
+      "sha256": "ac5b22a440808411f114babe3d23d0816031affd94bfe2c8e641e5d9613623d8",
+      "byte": 1609,
+      "scaricatoIl": "2026-09-03T11:13:24.401Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-special-recipes.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-special-recipes.json",
+      "sha256": "d9aa659810ffba145de1de3a813d78230cb6775ed3e7cc55ca5c2ea22ea36298",
+      "byte": 1676,
+      "scaricatoIl": "2026-09-03T11:13:24.623Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-demon-unlocks.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-demon-unlocks.json",
+      "sha256": "6d6ac8e8309f62ef804cbc98f63370dbbf080a004ba915fb33e4927aa58ed897",
+      "byte": 2100,
+      "scaricatoIl": "2026-09-03T11:13:24.842Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-fusion-prereqs.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-fusion-prereqs.json",
+      "sha256": "93044fc9630d580ef1c965c5f220b5673b26ce279e1dd6e82857960f8fc7e220",
+      "byte": 532,
+      "scaricatoIl": "2026-09-03T11:13:25.023Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-party-data.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-party-data.json",
+      "sha256": "5eb75857d1ae709133014a70e03c0c64a5c7892de506db327521da5b928d17f1",
+      "byte": 7744,
+      "scaricatoIl": "2026-09-03T11:13:25.248Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-enemy-data.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-enemy-data.json",
+      "sha256": "fed73e3a3e14b6c00fdf48c244f7f84616dd2cc82f9df621b92117de40057bb6",
+      "byte": 50843,
+      "scaricatoIl": "2026-09-03T11:13:25.992Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/roy-accessories.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/roy-accessories.json",
+      "sha256": "43713ac674adc449d75360a94c38f6164b9cf7d183c7c5ba35f03dfe44641671",
+      "byte": 4180,
+      "scaricatoIl": "2026-09-03T11:13:26.182Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/p5/data/comp-config.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/p5/data/comp-config.json",
+      "sha256": "8588a5fab4fd5836be998769f14cdca660677d97134384c70607608e61170bfd",
+      "byte": 1720,
+      "scaricatoIl": "2026-09-03T11:13:26.374Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "src/app/compendium/data/skill-effects.json",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/src/app/compendium/data/skill-effects.json",
+      "sha256": "bdb2364219e7554b80d405ae0c8619d3da89b3d6257704858523a7784545d0d5",
+      "byte": 1991,
+      "scaricatoIl": "2026-09-03T11:13:26.597Z"
+    },
+    {
+      "fonte": "aqiu384",
+      "percorso": "LICENSE.md",
+      "url": "https://raw.githubusercontent.com/aqiu384/megaten-fusion-tool/e93dd1c87ca453de8fae8165bdbef220732feabc/LICENSE.md",
+      "sha256": "6b0382b16279f26ff69014300541967a356a666eb0b91b422f6862f6b7dad17e",
+      "byte": 1211,
+      "scaricatoIl": "2026-09-03T11:13:26.817Z"
+    }
+  ]
+}

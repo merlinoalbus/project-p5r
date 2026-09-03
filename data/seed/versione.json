@@ -1,0 +1,27 @@
+{
+  "versione": 1,
+  "generatoIl": "2026-09-03T11:33:22.732Z",
+  "fonti": {
+    "primaria": {
+      "id": "chinhodado",
+      "commit": "802422dad1f5b9eee441e594e738aceaeb9e5a85",
+      "licenza": "Apache-2.0"
+    },
+    "verifica": {
+      "id": "aqiu384",
+      "commit": "e93dd1c87ca453de8fae8165bdbef220732feabc",
+      "licenza": "Unlicense"
+    }
+  },
+  "conteggi": {
+    "persona": 232,
+    "skill": 525,
+    "oggetti": 223,
+    "ricetteSpeciali": 24,
+    "tesori": 9,
+    "effettiTradotti": 512,
+    "descrizioniOggettiTradotte": 223,
+    "negoziazioniTradotte": 120,
+    "fontiCartaTradotte": 49
+  }
+}

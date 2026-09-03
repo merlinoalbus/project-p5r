@@ -1,0 +1,1340 @@
+[
+  {
+    "nome": "Aid Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Dia (Small HP recovery for 1 ally)"
+  },
+  {
+    "nome": "Amrita Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Amrita Drop (Cure all non-special ailments of 1 ally)"
+  },
+  {
+    "nome": "Ancient Day",
+    "categoria": "Gun",
+    "vincolo": "Akechi",
+    "descrizione": "Atk 350 / Acc 85 / Rounds 5 / All stats +6"
+  },
+  {
+    "nome": "Archangel Bra",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 300 / Ev 18 / +Reduce Elec dmg (high)"
+  },
+  {
+    "nome": "Arsène's Cane",
+    "categoria": "Weapon",
+    "vincolo": "Joker",
+    "descrizione": "Atk 130 / Acc 92 / +Random ailment (low)"
+  },
+  {
+    "nome": "Assault Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Assault Dive (Heavy Phys dmg to 1 foe)"
+  },
+  {
+    "nome": "Atom Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Frei (Light Nuke dmg to 1 foe)"
+  },
+  {
+    "nome": "Bear Gloves",
+    "categoria": "Weapon",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 240 / Acc 90 / +Critical rate up (med)"
+  },
+  {
+    "nome": "Big Bear Gloves",
+    "categoria": "Weapon",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 260 / Acc 90 / +Critical rate up (med)"
+  },
+  {
+    "nome": "Black Headband",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Mana Surge (SP +30%) / St +5"
+  },
+  {
+    "nome": "Black Headband R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Mana Surge (SP +30%) / St +8"
+  },
+  {
+    "nome": "Black Jacket",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 210 / Ev 15 / Prevents insta-kill from Curse"
+  },
+  {
+    "nome": "Black Moon",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Critical rate up (high)"
+  },
+  {
+    "nome": "Black Moon R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Apt Pupil (Increases Critical rate) / St +8"
+  },
+  {
+    "nome": "Black Wing Robe",
+    "categoria": "Protector",
+    "vincolo": "Unisex",
+    "descrizione": "Def 250 / Ev 20 / +Reduce Nuke dmg (med)"
+  },
+  {
+    "nome": "Black Wing Robe R",
+    "categoria": "Protector",
+    "vincolo": "Unisex",
+    "descrizione": "Def 270 / Ev 20 / +Reduce Nuke dmg (high)"
+  },
+  {
+    "nome": "Blazing Horns",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Fire Amp / En +10"
+  },
+  {
+    "nome": "Blessing Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Kouga (Med. Bless dmg to 1 foe)"
+  },
+  {
+    "nome": "Blizzard Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Bufudyne (Heavy Ice dmg to 1 foe)"
+  },
+  {
+    "nome": "Blood Red Capote",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 120 / Ev 20 / Ag +3"
+  },
+  {
+    "nome": "Bloodied Capote",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 130 / Ev 20 / Ag +6"
+  },
+  {
+    "nome": "Brain Shot",
+    "categoria": "Gun",
+    "vincolo": "Ann",
+    "descrizione": "Atk 140 / Acc 84 / Rounds 12 / +Brainwash (med)"
+  },
+  {
+    "nome": "Brave Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Brave Blade (Colossal Phys dmg to 1 foe)"
+  },
+  {
+    "nome": "Breeze Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Garu (Light Wind dmg to 1 foe)"
+  },
+  {
+    "nome": "Cat Buster",
+    "categoria": "Gun",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 170 / Acc 90 / Rounds 5 / +Sleep (med)"
+  },
+  {
+    "nome": "Catnap",
+    "categoria": "Gun",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 150 / Acc 90 / Rounds 5 / +Sleep (med)"
+  },
+  {
+    "nome": "Claiomh Solais",
+    "categoria": "Weapon",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 315 / Acc 90 / +50 SP"
+  },
+  {
+    "nome": "Claiomh Solais R",
+    "categoria": "Weapon",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 330 / Acc 90 / +50 SP"
+  },
+  {
+    "nome": "Crystal Skull",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "All stats +5 / +Angelic Grace (2x Magic evasion except Almighty)"
+  },
+  {
+    "nome": "Crystal Skull R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "All stats +6 / +Angelic Grace (2x Magic evasion except Almighty)"
+  },
+  {
+    "nome": "Cure Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Diarama (Med. HP restore to 1 ally)"
+  },
+  {
+    "nome": "Curse Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Eiga (Med. Curse dmg to 1 foe)"
+  },
+  {
+    "nome": "Cursed Ribbon",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Demonic Decree (Halves remaining HP of 1 foe)"
+  },
+  {
+    "nome": "Dainaraka Whip",
+    "categoria": "Weapon",
+    "vincolo": "Ann",
+    "descrizione": "Atk 320 / Acc 90 / +Freeze (high)"
+  },
+  {
+    "nome": "Dark Flame Band",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Inferno (Severe Fire dmg to 1 foe)"
+  },
+  {
+    "nome": "Dark Jacket",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 225 / Ev 18 / Prevents Curse insta-kill"
+  },
+  {
+    "nome": "Darkness Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Evade Curse (high) / Ma +5"
+  },
+  {
+    "nome": "Darkness Ring R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Evade Curse (high) / Ma +8"
+  },
+  {
+    "nome": "Death Contract",
+    "categoria": "Weapon",
+    "vincolo": "Haru",
+    "descrizione": "Atk 190 / Acc 80 / +Despair (low)"
+  },
+  {
+    "nome": "Death Promise",
+    "categoria": "Weapon",
+    "vincolo": "Haru",
+    "descrizione": "Atk 200 / Acc 80 / +Despair (med)"
+  },
+  {
+    "nome": "Diamond Dust Lily",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Diamond Dust (Severe Ice dmg to 1 foe)"
+  },
+  {
+    "nome": "Divine Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Kougaon (Heavy Bless dmg to 1 foe)"
+  },
+  {
+    "nome": "Doomsday",
+    "categoria": "Gun",
+    "vincolo": "Akechi",
+    "descrizione": "Atk 330 / Acc 85 / Rounds 5 / All Stats +5"
+  },
+  {
+    "nome": "Dragon's Heart",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Psycho Force (Severe Psy dmg to 1 foe)"
+  },
+  {
+    "nome": "Ember Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Agi (Light Fire dmg to 1 foe)"
+  },
+  {
+    "nome": "Emperor's Amulet",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "En +5 / +Auto-Mataru"
+  },
+  {
+    "nome": "Emperor's Charm R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "En +8 / +Auto-Mataru"
+  },
+  {
+    "nome": "Energy Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Energy Drop (Cure Confuse/Fear/Despair/Rage/Brainwash for 1 ally)"
+  },
+  {
+    "nome": "Fairy Hero Armor",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 180 / Ev 15 / Ma +7"
+  },
+  {
+    "nome": "Fairy Knight Armor",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 170 / Ev 15 / Ma +4"
+  },
+  {
+    "nome": "Fine Ruyi Jingu Bang",
+    "categoria": "Weapon",
+    "vincolo": "Ryuji",
+    "descrizione": "Def 290 / Acc 88 / +Auto-Tarukaja"
+  },
+  {
+    "nome": "Fine Silk Dress",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 100 / Ev 14 / +Evade Magic (med)"
+  },
+  {
+    "nome": "Fine Tapsuan",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 195 / Ev 15 / +Evade Wind (high)"
+  },
+  {
+    "nome": "Fire Dragon Horn",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Atomic Flare (Severe Nuke dmg to 1 foe)"
+  },
+  {
+    "nome": "Fleurs du Mal",
+    "categoria": "Weapon",
+    "vincolo": "Haru",
+    "descrizione": "Atk 325 / Acc 86 / Ma +5 / +Dizzy (high)"
+  },
+  {
+    "nome": "Fleurs du Mal R",
+    "categoria": "Weapon",
+    "vincolo": "Haru",
+    "descrizione": "Atk 345 / Acc 86 / Ma +5 / +Dizzy (high)"
+  },
+  {
+    "nome": "Frost Ace Hood",
+    "categoria": "Protector",
+    "vincolo": "Morgana",
+    "descrizione": "Def 120 / Ev 20 / +40 SP"
+  },
+  {
+    "nome": "Frost Hood",
+    "categoria": "Protector",
+    "vincolo": "Morgana",
+    "descrizione": "Def 110 / Ev 20 / +20 SP"
+  },
+  {
+    "nome": "Frost Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Bufu (Light Ice dmg to all foes)"
+  },
+  {
+    "nome": "Gatling Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Gatling Blow (Light Phys dmg 3-4 times to 1 foe)"
+  },
+  {
+    "nome": "Giant Slice Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Giant Slice (Med Phys dmg to 1 foe, powers up after baton pass)"
+  },
+  {
+    "nome": "Gigantomachia Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Gigantomachia (Colossal Phys dmg to all foes)"
+  },
+  {
+    "nome": "God's Hand Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+God's Hand (Colossal Phys dmg to 1 foe)"
+  },
+  {
+    "nome": "Goddess Horn",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Thunder Reign (Severe Elec dmg to 1 foe)"
+  },
+  {
+    "nome": "Godsent Dress",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 110 / Ev 14 / Ma +6"
+  },
+  {
+    "nome": "Gordios",
+    "categoria": "Weapon",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 330 / Acc 95 / +Critical rate up (high)"
+  },
+  {
+    "nome": "Graceful Harp",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Null Brainwash / Ma +5"
+  },
+  {
+    "nome": "Graceful Harp R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Null Brainwash / Ma +8"
+  },
+  {
+    "nome": "Grudge Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Eiha (Light Curse dmg to 1 foe)"
+  },
+  {
+    "nome": "Gungnir",
+    "categoria": "Gun",
+    "vincolo": "Ann",
+    "descrizione": "Atk 340 / Acc 90 / Rounds 12 / +Despair (med)"
+  },
+  {
+    "nome": "Hades Harp",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Ag +3 / +Null Brainwash"
+  },
+  {
+    "nome": "Hades Harp R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Ag +8 / +Null Brainwash"
+  },
+  {
+    "nome": "Hallowed Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Hamaon (Bless, med chance of insta-killing 1 foe)"
+  },
+  {
+    "nome": "Headhunter Ladle",
+    "categoria": "Weapon",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 150 / Acc 90 / +Critical rate up (low)"
+  },
+  {
+    "nome": "Headhunter Ladle EX",
+    "categoria": "Weapon",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 150 / Acc 90 / +Critical rate up (med)"
+  },
+  {
+    "nome": "Heaven's Gate",
+    "categoria": "Gun",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 330 / Acc 75 / Rounds 12 / Ag +10"
+  },
+  {
+    "nome": "Heavensent Dress",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 105 / Ev 14 / Ma +4"
+  },
+  {
+    "nome": "Hex Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Eigaon (Heavy Curse dmg to 1 foe)"
+  },
+  {
+    "nome": "High Archangel Bra",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 325 / Ev 20 / +Reduce Elec dmg (high)"
+  },
+  {
+    "nome": "Hinokagutsuchi",
+    "categoria": "Weapon",
+    "vincolo": "Akechi",
+    "descrizione": "Atk 350 / Acc 90 / +Burn (med)"
+  },
+  {
+    "nome": "Hinokagutsuchi II",
+    "categoria": "Weapon",
+    "vincolo": "Akechi",
+    "descrizione": "Atk 360 / Acc 90 / +Burn (high)"
+  },
+  {
+    "nome": "Hope Diamond",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "All stats +3 / Regenerate 3"
+  },
+  {
+    "nome": "Hope Diamond R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "All stats +4 / Regenerate 3"
+  },
+  {
+    "nome": "Imprisoned Mjolnir",
+    "categoria": "Weapon",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 324 / Acc 88 / +Elec attacks"
+  },
+  {
+    "nome": "Inferno Horns",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Fire Amp / En +13"
+  },
+  {
+    "nome": "Inferno Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Agidyne (Heavy Fire dmg to 1 foe)"
+  },
+  {
+    "nome": "Judge End",
+    "categoria": "Gun",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 360 / Acc 75 / Rounds 6 / All stats +11"
+  },
+  {
+    "nome": "Judge of Hell",
+    "categoria": "Gun",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 340 / Acc 75 / Rounds 6 / All stats +10"
+  },
+  {
+    "nome": "Judgement Cross",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Divine Judgement (Halves remaining HP of 1 foe)"
+  },
+  {
+    "nome": "Karma Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Psio (Med Psy dmg to 1 foe)"
+  },
+  {
+    "nome": "King Frost Cape",
+    "categoria": "Protector",
+    "vincolo": "Unisex",
+    "descrizione": "Def 260 / Ev 16 / +Reduce Ice dmg (high)"
+  },
+  {
+    "nome": "King Frost Cape EX",
+    "categoria": "Protector",
+    "vincolo": "Unisex",
+    "descrizione": "Def 280 / Ev 16 / +Reduce Ice dmg (high)"
+  },
+  {
+    "nome": "Koh-i-Noor",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "All stats +2 / +Bless Amp"
+  },
+  {
+    "nome": "Koh-i-Noor R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "All stats +3 / +Bless Amp"
+  },
+  {
+    "nome": "Kugelbein",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Auto-Maraku"
+  },
+  {
+    "nome": "Kugelbein R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Auto-Maraku / En +8"
+  },
+  {
+    "nome": "Kuzuryu Gouhou",
+    "categoria": "Gun",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 300 / Acc 75 / Rounds 10 / St +5"
+  },
+  {
+    "nome": "Kuzuryu Gouhou EX",
+    "categoria": "Gun",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 320 / Acc 75 / Rounds 10 / St +7"
+  },
+  {
+    "nome": "Lucky Robe",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 210 / Ev 18 / Lu +5"
+  },
+  {
+    "nome": "Masquerade Ribbon",
+    "categoria": "Weapon",
+    "vincolo": "Ann",
+    "descrizione": "Atk 240 / Acc 88 / +Dizzy (low)"
+  },
+  {
+    "nome": "Masquerade Ribbon R",
+    "categoria": "Weapon",
+    "vincolo": "Ann",
+    "descrizione": "Atk 250 / Acc 88 / +Dizzy (low)"
+  },
+  {
+    "nome": "Megaton Raid Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Megaton Raid (Severe Phys dmg to 1 foe)"
+  },
+  {
+    "nome": "Megido Blaster",
+    "categoria": "Gun",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 380 / Acc 85 / Rounds 3 / +Burn (high)"
+  },
+  {
+    "nome": "Megido Fire",
+    "categoria": "Gun",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 350 / Acc 85 / Rounds 3 / +Burn (high)"
+  },
+  {
+    "nome": "Mirrirmina",
+    "categoria": "Gun",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 220 / Acc 75 / Rounds 6 / Ma +5"
+  },
+  {
+    "nome": "Mirrirmina EX",
+    "categoria": "Gun",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 235 / Acc 75 / Rounds 6 / Ma +7"
+  },
+  {
+    "nome": "Mjolnir",
+    "categoria": "Weapon",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 280 / Acc 88 / +Elec attacks"
+  },
+  {
+    "nome": "Moonlight Robe",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 50 / Ev 30 / +Repel Phys (high)"
+  },
+  {
+    "nome": "Moonlight Robe R",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 70 / Ev 30 / +Repel Phys (high)"
+  },
+  {
+    "nome": "Myriad Slash Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Myriad Slashes (Med Phys dmg to 1 foe 2-3 times)"
+  },
+  {
+    "nome": "Mystic Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Psiodyne (Heavy Psy dmg to 1 foe)"
+  },
+  {
+    "nome": "Naraka Whip",
+    "categoria": "Weapon",
+    "vincolo": "Ann",
+    "descrizione": "Atk 250 / Acc 90 / +Freeze (high)"
+  },
+  {
+    "nome": "Nataraja",
+    "categoria": "Gun",
+    "vincolo": "Joker",
+    "descrizione": "Atk 330 / Acc 85 / Rounds 8 / All stats +5"
+  },
+  {
+    "nome": "Nataraja EX",
+    "categoria": "Gun",
+    "vincolo": "Joker",
+    "descrizione": "Atk 350 / Acc 85 / Rounds 8 / All stats +6"
+  },
+  {
+    "nome": "Nuclear Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Freila (Med. Nuke dmg to 1 foe)"
+  },
+  {
+    "nome": "Official's Robe",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 280 / Ev 15 / +Evade Curse (high)"
+  },
+  {
+    "nome": "Official's Robe R",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 295 / Ev 20 / +Evade Curse (high)"
+  },
+  {
+    "nome": "Orichalcum",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Evade Phys / All stats +6"
+  },
+  {
+    "nome": "Orichalcum R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Evade Phys / All stats +7"
+  },
+  {
+    "nome": "Orlov",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+High Counter / En +3"
+  },
+  {
+    "nome": "Orlov R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+High Counter / En +5"
+  },
+  {
+    "nome": "Paradise Lost",
+    "categoria": "Weapon",
+    "vincolo": "Joker",
+    "descrizione": "Atk 325 / Acc 92 / +Reduce Curse dmg (high)"
+  },
+  {
+    "nome": "Paradise Lost R",
+    "categoria": "Weapon",
+    "vincolo": "Joker",
+    "descrizione": "Atk 340 / Acc 98 / +Reduce Curse dmg (high)"
+  },
+  {
+    "nome": "Paw-omber",
+    "categoria": "Gun",
+    "vincolo": "Haru",
+    "descrizione": "Atk 220 / Acc 70 / Rounds 1 / +Confuse (med)"
+  },
+  {
+    "nome": "Pawzooka",
+    "categoria": "Gun",
+    "vincolo": "Haru",
+    "descrizione": "Atk 200 / Acc 70 / Rounds 1 / +Confuse (med)"
+  },
+  {
+    "nome": "Picaresque Crown",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Insta-heal (Auto recover from ailment after 1 turn) / All stats +3"
+  },
+  {
+    "nome": "Picaresque Hat",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Insta-heal (Auto recover from ailment after 1 turn) / All stats +2"
+  },
+  {
+    "nome": "Pink Buster",
+    "categoria": "Gun",
+    "vincolo": "Ann",
+    "descrizione": "Atk 135 / Acc 90 / Rounds 12 / +Brainwash (med)"
+  },
+  {
+    "nome": "Prayer Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Kouha (Light Bless dmg to 1 foe)"
+  },
+  {
+    "nome": "Providence",
+    "categoria": "Gun",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 350 / Acc 75 / Rounds 10 / Ag +13"
+  },
+  {
+    "nome": "Psy Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Psi (Light Psy dmg to 1 foe)"
+  },
+  {
+    "nome": "Pumpkin Bomb",
+    "categoria": "Gun",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 150 / Acc 85 / Rounds 3 / +Burn (med)"
+  },
+  {
+    "nome": "Pumpkin Buster",
+    "categoria": "Gun",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 160 / Acc 85 / Rounds 3 / +Burn (high)"
+  },
+  {
+    "nome": "Queen's Necklace",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Mana Bonus (SP +10%) / All stats +1"
+  },
+  {
+    "nome": "Queen's Necklace R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Mana Bonus (SP +10%) / All stats +2"
+  },
+  {
+    "nome": "Reactor Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Freidyne (Heavy Nuke dmg to 1 foe)"
+  },
+  {
+    "nome": "Rebellion Anklet",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Rebellion (Incr. Critical rate for 1 ally)"
+  },
+  {
+    "nome": "Red String",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Lu +10 / +Attack Master (Incr. Attack at start of battle)"
+  },
+  {
+    "nome": "Red String R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Lu +13 / +Attack Master (Incr. Attack at start of battle)"
+  },
+  {
+    "nome": "Regent",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Str +3 / +Auto-Tarukaja"
+  },
+  {
+    "nome": "Regent R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "Str +5 / +Auto-Tarukaja"
+  },
+  {
+    "nome": "Rejuvenate Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Samarecarm (Revive 1 ally with full HP)"
+  },
+  {
+    "nome": "Revival Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Recarm (Revive 1 ally with 50% HP)"
+  },
+  {
+    "nome": "Revolution Anklet",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Revolution (Increases Critical rate of everyone on field)"
+  },
+  {
+    "nome": "Rising Slash Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Rising Slash (Heavy Phys dmg to 1 foe. Powers up after baton pass)"
+  },
+  {
+    "nome": "Rosary of Purity",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Holy Benevolence (Revive all fallen allies to full HP)"
+  },
+  {
+    "nome": "Rush Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Kill Rush (Light Phys dmg to 1 foe 1-3 times)"
+  },
+  {
+    "nome": "Ruyi Jingu Bang",
+    "categoria": "Weapon",
+    "vincolo": "Ryuji",
+    "descrizione": "Atk 270 / Acc 88 / +Auto-Tarukaja"
+  },
+  {
+    "nome": "Sabazios",
+    "categoria": "Weapon",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 315 / Acc 90 / +Critical rate up (med)"
+  },
+  {
+    "nome": "Sahasrara",
+    "categoria": "Gun",
+    "vincolo": "Kasumi",
+    "descrizione": "Atk 320 / Acc 90 / Rounds 10 / All stats +5"
+  },
+  {
+    "nome": "Sahasrara EX",
+    "categoria": "Gun",
+    "vincolo": "Kasumi",
+    "descrizione": "Atk 345 / Acc 90 / Rounds 10 / All stats +6"
+  },
+  {
+    "nome": "Senryou Yakusha",
+    "categoria": "Weapon",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 130 / Acc 90 / St +5"
+  },
+  {
+    "nome": "Senryou Yakusha R",
+    "categoria": "Weapon",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 140 / Acc 90 / St +6"
+  },
+  {
+    "nome": "Shiny Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Invigorate 3 (Restores 7 SP each turn) / All stats +2"
+  },
+  {
+    "nome": "Shiny Belt R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Invigorate 3 (Restores 7 SP each turn) / All stats +3"
+  },
+  {
+    "nome": "Silk Dress",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 95 / Ev 10 / +Evade Magic (low)"
+  },
+  {
+    "nome": "Sirius Armor",
+    "categoria": "Protector",
+    "vincolo": "Unisex",
+    "descrizione": "Def 250 / Ev 10 / +Reduce Magic dmg (high)"
+  },
+  {
+    "nome": "Sirius Armor EX",
+    "categoria": "Protector",
+    "vincolo": "Unisex",
+    "descrizione": "Def 330 / Ev 10 / +Reduce Magic dmg (high)"
+  },
+  {
+    "nome": "Snow Queen's Whip",
+    "categoria": "Weapon",
+    "vincolo": "Ann",
+    "descrizione": "Atk 260 / Acc 90 / +Auto-Sukukaja"
+  },
+  {
+    "nome": "Snow Queen's Whip II",
+    "categoria": "Weapon",
+    "vincolo": "Ann",
+    "descrizione": "Atk 280 / Acc 90 / +Auto-Sukukaja"
+  },
+  {
+    "nome": "Snow Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Bufula (Med. Ice dmg to 1 foe)"
+  },
+  {
+    "nome": "Spark Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Zionga (Med. Elec dmg to 1 foe)"
+  },
+  {
+    "nome": "Special Shot Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+One-shot Kill (Heavy Gun dmg to area of foes with high Critical)"
+  },
+  {
+    "nome": "Spiral Aid Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Media (Small HP recovery for all allies)"
+  },
+  {
+    "nome": "Spiral Amrita Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Amrita Shower (Cure all non-special ailments for all allies)"
+  },
+  {
+    "nome": "Spiral Atom Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mafrei (Light Nuke dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Blessing Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Makouga (Med. Bless dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Blizzard Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mabufudyne (Heavy Ice dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Breeze Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Magaru (Light Wind dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Cure Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mediarama (Med. HP restore to all allies)"
+  },
+  {
+    "nome": "Spiral Curse Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Maeiga (Med. Curse dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Divine Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Makougaon (Heavy Bless dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Ember Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Maragi (Light Fire dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Energy Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Energy Shower (Cures Confuse/Fear/Despair/Rage/Brainwash for all allies)"
+  },
+  {
+    "nome": "Spiral Frost Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mabufu (Light Ice dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Gale Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Magarudyne (Heavy Wind dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Grudge Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+MaEiha (Light Curse dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Hallowed Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mahamaon (Bless, Med. chance of insta-killing all foes)"
+  },
+  {
+    "nome": "Spiral Heal Charm",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Madiarahan (Full HP restore for entire party)"
+  },
+  {
+    "nome": "Spiral Hell Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mamudoon (Curse, Med. chance of insta-killing all foes)"
+  },
+  {
+    "nome": "Spiral Hex Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Maeigaon (Heavy Curse dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Inferno Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Maragidyne (Heavy Fire dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Karma Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mapsio (Med. Psy dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Mystic Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mapsiodyne (Heavy Psy dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Nuclear Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mafreila (Med. Nuke dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Prayer Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Makouha (Light Bless dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Psy Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mapsi (Light Psy dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Reactor Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mafreidyne (Heavy Nuke dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Snow Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mabufula (Med. Ice dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Spark Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mazionga (Med. Elec dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Static Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Mazio (Light Elec dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Thunder Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Maziodyne (Heavy Elec dmg to all foes)"
+  },
+  {
+    "nome": "Spiral Wind Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Magarula (Med. Wind dmg to all foes)"
+  },
+  {
+    "nome": "Static Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Zio (Light Elec dmg to 1 foe)"
+  },
+  {
+    "nome": "Stone of Scone",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "En +3 / +Dodge Phys"
+  },
+  {
+    "nome": "Stone of Scone R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "En +5 / +Dodge Phys"
+  },
+  {
+    "nome": "Storm Sculpture",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Panta Rhei (Severe Wind dmg to 1 foe)"
+  },
+  {
+    "nome": "Sudarshana",
+    "categoria": "Gun",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 315 / Acc 90 / Rounds 5 / +Dizzy (med)"
+  },
+  {
+    "nome": "Sudarshana EX",
+    "categoria": "Gun",
+    "vincolo": "Morgana",
+    "descrizione": "Atk 330 / Acc 90 / Rounds 5 / +Dizzy (high)"
+  },
+  {
+    "nome": "Super Lucky Robe",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 220 / Ev 18 / Lu +10"
+  },
+  {
+    "nome": "Swift Strike Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Swift Strike (Miniscule Phys dmg to all foes 2-4 times)"
+  },
+  {
+    "nome": "Sword Dance Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Sword Dance (Colossal Phys dmg to 1 foe with high crit)"
+  },
+  {
+    "nome": "Sword of Sinai",
+    "categoria": "Weapon",
+    "vincolo": "Kasumi",
+    "descrizione": "Atk 345 / Acc 95 / +Dizzy (med)"
+  },
+  {
+    "nome": "Sword of Sinai II",
+    "categoria": "Weapon",
+    "vincolo": "Kasumi",
+    "descrizione": "Atk 365 / Acc 95 / +Dizzy (high)"
+  },
+  {
+    "nome": "Tantric Oath",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 272 / Ev 18 / +Reduce Magic dmg (high)"
+  },
+  {
+    "nome": "Tantric Oath R",
+    "categoria": "Protector",
+    "vincolo": "Men",
+    "descrizione": "Def 350 / Ev 18 / +Reduce Magic dmg (high)"
+  },
+  {
+    "nome": "Tapsuan",
+    "categoria": "Protector",
+    "vincolo": "Women",
+    "descrizione": "Def 170 / Ev 12 / +Evade Wind (high)"
+  },
+  {
+    "nome": "The Great Thief Stick",
+    "categoria": "Weapon",
+    "vincolo": "Joker",
+    "descrizione": "Atk 150 / Acc 92 / +Random ailment (med)"
+  },
+  {
+    "nome": "Thunder Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Ziodyne (Heavy elec dmg to 1 foe)"
+  },
+  {
+    "nome": "Triple Shot Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Triple Down (Light Gun dmg to all foes 3 times)"
+  },
+  {
+    "nome": "Tyrant Pistol",
+    "categoria": "Gun",
+    "vincolo": "Joker",
+    "descrizione": "Atk 350 / Acc 85 / Rounds 8 / Ma +10"
+  },
+  {
+    "nome": "Tyrant Pistol EX",
+    "categoria": "Gun",
+    "vincolo": "Joker",
+    "descrizione": "Atk 370 / Acc 85 / Rounds 8 / Ma +15"
+  },
+  {
+    "nome": "Unparalleled Vajra",
+    "categoria": "Weapon",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 325 / Acc 90 / +Random ailment (high)"
+  },
+  {
+    "nome": "Usumidori",
+    "categoria": "Weapon",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 324 / Acc 88 / +Fear (high)"
+  },
+  {
+    "nome": "Usumidori R",
+    "categoria": "Weapon",
+    "vincolo": "Yusuke",
+    "descrizione": "Atk 340 / Acc 88 / +Fear (high)"
+  },
+  {
+    "nome": "Vajra",
+    "categoria": "Weapon",
+    "vincolo": "Makoto",
+    "descrizione": "Atk 305 / Acc 90 / +Random ailment (high)"
+  },
+  {
+    "nome": "Vorpal Blade Belt",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Vorpal Blade (Severe Phys dmg to all foes)"
+  },
+  {
+    "nome": "White Headband",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+50 HP"
+  },
+  {
+    "nome": "White Headband R",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Life Surge (HP +30%) / En +8"
+  },
+  {
+    "nome": "Wild Hunt",
+    "categoria": "Gun",
+    "vincolo": "Ann",
+    "descrizione": "Atk 320 / Acc 90 / +Despair (med)"
+  },
+  {
+    "nome": "Wind Ring",
+    "categoria": "Accessory",
+    "vincolo": null,
+    "descrizione": "+Garula (Med. Wind dmg to 1 foe)"
+  },
+  {
+    "nome": "Yagrush",
+    "categoria": "Gun",
+    "vincolo": "Haru",
+    "descrizione": "Atk 345 / Acc 70 / Rounds 1 / +Shock (med)"
+  },
+  {
+    "nome": "Yagrush EX",
+    "categoria": "Gun",
+    "vincolo": "Haru",
+    "descrizione": "Atk 360 / Acc 70 / Rounds 1 / +Shock (high)"
+  }
+]

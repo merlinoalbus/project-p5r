@@ -1,0 +1,19 @@
+{
+  "_nota": "Correzioni applicate ai dati grezzi della fonte primaria PRIMA della normalizzazione. Ogni voce cita la fonte. Le rinomine allineano i nomi alla localizzazione inglese di Persona 5 ROYAL (la fonte primaria conserva alcuni nomi della versione base).",
+  "rinominaSkill": [
+    { "da": "Absorb Phys", "a": "Drain Phys", "fonte": "P5R rinomina 'Absorb' in 'Drain' — confermato da aqiu384 roy-skill-data.json" },
+    { "da": "Absorb Fire", "a": "Drain Fire", "fonte": "idem" },
+    { "da": "Absorb Ice", "a": "Drain Ice", "fonte": "idem" },
+    { "da": "Absorb Elec", "a": "Drain Elec", "fonte": "idem" },
+    { "da": "Absorb Wind", "a": "Drain Wind", "fonte": "idem" },
+    { "da": "Absorb Psy", "a": "Drain Psy", "fonte": "idem" },
+    { "da": "Absorb Nuke", "a": "Drain Nuke", "fonte": "idem" },
+    { "da": "Absorb Bless", "a": "Drain Bless", "fonte": "idem" },
+    { "da": "Absorb Curse", "a": "Drain Curse", "fonte": "idem" }
+  ],
+  "rinominaOggetti": [],
+  "livelliSkill": [],
+  "affinita": [],
+  "eredita": [],
+  "campiSkill": []
+}

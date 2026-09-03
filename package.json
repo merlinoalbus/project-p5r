@@ -18,7 +18,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:scarica": "tsx scripts/seed/scaricaDataset.ts",
+    "seed:normalizza": "tsx scripts/seed/normalizzaDataset.ts",
+    "seed:verifica": "tsx scripts/seed/verificaIncrociata.ts"
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",

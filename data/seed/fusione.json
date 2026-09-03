@@ -1,0 +1,2143 @@
+{
+  "arcani": [
+    "Fool",
+    "Magician",
+    "Priestess",
+    "Empress",
+    "Emperor",
+    "Hierophant",
+    "Lovers",
+    "Chariot",
+    "Justice",
+    "Hermit",
+    "Fortune",
+    "Strength",
+    "Hanged",
+    "Death",
+    "Temperance",
+    "Devil",
+    "Tower",
+    "Star",
+    "Moon",
+    "Sun",
+    "Judgement",
+    "Faith",
+    "Councillor",
+    "World"
+  ],
+  "tabella": [
+    {
+      "a": "Fool",
+      "b": "Fool",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Fool",
+      "b": "Magician",
+      "risultato": "Death"
+    },
+    {
+      "a": "Fool",
+      "b": "Priestess",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Fool",
+      "b": "Empress",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Fool",
+      "b": "Emperor",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Fool",
+      "b": "Hierophant",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Fool",
+      "b": "Lovers",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Fool",
+      "b": "Chariot",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Fool",
+      "b": "Justice",
+      "risultato": "Star"
+    },
+    {
+      "a": "Fool",
+      "b": "Hermit",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Fool",
+      "b": "Fortune",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Fool",
+      "b": "Strength",
+      "risultato": "Death"
+    },
+    {
+      "a": "Fool",
+      "b": "Hanged",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Fool",
+      "b": "Death",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Fool",
+      "b": "Temperance",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Fool",
+      "b": "Devil",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Fool",
+      "b": "Tower",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Fool",
+      "b": "Star",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Fool",
+      "b": "Moon",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Fool",
+      "b": "Sun",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Fool",
+      "b": "Judgement",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Fool",
+      "b": "Faith",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Fool",
+      "b": "Councillor",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Magician",
+      "b": "Magician",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Magician",
+      "b": "Priestess",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Magician",
+      "b": "Empress",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Magician",
+      "b": "Emperor",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Magician",
+      "b": "Hierophant",
+      "risultato": "Death"
+    },
+    {
+      "a": "Magician",
+      "b": "Lovers",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Magician",
+      "b": "Chariot",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Magician",
+      "b": "Justice",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Magician",
+      "b": "Hermit",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Magician",
+      "b": "Fortune",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Magician",
+      "b": "Strength",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Magician",
+      "b": "Hanged",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Magician",
+      "b": "Death",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Magician",
+      "b": "Temperance",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Magician",
+      "b": "Devil",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Magician",
+      "b": "Tower",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Magician",
+      "b": "Star",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Magician",
+      "b": "Moon",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Magician",
+      "b": "Sun",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Magician",
+      "b": "Judgement",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Magician",
+      "b": "Faith",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Magician",
+      "b": "Councillor",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Priestess",
+      "b": "Priestess",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Priestess",
+      "b": "Empress",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Priestess",
+      "b": "Emperor",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Priestess",
+      "b": "Hierophant",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Priestess",
+      "b": "Lovers",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Priestess",
+      "b": "Chariot",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Priestess",
+      "b": "Justice",
+      "risultato": "Death"
+    },
+    {
+      "a": "Priestess",
+      "b": "Hermit",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Priestess",
+      "b": "Fortune",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Priestess",
+      "b": "Strength",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Priestess",
+      "b": "Hanged",
+      "risultato": "Death"
+    },
+    {
+      "a": "Priestess",
+      "b": "Death",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Priestess",
+      "b": "Temperance",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Priestess",
+      "b": "Devil",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Priestess",
+      "b": "Tower",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Priestess",
+      "b": "Star",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Priestess",
+      "b": "Moon",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Priestess",
+      "b": "Sun",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Priestess",
+      "b": "Judgement",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Priestess",
+      "b": "Faith",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Priestess",
+      "b": "Councillor",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Empress",
+      "b": "Empress",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Empress",
+      "b": "Emperor",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Empress",
+      "b": "Hierophant",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Empress",
+      "b": "Lovers",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Empress",
+      "b": "Chariot",
+      "risultato": "Star"
+    },
+    {
+      "a": "Empress",
+      "b": "Justice",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Empress",
+      "b": "Hermit",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Empress",
+      "b": "Fortune",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Empress",
+      "b": "Strength",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Empress",
+      "b": "Hanged",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Empress",
+      "b": "Death",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Empress",
+      "b": "Temperance",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Empress",
+      "b": "Devil",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Empress",
+      "b": "Tower",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Empress",
+      "b": "Star",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Empress",
+      "b": "Moon",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Empress",
+      "b": "Sun",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Empress",
+      "b": "Judgement",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Empress",
+      "b": "Faith",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Empress",
+      "b": "Councillor",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Emperor",
+      "b": "Emperor",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Emperor",
+      "b": "Hierophant",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Emperor",
+      "b": "Lovers",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Emperor",
+      "b": "Chariot",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Emperor",
+      "b": "Justice",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Emperor",
+      "b": "Hermit",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Emperor",
+      "b": "Fortune",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Emperor",
+      "b": "Strength",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Emperor",
+      "b": "Hanged",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Emperor",
+      "b": "Death",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Emperor",
+      "b": "Temperance",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Emperor",
+      "b": "Devil",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Emperor",
+      "b": "Tower",
+      "risultato": "Star"
+    },
+    {
+      "a": "Emperor",
+      "b": "Star",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Emperor",
+      "b": "Moon",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Emperor",
+      "b": "Sun",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Emperor",
+      "b": "Judgement",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Emperor",
+      "b": "Faith",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Emperor",
+      "b": "Councillor",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Hierophant",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Lovers",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Chariot",
+      "risultato": "Star"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Justice",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Hermit",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Fortune",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Strength",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Hanged",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Death",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Temperance",
+      "risultato": "Death"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Devil",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Tower",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Star",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Moon",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Sun",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Judgement",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Faith",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Hierophant",
+      "b": "Councillor",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Lovers",
+      "b": "Lovers",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Lovers",
+      "b": "Chariot",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Lovers",
+      "b": "Justice",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Lovers",
+      "b": "Hermit",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Lovers",
+      "b": "Fortune",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Lovers",
+      "b": "Strength",
+      "risultato": "Death"
+    },
+    {
+      "a": "Lovers",
+      "b": "Hanged",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Lovers",
+      "b": "Death",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Lovers",
+      "b": "Temperance",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Lovers",
+      "b": "Devil",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Lovers",
+      "b": "Tower",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Lovers",
+      "b": "Star",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Lovers",
+      "b": "Moon",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Lovers",
+      "b": "Sun",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Lovers",
+      "b": "Judgement",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Lovers",
+      "b": "Faith",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Lovers",
+      "b": "Councillor",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Chariot",
+      "b": "Chariot",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Chariot",
+      "b": "Justice",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Chariot",
+      "b": "Hermit",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Chariot",
+      "b": "Fortune",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Chariot",
+      "b": "Strength",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Chariot",
+      "b": "Hanged",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Chariot",
+      "b": "Death",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Chariot",
+      "b": "Temperance",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Chariot",
+      "b": "Devil",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Chariot",
+      "b": "Tower",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Chariot",
+      "b": "Star",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Chariot",
+      "b": "Moon",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Chariot",
+      "b": "Sun",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Chariot",
+      "b": "Faith",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Chariot",
+      "b": "Councillor",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Justice",
+      "b": "Justice",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Justice",
+      "b": "Hermit",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Justice",
+      "b": "Fortune",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Justice",
+      "b": "Strength",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Justice",
+      "b": "Hanged",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Justice",
+      "b": "Death",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Justice",
+      "b": "Temperance",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Justice",
+      "b": "Devil",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Justice",
+      "b": "Tower",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Justice",
+      "b": "Star",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Justice",
+      "b": "Moon",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Justice",
+      "b": "Sun",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Justice",
+      "b": "Faith",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Justice",
+      "b": "Councillor",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Hermit",
+      "b": "Hermit",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Hermit",
+      "b": "Fortune",
+      "risultato": "Star"
+    },
+    {
+      "a": "Hermit",
+      "b": "Strength",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Hermit",
+      "b": "Hanged",
+      "risultato": "Star"
+    },
+    {
+      "a": "Hermit",
+      "b": "Death",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Hermit",
+      "b": "Temperance",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Hermit",
+      "b": "Devil",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Hermit",
+      "b": "Tower",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Hermit",
+      "b": "Star",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Hermit",
+      "b": "Moon",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Hermit",
+      "b": "Sun",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Hermit",
+      "b": "Judgement",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Hermit",
+      "b": "Faith",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Hermit",
+      "b": "Councillor",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Fortune",
+      "b": "Fortune",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Fortune",
+      "b": "Strength",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Fortune",
+      "b": "Hanged",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Fortune",
+      "b": "Death",
+      "risultato": "Star"
+    },
+    {
+      "a": "Fortune",
+      "b": "Temperance",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Fortune",
+      "b": "Devil",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Fortune",
+      "b": "Tower",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Fortune",
+      "b": "Star",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Fortune",
+      "b": "Moon",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Fortune",
+      "b": "Sun",
+      "risultato": "Star"
+    },
+    {
+      "a": "Fortune",
+      "b": "Judgement",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Fortune",
+      "b": "Faith",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Fortune",
+      "b": "Councillor",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Strength",
+      "b": "Strength",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Strength",
+      "b": "Hanged",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Strength",
+      "b": "Death",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Strength",
+      "b": "Temperance",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Strength",
+      "b": "Devil",
+      "risultato": "Death"
+    },
+    {
+      "a": "Strength",
+      "b": "Tower",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Strength",
+      "b": "Star",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Strength",
+      "b": "Moon",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Strength",
+      "b": "Sun",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Strength",
+      "b": "Faith",
+      "risultato": "Star"
+    },
+    {
+      "a": "Strength",
+      "b": "Councillor",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Hanged",
+      "b": "Hanged",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Hanged",
+      "b": "Death",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Hanged",
+      "b": "Temperance",
+      "risultato": "Death"
+    },
+    {
+      "a": "Hanged",
+      "b": "Devil",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Hanged",
+      "b": "Tower",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Hanged",
+      "b": "Star",
+      "risultato": "Justice"
+    },
+    {
+      "a": "Hanged",
+      "b": "Moon",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Hanged",
+      "b": "Sun",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Hanged",
+      "b": "Judgement",
+      "risultato": "Star"
+    },
+    {
+      "a": "Hanged",
+      "b": "Faith",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Hanged",
+      "b": "Councillor",
+      "risultato": "Star"
+    },
+    {
+      "a": "Death",
+      "b": "Death",
+      "risultato": "Death"
+    },
+    {
+      "a": "Death",
+      "b": "Temperance",
+      "risultato": "Hanged"
+    },
+    {
+      "a": "Death",
+      "b": "Devil",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Death",
+      "b": "Tower",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Death",
+      "b": "Star",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Death",
+      "b": "Moon",
+      "risultato": "Hierophant"
+    },
+    {
+      "a": "Death",
+      "b": "Sun",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Death",
+      "b": "Faith",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Death",
+      "b": "Councillor",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Temperance",
+      "b": "Temperance",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Temperance",
+      "b": "Devil",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Temperance",
+      "b": "Tower",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Temperance",
+      "b": "Star",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Temperance",
+      "b": "Moon",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Temperance",
+      "b": "Sun",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Temperance",
+      "b": "Judgement",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Temperance",
+      "b": "Faith",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Temperance",
+      "b": "Councillor",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Devil",
+      "b": "Devil",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Devil",
+      "b": "Tower",
+      "risultato": "Magician"
+    },
+    {
+      "a": "Devil",
+      "b": "Star",
+      "risultato": "Strength"
+    },
+    {
+      "a": "Devil",
+      "b": "Moon",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Devil",
+      "b": "Sun",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Devil",
+      "b": "Judgement",
+      "risultato": "Lovers"
+    },
+    {
+      "a": "Devil",
+      "b": "Faith",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Devil",
+      "b": "Councillor",
+      "risultato": "Chariot"
+    },
+    {
+      "a": "Tower",
+      "b": "Tower",
+      "risultato": "Tower"
+    },
+    {
+      "a": "Tower",
+      "b": "Star",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "Tower",
+      "b": "Moon",
+      "risultato": "Hermit"
+    },
+    {
+      "a": "Tower",
+      "b": "Sun",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Tower",
+      "b": "Judgement",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Tower",
+      "b": "Faith",
+      "risultato": "Death"
+    },
+    {
+      "a": "Tower",
+      "b": "Councillor",
+      "risultato": "Death"
+    },
+    {
+      "a": "Star",
+      "b": "Star",
+      "risultato": "Star"
+    },
+    {
+      "a": "Star",
+      "b": "Moon",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Star",
+      "b": "Sun",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Star",
+      "b": "Judgement",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Star",
+      "b": "Faith",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Star",
+      "b": "Councillor",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Moon",
+      "b": "Moon",
+      "risultato": "Moon"
+    },
+    {
+      "a": "Moon",
+      "b": "Sun",
+      "risultato": "Empress"
+    },
+    {
+      "a": "Moon",
+      "b": "Judgement",
+      "risultato": "Fool"
+    },
+    {
+      "a": "Moon",
+      "b": "Faith",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Moon",
+      "b": "Councillor",
+      "risultato": "Temperance"
+    },
+    {
+      "a": "Sun",
+      "b": "Sun",
+      "risultato": "Sun"
+    },
+    {
+      "a": "Sun",
+      "b": "Judgement",
+      "risultato": "Death"
+    },
+    {
+      "a": "Sun",
+      "b": "Faith",
+      "risultato": "Emperor"
+    },
+    {
+      "a": "Sun",
+      "b": "Councillor",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Judgement",
+      "b": "Judgement",
+      "risultato": "Judgement"
+    },
+    {
+      "a": "Judgement",
+      "b": "Faith",
+      "risultato": "Fortune"
+    },
+    {
+      "a": "Judgement",
+      "b": "Councillor",
+      "risultato": "Devil"
+    },
+    {
+      "a": "Faith",
+      "b": "Faith",
+      "risultato": "Faith"
+    },
+    {
+      "a": "Faith",
+      "b": "Councillor",
+      "risultato": "Priestess"
+    },
+    {
+      "a": "Councillor",
+      "b": "Councillor",
+      "risultato": "Councillor"
+    },
+    {
+      "a": "World",
+      "b": "World",
+      "risultato": "World"
+    }
+  ],
+  "speciali": [
+    {
+      "risultato": "Alice",
+      "ingredienti": [
+        "Belial",
+        "Nebiros"
+      ]
+    },
+    {
+      "risultato": "Ardha",
+      "ingredienti": [
+        "Shiva",
+        "Parvati"
+      ]
+    },
+    {
+      "risultato": "Asura",
+      "ingredienti": [
+        "Jikokuten",
+        "Zouchouten",
+        "Koumokuten",
+        "Bishamonten"
+      ]
+    },
+    {
+      "risultato": "Black Frost",
+      "ingredienti": [
+        "Jack-o'-Lantern",
+        "Jack Frost",
+        "King Frost"
+      ]
+    },
+    {
+      "risultato": "Bugs",
+      "ingredienti": [
+        "Pixie",
+        "Pisaca",
+        "Hariti"
+      ]
+    },
+    {
+      "risultato": "Chi You",
+      "ingredienti": [
+        "White Rider",
+        "Hecatoncheires",
+        "Thor",
+        "Cu Chulainn",
+        "Yoshitsune"
+      ]
+    },
+    {
+      "risultato": "Flauros",
+      "ingredienti": [
+        "Berith",
+        "Eligor",
+        "Orobas"
+      ]
+    },
+    {
+      "risultato": "Hell Biker",
+      "ingredienti": [
+        "Archangel",
+        "Matador",
+        "Decarabia"
+      ]
+    },
+    {
+      "risultato": "Izanagi-no-Okami",
+      "ingredienti": [
+        "Yamata-no-Orochi",
+        "Throne",
+        "Inugami",
+        "Raja Naga",
+        "Barong",
+        "Norn"
+      ]
+    },
+    {
+      "risultato": "Izanagi-no-Okami Picaro",
+      "ingredienti": [
+        "Okuninushi",
+        "Orthrus",
+        "Kali",
+        "Mithras",
+        "Cu Chulainn",
+        "Lucifer"
+      ]
+    },
+    {
+      "risultato": "Kohryu",
+      "ingredienti": [
+        "Seiryu",
+        "Byakko",
+        "Suzaku",
+        "Genbu"
+      ]
+    },
+    {
+      "risultato": "Lucifer",
+      "ingredienti": [
+        "Anubis",
+        "Ananta",
+        "Trumpeter",
+        "Michael",
+        "Metatron",
+        "Satan"
+      ]
+    },
+    {
+      "risultato": "Metatron",
+      "ingredienti": [
+        "Principality",
+        "Power",
+        "Dominion",
+        "Melchizedek",
+        "Sandalphon",
+        "Michael"
+      ]
+    },
+    {
+      "risultato": "Michael",
+      "ingredienti": [
+        "Gabriel",
+        "Raphael",
+        "Uriel"
+      ]
+    },
+    {
+      "risultato": "Neko Shogun",
+      "ingredienti": [
+        "Kodama",
+        "Sudama",
+        "Anzu"
+      ]
+    },
+    {
+      "risultato": "Ongyo-Ki",
+      "ingredienti": [
+        "Kin-Ki",
+        "Sui-Ki",
+        "Fuu-Ki"
+      ]
+    },
+    {
+      "risultato": "Satanael",
+      "ingredienti": [
+        "Arsène",
+        "Anzu",
+        "Ishtar",
+        "Satan",
+        "Lucifer",
+        "Michael"
+      ]
+    },
+    {
+      "risultato": "Seth",
+      "ingredienti": [
+        "Isis",
+        "Anubis",
+        "Thoth",
+        "Horus"
+      ]
+    },
+    {
+      "risultato": "Shiva",
+      "ingredienti": [
+        "Barong",
+        "Rangda"
+      ]
+    },
+    {
+      "risultato": "Sraosha",
+      "ingredienti": [
+        "Mitra",
+        "Mithras",
+        "Melchizedek",
+        "Lilith",
+        "Gabriel"
+      ]
+    },
+    {
+      "risultato": "Tam Lin",
+      "ingredienti": [
+        "Cait Sith",
+        "High Pixie",
+        "Leanan Sidhe"
+      ]
+    },
+    {
+      "risultato": "Trumpeter",
+      "ingredienti": [
+        "White Rider",
+        "Red Rider",
+        "Black Rider",
+        "Pale Rider"
+      ]
+    },
+    {
+      "risultato": "Vasuki",
+      "ingredienti": [
+        "Naga",
+        "Ananta",
+        "Raja Naga"
+      ]
+    },
+    {
+      "risultato": "Yoshitsune",
+      "ingredienti": [
+        "Shiki-Ouji",
+        "Arahabaki",
+        "Okuninushi",
+        "Yatagarasu",
+        "Futsunushi"
+      ]
+    }
+  ],
+  "tesori": {
+    "nomi": [
+      "Crystal Skull",
+      "Koh-i-Noor",
+      "Queen's Necklace",
+      "Regent",
+      "Stone of Scone",
+      "Orlov",
+      "Emperor's Amulet",
+      "Hope Diamond",
+      "Orichalcum"
+    ],
+    "modificatori": {
+      "Fool": [
+        2,
+        1,
+        1,
+        -1,
+        -1,
+        -1,
+        -1,
+        1,
+        1
+      ],
+      "Magician": [
+        1,
+        -1,
+        -1,
+        1,
+        2,
+        1,
+        1,
+        1,
+        -2
+      ],
+      "Priestess": [
+        1,
+        2,
+        1,
+        -1,
+        -1,
+        1,
+        -1,
+        1,
+        1
+      ],
+      "Empress": [
+        1,
+        1,
+        2,
+        -1,
+        -1,
+        1,
+        1,
+        -1,
+        1
+      ],
+      "Emperor": [
+        -1,
+        -1,
+        -1,
+        2,
+        1,
+        -1,
+        1,
+        1,
+        -1
+      ],
+      "Hierophant": [
+        -1,
+        -2,
+        -1,
+        1,
+        1,
+        -1,
+        -1,
+        -1,
+        2
+      ],
+      "Lovers": [
+        1,
+        1,
+        1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -2,
+        -1
+      ],
+      "Chariot": [
+        -1,
+        -1,
+        -1,
+        1,
+        1,
+        1,
+        -2,
+        -1,
+        -1
+      ],
+      "Justice": [
+        1,
+        2,
+        -1,
+        1,
+        -1,
+        -2,
+        1,
+        -1,
+        1
+      ],
+      "Hermit": [
+        -2,
+        1,
+        -1,
+        2,
+        -1,
+        -1,
+        1,
+        1,
+        -1
+      ],
+      "Fortune": [
+        -1,
+        -1,
+        -1,
+        1,
+        2,
+        1,
+        -1,
+        1,
+        1
+      ],
+      "Strength": [
+        -1,
+        1,
+        1,
+        -1,
+        1,
+        2,
+        1,
+        -1,
+        -1
+      ],
+      "Hanged": [
+        -1,
+        -1,
+        1,
+        1,
+        -1,
+        1,
+        2,
+        -1,
+        1
+      ],
+      "Death": [
+        1,
+        1,
+        -1,
+        1,
+        1,
+        -1,
+        -1,
+        2,
+        1
+      ],
+      "Temperance": [
+        2,
+        -1,
+        1,
+        -1,
+        -1,
+        1,
+        1,
+        -1,
+        -1
+      ],
+      "Devil": [
+        -1,
+        1,
+        1,
+        -2,
+        -1,
+        -1,
+        2,
+        -1,
+        1
+      ],
+      "Tower": [
+        -1,
+        1,
+        -2,
+        -1,
+        1,
+        -1,
+        1,
+        -1,
+        -1
+      ],
+      "Star": [
+        1,
+        -1,
+        -1,
+        1,
+        1,
+        2,
+        -1,
+        1,
+        1
+      ],
+      "Moon": [
+        -1,
+        -1,
+        2,
+        -1,
+        -2,
+        1,
+        -1,
+        -1,
+        -1
+      ],
+      "Sun": [
+        1,
+        1,
+        -1,
+        1,
+        -1,
+        1,
+        -1,
+        2,
+        1
+      ],
+      "Judgement": [
+        -1,
+        -1,
+        -1,
+        -1,
+        1,
+        -1,
+        1,
+        -1,
+        1
+      ],
+      "Faith": [
+        1,
+        1,
+        1,
+        -1,
+        1,
+        -1,
+        1,
+        1,
+        2
+      ],
+      "Councillor": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        -1,
+        1,
+        1,
+        1
+      ],
+      "World": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "eredita": {
+    "tipi": [
+      "Physical",
+      "Fire",
+      "Ice",
+      "Electric",
+      "Wind",
+      "Psy",
+      "Nuclear",
+      "Bless",
+      "Curse",
+      "Healing",
+      "Ailment",
+      "Almighty"
+    ],
+    "colonne": [
+      "phys",
+      "gun",
+      "fire",
+      "ice",
+      "electric",
+      "wind",
+      "psy",
+      "nuclear",
+      "bless",
+      "curse",
+      "healing",
+      "ailment"
+    ],
+    "matrice": {
+      "Physical": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true
+      ],
+      "Fire": [
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "Ice": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "Electric": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "Wind": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "Psy": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "Nuclear": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "Bless": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "Curse": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "Healing": [
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "Ailment": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "Almighty": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  },
+  "dlc": [
+    [
+      "Izanagi",
+      "Izanagi Picaro"
+    ],
+    [
+      "Orpheus",
+      "Orpheus Picaro"
+    ],
+    [
+      "Ariadne",
+      "Ariadne Picaro"
+    ],
+    [
+      "Asterius",
+      "Asterius Picaro"
+    ],
+    [
+      "Thanatos",
+      "Thanatos Picaro"
+    ],
+    [
+      "Kaguya",
+      "Kaguya Picaro"
+    ],
+    [
+      "Magatsu-Izanagi",
+      "Magatsu-Izanagi Picaro"
+    ],
+    [
+      "Tsukiyomi",
+      "Tsukiyomi Picaro"
+    ],
+    [
+      "Messiah",
+      "Messiah Picaro"
+    ],
+    [
+      "Orpheus F",
+      "Orpheus F Picaro"
+    ],
+    [
+      "Athena",
+      "Athena Picaro"
+    ],
+    [
+      "Izanagi-no-Okami",
+      "Izanagi-no-Okami Picaro"
+    ],
+    [
+      "Raoul"
+    ]
+  ]
+}

@@ -1,0 +1,7054 @@
+[
+  {
+    "nome": "Abysmal Surge",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Despair (medium odds) to all foes.",
+    "fontiEsecuzione": [
+      "Loa"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Awakened God (Arahabaki)",
+    "unica": null
+  },
+  {
+    "nome": "Abyssal Eye",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 50
+    },
+    "effetto": "Deal severe Almighty damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Hastur"
+  },
+  {
+    "nome": "Abyssal Wings",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 30
+    },
+    "effetto": "Deal severe Curse damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Tsukiyomi"
+  },
+  {
+    "nome": "Active Support",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Moral Support may now Charge or recover SP.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Adverse Resolve",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase critical rate when surrounded.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Battle Fiend (Rakshasa)",
+    "unica": null
+  },
+  {
+    "nome": "Agi",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Fire damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Crypt-Dwelling Pyromaniac (Jack-o'-Lantern)",
+    "unica": null
+  },
+  {
+    "nome": "Agidyne",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Fire damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Decarabia"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Agilao",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Fire damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Girl of the Hanging Tree (Hua Po)",
+    "unica": null
+  },
+  {
+    "nome": "Agneyastra",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 24
+    },
+    "effetto": "Deal medium Phys damage to all foes 1 to 3 times.",
+    "fontiEsecuzione": [
+      "Asterius Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ailment Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting all ailments.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ailment Hunter",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Damage +25% for each foe afflicted with an ailment",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Akashic Arts",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 20
+    },
+    "effetto": "Deal severe Phys damage to all foes 1-2 times with high critical.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Athena"
+  },
+  {
+    "nome": "Ali Dance",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Half hit rate of all incoming attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 1/15 Foggy Day 50",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "All-out Attack Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases damage from All-out Attacks",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Allure of Wisdom",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of magic skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Almighty Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Almighty attacks by 50%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Network Fusion",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Almighty Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Almighty attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Network Fusion",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ambient Aid",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Greatly increase inflicting rate of all status effects under rainy day or special weather warning.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Amrita Drop",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Cure all ailments of 1 ally except for unique status.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Amrita Shower",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Cure all ailments of party except for unique status.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Analysis",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Confirm affinities you have previously attacked.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Angelic Grace",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion against Fire/Ice/Elec/Wind/Nuke/Psy/Bless/Curse attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Apt Pupil",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase critical rate.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Gym Trickster 50",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Arms Master",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Half HP cost for physical skills.",
+    "fontiEsecuzione": [
+      "Tsukiyomi Picaro"
+    ],
+    "fonteCarta": "Jazz 1/22",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Assault Dive",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 13
+    },
+    "effetto": "Deal heavy Phys damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Bicorn"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Atomic Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Nuke skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Atomic Flare",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Nuclear damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Bishamonten"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Atomic Hellscape",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Nuke skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Attack Master",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Automatic Tarukaja at the start of battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Attract",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Raises chance of being targeted",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Fusion Mutation",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Auto-Maraku",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Automatic Marakukaja at the start of battle. (Overwrites Defense Master)",
+    "fontiEsecuzione": [
+      "Ariadne Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Auto-Masuku",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Automatic Masukukaja at the start of battle. (Overwrites Speed Master)",
+    "fontiEsecuzione": [
+      "Jatayu"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Auto-Mataru",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Automatic Matarukaja at the start of battle. (Overwrites Attack Master)",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ave Maria",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Support spells by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ayamur",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 25
+    },
+    "effetto": "Deal medium Phys damage to 1 foe 3 times. High accuracy.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Baal"
+  },
+  {
+    "nome": "Bad Beat",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 21
+    },
+    "effetto": "Deal medium Phys damage and inflict Despair (low odds) to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Baisudi",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Cure Burn/Freeze/Shock of 1 ally.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Bargain Bolts",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Elec skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Beast Weaver",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 20
+    },
+    "effetto": "Deal colossal Phys damage to 1 foe and user is debuffed with Tarunda.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Ariadne"
+  },
+  {
+    "nome": "Black Viper",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Almighty damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Satan"
+  },
+  {
+    "nome": "Blazing Hell",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 54
+    },
+    "effetto": "Deal severe Fire damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Bleeding Dry Brush",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Drains next non-Almighty attack for 1 ally, Removes innate weaknesses",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Vanity",
+    "negoziazione": null,
+    "unica": "Ring of Vanity"
+  },
+  {
+    "nome": "Bless Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen (non instant death) Bless attacks by 50%.",
+    "fontiEsecuzione": [
+      "Power"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Bless Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen (non instant death) Bless attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Blessed Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Bless skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Bloodbath",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Phys damage and inflict Fear (low odds) to all foes.",
+    "fontiEsecuzione": [
+      "Kumbhanda"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "The Black Avenger (Chernobog)",
+    "unica": null
+  },
+  {
+    "nome": "Bloodstained Eyes",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Raises evasion against foes afflicted with ailments",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Bolstering Force",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Damage dealt during 1 More +50%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Tsukiyomi"
+  },
+  {
+    "nome": "Brain Buster",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Phys damage and inflict Brainwash (low odds) to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Monk of the Valley (Kurama Tengu)",
+    "unica": null
+  },
+  {
+    "nome": "Brain Jack",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Brainwash (medium odds) to all foes.",
+    "fontiEsecuzione": [
+      "Nebiros"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Rhetorician of the Sea (Forneus)",
+    "unica": null
+  },
+  {
+    "nome": "Brain Shake",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 9
+    },
+    "effetto": "Deal medium Phys damage and inflict Brainwash (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Possessive Dog Ghost (Inugami)",
+    "unica": null
+  },
+  {
+    "nome": "Brainwash Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Brainwash.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Brave Blade",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 24
+    },
+    "effetto": "Deal colossal Phys damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Infuriated Wisdom King (Atavaka)",
+    "unica": null
+  },
+  {
+    "nome": "Brave Step",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Raises critical rate for 3 turns for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Cendrillon"
+  },
+  {
+    "nome": "Bufu",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Ice damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Mocking Snowman (Jack Frost)",
+    "unica": null
+  },
+  {
+    "nome": "Bufudyne",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Ice damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Belphegor"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Monarch of Snow (King Frost)",
+    "unica": null
+  },
+  {
+    "nome": "Bufula",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Ice damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Ambassador of Filth (Belphegor)",
+    "unica": null
+  },
+  {
+    "nome": "Burn Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Burn.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cadenza",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Restore 50% HP of party and increase evasion rate.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Orpheus"
+  },
+  {
+    "nome": "Champion's Cup",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Diarama + Tarukaja",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Lust",
+    "negoziazione": null,
+    "unica": "Ring of Lust"
+  },
+  {
+    "nome": "Charge",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 15
+    },
+    "effetto": "Multiply user's next Phys attack damage by 2.5.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 9/4",
+    "negoziazione": "Blood-Thirsty Demoness (Dakini)",
+    "unica": null
+  },
+  {
+    "nome": "Checkmate",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 90
+    },
+    "effetto": "Matarunda + Marakunda + Masukunda",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Agnes"
+  },
+  {
+    "nome": "Chi You's Blessing",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Psy skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Circle of Sadness",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Activates endure up to 4 times",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Orpheus"
+  },
+  {
+    "nome": "Cleave",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 6
+    },
+    "effetto": "Deal light Phys damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Hunting Puss in Boots (Cait Sith)",
+    "unica": null
+  },
+  {
+    "nome": "Climate Decorum",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Greatly increase evasion under rainy day or special weather warning.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cocytus",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Ice skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cold-Blooded",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting Freeze during 1 More",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Conceal",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Lowers chance of being targeted",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Fusion Mutation",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Concentrate",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 15
+    },
+    "effetto": "Multiply user's next magical attack damage by 2.5.",
+    "fontiEsecuzione": [
+      "Athena Picaro"
+    ],
+    "fonteCarta": "Jazz 9/25",
+    "negoziazione": "Decadent False God (Alilat)",
+    "unica": null
+  },
+  {
+    "nome": "Confuse Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Confuse.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cool Customer",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces ailment susceptibility by 50% for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Lucy"
+  },
+  {
+    "nome": "Cornered Fang",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 10
+    },
+    "effetto": "Deal medium Phys damage to 1 foe. More powerful when surrounded.",
+    "fontiEsecuzione": [
+      "Shiisaa"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cosmic Flare",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 54
+    },
+    "effetto": "Deal severe Nuclear damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Counter",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "10% chance of reflecting Phys attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Counterstrike",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "15% chance of reflecting Phys attacks.",
+    "fontiEsecuzione": [
+      "Naga"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Funerary Warrior (Valkyrie)",
+    "unica": null
+  },
+  {
+    "nome": "Country Maker",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Scales damage dealt and received against Compendium completion rate",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Izanagi-no-Okami"
+  },
+  {
+    "nome": "Crisis Control",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces damage taken when weakness struck",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cross Slash",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 20
+    },
+    "effetto": "Deal heavy Phys damage to 1 foe 2 times. High accuracy.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Izanagi"
+  },
+  {
+    "nome": "Curse Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen (non instant death) Curse attacks by 50%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Curse Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen (non instant death) Curse attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Cursed Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Curse skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dazzler",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Dizzy (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Deadly Fury",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 18
+    },
+    "effetto": "Deal severe Phys damage to 1 foe. More powerful under Baton Pass.",
+    "fontiEsecuzione": [
+      "Valkyrie"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Quaking Lady of Shadow (Skadi)",
+    "unica": null
+  },
+  {
+    "nome": "Death Scythe",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 20
+    },
+    "effetto": "Deal severe Phys damage and inflict Fear (medium odds) to 1 foe.",
+    "fontiEsecuzione": [
+      "Macabre"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Deathbound",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 22
+    },
+    "effetto": "Deal medium Phys damage to all foes 1 to 2 times.",
+    "fontiEsecuzione": [
+      "Girimehkala"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Rebellious Elephant (Girimehkala)",
+    "unica": null
+  },
+  {
+    "nome": "Deathly Illness",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases success rate of instant death skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Debilitate",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 30
+    },
+    "effetto": "Decrease 1 foe's Attack, Defense and Agility for 3 turns.",
+    "fontiEsecuzione": [
+      "Magatsu-Izanagi Picaro"
+    ],
+    "fonteCarta": "Jazz 12/11",
+    "negoziazione": "Hedonistic Braggart (Dionysus)",
+    "unica": null
+  },
+  {
+    "nome": "Defense Master",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Automatic Rakukaja at the start of battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dekaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Negate all -kaja buff effects of all foes.",
+    "fontiEsecuzione": [
+      "Mokoi"
+    ],
+    "fonteCarta": "CJ Maid Cafe",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dekunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Negate all -nda debuff effects of party.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Maid Cafe",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Demon's Bite",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles own HP recovery",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Demonic Decree",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 38
+    },
+    "effetto": "Half remaining HP of 1 foe.",
+    "fontiEsecuzione": [
+      "Belial",
+      "Thanatos Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Despair Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Despair.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dia",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Slightly restore 1 ally's HP.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Beguiling Girl (Pixie)",
+    "unica": null
+  },
+  {
+    "nome": "Diamond Dust",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Ice damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Alilat"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Diarahan",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Fully restore 1 ally's HP.",
+    "fontiEsecuzione": [
+      "Sarasvati"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Final Assessor (Norn)",
+    "unica": null
+  },
+  {
+    "nome": "Diarama",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Moderately restore 1 ally's HP.",
+    "fontiEsecuzione": [
+      "Apsaras"
+    ],
+    "fonteCarta": "Chain 20",
+    "negoziazione": "Prankster Leader (High Pixie)",
+    "unica": null
+  },
+  {
+    "nome": "Die For Me!",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 40
+    },
+    "effetto": "High chance of instantly killing all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Alice"
+  },
+  {
+    "nome": "Divine Grace",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Effects of healing magic are increased by 50%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Divine Judgement",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 38
+    },
+    "effetto": "Half remaining HP of 1 foe.",
+    "fontiEsecuzione": [
+      "Dominion"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dizzy Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Dizzy.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Bless",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against (non instant death) Bless attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against (non instant death) Curse attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Elec",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against Electric attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Fire",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against Fire attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Ice",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against Ice attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Trial 20",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Nuke",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against Nuclear attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Phys",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles evasion rate against Phys attacks",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Psy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against Psy attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dodge Wind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Double evasion rate against Wind attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Door of Hades",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 32
+    },
+    "effetto": "Deal heavy Almighty damage to all foes with medium chance of instant kill.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Thanatos"
+  },
+  {
+    "nome": "Dormin Rush",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Phys damage and inflict Sleep (low odds) to all foes.",
+    "fontiEsecuzione": [
+      "Incubus"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dormina",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Sleep (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Envoy of Slumber (Sandman)",
+    "unica": null
+  },
+  {
+    "nome": "Double Fangs",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 10
+    },
+    "effetto": "Deal medium Phys damage to 1 foe 2 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Twin-Headed Guardian (Orthrus)",
+    "unica": null
+  },
+  {
+    "nome": "Double Shot",
+    "elemento": "gun",
+    "costo": {
+      "tipo": "hp",
+      "valore": 12
+    },
+    "effetto": "Deal light Gun damage to 1 foe 2 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Bringer of Misfortune (Shiki-Ouji)",
+    "unica": null
+  },
+  {
+    "nome": "Drain Bless",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Bless attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Curse attacks.",
+    "fontiEsecuzione": [
+      "Attis"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Elec",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Electric attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Foggy Day ???",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Fire",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Fire attacks.",
+    "fontiEsecuzione": [
+      "Chimera"
+    ],
+    "fonteCarta": "Full Moon ???",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Ice",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Ice attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Nuke",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Nuclear attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Phys",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Phys attacks.",
+    "fontiEsecuzione": [
+      "Chi You"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Psy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Psy attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drain Wind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Absorb Wind attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Draining Mouth",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles effectiveness of absorption skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Dream Needle",
+    "elemento": "gun",
+    "costo": {
+      "tipo": "hp",
+      "valore": 8
+    },
+    "effetto": "Deal light Gun damage and inflict Sleep (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Drunken Passion",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Fire skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Eccentric Temper",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Low chance to strengthen Phys attacks by 80% for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "William"
+  },
+  {
+    "nome": "Eiga",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Curse damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Nue"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Gathering Devil (Choronzon)",
+    "unica": null
+  },
+  {
+    "nome": "Eigaon",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Curse damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Rangda"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Wandering Reviver (Nebiros)",
+    "unica": null
+  },
+  {
+    "nome": "Eiha",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Curse damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Elec Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Electric attacks by 50%.",
+    "fontiEsecuzione": [
+      "Thunderbird"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Elec Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Electric attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Elec Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Negate Electric resistances of all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Elec Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Create a shield on 1 ally to reduce damage of Electric attacks for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Waterside Nymph (Apsaras)",
+    "unica": null
+  },
+  {
+    "nome": "Electric Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Elec skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Emergency Shift",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to swap current party with backups when 2 or more people are KO'd.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Endure",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Survive one fatal blow with 1 HP remaining.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Full Moon 50",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Enduring Soul",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Survive one fatal blow with HP completely recovered.",
+    "fontiEsecuzione": [
+      "Orpheus F Picaro"
+    ],
+    "fonteCarta": "L Leblanc",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Energy Drop",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Cure Confuse/Fear/Despair/Rage/Brainwash of 1 ally.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Energy Shower",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Cure Confuse/Fear/Despair/Rage/Brainwash of party.",
+    "fontiEsecuzione": [
+      "Kikuri-Hime"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Destructive Beauty (Parvati)",
+    "unica": null
+  },
+  {
+    "nome": "Evade Bless",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against (non instant death) Bless attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against (non instant death) Curse attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Elec",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against Electric attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Fire",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against Fire attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Ice",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against Ice attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Nuke",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against Nuclear attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Phys",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triples evasion rate against Phys attacks",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Psy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against Psy attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evade Wind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triple evasion rate against Wind attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evil Smile",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Fear (medium odds) to all foes.",
+    "fontiEsecuzione": [
+      "Andras"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Evil Touch",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Fear (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Menacing Owlman (Andras)",
+    "unica": null
+  },
+  {
+    "nome": "EXP Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "EXP +15% after battle",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Explosive Scheme",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Restores 25% HP after Futaba's All-Out Attack for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Famine's Scream",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Inflict Hunger (medium odds) to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Fast Heal",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Half the time needed to recover from ailments.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Fear Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Fear.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Fighting Spirit",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 80
+    },
+    "effetto": "Next Phys attack +150% damage for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "William"
+  },
+  {
+    "nome": "Final Guard",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to nullify a fatal attack to a current party member.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Fire Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Fire attacks by 50%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Deformed Lion God (Chimera)",
+    "unica": null
+  },
+  {
+    "nome": "Fire Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Fire attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Midnight Queen (Queen Mab)",
+    "unica": null
+  },
+  {
+    "nome": "Fire Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Negate Fire resistances of all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Equine Sage (Orobas)",
+    "unica": null
+  },
+  {
+    "nome": "Fire Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Create a shield on 1 ally to reduce damage of Fire attacks for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Leafy Old Man (Koropokkuru)",
+    "unica": null
+  },
+  {
+    "nome": "Firm Stance",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Half all incoming damage by sacrificing evasion completely.",
+    "fontiEsecuzione": [
+      "Messiah Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Flash Bomb",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 19
+    },
+    "effetto": "Deal medium Phys damage and inflict Dizzy (low odds) to all foes.",
+    "fontiEsecuzione": [
+      "Ippon-Datara"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Forget Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Forget.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Fortified Moxy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase critical rate when beginning battle with preemptive turn.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Fortify Spirit",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibilities to all ailments.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Foul Breath",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Increase susceptibility to all ailments of 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Pulsing Mud (Black Ooze)",
+    "unica": null
+  },
+  {
+    "nome": "Foul Odor",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting ailments after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Foul Stench",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting ailments",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Freeze Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Freeze.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Heretic Goat (Baphomet)",
+    "unica": null
+  },
+  {
+    "nome": "Frei",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Nuclear damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Theater",
+    "negoziazione": "Rooftop Lion (Shiisaa)",
+    "unica": null
+  },
+  {
+    "nome": "Freidyne",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Nuclear damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Thoth"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Scandalous Queen (Titania)",
+    "unica": null
+  },
+  {
+    "nome": "Freila",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Nuclear damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Frenzied Bull",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Scales damage dealt against lost HP under 50%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Asterius"
+  },
+  {
+    "nome": "Frigid Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Ice skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Gaia Blessing",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting Burn, Freeze, and Shock by 50% for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Agnes"
+  },
+  {
+    "nome": "Gaia Pact",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting Burn, Freeze, and Shock by 25% for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Johanna"
+  },
+  {
+    "nome": "Gambler's Foresight",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 20
+    },
+    "effetto": "Masukukaja, Begins battle with Concentrate",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Envy",
+    "negoziazione": null,
+    "unica": "Ring of Envy"
+  },
+  {
+    "nome": "Garu",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Deal light Wind damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Mad Marsh Horse (Kelpie)",
+    "unica": null
+  },
+  {
+    "nome": "Garudyne",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal heavy Wind damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Haughty Vulture (Jatayu)",
+    "unica": null
+  },
+  {
+    "nome": "Garula",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Deal medium Wind damage to 1 foe.",
+    "fontiEsecuzione": [
+      "High Pixie"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Tornado Devil (Fuu-Ki)",
+    "unica": null
+  },
+  {
+    "nome": "Gatling Blows",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 16
+    },
+    "effetto": "Deal light Phys damage to 1 foe 3 to 4 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ghastly Wail",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 28
+    },
+    "effetto": "Instantly kill all foes under Fear.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Dancer of Death (Macabre)",
+    "unica": null
+  },
+  {
+    "nome": "Ghost Nest",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting ailments on downed foes",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Giant Slice",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 9
+    },
+    "effetto": "Deal medium Phys damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Gigantomachia",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 25
+    },
+    "effetto": "Deal colossal Phys damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Evil Voracious Dragon (Fafnir)",
+    "unica": null
+  },
+  {
+    "nome": "Gloomy Child",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Activates all equipped special weather passives",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Gluttonmouth",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthens own HP recovery by 50%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "God Maker",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of ally traits activating",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Izanagi"
+  },
+  {
+    "nome": "God's Hand",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 25
+    },
+    "effetto": "Deal colossal Phys damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Cerberus"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Grace of Mother",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Recovery skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Grace of the Olive",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of skills to 0 during 1 More",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Athena"
+  },
+  {
+    "nome": "Great Aim",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Gun hit rate +5%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Growth 1",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Persona gains 1/4 EXP while inactive.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Growth 2",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Persona gains 1/2 EXP while inactive.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Beach",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Growth 3",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Persona gains full EXP even while inactive.",
+    "fontiEsecuzione": [
+      "Izanagi Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Guiding Tendril",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 20
+    },
+    "effetto": "Downs all foes, Only usable when ambushing foe, Life Aid",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Sorrow",
+    "negoziazione": null,
+    "unica": "Ring of Sorrow"
+  },
+  {
+    "nome": "Gun Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Gun damage +50%",
+    "fontiEsecuzione": [
+      "White Rider"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Gun Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Gun damage +25%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Hallowed Spirit",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles own HP and SP recovery",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Messiah"
+  },
+  {
+    "nome": "Hama",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Small chance of instantly killing 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Hama Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase success rate of instant death by Bless skills.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Hamaon",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Medium chance of instantly killing 1 foe.",
+    "fontiEsecuzione": [
+      "Unicorn"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Bearer of the Scales (Anubis)",
+    "unica": null
+  },
+  {
+    "nome": "Hassou Tobi",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 25
+    },
+    "effetto": "Deal light Phys damage to all foes 8 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Yoshitsune"
+  },
+  {
+    "nome": "Hazy Presence",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of ally follow-up attacks",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Raoul"
+  },
+  {
+    "nome": "Headbutt",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 9
+    },
+    "effetto": "Deal medium Phys damage and inflict Forget (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Heat Riser",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 30
+    },
+    "effetto": "Increase 1 ally's Attack, Defense and Agility for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 12/4 CJ Underground Mall",
+    "negoziazione": "Evil Synthetic Organism (Byakhee)",
+    "unica": null
+  },
+  {
+    "nome": "Heat Up",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 5% HP and 10 SP at the start of preemptive turn.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Trial 50",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Heat Wave",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 20
+    },
+    "effetto": "Deal heavy Phys damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Heated Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Fire skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "High Counter",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "20% chance of reflecting Phys attacks.",
+    "fontiEsecuzione": [
+      "Ose"
+    ],
+    "fonteCarta": "CJ Leblanc",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "High Energy",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 80
+    },
+    "effetto": "Next Magic attack +150% damage for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Celestine"
+  },
+  {
+    "nome": "Hollow Jester",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Damage +40% for each foe afflicted with an ailment",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Magatsu-Izanagi"
+  },
+  {
+    "nome": "Holy Benevolence",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 26
+    },
+    "effetto": "Revive all allies with 100% HP",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Maria"
+  },
+  {
+    "nome": "Holy Embrace",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 25% max HP each turn in battle",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Maria"
+  },
+  {
+    "nome": "Holy Whisper",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 15% max HP and 15 SP each turn in battle",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Maria"
+  },
+  {
+    "nome": "Hyakka Ryouran",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 90
+    },
+    "effetto": "Matarukaja + Marakukaja + Masukukaja",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Gorokichi"
+  },
+  {
+    "nome": "Hysterical Slap",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 9
+    },
+    "effetto": "Deal medium Phys damage and inflict Rage (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Life-Draining Spirit (Kumbhanda)",
+    "unica": null
+  },
+  {
+    "nome": "Ice Age",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 54
+    },
+    "effetto": "Deal severe Ice damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ice Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Ice attacks by 50%.",
+    "fontiEsecuzione": [
+      "Lilim"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Drunken Serpents (Yamata-no-Orochi)",
+    "unica": null
+  },
+  {
+    "nome": "Ice Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Ice attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ice Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Negate Ice resistances of all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ice Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Create a shield on 1 ally to reduce damage of Ice attacks for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Icy Glare",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces ailment susceptibility by 25% for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Milady"
+  },
+  {
+    "nome": "Immunity",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Nullifies ailments",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Inferno",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Fire damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Surt"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Infinite Scheme",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Restores 100% after Futaba's All-Out Attack for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Al Azif"
+  },
+  {
+    "nome": "Ingenious Spirit",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to halve Support and Almighty skill costs for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Hereward"
+  },
+  {
+    "nome": "Insta-Heal",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover from an ailment in 1 turn.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Intense Focus",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Single-target magic damage +20%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Internal Hypnosis",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Extends buffs received by 1 turn",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Invigorate 1",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 3 SP each turn in battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Technician 30",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Invigorate 2",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 5 SP each turn in battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Invigorate 3",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 7 SP each turn in battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Inviolable Beauty",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Triples damage dealt by Counter skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Kaguya"
+  },
+  {
+    "nome": "Iron Heart",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of SP skills after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Thanatos"
+  },
+  {
+    "nome": "Just Die",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of instant death skills to 0",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Kill Rush",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 14
+    },
+    "effetto": "Deal light Phys damage to 1 foe 1-3 times.",
+    "fontiEsecuzione": [
+      "Oni"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Kouga",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Bless damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Expressionless Beast (Unicorn)",
+    "unica": null
+  },
+  {
+    "nome": "Kougaon",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Bless damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Anubis"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Kouha",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Bless damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Heavenly Punisher (Archangel)",
+    "unica": null
+  },
+  {
+    "nome": "Kuzunoha's Order",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces skill costs by 25%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Laevateinn",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 25
+    },
+    "effetto": "Colossal damage to 1 foe",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Loki"
+  },
+  {
+    "nome": "Last Stand",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces enemy hit rate by 2/3 when surrounded",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Life Aid",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 8% HP and SP after a successful battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Trial 80",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Life Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "All Stats +3, SP +20",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Life Drain",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Drains HP from 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Bedside Brute (Incubus)",
+    "unica": null
+  },
+  {
+    "nome": "Life Leech",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Drains 150 HP from 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Life Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 95
+    },
+    "effetto": "Repels next non-Almighty attack for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Lucy"
+  },
+  {
+    "nome": "Linked Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Greatly raises damage dealt after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Lucky Punch",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 3
+    },
+    "effetto": "Deal minuscule Phys damage to 1 foe. High critical rate.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Lullaby",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Sleep (medium odds) to all foes.",
+    "fontiEsecuzione": [
+      "Sandman"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Woman who brings Ruin (Lilim)",
+    "unica": null
+  },
+  {
+    "nome": "Lunge",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 5
+    },
+    "effetto": "Deal light Phys damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Dirty Two-Horned Beast (Bicorn)",
+    "unica": null
+  },
+  {
+    "nome": "Mabaisudi",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Cure Burn/Freeze/Shock of party.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mabufu",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Ice damage to all foes.",
+    "fontiEsecuzione": [
+      "Koropokkuru"
+    ],
+    "fonteCarta": "CJ BBB",
+    "negoziazione": "Raging Water Demon (Sui-Ki)",
+    "unica": null
+  },
+  {
+    "nome": "Mabufudyne",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Ice damage to all foes.",
+    "fontiEsecuzione": [
+      "Baphomet"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "The Shadowed One (Scathach)",
+    "unica": null
+  },
+  {
+    "nome": "Mabufula",
+    "elemento": "ice",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Ice damage to all foes.",
+    "fontiEsecuzione": [
+      "Sui-Ki"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Maeiga",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Curse damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Maeigaon",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Curse damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Maeiha",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Curse damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mafrei",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Nuclear damage to all foes.",
+    "fontiEsecuzione": [
+      "Makami"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Hunting Wolf Spirit (Makami)",
+    "unica": null
+  },
+  {
+    "nome": "Mafreidyne",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Nuclear damage to all foes.",
+    "fontiEsecuzione": [
+      "Titania"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mafreila",
+    "elemento": "nuclear",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Nuclear damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Dark Sun (Mithras)",
+    "unica": null
+  },
+  {
+    "nome": "Magaru",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal small Wind damage to all foes.",
+    "fontiEsecuzione": [
+      "Kelpie"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Captivating Dancer (Ame-no-Uzume)",
+    "unica": null
+  },
+  {
+    "nome": "Magarudyne",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 20
+    },
+    "effetto": "Deal heavy Wind damage to all foes.",
+    "fontiEsecuzione": [
+      "Garuda"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Raging Bird God (Garuda)",
+    "unica": null
+  },
+  {
+    "nome": "Magarula",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 14
+    },
+    "effetto": "Deal medium Wind damage to all foes.",
+    "fontiEsecuzione": [
+      "Anzu"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Magatsu Mandala",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 30
+    },
+    "effetto": "Deal heavy Curse damage to all foes and inflict Confuse/Fear/Despair (medium odds).",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Magatsu-Izanagi"
+  },
+  {
+    "nome": "Magic Ability",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen all magical attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Network Fusion",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mahama",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 14
+    },
+    "effetto": "Small chance of instantly killing all foes.",
+    "fontiEsecuzione": [
+      "Archangel"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "She of Life and Death (Isis)",
+    "unica": null
+  },
+  {
+    "nome": "Mahamaon",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 26
+    },
+    "effetto": "Medium chance of instantly killing all foes.",
+    "fontiEsecuzione": [
+      "Melchizedek"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Fire Assassin (Throne)",
+    "unica": null
+  },
+  {
+    "nome": "Majestic Presence",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles effectiveness and decreases costs of Recovery skills for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Diego"
+  },
+  {
+    "nome": "Makajam",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Forget (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Zealous Messenger (Angel)",
+    "unica": null
+  },
+  {
+    "nome": "Makajamaon",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Forget (medium odds) to all foes.",
+    "fontiEsecuzione": [
+      "Kaiwan"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Vampire Moth (Mothman)",
+    "unica": null
+  },
+  {
+    "nome": "Makara Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 9
+    },
+    "effetto": "Remove magic-repellent shields from all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Makarakarn",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Create a shield on 1 ally to repel 1 magical attack.",
+    "fontiEsecuzione": [
+      "Clotho"
+    ],
+    "fonteCarta": "Jazz 10/30",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Makouga",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Bless damage to all foes.",
+    "fontiEsecuzione": [
+      "Isis"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Divine Warrior (Power)",
+    "unica": null
+  },
+  {
+    "nome": "Makougaon",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Bless damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Merciless Inquisitor (Dominion)",
+    "unica": null
+  },
+  {
+    "nome": "Makouha",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Bless damage to all foes.",
+    "fontiEsecuzione": [
+      "Angel"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mamudo",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 14
+    },
+    "effetto": "Small chance of instantly killing all foes.",
+    "fontiEsecuzione": [
+      "Leanan Sidhe"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mamudoon",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 26
+    },
+    "effetto": "Medium chance of instantly killing all foes.",
+    "fontiEsecuzione": [
+      "Chernobog"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Missionary of Depravity (Belial)",
+    "unica": null
+  },
+  {
+    "nome": "Mapsi",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Psy damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mapsio",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Psy damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mapsiodyne",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Psy damage to all foes.",
+    "fontiEsecuzione": [
+      "Forneus"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Throbbing King of Desires (Mara)",
+    "unica": null
+  },
+  {
+    "nome": "Maragi",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Fire damage to all foes.",
+    "fontiEsecuzione": [
+      "Cait Sith"
+    ],
+    "fonteCarta": "CJ BBB",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Maragidyne",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Fire damage to all foes.",
+    "fontiEsecuzione": [
+      "Orpheus Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Harlot of Desire (Lilith)",
+    "unica": null
+  },
+  {
+    "nome": "Maragion",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Fire damage to all foes.",
+    "fontiEsecuzione": [
+      "Orthrus"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Marakukaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Increase party's Defense for 3 turns.",
+    "fontiEsecuzione": [
+      "Lamia"
+    ],
+    "fonteCarta": "Jazz 7/17 10/16",
+    "negoziazione": "Strumming Veena Player (Sarasvati)",
+    "unica": null
+  },
+  {
+    "nome": "Marakunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Decrease all foes' Defense for 3 turns.",
+    "fontiEsecuzione": [
+      "Orobas"
+    ],
+    "fonteCarta": "Jazz 8/14 11/13",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Marin Karin",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Brainwash (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Martyr's Gift",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Bless skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Masquerade",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 25
+    },
+    "effetto": "Severe damage to 1 foe, x2 hits",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Ella"
+  },
+  {
+    "nome": "Mastery of Magic",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Low chance to decrease attack spell costs for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Carmen"
+  },
+  {
+    "nome": "Masukukaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Increase party's Agility for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 7/31 10/23 CJ Aquarium",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Masukunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Decrease all foes' Agility for 3 turns.",
+    "fontiEsecuzione": [
+      "Mandrake"
+    ],
+    "fonteCarta": "Jazz 8/28 11/27 CJ Aquarium",
+    "negoziazione": "Killer Teddy Bear (Bugs)",
+    "unica": null
+  },
+  {
+    "nome": "Matarukaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Increase party's Attack power for 3 turns.",
+    "fontiEsecuzione": [
+      "Eligor"
+    ],
+    "fonteCarta": "Jazz 7/10 10/9",
+    "negoziazione": "Lamenting Sacrifice (Kushinada)",
+    "unica": null
+  },
+  {
+    "nome": "Matarunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Decrease all foes' Attack power for 3 turns.",
+    "fontiEsecuzione": [
+      "Slime"
+    ],
+    "fonteCarta": "Jazz 8/7 11/6",
+    "negoziazione": "Dancing Witch (Rangda)",
+    "unica": null
+  },
+  {
+    "nome": "Mazio",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Deal light Electric damage to all foes.",
+    "fontiEsecuzione": [
+      "Agathion"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Maziodyne",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal heavy Electric damage to all foes.",
+    "fontiEsecuzione": [
+      "Barong"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Thunder Emperor (Thor)",
+    "unica": null
+  },
+  {
+    "nome": "Mazionga",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Electric damage to all foes.",
+    "fontiEsecuzione": [
+      "Take-Minakata"
+    ],
+    "fonteCarta": "Trial 30",
+    "negoziazione": "Storm-Invoking Ptarmigan (Thunderbird)",
+    "unica": null
+  },
+  {
+    "nome": "Me Patra",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Cure Dizzy/Forget/Sleep/Hunger of party.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Media",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 7
+    },
+    "effetto": "Slightly restore party's HP.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mediarahan",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 30
+    },
+    "effetto": "Fully restore party's HP.",
+    "fontiEsecuzione": [
+      "Kaguya Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mediarama",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Moderately restore party's HP.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Mountain Girl (Kikuri-Hime)",
+    "unica": null
+  },
+  {
+    "nome": "Megaton Raid",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 16
+    },
+    "effetto": "Deal severe Phys damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Guard Dog of Hades (Cerberus)",
+    "unica": null
+  },
+  {
+    "nome": "Megido",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 15
+    },
+    "effetto": "Deal medium Almighty damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Chanting Baboon (Thoth)",
+    "unica": null
+  },
+  {
+    "nome": "Megidola",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Deal heavy Almighty damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Megidolaon",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 38
+    },
+    "effetto": "Deal severe Almighty damage to all foes.",
+    "fontiEsecuzione": [
+      "Black Rider"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Coffin Borne God (Mot)",
+    "unica": null
+  },
+  {
+    "nome": "Mementos Scan",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to fully map a floor of Mementos when entering that floor.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Memory Blow",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 15
+    },
+    "effetto": "Deal light Phys damage and inflict Forget (low odds) to all foes.",
+    "fontiEsecuzione": [
+      "Black Ooze"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mighty Gaze",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "All-target magic damage +20%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mind Slice",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 19
+    },
+    "effetto": "Deal medium Phys damage and inflict Confuse (low odds) to all foes.",
+    "fontiEsecuzione": [
+      "Mothman"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Miracle Punch",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Phys damage to 1 foe. High critical rate.",
+    "fontiEsecuzione": [
+      "Obariyon"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Auspicious Pachyderm (Ganesha)",
+    "unica": null
+  },
+  {
+    "nome": "Miracle Rush",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Phys damage to all foes. High critical rate.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Diego"
+  },
+  {
+    "nome": "Money Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles money earned after battle",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Moral Support",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to cast Kaja or party-healing magic during battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Morning Star",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 54
+    },
+    "effetto": "Deal severe Almighty damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Lucifer"
+  },
+  {
+    "nome": "Mother's Lament",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Curse skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mouth of Savoring",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthens own SP recovery by 50%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mudo",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Small chance of instantly killing 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Corpse Bird (Onmoraki)",
+    "unica": null
+  },
+  {
+    "nome": "Mudo Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase success rate of instant death by Curse skills.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Mudoon",
+    "elemento": "curse",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Medium chance of instantly killing 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Dream-Dwelling Skull (Loa)",
+    "unica": null
+  },
+  {
+    "nome": "Myriad Slashes",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 20
+    },
+    "effetto": "Deal medium Phys damage to 1 foe 2 to 3 times.",
+    "fontiEsecuzione": [
+      "Dakini"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Myriad Truths",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 40
+    },
+    "effetto": "Deal 3 times heavy Almighty damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Izanagi-no-Okami"
+  },
+  {
+    "nome": "Naranari",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles effectiveness of SP regeneration skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Negative Pile",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Phys damage and inflict Despair (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Slithering Snakewoman (Lamia)",
+    "unica": null
+  },
+  {
+    "nome": "Neo Cadenza",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Restore 50% HP of party and increase attack, defense, and evasion rate.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Orpheus F"
+  },
+  {
+    "nome": "Nocturnal Flash",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Dizzy (medium odds) to all foes.",
+    "fontiEsecuzione": [
+      "Narcissus"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Self-Infatuated Star (Narcissus)",
+    "unica": null
+  },
+  {
+    "nome": "Nuke Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Nuclear attacks by 50%.",
+    "fontiEsecuzione": [
+      "Mithras"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Nuke Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Nuclear attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Nuke Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Negate Nuclear resistances of all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Nuke Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Create a shield on 1 ally to reduce damage of Nuclear attacks for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Bless",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Bless attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Brainwash",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Brainwash.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Burn",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Immune to Burn",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Confuse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Confuse.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Curse attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Despair",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Despair.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Dizzy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Dizzy.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Elec",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Electric attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Fear",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Fear.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Fire",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Fire attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Forget",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Forget.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Freeze",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Immune to Freeze",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Hunger",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Immune to Hunger",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Ice",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Ice attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Mortal",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Nullifies damage from Bless and Curse attacks",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Nuke",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Nuclear attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Phys",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Phys attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Psy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Psy attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Rage",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Rage.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Shock",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Immune to Shock",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Sleep",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Sleep.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Null Wind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against Wind attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Omen",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Greatly increases success rate of instant death skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ominous Words",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Despair (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Corpse-Eating Corpse (Pisaca)",
+    "unica": null
+  },
+  {
+    "nome": "One-shot Kill",
+    "elemento": "gun",
+    "costo": {
+      "tipo": "hp",
+      "valore": 17
+    },
+    "effetto": "Deal severe Gun damage to 1 foe. High critical rate.",
+    "fontiEsecuzione": [
+      "Yamata-no-Orochi"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Spear-Wielding General (Cu Chulainn)",
+    "unica": null
+  },
+  {
+    "nome": "Oni Kagura",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 16
+    },
+    "effetto": "Deal medium Phys damage and inflict Rage (low odds) to all foes.",
+    "fontiEsecuzione": [
+      "Yaksini"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Cruel Leopard (Ose)",
+    "unica": null
+  },
+  {
+    "nome": "Oratorio",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 38
+    },
+    "effetto": "Fully restore party's HP and negate all -nda debuffs.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Messiah"
+  },
+  {
+    "nome": "Pagan Allure",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Magic damage +50%, Cannot exceed 100% limit",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Panta Rhei",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 42
+    },
+    "effetto": "Deal severe Wind damage to 1 foe",
+    "fontiEsecuzione": [
+      "Quetzalcoatl"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Patra",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Cure Dizzy/Forget/Sleep/Hunger of 1 ally.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Troublesome Maid (Silky)",
+    "unica": null
+  },
+  {
+    "nome": "Phantom Show",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Inflict Sleep (high odds) to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Raoul"
+  },
+  {
+    "nome": "Pinch Anchor",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Allows use of ambush-only skills after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Pinnacle of Magic",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Low chance to halve attack spell costs for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Celestine"
+  },
+  {
+    "nome": "Position Hack",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to instantly Hold Up enemies when starting a battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Positive Thoughts",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Extends buffs received by 2 turns",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Potent Hypnosis",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Extends buffs cast by 1 turn",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Power Slash",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 10
+    },
+    "effetto": "Deal medium Phys damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Berith"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Brutal Cavalryman (Berith)",
+    "unica": null
+  },
+  {
+    "nome": "President's Insight",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 15
+    },
+    "effetto": "Next Magic attack +150% damage for 1 ally, Attack Master",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Greed",
+    "negoziazione": null,
+    "unica": "Ring of Greed"
+  },
+  {
+    "nome": "Proud Presence",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles effectiveness of Recovery skills for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Zorro"
+  },
+  {
+    "nome": "Psi",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Psy damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Theater",
+    "negoziazione": "Hanging Tree Spirit (Kodama)",
+    "unica": null
+  },
+  {
+    "nome": "Psio",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Psy damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Sudama"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Wishless Star (Kaiwan)",
+    "unica": null
+  },
+  {
+    "nome": "Psiodyne",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Psy damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Sacrificial Pyrekeeper (Moloch)",
+    "unica": null
+  },
+  {
+    "nome": "Psy Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Psy attacks by 50%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Psy Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Psy attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Psy Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Negate Psy resistances of all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Psy Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Create a shield on 1 ally to reduce damage of Psy attacks for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Unfaithful Dream-King (Oberon)",
+    "unica": null
+  },
+  {
+    "nome": "Psychic Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Psy skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Psycho Blast",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 54
+    },
+    "effetto": "Deal severe Psy damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Psycho Force",
+    "elemento": "psy",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Psy damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Mara"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Pulinpa",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Confuse (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Gallows Flower (Mandrake)",
+    "unica": null
+  },
+  {
+    "nome": "Rage Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Rage.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Raging Temper",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Low chance to strengthen Phys attacks by 40% for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Captain Kidd"
+  },
+  {
+    "nome": "Rakukaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Increase 1 ally's Defense for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Sky Tree",
+    "negoziazione": "Apprentice in a Jug (Agathion)",
+    "unica": null
+  },
+  {
+    "nome": "Rakunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Decrease 1 foe's Defense for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Jealous Lover (Leanan Sidhe)",
+    "unica": null
+  },
+  {
+    "nome": "Rampage",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 13
+    },
+    "effetto": "Deal light Phys damage to all foes 1 to 3 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Chivalrous Fiend (Oni)",
+    "unica": null
+  },
+  {
+    "nome": "Rare Antibody",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces susceptibility to ailments",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Rebellion",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 5
+    },
+    "effetto": "Increase 1 ally's critical rate for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Rebellion Blade",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 99
+    },
+    "effetto": "Colossal damage to 1 foe, Damage +150% when target downed",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Hereward"
+  },
+  {
+    "nome": "Recarm",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Revive 1 ally with 50% HP recovered.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Regenerate 1",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Restore 2% of max HP each turn in battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Regenerate 2",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 4% of max HP each turn in battle.",
+    "fontiEsecuzione": [
+      "Rakshasa"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Regenerate 3",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 6% of max HP each turn in battle.",
+    "fontiEsecuzione": [
+      "Koumokuten"
+    ],
+    "fonteCarta": "CJ Art Museum",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Relentless",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Damage that strikes foe weaknesses +50%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Relief Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Support skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Bless",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Bless attacks.",
+    "fontiEsecuzione": [
+      "Raphael"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Curse attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Elec",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Electric attacks.",
+    "fontiEsecuzione": [
+      "Mot"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Fire",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Fire attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Ice",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Ice attacks.",
+    "fontiEsecuzione": [
+      "Parvati"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Nuke",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Nuclear attacks.",
+    "fontiEsecuzione": [
+      "Lilith"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Phys",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Phys attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Psy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Psy attacks.",
+    "fontiEsecuzione": [
+      "Kali"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Repel Wind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Repel Wind attacks.",
+    "fontiEsecuzione": [
+      "Byakhee"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Bless",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Bless attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Brainwash",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Brainwash.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Burn",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves susceptibility to Burn",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Confuse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Confuse.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Curse attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Despair",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Despair.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Dizzy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Dizzy.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Elec",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Electric attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Fear",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Fear.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Fire",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Fire attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Forget",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Forget.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Freeze",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves susceptibility to Freeze",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Hunger",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves susceptibility to Hunger",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Ice",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Ice attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Nuke",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Nuclear attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Phys",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Phys attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Psy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Psy attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Rage",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Rage.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Shock",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves susceptibility to Shock",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Sleep",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce susceptibility to Sleep.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Resist Wind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduce damage from Wind attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Retaliating Body",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Doubles damage from Counter skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Reverse Rub",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Inflict Rage (100%) to 1 ally.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Revolution",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 5
+    },
+    "effetto": "Increase all foes and allies' critical rate for 3 turns.",
+    "fontiEsecuzione": [
+      "Ganesha"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Pagan Saviour (Melchizedek)",
+    "unica": null
+  },
+  {
+    "nome": "Riot Gun",
+    "elemento": "gun",
+    "costo": {
+      "tipo": "hp",
+      "valore": 24
+    },
+    "effetto": "Deal severe Gun damage to all foes.",
+    "fontiEsecuzione": [
+      "Cu Chulainn"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Rising Slash",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 14
+    },
+    "effetto": "Deal heavy Phys damage to 1 foe. More powerful under Baton Pass.",
+    "fontiEsecuzione": [
+      "Inugami"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Salvation",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Fully restore HP and cure all ailments of party except for unique status.",
+    "fontiEsecuzione": [
+      "Izanagi-no-Okami Picaro"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Samarecarm",
+    "elemento": "healing",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Revive 1 ally with all HP recovered.",
+    "fontiEsecuzione": [
+      "Norn"
+    ],
+    "fonteCarta": "CJ Church",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Samsara",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 40
+    },
+    "effetto": "High chance of instantly killing all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Daisoujou"
+  },
+  {
+    "nome": "Samurai's Ruling",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Raises critical rate and Magic evasion",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Savior Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Recovery skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Scoundrel Eyes",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Raises evasion rate against Phys attacks for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Goemon"
+  },
+  {
+    "nome": "Self-Destruct",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Sacrifice self and deal medium Almighty damage to all.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Sharp Student",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Lower odds of receiving critical hit.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Gym",
+    "negoziazione": "Torn King of Desires (Mara)",
+    "unica": null
+  },
+  {
+    "nome": "Shining Arrows",
+    "elemento": "bless",
+    "costo": {
+      "tipo": "sp",
+      "valore": 22
+    },
+    "effetto": "Deal light Bless damage to all foes 4 to 8 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Kaguya"
+  },
+  {
+    "nome": "Shock Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Shock.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Skillful Combo",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Raises damage dealt after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Skillful Technique",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Technical damage +25%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Skull Cracker",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 10
+    },
+    "effetto": "Deal medium Phys damage and inflict Confuse (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Night Chimera (Nue)",
+    "unica": null
+  },
+  {
+    "nome": "Sledgehammer",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 10
+    },
+    "effetto": "Deal medium Phys damage and inflict Dizzy (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Embittered Blacksmith (Ippon-Datara)",
+    "unica": null
+  },
+  {
+    "nome": "Sleep Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase chance of inflicting Sleep.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Twilight Prostitute (Succubus)",
+    "unica": null
+  },
+  {
+    "nome": "Snap",
+    "elemento": "gun",
+    "costo": {
+      "tipo": "hp",
+      "valore": 9
+    },
+    "effetto": "Deal medium Gun damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Night-Walking Warrior (Mokoi)",
+    "unica": null
+  },
+  {
+    "nome": "Soul Chain",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 20 SP when performing Baton Pass.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Network Fusion",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Soul Touch",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover 5 SP after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Speed Master",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Automatic Sukukaja at the start of battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Spell Master",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Half SP cost for magic skills.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 1/29",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Spirit Drain",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Drains SP from 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Spirit Leech",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Drains 150 SP from 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Stagnant Air",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "sp",
+      "valore": 5
+    },
+    "effetto": "Increase susceptibility to all ailments of all foes and allies.",
+    "fontiEsecuzione": [
+      "Legion"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Static Electricity",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting Shock on downed foes",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Stealth",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Lowers chance of being targeted",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Stomach Blow",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Medium Physical damage to 1 foe and inflict Hunger.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Striking Weight",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Phys damage +20%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Subrecover HP",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "After battle, 10% HP recovery for backup allies.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Subrecover HP EX",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "After battle, 20% HP recovery for backup allies.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Subrecover SP",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "After battle, 1% SP recovery for backup allies.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Subrecover SP EX",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "After battle, 3% SP recovery for backup allies.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Sukukaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Increase 1 ally's Agility for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Sky Tree",
+    "negoziazione": "Noisy Mountain Spirit (Sudama)",
+    "unica": null
+  },
+  {
+    "nome": "Sukunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Decrease 1 foe's Agility for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Piggyback Demon (Obariyon)",
+    "unica": null
+  },
+  {
+    "nome": "Summon",
+    "elemento": "almighty",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Summon ally reinforcements.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Enemies"
+  },
+  {
+    "nome": "Support Plus 1",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Adds Masukunda to Moral Support pool",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 1",
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Support Plus 2",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Adds Masukunda and Marakunda to Moral Support pool",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 2",
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Support Plus 3",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Adds Masukunda, Marakunda, and Matarunda to Moral Support pool",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 3",
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Support Rate Up",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Raises chance of Moral Support activating",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Jazz 4",
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Survival Trick",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Survive one instant death attack with 1 HP remaining.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Abyssal King of Avarice (Abaddon)",
+    "unica": null
+  },
+  {
+    "nome": "Swift Strike",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 17
+    },
+    "effetto": "Deal miniscule Phys damage to all foes 2-4 times.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Defeated Avenger (Take-Minakata)",
+    "unica": null
+  },
+  {
+    "nome": "Sword Dance",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 21
+    },
+    "effetto": "Deal colossal Phys damage to 1 foe with high critical.",
+    "fontiEsecuzione": [
+      "Atavaka"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Tactical Spirit",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to halve Support skill costs for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Robin Hood"
+  },
+  {
+    "nome": "Tag Team",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Allows use of consumables without expending them after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Ariadne"
+  },
+  {
+    "nome": "Tarukaja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Increase 1 ally's Attack power for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Sky Tree",
+    "negoziazione": "War-Hungry Horseman (Eligor)",
+    "unica": null
+  },
+  {
+    "nome": "Tarunda",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Decrease 1 foe's Attack power for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Viscid Rotting Meat (Slime)",
+    "unica": null
+  },
+  {
+    "nome": "Taunt",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 3
+    },
+    "effetto": "Inflict Rage (high odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Foolish Monk (Koppa Tengu)",
+    "unica": null
+  },
+  {
+    "nome": "Tempest Slash",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 17
+    },
+    "effetto": "Deal minuscule Phys damage to 1 foe 3 to 5 times .",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Nimble Monkey King (Hanuman)",
+    "unica": null
+  },
+  {
+    "nome": "Tentarafoo",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Confuse (medium odds) to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Terror Claw",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Phys damage and inflict Fear (medium odds) to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Ascended Feline (Nekomata)",
+    "unica": null
+  },
+  {
+    "nome": "Tetra Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 9
+    },
+    "effetto": "Remove physical-repellent shields from all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Fused Ghost (Legion)",
+    "unica": null
+  },
+  {
+    "nome": "Tetraja",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Create shields on party to nullify one instant death attack of Bless or Curse types.",
+    "fontiEsecuzione": [],
+    "fonteCarta": "CJ Maid Cafe",
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Tetrakarn",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 24
+    },
+    "effetto": "Create a shield on 1 ally to repel 1 Phys attack.",
+    "fontiEsecuzione": [
+      "Scathach"
+    ],
+    "fonteCarta": "Jazz 10/2 CJ Destiny Land",
+    "negoziazione": "Vicious Pentagram (Decarabia)",
+    "unica": null
+  },
+  {
+    "nome": "Thermal Conduct",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increases chance of inflicting Burn after Baton Pass",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Thermopylae",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 30
+    },
+    "effetto": "Increase party's Attack, Defense and Agility for 3 turns. Only usable if the party is surrounded.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Thunder Reign",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Electric damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Dionysus"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Titanomachia",
+    "elemento": "fire",
+    "costo": {
+      "tipo": "sp",
+      "valore": 34
+    },
+    "effetto": "Deal severe Fire damage to all foes and inflict Fear (high odds).",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Asterius"
+  },
+  {
+    "nome": "Touch n' Go",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Apply Sukukaja when performing Baton Pass.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Treasure Reboot",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to revive search objects in the area after battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Treasure Skimmer",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Find out if a foe is carrying a rare item ahead of time.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Necronomicon"
+  },
+  {
+    "nome": "Trigger Happy",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Increase critical rate of Gun attacks.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Triple Down",
+    "elemento": "gun",
+    "costo": {
+      "tipo": "hp",
+      "valore": 16
+    },
+    "effetto": "Deal light Gun damage to all foes 3 times.",
+    "fontiEsecuzione": [
+      "Shiki-Ouji"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Tyrant's Mind",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "All damage +25%, Can exceed 100% limit",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Satanel"
+  },
+  {
+    "nome": "Tyrant's Will",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 15
+    },
+    "effetto": "Next Phys attack +150% damage for 1 ally, Defense Master",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Pride",
+    "negoziazione": null,
+    "unica": "Ring of Pride"
+  },
+  {
+    "nome": "Ultimate Support",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Moral Support may now fully recover and buff all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Al Azif"
+  },
+  {
+    "nome": "Ultimate Vessel",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Carries multiple traits to pass down during fusion",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Regent"
+  },
+  {
+    "nome": "Undying Fury",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Phys damage +30%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Universal Law",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Technical damage +50%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Unparalleled Eyes",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Greatly raises evasion rate against Phys attacks for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Gorokichi"
+  },
+  {
+    "nome": "Unshaken Will",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Impart immunity against all mental ailments.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Asura"
+  },
+  {
+    "nome": "Vacuum Wave",
+    "elemento": "wind",
+    "costo": {
+      "tipo": "sp",
+      "valore": 48
+    },
+    "effetto": "Deal severe Wind damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Vahana's Wings",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Reduces costs of Wind skills by 75%",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Vajra Blast",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 13
+    },
+    "effetto": "Deal medium Phys damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Samurai Killer (Kin-Ki)",
+    "unica": null
+  },
+  {
+    "nome": "Vault Guardian",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 20
+    },
+    "effetto": "Marakukaja, Begins battle with Tetrakarn + Makarakarn",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Gluttony",
+    "negoziazione": null,
+    "unica": "Ring of Gluttony"
+  },
+  {
+    "nome": "Veil of Midnight",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Chance to prevent down when weakness struck for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Cendrillon"
+  },
+  {
+    "nome": "Veil of Sunrise",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "High chance to prevent down when weakness struck for all allies",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": "Ella"
+  },
+  {
+    "nome": "Vicious Strike",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 18
+    },
+    "effetto": "Deal medium Phys damage to all foes.",
+    "fontiEsecuzione": [
+      "Kin-Ki"
+    ],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Victory Cry",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Recover full HP and SP after a successful battle.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Vitality of the Tree",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Allows use of ambush-only skills under normal conditions",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Vorpal Blade",
+    "elemento": "phys",
+    "costo": {
+      "tipo": "hp",
+      "valore": 23
+    },
+    "effetto": "Deal severe Phys damage to all foes.",
+    "fontiEsecuzione": [
+      "Oberon"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "The Blackened Fury (Kali)",
+    "unica": null
+  },
+  {
+    "nome": "Wage War",
+    "elemento": "ailment",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Inflict Rage (medium odds) to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Human-Eating Lady (Yaksini)",
+    "unica": null
+  },
+  {
+    "nome": "Wealth of Lotus",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Extends buffs cast by 2 turns",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Wild Thunder",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 54
+    },
+    "effetto": "Deal severe Electric damage to all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Will of the Sword",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Charge-type effects +200% damage instead, Begins battle with Concentrate",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Wind Amp",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Wind attacks by 50%.",
+    "fontiEsecuzione": [
+      "Fuu-Ki"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Warped Abyss (Hastur)",
+    "unica": null
+  },
+  {
+    "nome": "Wind Bloodline",
+    "elemento": "trait",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Halves costs of Wind skills",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Wind Boost",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Strengthen Wind attacks by 25%.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Reviled Dictator (Baal)",
+    "unica": null
+  },
+  {
+    "nome": "Wind Break",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 6
+    },
+    "effetto": "Negate Wind resistances of all foes.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Thief of Tablets (Anzu)",
+    "unica": null
+  },
+  {
+    "nome": "Wind Wall",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 18
+    },
+    "effetto": "Create a shield on 1 ally to reduce damage of Wind attacks for 3 turns.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Wings of Wisdom",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 10
+    },
+    "effetto": "Amrita Shower, Speed Master",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Ring of Wrath",
+    "negoziazione": null,
+    "unica": "Ring of Wrath"
+  },
+  {
+    "nome": "Zio",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Deal light Electric damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
+    "nome": "Ziodyne",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 12
+    },
+    "effetto": "Deal heavy Electric damage to 1 foe.",
+    "fontiEsecuzione": [
+      "Atropos"
+    ],
+    "fonteCarta": null,
+    "negoziazione": "Dancing Lion (Barong)",
+    "unica": null
+  },
+  {
+    "nome": "Zionga",
+    "elemento": "electric",
+    "costo": {
+      "tipo": "sp",
+      "valore": 8
+    },
+    "effetto": "Deal medium Electric damage to 1 foe.",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": "Cavern Snakeman (Naga)",
+    "unica": null
+  }
+]
