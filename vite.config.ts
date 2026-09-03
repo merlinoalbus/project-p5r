@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { pluginAssetPredefiniti } from './vite/assetPredefiniti'
+import { pluginAssetPredefiniti } from './vite/assetPredefiniti.ts'
 
 // Tailwind 4 tramite plugin Vite ufficiale: raccoglie l'`@import "tailwindcss"`
 // in src/tailwind.css e genera le utility a richiesta (config CSS-first).

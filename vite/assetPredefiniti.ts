@@ -16,7 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Plugin } from 'vite';
-import { slugPercorso } from '../shared/slug';
+import { slugPercorso } from '../shared/slug.ts';
 
 /** Estensioni ammesse, in ordine di preferenza a parità di chiave. */
 export const ESTENSIONI = ['webp', 'png', 'svg', 'jpg', 'jpeg', 'gif'] as const;
