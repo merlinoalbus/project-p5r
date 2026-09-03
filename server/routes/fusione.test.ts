@@ -9,7 +9,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from '../services/seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import type { EsitoFusioneDto, PersonaRiassuntoDto, RicetteFusioneDto } from '../../shared/types.js';
+import type { EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicetteFusioneDto } from '../../shared/types.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
@@ -88,6 +88,45 @@ describe('API fusione', () => {
     expect(((await request(app).get(`/api/fusione/ricette/${regent}`)).body.data as RicetteFusioneDto).totale).toBe(0);
     expect((await request(app).get('/api/fusione/ricette/999999')).status).toBe(404);
     expect((await request(app).get(`/api/fusione/ricette/${jack}?livelloMax=0`)).status).toBe(400);
+  });
+
+  it('piani: alberi ricorsivi con scorta e Registro della partita, opzioni e validazione', async () => {
+    const jack = await idDi('Jack Frost');
+    // senza partita: scorta e Registro vuoti, solo catture
+    const base = (await request(app).get(`/api/fusione/piani/${jack}?profondita=2&alternative=2`)).body.data as PianiFusioneDto;
+    expect(base.persona.nome).toBe('Jack Frost');
+    expect(base.disponibilita).toEqual({ scorta: 0, registro: 0 });
+    expect(base.opzioni).toMatchObject({ profondita: 2, alternative: 2, catture: true, livelloMax: null });
+    expect(base.piani.length).toBeGreaterThan(0);
+    expect(base.piani[0].radice.modo).toBe('cattura'); // Jack Frost stesso è catturabile
+    // senza catture né disponibilità → nessun piano
+    const nulla = (await request(app).get(`/api/fusione/piani/${jack}?catture=false`)).body.data as PianiFusioneDto;
+    expect(nulla.piani).toEqual([]);
+    // partita con scorta (Pixie, Arsène) e livello 12: piani con foglie in scorta, limite di livello dal protagonista
+    const p = await request(app).post('/api/partite').send({ nome: 'Piani', livelloProtagonista: 12 });
+    const partitaId = p.body.data.id as number;
+    const pixie = await idDi('Pixie');
+    const arsene = await idDi('Arsène');
+    await request(app).post(`/api/partite/${partitaId}/persona`).send({ personaId: pixie.valueOf() });
+    await request(app).post(`/api/partite/${partitaId}/persona`).send({ personaId: arsene });
+    const conPartita = (await request(app).get(`/api/fusione/piani/${jack}?partita=${partitaId}&catture=false&limitaLivello=true&profondita=3&alternative=3`)).body.data as PianiFusioneDto;
+    expect(conPartita.disponibilita.scorta).toBe(2);
+    expect(conPartita.disponibilita.registro).toBe(2); // l'aggiunta alla scorta registra nel compendio personale
+    expect(conPartita.opzioni.livelloMax).toBe(12);
+    for (const piano of conPartita.piani) {
+      expect(piano.costo).toBeGreaterThanOrEqual(0);
+      const controlla = (n: PianiFusioneDto['piani'][number]['radice']) => {
+        if (n.modo === 'fusione') expect(n.persona.livello).toBeLessThanOrEqual(12);
+        expect(n.modo).not.toBe('cattura');
+        n.figli.forEach(controlla);
+      };
+      controlla(piano.radice);
+    }
+    // validazione
+    expect((await request(app).get(`/api/fusione/piani/${jack}?profondita=9`)).status).toBe(400);
+    expect((await request(app).get(`/api/fusione/piani/${jack}?catture=forse`)).status).toBe(400);
+    expect((await request(app).get('/api/fusione/piani/999999')).status).toBe(404);
+    await request(app).delete(`/api/partite/${partitaId}`);
   });
 
   it('con: tutte le fusioni in cui la Persona è ingrediente', async () => {

@@ -228,6 +228,32 @@ export interface RicetteFusioneDto {
   livelloMax: number | null;
 }
 
+/** Nodo di un piano di fusione ricorsivo. */
+export interface NodoPianoDto {
+  persona: PersonaFusioneDto;
+  modo: 'scorta' | 'registro' | 'cattura' | 'fusione';
+  costo: number;
+  tipo?: TipoFusione;
+  figli: NodoPianoDto[];
+}
+
+export interface PianoFusioneDto {
+  radice: NodoPianoDto;
+  costo: number;
+  profondita: number;
+  catture: number;
+  evocazioni: number;
+  fusioni: number;
+}
+
+export interface PianiFusioneDto {
+  persona: PersonaFusioneDto;
+  piani: PianoFusioneDto[];
+  opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null };
+  /** Esemplari in scorta e Persona nel Registro considerati (dalla partita). */
+  disponibilita: { scorta: number; registro: number };
+}
+
 // ---- Traduzioni ----
 
 export interface TraduzioneDto {

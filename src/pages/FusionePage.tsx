@@ -13,10 +13,11 @@ import { PageState } from '../components/shared/PageState';
 import { useAsset } from '../stores/assetStore';
 import { Calcolatore } from '../components/fusione/Calcolatore';
 import { RicettePersona } from '../components/fusione/RicettePersona';
+import { PianiFusione } from '../components/fusione/PianiFusione';
 
-type Vista = 'calcolatore' | 'ricette' | 'con' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
+type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string]> = [
-  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'],
+  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'],
   ['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro'],
 ];
 
@@ -33,7 +34,7 @@ export function FusionePage() {
   const [a, setA] = useState('');
   const [b, setB] = useState('');
   const vistaParam = params.get('vista');
-  const vista: Vista = VISTE.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : 'calcolatore';
+  const vista: Vista = VISTE.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
   const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
   const sfondoVelluto = useAsset('sfondi/stanza-velluto');
@@ -79,6 +80,9 @@ export function FusionePage() {
         )}
         {persone.dati && vista === 'ricette' && (
           <RicettePersona key={`per-${idParam('ricette') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="per" inizialeId={idParam('ricette')} />
+        )}
+        {persone.dati && vista === 'piani' && (
+          <PianiFusione key={`piani-${idParam('piani') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inizialeId={idParam('piani')} />
         )}
         {persone.dati && vista === 'con' && (
           <RicettePersona key={`con-${idParam('con') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="con" inizialeId={idParam('con')} />

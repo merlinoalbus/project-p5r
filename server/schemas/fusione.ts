@@ -28,3 +28,15 @@ export const queryRicette = z.object({
 });
 
 export const paramsPersonaId = z.object({ personaId: idNumerico });
+
+const booleano = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1').optional();
+
+export const queryPiani = z.object({
+  partita: idNumerico.optional(),
+  dlc: elencoDlc,
+  livelloMax: z.coerce.number().int().min(1).max(99).optional(),
+  profondita: z.coerce.number().int().min(1).max(4).optional(),
+  alternative: z.coerce.number().int().min(1).max(10).optional(),
+  catture: booleano,
+  limitaLivello: booleano,
+});

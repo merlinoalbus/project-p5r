@@ -5,7 +5,8 @@
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
-import type { EsitoFusioneDto, PersonaFusioneDto, RicettaFusioneDto, RicetteFusioneDto } from '../../../shared/types.js';
+import type { EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicettaFusioneDto, RicetteFusioneDto } from '../../../shared/types.js';
+import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
 export interface OpzioniContesto {
@@ -76,6 +77,51 @@ export function ricettePerDto(personaId: number, opz: OpzioniContesto): RicetteF
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
   return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map(ricettaDto), dlcPosseduti, livelloMax: opz.livelloMax ?? null };
+}
+
+/** Scorta (esemplari per Persona) e Registro (Persona registrate) della partita; vuoti senza partita. */
+function disponibilitaDi(partitaId?: number): Disponibilita {
+  const disp: Disponibilita = { scorta: new Map(), registro: new Set() };
+  if (partitaId === undefined) return disp;
+  for (const r of prepared('SELECT persona_id FROM persona_posseduta WHERE partita_id = ?').all(partitaId) as Array<{ persona_id: number }>) {
+    disp.scorta.set(r.persona_id, (disp.scorta.get(r.persona_id) ?? 0) + 1);
+  }
+  for (const r of prepared('SELECT persona_id FROM compendio_partita WHERE partita_id = ? AND registrata = 1').all(partitaId) as Array<{ persona_id: number }>) {
+    disp.registro.add(r.persona_id);
+  }
+  return disp;
+}
+
+function nodoDto(n: NodoPiano): NodoPianoDto {
+  return { persona: personaDto(n.persona), modo: n.modo, costo: n.costo, ...(n.tipo ? { tipo: n.tipo } : {}), figli: n.figli.map(nodoDto) };
+}
+
+export interface OpzioniPiani extends OpzioniContesto {
+  profondita?: number;
+  alternative?: number;
+  catture?: boolean;
+  /** Se true e c'è una partita, il livello massimo è quello del protagonista. */
+  limitaLivello?: boolean;
+}
+
+/** Piani di fusione ricorsivi per ottenere la Persona, con scorta e Registro della partita. */
+export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto {
+  const { ctx } = contestoDa(opz);
+  const target = personaOErrore(personaId);
+  const disp = disponibilitaDi(opz.partitaId);
+  let livelloMax: number | null = opz.livelloMax ?? null;
+  if (livelloMax === null && opz.limitaLivello && opz.partitaId !== undefined) {
+    const r = prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(opz.partitaId) as { livello_protagonista: number } | undefined;
+    livelloMax = r?.livello_protagonista ?? null;
+  }
+  const opzioni = { profondita: opz.profondita ?? 3, alternative: opz.alternative ?? 3, catture: opz.catture ?? true, livelloMax };
+  const piani = pianiFusione(target, ctx, disp, opzioni);
+  return {
+    persona: personaDto(target),
+    piani: piani.map((p) => ({ radice: nodoDto(p.radice), costo: p.costo, profondita: p.profondita, catture: p.catture, evocazioni: p.evocazioni, fusioni: p.fusioni })),
+    opzioni,
+    disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
+  };
 }
 
 /** Fusioni in cui la Persona è ingrediente. */

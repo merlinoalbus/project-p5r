@@ -9,8 +9,8 @@
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { paramsPersonaId, queryFondi, queryRicette } from '../schemas/fusione.js';
-import { fondiDto, fusioniConDto, ricettePerDto } from '../services/fusione/fusioneService.js';
+import { paramsPersonaId, queryFondi, queryPiani, queryRicette } from '../schemas/fusione.js';
+import { fondiDto, fusioniConDto, pianiDto, ricettePerDto } from '../services/fusione/fusioneService.js';
 
 const router = Router();
 
@@ -27,6 +27,11 @@ router.get('/ricette/:personaId', validate({ params: paramsPersonaId, query: que
 router.get('/con/:personaId', validate({ params: paramsPersonaId, query: queryRicette }), (req, res) => {
   const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
   res.json(fusioniConDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+});
+
+router.get('/piani/:personaId', validate({ params: paramsPersonaId, query: queryPiani }), (req, res) => {
+  const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; profondita?: number; alternative?: number; catture?: boolean; limitaLivello?: boolean };
+  res.json(pianiDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, profondita: q.profondita, alternative: q.alternative, catture: q.catture, limitaLivello: q.limitaLivello }));
 });
 
 export default router;

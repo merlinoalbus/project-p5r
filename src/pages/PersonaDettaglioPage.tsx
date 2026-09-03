@@ -50,7 +50,10 @@ function SezioneFusione({ personaId, rara, partitaId, livelloProtagonista }: { p
         <div>
           <div className="flex items-baseline justify-between gap-2 flex-wrap">
             <span className="text-[13px] text-text-secondary">Come ottenerla: <strong className="text-text">{per.dati.totale}</strong> ricette{per.dati.totale > 0 ? ' (le più economiche)' : ''}</span>
-            {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="text-[13px] text-primary">Tutte le ricette →</Link>}
+            <span className="flex gap-3">
+              {per.dati.totale > 5 && <Link to={`/fusione?vista=ricette&ricette=${personaId}`} className="text-[13px] text-primary">Tutte le ricette →</Link>}
+              <Link to={`/fusione?vista=piani&piani=${personaId}`} className="text-[13px] text-primary">Piano di fusione →</Link>
+            </span>
           </div>
           {per.dati.ricette.length > 0 && (
             <ul className="m-0 p-0 list-none divide-y divide-border-light">
