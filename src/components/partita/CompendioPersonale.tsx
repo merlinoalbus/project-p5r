@@ -25,7 +25,7 @@ export function CompendioPersonale({ partitaId }: Props) {
   const setRegistrate = new Map((registrate.dati ?? []).map((r) => [r.personaId, r]));
   const lista = useMemo(() => {
     const testo = q.trim().toLowerCase();
-    return (tutte.dati ?? []).filter((p) => (!testo || p.nome.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)) && (!soloMancanti || !setRegistrate.has(p.id)));
+    return (tutte.dati ?? []).filter((p) => (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo)) && (!soloMancanti || !setRegistrate.has(p.id)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tutte.dati, q, soloMancanti, registrate.dati]);
 
@@ -60,10 +60,10 @@ export function CompendioPersonale({ partitaId }: Props) {
           return (
             <li key={p.id} className="flex items-center gap-3 py-1">
               <label className="touch flex items-center justify-center cursor-pointer">
-                <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nome} registrata`} />
+                <input type="checkbox" className="w-6 h-6" checked={!!r} disabled={occupato === p.id} onChange={(e) => void cambia(p.id, e.target.checked)} aria-label={`${p.nomeIt} registrata`} />
               </label>
               <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-              <Link to={`/compendio/persona/${p.id}`} className="font-semibold no-underline text-text hover:text-primary flex-1">{p.nome}</Link>
+              <Link to={`/compendio/persona/${p.id}`} className="font-semibold no-underline text-text hover:text-primary flex-1">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
               <span className="chip">{p.arcanaNome}</span>
               {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && <span className="text-[12px] text-text-secondary">reg. liv. {r.livelloRegistrato}</span>}
             </li>

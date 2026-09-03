@@ -41,6 +41,10 @@ describe('caricaSeed', () => {
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'rangoDote'")).toBe(25);
     expect((db.prepare("SELECT punti_necessari AS p FROM confidente_rango WHERE confidente_chiave = 'ryuji' AND rango = 2").get() as { p: number }).p).toBe(20);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'effettoSkill'")).toBe(512);
+    // Localizzazione italiana dalla guida allgamestaff (step 0.11)
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'skill'")).toBe(371);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'persona'")).toBe(58);
+    expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'termine'")).toBe(56);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'descrizioneOggetto'")).toBe(223);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'negoziazione'")).toBe(120);
     expect(n("SELECT COUNT(*) AS n FROM traduzione WHERE ambito = 'fonteCarta'")).toBe(49);

@@ -64,7 +64,7 @@ src/
                       esami/invito, annulla ultimo, barra verso il rango successivo, sblocco, note, immagine personaggio + carta dell'arcano), ScortaPersona (aggiunta dal compendio,
                       modifica livello/statistiche/skill), CompendioPersonale (spunte + completamento), RiepilogoPartita, NuovaPartitaModal
   components/impostazioni/ GestionePartite, ImportaRiferimenti (catalogo link → importazione a lotti di 10 con avanzamento ed esiti), TraduzioniEditor
-  pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Skill (525, filtri), SkillDettaglio,
+  pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Glossario (termini per categoria), Skill (525, filtri), SkillDettaglio,
                       Fusione (due arcani, matrice 24×24, ricette speciali, Demoni del Tesoro), Partita (schede), Impostazioni, NotFound
   stores/             configStore, notificationStore, glossarioStore (rese italiane, caricato una volta), partitaStore (partite + attiva),
                       preferenzeStore (localStorage: grafica predefinita), assetStore (manifest /asset/manifest.json + hook useAsset)
@@ -99,7 +99,8 @@ docs/                 documentazione di bordo e riferimenti di dominio
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
     `confidente` + `confidente_rango` (punti necessari per rango, 0 = non a punti), `dote_sociale` + `dote_sociale_rango` (5 ranghi
-    con nome e soglia), `traduzione`, `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
+    con nome e soglia), `traduzione` (compresi gli ambiti `skill`, `persona`, `termine` della localizzazione italiana ufficiale
+    dalla guida allgamestaff, vedi `docs/riferimenti/glossario-localizzazione.md`), `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
     `seed_meta` → reseed solo quando il seed cambia; `persona`/`skill`/`oggetto`/`confidente` in UPSERT per chiave naturale
     (id stabili, mai cancellazioni), relazioni di gioco svuotate e ricaricate, `traduzione` con `fonte='utente'` mai sovrascritta;
   - **dati utente** (`partita` con indice parziale "una sola attiva", `compendio_partita`, `persona_posseduta` +
@@ -109,12 +110,12 @@ docs/                 documentazione di bordo e riferimenti di dominio
   proporzione alle statistiche base; il BE espone per ogni Persona posseduta `statistiche` (registrate dall'utente oppure stimate al livello) e
   `statisticheBaseLivello`; la scheda Persona ha il cursore del livello con stima e differenza.
 - Testi canonici (nomi Persona/skill, chiavi arcana/elementi, effetti, descrizioni) restano in inglese Royal nelle tabelle di
-    gioco; la resa italiana si legge da `traduzione(ambito, chiave)`.
+    gioco; la resa italiana si legge da `traduzione(ambito, chiave)`; i DTO espongono `nomeIt` per skill e Persona (fallback al canonico).
 
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|
-| Compendio | `GET /api/compendio/arcani`, `/glossario`, `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
+| Compendio | `GET /api/compendio/arcani`, `/glossario`, `/termini` (glossario italiano ↔ inglese per categoria), `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
 | Traduzioni | `GET /api/traduzioni?ambito&q&soloUtente`, `GET /ambiti`, `PUT /:ambito/:chiave {testo}` (→ fonte utente), `DELETE /:ambito/:chiave` (ripristina il seed) |
 | Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti` (punti, rango, nomeRango, sogliaProssima, mancanti, ranghi[]), `PATCH /:id/doti/:chiave {punti|delta|note 1–3 + libro/fortuna}`; `GET /:id/confidenti` (punti, puntiNecessari, mancanti, personaArcanoInScorta), `PUT /:id/confidenti/:chiave {sbloccato,rango,punti|deltaPunti|noteRisposta 1–3|regalo|uscita + bonusArcano/esame/invito,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
 | Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave`; catalogo dei riferimenti (solo link): `GET /catalogo?ambito` (voci + `presente`), `POST /catalogo/importa {ambito, chiavi ≤20, sovrascrivi}` → `{importate, saltate, fallite[{chiave, motivo}]}` |

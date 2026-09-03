@@ -32,7 +32,7 @@ export function CompendioPage() {
     if (!dati) return [];
     const testo = q.trim().toLowerCase();
     const lista = dati.filter((p) =>
-      (!testo || p.nome.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))
+      (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))
       && (!arcana || p.arcana === arcana)
       && p.livello <= livelloMax
       && (mostraDlc || !p.dlc)
@@ -89,7 +89,8 @@ export function CompendioPage() {
                   <div className="w-12 h-12 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary text-[18px] shrink-0" title="Livello">{p.livello}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-[15px] truncate">{p.nome}</span>
+                      <span className="font-semibold text-[15px] truncate">{p.nomeIt}</span>
+                      {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted truncate">{p.nome}</span>}
                       <span className="chip">{p.arcanaNome}</span>
                       {p.dlc && <span className="chip">DLC</span>}
                       {p.rara && <span className="chip">Tesoro</span>}

@@ -284,6 +284,7 @@ export interface ModificaConfidente {
 export interface CompendioPartitaDto {
   personaId: number;
   nome: string;
+  nomeIt: string;
   arcana: string;
   arcanaNome: string;
   livello: number;
@@ -296,6 +297,8 @@ export interface PersonaPossedutaDto {
   id: number;
   personaId: number;
   nome: string;
+  /** Nome italiano (uguale a `nome` salvo eccezioni della localizzazione). */
+  nomeIt: string;
   arcana: string;
   arcanaNome: string;
   livelloBase: number;

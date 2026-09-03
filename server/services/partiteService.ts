@@ -217,7 +217,7 @@ export function compendioPartita(partitaId: number): CompendioPartitaDto[] {
   rigaPartita(partitaId);
   return (prepared(`SELECT cp.persona_id, p.nome, p.arcana, p.livello, cp.registrata, cp.livello_registrato, cp.updated_at
     FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? ORDER BY p.livello, p.nome`).all(partitaId) as Array<{ persona_id: number; nome: string; arcana: string; livello: number; registrata: number; livello_registrato: number | null; updated_at: string }>)
-    .map((r) => ({ personaId: r.persona_id, nome: r.nome, arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello, registrata: r.registrata === 1, livelloRegistrato: r.livello_registrato, updatedAt: r.updated_at }));
+    .map((r) => ({ personaId: r.persona_id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello, registrata: r.registrata === 1, livelloRegistrato: r.livello_registrato, updatedAt: r.updated_at }));
 }
 
 export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): CompendioPartitaDto[] {
@@ -258,7 +258,7 @@ function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
   const base = { forza: r.b_forza, magia: r.b_magia, resistenza: r.b_resistenza, agilita: r.b_agilita, fortuna: r.b_fortuna };
   const stimate = statistichePerLivello(base, r.livello_base, r.livello);
   return {
-    id: r.id, personaId: r.persona_id, nome: r.nome, arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livelloBase: r.livello_base, livello: r.livello,
+    id: r.id, personaId: r.persona_id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livelloBase: r.livello_base, livello: r.livello,
     statistiche: statisticheBase
       ? stimate
       : { forza: r.forza ?? stimate.forza, magia: r.magia ?? stimate.magia, resistenza: r.resistenza ?? stimate.resistenza, agilita: r.agilita ?? stimate.agilita, fortuna: r.fortuna ?? stimate.fortuna },

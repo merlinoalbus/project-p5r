@@ -103,6 +103,16 @@ describe('API', () => {
     const conf = await request(app).get('/api/compendio/confidenti');
     expect(conf.body.data).toHaveLength(23);
     expect(conf.body.data[0]).toMatchObject({ chiave: 'igor', arcanaNome: 'Matto' });
+    // Localizzazione italiana: nomi skill/Persona e glossario dei termini
+    const cleave = ((await request(app).get('/api/compendio/skill?q=Cleave')).body.data as Array<{ nome: string; nomeIt: string }>).find((s) => s.nome === 'Cleave')!;
+    expect(cleave.nomeIt).toBe('Fendente');
+    const agi = ((await request(app).get('/api/compendio/skill?q=Agi')).body.data as Array<{ nome: string; nomeIt: string }>).find((s) => s.nome === 'Agi')!;
+    expect(agi.nomeIt).toBe('Agi');
+    const regent = ((await request(app).get('/api/compendio/persona?q=Regent')).body.data as Array<{ nome: string; nomeIt: string }>).find((p) => p.nome === 'Regent')!;
+    expect(regent.nomeIt).toBe('Reggente');
+    const termini = await request(app).get('/api/compendio/termini');
+    expect(termini.body.data).toHaveLength(56);
+    expect(termini.body.data.find((t: { chiave: string }) => t.chiave === 'Hold Up')).toMatchObject({ nome: 'Rapina', categoria: 'battaglia' });
     const regole = await request(app).get('/api/compendio/fusione/regole');
     expect(regole.body.data.tabella).toHaveLength(273);
     expect(regole.body.data.speciali).toHaveLength(24);

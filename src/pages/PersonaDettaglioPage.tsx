@@ -39,7 +39,7 @@ export function PersonaDettaglioPage() {
   const navigate = useNavigate();
   const personaId = Number(id);
   const { dati: p, caricamento, errore, ricarica } = useCarica(() => getPersona(personaId), [personaId]);
-  useDocumentTitle(p ? p.nome : 'Persona');
+  useDocumentTitle(p ? p.nomeIt : 'Persona');
   const attiva = usePartitaStore((s) => s.attiva);
   const [livello, setLivello] = useState<number | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -51,7 +51,7 @@ export function PersonaDettaglioPage() {
     setOccupato(true);
     try {
       await aggiungiPosseduta(attiva.id, p.id, { livello: livelloScelto });
-      notifica('success', `${p.nome} aggiunta alla scorta di «${attiva.nome}».`);
+      notifica('success', `${p.nomeIt} aggiunta alla scorta di «${attiva.nome}».`);
     } catch (err) {
       if (isApiError(err, 'persona-gia-posseduta')) notifica('warning', 'Questa Persona è già nella scorta.');
       else notifica('error', err instanceof Error ? err.message : 'Operazione fallita.');
@@ -75,7 +75,8 @@ export function PersonaDettaglioPage() {
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="m-0 text-2xl font-bold">{p.nome}</h1>
+                <h1 className="m-0 text-2xl font-bold">{p.nomeIt}</h1>
+                {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
                 <span className="chip chip--attivo">{p.arcanaNome}</span>
                 <span className="chip">Livello {p.livello}</span>
                 {p.dlc && <span className="chip">DLC{p.dlcSet ? ` ${p.dlcSet}` : ''}</span>}

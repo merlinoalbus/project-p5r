@@ -1,6 +1,6 @@
 {
   "versione": 1,
-  "generatoIl": "2026-09-03T17:08:36.284Z",
+  "generatoIl": "2026-09-03T17:30:31.723Z",
   "fonti": {
     "primaria": {
       "id": "chinhodado",
@@ -25,8 +25,8 @@
     "descrizioniOggettiTradotte": 223,
     "negoziazioniTradotte": 120,
     "fontiCartaTradotte": 49,
-    "skillLocalizzate": 0,
-    "personeLocalizzate": 0,
-    "termini": 0
+    "skillLocalizzate": 371,
+    "personeLocalizzate": 58,
+    "termini": 56
   }
 }

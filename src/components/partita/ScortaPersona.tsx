@@ -28,11 +28,11 @@ export function ScortaPersona({ partitaId }: Props) {
   const [modifica, setModifica] = useState<PersonaPossedutaDto | null>(null);
 
   const rimuovi = async (p: PersonaPossedutaDto) => {
-    if (!dati || !window.confirm(`Rimuovere ${p.nome} dalla scorta? Resta registrata nel compendio.`)) return;
+    if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
     try {
       await rimuoviPosseduta(partitaId, p.id);
       imposta(dati.filter((x) => x.id !== p.id));
-      notifica('info', `${p.nome} rimossa dalla scorta.`);
+      notifica('info', `${p.nomeIt} rimossa dalla scorta.`);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Rimozione fallita.');
     }
@@ -53,7 +53,8 @@ export function ScortaPersona({ partitaId }: Props) {
               <div className="flex items-center gap-2 flex-wrap">
                 <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={64} />
                 <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary" title="Livello">{p.livello}</span>
-                <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[15px] no-underline text-text hover:text-primary">{p.nome}</Link>
+                <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[15px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
+                {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
                 <span className="chip">{p.arcanaNome}</span>
                 {!p.inSquadra && <span className="chip">In deposito</span>}
                 {!p.statisticheBase && <span className="chip chip--attivo">Potenziata</span>}
@@ -104,7 +105,7 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
   const [occupato, setOccupato] = useState<number | null>(null);
   const filtrate = useMemo(() => {
     const testo = q.trim().toLowerCase();
-    return (dati ?? []).filter((p) => !p.rara && (!testo || p.nome.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))).slice(0, 40);
+    return (dati ?? []).filter((p) => !p.rara && (!testo || p.nome.toLowerCase().includes(testo) || p.nomeIt.toLowerCase().includes(testo) || p.arcanaNome.toLowerCase().includes(testo))).slice(0, 40);
   }, [dati, q]);
 
   const aggiungi = async (personaId: number, nome: string) => {
@@ -128,9 +129,9 @@ function AggiungiPersonaModal({ aperta, onChiudi, onAggiunta, partitaId }: { ape
         {filtrate.map((p) => (
           <li key={p.id} className="flex items-center gap-2 py-2">
             <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
-            <span className="font-semibold flex-1">{p.nome}</span>
+            <span className="font-semibold flex-1">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</span>
             <span className="chip">{p.arcanaNome}</span>
-            <button type="button" className="btn btn-primary btn-sm" disabled={occupato === p.id} onClick={() => void aggiungi(p.id, p.nome)}>Aggiungi</button>
+            <button type="button" className="btn btn-primary btn-sm" disabled={occupato === p.id} onClick={() => void aggiungi(p.id, p.nomeIt)}>Aggiungi</button>
           </li>
         ))}
         {dati && filtrate.length === 0 && <li className="py-3 text-[13px] text-text-muted">Nessuna Persona trovata.</li>}
