@@ -22,3 +22,6 @@ coverage/
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# PID degli script di gestione server
+.pids/
