@@ -216,6 +216,10 @@ export interface EsitoFusioneDto {
   /** Spiegazione quando la fusione non è possibile. */
   motivo: string | null;
   dlcPosseduti: number[];
+  /** Sconto del Registro applicato al costo (dalla partita). */
+  sconto: number;
+  /** Bonus EXP del Confidente dell'arcano del risultato (dalla partita), null senza partita o senza risultato. */
+  bonusConfidente: { arcana: string; arcanaNome: string; confidenteNome: string | null; rango: number; moltiplicatoreExp: number } | null;
 }
 
 /** Elenco di ricette (per ottenere una Persona, o con una Persona come ingrediente). */
@@ -226,6 +230,8 @@ export interface RicetteFusioneDto {
   ricette: RicettaFusioneDto[];
   dlcPosseduti: number[];
   livelloMax: number | null;
+  /** Sconto del Registro applicato ai costi (dalla partita), 0 senza partita. */
+  sconto: number;
 }
 
 /** Nodo di un piano di fusione ricorsivo. */
@@ -256,6 +262,8 @@ export interface PianiFusioneDto {
   opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null; slotFortunato: boolean };
   /** Skill richieste (propagate lungo la catena). */
   skillRichieste: Array<{ id: number; nome: string; nomeIt: string; elemento: string; elementoNome: string }>;
+  /** Sconto del Registro applicato ai costi (dalla partita), 0 senza partita. */
+  sconto: number;
   /** Esemplari in scorta e Persona nel Registro considerati (dalla partita). */
   disponibilita: { scorta: number; registro: number };
 }
@@ -303,6 +311,23 @@ export interface RicercaSkillDto {
   ricette: RicettaPerSkillDto[];
   /** Persona (risultati) che compaiono nelle ricette, con il numero di ricette ciascuna. */
   perRisultato: Array<{ persona: PersonaFusioneDto; ricette: number; costoMinimo: number }>;
+}
+
+/** Stato della Stanza di Velluto per una partita (bonus quantificabili). */
+export interface VellutoDto {
+  partitaId: number;
+  compendio: { registrate: number; totale: number; percentuale: number };
+  /** Sconto percentuale sui prezzi di evocazione dal Registro. */
+  sconto: number;
+  allarmeAttivo: boolean;
+  gemelle: {
+    rango: number;
+    trattamentoSpeciale: boolean;
+    sblocchi: Array<{ rango: number; nome: string; effetto: string; ottenuto: boolean }>;
+    prossimo: { rango: number; nome: string; effetto: string } | null;
+  };
+  /** Per ogni arcano: Confidente, rango e moltiplicatore EXP della fusione. */
+  arcani: Array<{ arcana: string; arcanaNome: string; confidenteChiave: string | null; confidenteNome: string | null; rango: number; moltiplicatoreExp: number }>;
 }
 
 // ---- Traduzioni ----

@@ -10,7 +10,8 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { paramsPersonaId, queryCercaSkill, queryEredita, queryFondi, queryPiani, queryRicette } from '../schemas/fusione.js';
-import { cercaPerSkillDto, ereditaDto, fondiDto, fusioniConDto, pianiDto, ricettePerDto } from '../services/fusione/fusioneService.js';
+import { cercaPerSkillDto, ereditaDto, fondiDto, fusioniConDto, pianiDto, ricettePerDto, vellutoDto } from '../services/fusione/fusioneService.js';
+import { z } from 'zod';
 
 const router = Router();
 
@@ -42,6 +43,10 @@ router.get('/eredita', validate({ query: queryEredita }), (req, res) => {
 router.get('/cerca-skill', validate({ query: queryCercaSkill }), (req, res) => {
   const q = req.query as unknown as { skill: number[]; risultato?: number; partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
   res.json(cercaPerSkillDto(q.skill, { risultatoId: q.risultato, partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+});
+
+router.get('/velluto', validate({ query: z.object({ partita: z.coerce.number().int().positive() }) }), (req, res) => {
+  res.json(vellutoDto((req.query as unknown as { partita: number }).partita));
 });
 
 export default router;

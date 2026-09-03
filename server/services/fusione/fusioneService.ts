@@ -7,6 +7,8 @@ import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
 import { analisiEredita, copre, elementoEreditabile, skillAlLivello, skillPerId, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
+import { SBLOCCHI_GEMELLE, moltiplicatoreExpConfidente, prezzoScontato, sblocchiGemelle, scontoRegistro } from '../../../shared/bonusVelluto.js';
+import type { VellutoDto } from '../../../shared/types.js';
 import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
@@ -25,6 +27,57 @@ function contestoDa(opz: OpzioniContesto): { ctx: Contesto; dlcPosseduti: number
     dlc = JSON.parse(r.dlc_posseduti_json) as number[];
   }
   return { ctx: creaContesto(dlc), dlcPosseduti: dlc };
+}
+
+// ---- Stanza di Velluto (Fase 4.2) ----
+
+/** Percentuale di completamento del compendio personale (Persona non DLC registrate) e sconto del Registro. */
+function scontoPartita(partitaId: number | undefined): { registrate: number; totale: number; percentuale: number; sconto: number } {
+  const totale = (prepared('SELECT COUNT(*) AS n FROM persona WHERE dlc = 0').get() as { n: number }).n;
+  if (partitaId === undefined) return { registrate: 0, totale, percentuale: 0, sconto: 0 };
+  const registrate = (prepared('SELECT COUNT(*) AS n FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id WHERE cp.partita_id = ? AND cp.registrata = 1 AND p.dlc = 0').get(partitaId) as { n: number }).n;
+  const percentuale = totale > 0 ? Math.floor((registrate / totale) * 100) : 0;
+  return { registrate, totale, percentuale, sconto: scontoRegistro(percentuale) };
+}
+
+/** Rango del Confidente per arcano nella partita (0 se assente). */
+function ranghiPerArcana(partitaId: number | undefined): Map<string, { chiave: string; nome: string; rango: number }> {
+  const m = new Map<string, { chiave: string; nome: string; rango: number }>();
+  const righe = prepared(`SELECT c.chiave, c.nome, c.arcana, COALESCE(cp.rango, 0) AS rango FROM confidente c
+    LEFT JOIN confidente_partita cp ON cp.confidente_chiave = c.chiave AND cp.partita_id = ? ORDER BY c.ordine`).all(partitaId ?? -1) as Array<{ chiave: string; nome: string; arcana: string; rango: number }>;
+  for (const r of righe) if (!m.has(r.arcana) || m.get(r.arcana)!.rango < r.rango) m.set(r.arcana, { chiave: r.chiave, nome: r.nome, rango: r.rango });
+  return m;
+}
+
+/** Stato della Stanza di Velluto per la partita. */
+export function vellutoDto(partitaId: number): VellutoDto {
+  const partita = prepared('SELECT id, allarme_attivo FROM partita WHERE id = ?').get(partitaId) as { id: number; allarme_attivo: number } | undefined;
+  if (!partita) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
+  const c = scontoPartita(partitaId);
+  const ranghi = ranghiPerArcana(partitaId);
+  const gemelle = ranghi.get('Strength')?.rango ?? 0;
+  const sb = sblocchiGemelle(gemelle);
+  const arcani = (prepared('SELECT chiave FROM arcana ORDER BY ordine').all() as Array<{ chiave: string }>).map((a) => {
+    const r = ranghi.get(a.chiave);
+    return { arcana: a.chiave, arcanaNome: t('arcana', a.chiave), confidenteChiave: r?.chiave ?? null, confidenteNome: r?.nome ?? null, rango: r?.rango ?? 0, moltiplicatoreExp: moltiplicatoreExpConfidente(r?.rango ?? 0) };
+  });
+  return {
+    partitaId,
+    compendio: { registrate: c.registrate, totale: c.totale, percentuale: c.percentuale },
+    sconto: c.sconto,
+    allarmeAttivo: partita.allarme_attivo === 1,
+    gemelle: {
+      rango: gemelle,
+      trattamentoSpeciale: gemelle >= 5,
+      sblocchi: SBLOCCHI_GEMELLE.map((s) => ({ ...s, ottenuto: s.rango <= gemelle })),
+      prossimo: sb.prossimo,
+    },
+    arcani,
+  };
+}
+
+function ricettaScontata(r: RicettaFusioneDto, sconto: number): RicettaFusioneDto {
+  return sconto > 0 ? { ...r, costo: prezzoScontato(r.costo, sconto) } : r;
 }
 
 function personaDto(p: PersonaFusione): PersonaFusioneDto {
@@ -47,12 +100,19 @@ export function fondiDto(aId: number, bId: number, opz: OpzioniContesto): EsitoF
   const a = personaOErrore(aId);
   const b = personaOErrore(bId);
   const ammesse = new Set(ctx.ammesse.map((p) => p.id));
-  if (a.id === b.id) return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo: 'Una Persona non può essere fusa con sé stessa.', dlcPosseduti };
+  if (a.id === b.id) return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo: 'Una Persona non può essere fusa con sé stessa.', dlcPosseduti, sconto: 0, bonusConfidente: null };
   for (const p of [a, b]) {
-    if (!ammesse.has(p.id)) return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo: `${t('persona', p.nome)} è un contenuto scaricabile non segnato come posseduto in questa partita.`, dlcPosseduti };
+    if (!ammesse.has(p.id)) return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo: `${t('persona', p.nome)} è un contenuto scaricabile non segnato come posseduto in questa partita.`, dlcPosseduti, sconto: 0, bonusConfidente: null };
   }
   const r = fondi(a, b, ctx);
-  if (r) return { a: personaDto(a), b: personaDto(b), ricetta: ricettaDto(r), motivo: null, dlcPosseduti };
+  if (r) {
+    const sconto = scontoPartita(opz.partitaId).sconto;
+    const rango = ranghiPerArcana(opz.partitaId).get(r.risultato.arcana);
+    const bonusConfidente = opz.partitaId !== undefined
+      ? { arcana: r.risultato.arcana, arcanaNome: t('arcana', r.risultato.arcana), confidenteNome: rango?.nome ?? null, rango: rango?.rango ?? 0, moltiplicatoreExp: moltiplicatoreExpConfidente(rango?.rango ?? 0) }
+      : null;
+    return { a: personaDto(a), b: personaDto(b), ricetta: ricettaScontata(ricettaDto(r), sconto), motivo: null, dlcPosseduti, sconto, bonusConfidente };
+  }
   let motivo = 'Nessuna Persona corrisponde a questa combinazione.';
   if (a.rara && b.rara) motivo = 'Questi due Demoni del Tesoro non producono alcuna Persona con la fusione normale.';
   else if (a.rara || b.rara) motivo = 'Il Demone del Tesoro non ha una Persona a quella distanza nell\'arcano: la fusione non è possibile.';
@@ -60,7 +120,7 @@ export function fondiDto(aId: number, bId: number, opz: OpzioniContesto): EsitoF
   else if (!ctx.perArcana.has(a.arcana) || (ctx.perArcana.get(a.arcana) && !ctx.perArcana.get(b.arcana))) motivo = 'Arcano sconosciuto.';
   else if (arcanaSenzaRisultato(a.arcana, b.arcana)) motivo = 'Questi due arcani non possono essere fusi insieme (Giudizio con Giustizia, Forza, Carro o Morte).';
   else motivo = 'Il livello di riferimento supera la Persona più alta dell\'arcano risultante.';
-  return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo, dlcPosseduti };
+  return { a: personaDto(a), b: personaDto(b), ricetta: null, motivo, dlcPosseduti, sconto: 0, bonusConfidente: null };
 }
 
 function arcanaSenzaRisultato(a: string, b: string): boolean {
@@ -77,7 +137,8 @@ export function ricettePerDto(personaId: number, opz: OpzioniContesto): RicetteF
   if (opz.livelloMax !== undefined) ricette = ricette.filter((r) => r.risultato.livello <= opz.livelloMax! && r.ingredienti.every((i) => i.livello <= opz.livelloMax!));
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
-  return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map(ricettaDto), dlcPosseduti, livelloMax: opz.livelloMax ?? null };
+  const sconto = scontoPartita(opz.partitaId).sconto;
+  return { persona: personaDto(target), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, sconto };
 }
 
 /** Scorta (esemplari per Persona) e Registro (Persona registrate) della partita; vuoti senza partita. */
@@ -98,8 +159,8 @@ function skillBreve(id: number): { id: number; nome: string; nomeIt: string } {
   return { id, nome: s?.nome ?? String(id), nomeIt: s ? t('skill', s.nome) : String(id) };
 }
 
-function nodoDto(n: NodoPiano): NodoPianoDto {
-  return { persona: personaDto(n.persona), modo: n.modo, costo: n.costo, ...(n.tipo ? { tipo: n.tipo } : {}), figli: n.figli.map(nodoDto), skillPortate: n.skillPortate.map(skillBreve), skillDaLivello: n.skillDaLivello.map(skillBreve) };
+function nodoDto(n: NodoPiano, sconto = 0): NodoPianoDto {
+  return { persona: personaDto(n.persona), modo: n.modo, costo: prezzoScontato(n.costo, sconto), ...(n.tipo ? { tipo: n.tipo } : {}), figli: n.figli.map((f) => nodoDto(f, sconto)), skillPortate: n.skillPortate.map(skillBreve), skillDaLivello: n.skillDaLivello.map(skillBreve) };
 }
 
 export interface OpzioniPiani extends OpzioniContesto {
@@ -140,11 +201,13 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
   }
   const opzioni = { profondita: opz.profondita ?? 3, alternative: opz.alternative ?? 3, catture: opz.catture ?? true, livelloMax, slotFortunato: opz.slotFortunato ?? false };
   const piani = pianiFusione(target, ctx, disp, { ...opzioni, skill: skillRichieste.map((s) => s.id) });
+  const sconto = scontoPartita(opz.partitaId).sconto;
   return {
     persona: personaDto(target),
-    piani: piani.map((p) => ({ radice: nodoDto(p.radice), costo: p.costo, profondita: p.profondita, catture: p.catture, evocazioni: p.evocazioni, fusioni: p.fusioni })),
+    piani: piani.map((p) => ({ radice: nodoDto(p.radice, sconto), costo: prezzoScontato(p.costo, sconto), profondita: p.profondita, catture: p.catture, evocazioni: p.evocazioni, fusioni: p.fusioni })),
     opzioni,
     skillRichieste,
+    sconto,
     disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
   };
 }
@@ -252,5 +315,6 @@ export function fusioniConDto(personaId: number, opz: OpzioniContesto): RicetteF
   if (opz.livelloMax !== undefined) ricette = ricette.filter((r) => r.risultato.livello <= opz.livelloMax! && r.ingredienti.every((i) => i.livello <= opz.livelloMax!));
   const totale = ricette.length;
   const limite = opz.limite ?? 500;
-  return { persona: personaDto(persona), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map(ricettaDto), dlcPosseduti, livelloMax: opz.livelloMax ?? null };
+  const sconto = scontoPartita(opz.partitaId).sconto;
+  return { persona: personaDto(persona), totale, totaleSenzaFiltri, ricette: ricette.slice(0, limite).map((r) => ricettaScontata(ricettaDto(r), sconto)), dlcPosseduti, livelloMax: opz.livelloMax ?? null, sconto };
 }

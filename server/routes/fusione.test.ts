@@ -1,5 +1,5 @@
 // ============================================================
-// Test API fusione — fondi, ricette, con; contesto DLC da partita o esplicito; filtri e validazione
+// Test API fusione — fondi, ricette, con, piani, eredita, cerca-skill, velluto; contesto DLC da partita o esplicito; filtri e validazione
 // ============================================================
 
 import path from 'node:path';
@@ -9,7 +9,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from '../services/seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import type { EreditaFusioneDto, EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto, SkillRiassuntoDto } from '../../shared/types.js';
+import type { EreditaFusioneDto, EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto, SkillRiassuntoDto, VellutoDto } from '../../shared/types.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
@@ -196,6 +196,64 @@ describe('API fusione', () => {
     expect((await request(app).get('/api/fusione/cerca-skill?skill=')).status).toBe(400);
     expect((await request(app).get('/api/fusione/cerca-skill?skill=1,2,3,4,5')).status).toBe(400);
     expect((await request(app).get('/api/fusione/cerca-skill?skill=999999')).status).toBe(404);
+  });
+
+  it('velluto: sconto del Registro dal compendio, ranghi per arcano, Allarme e Gemelle; costi scontati in ricette e piani', async () => {
+    const p = await request(app).post('/api/partite').send({ nome: 'Velluto', livelloProtagonista: 40 });
+    const partitaId = p.body.data.id as number;
+    const jack = await idDi('Jack Frost');
+    const arsene = await idDi('Arsène');
+    const vuoto = (await request(app).get(`/api/fusione/velluto?partita=${partitaId}`)).body.data as VellutoDto;
+    expect(vuoto.sconto).toBe(0);
+    expect(vuoto.compendio.registrate).toBe(0);
+    expect(vuoto.compendio.totale).toBeGreaterThan(200);
+    expect(vuoto.allarmeAttivo).toBe(false);
+    expect(vuoto.gemelle).toMatchObject({ rango: 0, trattamentoSpeciale: false });
+    expect(vuoto.gemelle.sblocchi).toHaveLength(5);
+    expect(vuoto.gemelle.prossimo?.rango).toBe(1);
+    expect(vuoto.arcani.length).toBeGreaterThanOrEqual(22);
+    expect(vuoto.arcani.every((a) => a.rango === 0 && a.moltiplicatoreExp === 1)).toBe(true);
+    // Confidenti: Gemelle (Forza) al rango 5, Igor (Matto) al 3 → sblocchi e moltiplicatori
+    expect((await request(app).put(`/api/partite/${partitaId}/confidenti/gemelle`).send({ rango: 5 })).status).toBe(200);
+    expect((await request(app).put(`/api/partite/${partitaId}/confidenti/igor`).send({ rango: 3 })).status).toBe(200);
+    expect((await request(app).put(`/api/partite/${partitaId}`).send({ allarmeAttivo: true })).status).toBe(200);
+    // Registro: registra il 25% delle Persona non DLC → sconto 10%
+    const tutte = (await request(app).get('/api/compendio/persona?limite=500')).body.data as PersonaRiassuntoDto[];
+    const nonDlc = tutte.filter((x) => !x.dlc);
+    const daRegistrare = nonDlc.slice(0, Math.ceil(vuoto.compendio.totale * 0.25));
+    for (const x of daRegistrare) await request(app).put(`/api/partite/${partitaId}/compendio/${x.id}`).send({ registrata: true });
+    const v = (await request(app).get(`/api/fusione/velluto?partita=${partitaId}`)).body.data as VellutoDto;
+    expect(v.compendio.registrate).toBe(daRegistrare.length);
+    expect(v.compendio.percentuale).toBeGreaterThanOrEqual(25);
+    expect(v.sconto).toBe(10);
+    expect(v.allarmeAttivo).toBe(true);
+    expect(v.gemelle).toMatchObject({ rango: 5, trattamentoSpeciale: true });
+    expect(v.gemelle.sblocchi.filter((s) => s.ottenuto).map((s) => s.rango)).toEqual([1, 3, 5]);
+    expect(v.gemelle.prossimo?.rango).toBe(8);
+    expect(v.arcani.find((a) => a.arcana === 'Strength')).toMatchObject({ confidenteChiave: 'gemelle', rango: 5, moltiplicatoreExp: 2 });
+    expect(v.arcani.find((a) => a.arcana === 'Fool')).toMatchObject({ rango: 3, moltiplicatoreExp: 1.5 });
+    // costi scontati: ricette e piani con la partita valgono il 90% di quelli senza
+    const pieno = (await request(app).get(`/api/fusione/ricette/${jack}?limite=5`)).body.data as RicetteFusioneDto;
+    const scontato = (await request(app).get(`/api/fusione/ricette/${jack}?limite=5&partita=${partitaId}`)).body.data as RicetteFusioneDto;
+    expect(pieno.sconto).toBe(0);
+    expect(scontato.sconto).toBe(10);
+    for (let i = 0; i < pieno.ricette.length; i++) expect(scontato.ricette[i].costo).toBe(Math.round(pieno.ricette[i].costo * 0.9));
+    const pianoPieno = (await request(app).get(`/api/fusione/piani/${jack}?profondita=2&alternative=1`)).body.data as PianiFusioneDto;
+    const pianoScontato = (await request(app).get(`/api/fusione/piani/${jack}?profondita=2&alternative=1&partita=${partitaId}&limitaLivello=false`)).body.data as PianiFusioneDto;
+    expect(pianoScontato.sconto).toBe(10);
+    if (pianoPieno.piani[0]?.costo > 0) expect(pianoScontato.piani[0].costo).toBeLessThan(pianoPieno.piani[0].costo);
+    // fondi con partita: sconto e bonus del Confidente dell'arcano del risultato
+    const pixie = await idDi('Pixie');
+    const esito = (await request(app).get(`/api/fusione/fondi?a=${arsene}&b=${pixie}&partita=${partitaId}`)).body.data as EsitoFusioneDto;
+    expect(esito.sconto).toBe(10);
+    expect(esito.bonusConfidente).not.toBeNull();
+    expect(esito.bonusConfidente!.arcana).toBe(esito.ricetta!.risultato.arcana);
+    const senza = (await request(app).get(`/api/fusione/fondi?a=${arsene}&b=${pixie}`)).body.data as EsitoFusioneDto;
+    expect(senza.bonusConfidente).toBeNull();
+    expect(esito.ricetta!.costo).toBe(Math.round(senza.ricetta!.costo * 0.9));
+    // validazione
+    expect((await request(app).get('/api/fusione/velluto')).status).toBe(400);
+    expect((await request(app).get('/api/fusione/velluto?partita=99999')).status).toBe(404);
   });
 
   it('con: tutte le fusioni in cui la Persona è ingrediente', async () => {

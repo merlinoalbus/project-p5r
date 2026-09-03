@@ -66,6 +66,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
               <span className="text-text-muted ml-auto">
                 {dati.totale} {modalita === 'per' ? 'ricette' : 'fusioni'}{dati.livelloMax !== null && dati.totaleSenzaFiltri !== dati.totale ? ` (${dati.totaleSenzaFiltri} senza limite di livello)` : ''}
                 {soloPronte ? ` · ${ricette.length} pronte` : ''}
+                {dati.sconto > 0 ? ` · costi con sconto Registro ${dati.sconto}%` : ''}
               </span>
             )}
           </div>

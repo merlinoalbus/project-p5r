@@ -2,7 +2,7 @@
 // API fusione — fusione diretta, ricette per una Persona, fusioni con una Persona
 // ============================================================
 
-import type { EreditaFusioneDto, EsitoFusioneDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto } from '../../types';
+import type { EreditaFusioneDto, EsitoFusioneDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto, VellutoDto } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
 /** Contesto della richiesta: partita (DLC posseduti) e filtri. */
@@ -40,6 +40,9 @@ export const getEredita = (a: number, b: number, opz: { partita?: number; livell
 /** Ricette che consentono di ereditare tutte le skill indicate (fino a 4). */
 export const cercaPerSkill = (skill: number[], opz: { partita?: number; risultato?: number; livelloMax?: number; limite?: number } = {}): Promise<RicercaSkillDto> =>
   apiGet(`/fusione/cerca-skill${queryString({ skill: skill.join(','), risultato: opz.risultato, partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`, { timeoutMs: 120_000, maxRetries: 0 });
+
+/** Stato della Stanza di Velluto della partita (sconto del Registro, Allarme, Gemelle, ranghi per arcano). */
+export const getVelluto = (partita: number): Promise<VellutoDto> => apiGet(`/fusione/velluto${queryString({ partita })}`);
 
 export const getFusioniCon = (personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
   apiGet(`/fusione/con/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`);
