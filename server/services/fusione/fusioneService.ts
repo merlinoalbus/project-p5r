@@ -5,7 +5,8 @@
 import { prepared } from '../../db/dbService.js';
 import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
-import type { EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicettaFusioneDto, RicetteFusioneDto } from '../../../shared/types.js';
+import type { EreditaFusioneDto, EsitoFusioneDto, NodoPianoDto, PersonaFusioneDto, PianiFusioneDto, RicercaSkillDto, RicettaFusioneDto, RicetteFusioneDto, SkillEreditaDto } from '../../../shared/types.js';
+import { analisiEredita, copre, skillAlLivello, skillPosseduta, tipoEredita, type IngredienteEredita, type SkillEredita } from './eredita.js';
 import { pianiFusione, type Disponibilita, type NodoPiano } from './alberoFusione.js';
 import { creaContesto, fondi, fusioniCon, personaFusione, ricettePer, type Contesto, type PersonaFusione, type RicettaFusione } from './motoreFusione.js';
 
@@ -122,6 +123,107 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
     opzioni,
     disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
   };
+}
+
+// ---- Eredità delle skill (Fase 3) ----
+
+function skillDto(s: SkillEredita): { id: number; nome: string; nomeIt: string; elemento: string } {
+  return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento };
+}
+
+/** Ingrediente con le skill della scorta se posseduto nella partita, altrimenti quelle al livello indicato (o base). */
+function ingredienteDa(p: PersonaFusione, partitaId: number | undefined, livello: number | undefined): IngredienteEredita & { livello: number; daScorta: boolean } {
+  if (partitaId !== undefined) {
+    const poss = prepared('SELECT id, livello FROM persona_posseduta WHERE partita_id = ? AND persona_id = ? ORDER BY livello DESC LIMIT 1').get(partitaId, p.id) as { id: number; livello: number } | undefined;
+    if (poss) {
+      const skill = skillPosseduta(poss.id);
+      if (skill.length > 0) return { persona: p, skill, livello: poss.livello, daScorta: true };
+    }
+  }
+  const l = livello ?? p.livello;
+  return { persona: p, skill: skillAlLivello(p.id, l), livello: l, daScorta: false };
+}
+
+/** Analisi dell'eredità per la fusione A + B (o la ricetta speciale se A + B la compongono). */
+export function ereditaDto(aId: number, bId: number, opz: OpzioniContesto & { livelloA?: number; livelloB?: number }): EreditaFusioneDto {
+  const { ctx } = contestoDa(opz);
+  const a = personaOErrore(aId);
+  const b = personaOErrore(bId);
+  const r = fondi(a, b, ctx);
+  if (!r) throw httpErrors.badRequest('fusione-impossibile', 'Queste due Persona non producono alcun risultato: nessuna eredità da analizzare.');
+  const ingredienti = [ingredienteDa(a, opz.partitaId, opz.livelloA), ingredienteDa(b, opz.partitaId, opz.livelloB)];
+  const an = analisiEredita(r.risultato, ingredienti);
+  const tipo = an.tipo;
+  return {
+    risultato: personaDto(r.risultato),
+    tipo,
+    tipoNome: tipo ? t('tipoEredita', tipo) : null,
+    ingredienti: ingredienti.map((i) => ({ persona: personaDto(i.persona), livello: i.livello, daScorta: i.daScorta, skill: i.skill.map(skillDto) })),
+    totaleSkillGenitori: an.totaleSkillGenitori,
+    slot: an.slot,
+    slotScelti: an.slotScelti,
+    candidate: an.candidate.map((c): SkillEreditaDto => ({ ...skillDto(c), elementoNome: t('elementoSkill', c.elemento), da: c.da, ereditabile: c.ereditabile, giaAppresa: c.giaAppresa, motivo: c.motivo })),
+    tratti: an.tratti.map((x) => ({ id: x.skill.id, nome: x.skill.nome, nomeIt: t('skill', x.skill.nome), effettoNome: t('effettoSkill', (prepared('SELECT effetto FROM skill WHERE id = ?').get(x.skill.id) as { effetto: string }).effetto), da: x.da })),
+  };
+}
+
+/**
+ * Ricette (per un risultato dato o per qualunque Persona) che consentono di ereditare tutte le skill desiderate.
+ * Il bacino degli ingredienti è quello al loro livello base (o della scorta se posseduti nella partita).
+ */
+export function cercaPerSkillDto(skillIds: number[], opz: OpzioniContesto & { risultatoId?: number }): RicercaSkillDto {
+  const { ctx } = contestoDa(opz);
+  const skillInfo = skillIds.map((id) => {
+    const r = prepared('SELECT id, nome, elemento FROM skill WHERE id = ?').get(id) as { id: number; nome: string; elemento: string } | undefined;
+    if (!r) throw httpErrors.notFound('skill-non-trovata', `La skill ${id} non esiste.`);
+    return { id: r.id, nome: r.nome, nomeIt: t('skill', r.nome), elemento: r.elemento, elementoNome: t('elementoSkill', r.elemento) };
+  });
+  const bersagli = opz.risultatoId !== undefined ? [personaOErrore(opz.risultatoId)] : ctx.ammesse.filter((p) => !p.rara);
+  const cacheIng = new Map<number, IngredienteEredita & { livello: number; daScorta: boolean }>();
+  const ingr = (p: PersonaFusione) => {
+    let i = cacheIng.get(p.id);
+    if (!i) { i = ingredienteDa(p, opz.partitaId, undefined); cacheIng.set(p.id, i); }
+    return i;
+  };
+  const trovate: Array<{ ricetta: RicettaFusione; slot: number; slotScelti: number; daEreditare: number[]; giaApprese: number[] }> = [];
+  for (const target of bersagli) {
+    // Filtro rapido: il tipo del risultato deve ammettere ogni skill desiderata (salvo quelle che apprende da sé).
+    const tipo = tipoEredita(target.id);
+    const proprie = new Set(skillAlLivello(target.id, 99).map((s) => s.id));
+    if (skillInfo.some((s) => !proprie.has(s.id) && !elementoAmmesso(tipo, s.elemento))) continue;
+    const ricette = ricettePer(target, ctx).filter((r) => opz.livelloMax === undefined || (r.risultato.livello <= opz.livelloMax && r.ingredienti.every((i) => i.livello <= opz.livelloMax!)));
+    for (const r of ricette) {
+      // Filtro rapido: ogni skill desiderata non propria deve stare nel bacino di almeno un ingrediente.
+      const ingredienti = r.ingredienti.map(ingr);
+      const bacino = new Set(ingredienti.flatMap((i) => i.skill.map((s) => s.id)));
+      if (skillInfo.some((s) => !proprie.has(s.id) && !bacino.has(s.id))) continue;
+      const an = analisiEredita(target, ingredienti);
+      const esito = copre(an, skillIds);
+      if (esito.ok) trovate.push({ ricetta: r, slot: an.slot, slotScelti: an.slotScelti, daEreditare: esito.daEreditare, giaApprese: esito.giaApprese });
+    }
+  }
+  trovate.sort((x, y) => x.ricetta.costo - y.ricetta.costo || x.ricetta.risultato.livello - y.ricetta.risultato.livello);
+  const perRisultatoMap = new Map<number, { persona: PersonaFusione; ricette: number; costoMinimo: number }>();
+  for (const tr of trovate) {
+    const e = perRisultatoMap.get(tr.ricetta.risultato.id);
+    if (e) { e.ricette++; e.costoMinimo = Math.min(e.costoMinimo, tr.ricetta.costo); }
+    else perRisultatoMap.set(tr.ricetta.risultato.id, { persona: tr.ricetta.risultato, ricette: 1, costoMinimo: tr.ricetta.costo });
+  }
+  const limite = opz.limite ?? 200;
+  return {
+    skill: skillInfo,
+    risultato: opz.risultatoId !== undefined ? personaDto(personaOErrore(opz.risultatoId)) : null,
+    totale: trovate.length,
+    ricette: trovate.slice(0, limite).map((tr) => ({ ricetta: ricettaDto(tr.ricetta), slot: tr.slot, slotScelti: tr.slotScelti, daEreditare: tr.daEreditare, giaApprese: tr.giaApprese })),
+    perRisultato: [...perRisultatoMap.values()].sort((x, y) => x.costoMinimo - y.costoMinimo).map((e) => ({ persona: personaDto(e.persona), ricette: e.ricette, costoMinimo: e.costoMinimo })),
+  };
+}
+
+function elementoAmmesso(tipo: string | null, elemento: string): boolean {
+  if (elemento === 'support' || elemento === 'passive' || elemento === 'almighty') return true;
+  if (elemento === 'trait' || tipo === null) return false;
+  const riga = prepared('SELECT ammesso FROM eredita_matrice WHERE tipo = ? AND elemento = ?').get(tipo, elemento) as { ammesso: number } | undefined;
+  return riga?.ammesso === 1;
 }
 
 /** Fusioni in cui la Persona è ingrediente. */

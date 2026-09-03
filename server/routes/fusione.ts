@@ -9,8 +9,8 @@
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { paramsPersonaId, queryFondi, queryPiani, queryRicette } from '../schemas/fusione.js';
-import { fondiDto, fusioniConDto, pianiDto, ricettePerDto } from '../services/fusione/fusioneService.js';
+import { paramsPersonaId, queryCercaSkill, queryEredita, queryFondi, queryPiani, queryRicette } from '../schemas/fusione.js';
+import { cercaPerSkillDto, ereditaDto, fondiDto, fusioniConDto, pianiDto, ricettePerDto } from '../services/fusione/fusioneService.js';
 
 const router = Router();
 
@@ -32,6 +32,16 @@ router.get('/con/:personaId', validate({ params: paramsPersonaId, query: queryRi
 router.get('/piani/:personaId', validate({ params: paramsPersonaId, query: queryPiani }), (req, res) => {
   const q = req.query as unknown as { partita?: number; dlc?: number[]; livelloMax?: number; profondita?: number; alternative?: number; catture?: boolean; limitaLivello?: boolean };
   res.json(pianiDto(Number(req.params.personaId), { partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, profondita: q.profondita, alternative: q.alternative, catture: q.catture, limitaLivello: q.limitaLivello }));
+});
+
+router.get('/eredita', validate({ query: queryEredita }), (req, res) => {
+  const q = req.query as unknown as { a: number; b: number; partita?: number; dlc?: number[]; livelloA?: number; livelloB?: number };
+  res.json(ereditaDto(q.a, q.b, { partitaId: q.partita, dlc: q.dlc, livelloA: q.livelloA, livelloB: q.livelloB }));
+});
+
+router.get('/cerca-skill', validate({ query: queryCercaSkill }), (req, res) => {
+  const q = req.query as unknown as { skill: number[]; risultato?: number; partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
+  res.json(cercaPerSkillDto(q.skill, { risultatoId: q.risultato, partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
 });
 
 export default router;

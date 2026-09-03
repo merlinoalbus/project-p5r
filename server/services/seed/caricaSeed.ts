@@ -26,6 +26,7 @@ import { config } from '../../config.js';
 import type { ConfidenteSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
+import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
 const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'doti.json'] as const;
@@ -275,6 +276,7 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
   })();
   invalidaCacheTraduzioni();
   invalidaMotoreFusione();
+  invalidaEredita();
 
   return { caricato: true, versione: seed.versione, hash: seed.hash, conteggi: conteggi() };
 }

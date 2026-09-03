@@ -65,7 +65,8 @@ src/
                       esami/invito, annulla ultimo, barra verso il rango successivo, sblocco, note, immagine personaggio + carta dell'arcano), ScortaPersona (aggiunta dal compendio,
                       modifica livello/statistiche/skill), CompendioPersonale (spunte + completamento), RiepilogoPartita, NuovaPartitaModal
   components/fusione/ SelettorePersona (ricerca con elenco), Calcolatore (A + B), RicettePersona (per ottenere / con, filtri, mostra altre), RicettaRiga,
-                      PianiFusione (albero ricorsivo con foglie scorta/Registro/cattura, opzioni)
+                      PianiFusione (albero ricorsivo con foglie scorta/Registro/cattura, opzioni), PannelloEredita (slot, bacino, tratti),
+                      CercaSkill (selettore multi-skill, risultato facoltativo, ricette valide)
   components/impostazioni/ GestionePartite, ImportaRiferimenti (catalogo link → importazione a lotti di 10 con avanzamento ed esiti), TraduzioniEditor
   pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Glossario (termini per categoria), Skill (525, filtri), SkillDettaglio,
                       Fusione (due arcani, matrice 24×24, ricette speciali, Demoni del Tesoro), Partita (schede), Impostazioni, NotFound
@@ -121,7 +122,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 | Compendio | `GET /api/compendio/arcani`, `/glossario`, `/termini` (glossario italiano ↔ inglese per categoria), `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
 | Traduzioni | `GET /api/traduzioni?ambito&q&soloUtente`, `GET /ambiti`, `PUT /:ambito/:chiave {testo}` (→ fonte utente), `DELETE /:ambito/:chiave` (ripristina il seed) |
 | Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti` (punti, rango, nomeRango, sogliaProssima, mancanti, ranghi[]), `PATCH /:id/doti/:chiave {punti|delta|note 1–3 + libro/fortuna}`; `GET /:id/confidenti` (punti, puntiNecessari, mancanti, personaArcanoInScorta), `PUT /:id/confidenti/:chiave {sbloccato,rango,punti|deltaPunti|noteRisposta 1–3|regalo|uscita + bonusArcano/esame/invito,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
-| Fusione | `GET /api/fusione/fondi?a&b&partita|dlc` (esito con motivo), `GET /api/fusione/ricette/:personaId?partita|dlc&livelloMax&limite` (totale, totaleSenzaFiltri, ricette per costo), `GET /api/fusione/con/:personaId?…` (fusioni con la Persona come ingrediente), `GET /api/fusione/piani/:personaId?partita&profondita≤4&alternative≤10&catture&limitaLivello|livelloMax` (piani ricorsivi) |
+| Fusione | `GET /api/fusione/fondi?a&b&partita|dlc` (esito con motivo), `GET /api/fusione/ricette/:personaId?partita|dlc&livelloMax&limite` (totale, totaleSenzaFiltri, ricette per costo), `GET /api/fusione/con/:personaId?…` (fusioni con la Persona come ingrediente), `GET /api/fusione/piani/:personaId?partita&profondita≤4&alternative≤10&catture&limitaLivello|livelloMax` (piani ricorsivi), `GET /api/fusione/eredita?a&b&partita&livelloA&livelloB` (slot, candidate, tratti), `GET /api/fusione/cerca-skill?skill=id,…(≤4)&risultato&partita&livelloMax&limite` (ricette che consentono le skill) |
 | Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave`; catalogo dei riferimenti (solo link): `GET /catalogo?ambito` (voci + `presente`), `POST /catalogo/importa {ambito, chiavi ≤20, sovrascrivi}` → `{importate, saltate, fallite[{chiave, motivo}]}` |
 Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
@@ -138,7 +139,10 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   2 ingredienti (o N per le ricette speciali). Stima ottimistica h(p, profondità) memoizzata + ricerca in profondità con potatura
   (branch-and-bound sulle N migliori), ampiezza per nodo 12; `pianoCoerente` verifica ogni nodo col motore. La disponibilità viene da
   `persona_posseduta` e `compendio_partita` della partita.
-- Previsti (fasi 3–4, sullo stesso snapshot): `eredita` (matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill
+- `server/services/fusione/eredita.ts` (Fase 3): snapshot skill/apprese/tratti/tipi/matrice; `slotEreditabili(totale)`, `elementoEreditabile(tipo, elemento)`,
+  `skillAlLivello`, `skillPosseduta`, `analisiEredita(risultato, ingredienti)` (candidate con motivo, slot, tratti), `copre(analisi, skillIds)`.
+  `fusioneService.ereditaDto` (bacino dalla scorta se posseduta) e `cercaPerSkillDto` (filtri rapidi per tipo e bacino, poi analisi completa).
+- Previsti (fase 4, sullo stesso snapshot): `catene` (matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill
   multi-step, bonus del Confidente, Allarme, Potenziamento).
 
 ## 7. Frontend

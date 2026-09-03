@@ -9,6 +9,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { SelettorePersona } from './SelettorePersona';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { formattaYen } from '../../utils/punti';
+import { PannelloEredita } from './PannelloEredita';
 import type { PersonaRiassuntoDto } from '../../types';
 
 interface Props {
@@ -53,6 +54,9 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
                 <div className="text-[13px] text-text-secondary mt-1">{r.risultato.arcanaNome} · livello {r.risultato.livello}{r.risultato.speciale ? ' · fusione speciale' : ''}</div>
                 <div className="text-[13px] text-text-secondary">Tipo: {r.tipo === 'normale' ? 'normale' : r.tipo === 'stesso-arcano' ? 'stesso arcano' : r.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'speciale'} · costo stimato <strong className="text-text">{formattaYen(r.costo)}</strong></div>
                 {inScorta.has(a.id) && inScorta.has(b.id) && <div className="chip chip--attivo mt-2">Hai entrambi gli ingredienti nella scorta</div>}
+              </div>
+              <div className="w-full border-t border-border-light pt-3">
+                <PannelloEredita a={a.id} b={b.id} partitaId={partitaId} />
               </div>
             </div>
           ) : (

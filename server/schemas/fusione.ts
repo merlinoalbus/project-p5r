@@ -31,6 +31,27 @@ export const paramsPersonaId = z.object({ personaId: idNumerico });
 
 const booleano = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1').optional();
 
+export const queryEredita = z.object({
+  a: idNumerico,
+  b: idNumerico,
+  partita: idNumerico.optional(),
+  dlc: elencoDlc,
+  livelloA: z.coerce.number().int().min(1).max(99).optional(),
+  livelloB: z.coerce.number().int().min(1).max(99).optional(),
+});
+
+export const queryCercaSkill = z.object({
+  skill: z
+    .string()
+    .transform((s) => s.split(',').map((x) => x.trim()).filter((x) => x.length > 0).map(Number))
+    .pipe(z.array(z.number().int().positive()).min(1).max(4)),
+  risultato: idNumerico.optional(),
+  partita: idNumerico.optional(),
+  dlc: elencoDlc,
+  livelloMax: z.coerce.number().int().min(1).max(99).optional(),
+  limite: z.coerce.number().int().min(1).max(2000).optional(),
+});
+
 export const queryPiani = z.object({
   partita: idNumerico.optional(),
   dlc: elencoDlc,

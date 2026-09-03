@@ -9,9 +9,9 @@ import { Calcolatore } from './Calcolatore';
 import { RicettePersona } from './RicettePersona';
 import type { EsitoFusioneDto, PersonaFusioneDto, PersonaRiassuntoDto, RicetteFusioneDto } from '../../types';
 
-const { getFondi, getRicettePer, getFusioniCon, getImmagini } = vi.hoisted(() => ({ getFondi: vi.fn(), getRicettePer: vi.fn(), getFusioniCon: vi.fn(), getImmagini: vi.fn() }));
+const { getFondi, getRicettePer, getFusioniCon, getImmagini, getEredita } = vi.hoisted(() => ({ getFondi: vi.fn(), getRicettePer: vi.fn(), getFusioniCon: vi.fn(), getImmagini: vi.fn(), getEredita: vi.fn() }));
 vi.mock('../../services/api', () => ({
-  getFondi, getRicettePer, getFusioniCon, getImmagini,
+  getFondi, getRicettePer, getFusioniCon, getImmagini, getEredita,
   caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(),
   urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
 }));
@@ -31,8 +31,22 @@ const jack = persona(88, 'Jack Frost', 'Mago', 11);
 const persone = [arsene, pixie, regent, jack];
 
 beforeEach(() => {
-  getFondi.mockReset(); getRicettePer.mockReset(); getFusioniCon.mockReset(); getImmagini.mockReset();
+  getFondi.mockReset(); getRicettePer.mockReset(); getFusioniCon.mockReset(); getImmagini.mockReset(); getEredita.mockReset();
   getImmagini.mockResolvedValue([]);
+  getEredita.mockResolvedValue({
+    risultato: fus(jack), tipo: 'Ice', tipoNome: 'Ghiaccio',
+    ingredienti: [
+      { persona: fus(arsene), livello: 1, daScorta: true, skill: [{ id: 5, nome: 'Eiha', nomeIt: 'Eiha', elemento: 'curse' }] },
+      { persona: fus(pixie), livello: 2, daScorta: false, skill: [{ id: 6, nome: 'Zio', nomeIt: 'Zio', elemento: 'electric' }, { id: 7, nome: 'Dia', nomeIt: 'Dia', elemento: 'healing' }] },
+    ],
+    totaleSkillGenitori: 3, slot: 1, slotScelti: 0,
+    candidate: [
+      { id: 6, nome: 'Zio', nomeIt: 'Zio', elemento: 'electric', elementoNome: 'Elettricità', da: [2], ereditabile: true, giaAppresa: false, motivo: null },
+      { id: 5, nome: 'Eiha', nomeIt: 'Eiha', elemento: 'curse', elementoNome: 'Oscurità', da: [1], ereditabile: true, giaAppresa: false, motivo: null },
+      { id: 7, nome: 'Dia', nomeIt: 'Dia', elemento: 'healing', elementoNome: 'Guarigione', da: [2], ereditabile: false, giaAppresa: true, motivo: 'il risultato la apprende comunque da sé' },
+    ],
+    tratti: [{ id: 90, nome: 'Frigid Bloodline', nomeIt: 'Stirpe gelida', effettoNome: 'Potenzia il ghiaccio', da: null }, { id: 91, nome: 'Pinch Anchor', nomeIt: 'Ancora nei guai', effettoNome: 'x', da: 1 }],
+  });
 });
 
 async function scegli(etichetta: string, testo: string, nome: string) {
@@ -52,6 +66,15 @@ describe('Calcolatore', () => {
     expect(await screen.findByRole('link', { name: 'Jack Frost' })).toHaveAttribute('href', '/compendio/persona/88');
     expect(screen.getByText(/costo stimato/).textContent).toMatch(/8\D?227 ¥/);
     expect(screen.getByText('Hai entrambi gli ingredienti nella scorta')).toBeInTheDocument();
+    // pannello eredità: slot, ereditabili, escluse con motivo, tratti
+    expect(await screen.findByText('Eredità delle skill')).toBeInTheDocument();
+    expect(getEredita).toHaveBeenCalledWith(1, 2, { partita: 7 });
+    expect(screen.getByText(/skill dei genitori 3/)).toHaveTextContent('1 slot (0 a scelta, 1 casuale)');
+    expect(screen.getByText('Zio')).toBeInTheDocument();
+    expect(screen.getByText(/Non ereditabili \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Dia: il risultato la apprende comunque da sé/)).toBeInTheDocument();
+    expect(screen.getByText('Stirpe gelida')).toBeInTheDocument();
+    expect(screen.getByText(/da Arsène/)).toBeInTheDocument();
   });
 
   it('mostra il motivo quando la fusione non è possibile', async () => {

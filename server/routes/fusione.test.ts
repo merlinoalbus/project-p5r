@@ -9,7 +9,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from '../services/seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import type { EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicetteFusioneDto } from '../../shared/types.js';
+import type { EreditaFusioneDto, EsitoFusioneDto, PersonaRiassuntoDto, PianiFusioneDto, RicercaSkillDto, RicetteFusioneDto, SkillRiassuntoDto } from '../../shared/types.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
@@ -127,6 +127,63 @@ describe('API fusione', () => {
     expect((await request(app).get(`/api/fusione/piani/${jack}?catture=forse`)).status).toBe(400);
     expect((await request(app).get('/api/fusione/piani/999999')).status).toBe(404);
     await request(app).delete(`/api/partite/${partitaId}`);
+  });
+
+  it('eredita: slot, bacino per ingrediente (scorta o livello), compatibilità e tratti; errori', async () => {
+    const arsene = await idDi('Arsène');
+    const pixie = await idDi('Pixie');
+    const e = (await request(app).get(`/api/fusione/eredita?a=${arsene}&b=${pixie}&livelloA=7`)).body.data as EreditaFusioneDto;
+    expect(e.risultato.nomeIt).toBeTruthy();
+    expect(e.tipoNome).toBeTruthy();
+    expect(e.ingredienti[0]).toMatchObject({ livello: 7, daScorta: false });
+    expect(e.ingredienti[0].skill.map((s) => s.nome)).toEqual(['Eiha', 'Cleave', 'Sukunda', 'Dream Needle', 'Adverse Resolve']);
+    expect(e.totaleSkillGenitori).toBe(e.ingredienti[0].skill.length + e.ingredienti[1].skill.length);
+    expect(e.slotScelti).toBe(Math.max(0, e.slot - 1));
+    expect(e.candidate.every((c) => c.nomeIt && c.elementoNome)).toBe(true);
+    expect(e.tratti[0].da).toBeNull();
+    // ingrediente dalla scorta: le skill sono quelle possedute
+    const p = await request(app).post('/api/partite').send({ nome: 'Eredità', livelloProtagonista: 30 });
+    const partitaId = p.body.data.id as number;
+    const bufu = ((await request(app).get('/api/compendio/skill?q=Bufu')).body.data as SkillRiassuntoDto[]).find((s) => s.nome === 'Bufu')!;
+    await request(app).post(`/api/partite/${partitaId}/persona`).send({ personaId: arsene, livello: 10, skillIds: [bufu.id] });
+    const conScorta = (await request(app).get(`/api/fusione/eredita?a=${arsene}&b=${pixie}&partita=${partitaId}`)).body.data as EreditaFusioneDto;
+    expect(conScorta.ingredienti[0]).toMatchObject({ daScorta: true, livello: 10 });
+    expect(conScorta.ingredienti[0].skill.map((s) => s.nome)).toEqual(['Bufu']);
+    await request(app).delete(`/api/partite/${partitaId}`);
+    // fusione impossibile → 400 in italiano; parametri mancanti → 400
+    const regent = await idDi('Regent');
+    const orlov = await idDi('Orlov');
+    const imp = await request(app).get(`/api/fusione/eredita?a=${regent}&b=${regent}`);
+    expect(imp.status).toBe(400);
+    expect(imp.body.error.message).toMatch(/nessuna eredità/i);
+    expect(orlov).toBeGreaterThan(0);
+    expect((await request(app).get('/api/fusione/eredita?a=1')).status).toBe(400);
+  });
+
+  it('cerca-skill: ricette che consentono le skill desiderate, per risultato dato o per qualunque Persona', async () => {
+    const skills = (await request(app).get('/api/compendio/skill?q=Tarukaja')).body.data as SkillRiassuntoDto[];
+    const tarukaja = skills.find((s) => s.nome === 'Tarukaja')!;
+    const tutte = (await request(app).get(`/api/fusione/cerca-skill?skill=${tarukaja.id}&limite=50`)).body.data as RicercaSkillDto;
+    expect(tutte.skill[0]).toMatchObject({ nome: 'Tarukaja' });
+    expect(tutte.totale).toBeGreaterThan(0);
+    expect(tutte.ricette.length).toBeLessThanOrEqual(50);
+    expect(tutte.perRisultato.length).toBeGreaterThan(0);
+    for (const r of tutte.ricette) {
+      expect(r.slotScelti).toBeGreaterThanOrEqual(r.daEreditare.length);
+      expect(r.daEreditare.length + r.giaApprese.length).toBe(1);
+    }
+    for (let i = 1; i < tutte.ricette.length; i++) expect(tutte.ricette[i].ricetta.costo).toBeGreaterThanOrEqual(tutte.ricette[i - 1].ricetta.costo);
+    const jack = await idDi('Jack Frost');
+    const perJack = (await request(app).get(`/api/fusione/cerca-skill?skill=${tarukaja.id}&risultato=${jack}`)).body.data as RicercaSkillDto;
+    expect(perJack.risultato?.nome).toBe('Jack Frost');
+    expect(perJack.ricette.every((r) => r.ricetta.risultato.id === jack)).toBe(true);
+    // skill di fuoco su un risultato di tipo Ghiaccio: impossibile per la matrice
+    const agi = ((await request(app).get('/api/compendio/skill?q=Agi')).body.data as SkillRiassuntoDto[]).find((s) => s.nome === 'Agi')!;
+    const perJackAgi = (await request(app).get(`/api/fusione/cerca-skill?skill=${agi.id}&risultato=${jack}`)).body.data as RicercaSkillDto;
+    expect(perJackAgi.totale).toBe(0);
+    expect((await request(app).get('/api/fusione/cerca-skill?skill=')).status).toBe(400);
+    expect((await request(app).get('/api/fusione/cerca-skill?skill=1,2,3,4,5')).status).toBe(400);
+    expect((await request(app).get('/api/fusione/cerca-skill?skill=999999')).status).toBe(404);
   });
 
   it('con: tutte le fusioni in cui la Persona è ingrediente', async () => {

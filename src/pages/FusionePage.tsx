@@ -14,10 +14,11 @@ import { useAsset } from '../stores/assetStore';
 import { Calcolatore } from '../components/fusione/Calcolatore';
 import { RicettePersona } from '../components/fusione/RicettePersona';
 import { PianiFusione } from '../components/fusione/PianiFusione';
+import { CercaSkill } from '../components/fusione/CercaSkill';
 
-type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
+type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string]> = [
-  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'],
+  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'], ['skill', 'Cerca per skill'],
   ['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro'],
 ];
 
@@ -83,6 +84,9 @@ export function FusionePage() {
         )}
         {persone.dati && vista === 'piani' && (
           <PianiFusione key={`piani-${idParam('piani') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inizialeId={idParam('piani')} />
+        )}
+        {persone.dati && vista === 'skill' && (
+          <CercaSkill persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} />
         )}
         {persone.dati && vista === 'con' && (
           <RicettePersona key={`con-${idParam('con') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="con" inizialeId={idParam('con')} />

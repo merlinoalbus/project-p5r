@@ -254,6 +254,51 @@ export interface PianiFusioneDto {
   disponibilita: { scorta: number; registro: number };
 }
 
+/** Skill candidata all'eredità in una fusione. */
+export interface SkillEreditaDto {
+  id: number;
+  nome: string;
+  nomeIt: string;
+  elemento: string;
+  elementoNome: string;
+  /** Ingredienti (id Persona) che la portano. */
+  da: number[];
+  ereditabile: boolean;
+  giaAppresa: boolean;
+  motivo: string | null;
+}
+
+/** Analisi dell'eredità per una fusione A + B. */
+export interface EreditaFusioneDto {
+  risultato: PersonaFusioneDto;
+  tipo: string | null;
+  tipoNome: string | null;
+  ingredienti: Array<{ persona: PersonaFusioneDto; livello: number; daScorta: boolean; skill: Array<{ id: number; nome: string; nomeIt: string; elemento: string }> }>;
+  totaleSkillGenitori: number;
+  slot: number;
+  slotScelti: number;
+  candidate: SkillEreditaDto[];
+  tratti: Array<{ id: number; nome: string; nomeIt: string; effettoNome: string; da: number | null }>;
+}
+
+/** Ricetta che consente un insieme di skill desiderate. */
+export interface RicettaPerSkillDto {
+  ricetta: RicettaFusioneDto;
+  slot: number;
+  slotScelti: number;
+  daEreditare: number[];
+  giaApprese: number[];
+}
+
+export interface RicercaSkillDto {
+  skill: Array<{ id: number; nome: string; nomeIt: string; elemento: string; elementoNome: string }>;
+  risultato: PersonaFusioneDto | null;
+  totale: number;
+  ricette: RicettaPerSkillDto[];
+  /** Persona (risultati) che compaiono nelle ricette, con il numero di ricette ciascuna. */
+  perRisultato: Array<{ persona: PersonaFusioneDto; ricette: number; costoMinimo: number }>;
+}
+
 // ---- Traduzioni ----
 
 export interface TraduzioneDto {

@@ -31,7 +31,10 @@ Ogni step si chiude solo con il verdetto **APPROVATO** del galaxy-task-validator
 | 2.2 | UI: vista «Piano di fusione» (bersaglio, profondità, alternative, catture, limite di livello) con albero rientrato e legenda; link «Piano di fusione →» dalla scheda Persona | ✅ 2026-09-03 |
 
 ## Fase 3 — Eredità skill e ricerca per skill desiderate
-⬜ matrice tipo-eredità × elemento, numero di slot, ricette che consentono un set di skill; tratti.
+| Step | Contenuto | Stato |
+|---|---|---|
+| 3.1 | Modulo `eredita.ts` (regole P5/P5R dal wiki e dalla guida): slot dal totale skill dei genitori (3–5→1 … 42→8, uno casuale), matrice tipo × elemento (supporto/passive/quasi-divine sempre, arma da fuoco = fisico), skill esclusive escluse, bacino = skill della scorta se possedute altrimenti innate + apprese al livello, tratti (uno fra ingredienti e proprio); API `GET /api/fusione/eredita?a&b&partita&livelloA&livelloB` e `GET /api/fusione/cerca-skill?skill≤4&risultato&partita&livelloMax` (ricette che consentono tutte le skill: bacino, compatibilità, slot); test | ⏳ in validazione |
+| 3.2 | UI: pannello «Eredità delle skill» nel calcolatore (slot, bacino per ingrediente, ereditabili/escluse con motivo, tratti); vista «Cerca per skill» (fino a 4 skill, risultato facoltativo, limite di livello, elenco per Persona e ricette con «Apri nel calcolatore») | ⏳ in validazione |
 
 ## Fase 4 — Catene/cicli e ottimizzatore dei bonus
 ⬜ propagazione skill a catena, bonus EXP del Confidente (arcano risultante), Allarme delle fusioni, Potenziamento/Forca (cicli con Demoni del Tesoro), Addestramento, qualsiasi altro bonus documentato.
