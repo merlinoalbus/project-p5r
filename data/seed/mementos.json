@@ -593,8 +593,11 @@
    "ricompense": [
     "Annulla att. fisici (carta abilità)"
    ],
-   "confidente": null,
-   "note": "Difficoltà B. Richiesta 'particolare' in due parti: nella Parte 1 tutti gli attacchi mancano automaticamente e dopo 3 turni si viene espulsi; la Parte 2 si vince con un 'Abbattimento acrobatico' scriptato (Su, poi Triangolo). Confidente collegato: oda_torre.",
+   "confidente": {
+    "chiave": "shinya",
+    "rango": null
+   },
+   "note": "Difficoltà B. Richiesta 'particolare' in due parti: nella Parte 1 tutti gli attacchi mancano automaticamente e dopo 3 turni si viene espulsi; la Parte 2 si vince con un 'Abbattimento acrobatico' scriptato (Su, poi Triangolo). Il combattimento vero e proprio (Parte 2) richiede prima di aver stretto un legame con il Confidente Torre (Shinya Oda).",
    "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
   },
   {
