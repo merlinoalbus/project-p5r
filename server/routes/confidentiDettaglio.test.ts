@@ -51,7 +51,11 @@ describe('API dettaglio Confidenti', () => {
     expect(takemi.arcanaNome).toBe('Morte');
     expect(takemi.abilita[0]).toMatchObject({ rango: 1, nome: 'Rigenerazione' });
     expect(takemi.regali.some((g) => g.nome === 'Castella')).toBe(true);
-    expect(takemi.dialoghi[0].scelte[0]).toMatchObject({ punti: 2, puntiTesto: '+2', romantica: false });
+    // Takemi rango 1: la guida dà solo la sequenza e l'esito («RANGO CONFIDENTE +1!»), nessun punto per scelta
+    expect(takemi.dialoghi[0].scelte[0]).toMatchObject({ punti: null, puntiTesto: null, romantica: false });
+    expect(takemi.dialoghi[0].note).toContain('Esito della sequenza');
+    const sojiro = (await request(app).get('/api/compendio/confidenti/sojiro')).body.data as ConfidenteDettaglioDto;
+    expect(sojiro.dialoghi.find((x) => x.etichetta === '2')!.scelte.every((x) => x.punti === 2)).toBe(true);
     const ann = (await request(app).get('/api/compendio/confidenti/ann')).body.data as ConfidenteDettaglioDto;
     expect(ann.dialoghi.some((d) => d.scelte.some((s) => s.romantica))).toBe(true);
     const igor = (await request(app).get('/api/compendio/confidenti/igor')).body.data as ConfidenteDettaglioDto;
