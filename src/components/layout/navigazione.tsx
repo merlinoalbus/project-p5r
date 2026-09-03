@@ -23,7 +23,7 @@ export const VOCI_NAV: VoceNav[] = [
   { to: '/skill', label: 'Skill', icon: <IconBolt size={20} />, asset: 'ui/nav-skill', principale: true },
   { to: '/fusione', label: 'Fusione', icon: <IconFusion size={20} />, asset: 'ui/nav-fusione', principale: true },
   { to: '/partita', label: 'Partita', icon: <IconMask size={20} />, asset: 'ui/nav-partita', principale: true },
-  { to: '/guida/domande', label: 'Guida', icon: <IconStar size={20} />, asset: 'ui/nav-guida', principale: false },
+  { to: '/guida', label: 'Guida', icon: <IconStar size={20} />, asset: 'ui/nav-guida', principale: false },
   { to: '/impostazioni', label: 'Impostazioni', icon: <IconGear size={20} />, asset: 'ui/nav-impostazioni', principale: false },
 ];
 

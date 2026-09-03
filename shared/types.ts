@@ -727,6 +727,37 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Calendario di gioco (Fase 6.3) ----
+
+export interface GiornoCalendarioDto {
+  data: string;
+  giornoSettimana: string;
+  meteo: string | null;
+  eventi: Array<{ id: number; tipo: 'storia' | 'scadenza' | 'sblocco' | 'esame' | 'festa' | 'vacanza' | 'consiglio' | 'meteo'; titolo: string; dettaglio: string; fonte: string }>;
+  tempoLibero: { giorno: boolean; sera: boolean } | null;
+  /** Numero della «Soluzione per settimana» della guida. */
+  settimana: number | null;
+}
+
+export interface SettimanaGuidaDto {
+  numero: number;
+  titolo: string;
+  periodo: string;
+  url: string;
+  riassunto: string;
+  incertezze: string;
+}
+
+export interface CalendarioDto {
+  giorni: GiornoCalendarioDto[];
+  settimane: SettimanaGuidaDto[];
+  dataGioco: string | null;
+  oggi: GiornoCalendarioDto | null;
+  prossimeScadenze: Array<{ data: string; tipo: string; titolo: string; dettaglio: string; giorniMancanti: number }>;
+  /** Mesi presenti («MM»), in ordine di anno scolastico. */
+  mesi: string[];
+}
+
 // ---- Storico (Fase 5.1) ----
 
 export interface EventoPartitaDto {

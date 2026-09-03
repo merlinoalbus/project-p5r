@@ -70,6 +70,12 @@ export interface FusioneSeed {
 }
 
 /** Confidente (dato di gioco). */
+/** Calendario di gioco (guida allgamestaff; meteo da wikiwiki.jp). */
+export interface CalendarioSeed {
+  giorni: Array<{ data: string; giornoSettimana: string; meteo: string | null; eventi: Array<{ tipo: string; titolo: string; dettaglio: string; fonte: string }>; tempoLibero: { giorno: boolean; sera: boolean } | null }>;
+  settimane: Array<{ numero: number; titolo: string; periodo: string; url: string; riassunto: string; incertezze: string }>;
+}
+
 /** Domande in classe ed esami (guida allgamestaff). */
 export interface DomandeSeed {
   domande: Array<{ data: string; tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'altro'; chi: string; domanda: string; risposte: Array<{ ordine: number | null; testo: string }>; ricompensa: string; note: string; fonte: string }>;

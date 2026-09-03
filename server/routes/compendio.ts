@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { domande } from '../services/domandeService.js';
+import { calendario } from '../services/calendarioService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -12,6 +13,7 @@ import {
 } from '../services/compendioService.js';
 
 const queryDomande = z.object({ partita: z.coerce.number().int().positive().optional() });
+const queryCalendario = z.object({ partita: z.coerce.number().int().positive().optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
 
 router.get('/arcani', (_req, res) => {
@@ -55,6 +57,10 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/calendario', validate({ query: queryCalendario }), (req, res) => {
+  const q = req.query as unknown as { partita?: number; mese?: string };
+  res.json(calendario(q.partita, q.mese));
 });
 router.get('/domande', validate({ query: queryDomande }), (req, res) => {
   res.json(domande((req.query as unknown as { partita?: number }).partita));

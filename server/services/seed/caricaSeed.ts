@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -49,6 +49,7 @@ interface SeedCompleto {
   confidenti: ConfidenteSeed[];
   confidentiDettaglio: ConfidenteDettaglioSeed[];
   domande: DomandeSeed;
+  calendario: CalendarioSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -74,6 +75,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     confidenti: JSON.parse(contenuti['confidenti.json']) as ConfidenteSeed[],
     confidentiDettaglio: JSON.parse(contenuti['confidenti-dettaglio.json']) as ConfidenteDettaglioSeed[],
     domande: JSON.parse(contenuti['domande.json']) as DomandeSeed,
+    calendario: JSON.parse(contenuti['calendario.json']) as CalendarioSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -274,6 +276,27 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     const insEs = db.prepare('INSERT INTO esame (chiave, ordine, nome, date_json, data_risultati, domande_json, note) VALUES (?, ?, ?, ?, ?, ?, ?)');
     seed.domande.esami.forEach((e, i) => insEs.run(e.chiave, i, e.nome, JSON.stringify(e.date), e.dataRisultati, JSON.stringify(e.domande), e.note));
     db.prepare("INSERT INTO esame_premi (chiave, json) VALUES ('premi', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.domande.premi));
+
+    // ---- Calendario di gioco (Fase 6.3): sostituito integralmente ----
+    db.prepare('DELETE FROM evento_calendario').run();
+    db.prepare('DELETE FROM giorno_calendario').run();
+    db.prepare('DELETE FROM settimana_guida').run();
+    const insSett = db.prepare('INSERT INTO settimana_guida (numero, titolo, periodo, url, riassunto, incertezze) VALUES (?, ?, ?, ?, ?, ?)');
+    for (const w of seed.calendario.settimane) insSett.run(w.numero, w.titolo, w.periodo, w.url, w.riassunto, w.incertezze);
+    // Settimana della guida per ogni giorno: dal periodo «GG/MM - GG/MM» (anno scolastico aprile→marzo).
+    const idxData = (mmgg: string) => { const [m, g] = mmgg.split('-').map(Number); return ((m - 4 + 12) % 12) * 31 + g; };
+    const intervalli = seed.calendario.settimane.map((w) => {
+      const m = /^(\d{2})\/(\d{2})\s*-\s*(\d{2})\/(\d{2})$/.exec(w.periodo.trim());
+      return m ? { numero: w.numero, da: idxData(`${m[2]}-${m[1]}`), a: idxData(`${m[4]}-${m[3]}`) } : null;
+    }).filter((x): x is { numero: number; da: number; a: number } => x !== null);
+    const insGiorno = db.prepare('INSERT INTO giorno_calendario (data, ordine, giorno_settimana, meteo, tempo_libero_json, settimana) VALUES (?, ?, ?, ?, ?, ?)');
+    const insEvento = db.prepare('INSERT INTO evento_calendario (data, ordine, tipo, titolo, dettaglio, fonte) VALUES (?, ?, ?, ?, ?, ?)');
+    seed.calendario.giorni.forEach((g, i) => {
+      const idx = idxData(g.data);
+      const sett = intervalli.find((x) => idx >= x.da && idx <= x.a)?.numero ?? null;
+      insGiorno.run(g.data, i, g.giornoSettimana, g.meteo, g.tempoLibero ? JSON.stringify(g.tempoLibero) : null, sett);
+      g.eventi.forEach((e, j) => insEvento.run(g.data, j, e.tipo, e.titolo, e.dettaglio ?? '', e.fonte ?? ''));
+    });
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)
