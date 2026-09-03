@@ -541,9 +541,18 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
     fontiCarta,
   };
 
+  // Timestamp stabile: se i dati generati sono identici a quelli già su disco,
+  // si conserva il `generatoIl` precedente (rigenerazione idempotente).
+  const fileVersione = path.join(DIR_SEED, 'versione.json');
+  const precedente = fs.existsSync(fileVersione) ? (JSON.parse(fs.readFileSync(fileVersione, 'utf-8')) as { generatoIl?: string }) : null;
+  const dati: Record<string, unknown> = { 'persona.json': persone, 'skill.json': skill, 'oggetti.json': oggetti, 'fusione.json': fusione, 'traduzioni.json': traduzioni };
+  const invariati = Object.entries(dati).every(([nome, d]) => {
+    const f = path.join(DIR_SEED, nome);
+    return fs.existsSync(f) && fs.readFileSync(f, 'utf-8') === JSON.stringify(d, null, 2) + '\n';
+  });
   const versione = {
     versione: 1,
-    generatoIl: new Date().toISOString(),
+    generatoIl: invariati && precedente?.generatoIl ? precedente.generatoIl : new Date().toISOString(),
     fonti: {
       primaria: { id: FONTE_CHINHODADO.id, commit: FONTE_CHINHODADO.commit, licenza: FONTE_CHINHODADO.licenza },
       verifica: { id: FONTE_AQIU384.id, commit: FONTE_AQIU384.commit, licenza: FONTE_AQIU384.licenza },
@@ -562,12 +571,8 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
   };
 
   fs.mkdirSync(DIR_SEED, { recursive: true });
-  const scrivi = (nome: string, dati: unknown) => fs.writeFileSync(path.join(DIR_SEED, nome), JSON.stringify(dati, null, 2) + '\n');
-  scrivi('persona.json', persone);
-  scrivi('skill.json', skill);
-  scrivi('oggetti.json', oggetti);
-  scrivi('fusione.json', fusione);
-  scrivi('traduzioni.json', traduzioni);
+  const scrivi = (nome: string, contenuto: unknown) => fs.writeFileSync(path.join(DIR_SEED, nome), JSON.stringify(contenuto, null, 2) + '\n');
+  for (const [nome, d] of Object.entries(dati)) scrivi(nome, d);
   scrivi('versione.json', versione);
   return { mancanti };
 }

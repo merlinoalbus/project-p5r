@@ -183,15 +183,16 @@ export function confronta(): Esito[] {
   // ---- Ricette speciali ----
   const speciali = nuovo('Ricette speciali', true);
   const ricetteAq = Object.entries(ricette).filter(([, ing]) => ing.length > 0);
-  const ricetteSeed = new Map(fusione.speciali.map((r) => [r.risultato, [...r.ingredienti].map(chiaveNome).sort().join(' + ')]));
+  const ricetteSeed = new Map(fusione.speciali.map((r) => [chiaveNome(r.risultato), [...r.ingredienti].map(chiaveNome).sort().join(' + ')]));
   speciali.confrontati = ricetteSeed.size;
   for (const [ris, ing] of ricetteAq) {
-    const s = ricetteSeed.get(ris);
+    const s = ricetteSeed.get(chiaveNome(ris));
     const aq = [...ing].map(chiaveNome).sort().join(' + ');
     if (!s) speciali.discrepanze.push(`${ris}: ricetta presente solo in aqiu384 (${aq})`);
     else if (s !== aq) speciali.discrepanze.push(`${ris}: ${s} vs ${aq}`);
   }
-  for (const ris of ricetteSeed.keys()) if (!ricette[ris]) speciali.discrepanze.push(`${ris}: ricetta presente solo nel seed`);
+  const risultatiAq = new Set(ricetteAq.map(([n]) => chiaveNome(n)));
+  for (const ris of ricetteSeed.keys()) if (!risultatiAq.has(ris)) speciali.discrepanze.push(`${ris}: ricetta presente solo nel seed`);
 
   // ---- Demoni del Tesoro ----
   const tesori = nuovo('Demoni del Tesoro — nomi e modificatori', true);
@@ -265,10 +266,13 @@ export function confronta(): Esito[] {
 
 /** Scrive il report markdown e restituisce true se ci sono discrepanze bloccanti. */
 export function scriviReport(esiti: Esito[]): boolean {
+  const fileReport = path.join(DIR_SEED, 'verifica-incrociata.md');
   const righe: string[] = [];
   righe.push('# Verifica incrociata del seed');
   righe.push('');
-  righe.push(`Generato il ${new Date().toISOString()}.`);
+  // Timestamp stabile: si conserva quello precedente se il resto del report non cambia.
+  const SEGNAPOSTO = '@@GENERATO_IL@@';
+  righe.push(`Generato il ${SEGNAPOSTO}.`);
   righe.push(`Fonte primaria: ${FONTE_CHINHODADO.proprietario}/${FONTE_CHINHODADO.repository} @ ${FONTE_CHINHODADO.commit.slice(0, 7)} (${FONTE_CHINHODADO.licenza}).`);
   righe.push(`Fonte di verifica: ${FONTE_AQIU384.proprietario}/${FONTE_AQIU384.repository} @ ${FONTE_AQIU384.commit.slice(0, 7)} (${FONTE_AQIU384.licenza}).`);
   righe.push('');
@@ -288,7 +292,14 @@ export function scriviReport(esiti: Esito[]): boolean {
   const bloccanti = esiti.some((e) => e.bloccante && e.discrepanze.length > 0);
   righe.push(`**Esito: ${bloccanti ? 'BLOCCANTE — divergono dati che pilotano il motore di fusione' : 'OK sui dati del motore di fusione'}.**`);
   righe.push('');
-  fs.writeFileSync(path.join(DIR_SEED, 'verifica-incrociata.md'), righe.join('\n'));
+  const corpo = righe.join('\n');
+  let generatoIl = new Date().toISOString();
+  if (fs.existsSync(fileReport)) {
+    const vecchio = fs.readFileSync(fileReport, 'utf-8');
+    const m = vecchio.match(/^Generato il (\S+)\.$/m);
+    if (m && vecchio.replace(m[1], SEGNAPOSTO) === corpo) generatoIl = m[1];
+  }
+  fs.writeFileSync(fileReport, corpo.replace(SEGNAPOSTO, generatoIl));
   return bloccanti;
 }
 

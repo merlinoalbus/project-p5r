@@ -1,6 +1,6 @@
 # Architettura — project-p5r
 
-Aggiornato allo step **0.1 (scaffold)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
+Aggiornato allo step **0.2 (dataset)**. Le sezioni marcate *(previsto)* descrivono ciò che gli step successivi
 realizzeranno secondo `docs/ROADMAP.md`.
 
 ## 1. Vista d'insieme
@@ -57,8 +57,10 @@ src/
   stores/             configStore, notificationStore (zustand)
   services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema.ts, index.ts barrel
   hooks/, utils/      useDocumentTitle, constants
-data/seed/            (previsto) dataset Royal normalizzato in JSON, versionato, incluso nell'immagine Docker
-scripts/              gestione server (bash) + (previsto) pipeline seed: scarica / normalizza / verifica incrociata
+data/seed/            dataset Royal normalizzato in JSON (persona, skill, oggetti, fusione, traduzioni, versione), versionato,
+                      incluso nell'immagine Docker; sorgenti/ = file grezzi delle fonti (fuori dall'immagine)
+scripts/seed/         pipeline dataset: fonti (commit fissati) → scarica (manifest sha256) → normalizza (sandbox vm,
+                      correzioni Royal documentate, gate traduzioni 100%) → verifica incrociata (report); gestione server in scripts/*.sh
 docs/                 documentazione di bordo e riferimenti di dominio
 ```
 

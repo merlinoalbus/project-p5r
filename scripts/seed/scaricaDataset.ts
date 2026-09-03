@@ -5,7 +5,8 @@
 // Scarica ogni file di `FONTI` al commit fissato in data/seed/sorgenti/<id>/…
 // e scrive manifest.json con URL, sha256, dimensione e data di download.
 // Se un file esiste già con lo stesso hash del manifest non viene riscaricato
-// (idempotente); con `--forza` si riscarica tutto.
+// e il manifest non viene toccato (idempotente: `git status` resta pulito);
+// con `--forza` si riscarica tutto.
 // ============================================================
 
 import fs from 'node:fs';
@@ -50,6 +51,7 @@ async function scaricaFile(url: string): Promise<Buffer> {
 export async function scaricaTutto(forza = false): Promise<Manifest> {
   const precedente = leggiManifest();
   const voci: VoceManifest[] = [];
+  let scaricati = 0;
   for (const fonte of FONTI) {
     for (const percorso of fonte.file) {
       const destinazione = percorsoSorgente(fonte.id, percorso);
@@ -67,8 +69,16 @@ export async function scaricaTutto(forza = false): Promise<Manifest> {
       fs.mkdirSync(path.dirname(destinazione), { recursive: true });
       fs.writeFileSync(destinazione, buf);
       voci.push({ fonte: fonte.id, percorso, url, sha256: sha256(buf), byte: buf.length, scaricatoIl: new Date().toISOString() });
+      scaricati++;
       console.log(`↓ ${fonte.id}/${percorso} (${buf.length} byte)`);
     }
+  }
+  // Idempotenza: se nessun file è stato riscaricato e le fonti sono le stesse,
+  // il manifest resta byte-per-byte identico (nessun nuovo timestamp).
+  const fontiAttuali = FONTI.map(({ id, proprietario, repository, commit, dataCommit, licenza }) => ({ id, proprietario, repository, commit, dataCommit, licenza }));
+  if (precedente && scaricati === 0 && JSON.stringify(precedente.fonti) === JSON.stringify(fontiAttuali) && precedente.file.length === voci.length) {
+    console.log('manifest invariato');
+    return precedente;
   }
   const manifest: Manifest = {
     generatoIl: new Date().toISOString(),

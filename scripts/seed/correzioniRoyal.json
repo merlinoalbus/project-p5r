@@ -53,6 +53,8 @@
     "Eredità di Macabre (A: Curse, B: Ailment) e Maria (A: Healing, B: Bless): wiki senza dato; si mantiene A",
     "Famine's Scream costo (A: nessuno, B: 8 SP) e Summon elemento (A: almighty, B: support): skill esclusive dei nemici, wiki senza dato; si mantiene A",
     "Guiding Tendril (A: support, B: almighty): l'effetto nel dataset ('atterra tutti i nemici, solo in imboscata') è di supporto; si mantiene A",
-    "Great Aim (precisione Arma da fuoco +5%): nessuna pagina wiki; aqiu384 la chiama 'Gun Accuracy +5%'. NON è 'Snipe' (che in Royal è 'Gun Boost', già presente): si mantiene A"
+    "Great Aim (precisione Arma da fuoco +5%): la lista Royal della wiki la riporta come 'Gun Accuracy + 5%' (solo da accessorio), come aqiu384; nessuna Persona la possiede. NON è 'Snipe' (che in Royal è 'Gun Boost', già presente): si mantiene il nome A in attesa di riscontro in gioco",
+    "Self-destruct costo (A: nessuno, B: 1% HP): skill esclusiva dei nemici; si mantiene A",
+    "Oggetto 'The Great Thief Stick' (A) vs 'Great Thief Stick' (B): nome dell'oggetto da esecuzione non verificato; si mantiene A"
   ]
 }
