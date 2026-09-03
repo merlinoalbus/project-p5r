@@ -21,8 +21,8 @@ Ogni step si chiude solo con il verdetto **APPROVATO** del galaxy-task-validator
 ## Fase 1 — Motore di fusione diretta e inversa + UI calcolatore
 | Step | Contenuto | Stato |
 |---|---|---|
-| 1.1 | Motore (`server/services/fusione/motoreFusione.ts`, regole chinhodado): fusione A+B normale, stesso arcano, Demone del Tesoro, speciale; ricette per ottenere una Persona (inversa completa) e fusioni con una Persona; contesto DLC (dalla partita o esplicito); costo stimato; API `/api/fusione/fondi`, `/ricette/:id`, `/con/:id` con filtro livello e limite; test di coerenza diretta↔inversa su tutto il compendio | ⏳ in validazione |
-| 1.2 | UI: Fusione → Calcolatore A + B, Come ottenere, Fusioni con… (ricerca per nome italiano/canonico/arcano, evidenza della scorta, filtro al livello del protagonista, «Mostra altre»); sezione Fusione nella scheda Persona con le 5 ricette più economiche e i collegamenti | ⏳ in validazione |
+| 1.1 | Motore (`server/services/fusione/motoreFusione.ts`, regole chinhodado): fusione A+B normale, stesso arcano, Demone del Tesoro, speciale; ricette per ottenere una Persona (inversa completa) e fusioni con una Persona; contesto DLC (dalla partita o esplicito); costo stimato; API `/api/fusione/fondi`, `/ricette/:id`, `/con/:id` con filtro livello e limite; test di coerenza diretta↔inversa su tutto il compendio | ✅ 2026-09-03 |
+| 1.2 | UI: Fusione → Calcolatore A + B, Come ottenere, Fusioni con… (ricerca per nome italiano/canonico/arcano, evidenza della scorta, filtro al livello del protagonista, «Mostra altre»); sezione Fusione nella scheda Persona con le 5 ricette più economiche e i collegamenti | ✅ 2026-09-03 |
 
 ## Fase 2 — Albero di fusione ricorsivo
 ⬜ dal compendio personale/Persona catturabili fino al target; branch-and-bound su costo, profondità, livello; UI ad albero.

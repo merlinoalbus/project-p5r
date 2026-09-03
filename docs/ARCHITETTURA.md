@@ -130,7 +130,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   che producono l'arcano del target + fusioni con Demone del Tesoro; costo Σ(27L²+126L+2147). `fusioneService.ts` produce i DTO con nomi
   italiani e i motivi in italiano quando la fusione non è possibile.
 - API pubblica del motore: `creaContesto(dlcPosseduti)`, `fondi(a, b, ctx)`, `ricettePer(target, ctx)`, `fusioniCon(persona, ctx)`,
-  `ricettaSpeciale`, `costoFusione`, `livelloFusione`, `arcanaRisultato`, `invalidaMotoreFusione`.
+  `ricettaSpeciale`, `costoFusione`, `livelloFusione`, `arcanaRisultato`, `personaFusione(id)`, `invalidaMotoreFusione`.
 - Previsti (fasi 2–4, sullo stesso snapshot): `alberoFusione` (ricorsione dal compendio personale al target con branch-and-bound su costo,
   profondità e livello del protagonista), `eredita` (matrice tipo-eredità × elemento, slot ereditabili), `catene` (propagazione skill
   multi-step, bonus del Confidente, Allarme, Potenziamento).
