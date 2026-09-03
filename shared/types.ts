@@ -90,8 +90,8 @@ export interface SkillAppresaDto extends SkillRiassuntoDto {
 }
 
 export interface RicettaSpecialeDto {
-  risultato: { id: number; nome: string };
-  ingredienti: Array<{ id: number; nome: string }>;
+  risultato: { id: number; nome: string; nomeIt: string };
+  ingredienti: Array<{ id: number; nome: string; nomeIt: string }>;
 }
 
 /** Scheda completa di una Persona. */
@@ -178,7 +178,7 @@ export interface RegoleFusioneDto {
   arcani: string[];
   tabella: Array<{ a: string; b: string; risultato: string }>;
   speciali: RicettaSpecialeDto[];
-  tesori: { nomi: string[]; modificatori: Record<string, number[]> };
+  tesori: { nomi: string[]; nomiIt: string[]; modificatori: Record<string, number[]> };
   eredita: { tipi: string[]; colonne: string[]; matrice: Record<string, boolean[]> };
   dlc: string[][];
 }
@@ -458,6 +458,8 @@ export interface PersonaPossedutaDto {
   statisticheBaseLivello: StatisticheDto;
   tratto: SkillRiassuntoDto | null;
   inSquadra: boolean;
+  /** Persona «carica» (nome giallo): creata durante l'Allarme delle fusioni. */
+  carica: boolean;
   note: string;
   skill: Array<{ slot: number } & SkillRiassuntoDto>;
   createdAt: string;
@@ -497,6 +499,61 @@ export interface ObiettivoDto {
   pianiSalvati: number;
   createdAt: string;
   updatedAt: string;
+}
+
+// ---- Operazioni della Stanza di Velluto dalla scorta (Fase 5.4) ----
+
+export interface AnteprimaFusioneDto {
+  risultato: PersonaFusioneDto;
+  tipo: TipoFusione;
+  ingredienti: Array<{ possedutaId: number; personaId: number; nome: string; nomeIt: string; livello: number; carica: boolean }>;
+  /** Ingredienti «carichi» (gialli). */
+  cariche: number;
+  livelloBase: number;
+  bonusLivelli: { min: number; max: number; rangoMatto: number; rangoArcano: number; affidabilita: 'alta' | 'media' | 'bassa' };
+  livelloSuggerito: number;
+  sopraProtagonista: boolean;
+  allarme: boolean;
+  /** Punti statistica casuali aggiunti dal gioco con l'Allarme (15/20/25 secondo le Persona cariche). */
+  puntiAllarme: number;
+  /** Con l'Allarme e ingredienti carichi le skill possono mutare (incidente). */
+  rischioIncidente: boolean;
+  slot: number;
+  slotScelti: number;
+  candidate: Array<SkillRiassuntoDto & { da: number[]; ereditabile: boolean; giaAppresa: boolean; motivo: string | null }>;
+  tratti: Array<{ id: number; nome: string; nomeIt: string; da: number | null }>;
+  skillInnate: SkillRiassuntoDto[];
+}
+
+export interface EsitoFusioneScortaDto {
+  risultato: PersonaPossedutaDto;
+  rimosse: Array<{ possedutaId: number; personaId: number; nomeIt: string; livello: number }>;
+  anteprima: AnteprimaFusioneDto;
+}
+
+export interface EsitoForcaDto {
+  ricevente: PersonaPossedutaDto;
+  sacrificio: { personaId: number; nomeIt: string; livello: number; carica: boolean };
+  moltiplicatore: number;
+  fattori: Array<{ nome: string; valore: number; affidabilita: 'alta' | 'media' | 'bassa' }>;
+  interpolato: boolean;
+  incidente: boolean;
+  /** Punti garantiti da un incidente con questi esemplari (5/10/15). */
+  puntiGarantiti: number;
+}
+
+export interface EsitoIsolamentoDto {
+  persona: PersonaPossedutaDto;
+  guadagno: { applicazioni: number; puntiPerStatistica: number; totale: number };
+  skillAppresa: SkillRiassuntoDto | null;
+  elementoDebolezza: string | null;
+}
+
+export interface SuggerimentoIsolamentoDto {
+  elemento: string | null;
+  elementoNome: string | null;
+  tier: string;
+  skill: SkillRiassuntoDto | null;
 }
 
 // ---- Piani salvati (Fase 5.3) ----

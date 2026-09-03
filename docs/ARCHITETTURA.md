@@ -137,6 +137,13 @@ fusioni con ≥2 ingredienti, foglie senza figli, Persona esistenti, profondità
 con la scorta attuale: una fusione col risultato già in scorta chiude il sottoalbero; una fusione con tutti gli ingredienti in scorta è un
 «passo eseguibile». `AlberoPiano` (FE) è condiviso fra la vista «Piano di fusione» e i piani salvati.
 
+### Operazioni della Stanza di Velluto dalla scorta (Fase 5.4)
+`operazioniVellutoService`: `anteprimaFusione` riusa il motore (`fondi` / `ricettaSpeciale`) e l'eredità (`analisiEredita` sugli esemplari
+posseduti con le loro skill) e aggiunge il livello suggerito (`bonusLivelliFusione`), i punti dell'Allarme (`puntiAllarmeFusione` per Persona
+«cariche») e le skill innate; `eseguiFusione` valida le skill scelte fra le candidate ereditabili (≤ `slotScelti`, tutti gli slot con l'Allarme),
+rimuove gli ingredienti e crea il risultato tramite `aggiungiPosseduta` (compendio, eventi, obiettivi) marcandolo «carico» se durante l'Allarme;
+`eseguiForca` e `eseguiIsolamento` registrano i valori osservati (livello, skill, punti) e gli eventi; migrazione 008 aggiunge `carica`.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

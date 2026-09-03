@@ -41,6 +41,40 @@ export function moltiplicatoreExpConfidente(rango: number): number {
   return MOLTIPLICATORE_EXP_CONFIDENTE[r] ?? 1;
 }
 
+// ---- Bonus di livello alla fusione (Ghigliottina): la Persona creata nasce sopra il livello base ----
+
+/**
+ * Livelli extra della Persona appena fusa in funzione del rango del Confidente del Matto (fase di gioco) e del rango del
+ * Confidente del suo arcano (tabella omoteura.com, affidabilità media: intervalli osservati, non formula). Rango arcano 0 → +0.
+ * Il bonus vale solo per la Persona creata: usata come materiale conta di nuovo il livello base della sua specie.
+ */
+export function bonusLivelliFusione(rangoMatto: number, rangoArcano: number): { min: number; max: number; affidabilita: Affidabilita } {
+  const r = Math.max(0, Math.min(10, Math.floor(rangoArcano)));
+  if (r === 0) return { min: 0, max: 0, affidabilita: 'media' };
+  const m = Math.max(0, Math.min(10, Math.floor(rangoMatto)));
+  let min: number;
+  let max: number;
+  if (m <= 5) {
+    // Fase 1 (Matto 1–5): ranghi 1–3 → +1…+2, 4+ → +2
+    [min, max] = r <= 3 ? [1, 2] : [2, 2];
+  } else if (m <= 9) {
+    // Fase 2 (Matto 6–9)
+    [min, max] = r <= 2 ? [1, 1] : r <= 4 ? [2, 2] : r <= 6 ? [3, 3] : [4, 4];
+  } else {
+    // Fase 3 (Matto 10)
+    [min, max] = r <= 2 ? [1, 2] : r <= 5 ? [2, 3] : r <= 8 ? [4, 5] : [5, 6];
+  }
+  return { min, max, affidabilita: 'media' };
+}
+
+/** Punti statistica casuali aggiunti alla Persona fusa durante l'Allarme (senza incidente). Affidabilità alta (game8, omoteura). */
+export const PUNTI_ALLARME_FUSIONE = 15;
+
+/** Punti dell'Allarme in base a quante Persona «cariche» (gialle) sono fra gli ingredienti: 15 / 20 / 25 (wikiwiki.jp 合体警報). Affidabilità alta. */
+export function puntiAllarmeFusione(cariche: number): number {
+  return cariche >= 2 ? 25 : cariche === 1 ? 20 : PUNTI_ALLARME_FUSIONE;
+}
+
 // ---- Forca / Potenziamento (Gallows) ----
 
 /** Moltiplicatori documentati per rango del Confidente dell'arcano del ricevente (ranghi 1, 5, 10; Igor non al massimo / al massimo). Affidabilità alta. */
@@ -143,13 +177,13 @@ export function tierResistenza(livello: number): (typeof TIER_RESISTENZA)[number
   return TIER_RESISTENZA.find((t) => livello >= t.livelloMin && (t.livelloMax === null || livello <= t.livelloMax)) ?? TIER_RESISTENZA[0];
 }
 
-/** Incensi: effetto per applicazione (ogni 2 giorni), prezzo in yen (null = solo scambio con fiori dei Mementos). Affidabilità alta. */
-export const INCENSI: ReadonlyArray<{ chiave: string; nome: string; prezzo: number | null; punti: number; statistiche: number; nota: string }> = [
-  { chiave: 'base', nome: 'Incenso base (una statistica)', prezzo: 4000, punti: 1, statistiche: 1, nota: 'una versione per ciascuna statistica' },
-  { chiave: 'musk', nome: 'Musk (due statistiche)', prezzo: 8000, punti: 1, statistiche: 2, nota: 'coppie fisse: FR+MA, FR+AG, MA+RS, MA+FO, RS+AG' },
-  { chiave: 'rasta', nome: 'Rasta Sandalwood (FR, MA, AG)', prezzo: 14000, punti: 1, statistiche: 3, nota: 'dal 1º ottobre' },
-  { chiave: 'ambergris', nome: 'Ambergris', prezzo: null, punti: 2, statistiche: 1, nota: 'scambio con 80 fiori dei Mementos' },
-  { chiave: 'nirvana', nome: 'Nirvana', prezzo: null, punti: 3, statistiche: 1, nota: 'scambio con 80 fiori dei Mementos, dal 30 ottobre' },
+/** Incensi: effetto per applicazione (ogni 2 giorni), prezzo in yen (null = solo scambio con fiori dei Mementos). Nomi in italiano con l'originale inglese (la localizzazione ufficiale italiana degli incensi non è nel glossario). Affidabilità alta. */
+export const INCENSI: ReadonlyArray<{ chiave: string; nome: string; nomeOriginale: string; prezzo: number | null; punti: number; statistiche: number; nota: string }> = [
+  { chiave: 'base', nome: 'Incenso semplice (una statistica)', nomeOriginale: 'Incense', prezzo: 4000, punti: 1, statistiche: 1, nota: 'una versione per ciascuna statistica' },
+  { chiave: 'musk', nome: 'Muschio (due statistiche)', nomeOriginale: 'Musk', prezzo: 8000, punti: 1, statistiche: 2, nota: 'coppie fisse: FR+MA, FR+AG, MA+RS, MA+FO, RS+AG' },
+  { chiave: 'rasta', nome: 'Sandalo rasta (FR, MA, AG)', nomeOriginale: 'Rasta Sandalwood', prezzo: 14000, punti: 1, statistiche: 3, nota: 'dal 1º ottobre' },
+  { chiave: 'ambergris', nome: 'Ambra grigia', nomeOriginale: 'Ambergris', prezzo: null, punti: 2, statistiche: 1, nota: 'scambio con 80 fiori dei Mementos' },
+  { chiave: 'nirvana', nome: 'Nirvana', nomeOriginale: 'Nirvana', prezzo: null, punti: 3, statistiche: 1, nota: 'scambio con 80 fiori dei Mementos, dal 30 ottobre' },
 ];
 
 /** Giorni per applicazione dell'incenso. */

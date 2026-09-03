@@ -29,12 +29,13 @@ describe('PianiSalvati', () => {
 
   it('mostra avanzamento e passo eseguibile con collegamento al calcolatore; albero a richiesta con foglie evidenziate; rinomina ed elimina', async () => {
     getPianiSalvati.mockResolvedValue([piano]);
-    getPossedute.mockResolvedValue([{ personaId: 1 }, { personaId: 2 }]);
+    getPossedute.mockResolvedValue([{ id: 11, personaId: 1 }, { id: 12, personaId: 2 }]);
     render(<MemoryRouter initialEntries={['/partita?scheda=piani']}><PianiSalvati partitaId={7} /></MemoryRouter>);
     expect((await screen.findAllByRole('link', { name: 'Jack Frost' }))[0]).toHaveAttribute('href', '/compendio/persona/88');
     expect(getPianiSalvati).toHaveBeenCalledWith(7, undefined);
     expect(screen.getByText('2/2')).toBeInTheDocument();
     expect(screen.getByRole('list', { name: 'Passi eseguibili' }).querySelector('a')).toHaveAttribute('href', '/fusione?vista=calcolatore&a=1&b=2');
+    expect(await screen.findByRole('button', { name: 'Esegui' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra albero' }));
     expect(screen.getByRole('link', { name: /Arsène/ })).toHaveClass('chip--attivo');
     // rinomina

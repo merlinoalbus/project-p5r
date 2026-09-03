@@ -10,7 +10,8 @@ import { SelettorePersona } from './SelettorePersona';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { formattaYen } from '../../utils/punti';
 import { PannelloEredita } from './PannelloEredita';
-import type { PersonaRiassuntoDto } from '../../types';
+import { EseguiFusioneModal } from './EseguiFusioneModal';
+import type { PersonaPossedutaDto, PersonaRiassuntoDto } from '../../types';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -19,10 +20,14 @@ interface Props {
   /** Preselezione dall'URL. */
   inizialeA?: number;
   inizialeB?: number;
+  /** Scorta della partita (per eseguire la fusione dagli esemplari posseduti). */
+  scorta?: PersonaPossedutaDto[];
+  onScortaCambiata?: () => void;
 }
 
 /** Due Persona → risultato (o motivo dell'impossibilità), con costo e tipo di fusione. */
-export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB }: Props) {
+export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB, scorta, onScortaCambiata }: Props) {
+  const [esecuzione, setEsecuzione] = useState(false);
   const [a, setA] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeA) ?? null);
   const [b, setB] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeB) ?? null);
   const { dati: esito, caricamento, errore } = useCarica(
@@ -59,7 +64,20 @@ export function Calcolatore({ persone, partitaId, inScorta, inizialeA, inizialeB
                     {esito.bonusConfidente.rango === 0 && <span className="text-text-muted"> · aggiorna i ranghi nella scheda Confidenti</span>}
                   </div>
                 )}
-                {inScorta.has(a.id) && inScorta.has(b.id) && <div className="chip chip--attivo mt-2">Hai entrambi gli ingredienti nella scorta</div>}
+                {inScorta.has(a.id) && inScorta.has(b.id) && (
+                  <div className="flex items-center gap-2 flex-wrap mt-2">
+                    <span className="chip chip--attivo">Hai entrambi gli ingredienti nella scorta</span>
+                    {partitaId && scorta && <button type="button" className="btn btn-primary btn-sm" onClick={() => setEsecuzione(true)}>Esegui la fusione dalla scorta</button>}
+                  </div>
+                )}
+                {esecuzione && partitaId && scorta && (
+                  <EseguiFusioneModal
+                    partitaId={partitaId}
+                    possedutaIds={[scorta.find((p) => p.personaId === a.id)!.id, scorta.find((p) => p.personaId === b.id)!.id]}
+                    onChiudi={() => setEsecuzione(false)}
+                    onEseguita={() => { setEsecuzione(false); onScortaCambiata?.(); }}
+                  />
+                )}
               </div>
               <div className="w-full border-t border-border-light pt-3">
                 <PannelloEredita a={a.id} b={b.id} partitaId={partitaId} />

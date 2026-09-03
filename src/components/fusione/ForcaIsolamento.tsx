@@ -3,7 +3,10 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { getPossedute } from '../../services/api';
+import { eseguiIsolamento, getPossedute, getSuggerimentoIsolamento } from '../../services/api';
+import { notifica } from '../../stores/notificationStore';
+import { EseguiForcaModal } from './EseguiForcaModal';
+import { NOMI_STATISTICHE } from '../../utils/statistiche';
 import { useCarica } from '../../hooks/useCarica';
 import { Spinner } from '../shared/PageState';
 import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
@@ -16,8 +19,9 @@ interface Props {
 }
 
 /** Forca: scegli il ricevente nella scorta; i sacrifici possibili (scorta) sono ordinati per moltiplicatore EXP. */
-function Forca({ scorta, persone, velluto }: { scorta: PersonaPossedutaDto[]; persone: PersonaRiassuntoDto[]; velluto: VellutoDto | null }) {
+function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scorta: PersonaPossedutaDto[]; persone: PersonaRiassuntoDto[]; velluto: VellutoDto | null; partitaId: number; onScortaCambiata: () => void }) {
   const [riceventeId, setRiceventeId] = useState<number | null>(null);
+  const [sacrificioId, setSacrificioId] = useState<number | null>(null);
   const ricevente = scorta.find((p) => p.id === riceventeId) ?? null;
   const rangoDi = (arcana: string) => velluto?.arcani.find((a) => a.arcana === arcana)?.rango ?? 0;
   const igorMax = rangoDi('Fool') >= 10;
@@ -62,7 +66,9 @@ function Forca({ scorta, persone, velluto }: { scorta: PersonaPossedutaDto[]; pe
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold">{p.nomeIt}</span>
                       <span className="text-text-muted">{p.arcanaNome} · livello {p.livello}</span>
+                      {p.carica && <span className="chip" title="Creata durante l'Allarme: alla Forca provoca un incidente garantito con +10 punti">gialla</span>}
                       <span className="ml-auto font-black tabular-nums">EXP ×{esito.moltiplicatore.toLocaleString('it-IT')}</span>
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSacrificioId(p.id)}>Esegui</button>
                     </div>
                     <div className="text-[12px] text-text-muted">
                       {esito.fattori.length === 0 ? 'Nessun bonus' : esito.fattori.map((f) => `${f.nome} ×${f.valore.toLocaleString('it-IT')}`).join(' · ')}
@@ -72,6 +78,12 @@ function Forca({ scorta, persone, velluto }: { scorta: PersonaPossedutaDto[]; pe
                 ))}
               </ul>
               {allarme && <p className="m-0 text-[12px] text-warning">Con l'Allarme un incidente azzera l'EXP ma garantisce +{FORCA_INCIDENTE_BONUS.sacrificioNormale} punti statistica (+{FORCA_INCIDENTE_BONUS.unaPersonaCarica}/+{FORCA_INCIDENTE_BONUS.entrambeCariche} con Persona «cariche»).</p>}
+              {sacrificioId !== null && (() => {
+                const c = candidati.find((x) => x.p.id === sacrificioId);
+                return c ? (
+                  <EseguiForcaModal partitaId={partitaId} ricevente={ricevente} sacrificio={c.p} stima={c.esito} allarme={allarme} onChiudi={() => setSacrificioId(null)} onEseguita={() => { setSacrificioId(null); onScortaCambiata(); }} />
+                ) : null;
+              })()}
             </>
           )}
         </>
@@ -81,7 +93,7 @@ function Forca({ scorta, persone, velluto }: { scorta: PersonaPossedutaDto[]; pe
 }
 
 /** Isolamento: Persona (scorta), incenso, giorni → punti stimati e resistenza ottenuta. */
-function Isolamento({ scorta, velluto }: { scorta: PersonaPossedutaDto[]; velluto: VellutoDto | null }) {
+function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: PersonaPossedutaDto[]; velluto: VellutoDto | null; partitaId: number; onScortaCambiata: () => void }) {
   const [possedutaId, setPossedutaId] = useState<number | null>(null);
   const [incensoChiave, setIncensoChiave] = useState(INCENSI[0].chiave);
   const [giorni, setGiorni] = useState(4);
@@ -90,6 +102,22 @@ function Isolamento({ scorta, velluto }: { scorta: PersonaPossedutaDto[]; vellut
   const allarme = velluto?.allarmeAttivo ?? false;
   const rangoGemelle = velluto?.gemelle.rango ?? 0;
   const guadagno = guadagnoIncenso(incenso, giorni, allarme);
+  const [statScelte, setStatScelte] = useState<string[]>(['forza']);
+  const [occupato, setOccupato] = useState(false);
+  const suggerimento = useCarica(() => (persona ? getSuggerimentoIsolamento(partitaId, persona.id) : Promise.resolve(null)), [partitaId, persona?.id, persona?.livello]);
+  const registra = async () => {
+    if (!persona) return;
+    setOccupato(true);
+    try {
+      const esito = await eseguiIsolamento(partitaId, { possedutaId: persona.id, incenso: incenso.chiave, giorni, statistiche: statScelte.slice(0, incenso.statistiche) });
+      notifica('success', `${persona.nomeIt}: +${esito.guadagno.puntiPerStatistica} a ${statScelte.slice(0, incenso.statistiche).map((k) => NOMI_STATISTICHE[k]).join(', ')}${esito.skillAppresa ? `, appresa ${esito.skillAppresa.nomeIt}` : ''}.`);
+      onScortaCambiata();
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Registrazione fallita.');
+    } finally {
+      setOccupato(false);
+    }
+  };
   return (
     <section className="card flex flex-col gap-3">
       <h2 className="m-0 text-[15px] font-semibold">Isolamento (addestramento)</h2>
@@ -121,7 +149,21 @@ function Isolamento({ scorta, velluto }: { scorta: PersonaPossedutaDto[]; vellut
             {persona.livello < 34 && <span className="text-warning"> · sotto il livello 34 la debolezza non viene coperta (solo schivata)</span>}
           </div>
         )}
-        <div className="text-[12px] text-text-muted">Statistiche: Forza, Magia, Resistenza, Agilità, Fortuna · tetto 99.</div>
+        {persona && suggerimento.dati && (
+          <div>Skill di resistenza prevista: <strong>{suggerimento.dati.skill ? suggerimento.dati.skill.nomeIt : 'nessuna nel dataset'}</strong>{suggerimento.dati.elementoNome ? ` (debolezza: ${suggerimento.dati.elementoNome})` : ' (nessuna debolezza)'}.</div>
+        )}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[12px] text-text-muted">Statistiche interessate ({incenso.statistiche}):</span>
+          {Object.entries(NOMI_STATISTICHE).map(([k, n]) => (
+            <button key={k} type="button" className={`chip touch ${statScelte.includes(k) ? 'chip--attivo' : ''}`} aria-pressed={statScelte.includes(k)} onClick={() => setStatScelte((sc) => (sc.includes(k) ? sc.filter((x) => x !== k) : sc.length < incenso.statistiche ? [...sc, k] : [...sc.slice(1), k]))}>{n}</button>
+          ))}
+        </div>
+        {persona && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <button type="button" className="btn btn-primary btn-sm" disabled={occupato || statScelte.length !== incenso.statistiche || rangoGemelle < 3} onClick={() => void registra()}>Registra l'isolamento su {persona.nomeIt}</button>
+            {statScelte.length !== incenso.statistiche && <span className="text-[12px] text-warning">Scegli esattamente {incenso.statistiche} {incenso.statistiche === 1 ? 'statistica' : 'statistiche'}.</span>}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -134,8 +176,8 @@ export function ForcaIsolamento({ persone, partitaId, velluto }: Props) {
   if (!scorta.dati) return <div className="flex justify-center py-6"><Spinner /></div>;
   return (
     <div className="flex flex-col gap-3">
-      <Forca scorta={scorta.dati} persone={persone} velluto={velluto} />
-      <Isolamento scorta={scorta.dati} velluto={velluto} />
+      <Forca scorta={scorta.dati} persone={persone} velluto={velluto} partitaId={partitaId} onScortaCambiata={() => void scorta.ricarica()} />
+      <Isolamento scorta={scorta.dati} velluto={velluto} partitaId={partitaId} onScortaCambiata={() => void scorta.ricarica()} />
     </div>
   );
 }

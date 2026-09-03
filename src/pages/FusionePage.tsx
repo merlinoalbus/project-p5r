@@ -96,7 +96,7 @@ export function FusionePage() {
 
       <PageState isLoading={caricamento || persone.caricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
         {persone.dati && vista === 'calcolatore' && (
-          <Calcolatore persone={persone.dati} partitaId={attiva?.id ?? null} inScorta={inScorta} inizialeA={idParam('a')} inizialeB={idParam('b')} />
+          <Calcolatore persone={persone.dati} partitaId={attiva?.id ?? null} inScorta={inScorta} inizialeA={idParam('a')} inizialeB={idParam('b')} scorta={scorta.dati ?? undefined} onScortaCambiata={() => void scorta.ricarica()} />
         )}
         {persone.dati && vista === 'ricette' && (
           <RicettePersona key={`per-${idParam('ricette') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="per" inizialeId={idParam('ricette')} />
@@ -175,12 +175,12 @@ export function FusionePage() {
               <li key={r.risultato.id} className="card flex flex-wrap items-center gap-1 text-[13px]">
                 {r.ingredienti.map((i, idx) => (
                   <span key={i.id} className="flex items-center gap-1">
-                    <Link to={`/compendio/persona/${i.id}`} className="chip touch no-underline">{i.nome}</Link>
+                    <Link to={`/compendio/persona/${i.id}`} className="chip touch no-underline">{i.nomeIt}</Link>
                     {idx < r.ingredienti.length - 1 && <span className="text-text-muted">+</span>}
                   </span>
                 ))}
                 <span className="text-text-muted mx-1">→</span>
-                <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo touch no-underline">{r.risultato.nome}</Link>
+                <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo touch no-underline">{r.risultato.nomeIt}</Link>
               </li>
             ))}
           </ul>
@@ -193,7 +193,7 @@ export function FusionePage() {
               <thead>
                 <tr>
                   <th className="sticky left-0 bg-bg z-10">Arcano</th>
-                  {dati.tesori.nomi.map((n) => <th key={n}>{n}</th>)}
+                  {dati.tesori.nomi.map((n, i) => <th key={n} title={n}>{dati.tesori.nomiIt[i] ?? n}</th>)}
                 </tr>
               </thead>
               <tbody>

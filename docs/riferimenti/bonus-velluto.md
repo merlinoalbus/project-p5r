@@ -1,4 +1,22 @@
-# Bonus della Stanza di Velluto — regole numeriche (Fase 4.2)
+# Bonus della Stanza di Velluto — regole numeriche (Fase 4.2, integrate in 5.4)
+
+## Integrazione 2026-09-03 sera (Fase 5.4) — fusione, materiali e Allarme
+- **La fusione non trasferisce livelli né statistiche dei materiali**: il livello del risultato si calcola sui livelli base delle specie
+  («使用するのは現在Lvではなく、各ペルソナに設定されている初期Lv», wikiwiki.jp/persona5r ベルベットルーム; kamigame 合体の法則; guide EN).
+  Eccezione: la fusione con Demone del Tesoro legge il livello attuale del Tesoro (kamigame 宝魔合体). Il carry-over per giri successivi esiste
+  in Persona 5 Strikers (力の蓄積), non in Royal. Affidabilità **alta**.
+- **Bonus di livello del Confidente alla fusione** (omoteura.com ギロチン刑): livelli extra della Persona creata per fase del Matto e rango
+  dell'arcano — Matto 1–5: ranghi 1–3 → +1…+2, 4+ → +2; Matto 6–9: 1–2 → +1, 3–4 → +2, 5–6 → +3, 7+ → +4; Matto 10: 1–2 → +1…+2,
+  3–5 → +2…+3, 6–8 → +4…+5, 9–10 → +5…+6. Ogni livello +3 punti casuali (le statistiche «gialle» nella schermata si possono rimescolare
+  uscendo e rientrando). Affidabilità **media** (fonte singola con intervalli osservati).
+- **Punti dell'Allarme alla Ghigliottina** (wikiwiki.jp 合体警報): +15 (ingredienti normali), +20 (una Persona gialla), +25 (due gialle);
+  1–3 skill possono mutare in versioni superiori; la Persona creata è «gialla» (carica). Affidabilità **alta**.
+- **Forca con Allarme**: game-kouryaku.info riporta «i moltiplicatori normali raddoppiano» (e 2 skill trasferite), wikiwiki riporta la scala
+  fissa 2/3/5/7: l'app usa la scala fissa e segnala la divergenza. Incidente: +5 (normale) / +10 (una gialla) / +15 (due gialle), nessuna EXP;
+  con l'Allarme lo stesso bersaglio può essere potenziato più volte al giorno. Affidabilità **alta**.
+- **Ciclo per il 99 in Royal** (wikiwiki.jp おすすめ強化, altema, puni-perpetual, ameblo): Chihaya rango 8 (禁忌・天運占い) + Ryuji rango 7 (瞬殺);
+  Allarme → fusione di due Persona qualsiasi → gialla → Forca sul bersaglio → incidente +10; ~20–28 cicli per un livello 80+ (1–2 ore).
+
 
 Censimento del 2026-09-03 (fonti e affidabilità per ogni regola). Costanti e funzioni in `shared/bonusVelluto.ts`; stato per partita da `GET /api/fusione/velluto`.
 Nell'app: sconto del Registro applicato ai costi di ricette e piani; bonus EXP del Confidente nel calcolatore e nel pannello «Stanza di Velluto»;

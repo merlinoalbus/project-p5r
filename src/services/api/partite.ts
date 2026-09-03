@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, ObiettivoDto, PersonaPossedutaDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto,
 } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
@@ -27,6 +27,7 @@ export interface DatiPosseduta {
   inSquadra?: boolean;
   note?: string;
   skillIds?: number[];
+  carica?: boolean;
   /** Origine libera (es. «fusione», «cattura»), registrata nello storico. */
   origine?: string;
 }
@@ -76,6 +77,16 @@ export const salvaPiano = (id: number, dati: { personaId: number; piano: PianoFu
   apiPost(`/partite/${id}/piani`, dati);
 export const aggiornaPianoSalvato = (id: number, pianoId: number, dati: { nome?: string; note?: string; obiettivoId?: number | null }): Promise<PianoSalvatoDto> => apiPut(`/partite/${id}/piani/${pianoId}`, dati);
 export const eliminaPianoSalvato = (id: number, pianoId: number): Promise<void> => apiDelete(`/partite/${id}/piani/${pianoId}`);
+
+/** Operazioni della Stanza di Velluto eseguite dalla scorta (Fase 5.4). */
+export const getAnteprimaFusione = (id: number, dati: { possedutaIds: number[]; risultatoId?: number }): Promise<AnteprimaFusioneDto> => apiPost(`/partite/${id}/velluto/fusione/anteprima`, dati);
+export const eseguiFusioneScorta = (id: number, dati: { possedutaIds: number[]; risultatoId?: number; skillIds?: number[]; trattoSkillId?: number | null; livello?: number; statistiche?: StatisticheDto | null; note?: string }): Promise<EsitoFusioneScortaDto> =>
+  apiPost(`/partite/${id}/velluto/fusione`, dati);
+export const eseguiForca = (id: number, dati: { riceventeId: number; sacrificioId: number; nuovoLivello?: number; skillTrasferiteIds?: number[]; skillRimosseIds?: number[]; incidente?: boolean; puntiStatistica?: Partial<StatisticheDto> }): Promise<EsitoForcaDto> =>
+  apiPost(`/partite/${id}/velluto/forca`, dati);
+export const eseguiIsolamento = (id: number, dati: { possedutaId: number; incenso?: string; giorni: number; statistiche?: string[]; skillResistenzaId?: number | null; skillRimossaId?: number | null }): Promise<EsitoIsolamentoDto> =>
+  apiPost(`/partite/${id}/velluto/isolamento`, dati);
+export const getSuggerimentoIsolamento = (id: number, possedutaId: number): Promise<SuggerimentoIsolamentoDto> => apiGet(`/partite/${id}/velluto/isolamento/${possedutaId}`);
 
 /** Storico della partita dal più recente; `prima` è il cursore restituito come `prossimo`. */
 export const getStorico = (id: number, opz: { limite?: number; prima?: number; tipi?: string[]; persona?: number } = {}): Promise<StoricoDto> =>

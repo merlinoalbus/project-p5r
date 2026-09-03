@@ -267,7 +267,7 @@ export function aggiornaCompendio(partitaId: number, personaId: number, dati: { 
 
 interface RigaPosseduta {
   id: number; partita_id: number; persona_id: number; livello: number; forza: number | null; magia: number | null; resistenza: number | null;
-  agilita: number | null; fortuna: number | null; tratto_skill_id: number | null; in_squadra: number; note: string; created_at: string; updated_at: string;
+  agilita: number | null; fortuna: number | null; tratto_skill_id: number | null; in_squadra: number; carica: number; note: string; created_at: string; updated_at: string;
   nome: string; arcana: string; livello_base: number; b_forza: number; b_magia: number; b_resistenza: number; b_agilita: number; b_fortuna: number; tratto_nome: string;
 }
 
@@ -287,7 +287,7 @@ function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
       ? stimate
       : { forza: r.forza ?? stimate.forza, magia: r.magia ?? stimate.magia, resistenza: r.resistenza ?? stimate.resistenza, agilita: r.agilita ?? stimate.agilita, fortuna: r.fortuna ?? stimate.fortuna },
     statisticheBase,
-    statisticheBaseLivello: base, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
+    statisticheBaseLivello: base, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, carica: r.carica === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 
@@ -302,6 +302,8 @@ export interface DatiPosseduta {
   statistiche?: { forza: number; magia: number; resistenza: number; agilita: number; fortuna: number } | null;
   trattoSkillId?: number | null;
   inSquadra?: boolean;
+  /** Persona «carica» (nome giallo: creata durante l'Allarme). */
+  carica?: boolean;
   note?: string;
   /** Skill conosciute, in ordine di slot (max 8). */
   skillIds?: number[];
@@ -328,9 +330,9 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
   const adesso = nowIso();
   return getDb().transaction(() => {
     const s = dati.statistiche ?? null;
-    const info = prepared(`INSERT INTO persona_posseduta (partita_id, persona_id, livello, forza, magia, resistenza, agilita, fortuna, tratto_skill_id, in_squadra, note, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, personaId, dati.livello ?? p.livello, s?.forza ?? null, s?.magia ?? null, s?.resistenza ?? null, s?.agilita ?? null, s?.fortuna ?? null,
-      dati.trattoSkillId ?? null, dati.inSquadra === false ? 0 : 1, dati.note ?? '', adesso, adesso);
+    const info = prepared(`INSERT INTO persona_posseduta (partita_id, persona_id, livello, forza, magia, resistenza, agilita, fortuna, tratto_skill_id, in_squadra, carica, note, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, personaId, dati.livello ?? p.livello, s?.forza ?? null, s?.magia ?? null, s?.resistenza ?? null, s?.agilita ?? null, s?.fortuna ?? null,
+      dati.trattoSkillId ?? null, dati.inSquadra === false ? 0 : 1, dati.carica ? 1 : 0, dati.note ?? '', adesso, adesso);
     const id = Number(info.lastInsertRowid);
     const skillIds = dati.skillIds ?? skillInnateFinoAlLivello(personaId, dati.livello ?? p.livello);
     skillIds.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(id, i + 1, sid));
@@ -361,12 +363,12 @@ export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: 
   const adesso = nowIso();
   return getDb().transaction(() => {
     const s = dati.statistiche === undefined ? undefined : dati.statistiche;
-    prepared(`UPDATE persona_posseduta SET livello = ?, forza = ?, magia = ?, resistenza = ?, agilita = ?, fortuna = ?, tratto_skill_id = ?, in_squadra = ?, note = ?, updated_at = ? WHERE id = ?`).run(
+    prepared(`UPDATE persona_posseduta SET livello = ?, forza = ?, magia = ?, resistenza = ?, agilita = ?, fortuna = ?, tratto_skill_id = ?, in_squadra = ?, carica = ?, note = ?, updated_at = ? WHERE id = ?`).run(
       dati.livello ?? r.livello,
       s === undefined ? r.forza : s?.forza ?? null, s === undefined ? r.magia : s?.magia ?? null, s === undefined ? r.resistenza : s?.resistenza ?? null,
       s === undefined ? r.agilita : s?.agilita ?? null, s === undefined ? r.fortuna : s?.fortuna ?? null,
       dati.trattoSkillId === undefined ? r.tratto_skill_id : dati.trattoSkillId, dati.inSquadra === undefined ? r.in_squadra : dati.inSquadra ? 1 : 0,
-      dati.note ?? r.note, adesso, possedutaId,
+      dati.carica === undefined ? r.carica : dati.carica ? 1 : 0, dati.note ?? r.note, adesso, possedutaId,
     );
     const skillPrima = (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(possedutaId) as Array<{ skill_id: number }>).map((x) => x.skill_id);
     if (dati.skillIds) {

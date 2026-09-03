@@ -3,7 +3,7 @@
 // ============================================================
 
 import {
-  FORCA_INCIDENTE_BONUS, INCENSI, giorniIsolamento, guadagnoIncenso, moltiplicatoreExpConfidente, moltiplicatoreForca, prezzoScontato, sblocchiGemelle, scontoRegistro, tierResistenza,
+  FORCA_INCIDENTE_BONUS, INCENSI, bonusLivelliFusione, puntiAllarmeFusione, giorniIsolamento, guadagnoIncenso, moltiplicatoreExpConfidente, moltiplicatoreForca, prezzoScontato, sblocchiGemelle, scontoRegistro, tierResistenza,
 } from './bonusVelluto.js';
 
 describe('sconto del Registro', () => {
@@ -27,6 +27,19 @@ describe('EXP del Confidente', () => {
     expect(moltiplicatoreExpConfidente(10)).toBe(3);
     expect(moltiplicatoreExpConfidente(12)).toBe(3);
     expect(moltiplicatoreExpConfidente(-1)).toBe(1);
+  });
+});
+
+describe('bonus di livello alla fusione', () => {
+  it("tabella per fase del Matto e rango dell'arcano", () => {
+    expect(bonusLivelliFusione(3, 0)).toMatchObject({ min: 0, max: 0 });
+    expect(bonusLivelliFusione(3, 2)).toMatchObject({ min: 1, max: 2 });
+    expect(bonusLivelliFusione(5, 5)).toMatchObject({ min: 2, max: 2 });
+    expect(bonusLivelliFusione(7, 5)).toMatchObject({ min: 3, max: 3 });
+    expect(bonusLivelliFusione(9, 10)).toMatchObject({ min: 4, max: 4 });
+    expect(bonusLivelliFusione(10, 10)).toMatchObject({ min: 5, max: 6 });
+    expect(bonusLivelliFusione(10, 4)).toMatchObject({ min: 2, max: 3 });
+    expect([puntiAllarmeFusione(0), puntiAllarmeFusione(1), puntiAllarmeFusione(2), puntiAllarmeFusione(3)]).toEqual([15, 20, 25, 25]);
   });
 });
 
