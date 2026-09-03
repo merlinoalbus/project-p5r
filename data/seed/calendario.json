@@ -1,0 +1,4029 @@
+{
+ "giorni": [
+  {
+   "data": "04-09",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Inizio del gioco",
+     "dettaglio": "Fuga dal casino (tutorial), interrogatorio di Sae Niijima, arrivo a Yongen-Jaya e al Leblanc da Sojiro Sakura.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-prologo/"
+    },
+    {
+     "tipo": "vacanza",
+     "titolo": "Nessun tempo libero",
+     "dettaglio": "Giornata interamente guidata dalla trama introduttiva.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-prologo/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-10",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Primo giorno alla Shujin Academy",
+     "dettaglio": "Visita alla scuola, tessera studente, incontro con Kawakami e il preside.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-prologo/"
+    },
+    {
+     "tipo": "vacanza",
+     "titolo": "Nessun tempo libero (sera bloccata)",
+     "dettaglio": "Non si puo' uscire la sera del 10 aprile.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-prologo/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-11",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Primo giorno di scuola / scoperta del castello",
+     "dettaglio": "Incontro con Ryuji, primo accesso al Metaverso e al Palazzo di Kamoshida.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-12",
+   "giornoSettimana": "Martedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Secondo accesso al Palazzo di Kamoshida",
+     "dettaglio": "Prima Persona (Arsene), Safe Room, negoziazione con le Ombre.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Ryuji Sakamoto (Carro) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-13",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-14",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-15",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Salvataggio di Ann nel Palazzo di Kamoshida",
+     "dettaglio": "Sconfitta del Capitano della Guardia.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidenti Ann Takamaki (Amanti) e Morgana (Mago) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-16",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Clinica di Tae Takemi disponibile",
+     "dettaglio": "Incontro con la dottoressa Takemi a Yongen-Jaya.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-17",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Negozio di softair e crafting in mansarda",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-18",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Tae Takemi (Morte) rango 1 / Biblioteca",
+     "dettaglio": "Tutorial biblioteca; possibile studio per Coraggio/Conoscenza.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-2/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-19",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-20",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Inizio infiltrazione seria nel Palazzo di Kamoshida",
+     "dettaglio": "Ann diventa \"Panther\"; Stanza di Velluto (Igor, Matto rango 2, Terzo Occhio).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-2/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-21",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-22",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Invio della lettera di sfida a Kamoshida",
+     "dettaglio": "Confronto e sconfitta dell'Ombra di Kamoshida; primo tesoro materializzato.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-2/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "04-23",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-24",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-25",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Bagno pubblico e lavanderia disponibili",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-3/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-26",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Lavoro part-time al fioraio Rafflesia",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-3/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-27",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-28",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-29",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Giorno festivo in Giappone (Showa Day, riflesso nella guida come giorno senza scuola)",
+     "dettaglio": "Segnalato dalla guida come giorno di scuola sospesa; corrisponde alla Golden Week giapponese.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-3/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "04-30",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-01",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza furto del tesoro di Kamoshida",
+     "dettaglio": "Consigliato completare il Palazzo di Kamoshida entro questa data (vedi anche wikiwiki: scadenza 1 maggio).",
+     "fonte": "https://wikiwiki.jp/persona5r/4%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-02",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Assemblea scolastica: cambio di personalita' di Kamoshida",
+     "dettaglio": "Confessione pubblica; trofeo \"Assedio al castello della lussuria\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    },
+    {
+     "tipo": "festa",
+     "titolo": "Golden Week (vacanze di primavera giapponesi)",
+     "dettaglio": "Periodo festivo giapponese; la guida segnala assenza di scuola nei giorni circostanti.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-03",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Giorno dedicato ad aiutare Sojiro al Leblanc",
+     "dettaglio": "Nessuna scuola.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-04",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-05",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Formazione ufficiale dei Ladri Fantasma",
+     "dettaglio": "Banchetto celebrativo, scelta del nome del gruppo, rivelazione del bersaglio Madarame.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-06",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Mishima (Luna) rango 1 / primo lavoro Beef Bowl Shop",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-07",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Accesso ai Memento (Dedalo di Qimranut)",
+     "dettaglio": "Tutorial Memento, primo miniboss.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-08",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-09",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Toranosuke Yoshida (Sole) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-5/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-10",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-11",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di meta' semestre (1a sessione) - inizio",
+     "dettaglio": "Nessuna attivita' libera nei giorni d'esame.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "05-12",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "05-13",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di meta' semestre (1a sessione) - fine",
+     "dettaglio": "Ultimo giorno della sessione (11-13 maggio secondo la guida esami); presentazione di Takuto Maruki come terapista scolastico.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Takuto Maruki (Consigliere) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-5/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "05-14",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Risultati esami e introduzione di Yusuke Kitagawa",
+     "dettaglio": "Scoperta del segreto di Madarame.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-5/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-15",
+   "giornoSettimana": "Domenica",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-16",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Inizio esplorazione del Palazzo di Madarame",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-6/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-17",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-18",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Decisione: rubare il cuore di Madarame entro il 5 giugno",
+     "dettaglio": "Scadenza lettera di sfida fissata al 2 giugno (dato dalla guida; vedi discrepanza nel rapporto).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-6/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-19",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Gemelle Custodi (Forza) rango 1",
+     "dettaglio": "Sblocca la Ghigliottina di Gruppo nei Memento.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-6/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-20",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-21",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-22",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-23",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-24",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-25",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-26",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-27",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-28",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-29",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-30",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Evento pulizia del parco (obbligatorio) / primo incontro con Kasumi Yoshizawa",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-7/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Kasumi Yoshizawa (Fede) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-7/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "05-31",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Invio della lettera di sfida a Madarame (secondo la guida IT)",
+     "dettaglio": "Nota: un'altra pagina della guida indica il 2 giugno come scadenza per l'invio; discrepanza segnalata nel rapporto.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-7/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-01",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Furto del cuore di Madarame",
+     "dettaglio": "Boss: Ichiryusai Azazel Madarame. Yusuke si unisce ufficialmente ai Ladri Fantasma.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-8/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-02",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-03",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-04",
+   "giornoSettimana": "Sabato",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-05",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Confessione pubblica di Madarame",
+     "dettaglio": "Trofeo \"Sequestro del Museo della Vanita'\"; rivelazione del terzo bersaglio, Junya Kaneshiro.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-8/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Kichijoji (nuova zona) e Stanza di Velluto a Kichijoji",
+     "dettaglio": "Freccette e biliardo disponibili.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-8/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-06",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Sadayo Kawakami (Temperanza) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-9/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-07",
+   "giornoSettimana": "Martedi",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-08",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Abilita' Isolamento (allenamento Personae in cella)",
+     "dettaglio": "Sbloccata tramite il Confidente Gemelle Custodi (Forza).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-9/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-09",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Gita all'emittente televisiva e primo incontro con Goro Akechi",
+     "dettaglio": "Sblocco della zona Suidobashi.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-9/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-10",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Goro Akechi (Giustizia) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-9/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-11",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-12",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-13",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Makoto Niijima incarica il gruppo di investigare sulla mafia di Kaneshiro",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-14",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-15",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Sistema faccende domestiche di Kawakami (caffe' e bucato)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-16",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-17",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Yusuke Kitagawa (Imperatore) rango 1",
+     "dettaglio": "Prima uscita ai Memento.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-18",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Scoperta del nome del bersaglio: Junya Kaneshiro",
+     "dettaglio": "Incontro con la reporter Ichiko Ohya al bar Crossroads.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Zona Shinjuku disponibile",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-19",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Scoperta dell'estensione del Palazzo di Kaneshiro su tutto il quartiere",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-20",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Kaneshiro ricatta il gruppo: 3 milioni di yen in 3 settimane",
+     "dettaglio": "Makoto Niijima si unisce al gruppo (Queen); prima infiltrazione nel Palazzo di Kaneshiro.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-11/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-21",
+   "giornoSettimana": "Martedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Zona Shinjuku (fioraio, libreria) e Memento con richieste aperte",
+     "dettaglio": "La guida IT non conferma esplicitamente in questa data lo sblocco nominale dell'\"Allarme delle fusioni\": il sistema si lega al rango 1 del Confidente Gemelle Custodi (Forza, ottenuto il 19/5), non a una data fissa; vedi rapporto.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-11/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-22",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-23",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Chihaya Mifune disponibile (veggente a Shinjuku)",
+     "dettaglio": "Non ancora Confidente formale in questa data.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-11/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-24",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-25",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Infiltrazione del Palazzo di Kaneshiro fino al Tesoro",
+     "dettaglio": "Makoto assume il nome in codice \"Queen\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-11/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-26",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-27",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Battaglia contro l'Ombra di Kaneshiro (Junya Bael Kaneshiro)",
+     "dettaglio": "Furto del tesoro del Palazzo di Kaneshiro.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-12/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-28",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-29",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "06-30",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza pagamento/minaccia Kaneshiro (3 milioni di yen)",
+     "dettaglio": "Data limite indicata dalla guida per la vicenda Kaneshiro.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-11/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-01",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-02",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Hifumi Togo (Stella) rango 1",
+     "dettaglio": "Incontro a Kanda.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-12/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-03",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-04",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-05",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Ichiko Ohya (Diavolo) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-13/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-06",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-07",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Tanabata (festa delle stelle)",
+     "dettaglio": "Domande scolastiche a tema Tanabata e somen.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-13/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-08",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-09",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza risveglio del cuore di Kaneshiro",
+     "dettaglio": "Riunione dei Ladri Fantasma dopo la vittoria.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-13/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Sae Niijima (Giudizio) rango 1",
+     "dettaglio": "Incontro in carcere.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-13/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-10",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-11",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-12",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-13",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di fine semestre (1a sessione) - inizio",
+     "dettaglio": "Nessuna attivita' libera 13-15 luglio.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "07-14",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "07-15",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di fine semestre (1a sessione) - fine",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "07-16",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Il dottor Maruki propone ai Ladri Fantasma di risvegliare i cuori",
+     "dettaglio": "Sviluppo narrativo significativo per la trama di Maruki.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-14/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-17",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Festival estivo",
+     "dettaglio": "Incontro con Kasumi; preparativi per il 18 luglio.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-14/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-18",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Festival estivo (prosecuzione)",
+     "dettaglio": "Medjed dichiara guerra ai Ladri Fantasma.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-15/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-19",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Risultati esami",
+     "dettaglio": "\"Siamo tra i primi dieci\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-15/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-20",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-21",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Rivelazione: Alibaba e' Futaba Sakura",
+     "dettaglio": "Scoperta che vive vicino a Yongen-Jaya.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-15/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-22",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-23",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-24",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Medjed minaccia un attacco per il 21 agosto",
+     "dettaglio": "Annuncio riportato durante la settimana.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-15/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Sae Niijima (Giudizio) rango 2",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-15/"
+    },
+    {
+     "tipo": "festa",
+     "titolo": "Fine anno scolastico / inizio vacanze estive (indicativo)",
+     "dettaglio": "La guida colloca l'inizio delle vacanze estive intorno al 24 luglio (fonte wikiwiki: \"inizio estate\").",
+     "fonte": "https://wikiwiki.jp/persona5r/7%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-25",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Decisione di infiltrarsi nel Palazzo di Futaba",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-16/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-26",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Il ritrovo dei Ladri Fantasma si sposta al Leblanc",
+     "dettaglio": "Makoto entra formalmente come Confidente Papessa rango 1.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-16/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-27",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Giornata Memento con pioggia torrenziale",
+     "dettaglio": "Giorno dedicato interamente all'esplorazione dei Memento (6 richieste).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-16/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "07-28",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-29",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Chihaya Mifune (Fortuna) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-16/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-30",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "07-31",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-01",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Pioggia (acquazzone improvviso)",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Giornata interamente dedicata al Palazzo di Futaba (Tesoro)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-17/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-02",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno (isola di calore)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-03",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia (acquazzone)",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Tappe verso la fermata dei piani di Medjed",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-17/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-04",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-05",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-06",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-07",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-08",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Tae Takemi (Morte) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-18/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-09",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-10",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-11",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Pioggia/Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Bon (Obon) - periodo estivo",
+     "dettaglio": "Non confermato esplicitamente dalla guida IT come festivita' nominata; segnalato come possibile riferimento nel rapporto.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-18/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-12",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-13",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-14",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Doti sociali: Fascino al livello massimo (\"Irresistibile\")",
+     "dettaglio": "Raggiunto tramite il Confidente Toranosuke Yoshida.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-18/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-15",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Junichi Iwai (Appeso) rango 1",
+     "dettaglio": "Negozio di softair.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-19/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-16",
+   "giornoSettimana": "Martedi",
+   "meteo": "Pioggia/Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-17",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-18",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Pioggia/Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-19",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Termine consigliato per completare il Palazzo di Futaba",
+     "dettaglio": "Indicato dalla guida come limite prima della minaccia Medjed del 21 agosto (vedi anche wikiwiki: scadenza invio 20/8).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-16/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Yusuke Kitagawa (Imperatore) rango massimo (10)",
+     "dettaglio": "Seconda evoluzione Persona (Kamu Susano-o).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-19/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-20",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-21",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Risoluzione della crisi Medjed",
+     "dettaglio": "Giorno critico della trama; l'attacco hacker minacciato viene sventato.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-19/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Nuovo membro del gruppo (Futaba Sakura)",
+     "dettaglio": "Ingresso ufficiale nel party dopo la crisi Medjed.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-19/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-22",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-23",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-24",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-25",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Toranosuke Yoshida (Sole) rango massimo (10)",
+     "dettaglio": "Fascino al livello massimo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-20/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-26",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-27",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Pioggia",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Riunione degli amici al Leblanc (senza Ann e Makoto)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-20/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-28",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-29",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Gita in spiaggia con tutto il gruppo",
+     "dettaglio": "Nuovo nome in codice per Futaba.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-20/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-30",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno (notte torrida)",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "08-31",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Zona Akihabara disponibile",
+     "dettaglio": "Confidente Futaba Sakura (Eremita) rango 1.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-20/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-01",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Ripresa delle lezioni scolastiche (secondo semestre)",
+     "dettaglio": "Confidente Sadayo Kawakami raggiunge il rango massimo (10).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-21/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-02",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-03",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Riparazione del laptop di Futaba / accesso a \"Affari loschi di Tanaka\"",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-21/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-04",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-05",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-06",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-07",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Viaggio scolastico alle Hawaii - inizio",
+     "dettaglio": "Scene obbligatorie, nessun tempo libero (7-8 settembre).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-21/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "09-08",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "09-09",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-10",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-11",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Ritorno dal viaggio alle Hawaii",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-21/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "09-12",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-13",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Assemblea scolastica: annuncio della morte/dipartita del preside",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-22/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-14",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-15",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Primo accesso al Palazzo di Okumura",
+     "dettaglio": "Scoperta dei metodi di gestione della forza lavoro.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-22/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-16",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-17",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-18",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza fissata per il Palazzo di Okumura: 10 ottobre",
+     "dettaglio": "Colazione con Haru e Futaba; Haru rischia di essere venduta in matrimonio.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-22/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-19",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-20",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-21",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-22",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Equinozio d'autunno (Shubun no hi)",
+     "dettaglio": "Festa nazionale giapponese segnalata dalla guida come 23 settembre (possibile scarto di un giorno rispetto al calendario reale 2016, che la colloca il 22; vedi rapporto).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-23/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-23",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-24",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Pesca al Laghetto di Ichigaya disponibile",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-23/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-25",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-26",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-27",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Ichiko Ohya (Diavolo) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-24/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-28",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-29",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "09-30",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Massimizzazione delle doti sociali possibile (percorso guida 100%)",
+     "dettaglio": "Trofeo d'argento \"Perfezione pura\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-24/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-01",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Negozi: nuovi articoli/corso super avanzato disponibili dal 1 ottobre",
+     "dettaglio": "Segnalato sia da allgamestaff sia da wikiwiki (rifornimento negozi + \"corso super avanzato\").",
+     "fonte": "https://wikiwiki.jp/persona5r/10%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-02",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-03",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Evento obbligatorio nel Metaverso con Kasumi",
+     "dettaglio": "Dungeon sconosciuto, boss \"Organismo sintetico malvagio\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-25/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-04",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Prima infiltrazione nel Palazzo di Okumura",
+     "dettaglio": "Haru Okumura si unisce ufficialmente al gruppo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-25/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-05",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-06",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-07",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-08",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-09",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-10",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza Palazzo di Okumura",
+     "dettaglio": "Scontro decisivo con l'Ombra di Okumura; infarto di Okumura reso pubblico.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-11",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Confinamento serale al Leblanc",
+     "dettaglio": "11-13 ottobre: non e' possibile uscire la sera.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-12",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-13",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Popolarita' dei Ladri Fantasma in calo",
+     "dettaglio": "Riunione al ritrovo; nuova richiesta pericolosa da Mishima.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-14",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-15",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-16",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-17",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Pioggia",
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di meta' semestre (2a sessione) - inizio",
+     "dettaglio": "Nessuna attivita' libera 17-19 ottobre.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-18",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-19",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di meta' semestre (2a sessione) - fine",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-20",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-21",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "La polizia interroga gli studenti a scuola",
+     "dettaglio": "Riunione obbligatoria; confinamento serale al Leblanc.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-27/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "10-22",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Intervento televisivo di Akechi",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-27/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-23",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-24",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-25",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Festival della Cultura scolastico - primo giorno",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-26",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Festival della Cultura scolastico - secondo giorno",
+     "dettaglio": "Akechi ospite d'onore.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-27",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-28",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Primo accesso al Palazzo di Niijima (Casino')",
+     "dettaglio": "Interrogatorio di Sae; confinamento al Leblanc.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-29",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza annunciata per il Palazzo di Niijima: 20 novembre",
+     "dettaglio": "Akechi riceve il nome in codice \"Crow\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-30",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "10-31",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Halloween",
+     "dettaglio": "Non esplicitamente festeggiato nella narrazione secondo la guida IT.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Haru Okumura (Imperatrice) rango 1",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-01",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Maruki lascera' la scuola il 18 novembre",
+     "dettaglio": "Avviso riportato dalla guida: raggiungere il rango 9 del Confidente Consigliere entro due settimane.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-29/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-02",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-03",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-04",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-05",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-06",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Gemelle Custodi (Forza) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-29/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-07",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-08",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-09",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-10",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Shinya Oda (Torre) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-30/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-11",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-12",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-13",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Inizio infiltrazione del Palazzo di Sae Niijima",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-30/"
+    },
+    {
+     "tipo": "festa",
+     "titolo": "Inizio della stagione influenzale",
+     "dettaglio": "Segnalata dalla guida come evento speciale del calendario.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-30/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-14",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Infiltrazione finale del Palazzo di Niijima",
+     "dettaglio": "Completamento del Piano delle Puntate Alte e accesso alla Direzione.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-15",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-16",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Pioggia/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-17",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Futaba Sakura (Eremita) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-18",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Ultimo giorno di Maruki a scuola",
+     "dettaglio": "Invio della lettera di sfida al Palazzo di Niijima.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/"
+    },
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Takuto Maruki (Consigliere) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-19",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Battaglia finale contro l'Ombra di Sae Niijima (Sae Leviathan)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-20",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza finale Palazzo di Niijima / interrogatorio conclusivo",
+     "dettaglio": "Confidente Sae Niijima (Giudizio) raggiunge il rango massimo (10).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-21",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Rivelazione: Shido e' il prossimo obiettivo (\"Palazzo della Dieta\")",
+     "dettaglio": "Confinamento al Leblanc per motivi di sicurezza (21-23 novembre).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-32/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "11-22",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "11-23",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "11-24",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Accesso ufficiale al Palazzo di Shido nella Dieta",
+     "dettaglio": "Necessarie 5 lettere di raccomandazione da VIP ospiti.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-32/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-25",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-26",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-27",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-28",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-29",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "11-30",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-01",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-02",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-03",
+   "giornoSettimana": "Sabato",
+   "meteo": "Neve/Pioggia",
+   "eventi": [
+    {
+     "tipo": "meteo",
+     "titolo": "Prima nevicata segnalata dalla guida IT",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-33/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-04",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-05",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-06",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-07",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-08",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Stagione influenzale (dicembre)",
+     "dettaglio": "Menzionata dalla guida, con effetto ridotto rispetto a Persona 5 originale.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-33/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-09",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-10",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-11",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Giorno principale dell'infiltrazione nel Palazzo di Shido",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-33/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-12",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Invio della lettera di sfida a Shido",
+     "dettaglio": "Battaglia contro il boss (Bestia, Ali, Tomba, poi Shido in due fasi).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-34/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-13",
+   "giornoSettimana": "Martedi",
+   "meteo": "Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-14",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-15",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Neve",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-16",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-17",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Termine consigliato per cambiare il cuore di Shido (elezioni 18 dicembre)",
+     "dettaglio": "Riportato dalla guida come limite del 17 novembre in un passaggio (probabile refuso per 17 dicembre, vedi rapporto) legato alle elezioni del 18/12.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-32/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-18",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Sconfitta di Shido",
+     "dettaglio": "Trofeo di bronzo; riunione della squadra al Leblanc.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-34/"
+    },
+    {
+     "tipo": "festa",
+     "titolo": "Elezioni generali (Sousenkyo)",
+     "dettaglio": "Riferimento riportato dalla guida/wiki al giorno delle elezioni.",
+     "fonte": "https://wikiwiki.jp/persona5r/12%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-19",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Ritorno a scuola con sessione di studio di gruppo",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-35/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-20",
+   "giornoSettimana": "Martedi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di fine semestre (2a sessione) - inizio",
+     "dettaglio": "Nessuna attivita' libera 20-22 dicembre.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "12-21",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "12-22",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "esame",
+     "titolo": "Esami di fine semestre (2a sessione) - fine",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "12-23",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Morgana (Mago) rango massimo (10)",
+     "dettaglio": "Secondo Risveglio, Persona Futsunushi.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-35/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-24",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Neve",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Vigilia di Natale",
+     "dettaglio": "Primo della classe a scuola.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-35/"
+    },
+    {
+     "tipo": "storia",
+     "titolo": "Missione \"Ruba il cuore del pubblico\" - Dedalo di Iweleth",
+     "dettaglio": "Scontro con il Santo Graal, rivelazione del vero Igor, fusione di Caroline e Justine in Lavenza.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-35/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-25",
+   "giornoSettimana": "Domenica",
+   "meteo": "Neve",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Natale",
+     "dettaglio": "Party di Natale al Leblanc (fonte wikiwiki).",
+     "fonte": "https://wikiwiki.jp/persona5r/12%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-26",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-27",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-28",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-29",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-30",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "12-31",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Vigilia di Capodanno (Omisoka)",
+     "dettaglio": "Party di fine anno al Leblanc (fonte wikiwiki).",
+     "fonte": "https://wikiwiki.jp/persona5r/12%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-01",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Capodanno (Oshogatsu)",
+     "dettaglio": "Kasumi propone una visita al Santuario Meiji (Hatsumode).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-36/"
+    },
+    {
+     "tipo": "vacanza",
+     "titolo": "Nessun tempo libero",
+     "dettaglio": "Solo eventi di trama scriptati.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-36/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-02",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Accesso al \"Palazzo Misterioso\" (Dedalo/Palazzo di Maruki)",
+     "dettaglio": "Esplorazione con Kasumi e Akechi; tre miniboss.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-36/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-03",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "vacanza",
+     "titolo": "Nessun tempo libero (3-8 gennaio)",
+     "dettaglio": "Ogni giorno dedicato a un incontro obbligatorio con un membro del gruppo sulle distorsioni della realta'.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-36/"
+    }
+   ],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-04",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-05",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-06",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-07",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-08",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso/Neve",
+   "eventi": [],
+   "tempoLibero": {
+    "giorno": false,
+    "sera": false
+   }
+  },
+  {
+   "data": "01-09",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Scontro finale con il dottor Maruki nel suo Palazzo",
+     "dettaglio": "Battaglia contro Sumire/Cenerentola; scelta cruciale sul finale.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-37/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-10",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Inizio del terzo semestre",
+     "dettaglio": "Evoluzione di Morgana in Diego (Trofeo \"Il risveglio dei Ladri Fantasma\").",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-37/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-11",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso/Neve",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-12",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Sumire Yoshizawa entra ufficialmente nel gruppo (\"Violet\")",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-37/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-13",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-14",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-15",
+   "giornoSettimana": "Domenica",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-16",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno/Neve",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-17",
+   "giornoSettimana": "Martedi",
+   "meteo": "Pioggia/Pioggia",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-18",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso/Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-19",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-20",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Pioggia/Neve",
+   "eventi": [
+    {
+     "tipo": "meteo",
+     "titolo": "Giorno di pioggia segnalato dalla guida IT (ideale per i Memento)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-38/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-21",
+   "giornoSettimana": "Sabato",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-22",
+   "giornoSettimana": "Domenica",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-23",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Nuvoloso/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Possibilita' di iniziare una relazione romantica con Sumire Yoshizawa",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-39/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-24",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno/Sereno",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-25",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "sblocco",
+     "titolo": "Confidente Sumire Yoshizawa (Fede) rango massimo (10)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-39/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-26",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Neve/Neve (ondata di gelo)",
+   "eventi": [
+    {
+     "tipo": "meteo",
+     "titolo": "Allerta \"ondata di gelo\" (26-27 gennaio)",
+     "dettaglio": "Effetto speciale: Ombre affette da Congelamento; frequenza/ricompense come meteo sereno/nuvoloso.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+    },
+    {
+     "tipo": "storia",
+     "titolo": "Infiltrazione del Palazzo di Maruki per il Tesoro",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-39/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-27",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Neve/Nuvoloso (ondata di gelo)",
+   "eventi": [
+    {
+     "tipo": "meteo",
+     "titolo": "Allerta \"ondata di gelo\" (26-27 gennaio) - secondo giorno",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-28",
+   "giornoSettimana": "Sabato",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-29",
+   "giornoSettimana": "Domenica",
+   "meteo": "Neve/Neve",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-30",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Neve/Neve",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "01-31",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno/Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-01",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Nuvoloso",
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-02",
+   "giornoSettimana": "Giovedi",
+   "meteo": "Neve",
+   "eventi": [
+    {
+     "tipo": "scadenza",
+     "titolo": "Scadenza per assicurare il percorso verso il Palazzo finale",
+     "dettaglio": "Scelta narrativa cruciale sul finale (vero finale vs finale alternativo).",
+     "fonte": "https://wikiwiki.jp/persona5r/2%E6%9C%88"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-03",
+   "giornoSettimana": "Venerdi",
+   "meteo": "Nuvoloso",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Scontro finale contro il dottor Maruki",
+     "dettaglio": "Boss in quattro fasi (incluso Adam Kadmon); trofeo \"Riprenditi il futuro\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-04",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Sblocco dell'Arcano finale (Il Mondo) nella Stanza di Velluto",
+     "dettaglio": "Salto temporale al 13 febbraio.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-05",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-06",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-07",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-08",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-09",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-10",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-11",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-12",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-13",
+   "giornoSettimana": "Lunedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Ripresa della trama dopo il salto temporale",
+     "dettaglio": "Incontro con Sae Niijima.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-14",
+   "giornoSettimana": "Martedi",
+   "meteo": "Sereno",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "San Valentino",
+     "dettaglio": "Scena romantica serale con il/la partner scelto/a; cioccolatini che ripristinano tutti i punti SP.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-15",
+   "giornoSettimana": "Mercoledi",
+   "meteo": "Neve",
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "Giri choco (cioccolatini di cortesia)",
+     "dettaglio": "Ricevuti dalle Confidenti al rango massimo rimaste \"amiche\".",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-16",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-17",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-18",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-19",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-20",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-21",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-22",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-23",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-24",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-25",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-26",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-27",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "02-28",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-01",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-02",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Riunione della squadra al Leblanc (epilogo)",
+     "dettaglio": "",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-03",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Riunione mattutina della squadra e sviluppi narrativi",
+     "dettaglio": "Messaggio serale di Sumire con foto; balzo temporale al 13 marzo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-04",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-05",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-06",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-07",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-08",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-09",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-10",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-11",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-12",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-13",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Sojiro consiglia di organizzare un appuntamento",
+     "dettaglio": "Prenotazione per il giorno successivo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-14",
+   "giornoSettimana": "Martedi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "festa",
+     "titolo": "White Day",
+     "dettaglio": "Appuntamento romantico obbligatorio (rosa scarlatta dal fioraio del centro commerciale sotterraneo).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-15",
+   "giornoSettimana": "Mercoledi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-16",
+   "giornoSettimana": "Giovedi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-17",
+   "giornoSettimana": "Venerdi",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-18",
+   "giornoSettimana": "Sabato",
+   "meteo": null,
+   "eventi": [],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-19",
+   "giornoSettimana": "Domenica",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Ultimo giorno per interagire con i Confidenti",
+     "dettaglio": "Ogni Confidente al rango massimo offre un regalo speciale utile in New Game+.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/"
+    }
+   ],
+   "tempoLibero": null
+  },
+  {
+   "data": "03-20",
+   "giornoSettimana": "Lunedi",
+   "meteo": null,
+   "eventi": [
+    {
+     "tipo": "storia",
+     "titolo": "Finale del gioco",
+     "dettaglio": "Sequenze conclusive al Leblanc; canone \"Our Light\"; trofei \"La strada che ho scelto\" (oro) e \"Fantasmagorico Ladro Fantasma\" (platino).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/"
+    }
+   ],
+   "tempoLibero": null
+  }
+ ],
+ "settimane": [
+  {
+   "numero": 0,
+   "titolo": "Prologo",
+   "periodo": "09/04 - 10/04",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-prologo/",
+   "riassunto": "Tutorial di fuga dal casino', interrogatorio con Sae Niijima, scelta della difficolta' (permanente se Rilassata) e del doppiaggio (non modificabile). Arrivo a Yongen-Jaya e al Leblanc: Sojiro Sakura spiega la liberta' vigilata di un anno. Il 10/4 si visita la Shujin Academy (tessera studente, incontro con Kawakami e il preside) e si torna al Leblanc; la sera del 10/4 non si puo' uscire. Nessun esame, nessuna festivita', nessun giorno senza tempo libero oltre a quelli guidati dalla trama: e' un tutorial narrativo con scelte perlopiu' ininfluenti.",
+   "incertezze": "Nessuna informazione sul meteo di questi due giorni nella guida IT; non verificato con altre fonti."
+  },
+  {
+   "numero": 1,
+   "titolo": "Settimana 1",
+   "periodo": "11/04 - 17/04",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/",
+   "riassunto": "Tutorial narrativo esteso: scoperta del Metaverso e del Palazzo di Kamoshida, incontro con Ryuji (Confidente Carro, 12/4) e Morgana/Ann (Confidenti Mago e Amanti, 15/4, dopo il salvataggio di Ann e la sconfitta del Capitano della Guardia). Il 16/4 si sblocca la clinica di Tae Takemi; il 17/4 shopping a Central Street e crafting del primo Grimaldello (Perizia +2). Consiglio della guida: negoziare con le Ombre per accumulare Personae varie (Pixie, Bicorno, Jack-o'-Lantern), visitare il negozio di softair, esplorare Shibuya. Nessun esame ne' festivita'; azioni in gran parte guidate fino alla sera del 17/4.",
+   "incertezze": "Meteo non specificato dalla guida IT per questi giorni (integrato da wikiwiki.jp in calendario.json)."
+  },
+  {
+   "numero": 2,
+   "titolo": "Settimana 2",
+   "periodo": "18/04 - 24/04",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-2/",
+   "riassunto": "18/4: tutorial biblioteca, inizio del Confidente Tae Takemi (Morte). 19/4: uscita con Ryuji (rango 2, abilita' 'Bully Talk'). 20/4: inizio dell'infiltrazione seria nel Palazzo di Kamoshida (Ann diventa Panther), visita alla Stanza di Velluto (Igor rango 2, Terzo Occhio). 21/4: prosecuzione dell'esplorazione del Palazzo. 22/4: invio della lettera di sfida, sconfitta dell'Ombra di Kamoshida e furto del tesoro materializzato. 23-24/4: giorni piu' liberi, dettagli non ampiamente coperti dalla guida.",
+   "incertezze": "Dettagli scarsi per il 23 e 24 aprile nella fonte consultata."
+  },
+  {
+   "numero": 3,
+   "titolo": "Settimana 3",
+   "periodo": "25/04 - 30/04",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-3/",
+   "riassunto": "Settimana dedicata a Doti sociali e Confidenti minori: 25/4 sblocco bagno pubblico e lavanderia; 26/4 primo lavoro part-time al fioraio Rafflesia e progressione di Sojiro (Ierofante rango 2); 27-28/4 uscite con Ryuji (fino a rango 4, sblocco 'Sneak Dash'); 29/4 test clinico con Takemi (rango 3, sblocco Sterilizzazione) - la guida segnala questo come giorno scolastico sospeso, coerente con la Golden Week giapponese; 30/4 lettura e attivita' varie. Nessun esame ne' scadenze di trama in questa settimana.",
+   "incertezze": "Non confermato se il 29/4 corrisponda esattamente alla festivita' reale dello Showa Day (29 aprile); la guida non nomina esplicitamente la festivita'."
+  },
+  {
+   "numero": 4,
+   "titolo": "Settimana 4",
+   "periodo": "01/05 - 08/05",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-4/",
+   "riassunto": "1/5 scadenza indicativa per il furto del tesoro di Kamoshida (secondo wikiwiki). 2/5: assemblea scolastica con la confessione pubblica di Kamoshida (trofeo 'Assedio al castello della lussuria'); periodo di Golden Week. 3/5: giornata dedicata ad aiutare Sojiro, niente scuola. 5/5: banchetto celebrativo, scelta del nome del gruppo ('Ladri Fantasma'), rivelazione del prossimo bersaglio Ichiryusai Madarame; Igor sale a rango 3 (Matto), sbloccata la Riserva Extra (8 Personae). 6/5: nuovo Confidente Mishima (Luna, rango 1), primo lavoro al Beef Bowl Shop, uscita con Ann (Amanti rango 2). 7/5: primo accesso ai Memento (Dedalo di Qimranut), tutorial completo, incontro con Jose. 8/5: Mishima rango 2.",
+   "incertezze": "Nessuna festivita' nazionale esplicitamente nominata oltre alla Golden Week generica; meteo non specificato dalla guida IT (integrato da wikiwiki)."
+  },
+  {
+   "numero": 5,
+   "titolo": "Settimana 5",
+   "periodo": "09/05 - 15/05",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-5/",
+   "riassunto": "9/5: prima richiesta Memento, Ryuji rango 5, incontro serale con Toranosuke Yoshida (Confidente Sole rango 1). 10/5: Ryuji rango 6. 11-13/5: settimana di esami di meta' semestre (nessuna attivita' libera); il 13/5 assemblea scolastica con presentazione di Takuto Maruki, nuovo Confidente Consigliere (rango 1), seduta di terapia che porta subito al rango 2. 14/5: fine esami, risultati basati sulla Conoscenza accumulata, introduzione di Yusuke Kitagawa e scoperta del segreto di Madarame. 15/5: visita alla mostra d'arte con Ann e Yusuke, intervista a Madarame.",
+   "incertezze": "La guida segnala genericamente 'stagione del polline' senza indicare effetti puntuali giorno per giorno; risultati esami annunciati indicativamente il 20/5 secondo un passaggio della guida."
+  },
+  {
+   "numero": 6,
+   "titolo": "Settimana 6",
+   "periodo": "16/05 - 22/05",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-6/",
+   "riassunto": "16/5: inizio esplorazione del Palazzo di Madarame (museo). 17/5: Ann posa per Yusuke; il ritrovo si sposta al Corridoio dell'Edificio Teikyu a Shibuya. 18/5: incontro con Nakanohara, conferma dei crimini di Madarame; il gruppo fissa la scadenza del furto al 5 giugno e della lettera di sfida al 2 giugno (v. nota discrepanza). Rango Takemi 4. 19/5: seconda infiltrazione, sblocco del Confidente Gemelle Custodi (Forza, rango 1, Ghigliottina di Gruppo); Yusuke accetta di unirsi al gruppo. 20/5: pubblicazione dei voti; esecuzione del piano nel Palazzo, Yusuke si unisce ufficialmente. 21/5: uscita con Ann (rango 3). 22/5: uscite con Takemi (rango 5) e Yoshida (rango 2).",
+   "incertezze": "Le date di scadenza citate nella guida (2/6 lettera di sfida, 5/6 furto) risultano in parte in contraddizione con quanto riportato nella Settimana 7 (31/5 come giorno d'invio); vedi rapporto.md."
+  },
+  {
+   "numero": 7,
+   "titolo": "Settimana 7",
+   "periodo": "23/05 - 31/05",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-7/",
+   "riassunto": "23-26/5: uscite con Ann, Takemi e Ryuji (fino a rango 7 Carro, sblocco 'Uccisione istantanea'); 24/5 annuncio della pulizia del parco per il 30/5. 27/5: esplorazione completa del Palazzo di Madarame, acquisizione dei 3 Semi della Bramosia, individuazione del percorso verso il Tesoro. 28-29/5: progressione di Takemi (rango 7) e Yoshida (rango 3). 30/5: evento obbligatorio di pulizia del parco, primo incontro con Kasumi Yoshizawa (salvata da un molestatore, Confidente Fede rango 1). 31/5: invio della lettera di sfida a Madarame (secondo questa pagina della guida).",
+   "incertezze": "Discrepanza sulla data di invio della lettera di sfida rispetto alla Settimana 6 (vedi rapporto.md)."
+  },
+  {
+   "numero": 8,
+   "titolo": "Settimana 8",
+   "periodo": "01/06 - 05/06",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-8/",
+   "riassunto": "1/6: furto del cuore di Madarame, boss Ichiryusai Azazel Madarame, crollo del Palazzo, Yusuke si unisce ufficialmente. Igor rango 4, Morgana rango 3. 2/6: nuova richiesta Memento, uscite con Ryuji e Sojiro (rango 4 Ierofante, sblocco Curry del Leblanc). 3/6: operazione 'Guardia MAIDica', scoperta che Kawakami lavora come cameriera; Ryuji rango 8. 4/6: Ryuji rango 9 (sblocco 'Baluardo'); contatti di lavoro di Kawakami ottenuti. 5/6: confessione pubblica di Madarame, rivelazione del terzo bersaglio Junya Kaneshiro; sblocco di Kichijoji (pass ferroviario, Stanza di Velluto, freccette e biliardo).",
+   "incertezze": "Nessuna in particolare; settimana ben documentata dalla guida."
+  },
+  {
+   "numero": 9,
+   "titolo": "Settimana 9",
+   "periodo": "06/06 - 12/06",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-9/",
+   "riassunto": "6/6: incontro con Kasumi sotto la pioggia. 7/6: Ryuji raggiunge il rango massimo (10, Secondo Risveglio, Persona Seiten Taisei). 8/6: sblocco dell'abilita' Isolamento tramite le Gemelle Custodi; nuovo Confidente Sadayo Kawakami (Temperanza rango 1); uscita con Kasumi (rango 2). 9/6: gita all'emittente televisiva, primo incontro con Goro Akechi, sblocco di Suidobashi. 10/6: diretta TV con Akechi; nuovo Confidente Akechi (Giustizia rango 1). 11/6: Yusuke si trasferisce al Leblanc; Igor rango 5 (Riserva Super). 12/6: nuovo mercante Sakai a Kichijoji (scambio disponibile 12-17/6); uscite con Ann e Yoshida (rango 5, Manipolazione).",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 10,
+   "titolo": "Settimana 10",
+   "periodo": "13/06 - 19/06",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-10/",
+   "riassunto": "13/6 (pioggia): Makoto incarica il gruppo di investigare sulla mafia per proteggere gli studenti ricattati. 14/6: primo nome della lista, 'Iida-kun'. 15/6: sblocco delle faccende domestiche con Kawakami (rango 3). 16/6: investigazione a Central Street, incontro con Makoto in un vicolo. 17/6: karaoke di gruppo, contatto con la reporter Ichiko Ohya; prima uscita con Yusuke (Confidente Imperatore rango 1, sblocco duplicazione carte abilita'). 18/6: visita a Shinjuku, Ohya rivela il nome del bersaglio, Junya Kaneshiro. 19/6: scoperta che il Palazzo si estende su tutto il quartiere di Shibuya.",
+   "incertezze": "Nessuna in particolare; la scadenza dell'investigazione ('due settimane dal 13/6') e' generica."
+  },
+  {
+   "numero": 11,
+   "titolo": "Settimana 11",
+   "periodo": "20/06 - 26/06",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-11/",
+   "riassunto": "20/6: Kaneshiro ricatta il gruppo per 3 milioni di yen in 3 settimane; Makoto si unisce come Queen; prima infiltrazione nel Palazzo di Kaneshiro. 21/6: sblocco di Shinjuku (fioraio, libreria) e dei Memento con richieste aperte; Jose introduce timbri e fiori. 22/6: giornata Memento con diversi miniboss nei Dedali di Aiyatsbus e Chemdah. 23/6: uscita con Yusuke (rango 2); Chihaya Mifune appare per la prima volta a Shinjuku (veggente, non ancora Confidente formale). 24/6: uscita con Maruki (rango 4). 25/6: infiltrazione del Palazzo di Kaneshiro fino al Tesoro. 26/6: giorno di completamento/preparazione della lettera di sfida.",
+   "incertezze": "La guida non nomina esplicitamente un 'Allarme delle fusioni' legato a questa data: il sistema risulta legato al rango 1 del Confidente Gemelle Custodi (Forza), ottenuto gia' il 19/5 secondo la Settimana 6. Vedi rapporto.md."
+  },
+  {
+   "numero": 12,
+   "titolo": "Settimana 12",
+   "periodo": "27/06 - 03/07",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-12/",
+   "riassunto": "27/6: battaglia contro l'Ombra di Kaneshiro (Junya Bael Kaneshiro); furto del tesoro. Morgana rango 5, Igor rango 6. 28/6: uscita con Ann (rango 6). 30/6: uscita con Yusuke a Ueno (rango 3), sblocco della zona Ueno. 1/7: rango Conoscenza avanza a 'Dotto'; uscite con Maruki (rango 5) e Kawakami (rango 6, 'Domestica Tuttofare'). 2/7: nuovo Confidente Hifumi Togo (Stella rango 1) a Kanda. 3/7: vendita dei tesori del Palazzo di Kaneshiro, cena con Yoshida (rango 6).",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 13,
+   "titolo": "Settimana 13",
+   "periodo": "04/07 - 10/07",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-13/",
+   "riassunto": "4/7: Yusuke rivela un nuovo tema artistico sulla sofferenza (rango 5); uscita con Mishima (rango 3). 5/7: scoperta del nuovo bersaglio Memento Yoshimori Sakoda; nuovo Confidente Ichiko Ohya (Diavolo rango 1). 7/7 (Tanabata): domande scolastiche a tema; uscita con Kasumi (rango 4). 8/7: uscita con Ann (rango 7), nuovo punto di ritrovo Asakusa-Osiage. 9/7: scadenza/risveglio del cuore di Kaneshiro, riunione post-vittoria; incontro con Sae Niijima in carcere, nuovo Confidente Giudizio rango 1. 10/7: Sojiro lascia Akira a gestire il Leblanc; si discute del festival dei fuochi d'artificio.",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 14,
+   "titolo": "Settimana 14",
+   "periodo": "11/07 - 17/07",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-14/",
+   "riassunto": "11/7: incontro con Akechi sui Ladri Fantasma; Mishima rango 5. 12/7: partita a biliardo a Kichijoji. 13-15/7: seconda sessione di esami (esami di fine semestre, nessuna attivita' libera). 16/7: fine esami; il dottor Maruki propone ai Ladri Fantasma di risvegliare i cuori delle persone (svolta narrativa importante); riunione per organizzare il festival del 18/7. 17/7: festival estivo, uscita con Yoshida (rango 7).",
+   "incertezze": "Nessuna in particolare; date esami confermate anche dalla pagina dedicata 'Interrogazioni ed Esami'."
+  },
+  {
+   "numero": 15,
+   "titolo": "Settimana 15",
+   "periodo": "18/07 - 24/07",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-15/",
+   "riassunto": "18/7: festival estivo, Medjed dichiara guerra ai Ladri Fantasma. 19/7: risultati esami ('tra i primi dieci'); Kawakami rango 8. 20/7: minaccioso messaggio dall'utente 'Alibaba'. 21/7: rivelazione che Alibaba e' Futaba Sakura, residente vicino a Yongen-Jaya. 22/7: conferma che Sojiro compra cibo per tre persone. 23/7: riunione di gruppo, contatto di Alibaba. 24/7: Medjed annuncia la minaccia per il 21 agosto; Sae Niijima rango 2.",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 16,
+   "titolo": "Settimana 16",
+   "periodo": "25/07 - 31/07",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-16/",
+   "riassunto": "25/7: decisione di infiltrarsi nel Palazzo di Futaba (Morgana rango 6). 26/7: il ritrovo si sposta definitivamente al Leblanc; Makoto entra come Confidente Papessa rango 1. 27/7: giornata intera nei Memento con pioggia torrenziale (6 richieste). 28/7: Kasumi rango 5 (temporaneo, fino a gennaio), Kawakami rango 9. 29/7: Takemi rango 8, Ohya rango 2, primo incontro con Chihaya Mifune come Confidente Fortuna (rango 1). 30-31/7: progressione di Chihaya (rango 2) e preparazione per agosto. La guida indica il 19-20 agosto come limite per completare il Palazzo di Futaba prima della minaccia Medjed del 21/8.",
+   "incertezze": "La guida segnala che 'Kasumi non potra' salire di rango oltre il 5 fino a gennaio': meccanica narrativa bloccante, da verificare in gioco."
+  },
+  {
+   "numero": 17,
+   "titolo": "Settimana 17",
+   "periodo": "01/08 - 07/08",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-17/",
+   "riassunto": "1/8: giornata intera dedicata al raggiungimento del Tesoro nel Palazzo di Futaba. La guida fornita copre in dettaglio solo questo giorno per la settimana; i restanti giorni (2-7/8) non sono ampiamente documentati nella sezione consultata, oltre a un riferimento generico al 3/8 su 'fermare i piani di Medjed'.",
+   "incertezze": "Copertura incompleta per 2-7 agosto nella fonte consultata; integrare con altre settimane/wikiwiki se necessario."
+  },
+  {
+   "numero": 18,
+   "titolo": "Settimana 18",
+   "periodo": "08/08 - 14/08",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-18/",
+   "riassunto": "8/8: Takemi raggiunge il rango massimo (10, Morte); Hifumi rango 2. 9-10/8: uscite con Yusuke, Chihaya e Ann (rango massimo Amanti il 10/8). 11/8 (pioggia): lavoro al fioraio, raccolta di informazioni su un aggressore. 12/8: lavoro al minimarket. 13/8: uscite con Yusuke e Akechi (rango 3 Giustizia). 14/8: Big Bang Burger Challenge; Yoshida raggiunge il rango massimo (10) e il Fascino tocca il livello massimo ('Irresistibile').",
+   "incertezze": "Nessuna festivita' (es. Obon) nominata esplicitamente dalla guida per questo periodo, nonostante la collocazione temporale plausibile a meta' agosto."
+  },
+  {
+   "numero": 19,
+   "titolo": "Settimana 19",
+   "periodo": "15/08 - 21/08",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-19/",
+   "riassunto": "15/8 (pioggia): Big Bang Burger completato; nuovo Confidente Junichi Iwai (Appeso rango 1) al negozio di softair. 16-17/8: Yusuke rango 8-9; Chihaya rango 7; jazz club con Akechi (rango 4). 18/8: ricerca del nome 'Yuichi Fukurai' per una richiesta Memento. 19/8: Yusuke raggiunge il rango massimo (10, Kamu Susano-o); lavoro serale al Crossroads di Shinjuku. 20/8: uscita con Makoto (rango 2) e Yoshida (rango 9). 21/8: risoluzione della crisi Medjed, incontro con Sojiro, ingresso implicito di un nuovo alleato.",
+   "incertezze": "Nessuna in particolare; giorno del 21/8 confermato come scadenza chiave da piu' fonti."
+  },
+  {
+   "numero": 20,
+   "titolo": "Settimana 20",
+   "periodo": "22/08 - 31/08",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-20/",
+   "riassunto": "22/8: riunione post-Medjed al Leblanc; Ohya rango 4, Igor rango 7. 23-26/8: Futaba entra in scena progressivamente (socializza con Ann e Ryuji, inizia a lavorare al bar); Akechi rango 5, Ohya rango 5-6, Yoshida raggiunge il rango massimo (10, Fascino al massimo). 27/8 (pioggia): riunione degli amici senza Ann e Makoto; Iwai rango 2. 28/8: lavoro con Futaba e Sojiro, interruzione di Akechi. 29/8: gita in spiaggia con tutto il gruppo, nuovo nome in codice per Futaba; Ohya rango 7, Morgana rango 7. 30/8: giornata con Ryuji, pettegolezzi su Yoshizawa. 31/8: sblocco di Akihabara; nuovo Confidente Futaba Sakura (Eremita rango 1); Igor rango 8 (Riserva Ultra, 12 Personae).",
+   "incertezze": "Meteo generale indicato come 'estate calda' dalla guida, con pioggia confermata solo il 27/8."
+  },
+  {
+   "numero": 21,
+   "titolo": "Settimana 21",
+   "periodo": "01/09 - 11/09",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-21/",
+   "riassunto": "1/9: ripresa delle lezioni (secondo semestre); Kawakami raggiunge il rango massimo (10). 2/9: visita ad Akihabara (Maid Cafe', sala giochi); avanzamenti di Futaba e Iwai. 3/9: riparazione del laptop di Futaba, accesso ad 'Affari loschi di Tanaka'. 4/9: uscita con Futaba, Jazz Club. 5/9: cena con Sojiro e Futaba. 6/9: esplorazione completa dei Memento (sei boss nell'area Kaitul, uno in Akzeriyyuth). 7-8/9: viaggio scolastico alle Hawaii (scene obbligatorie, nessun tempo libero). 9/9: ritorno dalla vacanza. 10/9: appuntamento opzionale alle Hawaii. 11/9: ritorno in Giappone.",
+   "incertezze": "Nessun esame in questo periodo; meteo non specificato dalla guida IT per il viaggio alle Hawaii."
+  },
+  {
+   "numero": 22,
+   "titolo": "Settimana 22",
+   "periodo": "12/09 - 18/09",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-22/",
+   "riassunto": "12/9: ritorno dal viaggio, scena notturna con Sae e Makoto. 13/9: assemblea scolastica sulla dipartita del preside; Sae rango 4. 14/9: Futaba richiede il rientro al Leblanc. 15/9: primo accesso al Palazzo di Okumura, scoperta dei metodi di gestione della forza lavoro. 16/9: incontro con una ragazza fuori scuola (scelta libera). 17/9: incontro con Morgana e una nuova alleata nei Memento; Morgana rango 8. 18/9: colazione con Haru e Futaba; scadenza del Palazzo di Okumura fissata al 10 ottobre.",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 23,
+   "titolo": "Settimana 23",
+   "periodo": "19/09 - 25/09",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-23/",
+   "riassunto": "Settimana con 22 giorni residui prima della scadenza del Palazzo di Okumura: la guida consiglia di rimandare l'infiltrazione e concentrarsi su Confidenti e statistiche. Il 23/9 e' segnalata una festa nazionale (Equinozio d'autunno) che influisce sulla disponibilita' dei Confidenti. Focus su Maruki (verso rango 8-9), Makoto, Ohya, Hifumi; sblocco della pesca a Ichigaya il 24/9.",
+   "incertezze": "La data dell'Equinozio d'autunno riportata dalla guida (23/9) differisce di un giorno dal calendario giapponese reale del 2016 (22/9); possibile refuso o calendario di gioco leggermente sfalsato. Vedi rapporto.md."
+  },
+  {
+   "numero": 24,
+   "titolo": "Settimana 24",
+   "periodo": "26/09 - 30/09",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-24/",
+   "riassunto": "26/9: uscite con Shinya (Torre rango 2) e Hifumi (rango 5). 27/9: Ohya raggiunge il rango massimo (10, 'Scoop leggendario'); Makoto rango 5. 28/9: viaggio in treno con lettura; uscita con Futaba (rango 5) e Mishima (rango 7) ad Akihabara. 29/9: uscite con Makoto (rango 6) e Sojiro/Futaba (rango 7). 30/9: completamento delle letture; massimizzazione di tutte le doti sociali secondo il percorso guida (Coraggio raggiunge 'Cuor di leone'), trofeo d'argento 'Perfezione pura'. Nessun giorno completamente bloccato: il Palazzo non viene esplorato in questa settimana per scelta strategica della guida.",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 25,
+   "titolo": "Settimana 25",
+   "periodo": "01/10 - 09/10",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-25/",
+   "riassunto": "1/10: nuovi articoli nei negozi (rifornimento mensile) e 'corso super avanzato' disponibile dal 1 ottobre (confermato anche da wikiwiki); Shinya rango 3, Iwai rango 4. 2/10: scambio speciale con Sakai (2-8/10); Makoto rango 7; Chihaya rango 8. 3/10: evento obbligatorio nel Metaverso con Kasumi (dungeon sconosciuto, boss 'Organismo sintetico malvagio'). 4/10: prima infiltrazione nel Palazzo di Okumura, Haru si unisce ufficialmente al gruppo; sblocco di 5 Safe Room su 8. 5-9/10: giorni parzialmente liberi, non ampiamente dettagliati dalla guida oltre al ritorno al Palazzo il 6/10 per il Tesoro materializzato.",
+   "incertezze": "Copertura incompleta per il 5, 7, 8, 9 ottobre nella fonte consultata."
+  },
+  {
+   "numero": 26,
+   "titolo": "Settimana 26",
+   "periodo": "10/10 - 16/10",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-26/",
+   "riassunto": "10/10: scadenza del Palazzo di Okumura. 11/10: scontro decisivo con l'Ombra di Okumura; accenno all'imminente partenza di Maruki. 12/10: l'infarto di Okumura diventa notizia pubblica; Sae rivela il prossimo obiettivo; confinamento serale al Leblanc. 13/10: calo di popolarita' dei Ladri Fantasma; nuova richiesta pericolosa da Mishima su un assassino. Consiglio della guida: fare acquisti (DVD, libri, videogiochi) prima dei giorni di confinamento e completare gli scambi con Sakai (16-22/10).",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 27,
+   "titolo": "Settimana 27",
+   "periodo": "17/10 - 23/10",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-27/",
+   "riassunto": "17-19/10: esami di meta' semestre (seconda sessione), nessuna attivita' libera. 20/10: fine esami; nuovi obiettivi 'Trova il vero colpevole' e 'Sfuggi alla squadra investigativa'. 21/10: la polizia interroga gli studenti a scuola; riunione obbligatoria, confinamento serale. 22/10: intervento televisivo di Akechi; Makoto chiede aiuto per il festival scolastico. 23/10: riunione domenicale, nuovo obiettivo 'Ottieni informazioni su Akechi'.",
+   "incertezze": "Nessuna in particolare; date esami confermate dalla pagina dedicata."
+  },
+  {
+   "numero": 28,
+   "titolo": "Settimana 28",
+   "periodo": "24/10 - 31/10",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-28/",
+   "riassunto": "24/10: risultati esami (primo della classe seguendo la guida); incontro con Akechi al Leblanc. 25-26/10: Festival della Cultura scolastico (Akechi ospite d'onore il secondo giorno); sere di confinamento al Leblanc. 27/10: servizio TV provocatorio. 28/10: interrogatorio da Sae; primo accesso al Palazzo di Niijima (Casino'), miniboss Ose. 29/10: incontro in tribunale a Kasumigaseki; scadenza annunciata per il 20 novembre; Akechi riceve il nome in codice 'Crow'. 30/10: uscite con Shinya e Iwai. 31/10 (Halloween, non celebrato esplicitamente nella narrazione): primo incontro con Haru come Confidente (Imperatrice rango 1).",
+   "incertezze": "Halloween non confermato come evento festeggiato in narrazione, nonostante la data coincidente."
+  },
+  {
+   "numero": 29,
+   "titolo": "Settimana 29",
+   "periodo": "01/11 - 06/11",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-29/",
+   "riassunto": "1/11: richiesta Memento per risvegliare il cuore della madre di Shinya; avviso che Maruki partira' il 18 novembre (obiettivo: rango 9 entro due settimane). 2/11: Futaba rango 7, Akechi rango 7. 3/11: Shinya rango 8, Mishima raggiunge il rango massimo (10). 4/11: battaglia uno-contro-uno con Akechi nei Memento (rango 8). 5/11: Makoto raggiunge il rango massimo (10), Iwai rango 8. 6/11: esplorazione massiccia dei Memento (7 richieste), Gemelle Custodi raggiungono il rango massimo (10). Inizio della stagione influenzale (non specificato il giorno esatto).",
+   "incertezze": "Nessun giorno completamente bloccato; nessuna festivita' nazionale segnalata."
+  },
+  {
+   "numero": 30,
+   "titolo": "Settimana 30",
+   "periodo": "07/11 - 13/11",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-30/",
+   "riassunto": "7/11: Shinya rango 9, Hifumi rango 8. 8/11: Haru rango 2, Iwai rango 9. 9/11: notizie sulla caduta dei Ladri Fantasma; Futaba rango 8, Hifumi rango 9 ('Touryou'). 10/11: Shinya raggiunge il rango massimo (10, 'Tecnica di Oda'); biliardo a Kichijoji (Rango Tecnico 3). 11/11: Haru rango 3; biliardo (Rango Tecnico massimo). 12/11: Futaba rango 9 (scelta Amore/Amicizia, la guida consiglia Amicizia); Hifumi raggiunge il rango massimo (10, 'Sistema Togo'). 13/11: inizio della 'stagione influenzale' e dell'infiltrazione del Palazzo di Sae Niijima (Casino').",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 31,
+   "titolo": "Settimana 31",
+   "periodo": "14/11 - 20/11",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-31/",
+   "riassunto": "14/11: infiltrazione finale del Palazzo di Niijima (Puntate Alte, Arena, Oscura Dimora; 100.000 monete necessarie). 15/11: Haru rango 4. 16/11 (pioggia): lettura e allenamento in palestra. 17/11: Futaba raggiunge il rango massimo (10). 18/11: ultimo giorno di Maruki a scuola; Maruki raggiunge il rango massimo (10); invio della lettera di sfida al Palazzo. 19/11: battaglia finale contro l'Ombra di Sae Niijima (Sae Leviathan). 20/11: interrogatorio finale; Sae Niijima raggiunge il rango massimo (10).",
+   "incertezze": "Nessuna in particolare; nessun giorno completamente bloccato secondo la guida, nonostante la scadenza narrativa incombente."
+  },
+  {
+   "numero": 32,
+   "titolo": "Settimana 32",
+   "periodo": "21/11 - 30/11",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-32/",
+   "riassunto": "21/11: flashback rivelatori; Shido individuato come prossimo obiettivo ('Palazzo della Dieta'); confinamento al Leblanc (21-23/11). 22-23/11: Kawakami copre le assenze scolastiche; scena importante in stazione il 23/11. 24/11: accesso ufficiale al Palazzo di Shido nella Dieta; necessarie 5 lettere di raccomandazione da VIP ospiti. Dal 25/11: liberta' ripresa, focus sul Confidente Haru (verso rango 8 entro il 29/11).",
+   "incertezze": "La scadenza 'cambiare il cuore di Shido' e' riportata come 17 novembre in un passaggio della guida ma sembra un refuso per 17 dicembre, coerente con le elezioni del 18/12 menzionate nella Settimana 33-34. Vedi rapporto.md."
+  },
+  {
+   "numero": 33,
+   "titolo": "Settimana 33",
+   "periodo": "01/12 - 11/12",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-33/",
+   "riassunto": "1-2/12: uscite con Haru (rango 9-10, Imperatrice). 3/12: nevica; giorno libero. 4/12: cura della pianta, jazz club con Futaba. 6-7/12: videogiochi, promemoria della scadenza del Palazzo di Shido; uscita con Futaba ad Akihabara. 8/12: stagione influenzale (la guida nota che ha meno effetto rispetto al gioco originale); uscita con Futaba ad Asakusa e con Ohya a Shinjuku. 9/12: uscita con Yusuke al Santuario Meiji. 10/12: uscita con Makoto a Suidobashi; giorno piovoso. 11/12: giorno principale dell'infiltrazione del Palazzo di Shido (cinque sezioni esplorabili).",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 34,
+   "titolo": "Settimana 34",
+   "periodo": "12/12 - 18/12",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-34/",
+   "riassunto": "12/12: invio della lettera di sfida a Shido; battaglia contro il boss (tre forme preliminari - Bestia, Ali, Tomba - poi Shido in due fasi). 13/12: uscita con Yusuke a Ueno; Chihaya a Jinbocho. 14/12: allenamento in palestra. 15/12: nuove richieste Memento; uscita con Chihaya allo Skytree. 16/12: uscita con Yusuke a Ikebukuro. 17/12: gabbia dell'artiglio ad Akihabara; uscita con Haru a Tsukishima. 18/12: conseguenze della sconfitta di Shido (trofeo di bronzo); riunione della squadra al Leblanc.",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 35,
+   "titolo": "Settimana 35",
+   "periodo": "19/12 - 31/12",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-35/",
+   "riassunto": "19/12: ritorno a scuola con studio di gruppo. 20-22/12: esami di fine semestre (seconda sessione), nessuna attivita' libera. 23/12: riunione strategica al Leblanc; Morgana raggiunge il rango massimo (10, Secondo Risveglio, Persona Futsunushi). 24/12 (Vigilia di Natale): primo della classe a scuola; missione 'Ruba il cuore del pubblico' nel Dedalo di Iweleth, scontro con il Santo Graal (non vincibile), rivelazione del vero Igor, fusione di Caroline e Justine in Lavenza; scelta narrativa cruciale (rifiuto dell'accordo con Igor per il vero finale). 25/12 (Natale): party al Leblanc (fonte wikiwiki). 31/12 (Vigilia di Capodanno): party di fine anno al Leblanc (fonte wikiwiki).",
+   "incertezze": "Dettagli scarsi per il 26-30 dicembre in entrambe le fonti consultate (allgamestaff e wikiwiki)."
+  },
+  {
+   "numero": 36,
+   "titolo": "Settimana 36",
+   "periodo": "01/01 - 08/01",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-36/",
+   "riassunto": "1/1 (Capodanno/Oshogatsu): Kasumi propone una visita al Santuario Meiji (Hatsumode); nessun tempo libero, solo eventi scriptati. 2/1: accesso al 'Palazzo Misterioso' (il futuro Palazzo di Maruki), esplorazione con Kasumi e Akechi, tre miniboss. 3-8/1: ogni giorno e' dedicato a un incontro obbligatorio con un membro del gruppo per discutere le distorsioni della realta' (3/1 Ann, 4/1 Haru, 5/1 Ryuji, 6/1 Yusuke, 7/1 Futaba, 8/1 Makoto); nessun tempo libero in questi giorni.",
+   "incertezze": "Nessuna in particolare; giorni interamente scriptati secondo entrambe le fonti."
+  },
+  {
+   "numero": 37,
+   "titolo": "Settimana 37",
+   "periodo": "09/01 - 15/01",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-37/",
+   "riassunto": "9/1: scontro finale con il dottor Maruki al suo Palazzo; battaglia contro Sumire e la sua Persona 'Cenerentola'; scena narrativa con conseguenze sul finale. 10/1: inizio del terzo semestre; evoluzione di Morgana in Diego; trofeo 'Il risveglio dei Ladri Fantasma'. 11/1: incontro con Lavenza in infermeria; visita serale di Sumire. 12/1: Sumire entra ufficialmente nel gruppo come 'Violet'. 13/1: uscita prioritaria con Sumire; evoluzione della Persona di Ann in 'Celestine'. 14/1: uscita con Ryuji, la cui Persona evolve in 'William'. 15/1: colloquio con Futaba, la cui Persona evolve da Prometeo ad Al Azif.",
+   "incertezze": "Nessuna in particolare."
+  },
+  {
+   "numero": 38,
+   "titolo": "Settimana 38",
+   "periodo": "16/01 - 22/01",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-38/",
+   "riassunto": "16/1: raccolta piante con Haru; uscita con Yusuke, la cui Persona evolve in Gorokichi. 17/1: uscita con Makoto, Persona evoluta in Agnes ('Scacco matto'). 18/1: tempo dedicato a Sumire a Kichijoji (rango 6); freccette (Rango Staffetta 3). 19/1: rifiuto dei Memento con Haru; Sumire rango 7. 20/1 (pioggia, ideale per i Memento): esplorazione dei Memento, sconfitta delle Ombre di Kagami e Minamoto, accesso alla Sala di Controllo Cognitivo. 21/1: uscita con Sumire (rango 8). 22/1: nessuna uscita disponibile; meditazione al tempio, jazz club.",
+   "incertezze": "Nessuna festivita' specificamente menzionata."
+  },
+  {
+   "numero": 39,
+   "titolo": "Settimana 39",
+   "periodo": "23/01 - 31/01",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-39/",
+   "riassunto": "23/1: Sumire rango 9, possibilita' di iniziare una relazione romantica. 24/1: Haru, la cui Persona evolve da Astarte a Lucy ('Life Wall'). 25/1: Sumire raggiunge il rango massimo (10), Persona evoluta in Vanadis. 26-27/1: allerta 'ondata di gelo' (Ombre affette da Congelamento; frequenza/ricompense come meteo sereno/nuvoloso secondo la pagina 'Effetti del meteo'); il 26/1 infiltrazione del Palazzo di Maruki per il Tesoro, Sumire sblocca un attacco di squadra speciale. 28/1: ingresso nei Memento (Dedalo di Da'at). 29-31/1: giorni piu' liberi, conclusione del mese.",
+   "incertezze": "Copertura scarsa per il 27, 29, 30 e 31 gennaio dalla fonte consultata."
+  },
+  {
+   "numero": 40,
+   "titolo": "Settimana 40",
+   "periodo": "01/02 - 15/02",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-40/",
+   "riassunto": "1/2: giorno libero, uscita con Sumire, jazz club. 2/2: dialogo cruciale con il dottor Maruki che determina il finale (scelte per il 'vero finale'); possibile evoluzione della Persona di Akechi in Ervardo. 3/2: scontro finale con il dottor Maruki nel suo Palazzo, boss in quattro fasi (incluso Adam Kadmon), trofeo 'Riprenditi il futuro'. 4/2: eventi automatici, sblocco dell'Arcano 'Il Mondo' nella Stanza di Velluto, salto temporale al 13/2. 13/2: ripresa della trama, incontro con Sae. 14/2 (San Valentino): scena romantica serale con il/la partner scelto/a. 15/2: ricezione dei 'giri choco' (cioccolatini di cortesia) dalle Confidenti al rango massimo rimaste amiche.",
+   "incertezze": "Nessun dettaglio per il periodo 5-12 febbraio: corrisponde a un blocco narrativo continuo secondo wikiwiki, senza indicazioni di meteo o tempo libero."
+  },
+  {
+   "numero": 41,
+   "titolo": "Settimana 41 (Epilogo)",
+   "periodo": "02/03 - 20/03",
+   "url": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-41/",
+   "riassunto": "2/3: riunione della squadra al Leblanc. 3/3: riunione mattutina e sviluppi narrativi; messaggio serale di Sumire con foto ricordo; balzo temporale al 13/3. 13/3: Sojiro consiglia di organizzare un appuntamento, da prenotare per il giorno successivo. 14/3 (White Day): appuntamento romantico obbligatorio (acquisto di una rosa scarlatta al fioraio del centro commerciale sotterraneo). 19/3: ultimo giorno per interagire con i Confidenti; ogni Confidente al rango massimo offre un regalo speciale utile in New Game+. 20/3: finale del gioco, sequenze conclusive al Leblanc, canzone 'Our Light'; trofei 'La strada che ho scelto' (oro) e 'Fantasmagorico Ladro Fantasma' (platino).",
+   "incertezze": "Discrepanza sul giorno della settimana del 20/3 tra la guida IT (indica 'Domenica') e il calcolo deterministico dall'ancora del 9/4 = Sabato (che darebbe Lunedi'); vedi rapporto.md. Nessuna informazione sul meteo per l'intero epilogo."
+  }
+ ]
+}

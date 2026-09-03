@@ -164,6 +164,12 @@ per `ordine` nel seed: upsert, così `domanda_partita` non si perde al reseed), 
 `domandeService.domande(partitaId?)` calcola le prossime domande dalla `data_gioco` della partita (indice aprile→marzo);
 `impostaDomandaFatta` è idempotente e, alla prima spunta, può aggiungere una nota alla Dote Conoscenza (`aggiornaDote`) e registra l'evento.
 
+### Calendario di gioco (Fase 6.3)
+Seed `data/seed/calendario.json` (giorni ed eventi dalla ricerca sulla guida allgamestaff + meteo wikiwiki.jp; lacune dichiarate nel
+rapporto e non colmate). Migrazione 012: `giorno_calendario` (con la settimana della guida calcolata dal periodo «GG/MM - GG/MM»),
+`evento_calendario`, `settimana_guida`, ricaricate integralmente. `calendarioService.calendario(partitaId?, mese?)` restituisce i giorni
+(tutti o del mese), l'«oggi» della partita (`data_gioco`), le prossime scadenze/esami con i giorni mancanti (indice aprile→marzo).
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

@@ -13,6 +13,8 @@ import { GlossarioPage } from './pages/GlossarioPage';
 import { FusionePage } from './pages/FusionePage';
 import { ConfidenteDettaglioPage } from './pages/ConfidenteDettaglioPage';
 import { DomandePage } from './pages/DomandePage';
+import { CalendarioPage } from './pages/CalendarioPage';
+import { GuidaPage } from './pages/GuidaPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -33,7 +35,9 @@ export const router = createBrowserRouter([
       { path: 'fusione', element: <FusionePage /> },
       { path: 'partita', element: <PartitaPage /> },
       { path: 'confidenti/:chiave', element: <ConfidenteDettaglioPage /> },
+      { path: 'guida', element: <GuidaPage /> },
       { path: 'guida/domande', element: <DomandePage /> },
+      { path: 'guida/calendario', element: <CalendarioPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
