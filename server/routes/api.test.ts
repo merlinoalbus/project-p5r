@@ -3,8 +3,10 @@
 // ============================================================
 
 import fs from 'node:fs';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
+import type { AddressInfo } from 'node:net';
 import request from 'supertest';
 import { closeDb, initDb } from '../db/dbService.js';
 import { runMigrations } from '../db/migrationRunner.js';
@@ -260,6 +262,49 @@ describe('API', () => {
       expect((await request(app).get('/api/immagini/arcana/Fool')).status).toBe(404);
       expect(fs.readdirSync(path.join(dataDir, 'immagini', 'arcana'))).toHaveLength(0);
     } finally {
+      (config as { dataDir: string }).dataDir = originale;
+      fs.rmSync(dataDir, { recursive: true, force: true });
+    }
+  });
+
+  it('immagini: importazione da URL (successo, formato rifiutato, 404 remoto, URL non http)', async () => {
+    const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-url-'));
+    const originale = config.dataDir;
+    (config as { dataDir: string }).dataDir = dataDir;
+    const png = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
+    // Server HTTP locale che simula la sorgente remota.
+    const server = http.createServer((req, res) => {
+      if (req.url === '/carta.png') { res.writeHead(200, { 'Content-Type': 'image/png; charset=binary' }); res.end(png); return; }
+      if (req.url === '/pagina.html') { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end('<html></html>'); return; }
+      if (req.url === '/redirect') { res.writeHead(302, { Location: '/carta.png' }); res.end(); return; }
+      res.writeHead(404); res.end();
+    });
+    await new Promise<void>((ok) => server.listen(0, '127.0.0.1', () => ok()));
+    const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    try {
+      const ok = await request(app).post('/api/immagini/confidente/ryuji/da-url').send({ url: `${base}/carta.png` });
+      expect(ok.status).toBe(201);
+      expect(ok.body.data).toMatchObject({ ambito: 'confidente', chiave: 'ryuji', mime: 'image/png', byte: png.length });
+      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'confidente'))).toHaveLength(1);
+      // i redirect vengono seguiti e il file precedente sostituito (un solo file su disco)
+      const redir = await request(app).post('/api/immagini/confidente/ryuji/da-url').send({ url: `${base}/redirect` });
+      expect(redir.status).toBe(201);
+      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'confidente'))).toHaveLength(1);
+      const html = await request(app).post('/api/immagini/confidente/ann/da-url').send({ url: `${base}/pagina.html` });
+      expect(html.status).toBe(400);
+      expect(html.body.error.code).toBe('formato-non-ammesso');
+      const manca = await request(app).post('/api/immagini/confidente/ann/da-url').send({ url: `${base}/nulla.png` });
+      expect(manca.status).toBe(400);
+      expect(manca.body.error).toMatchObject({ code: 'download-fallito' });
+      expect(manca.body.error.message).toMatch(/404/);
+      const ftp = await request(app).post('/api/immagini/confidente/ann/da-url').send({ url: 'ftp://esempio.it/a.png' });
+      expect(ftp.status).toBe(400);
+      expect(ftp.body.error.code).toBe('url-non-valido');
+      expect((await request(app).post('/api/immagini/confidente/ann/da-url').send({ url: 'non-un-url' })).status).toBe(400);
+      // nessun file orfano per i tentativi falliti
+      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'confidente'))).toHaveLength(1);
+    } finally {
+      await new Promise<void>((ok) => server.close(() => ok()));
       (config as { dataDir: string }).dataDir = originale;
       fs.rmSync(dataDir, { recursive: true, force: true });
     }

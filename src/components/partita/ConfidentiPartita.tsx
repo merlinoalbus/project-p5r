@@ -75,7 +75,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
         <span className="text-text-muted">Moltiplicatori attivi:</span>
         <button type="button" className={`chip touch ${esame === 'top10' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-pressed={esame === 'top10'} title="Fra i primi dieci agli ultimi esami: punti ×1,2 fino all'esame successivo">Esami top 10 ×1,2</button>
         <button type="button" className={`chip touch ${esame === 'primo' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-pressed={esame === 'primo'} title="Primo del corso agli ultimi esami: punti ×1,5 fino all'esame successivo">Esami 1º ×1,5</button>
-        <button type="button" className={`chip touch ${invito ? 'chip--attivo' : ''}`} onClick={() => setInvito((v) => !v)} aria-pressed={invito} title="Invito accettato subito via SMS la sera prima: punti ×1,2 sull'uscita">Invito SMS ×1,2</button>
+        <button type="button" className={`chip touch ${invito ? 'chip--attivo' : ''}`} onClick={() => setInvito((v) => !v)} aria-pressed={invito} title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante quell'uscita ×1,2">Invito SMS ×1,2</button>
       </div>
       <p className="m-0 mb-3 text-[12px] text-text-muted">
         Le note mostrate in gioco valgono 5, 10 o 15 punti; il bonus della Persona dello stesso arcano (×1,5) viene proposto in base alla scorta della partita e si può forzare su ogni Confidente.

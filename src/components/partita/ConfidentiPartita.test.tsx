@@ -1,0 +1,93 @@
+// @vitest-environment jsdom
+// ============================================================
+// Test ConfidentiPartita — note della risposta, bonus arcano dalla scorta, soglie, annulla ultimo
+// ============================================================
+
+import { act, render, screen, within } from '@testing-library/react';
+import { ConfidentiPartita } from './ConfidentiPartita';
+import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
+
+const { getConfidentiPartita, aggiornaConfidente, getImmagini } = vi.hoisted(() => ({
+  getConfidentiPartita: vi.fn(),
+  aggiornaConfidente: vi.fn(),
+  getImmagini: vi.fn(),
+}));
+vi.mock('../../services/api', () => ({
+  getConfidentiPartita,
+  aggiornaConfidente,
+  getImmagini,
+  caricaImmagine: vi.fn(),
+  eliminaImmagine: vi.fn(),
+  importaImmagineDaUrl: vi.fn(),
+  urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file`,
+}));
+
+function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
+  return {
+    chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
+    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, personaArcanoInScorta: false, note: '', updatedAt: null,
+    ...sovrascrivi,
+  };
+}
+
+beforeEach(() => {
+  getConfidentiPartita.mockReset();
+  aggiornaConfidente.mockReset();
+  getImmagini.mockReset();
+  getImmagini.mockResolvedValue([]);
+});
+
+describe('ConfidentiPartita', () => {
+  it('propone il bonus arcano dalla scorta e invia note, moltiplicatori e annulla ultimo', async () => {
+    getConfidentiPartita.mockResolvedValue([confidente({ personaArcanoInScorta: true })]);
+    aggiornaConfidente.mockResolvedValueOnce(confidente({ personaArcanoInScorta: true, punti: 15, mancanti: 5 }));
+    render(<ConfidentiPartita partitaId={1} />);
+
+    const chip = await screen.findByRole('button', { name: '×1,5 Persona Carro (in scorta)' });
+    expect(chip).toHaveAttribute('aria-pressed', 'true');
+    // anteprime con bonus: 7,5 / 15 / 22,5; regalo 75; uscita 15
+    expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 1 nota (7,5 punti)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Ryuji Sakamoto: regalo gradito (75 punti)')).toBeInTheDocument();
+
+    await act(async () => { screen.getByLabelText('Ryuji Sakamoto: risposta da 2 note (15 punti)').click(); });
+    expect(aggiornaConfidente).toHaveBeenCalledWith(1, 'ryuji', { noteRisposta: 2, bonusArcano: true, esame: undefined, invito: false } satisfies ModificaConfidente);
+    expect(await screen.findByText(/mancano/)).toHaveTextContent('mancano 5');
+    expect(screen.getByRole('button', { name: /annulla l'ultimo incremento/ })).toHaveTextContent('Annulla ultimo (−15)');
+
+    // esami 1º ×1,5 e invito ×1,2 cumulativi: 5 × 1,5 × 1,5 × 1,2 = 13,5
+    await act(async () => { screen.getByRole('button', { name: 'Esami 1º ×1,5' }).click(); });
+    await act(async () => { screen.getByRole('button', { name: 'Invito SMS ×1,2' }).click(); });
+    expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 1 nota (13,5 punti)')).toBeInTheDocument();
+
+    aggiornaConfidente.mockResolvedValueOnce(confidente({ personaArcanoInScorta: true, punti: 0, mancanti: 20 }));
+    await act(async () => { screen.getByRole('button', { name: /annulla l'ultimo incremento/ }).click(); });
+    expect(aggiornaConfidente).toHaveBeenLastCalledWith(1, 'ryuji', { deltaPunti: -15 });
+  });
+
+  it('senza Persona in scorta il bonus è spento ma forzabile', async () => {
+    getConfidentiPartita.mockResolvedValue([confidente({})]);
+    render(<ConfidentiPartita partitaId={1} />);
+    const chip = await screen.findByRole('button', { name: '×1,5 Persona Carro' });
+    expect(chip).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 3 note (15 punti)')).toBeInTheDocument();
+    await act(async () => { chip.click(); });
+    expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 3 note (22,5 punti)')).toBeInTheDocument();
+  });
+
+  it('distingue passaggi non a punti, Confidenti senza soglie e rango massimo', async () => {
+    getConfidentiPartita.mockResolvedValue([
+      confidente({ rango: 1, puntiNecessari: 0, mancanti: 0 }),
+      confidente({ chiave: 'igor', nome: 'Igor', arcana: 'Fool', arcanaNome: 'Matto', rango: 0, sbloccato: false, puntiNecessari: null, mancanti: null }),
+      confidente({ chiave: 'morgana', nome: 'Morgana', arcana: 'Magician', arcanaNome: 'Mago', rango: 10, puntiNecessari: null, mancanti: null }),
+    ]);
+    render(<ConfidentiPartita partitaId={1} />);
+    expect(await screen.findByText('Il passaggio al rango 2 non dipende dai punti (storia, richiesta o dote sociale).')).toBeInTheDocument();
+    const cards = screen.getAllByRole('listitem');
+    expect(within(cards[1]).queryByText(/Punti verso il rango/)).not.toBeInTheDocument();
+    expect(within(cards[2]).getByText('MAX')).toBeInTheDocument();
+    expect(within(cards[2]).getByLabelText('Rango di Morgana più uno')).toBeDisabled();
+    // rango > 0 → la casella "Sbloccato" non è modificabile; a rango 0 lo è
+    expect(within(cards[0]).getByRole('checkbox')).toBeDisabled();
+    expect(within(cards[1]).getByRole('checkbox')).toBeEnabled();
+  });
+});

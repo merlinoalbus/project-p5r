@@ -50,8 +50,8 @@ export const bodyConfidente = z
     invito: z.boolean().optional(),
     note: z.string().max(2000).optional(),
   })
-  .refine((v) => [v.noteRisposta !== undefined, v.regalo === true, v.uscita === true].filter(Boolean).length <= 1, {
-    message: 'Indicare una sola sorgente di punti fra note della risposta, regalo e uscita.',
+  .refine((v) => [v.noteRisposta !== undefined, v.regalo === true, v.uscita === true, v.deltaPunti !== undefined, v.punti !== undefined].filter(Boolean).length <= 1, {
+    message: 'Indicare una sola sorgente di punti fra note della risposta, regalo, uscita, deltaPunti e punti.',
   });
 
 export const bodyCompendio = z.object({

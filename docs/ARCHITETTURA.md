@@ -128,6 +128,8 @@ livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondi
   il rango successivo con soglie per Confidente (`docs/riferimenti/confidenti-punti.md`), azzerati al cambio di rango; `src/utils/punti.ts` replica la formula per l'anteprima.
 
 ## 8. Build, test, deploy
+- Test (Vitest, 14 file / 62 casi): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+  FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
   radice del pidfile o all'ultimo runtime nostro (mai oltre un `bash` diverso dal pidfile), poi termina l'albero — Linux: SIGTERM,
