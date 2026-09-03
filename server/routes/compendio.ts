@@ -8,6 +8,7 @@ import { domande } from '../services/domandeService.js';
 import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
+import { battaglia } from '../services/battagliaService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -59,6 +60,9 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/battaglia', (_req, res) => {
+  res.json(battaglia());
 });
 router.get('/richieste', validate({ query: queryDomande }), (req, res) => {
   res.json(richieste((req.query as unknown as { partita?: number }).partita));

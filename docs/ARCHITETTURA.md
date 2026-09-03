@@ -183,6 +183,12 @@ in `dettagli`). Migrazione 014: `richiesta` (chiave stabile, bersaglio e ricompe
 `richiesta_partita` (accettata/completata), `dati_guida` (JSON per chiave: «jose», poi «battaglia»). `richiesteService` espone elenco con
 stato, aggiornamento con evento al completamento e i dati di Jose.
 
+### Aiuto in battaglia (Fase 7.3)
+`data/seed/battaglia.json` (generato dalla ricerca su allgamestaff) è salvato in `dati_guida` con chiave «battaglia»; `battagliaService`
+lo restituisce collegando ogni maschera dell'indice delle Ombre alla Persona del compendio (confronto normalizzato su nome inglese e
+italiano). L'indice unisce le tabelle dei Palazzi, le tabelle di negoziazione già nei punti dei dungeon e le Ombre dei Dedali
+(deduplicate per dungeon + maschera).
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

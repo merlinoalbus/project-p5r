@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { BattagliaSeed, CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -52,6 +52,7 @@ interface SeedCompleto {
   calendario: CalendarioSeed;
   dungeon: DungeonSeed[];
   mementos: MementosSeed;
+  battaglia: BattagliaSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -80,6 +81,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     calendario: JSON.parse(contenuti['calendario.json']) as CalendarioSeed,
     dungeon: JSON.parse(contenuti['dungeon.json']) as DungeonSeed[],
     mementos: JSON.parse(contenuti['mementos.json']) as MementosSeed,
+    battaglia: JSON.parse(contenuti['battaglia.json']) as BattagliaSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -345,6 +347,10 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     });
     for (const r of db.prepare('SELECT chiave FROM richiesta').all() as Array<{ chiave: string }>) if (!chiaviRichieste.has(r.chiave)) db.prepare('DELETE FROM richiesta WHERE chiave = ?').run(r.chiave);
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('jose', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.mementos.jose));
+
+    // ---- Aiuto in battaglia (Fase 7.3): sezioni della guida e indice delle Ombre (le chiavi dei dungeon devono esistere) ----
+    for (const o of seed.battaglia.ombre) if (!chiaviDungeon.has(o.dungeonChiave)) throw new Error(`Seed battaglia: dungeon sconosciuto '${o.dungeonChiave}' per l'Ombra '${o.ombra ?? o.persona ?? ''}'.`);
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('battaglia', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.battaglia));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

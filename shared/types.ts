@@ -727,6 +727,39 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Aiuto in battaglia (Fase 7.3) ----
+
+export interface OmbraDto {
+  dungeonChiave: string;
+  dungeon: string;
+  area: string | null;
+  areaChiave: string | null;
+  /** Nome dell'Ombra come appare in battaglia (italiano), se noto. */
+  ombra: string | null;
+  /** Nome della Persona/maschera come riportato dalla guida. */
+  persona: string | null;
+  livello: number | null;
+  debolezze: string[];
+  resistenze: string[];
+  personalita: string | null;
+  fonte: string;
+  personaCollegata: { id: number; nome: string; nomeIt: string } | null;
+}
+
+export interface BattagliaDto {
+  fonti: { principale: string; note: string };
+  sistema: { urlFonte: string; avvioScontro: string; comandi: string[]; esitiColpo: { debole: string; critico: string; tecnico: string; block: string; resiste: string }; unoMore: string; statiAlterati: Array<{ stato: string; effetto: string }>; notaFineBattaglia: string };
+  assaltoEHoldUp: { urlFonte: string; rapina: string; assalto: string; holdUp: string };
+  tecnico: { urlFonte: string; stati: Array<{ stato: string; elementi: string[] }> };
+  staffetta: { urlFonte: string; cosaE: string; disponibilita: string; effetto: string; livelli: string; indicatoriVisivi: string; ranghi: Array<{ rango: number; bonus: string }>; moltiplicatori: string; effettoSpeciale: string };
+  speciali: { urlFonte: string; meccanica: string; attivazione: string; proprietaDanno: string; elenco: Array<{ nome: string; personaggi: string[]; sblocco: string }> };
+  negoziazione: { urlFonti: string[]; quandoSiPuoNegoziare: string; opzioniHoldUp: Array<{ opzione: string; effetto: string }>; comeVerificarePersonalita: string; personalita: Array<{ nome: string; descrizione: string; risposteEfficaci: string[]; risposteDaEvitare: string[] }>; regole: string[]; incertezze: string };
+  ombreSciagura: { nomeOriginale: string; urlFonte: string; cosaSono: string; comeRiconoscerle: string; caratteristiche: string[]; comportamentoInBattaglia: { turnoProprio: string; quandoAttaccate: string; comeNeutralizzarle: string }; effettiStati: { immobilizzanti: string[]; soggiogamento: string; furia: string }; esplosioneAllaSconfitta: { descrizione: string; potenza: string; eccezioni: string }; ricompense: string; doveCompaiono: string; elenco: string[] | null; incertezze: string };
+  mietitore: { categoria: string; urlFonte: string; dove: string; comeSiManifesta: string; livelloConsigliato: string; abilita: string[]; immunita: string[]; debolezze: string[] | null; strategia: string[]; ricompense: string };
+  demoniTesoro: { categoria: string; urlFonte: string; cosaSono: string; comeCompaiono: string; primaComparsa: string; comportamento: string; resistenzeGenerali: string; tecnicheConsigliate: string[]; elenco: Array<{ nome: string; livello: number; arcano: string; dove: string }> };
+  ombre: OmbraDto[];
+}
+
 // ---- Richieste dei Mementos e Jose (Fase 7.2) ----
 
 export type StatoRichiesta = 'accettata' | 'completata';
