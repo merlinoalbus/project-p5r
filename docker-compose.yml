@@ -1,6 +1,10 @@
 # ============================================================
 # docker-compose — stack project-p5r (host Portainer, repo GitHub)
 # ============================================================
+# Rete: sull'host è esposto SOLO il frontend (13820); il backend è
+# raggiungibile unicamente dal frontend nginx sulla rete interna, che
+# proxa `/api/` verso `project_p5r_be:3101`. Il tunnel Cloudflare punta
+# al frontend (configurazione lato Cloudflare a carico dell'utente).
 # Porte host nel range 1382x (project-jira occupa 13810-13811,
 # manhua 13800-13802).
 #
@@ -18,8 +22,9 @@ services:
     image: ghcr.io/merlinoalbus/project-p5r-backend:latest
     container_name: project_p5r_be
     restart: unless-stopped
-    ports:
-      - "13821:3101"
+    # Nessuna porta host: solo la rete interna dello stack.
+    expose:
+      - "3101"
     environment:
       - PORT=3101
       - DATA_DIR=/data
