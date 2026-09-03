@@ -139,6 +139,1580 @@
       "chiave": "Councillor",
       "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5b/P5_Royal_Consultant_Arcana.png/revision/latest?cb=20200508064739",
       "fonte": "https://megamitensei.fandom.com/wiki/Category:Persona_5_Cards"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "igor",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/16/Persona_5_Confidant_Guides_Icon_%28Fool%29_-_Igor.png/revision/latest?cb=20180609125113",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Fool)_-_Igor.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "morgana",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/57/Persona_5_Confidant_Guides_Icon_%28Magician%29_-_Morgana.png/revision/latest?cb=20241201203706",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Magician)_-_Morgana.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "makoto",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e0/Persona_5_Confidant_Guides_Icon_%28Priestess%29_-_Makoto_Niijima.png/revision/latest?cb=20180609125324",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Priestess)_-_Makoto_Niijima.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "haru",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/11/Persona_5_Confidant_Guides_Icon_%28Empress%29_-_Haru_Okumura.png/revision/latest?cb=20180609125113",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Empress)_-_Haru_Okumura.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "yusuke",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6a/Persona_5_Confidant_Guides_Icon_%28Emperor%29_-_Yusuke_Kitagawa.png/revision/latest?cb=20180609125112",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Emperor)_-_Yusuke_Kitagawa.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "sojiro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c9/Persona_5_Confidant_Guides_Icon_%28Hierophant%29_-_Sojiro_Sakura.png/revision/latest?cb=20180609125115",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Hierophant)_-_Sojiro_Sakura.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "ann",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5b/Persona_5_Confidant_Guides_Icon_%28Lovers%29_-_Ann_Takamaki.png/revision/latest?cb=20180609125321",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Lovers)_-_Ann_Takamaki.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "ryuji",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b2/Persona_5_Confidant_Guides_Icon_%28Chariot%29_-_Ryuji_Sakamoto.png/revision/latest?cb=20241201203742",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Chariot)_-_Ryuji_Sakamoto.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "akechi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/1c/Persona_5_Confidant_Guides_Icon_%28Justice%29_-_Goro_Akechi.png/revision/latest?cb=20180609125321",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Justice)_-_Goro_Akechi.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "futaba",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c3/Persona_5_Confidant_Guides_Icon_%28Hermit%29_-_Futaba_Sakura.png/revision/latest?cb=20180609125115",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Hermit)_-_Futaba_Sakura.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "chihaya",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/07/Persona_5_Confidant_Guides_Icon_%28Fortune%29_-_Chihaya_Mifune.png/revision/latest?cb=20180609125114",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Fortune)_-_Chihaya_Mifune.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "gemelle",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/52/Persona_5_Confidant_Guides_Icon_%28Strength%29_-_Caroline_and_Justine.png/revision/latest?cb=20180609130641",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Strength)_-_Caroline_and_Justine.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "iwai",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2a/Persona_5_Confidant_Guides_Icon_%28Hanged-Man%29_-_Munehisa_Iwai.png/revision/latest?cb=20180609125114",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Hanged-Man)_-_Munehisa_Iwai.png",
+      "nota": "variante arcano usata: \"Hanged-Man\""
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "takemi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/44/Persona_5_Confidant_Guides_Icon_%28Death%29_-_Tae_Takemi.png/revision/latest?cb=20180609125111",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Death)_-_Tae_Takemi.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "kawakami",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5e/Persona_5_Confidant_Guides_Icon_%28Temperance%29_-_Sadayo_Kawakami.png/revision/latest?cb=20180609125325",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Temperance)_-_Sadayo_Kawakami.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "ohya",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/87/Persona_5_Confidant_Guides_Icon_%28Devil%29_-_Ichiko_Ohya.png/revision/latest?cb=20180609125112",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Devil)_-_Ichiko_Ohya.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "shinya",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4c/Persona_5_Confidant_Guides_Icon_%28Tower%29_-_Shinya_Oda.png/revision/latest?cb=20180609125359",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Tower)_-_Shinya_Oda.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "hifumi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/04/Persona_5_Confidant_Guides_Icon_%28Star%29_-_Hifumi_Togo.png/revision/latest?cb=20180609125323",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Star)_-_Hifumi_Togo.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "mishima",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/68/Persona_5_Confidant_Guides_Icon_%28Moon%29_-_Yuuki_Mishima.png/revision/latest?cb=20180609125322",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Moon)_-_Yuuki_Mishima.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "yoshida",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/69/Persona_5_Confidant_Guides_Icon_%28Sun%29_-_Toranosuke_Yoshida.png/revision/latest?cb=20180609125324",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Sun)_-_Toranosuke_Yoshida.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "sae",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b8/Persona_5_Confidant_Guides_Icon_%28Judgment%29_-_Sae_Niijima.png/revision/latest?cb=20180609125320",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona 5 Confidant Guides Icon (Judgment) - Sae Niijima.png",
+      "nota": "trovata via ricerca full-text (pattern arcano diverso da seed)"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "kasumi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Faith)_-_Kasumi_Yoshizawa.png"
+    },
+    {
+      "ambito": "confidente",
+      "chiave": "maruki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/80/Persona_5_Confidant_Guides_Icon_%28Councillor%29_-_Takuto_Maruki.png/revision/latest?cb=20210309075901",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Persona_5_Confidant_Guides_Icon_(Councillor)_-_Takuto_Maruki.png"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Abaddon",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/19/Abaddon_P5R.jpg/revision/latest?cb=20200504065331",
+      "fonte": "https://megamitensei.fandom.com/wiki/Abaddon"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Agathion",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/cb/Agathion_P5R.jpg/revision/latest?cb=20200429001134",
+      "fonte": "https://megamitensei.fandom.com/wiki/Agathion"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Alice",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/ba/Alice_P5R.jpg/revision/latest?cb=20200504071713",
+      "fonte": "https://megamitensei.fandom.com/wiki/Alice"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Alilat",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a6/Alilat_P5R.jpg/revision/latest?cb=20200504071251",
+      "fonte": "https://megamitensei.fandom.com/wiki/Alilat"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ame-no-Uzume",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/38/Ame-no-Uzume_P5R.jpg/revision/latest?cb=20200429005903",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ame-no-Uzume"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ananta",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/7f/Ananta_P5R.jpg/revision/latest?cb=20200429042859",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ananta"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Andras",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/37/Andras_P5R.jpg/revision/latest?cb=20200429041659",
+      "fonte": "https://megamitensei.fandom.com/wiki/Andras"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Angel",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/ea/Angel_P5R.jpg/revision/latest?cb=20200429002641",
+      "fonte": "https://megamitensei.fandom.com/wiki/Angel"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Anubis",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f3/Anubis_P5R.jpg/revision/latest?cb=20200429022726",
+      "fonte": "https://megamitensei.fandom.com/wiki/Anubis"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Anzu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/cb/Anzu_P5R.jpg/revision/latest?cb=20200429040614",
+      "fonte": "https://megamitensei.fandom.com/wiki/Anzu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Apsaras",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/97/Apsaras_P5R.jpg/revision/latest?cb=20200429003554",
+      "fonte": "https://megamitensei.fandom.com/wiki/Apsaras"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ara Mitama",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2d/Ara_Mitama_P5R.jpg/revision/latest?cb=20200429042403",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ara_Mitama"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Arahabaki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/ca/Arahabaki_P5R.jpg/revision/latest?cb=20200429030833",
+      "fonte": "https://megamitensei.fandom.com/wiki/Arahabaki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Archangel",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/0f/Archangel_P5R.jpg/revision/latest?cb=20200429005645",
+      "fonte": "https://megamitensei.fandom.com/wiki/Archangel"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ardha",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3b/Ardha_P5R.jpg/revision/latest?cb=20200504072856",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ardha"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ariadne",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/ba/P5_Ariadne.jpg/revision/latest?cb=20200429023351",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ariadne",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ariadne Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/ba/P5_Ariadne.jpg/revision/latest?cb=20200429023351",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ariadne",
+      "nota": "affidabilità media; pagina risolta da \"Ariadne Picaro\" a \"Ariadne\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Arsène",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8b/Arsene_P5R.jpg/revision/latest?cb=20200429000427",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ars%C3%A8ne"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Asterius",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/85/P5_Asterius.jpg/revision/latest?cb=20200429015132",
+      "fonte": "https://megamitensei.fandom.com/wiki/Asterius",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Asterius Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/85/P5_Asterius.jpg/revision/latest?cb=20200429015132",
+      "fonte": "https://megamitensei.fandom.com/wiki/Asterius",
+      "nota": "affidabilità media; pagina risolta da \"Asterius Picaro\" a \"Asterius\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Asura",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6f/Asura_P5R.jpg/revision/latest?cb=20200504064928",
+      "fonte": "https://megamitensei.fandom.com/wiki/Asura"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Atavaka",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/ea/Atavaka_P5R.jpg/revision/latest?cb=20200504060517",
+      "fonte": "https://megamitensei.fandom.com/wiki/Atavaka"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Athena",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8e/Athena_P5R.jpg/revision/latest?cb=20200429023122",
+      "fonte": "https://megamitensei.fandom.com/wiki/Athena"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Athena Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/91/Athena_Picaro_P5R.jpg/revision/latest?cb=20200429023151",
+      "fonte": "https://megamitensei.fandom.com/wiki/Athena",
+      "nota": "pagina risolta da \"Athena Picaro\" a \"Athena\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Atropos",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8d/Atropos_P5R.jpg/revision/latest?cb=20200429024103",
+      "fonte": "https://megamitensei.fandom.com/wiki/Atropos"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Attis",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6d/Attis_P5R.jpg/revision/latest?cb=20200504070854",
+      "fonte": "https://megamitensei.fandom.com/wiki/Attis"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Baal",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d7/Baal_P5R.jpg/revision/latest?cb=20200504071038",
+      "fonte": "https://megamitensei.fandom.com/wiki/Baal"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Baphomet",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b0/Baphomet_P5R.jpg/revision/latest?cb=20200429015400",
+      "fonte": "https://megamitensei.fandom.com/wiki/Baphomet"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Barong",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/0a/Barong_P5R.jpg/revision/latest?cb=20200429020732",
+      "fonte": "https://megamitensei.fandom.com/wiki/Barong"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Beelzebub",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/47/Beelzebub_P5R.jpg/revision/latest?cb=20200504130541",
+      "fonte": "https://megamitensei.fandom.com/wiki/Beelzebub"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Belial",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b8/Belial_P5R.jpg/revision/latest?cb=20200504070734",
+      "fonte": "https://megamitensei.fandom.com/wiki/Belial"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Belphegor",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/43/Belphegor_P5R.jpg/revision/latest?cb=20200429033128",
+      "fonte": "https://megamitensei.fandom.com/wiki/Belphegor"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Berith",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4d/P5X_Berith.png/revision/latest?cb=20240502084734",
+      "fonte": "https://megamitensei.fandom.com/wiki/Berith",
+      "nota": "affidabilità bassa; Nessun artwork P5/P5R su wiki (solo Persona 3). Immagine da Persona 5X (spin-off mobile), non da P5R: da verificare/sostituire a mano."
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Bicorn",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5e/Bicorn_P5R.jpg/revision/latest?cb=20200429001017",
+      "fonte": "https://megamitensei.fandom.com/wiki/Bicorn"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Bishamonten",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/20/Bishamonten_P5R.jpg/revision/latest?cb=20200504061959",
+      "fonte": "https://megamitensei.fandom.com/wiki/Bishamonten_(demon)",
+      "nota": "\"Bishamonten\" reindirizza a pagina di disambiguazione; pagina reale è \"Bishamonten (demon)\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Black Frost",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/55/Black_Frost_P5R.jpg/revision/latest?cb=20200504061841",
+      "fonte": "https://megamitensei.fandom.com/wiki/Black_Frost"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Black Ooze",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/44/Black_Ooze_P5R.jpg/revision/latest?cb=20200429012005",
+      "fonte": "https://megamitensei.fandom.com/wiki/Black_Ooze"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Black Rider",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/ac/Black_Rider_P5R.jpg/revision/latest?cb=20200429014644",
+      "fonte": "https://megamitensei.fandom.com/wiki/Black_Rider"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Bugs",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2b/Bugs_P5_Anime.png/revision/latest?cb=20201006023445",
+      "fonte": "https://megamitensei.fandom.com/wiki/Bugs",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Byakhee",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4f/Byakhee_P5R.jpg/revision/latest?cb=20200504061428",
+      "fonte": "https://megamitensei.fandom.com/wiki/Byakhee"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Byakko",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/08/Byakko_P5R.jpg/revision/latest?cb=20200429041346",
+      "fonte": "https://megamitensei.fandom.com/wiki/Byakko"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Cait Sith",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d4/Cait_Sith_P5R.jpg/revision/latest?cb=20200429002841",
+      "fonte": "https://megamitensei.fandom.com/wiki/Cait_Sith"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Cerberus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/44/Cerberus_P5R.jpg/revision/latest?cb=20200429015836",
+      "fonte": "https://megamitensei.fandom.com/wiki/Cerberus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Chernobog",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/19/Chernobog_P5R.jpg/revision/latest?cb=20200429014105",
+      "fonte": "https://megamitensei.fandom.com/wiki/Chernobog"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Chi You",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d0/Chi_You_P5R.jpg/revision/latest?cb=20200504131413",
+      "fonte": "https://megamitensei.fandom.com/wiki/Chi_You"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Chimera",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/ca/Chimera_P5R.jpg/revision/latest?cb=20200504062351",
+      "fonte": "https://megamitensei.fandom.com/wiki/Chimera"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Choronzon",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/32/Choronzon_P5R.jpg/revision/latest?cb=20200429040022",
+      "fonte": "https://megamitensei.fandom.com/wiki/Choronzon"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Clotho",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b0/Clotho_P5R.jpg/revision/latest?cb=20200429023936",
+      "fonte": "https://megamitensei.fandom.com/wiki/Clotho"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Crystal Skull",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/34/Crystal_Skull_P5R.jpg/revision/latest?cb=20200504133829",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Crystal_Skull_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso, non collegato a una pagina di lista"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Cu Chulainn",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/71/Cu_Chulainn_P5R.jpg/revision/latest?cb=20200504064607",
+      "fonte": "https://megamitensei.fandom.com/wiki/Cu_Chulainn"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Cybele",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c8/Cybele_P5R.jpg/revision/latest?cb=20200504072008",
+      "fonte": "https://megamitensei.fandom.com/wiki/Cybele"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Daisoujou",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/76/Daisoujou_P5R.jpg/revision/latest?cb=20200429025503",
+      "fonte": "https://megamitensei.fandom.com/wiki/Daisoujou"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Dakini",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/64/Dakini_P5R.jpg/revision/latest?cb=20200429034920",
+      "fonte": "https://megamitensei.fandom.com/wiki/Dakini"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Decarabia",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/68/Decabria_P5R.jpg/revision/latest?cb=20200429032440",
+      "fonte": "https://megamitensei.fandom.com/wiki/Decarabia",
+      "nota": "nome file sul wiki con refuso: \"Decabria\" invece di \"Decarabia\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Dionysus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3b/Dionysus_P5R.jpg/revision/latest?cb=20200504062618",
+      "fonte": "https://megamitensei.fandom.com/wiki/Dionysus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Dominion",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/24/Dominion_P5R.jpg/revision/latest?cb=20200504062250",
+      "fonte": "https://megamitensei.fandom.com/wiki/Dominion"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Eligor",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3f/Eligor_P5R.jpg/revision/latest?cb=20200429010623",
+      "fonte": "https://megamitensei.fandom.com/wiki/Eligor"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Emperor's Amulet",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/38/Emperor%27s_Amulet_P5R.jpg/revision/latest?cb=20200504132857",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Emperor's_Amulet_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Fafnir",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/73/Fafnir_P5R.jpg/revision/latest?cb=20200504071842",
+      "fonte": "https://megamitensei.fandom.com/wiki/Fafnir"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Flauros",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c8/Flauros_P5R.jpg/revision/latest?cb=20200429033740",
+      "fonte": "https://megamitensei.fandom.com/wiki/Flauros"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Forneus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4c/Forneus_Persona_5_Royal.jpg/revision/latest?cb=20221108051214",
+      "fonte": "https://megamitensei.fandom.com/wiki/Forneus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Fortuna",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/64/Fortuna_P5R.jpg/revision/latest?cb=20200429025205",
+      "fonte": "https://megamitensei.fandom.com/wiki/Fortuna"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Futsunushi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/79/Futsunushi_P5R.jpg/revision/latest?cb=20200504130835",
+      "fonte": "https://megamitensei.fandom.com/wiki/Futsunushi"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Fuu-Ki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5d/Fuu-Ki_P5R.jpg/revision/latest?cb=20200429031822",
+      "fonte": "https://megamitensei.fandom.com/wiki/Fuu-Ki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Gabriel",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/9b/Gabriel_P5R.jpg/revision/latest?cb=20200504065132",
+      "fonte": "https://megamitensei.fandom.com/wiki/Gabriel"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ganesha",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/df/Ganesha_P5R.jpg/revision/latest?cb=20200429020446",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ganesha"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Garuda",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/33/Garuda_P5R.jpg/revision/latest?cb=20200429020833",
+      "fonte": "https://megamitensei.fandom.com/wiki/Garuda"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Genbu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/75/Genbu_P5R.jpg/revision/latest?cb=20200429004702",
+      "fonte": "https://megamitensei.fandom.com/wiki/Genbu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Girimehkala",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/9f/Girimehkala_P5R.jpg/revision/latest?cb=20200429033505",
+      "fonte": "https://megamitensei.fandom.com/wiki/Girimehkala"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hanuman",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/45/Hanuman_P5R.jpg/revision/latest?cb=20200504061134",
+      "fonte": "https://megamitensei.fandom.com/wiki/Hanuman"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hariti",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3e/Hariti_P5R.jpg/revision/latest?cb=20200429041455",
+      "fonte": "https://megamitensei.fandom.com/wiki/Hariti"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hastur",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/62/Hastur_P5R.jpg/revision/latest?cb=20200504072724",
+      "fonte": "https://megamitensei.fandom.com/wiki/Hastur"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hecatoncheires",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/74/Hecatoncheir_P5R.jpg/revision/latest?cb=20200429032205",
+      "fonte": "https://megamitensei.fandom.com/wiki/Hecatoncheires",
+      "nota": "nome file sul wiki al singolare: \"Hecatoncheir\" invece di \"Hecatoncheires\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hell Biker",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/17/Hell_Biker_P5R.jpg/revision/latest?cb=20200429024854",
+      "fonte": "https://megamitensei.fandom.com/wiki/Hell_Biker"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "High Pixie",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b2/High_Pixie_P5R.jpg/revision/latest?cb=20200429011424",
+      "fonte": "https://megamitensei.fandom.com/wiki/High_Pixie"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hope Diamond",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/42/Hope_Diamond_P5R.jpg/revision/latest?cb=20200504133351",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Hope_Diamond_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Horus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6a/Horus_P5R.jpg/revision/latest?cb=20200429033334",
+      "fonte": "https://megamitensei.fandom.com/wiki/Horus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Hua Po",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/65/Hua_Po_P5R.jpg/revision/latest?cb=20200429002354",
+      "fonte": "https://megamitensei.fandom.com/wiki/Hua_Po"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Incubus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/41/Incubus_P5R.jpg/revision/latest?cb=20200429001342",
+      "fonte": "https://megamitensei.fandom.com/wiki/Incubus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Inugami",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/cd/Inugami_P5R.jpg/revision/latest?cb=20200429005546",
+      "fonte": "https://megamitensei.fandom.com/wiki/Inugami"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ippon-Datara",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e3/Ippon-Datara_P5R.jpg/revision/latest?cb=20200429011608",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ippon-Datara"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ishtar",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/ad/Ishtar_P5R.jpg/revision/latest?cb=20200504073005",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ishtar"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Isis",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6b/Isis_P5R.jpg/revision/latest?cb=20200429030703",
+      "fonte": "https://megamitensei.fandom.com/wiki/Isis"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Izanagi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/58/P5_Izanagi.jpg/revision/latest?cb=20200429012936",
+      "fonte": "https://megamitensei.fandom.com/wiki/Izanagi",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Izanagi Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/58/P5_Izanagi.jpg/revision/latest?cb=20200429012936",
+      "fonte": "https://megamitensei.fandom.com/wiki/Izanagi",
+      "nota": "affidabilità media; nessuna variante Picaro con artwork distinto: usato l'artwork base di Izanagi (P5)"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Izanagi-no-Okami",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e0/Izanagi_okami_P5R.jpg/revision/latest?cb=20200429013316",
+      "fonte": "https://megamitensei.fandom.com/wiki/Izanagi-no-Okami"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Izanagi-no-Okami Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/95/Izanagi-no-okami-picaro-P5R.jpg/revision/latest?cb=20200429013243",
+      "fonte": "https://megamitensei.fandom.com/wiki/Izanagi-no-Okami",
+      "nota": "pagina risolta da \"Izanagi-no-Okami Picaro\" a \"Izanagi-no-Okami\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Jack Frost",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/ff/Jack_Frost_P5R.jpg/revision/latest?cb=20200429004852",
+      "fonte": "https://megamitensei.fandom.com/wiki/Jack_Frost"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Jack-o'-Lantern",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c4/Pyro_Jack_P5R.jpg/revision/latest?cb=20200429001639",
+      "fonte": "https://megamitensei.fandom.com/wiki/Jack-o'-Lantern",
+      "nota": "Sulla pagina wiki dedicata l'unica immagine taggata P5R e \"Pyro Jack P5R.jpg\" (nessun file \"Jack-o-Lantern P5R\" trovato); Pyro Jack e Jack-o-Lantern sono demoni imparentati (evoluzione) e potrebbero condividere lo stesso modello 3D in P5R, ma consigliata verifica visiva a mano."
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Jatayu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/84/Jatayu_P5R.jpg/revision/latest?cb=20200429035027",
+      "fonte": "https://megamitensei.fandom.com/wiki/Jatayu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Jikokuten",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2a/Jikokuten_P5R.jpg/revision/latest?cb=20200429043812",
+      "fonte": "https://megamitensei.fandom.com/wiki/Jikokuten"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kaguya",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/ce/P5_Kaguya.jpg/revision/latest?cb=20200429010328",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kaguya",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kaguya Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/ce/P5_Kaguya.jpg/revision/latest?cb=20200429010328",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kaguya",
+      "nota": "affidabilità media; pagina risolta da \"Kaguya Picaro\" a \"Kaguya\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kaiwan",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/99/Kaiwan_P5R.jpg/revision/latest?cb=20200429033913",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kaiwan"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kali",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b4/Kali_P5R.jpg/revision/latest?cb=20200504060730",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kali"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kelpie",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f1/Kelpie_P5R.jpg/revision/latest?cb=20200429001505",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kelpie"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kikuri-Hime",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/dd/Kikuri-Hime_P5R.jpg/revision/latest?cb=20200429035208",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kikuri-Hime"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kin-Ki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/83/Kin-Ki_P5R.jpg/revision/latest?cb=20200429031636",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kin-Ki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "King Frost",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/99/King_Frost_P5R.jpg/revision/latest?cb=20200504055758",
+      "fonte": "https://megamitensei.fandom.com/wiki/King_Frost"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kodama",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b3/Kodama_P5R.jpg/revision/latest?cb=20200429003204",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kodama"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Koh-i-Noor",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a4/Koh-i-Noor_P5R.jpg/revision/latest?cb=20200429045825",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Koh-i-Noor_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kohryu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/21/Kohryu_P5R.jpg/revision/latest?cb=20200504065031",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kohryu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Koppa Tengu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8e/Koppa_Tengu_P5R.jpg/revision/latest?cb=20200429003308",
+      "fonte": "https://megamitensei.fandom.com/wiki/Koppa_Tengu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Koropokkuru",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d2/Koropokkuru_P5R.jpg/revision/latest?cb=20200429003435",
+      "fonte": "https://megamitensei.fandom.com/wiki/Koropokkuru"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Koumokuten",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/90/Koumokuten_P5R.jpg/revision/latest?cb=20200429043611",
+      "fonte": "https://megamitensei.fandom.com/wiki/Koumokuten"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kumbhanda",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f6/Kumbhanda_P5R.jpg/revision/latest?cb=20200429041241",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kumbhanda"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kurama Tengu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3c/Kurama_Tengu_P5R.jpg/revision/latest?cb=20200429042114",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kurama_Tengu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kushi Mitama",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4b/Kusi_Mitama_P5R.jpg/revision/latest?cb=20200429005218",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kushi_Mitama",
+      "nota": "nome file sul wiki con refuso: \"Kusi\" invece di \"Kushi\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Kushinada",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/55/Kushinada-Hime_P5R.jpg/revision/latest?cb=20200429035330",
+      "fonte": "https://megamitensei.fandom.com/wiki/Kushinada-Hime",
+      "nota": "nome corretto sul wiki è \"Kushinada-Hime\"; pagina \"Kushinada\" esiste ma priva di immagini"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Lachesis",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b1/Lachesis_P5R.jpg/revision/latest?cb=20200429024659",
+      "fonte": "https://megamitensei.fandom.com/wiki/Lachesis"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Lakshmi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/65/Lakshmi_P5R.jpg/revision/latest?cb=20200504062453",
+      "fonte": "https://megamitensei.fandom.com/wiki/Lakshmi"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Lamia",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8b/Lamia_P5R.jpg/revision/latest?cb=20200429041603",
+      "fonte": "https://megamitensei.fandom.com/wiki/Lamia"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Leanan Sidhe",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/1f/Leanan_Sidhe_P5R.jpg/revision/latest?cb=20200429012303",
+      "fonte": "https://megamitensei.fandom.com/wiki/Leanan_Sidhe"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Legion",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4d/Legion_P5R.jpg/revision/latest?cb=20200429035820",
+      "fonte": "https://megamitensei.fandom.com/wiki/Legion"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Lilim",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/48/Lilim_P5R.jpg/revision/latest?cb=20200429050123",
+      "fonte": "https://megamitensei.fandom.com/wiki/Lilim"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Lilith",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/00/Lilith_P5R.jpg/revision/latest?cb=20200429014332",
+      "fonte": "https://megamitensei.fandom.com/wiki/Lilith"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Loa",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/68/Loa_P5R.jpg/revision/latest?cb=20200504061555",
+      "fonte": "https://megamitensei.fandom.com/wiki/Loa"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Lucifer",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/27/Lucifer_P5R.jpg/revision/latest?cb=20200504132008",
+      "fonte": "https://megamitensei.fandom.com/wiki/Lucifer"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Macabre",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5e/Macabre_P5R.jpg/revision/latest?cb=20200504062156",
+      "fonte": "https://megamitensei.fandom.com/wiki/Macabre"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mada",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4b/Mada_P5R.jpg/revision/latest?cb=20200504131633",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mada"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Magatsu-Izanagi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/26/P5_Magatsu-Izanagi_and_Magatsu-Izanagi_Thief_God.jpg/revision/latest?cb=20160928205340",
+      "fonte": "https://megamitensei.fandom.com/wiki/Magatsu-Izanagi",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Magatsu-Izanagi Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/26/P5_Magatsu-Izanagi_and_Magatsu-Izanagi_Thief_God.jpg/revision/latest?cb=20160928205340",
+      "fonte": "https://megamitensei.fandom.com/wiki/Magatsu-Izanagi",
+      "nota": "affidabilità media; pagina risolta da \"Magatsu-Izanagi Picaro\" a \"Magatsu-Izanagi\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Makami",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/19/Makami_P5R.jpg/revision/latest?cb=20200429012414",
+      "fonte": "https://megamitensei.fandom.com/wiki/Makami"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mandrake",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/74/Mandrake_P5R.jpg/revision/latest?cb=20200429000848",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mandrake"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mara",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3b/Mara_AF_P5R.png/revision/latest?cb=20200504064410",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mara"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Maria",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/07/Maria_P5R.jpg/revision/latest?cb=20200504132228",
+      "fonte": "https://megamitensei.fandom.com/wiki/Maria_(demon)",
+      "nota": "\"Maria\" reindirizza a pagina di disambiguazione; pagina reale è \"Maria (demon)\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Matador",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/78/Matador_P5R.jpg/revision/latest?cb=20200429024641",
+      "fonte": "https://megamitensei.fandom.com/wiki/Matador"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Melchizedek",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e3/Melchizedek_P5R.jpg/revision/latest?cb=20200429014935",
+      "fonte": "https://megamitensei.fandom.com/wiki/Melchizedek"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Messiah",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/93/P5_Messiah.jpg/revision/latest?cb=20200429013504",
+      "fonte": "https://megamitensei.fandom.com/wiki/Messiah_(Persona)",
+      "nota": "affidabilità media; \"Messiah\" reindirizza a disambiguazione; pagina reale \"Messiah (Persona)\"; artwork P5 base non specificamente etichettato P5R"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Messiah Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/93/P5_Messiah.jpg/revision/latest?cb=20200429013504",
+      "fonte": "https://megamitensei.fandom.com/wiki/Messiah_(Persona)",
+      "nota": "affidabilità media; nessuna variante Picaro con artwork distinto trovata; riferimento è l'artwork base \"Messiah\" P5"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Metatron",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/9d/Metatron_P5R.jpg/revision/latest?cb=20200504131254",
+      "fonte": "https://megamitensei.fandom.com/wiki/Metatron"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Michael",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b2/Michael_P5R.jpg/revision/latest?cb=20200504073548",
+      "fonte": "https://megamitensei.fandom.com/wiki/Michael"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mishaguji",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a7/Mishaguji_P5R.jpg/revision/latest?cb=20200429021243",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mishaguji"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mithras",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/03/Mithras_P5R.jpg/revision/latest?cb=20200429031054",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mithras"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mitra",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3d/Mithra_P5R.jpg/revision/latest?cb=20200429025019",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mitra",
+      "nota": "nome file sul wiki con grafia alternativa: \"Mithra\" invece di \"Mitra\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mokoi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/0b/Mokoi_P5R.jpg/revision/latest?cb=20200429002251",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mokoi"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Moloch",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/16/Moloch_P5R.jpg/revision/latest?cb=20200504055856",
+      "fonte": "https://megamitensei.fandom.com/wiki/Moloch"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mot",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/53/Mot_P5R.jpg/revision/latest?cb=20200504063937",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mot"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mother Harlot",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/84/Mother_Harlot_P5R.jpg/revision/latest?cb=20200504073353",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mother_Harlot"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Mothman",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/dc/Mothman_P5R.jpg/revision/latest?cb=20200429034023",
+      "fonte": "https://megamitensei.fandom.com/wiki/Mothman"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Naga",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/af/Naga_P5R.jpg/revision/latest?cb=20200429034755",
+      "fonte": "https://megamitensei.fandom.com/wiki/Naga"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Narcissus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d2/Narcissus_P5R.jpg/revision/latest?cb=20200429022352",
+      "fonte": "https://megamitensei.fandom.com/wiki/Narcissus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Nebiros",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/12/Nebiros_P5R.jpg/revision/latest?cb=20200504064727",
+      "fonte": "https://megamitensei.fandom.com/wiki/Nebiros"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Neko Shogun",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6e/Neko_Shogun_P5R.jpg/revision/latest?cb=20200429040214",
+      "fonte": "https://megamitensei.fandom.com/wiki/Neko_Shogun"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Nekomata",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/9d/Nekomata_P5R.jpg/revision/latest?cb=20200429011840",
+      "fonte": "https://megamitensei.fandom.com/wiki/Nekomata"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Nigi Mitama",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/47/Nigi_Mitama_P5R.jpg/revision/latest?cb=20200429041116",
+      "fonte": "https://megamitensei.fandom.com/wiki/Nigi_Mitama"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Norn",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2c/Norn_P5R.jpg/revision/latest?cb=20200429021414",
+      "fonte": "https://megamitensei.fandom.com/wiki/Norn"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Nue",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fd/Nue_P5R.jpg/revision/latest?cb=20200429030120",
+      "fonte": "https://megamitensei.fandom.com/wiki/Nue"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Obariyon",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/dc/Obariyon_P5R.jpg/revision/latest?cb=20200429005024",
+      "fonte": "https://megamitensei.fandom.com/wiki/Obariyon"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Oberon",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fa/Oberon_P5R.jpg/revision/latest?cb=20200504060008",
+      "fonte": "https://megamitensei.fandom.com/wiki/Oberon"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Odin",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/11/Odin_P5R.jpg/revision/latest?cb=20200504072158",
+      "fonte": "https://megamitensei.fandom.com/wiki/Odin"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Okuninushi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d1/Okuninushi_P5R.jpg/revision/latest?cb=20200429020949",
+      "fonte": "https://megamitensei.fandom.com/wiki/Okuninushi"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ongyo-Ki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fc/Ongyo-Ki_P5R.jpg/revision/latest?cb=20200504131152",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ongyo-Ki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Oni",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f4/Oni_P5R.jpg/revision/latest?cb=20200429030303",
+      "fonte": "https://megamitensei.fandom.com/wiki/Oni"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Onmoraki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b3/Onmoraki_P5R.jpg/revision/latest?cb=20200429004607",
+      "fonte": "https://megamitensei.fandom.com/wiki/Onmoraki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orichalcum",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b8/Orichalcum_P5R.jpg/revision/latest?cb=20200504134144",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Orichalcum_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orlov",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a8/Orlov_P5R.jpg/revision/latest?cb=20200504132540",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Orlov_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orobas",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/57/Orobas_P5R.jpg/revision/latest?cb=20200429012053",
+      "fonte": "https://megamitensei.fandom.com/wiki/Orobas"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orpheus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d8/P5_Orpheus.jpg/revision/latest?cb=20200429004344",
+      "fonte": "https://megamitensei.fandom.com/wiki/Orpheus",
+      "nota": "affidabilità media; Sulla pagina wiki condivisa con \"Orpheus F\", l'unico file taggato P5R (\"F Orpheus P5R.jpg\") è la variante femminile; per Orpheus base usato artwork P5 generico non specificamente etichettato Royal."
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orpheus F",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/d0/F_Orpheus_P5R.jpg/revision/latest?cb=20200429004028",
+      "fonte": "https://megamitensei.fandom.com/wiki/Orpheus",
+      "nota": "pagina risolta da \"Orpheus F\" a \"Orpheus\"; trovato via ricerca full-text, verificare pertinenza"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orpheus F Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/96/F_Orpheus_Picaro_P5R.jpg/revision/latest?cb=20200429004054",
+      "fonte": "https://megamitensei.fandom.com/wiki/Orpheus",
+      "nota": "pagina risolta da \"Orpheus F Picaro\" a \"Orpheus\"; trovato via ricerca full-text, verificare pertinenza"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Orthrus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3a/Orthrus_P5R.jpg/revision/latest?cb=20200429032617",
+      "fonte": "https://megamitensei.fandom.com/wiki/Orthrus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Ose",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/43/Ose_P5R.jpg/revision/latest?cb=20200429025320",
+      "fonte": "https://megamitensei.fandom.com/wiki/Ose"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Pale Rider",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/66/Pale_Rider_P5R.jpg/revision/latest?cb=20200429020314",
+      "fonte": "https://megamitensei.fandom.com/wiki/Pale_Rider"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Parvati",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/84/Parvati_P5R.jpg/revision/latest?cb=20200429015525",
+      "fonte": "https://megamitensei.fandom.com/wiki/Parvati"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Pazuzu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5e/Pazuzu_P5R.jpg/revision/latest?cb=20200429022231",
+      "fonte": "https://megamitensei.fandom.com/wiki/Pazuzu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Phoenix",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a3/Phoenix_P5R.jpg/revision/latest?cb=20200429040456",
+      "fonte": "https://megamitensei.fandom.com/wiki/Phoenix",
+      "nota": "immagine trovata via ricerca prefisso file (non elencata tra le immagini standard della pagina)"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Pisaca",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c4/Pisaca_P5R.jpg/revision/latest?cb=20200429040115",
+      "fonte": "https://megamitensei.fandom.com/wiki/Pisaca"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Pixie",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8f/Pixie_P5R.jpg/revision/latest?cb=20200429000640",
+      "fonte": "https://megamitensei.fandom.com/wiki/Pixie"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Power",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a6/Power_P5R.jpg/revision/latest?cb=20200429034628",
+      "fonte": "https://megamitensei.fandom.com/wiki/Power"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Principality",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/78/Principality_P5R.jpg/revision/latest?cb=20200429042224",
+      "fonte": "https://megamitensei.fandom.com/wiki/Principality"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Queen Mab",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f4/Queen_Mab_P5R.jpg/revision/latest?cb=20200429035714",
+      "fonte": "https://megamitensei.fandom.com/wiki/Queen_Mab"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Queen's Necklace",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/7b/Queen%27s_Necklace_P5R.jpg/revision/latest?cb=20200429045116",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Queen's_Necklace_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Quetzalcoatl",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/ed/Quetzalcoatl_P5R.jpg/revision/latest?cb=20200504061738",
+      "fonte": "https://megamitensei.fandom.com/wiki/Quetzalcoatl"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Raja Naga",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/4a/Raja_Naga_P5R.jpg/revision/latest?cb=20200429015958",
+      "fonte": "https://megamitensei.fandom.com/wiki/Raja_Naga"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Rakshasa",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8d/Rakshasa_P5R.jpg/revision/latest?cb=20200429031339",
+      "fonte": "https://megamitensei.fandom.com/wiki/Rakshasa"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Rangda",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2d/Rangda_P5R.jpg/revision/latest?cb=20200429035514",
+      "fonte": "https://megamitensei.fandom.com/wiki/Rangda"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Raoul",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/4/42/Raoul_P5R.jpg/revision/latest?cb=20200429013712",
+      "fonte": "https://megamitensei.fandom.com/wiki/Raoul"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Raphael",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/63/Raphael_P5R.jpg/revision/latest?cb=20200504065547",
+      "fonte": "https://megamitensei.fandom.com/wiki/Raphael"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Red Rider",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/9e/Red_Rider_P5R.jpg/revision/latest?cb=20200429025757",
+      "fonte": "https://megamitensei.fandom.com/wiki/Red_Rider"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Regent",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/18/Regent_P5R.jpg/revision/latest?cb=20200429044450",
+      "fonte": "https://megamitensei.fandom.com/wiki/Regent_(Treasure_Demon)",
+      "nota": "\"Regent\" reindirizza a disambiguazione; pagina reale \"Regent (Treasure Demon)\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Saki Mitama",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/06/Saki_Mitama_P5R.jpg/revision/latest?cb=20200429002125",
+      "fonte": "https://megamitensei.fandom.com/wiki/Saki_Mitama"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Sandalphon",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e0/Sandalphon_P5R.jpg/revision/latest?cb=20200504064834",
+      "fonte": "https://megamitensei.fandom.com/wiki/Sandalphon"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Sandman",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/70/Sandman_P5R.jpg/revision/latest?cb=20200429034151",
+      "fonte": "https://megamitensei.fandom.com/wiki/Sandman"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Sarasvati",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/12/Sarasvati_P5R.jpg/revision/latest?cb=20200429021742",
+      "fonte": "https://megamitensei.fandom.com/wiki/Sarasvati"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Satan",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/34/Satan_P5R.jpg/revision/latest?cb=20200504131746",
+      "fonte": "https://megamitensei.fandom.com/wiki/Satan"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Satanael",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/94/Satanael_Persona_5_Royal.jpg/revision/latest?cb=20230702031507",
+      "fonte": "https://megamitensei.fandom.com/wiki/Satanael"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Scathach",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/0c/Scathach_P5R.jpg/revision/latest?cb=20200504065237",
+      "fonte": "https://megamitensei.fandom.com/wiki/Scathach"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Seiryu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/96/Seiryu_P5R.jpg/revision/latest?cb=20200504060312",
+      "fonte": "https://megamitensei.fandom.com/wiki/Seiryu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Setanta",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/09/Setanta_P5R.jpg/revision/latest?cb=20200429030421",
+      "fonte": "https://megamitensei.fandom.com/wiki/Setanta"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Seth",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/d/da/Seth_P5R.jpg/revision/latest?cb=20200429021912",
+      "fonte": "https://megamitensei.fandom.com/wiki/Seth",
+      "nota": "immagine trovata via ricerca prefisso file (non elencata tra le pagine collegate standard)"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Shiisaa",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b1/Shiisaa_P5R.jpg/revision/latest?cb=20200429012524",
+      "fonte": "https://megamitensei.fandom.com/wiki/Shiisaa"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Shiki-Ouji",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/34/Shiki-Ouji_P5R.jpg/revision/latest?cb=20200429040322",
+      "fonte": "https://megamitensei.fandom.com/wiki/Shiki-Ouji"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Shiva",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/23/Shiva_P5R.jpg/revision/latest?cb=20200504071552",
+      "fonte": "https://megamitensei.fandom.com/wiki/Shiva"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Siegfried",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b7/Siegfried_P5R.jpg/revision/latest?cb=20200504070409",
+      "fonte": "https://megamitensei.fandom.com/wiki/Siegfried"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Silky",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/7f/Silky_P5R.jpg/revision/latest?cb=20200429003736",
+      "fonte": "https://megamitensei.fandom.com/wiki/Silky"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Skadi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/20/Skadi_P5R.jpg/revision/latest?cb=20200429020205",
+      "fonte": "https://megamitensei.fandom.com/wiki/Skadi"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Slime",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/59/Slime_P5R.jpg/revision/latest?cb=20200429002937",
+      "fonte": "https://megamitensei.fandom.com/wiki/Slime"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Sraosha",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/cd/Sraosha_P5R.jpg/revision/latest?cb=20200504065939",
+      "fonte": "https://megamitensei.fandom.com/wiki/Sraosha"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Stone of Scone",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/93/Stone_of_Scone_P5R.jpg/revision/latest?cb=20200429045428",
+      "fonte": "https://megamitensei.fandom.com/wiki/File:Stone_of_Scone_P5R.jpg",
+      "nota": "affidabilità media; nessuna pagina demone dedicata (Persona speciale/gioiello); file trovato via ricerca prefisso"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Succubus",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e8/Succubus_P5R.jpg/revision/latest?cb=20200429001849",
+      "fonte": "https://megamitensei.fandom.com/wiki/Succubus"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Sudama",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/9e/Sudama_P5R.jpg/revision/latest?cb=20200429012205",
+      "fonte": "https://megamitensei.fandom.com/wiki/Sudama"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Sui-Ki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f2/Sui-Ki_P5R.jpg/revision/latest?cb=20200429032011",
+      "fonte": "https://megamitensei.fandom.com/wiki/Sui-Ki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Surt",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fd/Surt_P5R.jpg/revision/latest?cb=20200504071438",
+      "fonte": "https://megamitensei.fandom.com/wiki/Surt"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Suzaku",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f2/Suzaku_P5R.jpg/revision/latest?cb=20200429010118",
+      "fonte": "https://megamitensei.fandom.com/wiki/Suzaku"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Take-Minakata",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f9/Take-Minakata_P5R.jpg/revision/latest?cb=20200429041008",
+      "fonte": "https://megamitensei.fandom.com/wiki/Take-Minakata"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Tam Lin",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/5/5d/Tam_Lin_P5R.jpg/revision/latest?cb=20200429034333",
+      "fonte": "https://megamitensei.fandom.com/wiki/Tam_Lin"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Thanatos",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/07/P5_Thanatos.jpg/revision/latest?cb=20200429013844",
+      "fonte": "https://megamitensei.fandom.com/wiki/Thanatos",
+      "nota": "affidabilità media"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Thanatos Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/0/07/P5_Thanatos.jpg/revision/latest?cb=20200429013844",
+      "fonte": "https://megamitensei.fandom.com/wiki/Thanatos",
+      "nota": "affidabilità media; pagina risolta da \"Thanatos Picaro\" a \"Thanatos\""
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Thor",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/98/Thor_P5R.jpg/revision/latest?cb=20200504061248",
+      "fonte": "https://megamitensei.fandom.com/wiki/Thor"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Thoth",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fd/Thoth_P5R.jpg/revision/latest?cb=20200429032821",
+      "fonte": "https://megamitensei.fandom.com/wiki/Thoth"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Throne",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c4/Throne_P5R.jpg/revision/latest?cb=20200504064029",
+      "fonte": "https://megamitensei.fandom.com/wiki/Throne"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Thunderbird",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/92/Thunderbird_P5R.jpg/revision/latest?cb=20200429022602",
+      "fonte": "https://megamitensei.fandom.com/wiki/Thunderbird"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Titania",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/92/Titania_P5R.jpg/revision/latest?cb=20200429020600",
+      "fonte": "https://megamitensei.fandom.com/wiki/Titania"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Trumpeter",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/7c/Trumpeter_P5R.jpg/revision/latest?cb=20200429020055",
+      "fonte": "https://megamitensei.fandom.com/wiki/Trumpeter"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Tsukiyomi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/ab/P5_Tsukuyomi.jpg/revision/latest?cb=20200429022049",
+      "fonte": "https://megamitensei.fandom.com/wiki/Tsukiyomi",
+      "nota": "affidabilità media; nome file sul wiki con grafia alternativa \"Tsukuyomi\"; artwork P5 base (non specificamente etichettato P5R)"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Tsukiyomi Picaro",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/a/ab/P5_Tsukuyomi.jpg/revision/latest?cb=20200429022049",
+      "fonte": "https://megamitensei.fandom.com/wiki/Tsukiyomi",
+      "nota": "affidabilità media; nessuna variante Picaro con artwork distinto trovata; riferimento è l'artwork base \"Tsukuyomi\" P5 (grafia alternativa)"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Unicorn",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c2/Unicorn_P5R.jpg/revision/latest?cb=20200429042710",
+      "fonte": "https://megamitensei.fandom.com/wiki/Unicorn"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Uriel",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e1/Uriel_P5R.jpg/revision/latest?cb=20200504070244",
+      "fonte": "https://megamitensei.fandom.com/wiki/Uriel"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Valkyrie",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/6/66/Valkyrie_P5R.jpg/revision/latest?cb=20200429042616",
+      "fonte": "https://megamitensei.fandom.com/wiki/Valkyrie"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Vasuki",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/2/2d/Vasuki_P5R.jpg/revision/latest?cb=20200504062056",
+      "fonte": "https://megamitensei.fandom.com/wiki/Vasuki"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Vishnu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fb/Vishnu_P5R.jpg/revision/latest?cb=20200504072336",
+      "fonte": "https://megamitensei.fandom.com/wiki/Vishnu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Vohu Manah",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f2/Vohu_Manah_P5R.jpg/revision/latest?cb=20200504065706",
+      "fonte": "https://megamitensei.fandom.com/wiki/Vohu_Manah"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "White Rider",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3b/White_Rider_P5R.jpg/revision/latest?cb=20200429025642",
+      "fonte": "https://megamitensei.fandom.com/wiki/White_Rider"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Yaksini",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fa/Yaksini_P5R.jpg/revision/latest?cb=20200429012717",
+      "fonte": "https://megamitensei.fandom.com/wiki/Yaksini"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Yamata-no-Orochi",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/7/74/Yamata_no_Orochi_P5R.jpg/revision/latest?cb=20200504061023",
+      "fonte": "https://megamitensei.fandom.com/wiki/Yamata-no-Orochi"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Yatagarasu",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f9/Yatagarasu_P5R.jpg/revision/latest?cb=20200429015633",
+      "fonte": "https://megamitensei.fandom.com/wiki/Yatagarasu"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Yoshitsune",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/9/91/Yoshitsune_P5R.jpg/revision/latest?cb=20200504131025",
+      "fonte": "https://megamitensei.fandom.com/wiki/Yoshitsune"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Yurlungur",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e0/Yurlungur_P5R.jpg/revision/latest?cb=20200429044246",
+      "fonte": "https://megamitensei.fandom.com/wiki/Yurlungur"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Zaou-Gongen",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/1/15/Zaou-Gongen_P5R.jpg/revision/latest?cb=20200504070127",
+      "fonte": "https://megamitensei.fandom.com/wiki/Zaou-Gongen"
+    },
+    {
+      "ambito": "persona",
+      "chiave": "Zouchouten",
+      "url": "https://static.wikia.nocookie.net/megamitensei/images/f/f2/Zouchouten_P5R.jpg/revision/latest?cb=20200429043721",
+      "fonte": "https://megamitensei.fandom.com/wiki/Zouchouten"
     }
-  ]
+  ],
+  "mancanti": {
+    "persona": [
+      "Orpheus Picaro"
+    ],
+    "nota": "Nessun artwork P5/P5R reperito sul wiki per queste Persona: l'app usa l'asset predefinito o il segnaposto."
+  }
 }
