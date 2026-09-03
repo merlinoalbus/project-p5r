@@ -111,9 +111,16 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 <button type="button" className="btn btn-primary w-14" disabled={occ || c.rango === 10} onClick={() => void salva(c.chiave, { rango: c.rango + 1 })} aria-label={`Rango di ${c.nome} più uno`}>+</button>
               </div>
 
-              {c.rango < 10 && c.puntiNecessari === 0 && (
-                <p className="m-0 text-[13px] text-text-muted">Il passaggio al rango {c.rango + 1} non dipende dai punti (storia, richiesta o dote sociale).</p>
+              {c.rango === 0 && (
+                <p className="m-0 text-[13px] text-text-muted">Confidente non ancora sbloccato: porta il rango a 1 quando lo incontri in gioco; le note e i punti mancanti compaiono dal primo rango che li richiede.</p>
               )}
+              {c.rango > 0 && c.rango < 10 && c.puntiNecessari === 0 && (
+                <p className="m-0 text-[13px] text-text-muted">Il passaggio al rango {c.rango + 1} non dipende dai punti (storia, richiesta o dote sociale): nessuna nota da contare.</p>
+              )}
+              {c.rango > 0 && c.rango < 10 && c.puntiNecessari === null && (
+                <p className="m-0 text-[13px] text-text-muted">Progressione senza punti (storia, richieste di Mementos o fusioni): nessuna nota da contare per questo Confidente.</p>
+              )}
+              {c.rango === 10 && <p className="m-0 text-[13px] text-text-muted">Rango massimo raggiunto.</p>}
               {aPunti && (
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 text-[13px] flex-wrap">

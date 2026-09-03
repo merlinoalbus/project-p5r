@@ -81,9 +81,12 @@ describe('ConfidentiPartita', () => {
       confidente({ chiave: 'morgana', nome: 'Morgana', arcana: 'Magician', arcanaNome: 'Mago', rango: 10, puntiNecessari: null, mancanti: null }),
     ]);
     render(<ConfidentiPartita partitaId={1} />);
-    expect(await screen.findByText('Il passaggio al rango 2 non dipende dai punti (storia, richiesta o dote sociale).')).toBeInTheDocument();
+    expect(await screen.findByText(/Il passaggio al rango 2 non dipende dai punti/)).toBeInTheDocument();
     const cards = screen.getAllByRole('listitem');
     expect(within(cards[1]).queryByText(/Punti verso il rango/)).not.toBeInTheDocument();
+    // stati sempre spiegati: non sbloccato, rango massimo
+    expect(within(cards[1]).getByText(/Confidente non ancora sbloccato/)).toBeInTheDocument();
+    expect(within(cards[2]).getByText('Rango massimo raggiunto.')).toBeInTheDocument();
     expect(within(cards[2]).getByText('MAX')).toBeInTheDocument();
     expect(within(cards[2]).getByLabelText('Rango di Morgana più uno')).toBeDisabled();
     // rango > 0 → la casella "Sbloccato" non è modificabile; a rango 0 lo è
