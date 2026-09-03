@@ -104,9 +104,9 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
     let esaminati = 0;
     for (const c of candidati) {
       const costoTot = costo + c.costoPartner;
-      // Ordinati per costo: con l'elenco pieno un candidato pari o più caro del peggior ciclo trovato non può migliorare l'insieme
-      // (i costi non diminuiscono lungo la catena), quindi anche i partner gratuiti si fermano appena ci sono abbastanza alternative.
-      if (pieno() && costoTot >= migliori()) break;
+      // Ordinati per costo: con l'elenco pieno un candidato più caro del peggior ciclo trovato non può migliorare l'insieme
+      // (i costi non diminuiscono lungo la catena); a parità di costo può farlo solo se resta più corto del peggiore.
+      if (pieno() && (costoTot > migliori() || (costoTot === migliori() && anelli.length + 1 >= trovati[trovati.length - 1].lunghezza))) break;
       if (++esaminatiTotali > budget) return;
       const anello: AnelloCiclo = { ingrediente: corrente, partner: c.partner, partnerModo: c.modo, partnerCosto: c.costoPartner, risultato: c.ric.risultato, tipo: c.ric.tipo };
       if (c.ric.risultato.id === target.id) {
