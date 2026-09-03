@@ -103,7 +103,7 @@ describe('API obiettivi', () => {
     expect(storico.eventi[0].dettaglio).toBe('Segnato a mano.');
     // ordinamento: aperti prima, poi raggiunti, poi annullati
     lista = (await request(app).get(`/api/partite/${id}/obiettivi`)).body.data as ObiettivoDto[];
-    expect(lista.map((x) => x.stato)).toEqual(['raggiunto', 'raggiunto', 'raggiunto', 'annullato'].slice(0, lista.length));
+    expect(lista.map((x) => x.stato)).toEqual(['raggiunto', 'raggiunto', 'annullato']);
     // eliminazione
     expect((await request(app).delete(`/api/partite/${id}/obiettivi/${pix.id}`)).status).toBe(204);
     expect((await request(app).delete(`/api/partite/${id}/obiettivi/${pix.id}`)).status).toBe(404);
