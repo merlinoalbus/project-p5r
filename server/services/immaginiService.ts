@@ -104,7 +104,11 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
   if (u.protocol !== 'http:' && u.protocol !== 'https:') throw httpErrors.badRequest('url-non-valido', 'Sono ammessi solo URL http/https.');
   let res: Response;
   try {
-    res = await fetch(u, { signal: AbortSignal.timeout(20_000), redirect: 'follow' });
+    res = await fetch(u, {
+      signal: AbortSignal.timeout(20_000),
+      redirect: 'follow',
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ProjectP5R/1.0; +https://github.com/merlinoalbus/project-p5r)', Accept: 'image/*,*/*;q=0.8' },
+    });
   } catch (err) {
     throw httpErrors.badRequest('download-fallito', `Impossibile scaricare l'immagine: ${err instanceof Error ? err.message : String(err)}`);
   }
