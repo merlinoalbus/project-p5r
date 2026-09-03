@@ -22,3 +22,5 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 | 2026-09-03 | Procedura: ogni step validato dal galaxy-task-validator (agent verifica-only, emulato con agent general-purpose) | CLAUDE.md globale dell'utente | U |
 | 2026-09-03 | Elementi visivi: nessuna immagine protetta (Atlus) nel repo; caricamento dall'app + import da URL + asset originali generati da IA grafica, **con ogni testo in italiano**; serve un prompt per OGNI asset (`docs/grafica/prompt-immagini.md`) | vincolo di lingua e di licenza | U/IA |
 | 2026-09-03 | Sezione Confidenti: immagine dell'arcano e del personaggio, rango raggiunto, prossime risposte ottimali per massimizzare i punti | richiesta esplicita | U |
+| 2026-09-03 | Nomi canonici delle skill = localizzazione inglese di **Royal** (es. `Drain Fire`, non `Absorb Fire`); correzioni al dataset primario tracciate in `scripts/seed/correzioniRoyal.json` con fonte | la fonte primaria conserva nomi della versione base; l'app è per Royal | U/IA |
+| 2026-09-03 | Step 0.6 (prompt grafici) anticipato prima di 0.3–0.5 per far partire la produzione degli asset | richiesta dell'utente | U |
