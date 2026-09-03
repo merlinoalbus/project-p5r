@@ -50,7 +50,7 @@ describe('Calcolatore', () => {
     await scegli('Seconda Persona', 'pix', 'Pixie');
     expect(getFondi).toHaveBeenCalledWith(1, 2, { partita: 7 });
     expect(await screen.findByRole('link', { name: 'Jack Frost' })).toHaveAttribute('href', '/compendio/persona/88');
-    expect(screen.getByText(/costo stimato/).textContent).toMatch(/8[.  ]?227 ¥/);
+    expect(screen.getByText(/costo stimato/).textContent).toMatch(/8\D?227 ¥/);
     expect(screen.getByText('Hai entrambi gli ingredienti nella scorta')).toBeInTheDocument();
   });
 
