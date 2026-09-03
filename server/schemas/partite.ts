@@ -146,5 +146,13 @@ export const bodyIsolamento = z.object({
   skillResistenzaId: z.number().int().positive().nullable().optional(),
   skillRimossaId: z.number().int().positive().nullable().optional(),
 });
+export const bodySalvaCiclo = z.object({
+  personaId: z.number().int().positive(),
+  anelli: z.array(z.object({ ingredienteId: z.number().int().positive(), partnerId: z.number().int().positive(), risultatoId: z.number().int().positive() })).min(2).max(5),
+  nome: z.string().max(80).optional(),
+  note: z.string().max(2000).optional(),
+});
+export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
+export const paramsPartitaCiclo = z.object({ id: z.coerce.number().int().positive(), cicloId: z.coerce.number().int().positive() });
 export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);

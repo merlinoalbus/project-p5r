@@ -144,6 +144,13 @@ posseduti con le loro skill) e aggiunge il livello suggerito (`bonusLivelliFusio
 rimuove gli ingredienti e crea il risultato tramite `aggiungiPosseduta` (compendio, eventi, obiettivi) marcandolo «carico» se durante l'Allarme;
 `eseguiForca` e `eseguiIsolamento` registrano i valori osservati (livello, skill, punti) e gli eventi; migrazione 008 aggiunge `carica`.
 
+### Cicli di fusione (Fase 5.5)
+`cicliFusione.ts`: DFS dal bersaglio con cache delle fusioni per Persona (`fusioniDa`), partner procurabili (`registro` a prezzo di evocazione,
+`scorta` gratis, `cattura` se ammessa e non speciale/rara/DLC), potatura per costo parziale rispetto alla K-esima alternativa, ventaglio massimo
+per anello; risultati intermedi mai rari e sotto il livello massimo. `fusioneService.cicliDto` applica lo sconto del Registro e il bonus di
+livello del Confidente per anello. `cicliSalvatiService` rivalida gli anelli inviati dal client (fusioni reali, catena continua, ritorno al
+bersaglio), tiene anello corrente e iterazioni: l'esecuzione dell'anello passa per `eseguiFusione` (5.4) e poi `avanzaCiclo`.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

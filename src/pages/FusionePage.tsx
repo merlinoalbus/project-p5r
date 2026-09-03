@@ -17,11 +17,12 @@ import { PianiFusione } from '../components/fusione/PianiFusione';
 import { CercaSkill } from '../components/fusione/CercaSkill';
 import { PannelloVelluto } from '../components/fusione/PannelloVelluto';
 import { ForcaIsolamento } from '../components/fusione/ForcaIsolamento';
+import { CicliFusione } from '../components/fusione/CicliFusione';
 import { notifica } from '../stores/notificationStore';
 
-type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
+type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string]> = [
-  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'], ['skill', 'Cerca per skill'], ['forca', 'Forca e Isolamento'],
+  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'], ['skill', 'Cerca per skill'], ['cicli', 'Cicli di fusione'], ['forca', 'Forca e Isolamento'],
   ['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro'],
 ];
 
@@ -106,6 +107,9 @@ export function FusionePage() {
         )}
         {persone.dati && vista === 'skill' && (
           <CercaSkill persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} />
+        )}
+        {persone.dati && vista === 'cicli' && (
+          <CicliFusione key={`cicli-${idParam('cicli') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} inizialeId={idParam('cicli')} />
         )}
         {persone.dati && vista === 'forca' && (
           <ForcaIsolamento persone={persone.dati} partitaId={attiva?.id ?? null} velluto={velluto.dati ?? null} />

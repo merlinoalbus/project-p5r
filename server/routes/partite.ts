@@ -8,11 +8,12 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaObiettivo, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
+import { aggiornaCiclo, avanzaCiclo, cicliSalvati, eliminaCiclo, salvaCiclo } from '../services/cicliSalvatiService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
@@ -115,6 +116,24 @@ router.put('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano, body: b
 });
 router.delete('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano }), (req, res) => {
   eliminaPianoSalvato(Number(req.params.id), Number(req.params.pianoId));
+  res.status(204).end();
+});
+
+// ---- Cicli di fusione salvati (Fase 5.5) ----
+router.get('/:id/cicli', validate({ params: paramsPartita }), (req, res) => {
+  res.json(cicliSalvati(Number(req.params.id)));
+});
+router.post('/:id/cicli', validate({ params: paramsPartita, body: bodySalvaCiclo }), (req, res) => {
+  res.status(201).json(salvaCiclo(Number(req.params.id), req.body as Parameters<typeof salvaCiclo>[1]));
+});
+router.put('/:id/cicli/:cicloId', validate({ params: paramsPartitaCiclo, body: bodyAggiornaCiclo }), (req, res) => {
+  res.json(aggiornaCiclo(Number(req.params.id), Number(req.params.cicloId), req.body));
+});
+router.post('/:id/cicli/:cicloId/avanza', validate({ params: paramsPartitaCiclo }), (req, res) => {
+  res.json(avanzaCiclo(Number(req.params.id), Number(req.params.cicloId)));
+});
+router.delete('/:id/cicli/:cicloId', validate({ params: paramsPartitaCiclo }), (req, res) => {
+  eliminaCiclo(Number(req.params.id), Number(req.params.cicloId));
   res.status(204).end();
 });
 

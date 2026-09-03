@@ -9,8 +9,8 @@
 
 import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { paramsPersonaId, queryCercaSkill, queryEredita, queryFondi, queryPiani, queryRicette } from '../schemas/fusione.js';
-import { cercaPerSkillDto, ereditaDto, fondiDto, fusioniConDto, pianiDto, ricettePerDto, vellutoDto } from '../services/fusione/fusioneService.js';
+import { paramsPersonaId, queryCercaSkill, queryEredita, queryFondi, queryPiani, queryCicli, queryRicette } from '../schemas/fusione.js';
+import { cercaPerSkillDto, cicliDto, ereditaDto, fondiDto, fusioniConDto, pianiDto, ricettePerDto, vellutoDto } from '../services/fusione/fusioneService.js';
 import { z } from 'zod';
 
 const router = Router();
@@ -43,6 +43,14 @@ router.get('/eredita', validate({ query: queryEredita }), (req, res) => {
 router.get('/cerca-skill', validate({ query: queryCercaSkill }), (req, res) => {
   const q = req.query as unknown as { skill: number[]; risultato?: number; partita?: number; dlc?: number[]; livelloMax?: number; limite?: number };
   res.json(cercaPerSkillDto(q.skill, { risultatoId: q.risultato, partitaId: q.partita, dlc: q.dlc, livelloMax: q.livelloMax, limite: q.limite }));
+});
+
+router.get('/cicli/:personaId', validate({ params: paramsPersonaId, query: queryCicli }), (req, res) => {
+  const q = req.query as unknown as { partita?: number; dlc?: string; lunghezza?: number; alternative?: number; catture?: string; limitaLivello?: string; livelloMax?: number };
+  res.json(cicliDto(Number(req.params.personaId), {
+    partitaId: q.partita, dlc: q.dlc ? q.dlc.split(',').map(Number).filter((n) => Number.isInteger(n)) : undefined,
+    lunghezza: q.lunghezza, alternative: q.alternative, catture: q.catture === 'true', limitaLivello: q.limitaLivello === 'true', livelloMax: q.livelloMax,
+  }));
 });
 
 router.get('/velluto', validate({ query: z.object({ partita: z.coerce.number().int().positive() }) }), (req, res) => {
