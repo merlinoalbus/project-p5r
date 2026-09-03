@@ -133,6 +133,13 @@ describe('API', () => {
     expect(soloUtente.body.data).toHaveLength(1);
     const rip = await request(app).delete('/api/traduzioni/arcana/Fool');
     expect(rip.body.data).toMatchObject({ testo: 'Matto', fonte: 'seed' });
+    // Ripristino anche per gli ambiti della localizzazione (skill, persona, termine)
+    for (const [ambito, chiave, seed] of [['skill', 'Cleave', 'Fendente'], ['persona', 'Regent', 'Reggente'], ['termine', 'Hold Up', 'Rapina']] as const) {
+      expect((await request(app).put(`/api/traduzioni/${ambito}/${encodeURIComponent(chiave)}`).send({ testo: 'prova' })).body.data.testo).toBe('prova');
+      const rip = await request(app).delete(`/api/traduzioni/${ambito}/${encodeURIComponent(chiave)}`);
+      expect(rip.status).toBe(200);
+      expect(rip.body.data).toMatchObject({ testo: seed, fonte: 'seed' });
+    }
     expect((await request(app).put('/api/traduzioni/arcana/Inesistente').send({ testo: 'x' })).status).toBe(404);
     expect((await request(app).put('/api/traduzioni/arcana/Fool').send({ testo: '' })).status).toBe(400);
   });

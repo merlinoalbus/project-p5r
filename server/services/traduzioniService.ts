@@ -144,6 +144,10 @@ function testoDalSeed(ambito: string, chiave: string, seedDir: string): string |
     case 'descrizioneOggetto': return tr.descrizioniOggetti[chiave] ?? null;
     case 'negoziazione': return tr.negoziazioni[chiave] ?? null;
     case 'fonteCarta': return tr.fontiCarta[chiave] ?? null;
+    // Localizzazione italiana dalla guida (step 0.11)
+    case 'skill': return tr.skill?.[chiave] ?? null;
+    case 'persona': return tr.persone?.[chiave] ?? null;
+    case 'termine': return tr.termini?.find((t) => t.chiave === chiave)?.nome ?? null;
     default: return null;
   }
 }
