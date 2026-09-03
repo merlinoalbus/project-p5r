@@ -6,9 +6,10 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaObiettivo, bodyCreaObiettivo, paramsPartita, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyAggiornaObiettivo, bodyAggiornaPianoSalvato, bodyCreaObiettivo, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
+import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
 import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
@@ -95,6 +96,21 @@ router.put('/:id/obiettivi/:obiettivoId', validate({ params: paramsPartitaObiett
 });
 router.delete('/:id/obiettivi/:obiettivoId', validate({ params: paramsPartitaObiettivo }), (req, res) => {
   eliminaObiettivo(Number(req.params.id), Number(req.params.obiettivoId));
+  res.status(204).end();
+});
+
+// ---- Piani salvati (Fase 5.3) ----
+router.get('/:id/piani', validate({ params: paramsPartita, query: queryPianiSalvati }), (req, res) => {
+  res.json(pianiSalvati(Number(req.params.id), (req.query as unknown as { obiettivo?: number }).obiettivo));
+});
+router.post('/:id/piani', validate({ params: paramsPartita, body: bodySalvaPiano }), (req, res) => {
+  res.status(201).json(salvaPiano(Number(req.params.id), req.body as Parameters<typeof salvaPiano>[1]));
+});
+router.put('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano, body: bodyAggiornaPianoSalvato }), (req, res) => {
+  res.json(aggiornaPianoSalvato(Number(req.params.id), Number(req.params.pianoId), req.body));
+});
+router.delete('/:id/piani/:pianoId', validate({ params: paramsPartitaPiano }), (req, res) => {
+  eliminaPianoSalvato(Number(req.params.id), Number(req.params.pianoId));
   res.status(204).end();
 });
 

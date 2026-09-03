@@ -56,7 +56,7 @@ function obiettivoDto(r: RigaObiettivo): ObiettivoDto {
     speciale: r.speciale === 1, rara: r.rara === 1, dlc: r.dlc === 1,
     skill, livelloMin: r.livello_min, priorita: r.priorita, stato: r.stato, note: r.note,
     possedutaId: av.possedutaId, livelloAttuale: av.livelloAttuale, skillMancanti: skill.filter((s) => av.skillMancanti.includes(s.id)), livelloRaggiunto: av.livelloRaggiunto, soddisfatto: av.soddisfatto,
-    raggiuntoAt: r.raggiunto_at, createdAt: r.created_at, updatedAt: r.updated_at,
+    raggiuntoAt: r.raggiunto_at, pianiSalvati: (prepared('SELECT COUNT(*) AS n FROM piano_salvato WHERE obiettivo_id = ?').get(r.id) as { n: number }).n, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
 

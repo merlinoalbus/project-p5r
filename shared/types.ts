@@ -493,6 +493,51 @@ export interface ObiettivoDto {
   livelloRaggiunto: boolean;
   soddisfatto: boolean;
   raggiuntoAt: string | null;
+  /** Piani di fusione salvati legati all'obiettivo. */
+  pianiSalvati: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ---- Piani salvati (Fase 5.3) ----
+
+export interface PassoPianoDto {
+  risultato: PersonaFusioneDto;
+  ingredienti: PersonaFusioneDto[];
+  tipo: TipoFusione;
+  skillPortate: Array<{ id: number; nome: string; nomeIt: string }>;
+}
+
+export interface AvanzamentoPianoDto {
+  /** Il bersaglio è nella scorta. */
+  completato: boolean;
+  foglie: number;
+  foglieInScorta: number;
+  fusioni: number;
+  /** Fusioni il cui risultato è già in scorta. */
+  fusioniFatte: number;
+  /** Fusioni eseguibili adesso (tutti gli ingredienti in scorta). */
+  passi: PassoPianoDto[];
+}
+
+export interface PianoSalvatoDto {
+  id: number;
+  personaId: number;
+  nome: string;
+  nomeIt: string;
+  arcana: string;
+  arcanaNome: string;
+  livello: number;
+  /** Titolo scelto dall'utente (può essere vuoto). */
+  titolo: string;
+  note: string;
+  obiettivoId: number | null;
+  obiettivoStato: StatoObiettivo | null;
+  opzioni: { profondita: number; alternative: number; catture: boolean; livelloMax: number | null; slotFortunato: boolean } | Record<string, never>;
+  skill: SkillRiassuntoDto[];
+  piano: PianoFusioneDto;
+  costo: number;
+  avanzamento: AvanzamentoPianoDto;
   createdAt: string;
   updatedAt: string;
 }

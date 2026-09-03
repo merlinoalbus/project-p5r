@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, ObiettivoDto, PersonaPossedutaDto, StatisticheDto, StatoObiettivo, StoricoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, ObiettivoDto, PersonaPossedutaDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto,
 } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
@@ -69,6 +69,13 @@ export const getObiettivi = (id: number, stato?: StatoObiettivo): Promise<Obiett
 export const creaObiettivo = (id: number, personaId: number, dati: DatiObiettivo = {}): Promise<ObiettivoDto> => apiPost(`/partite/${id}/obiettivi`, { personaId, ...dati });
 export const aggiornaObiettivo = (id: number, obiettivoId: number, dati: DatiObiettivo): Promise<ObiettivoDto> => apiPut(`/partite/${id}/obiettivi/${obiettivoId}`, dati);
 export const eliminaObiettivo = (id: number, obiettivoId: number): Promise<void> => apiDelete(`/partite/${id}/obiettivi/${obiettivoId}`);
+
+/** Piani di fusione salvati (avanzamento ricalcolato sulla scorta). */
+export const getPianiSalvati = (id: number, obiettivo?: number): Promise<PianoSalvatoDto[]> => apiGet(`/partite/${id}/piani${queryString({ obiettivo })}`);
+export const salvaPiano = (id: number, dati: { personaId: number; piano: PianoFusioneDto; opzioni: object; skillIds?: number[]; obiettivoId?: number | null; nome?: string; note?: string }): Promise<PianoSalvatoDto> =>
+  apiPost(`/partite/${id}/piani`, dati);
+export const aggiornaPianoSalvato = (id: number, pianoId: number, dati: { nome?: string; note?: string; obiettivoId?: number | null }): Promise<PianoSalvatoDto> => apiPut(`/partite/${id}/piani/${pianoId}`, dati);
+export const eliminaPianoSalvato = (id: number, pianoId: number): Promise<void> => apiDelete(`/partite/${id}/piani/${pianoId}`);
 
 /** Storico della partita dal più recente; `prima` è il cursore restituito come `prossimo`. */
 export const getStorico = (id: number, opz: { limite?: number; prima?: number; tipi?: string[]; persona?: number } = {}): Promise<StoricoDto> =>
