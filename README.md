@@ -41,8 +41,9 @@ docs/          riferimenti di dominio, decisioni, prompt grafici
 
 ## Deploy (Portainer + GHCR + watchtower esterno)
 
-- `docker-compose.yml`: stack `project_p5r` con frontend nginx (host **13820**, target del tunnel Cloudflare) e backend
-  raggiungibile solo dalla rete interna via proxy `/api/` del frontend;
+- `docker-compose.yml`: stack `project_p5r` senza porte pubblicate: il frontend nginx è collegato alla rete esterna del tunnel
+  Cloudflare (`PROXY_NETWORK`, default `proxy`; cloudflared → `http://project_p5r_fe:80`) e proxa `/api/` verso il backend,
+  che vive solo sulla rete interna;
   DB creato dal backend sul volume `project_p5r_data` al primo avvio (migrazioni + seed inclusi nell'immagine).
 - `.github/workflows/docker-publish.yml`: a ogni push su `main`, dopo il gate CI, pubblica
   `ghcr.io/merlinoalbus/project-p5r-backend` e `…-frontend` con tag `:latest` e `:sha`.

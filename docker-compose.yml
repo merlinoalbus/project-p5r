@@ -1,12 +1,17 @@
 # ============================================================
 # docker-compose — stack project-p5r (host Portainer, repo GitHub)
 # ============================================================
-# Rete: sull'host è esposto SOLO il frontend (13820); il backend è
-# raggiungibile unicamente dal frontend nginx sulla rete interna, che
-# proxa `/api/` verso `project_p5r_be:3101`. Il tunnel Cloudflare punta
-# al frontend (configurazione lato Cloudflare a carico dell'utente).
-# Porte host nel range 1382x (project-jira occupa 13810-13811,
-# manhua 13800-13802).
+# Rete: NESSUNA porta pubblicata sull'host.
+#   - il backend vive solo sulla rete interna dello stack;
+#   - il frontend nginx (che proxa `/api/` verso `project_p5r_be:3101`)
+#     è collegato anche alla rete ESTERNA del reverse proxy/tunnel
+#     Cloudflare (`PROXY_NETWORK`, default `proxy`): cloudflared lo
+#     raggiunge come http://project_p5r_fe:80.
+#   La rete esterna deve già esistere sull'host (docker network create proxy).
+#
+# Variabili di stack (tutte opzionali):
+#   PROXY_NETWORK  nome della rete esterna del tunnel (default: proxy)
+#   LOG_LEVEL      livello di log del backend (default: info)
 #
 # Watchtower: sull'host è attiva un'istanza GLOBALE esterna — qui NON
 # si aggiunge alcun servizio watchtower: la label
@@ -22,7 +27,6 @@ services:
     image: ghcr.io/merlinoalbus/project-p5r-backend:latest
     container_name: project_p5r_be
     restart: unless-stopped
-    # Nessuna porta host: solo la rete interna dello stack.
     expose:
       - "3101"
     environment:
@@ -42,18 +46,22 @@ services:
     image: ghcr.io/merlinoalbus/project-p5r-frontend:latest
     container_name: project_p5r_fe
     restart: unless-stopped
-    ports:
-      - "13820:80"
+    expose:
+      - "80"
     depends_on:
       - project_p5r_be
     networks:
       - project_p5r_network
+      - proxy
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
 networks:
   project_p5r_network:
     driver: bridge
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:-proxy}
 
 volumes:
   project_p5r_data:
