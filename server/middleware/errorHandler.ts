@@ -27,7 +27,8 @@ function mappaErroreExpress(err: unknown): RispostaErrore | null {
   const status = e.status ?? e.statusCode;
   if (typeof status !== 'number' || status < 400 || status >= 500) return null;
   if (e.type === 'entity.too.large' || status === 413) {
-    return { status: 413, code: 'corpo-troppo-grande', message: 'Il contenuto inviato supera la dimensione massima consentita.' };
+    const limite = typeof e.limit === 'number' ? ` (massimo ${Math.round(e.limit / 1024 / 1024)} MB)` : '';
+    return { status: 413, code: 'corpo-troppo-grande', message: `Il contenuto inviato supera la dimensione massima consentita${limite}.` };
   }
   if (e.type === 'entity.parse.failed' || (err instanceof SyntaxError && status === 400)) {
     return { status: 400, code: 'json-malformato', message: 'Il corpo della richiesta non è JSON valido.' };
@@ -65,7 +66,8 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   // corpo oltre il limite, percorso non decodificabile… → envelope canonico in italiano.
   const rispostaExpress = mappaErroreExpress(err);
   if (rispostaExpress) {
-    log.warn({ path: req.path, method: req.method, status: rispostaExpress.status, code: rispostaExpress.code }, 'richiesta rifiutata');
+    const causa = err as Error & { type?: string };
+    log.warn({ path: req.path, method: req.method, status: rispostaExpress.status, code: rispostaExpress.code, tipo: causa.type, causa: causa.message }, 'richiesta rifiutata');
     if (!res.headersSent) {
       res.status(rispostaExpress.status).json({
         error: { code: rispostaExpress.code, message: rispostaExpress.message },

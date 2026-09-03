@@ -158,6 +158,11 @@ describe('API', () => {
     const ryuji = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 3 });
     expect(ryuji.body.data).toMatchObject({ chiave: 'ryuji', rango: 3, sbloccato: true, arcanaNome: 'Carro' });
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 11 })).status).toBe(400);
+    // Invariante: rango > 0 forza lo sblocco anche se il client manda sbloccato=false
+    const forzato = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ sbloccato: false, rango: 5 });
+    expect(forzato.body.data).toMatchObject({ sbloccato: true, rango: 5 });
+    const bloccato = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ sbloccato: false, rango: 0 });
+    expect(bloccato.body.data).toMatchObject({ sbloccato: false, rango: 0 });
 
     // Persona posseduta: aggiunta con skill automatiche, registrazione nel compendio, duplicato rifiutato
     const jf = ((await request(app).get('/api/compendio/persona?q=Jack%20Frost')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Jack Frost')!;
@@ -215,7 +220,7 @@ describe('API', () => {
       const grande = await request(app).put('/api/immagini/arcana/Grande').set('Content-Type', 'image/png').send(Buffer.alloc(9 * 1024 * 1024, 1));
       expect(grande.status).toBe(413);
       expect(grande.body.error.code).toBe('corpo-troppo-grande');
-      expect(grande.body.error.message).toMatch(/dimensione massima/);
+      expect(grande.body.error.message).toMatch(/dimensione massima consentita \(massimo 8 MB\)/);
       expect((await request(app).put('/api/immagini/pippo/Fool').set('Content-Type', 'image/png').send(png)).status).toBe(400);
       expect((await request(app).delete('/api/immagini/arcana/Fool')).status).toBe(204);
       expect((await request(app).get('/api/immagini/arcana/Fool')).status).toBe(404);
