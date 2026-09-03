@@ -464,6 +464,39 @@ export interface PersonaPossedutaDto {
   updatedAt: string;
 }
 
+// ---- Obiettivi (Fase 5.2) ----
+
+export type StatoObiettivo = 'aperto' | 'raggiunto' | 'annullato';
+
+export interface ObiettivoDto {
+  id: number;
+  personaId: number;
+  nome: string;
+  nomeIt: string;
+  arcana: string;
+  arcanaNome: string;
+  livelloBase: number;
+  speciale: boolean;
+  rara: boolean;
+  dlc: boolean;
+  /** Skill desiderate (mai tratti). */
+  skill: SkillRiassuntoDto[];
+  livelloMin: number | null;
+  /** 0 bassa, 1 normale, 2 alta. */
+  priorita: number;
+  stato: StatoObiettivo;
+  note: string;
+  /** Avanzamento rispetto alla scorta attuale. */
+  possedutaId: number | null;
+  livelloAttuale: number | null;
+  skillMancanti: SkillRiassuntoDto[];
+  livelloRaggiunto: boolean;
+  soddisfatto: boolean;
+  raggiuntoAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ---- Storico (Fase 5.1) ----
 
 export interface EventoPartitaDto {

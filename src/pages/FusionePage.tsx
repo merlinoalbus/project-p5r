@@ -51,6 +51,7 @@ export function FusionePage() {
   const vistaParam = params.get('vista');
   const vista: Vista = VISTE.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
+  const skillParam = (params.get('skill') ?? '').split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
   const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
   const sfondoAllarme = useAsset('sfondi/stanza-velluto-allarme');
   const sfondoBase = useAsset('sfondi/stanza-velluto');
@@ -101,7 +102,7 @@ export function FusionePage() {
           <RicettePersona key={`per-${idParam('ricette') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} modalita="per" inizialeId={idParam('ricette')} />
         )}
         {persone.dati && vista === 'piani' && (
-          <PianiFusione key={`piani-${idParam('piani') ?? 0}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inizialeId={idParam('piani')} />
+          <PianiFusione key={`piani-${idParam('piani') ?? 0}-${params.get('skill') ?? ''}`} persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inizialeId={idParam('piani')} skillInizialiIds={skillParam} />
         )}
         {persone.dati && vista === 'skill' && (
           <CercaSkill persone={persone.dati} partitaId={attiva?.id ?? null} livelloProtagonista={attiva?.livelloProtagonista ?? null} inScorta={inScorta} />

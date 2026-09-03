@@ -6,8 +6,9 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  paramsPartita, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaPersona, paramsPartitaPosseduta, queryStorico,
+  bodyAggiornaObiettivo, bodyCreaObiettivo, paramsPartita, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
+import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
@@ -78,6 +79,22 @@ router.put('/:id/persona/:possedutaId', validate({ params: paramsPartitaPossedut
 });
 router.delete('/:id/persona/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
   rimuoviPosseduta(Number(req.params.id), Number(req.params.possedutaId));
+  res.status(204).end();
+});
+
+// ---- Obiettivi (Fase 5.2) ----
+router.get('/:id/obiettivi', validate({ params: paramsPartita, query: queryObiettivi }), (req, res) => {
+  res.json(obiettivi(Number(req.params.id), (req.query as { stato?: 'aperto' | 'raggiunto' | 'annullato' }).stato));
+});
+router.post('/:id/obiettivi', validate({ params: paramsPartita, body: bodyCreaObiettivo }), (req, res) => {
+  const { personaId, ...dati } = req.body as { personaId: number } & Parameters<typeof creaObiettivo>[2];
+  res.status(201).json(creaObiettivo(Number(req.params.id), personaId, dati));
+});
+router.put('/:id/obiettivi/:obiettivoId', validate({ params: paramsPartitaObiettivo, body: bodyAggiornaObiettivo }), (req, res) => {
+  res.json(aggiornaObiettivo(Number(req.params.id), Number(req.params.obiettivoId), req.body));
+});
+router.delete('/:id/obiettivi/:obiettivoId', validate({ params: paramsPartitaObiettivo }), (req, res) => {
+  eliminaObiettivo(Number(req.params.id), Number(req.params.obiettivoId));
   res.status(204).end();
 });
 

@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, StatisticheDto, StoricoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, ObiettivoDto, PersonaPossedutaDto, StatisticheDto, StatoObiettivo, StoricoDto,
 } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
@@ -56,6 +56,19 @@ export const aggiungiPosseduta = (id: number, personaId: number, dati: DatiPosse
 export const aggiornaPosseduta = (id: number, possedutaId: number, dati: DatiPosseduta): Promise<PersonaPossedutaDto> =>
   apiPut(`/partite/${id}/persona/${possedutaId}`, dati);
 export const rimuoviPosseduta = (id: number, possedutaId: number): Promise<void> => apiDelete(`/partite/${id}/persona/${possedutaId}`);
+
+/** Dati di un obiettivo. */
+export interface DatiObiettivo {
+  skillIds?: number[];
+  livelloMin?: number | null;
+  priorita?: number;
+  stato?: StatoObiettivo;
+  note?: string;
+}
+export const getObiettivi = (id: number, stato?: StatoObiettivo): Promise<ObiettivoDto[]> => apiGet(`/partite/${id}/obiettivi${queryString({ stato })}`);
+export const creaObiettivo = (id: number, personaId: number, dati: DatiObiettivo = {}): Promise<ObiettivoDto> => apiPost(`/partite/${id}/obiettivi`, { personaId, ...dati });
+export const aggiornaObiettivo = (id: number, obiettivoId: number, dati: DatiObiettivo): Promise<ObiettivoDto> => apiPut(`/partite/${id}/obiettivi/${obiettivoId}`, dati);
+export const eliminaObiettivo = (id: number, obiettivoId: number): Promise<void> => apiDelete(`/partite/${id}/obiettivi/${obiettivoId}`);
 
 /** Storico della partita dal più recente; `prima` è il cursore restituito come `prossimo`. */
 export const getStorico = (id: number, opz: { limite?: number; prima?: number; tipi?: string[]; persona?: number } = {}): Promise<StoricoDto> =>

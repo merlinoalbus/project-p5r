@@ -6,10 +6,11 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { statistichePerLivello } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
-import { costoDto } from './compendioService.js';
+import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
+import { verificaObiettivi } from './obiettiviService.js';
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto, SkillRiassuntoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
 } from '../../shared/types.js';
 
 interface RigaPartita {
@@ -273,12 +274,6 @@ interface RigaPosseduta {
 const SQL_POSSEDUTA = `SELECT pp.*, p.nome, p.arcana, p.livello AS livello_base, p.forza AS b_forza, p.magia AS b_magia, p.resistenza AS b_resistenza,
   p.agilita AS b_agilita, p.fortuna AS b_fortuna, p.tratto AS tratto_nome FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id`;
 
-function skillDto(id: number): SkillRiassuntoDto | null {
-  const s = prepared('SELECT * FROM skill WHERE id = ?').get(id) as { id: number; nome: string; elemento: string; costo_tipo: 'sp' | 'hp' | 'nessuno'; costo_valore: number; effetto: string } | undefined;
-  if (!s) return null;
-  return { id: s.id, nome: s.nome, nomeIt: t('skill', s.nome), elemento: s.elemento, elementoNome: t('elementoSkill', s.elemento), costo: costoDto(s.costo_tipo, s.costo_valore), effetto: s.effetto, effettoNome: t('effettoSkill', s.effetto) };
-}
-
 function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
   const trattoId = r.tratto_skill_id ?? (prepared('SELECT id FROM skill WHERE nome = ?').get(r.tratto_nome) as { id: number } | undefined)?.id ?? null;
   const skill = (prepared('SELECT slot, skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(r.id) as Array<{ slot: number; skill_id: number }>)
@@ -346,6 +341,7 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
     prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, updated_at) VALUES (?, ?, 1, ?, ?)
       ON CONFLICT(partita_id, persona_id) DO UPDATE SET registrata = 1, livello_registrato = MAX(COALESCE(compendio_partita.livello_registrato, 0), excluded.livello_registrato), updated_at = excluded.updated_at`).run(partitaId, personaId, dati.livello ?? p.livello, adesso);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+    verificaObiettivi(partitaId, personaId);
     return possedutaDto(prepared(`${SQL_POSSEDUTA} WHERE pp.id = ?`).get(id) as RigaPosseduta);
   })();
 }
@@ -402,6 +398,7 @@ export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: 
         ON CONFLICT(partita_id, persona_id) DO UPDATE SET livello_registrato = MAX(COALESCE(compendio_partita.livello_registrato, 0), excluded.livello_registrato), updated_at = excluded.updated_at`).run(partitaId, r.persona_id, dati.livello, adesso);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+    verificaObiettivi(partitaId, r.persona_id);
     return possedutaDto(prepared(`${SQL_POSSEDUTA} WHERE pp.id = ?`).get(possedutaId) as RigaPosseduta);
   })();
 }

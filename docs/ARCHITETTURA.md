@@ -123,6 +123,13 @@ Migrazione 005: `evento_partita` (partita_id, tipo, titolo, dettaglio, dati_json
 etichette italiane stanno in `shared/eventi.ts` (usati anche dal frontend per i filtri per gruppo). Lettura paginata con cursore
 (`prima` = id dell'ultimo evento ricevuto) e totale del filtro; eliminazione singola per correggere errori.
 
+### Obiettivi (Fase 5.2)
+Migrazione 006: `obiettivo_partita` (persona_id, skill_json, livello_min, priorita, stato, note, raggiunto_at) con indice univoco parziale
+sugli obiettivi aperti per Persona. `obiettiviService` non importa `partiteService` (che invece chiama `verificaObiettivi` dentro le
+transazioni di aggiunta/aggiornamento in scorta): l'avanzamento (`skillMancanti`, `livelloRaggiunto`, `soddisfatto`) è calcolato a
+ogni lettura sulla scorta attuale, la chiusura automatica scrive `raggiunto_at` e un evento nello storico. `skillDto` è condiviso in
+`compendioService`.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

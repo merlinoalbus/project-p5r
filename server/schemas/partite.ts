@@ -85,5 +85,15 @@ export const queryStorico = z.object({
   tipi: z.string().max(1000).optional(),
   persona: z.coerce.number().int().positive().optional(),
 });
+const campiObiettivo = {
+  skillIds: z.array(z.number().int().positive()).max(8).optional(),
+  livelloMin: livello.nullable().optional(),
+  priorita: z.number().int().min(0).max(2).optional(),
+  note: z.string().max(2000).optional(),
+};
+export const bodyCreaObiettivo = z.object({ personaId: z.number().int().positive(), ...campiObiettivo });
+export const bodyAggiornaObiettivo = z.object({ ...campiObiettivo, stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
+export const queryObiettivi = z.object({ stato: z.enum(['aperto', 'raggiunto', 'annullato']).optional() });
+export const paramsPartitaObiettivo = z.object({ id: z.coerce.number().int().positive(), obiettivoId: z.coerce.number().int().positive() });
 export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
