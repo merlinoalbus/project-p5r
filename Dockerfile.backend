@@ -1,0 +1,58 @@
+# ============================================================
+# Dockerfile.backend — Express 5 + better-sqlite3 (runtime tsx)
+# ============================================================
+# 3 stage:
+#   1. build: typecheck del BE — l'immagine è gated su tsc pulito
+#   2. deps: npm ci --omit=dev (better-sqlite3 compilato qui se manca
+#      il prebuild musl per l'ABI corrente) + smoke test del binding
+#   3. runtime: node:22-alpine SENZA toolchain, utente non-root,
+#      /data pre-creata e chown-ata (il named volume eredita
+#      l'ownership del mountpoint alla prima creazione)
+#
+# Il dataset Royal (data/seed/) viaggia NELL'IMMAGINE: al primo boot
+# il backend crea il DB sul volume /data e carica il compendio.
+#
+# NB: tsx esegue i .ts direttamente a runtime → tsx/express/cors/
+# pino/pino-pretty/better-sqlite3/zod DEVONO stare in dependencies.
+# ============================================================
+
+# ---- Stage 1: type-check gate ----
+FROM node:22-alpine AS build
+WORKDIR /app
+RUN apk add --no-cache python3 make g++
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY tsconfig.json tsconfig.server.json ./
+COPY server/ ./server/
+COPY shared/ ./shared/
+COPY scripts/ ./scripts/
+RUN npx tsc -b tsconfig.server.json
+
+# ---- Stage 2: production deps ----
+FROM node:22-alpine AS deps
+WORKDIR /app
+RUN apk add --no-cache python3 make g++
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+# Smoke test del binding nativo: fallisce la BUILD, non il primo boot.
+RUN node -e "new (require('better-sqlite3'))(':memory:').close()"
+
+# ---- Stage 3: runtime (nessun toolchain) ----
+FROM node:22-alpine
+WORKDIR /app
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
+ && mkdir -p /data && chown appuser:appgroup /data
+COPY --from=deps  /app/node_modules ./node_modules
+COPY --from=build /app/server  ./server
+COPY --from=build /app/shared  ./shared
+COPY data/seed/ ./data/seed/
+COPY package.json tsconfig.json tsconfig.server.json ./
+ENV NODE_ENV=production \
+    DATA_DIR=/data \
+    SEED_DIR=/app/data/seed \
+    PORT=3101
+EXPOSE 3101
+USER appuser
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3101/api/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+CMD ["npx", "tsx", "server/index.ts"]

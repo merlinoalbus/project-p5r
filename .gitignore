@@ -1,0 +1,24 @@
+# Log
+logs
+*.log
+npm-debug.log*
+
+# Segreti e dati locali (il seed in data/seed/ è versionato)
+.env
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/backups/
+
+# Build
+node_modules
+dist
+dist-ssr
+*.local
+coverage/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

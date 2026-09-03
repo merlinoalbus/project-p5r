@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "p5r-frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--host"],
+      "port": 5273
+    },
+    {
+      "name": "p5r-backend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["tsx", "watch", "--env-file=.env", "server/index.ts"],
+      "port": 3101
+    }
+  ]
+}

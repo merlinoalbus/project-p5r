@@ -1,0 +1,98 @@
+# ============================================================
+# Build & Push Docker Images — GHCR (deploy pull-based)
+# ============================================================
+# Push su main → immagini :latest + :sha su ghcr.io. Sull'host il
+# watchtower esterno rileva il nuovo :latest e aggiorna i container
+# etichettati nel docker-compose.yml (stack Portainer dal repo).
+#
+# Le immagini vengono pubblicate SOLO se il gate CI è verde: il job
+# `verify` è un prerequisito di entrambe le build.
+
+name: Build & Push Docker Images
+
+on:
+  push:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  BE_IMAGE: ghcr.io/merlinoalbus/project-p5r-backend
+  FE_IMAGE: ghcr.io/merlinoalbus/project-p5r-frontend
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint (strict su server/)
+        run: npm run lint:ci
+      - name: Tests
+        run: npm test
+
+  build-backend:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.backend
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.BE_IMAGE }}:latest
+            ${{ env.BE_IMAGE }}:${{ github.sha }}
+
+  build-frontend:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.frontend
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.FE_IMAGE }}:latest
+            ${{ env.FE_IMAGE }}:${{ github.sha }}

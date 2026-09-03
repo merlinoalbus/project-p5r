@@ -1,0 +1,54 @@
+# ============================================================
+# docker-compose — stack project-p5r (host Portainer, repo GitHub)
+# ============================================================
+# Porte host nel range 1382x (project-jira occupa 13810-13811,
+# manhua 13800-13802).
+#
+# Watchtower: sull'host è attiva un'istanza GLOBALE esterna — qui NON
+# si aggiunge alcun servizio watchtower: la label
+# `com.centurylinklabs.watchtower.enable=true` inserisce i due
+# container tra quelli monitorati per l'auto-update da GHCR (:latest).
+#
+# Il DB SQLite viene creato dal backend sul volume `project_p5r_data`
+# al primo avvio (migrazioni + seed del compendio Royal inclusi
+# nell'immagine); sopravvive agli aggiornamenti d'immagine.
+
+services:
+  project_p5r_be:
+    image: ghcr.io/merlinoalbus/project-p5r-backend:latest
+    container_name: project_p5r_be
+    restart: unless-stopped
+    ports:
+      - "13821:3101"
+    environment:
+      - PORT=3101
+      - DATA_DIR=/data
+      - SEED_DIR=/app/data/seed
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      # DB SQLite + WAL + backups/ sopravvivono agli update di immagine.
+      - project_p5r_data:/data
+    networks:
+      - project_p5r_network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  project_p5r_fe:
+    image: ghcr.io/merlinoalbus/project-p5r-frontend:latest
+    container_name: project_p5r_fe
+    restart: unless-stopped
+    ports:
+      - "13820:80"
+    depends_on:
+      - project_p5r_be
+    networks:
+      - project_p5r_network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+networks:
+  project_p5r_network:
+    driver: bridge
+
+volumes:
+  project_p5r_data:
