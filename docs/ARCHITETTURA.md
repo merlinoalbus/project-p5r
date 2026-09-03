@@ -38,7 +38,7 @@ realizzeranno secondo `docs/ROADMAP.md`.
 server/
   index.ts            boot: initDb → runBootBackup → runMigrations → (caricaSeed, previsto) → listen; SIGINT/SIGTERM → server.close + closeDb
   bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
-  config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, LOG_LEVEL, SEED_DIR previsto)
+  config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, LOG_LEVEL, SEED_DIR)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
   db/                 dbService (connessione + pragma + cache statement), migrationRunner (user_version), backupService (7 copie)
   db/migrations/      NNN_nome.ts append-only, registrate in index.ts
@@ -66,7 +66,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
 1. `requestContextMiddleware`: genera/propaga `X-Request-Id`, crea child logger, access log a fine risposta.
 2. `responseShapeMiddleware`: monkey-patch di `res.json` → `{ data }` (idempotente su envelope già formati).
 3. `cors()` + `express.json({ limit: '5mb' })`.
-4. Router di area (`/api/...`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
+4. *(previsto)* Router di area (`/api/...`) con `validate({ params, query, body })` zod prima dell'handler (Express 5: `req.query` è
    un getter, quindi il middleware fa shadowing sull'istanza).
 5. `/api/health` (stato DB + `user_version`), `/api/config` (valori pubblici per il boot FE).
 6. 404 JSON per `/api/*` sconosciute; `errorHandler` ultimo: `HttpError` → status+codice; JSON malformato → 400; altro → 500 con stack nel log.
@@ -96,6 +96,9 @@ livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondi
 
 ## 8. Build, test, deploy
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
+  Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
+  radice del pidfile o all'ultimo runtime nostro (mai oltre un `bash` diverso dal pidfile), poi termina l'albero — Linux: SIGTERM,
+  attesa ≤5 s, SIGKILL ai superstiti; Windows: `taskkill //T` sul WINPID (tradotto dal PID MSYS). Provato su Windows e WSL Ubuntu.
 - CI (`.github/workflows/ci.yml`): typecheck, lint strict su `server/`, lint informativo, test, audit.
 - Immagini (`docker-publish.yml`): dopo il gate `verify`, build & push su GHCR `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`.
 - Il backend in Docker gira come `node --import tsx server/index.ts` (PID 1 = node, riceve SIGTERM da `docker stop`).

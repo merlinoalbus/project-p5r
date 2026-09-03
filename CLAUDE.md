@@ -23,8 +23,8 @@ italiana tramite la tabella `traduzione`.
 - `NOTICE` — attribuzioni delle fonti dati (Apache-2.0) (dallo step 0.2)
 
 ## Convenzioni tecniche (ereditate da project-jira, stesso autore)
-- Backend: `server/index.ts` → `initDb` → `runBootBackup` → `runMigrations` → `caricaSeed` → `listen`.
-  Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/`,
+- Backend: `server/index.ts` → `initDb` → `runBootBackup` → `runMigrations` → `caricaSeed` (dallo step 0.3) → `listen`.
+  Route sottili in `server/routes/`, logica in `server/services/`, schemi zod in `server/schemas/` (cartelle create dallo step 0.4),
   migrazioni append-only in `server/db/migrations/` registrate in `index.ts`.
 - Risposte API: successo `{ data }`, errore `{ error: { code, message, details? }, requestId }`; 404 JSON su `/api/*`.
 - Frontend: pagine in `src/pages/`, componenti in `src/components/<area>/`, stato in `src/stores/` (zustand),

@@ -31,11 +31,11 @@ Altri comandi: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 ## Struttura
 
 ```
-server/        Express: config, bootstrap, middleware, db (migrazioni), routes, services, schemas
+server/        Express: config, bootstrap, middleware, db (migrazioni); routes/services/schemas dallo step 0.4
 src/           React: pages, components (layout tablet-first), stores, services/api, hooks
 shared/        tipi condivisi FE/BE (solo tipi e costanti pure)
 data/seed/     dataset Persona 5 Royal normalizzato (versionato, caricato al boot — dallo step 0.2)
-scripts/       gestione server + pipeline di acquisizione/verifica del dataset
+scripts/       gestione server (+ pipeline di acquisizione/verifica del dataset dallo step 0.2)
 docs/          riferimenti di dominio, decisioni, prompt grafici
 ```
 

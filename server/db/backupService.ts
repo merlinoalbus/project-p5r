@@ -23,6 +23,10 @@ export async function runBootBackup(): Promise<void> {
   if (!fs.existsSync(dbPath)) {
     return;
   }
+  // DB appena creato da initDb (nessuna migrazione applicata): nulla da salvare.
+  if ((getDb().pragma('user_version', { simple: true }) as number) === 0) {
+    return;
+  }
 
   const backupsDir = path.join(config.dataDir, 'backups');
   try {
