@@ -16,6 +16,7 @@ import { migration006 } from './006_obiettivi.js';
 import { migration007 } from './007_piani_salvati.js';
 import { migration008 } from './008_carica.js';
 import { migration009 } from './009_cicli.js';
+import { migration010 } from './010_confidenti_dettaglio.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009];
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010];

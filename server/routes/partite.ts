@@ -8,7 +8,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyRegalo, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
@@ -19,7 +19,7 @@ import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
   aggiornaCompendio, aggiornaConfidente, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita,
-  confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
+  confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
 } from '../services/partiteService.js';
 
 const router = Router();
@@ -62,6 +62,11 @@ router.get('/:id/confidenti', validate({ params: paramsPartita }), (req, res) =>
 });
 router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, body: bodyConfidente }), (req, res) => {
   res.json(aggiornaConfidente(Number(req.params.id), String(req.params.chiave), req.body));
+});
+
+router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
+  const b = req.body as { regalo: string; fatto: boolean };
+  res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.regalo, b.fatto));
 });
 
 // ---- Compendio personale ----

@@ -208,8 +208,28 @@ export function confidenti(partitaId: number): ConfidentePartitaDto[] {
       punti: c.punti, puntiNecessari: c.rango >= 10 ? null : c.punti_necessari,
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
+      regaliFatti: regaliFattiDi(partitaId, c.chiave),
       note: c.note, updatedAt: c.updated_at,
     }));
+}
+
+function regaliFattiDi(partitaId: number, chiave: string): string[] {
+  return (prepared('SELECT regalo FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? ORDER BY fatto_at').all(partitaId, chiave) as Array<{ regalo: string }>).map((r) => r.regalo);
+}
+
+/** Segna un regalo come consegnato (o non consegnato) al Confidente nella partita. */
+export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: string, fatto: boolean): ConfidentePartitaDto {
+  rigaPartita(partitaId);
+  if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
+  const nome = regalo.trim();
+  if (!nome) throw httpErrors.badRequest('regalo-vuoto', 'Indica il nome del regalo.');
+  const adesso = nowIso();
+  getDb().transaction(() => {
+    if (fatto) prepared('INSERT OR IGNORE INTO regalo_partita (partita_id, confidente_chiave, regalo, fatto_at) VALUES (?, ?, ?, ?)').run(partitaId, chiave, nome, adesso);
+    else prepared('DELETE FROM regalo_partita WHERE partita_id = ? AND confidente_chiave = ? AND regalo = ?').run(partitaId, chiave, nome);
+    prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
+  })();
+  return confidenti(partitaId).find((c) => c.chiave === chiave)!;
 }
 
 export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {

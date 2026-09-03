@@ -150,6 +150,42 @@ export interface ConfidenteDto {
   ordine: number;
 }
 
+export interface SceltaDialogoDto {
+  ordine: number | null;
+  testo: string;
+  /** Note ♪ (1–3) secondo la guida; null se non indicato. */
+  punti: number | null;
+  puntiTesto: string | null;
+  romantica: boolean;
+  avviso: string | null;
+}
+
+export interface DialogoConfidenteDto {
+  id: number;
+  rango: number | null;
+  etichetta: string;
+  note: string;
+  scelte: SceltaDialogoDto[];
+}
+
+export interface RegaloConfidenteDto {
+  nome: string;
+  dove: string | null;
+  costo: string | null;
+  effetto: string | null;
+}
+
+/** Scheda completa di un Confidente (Fase 6.1). */
+export interface ConfidenteDettaglioDto extends ConfidenteDto {
+  abilita: Array<{ rango: number; nome: string; descrizione: string }>;
+  dialoghi: DialogoConfidenteDto[];
+  regali: RegaloConfidenteDto[];
+  regaliSconsigliati: string[];
+  disponibilita: { giorni: string[]; fasce: string[]; luogo: string; sbloccoData: string; sbloccoRequisiti: string; note: string };
+  noteGenerali: string;
+  fonti: string[];
+}
+
 /** Glossario completo per il frontend (cache locale). */
 /** Termine di gioco della localizzazione italiana ufficiale. */
 export interface TermineDto {
@@ -402,6 +438,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   mancanti: number | null;
   /** True se nella scorta della partita c'è almeno una Persona dello stesso arcano (bonus ×1,5 nel gioco). */
   personaArcanoInScorta: boolean;
+  /** Regali già consegnati in questa partita (nomi). */
+  regaliFatti: string[];
   note: string;
   updatedAt: string | null;
 }

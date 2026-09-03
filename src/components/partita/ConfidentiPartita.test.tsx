@@ -4,6 +4,7 @@
 // ============================================================
 
 import { act, render, screen, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
 
@@ -25,7 +26,7 @@ vi.mock('../../services/api', () => ({
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
   return {
     chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
-    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, personaArcanoInScorta: false, note: '', updatedAt: null,
+    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], personaArcanoInScorta: false, note: '', updatedAt: null,
     ...sovrascrivi,
   };
 }
@@ -39,9 +40,9 @@ beforeEach(() => {
 
 describe('ConfidentiPartita', () => {
   it('propone il bonus arcano dalla scorta e invia note, moltiplicatori e annulla ultimo', async () => {
-    getConfidentiPartita.mockResolvedValue([confidente({ personaArcanoInScorta: true })]);
-    aggiornaConfidente.mockResolvedValueOnce(confidente({ personaArcanoInScorta: true, punti: 15, mancanti: 5 }));
-    render(<ConfidentiPartita partitaId={1} />);
+    getConfidentiPartita.mockResolvedValue([confidente({ regaliFatti: [], personaArcanoInScorta: true })]);
+    aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 15, mancanti: 5 }));
+    render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
 
     const chip = await screen.findByRole('button', { name: '×1,5 Persona Carro (in scorta)' });
     expect(chip).toHaveAttribute('aria-pressed', 'true');
@@ -59,14 +60,14 @@ describe('ConfidentiPartita', () => {
     await act(async () => { screen.getByRole('button', { name: 'Invito SMS ×1,2' }).click(); });
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 1 nota (13,5 punti)')).toBeInTheDocument();
 
-    aggiornaConfidente.mockResolvedValueOnce(confidente({ personaArcanoInScorta: true, punti: 0, mancanti: 20 }));
+    aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 0, mancanti: 20 }));
     await act(async () => { screen.getByRole('button', { name: /annulla l'ultimo incremento/ }).click(); });
     expect(aggiornaConfidente).toHaveBeenLastCalledWith(1, 'ryuji', { deltaPunti: -15 });
   });
 
   it('senza Persona in scorta il bonus è spento ma forzabile', async () => {
     getConfidentiPartita.mockResolvedValue([confidente({})]);
-    render(<ConfidentiPartita partitaId={1} />);
+    render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
     const chip = await screen.findByRole('button', { name: '×1,5 Persona Carro' });
     expect(chip).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 3 note (15 punti)')).toBeInTheDocument();
@@ -80,7 +81,7 @@ describe('ConfidentiPartita', () => {
       confidente({ chiave: 'igor', nome: 'Igor', arcana: 'Fool', arcanaNome: 'Matto', rango: 0, sbloccato: false, puntiNecessari: null, mancanti: null }),
       confidente({ chiave: 'morgana', nome: 'Morgana', arcana: 'Magician', arcanaNome: 'Mago', rango: 10, puntiNecessari: null, mancanti: null }),
     ]);
-    render(<ConfidentiPartita partitaId={1} />);
+    render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
     expect(await screen.findByText(/Il passaggio al rango 2 non dipende dai punti/)).toBeInTheDocument();
     const cards = screen.getAllByRole('listitem');
     expect(within(cards[1]).queryByText(/Punti verso il rango/)).not.toBeInTheDocument();

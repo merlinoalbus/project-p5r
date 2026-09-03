@@ -47,6 +47,10 @@ export const getConfidentiPartita = (id: number): Promise<ConfidentePartitaDto[]
 export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaConfidente): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati);
 
+/** Regalo consegnato (o no) a un Confidente nella partita. */
+export const impostaRegaloFatto = (id: number, chiave: string, regalo: string, fatto: boolean): Promise<ConfidentePartitaDto> =>
+  apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}/regali`, { regalo, fatto });
+
 export const getCompendioPartita = (id: number): Promise<CompendioPartitaDto[]> => apiGet(`/partite/${id}/compendio`);
 export const aggiornaCompendio = (id: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): Promise<CompendioPartitaDto[]> =>
   apiPut(`/partite/${id}/compendio/${personaId}`, dati);

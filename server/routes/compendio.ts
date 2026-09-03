@@ -6,7 +6,7 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
-  dettaglioPersona, dettaglioSkill, elencaArcani, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
+  dettaglioPersona, dettaglioSkill, elencaArcani, dettaglioConfidente, elencaConfidenti, elencaOggetti, elencaPersona, elencaSkill, glossario, regoleFusione, terminiGlossario,
 } from '../services/compendioService.js';
 
 const router = Router();
@@ -52,6 +52,9 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/confidenti/:chiave', (req, res) => {
+  res.json(dettaglioConfidente(String(req.params.chiave)));
 });
 
 export default router;
