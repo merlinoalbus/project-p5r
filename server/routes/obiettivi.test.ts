@@ -69,8 +69,8 @@ describe('API obiettivi', () => {
     let lista = (await request(app).get(`/api/partite/${id}/obiettivi`)).body.data as ObiettivoDto[];
     expect(lista[0]).toMatchObject({ stato: 'aperto', possedutaId: poss.id, livelloAttuale: 11, livelloRaggiunto: false, soddisfatto: false });
     expect(lista[0].skillMancanti.map((s) => s.nome)).toContain('Agi');
-    // livello 15 e Agi appresa → chiusura automatica con evento
-    const skillIds = [...poss.skill.map((s) => s.id).filter((s) => s !== agi).slice(0, 7), agi];
+    // livello 15, Agi e Dia apprese → chiusura automatica con evento
+    const skillIds = [...poss.skill.map((s) => s.id).filter((s) => s !== agi && s !== dia).slice(0, 6), agi, dia];
     await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 15, skillIds });
     lista = (await request(app).get(`/api/partite/${id}/obiettivi`)).body.data as ObiettivoDto[];
     expect(lista[0]).toMatchObject({ stato: 'raggiunto', soddisfatto: true, livelloRaggiunto: true });
