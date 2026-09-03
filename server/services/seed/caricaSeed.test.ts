@@ -2,6 +2,7 @@
 // Test caricaSeed — caricamento reale di data/seed in un DB in memoria
 // ============================================================
 
+import fs from 'node:fs';
 import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
@@ -63,7 +64,8 @@ describe('caricaSeed', () => {
     expect((db.prepare("SELECT testo FROM traduzione WHERE ambito = 'arcana' AND chiave = 'Fool'").get() as { testo: string }).testo).toBe('Il Folle');
     expect((db.prepare("SELECT testo FROM traduzione WHERE ambito = 'arcana' AND chiave = 'Magician'").get() as { testo: string }).testo).toBe('Mago');
     expect(n('SELECT COUNT(*) AS n FROM persona')).toBe(232);
-    expect(n('SELECT COUNT(*) AS n FROM persona_skill')).toBe(n('SELECT COUNT(*) AS n FROM persona_skill'));
+    const seedPersone = JSON.parse(fs.readFileSync(path.join(DIR_SEED, 'persona.json'), 'utf-8')) as Array<{ skill: unknown[] }>;
+    expect(n('SELECT COUNT(*) AS n FROM persona_skill')).toBe(seedPersone.reduce((tot, p) => tot + p.skill.length, 0));
   });
 
   it('i dati utente sopravvivono al reseed (FK stabili)', () => {

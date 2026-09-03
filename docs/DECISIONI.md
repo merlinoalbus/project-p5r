@@ -24,3 +24,8 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 | 2026-09-03 | Sezione Confidenti: immagine dell'arcano e del personaggio, rango raggiunto, prossime risposte ottimali per massimizzare i punti | richiesta esplicita | U |
 | 2026-09-03 | Nomi canonici delle skill = localizzazione inglese di **Royal** (es. `Drain Fire`, non `Absorb Fire`); correzioni al dataset primario tracciate in `scripts/seed/correzioniRoyal.json` con fonte | la fonte primaria conserva nomi della versione base; l'app è per Royal | U/IA |
 | 2026-09-03 | Step 0.6 (prompt grafici) anticipato prima di 0.3–0.5 per far partire la produzione degli asset | richiesta dell'utente | U |
+| 2026-09-03 | Reseed: `persona`/`skill`/`oggetto`/`confidente` in UPSERT per chiave naturale con id stabili, righe sparite dal seed MAI cancellate; relazioni di gioco svuotate e ricaricate; hash = versione + contenuto dei 6 JSON (metadati esclusi) | i dati utente referenziano gli id; un aggiornamento del dataset non deve mai perdere lo stato della partita | IA |
+| 2026-09-03 | `traduzione.fonte='utente'` non viene mai sovrascritta dal seed | l'utente corregge le rese italiane dall'app e le correzioni devono sopravvivere | U/IA |
+| 2026-09-03 | Una Persona per partita in `persona_posseduta` (UNIQUE partita+persona) | nel gioco la scorta non ammette duplicati | IA |
+| 2026-09-03 | Lo health check espone `userVersion` dello schema (oggi 3) | diagnostica rapida in produzione | IA |
+

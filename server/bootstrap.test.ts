@@ -20,7 +20,7 @@ describe('createApp', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.status).toBe('ok');
     expect(res.body.data.db.ok).toBe(true);
-    expect(typeof res.body.data.db.userVersion).toBe('number');
+    expect(res.body.data.db.userVersion).toBe(0);
     expect(res.headers['x-request-id']).toBeTruthy();
   });
 
