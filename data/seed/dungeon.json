@@ -6990,5 +6990,2258 @@
    "https://megamitensei.fandom.com/wiki/Takuto_Maruki",
    "https://megamitensei.fandom.com/wiki/Councillor_Arcana"
   ]
+ },
+ {
+  "chiave": "mementos",
+  "tipo": "mementos",
+  "ordine": 10,
+  "nome": "Mementos (i Dedali)",
+  "sovrano": "Il pubblico (cognizione collettiva)",
+  "arcanaSovrano": "",
+  "date": {
+   "sblocco": "9 maggio (prima esplorazione con Morgana)",
+   "scadenza": "",
+   "furtoConsigliato": ""
+  },
+  "livelloConsigliato": "",
+  "note": "I nove Dedali dei Mementos in ordine di profondità. Le Ombre per Dedalo sono elencate come punti di tipo «Persona» con maschera, debolezze, resistenze e personalità (dalla guida allgamestaff, che non riporta i livelli). Timbri e fiori si scambiano da Jose (vedi «Richieste dei Mementos»).",
+  "aree": [
+   {
+    "chiave": "mementos-01-qimranut",
+    "ordine": 0,
+    "nome": "Dedalo di Qimranut",
+    "descrizione": "2 Aree (Area 1 e Area 2) Sblocco: 7 maggio (Sabato 5/07). Aver completato il Palazzo di Kamoshida Morgana porta il gruppo nel Sottopasso di Shibuya, dove si scopre l'esistenza dei Memento.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Primo incontro con Jose",
+      "descrizione": "Dopo aver completato la richiesta 'Un ex piuttosto appiccicoso' e essere usciti dai Memento (sulla via di casa, non dentro il dungeon), si incontra Jose per la prima volta: chiede di raccogliere 'fiori' per lui e regala una stella.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Banchina GIÙ - Area 2",
+      "descrizione": "Scendendo la scala mobile dalla Zona 1 si raggiunge la Zona 2; qui Morgana fa indagare sulla parete di fronte, poi si torna automaticamente a casa.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "altro",
+      "nome": "Nessun timbro/fiore raccoglibile alla prima visita",
+      "descrizione": "Alla primissima visita i fiori non sono ancora disponibili (si sbloccano da Aiyatsbus in poi); consigliato tornare qui in seguito per raccogliere fiori e timbri lasciati da Jose.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Piromane delle cripte",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Jack-o'-lantern · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Jack-o'-lantern",
+       "resisteA": "Fuoco (assorbe)",
+       "deboleA": "Ghiaccio, Vento",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Ragazza seducente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Pixie · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Pixie",
+       "resisteA": "Tuono (dimezza), Sacro (dimezza)",
+       "deboleA": "Armi da fuoco, Ghiaccio, Maledizione",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Bestia bicorne sporca",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Bicorno · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Bicorno",
+       "resisteA": "Maledizione (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Fiordiforca",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mandragora · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mandragora",
+       "resisteA": "Tuono (dimezza)",
+       "deboleA": "Fuoco",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Cavaliere brutale",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Berith · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Berith",
+       "resisteA": "Armi da fuoco (annulla), Fuoco (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Viscida carne marcescente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Slime · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Slime",
+       "resisteA": "Danni fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Fuoco, Vento",
+       "personalita": "Timida",
+       "note": "Ombra esclusiva del Dedalo di Qimranut secondo la tabella 'Nemici esclusivi dei Memento'."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-02-aiyatsbus",
+    "ordine": 1,
+    "nome": "Dedalo di Aiyatsbus",
+    "descrizione": "7 Aree (Area 1-7); Sala d'attesa in Area 4; 8 Timbri totali Aver completato interamente il Palazzo di Madarame (boss sconfitto). Alcune richieste (Bullismo sui bulli) richiedono anche il completamento del Palazzo di Kaneshiro. All'ingresso segue un tutorial; Morgana consegna 2 Goho-M.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Trova Jose",
+      "descrizione": "Jose va rintracciato nell'area (posizione casuale, icona dorata); parlandogli si può lasciare l'area in sicurezza. Migliora gli accessori Cristallo della Lussuria e Cristallo della Vanità in Anello della lussuria/Anello della vanità e consegna il Libro dei timbri.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "sicura",
+      "nome": "Sala d'attesa - Area 4",
+      "descrizione": "Equivalente di una Safe Room dei Palazzi: viaggio veloce e salvataggio.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "oggetto",
+      "nome": "8 Timbri",
+      "descrizione": "8 Timbri raccoglibili nell'area, di solito sulla banchina di uscita.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "altro",
+      "nome": "Il Mietitore",
+      "descrizione": "Può comparire già nella prima area di Aiyatsbus se si resta troppo a lungo sullo stesso piano.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Piromane delle cripte",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Jack-o'-lantern · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Jack-o'-lantern",
+       "resisteA": "Fuoco (assorbe)",
+       "deboleA": "Ghiaccio, Vento",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Ragazza seducente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Pixie · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Pixie",
+       "resisteA": "Tuono (dimezza), Sacro (dimezza)",
+       "deboleA": "Armi da fuoco, Ghiaccio, Maledizione",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Bestia bicorne sporca",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Bicorno · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Bicorno",
+       "resisteA": "Maledizione (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Bruto notturno",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Incubo · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Incubo",
+       "resisteA": "Tuono (dimezza)",
+       "deboleA": "Fuoco, Sacro",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Fiordiforca",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mandragora · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mandragora",
+       "resisteA": "Tuono (dimezza)",
+       "deboleA": "Fuoco",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Famiglio in vaso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Agathion · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Agathion",
+       "resisteA": "Armi da fuoco (dimezza), Tuono (dimezza)",
+       "deboleA": "Vento",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Gatto cacciatore",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Cait Sith · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Cait Sith",
+       "resisteA": "Tuono (dimezza)",
+       "deboleA": "Vento",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Domestica combinaguai",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Silky · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Silky",
+       "resisteA": "Ghiaccio (dimezza)",
+       "deboleA": "Fuoco, Tuono",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Meretrice del crepuscolo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Succube · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Succube",
+       "resisteA": "Fuoco (dimezza), Maledizione (annulla)",
+       "deboleA": "Vento, Sacro",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Folle cavallo di palude",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kelpie · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kelpie",
+       "resisteA": "Ghiaccio (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Messaggero zelante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Angelo · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Angelo",
+       "resisteA": "Tuono (dimezza), Sacro (annulla)",
+       "deboleA": "Armi da fuoco, Maledizione",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Castigatore divino",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Arcangelo · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Arcangelo",
+       "resisteA": "Sacro (annulla)",
+       "deboleA": "Tuono, Maledizione",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 16,
+      "tipo": "persona",
+      "nome": "Cavaliere brutale",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Berith · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Berith",
+       "resisteA": "Armi da fuoco (annulla), Fuoco (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 17,
+      "tipo": "persona",
+      "nome": "Cavaliere bellicoso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Eligor · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Eligor",
+       "resisteA": "Fuoco (dimezza), Maledizione (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 18,
+      "tipo": "persona",
+      "nome": "Reggente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Reggente · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Reggente",
+       "resisteA": "Danno fisico, Armi da fuoco, Fuoco, Ghiaccio, Tuono, Vento, Sacro, Maledizione",
+       "deboleA": "Psicocinesi, Nucleare",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 19,
+      "tipo": "persona",
+      "nome": "Viscida carne marcescente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Slime · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Slime",
+       "resisteA": "Danni fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Fuoco, Vento",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 20,
+      "tipo": "persona",
+      "nome": "Demone saltellante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Obariyon · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Obariyon",
+       "resisteA": "Danni fisici (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Irritabile",
+       "note": "Ombra esclusiva del Dedalo di Aiyatsbus."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     },
+     {
+      "ordine": 21,
+      "tipo": "persona",
+      "nome": "Spiritello degli alberi",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kodama · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kodama",
+       "resisteA": "Fuoco (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Giocosa",
+       "note": "Ombra esclusiva del Dedalo di Aiyatsbus."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-03-chemdah",
+    "ordine": 2,
+    "nome": "Dedalo di Chemdah",
+    "descrizione": "8 Aree (Area 1-8); Sala d'attesa in Area 5 Prime aree: Palazzo di Madarame completato. Per addentrarsi più a fondo e completare alcune richieste: Palazzo di Kaneshiro completato.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Sala d'attesa - Area 5",
+      "descrizione": "Punto di viaggio veloce e salvataggio.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Deviazioni",
+      "descrizione": "Prima menzione delle 'deviazioni': piani con planimetria anomala che offrono effetti positivi e negativi contemporaneamente (spariscono lasciando il piano); alla prima si sblocca il trofeo 'Devianza cognitiva'.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "altro",
+      "nome": "Nuovi scambi",
+      "descrizione": "Con l'accesso a Chemdah si sbloccano da Jose: Carta bianca, Fiala confusione S, Fiala del sonno L, Ambra grigia MA/AG/FO, Kogatana nera, Replica d'arma, Veste nera.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Ballerino affascinante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Ame no Uzume · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Ame no Uzume",
+       "resisteA": "Fuoco (assorbe)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Ninfa dell'acqua",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Apsaras · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Apsaras",
+       "resisteA": "Ghiaccio",
+       "deboleA": "Tuono",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Cavaliere bellicoso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Eligor · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Eligor",
+       "resisteA": "Fuoco (dimezza), Maledizione (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Donna dell'albero funesto",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Hua Po · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Hua Po",
+       "resisteA": "Fuoco",
+       "deboleA": "Armi da fuoco, Ghiaccio",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Fantasma di cane",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Inugami · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Inugami",
+       "resisteA": "Fuoco (annulla), Maledizione (annulla)",
+       "deboleA": "Vento",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Pupazzo di neve beffardo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Jack Frost · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Jack Frost",
+       "resisteA": "Ghiaccio (annulla)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Monaco stolto",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Koppa Tengu · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Koppa Tengu",
+       "resisteA": "Vento",
+       "deboleA": "Ghiaccio, Sacro",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Vecchietto della foglia",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Koropokguru · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Koropokguru",
+       "resisteA": "Armi da fuoco, Ghiaccio, Vento",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Fabbro amareggiato",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Ippon-Datara · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Ippon-Datara",
+       "resisteA": "Fuoco (dimezza), Sacro (dimezza), Maledizione (dimezza), Vento (respinge)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Giocosa",
+       "note": "Ombra esclusiva del Dedalo di Chemdah."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Guerriero notturno",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mokoi · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mokoi",
+       "resisteA": "Tuono",
+       "deboleA": "Vento",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Chimera notturna",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Nue · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Nue",
+       "resisteA": "Ghiaccio, Maledizione (annulla)",
+       "deboleA": "Fuoco",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Cadavere d'uccello",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Onmoraki · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Onmoraki",
+       "resisteA": "Fuoco, Maledizione (annulla)",
+       "deboleA": "Ghiaccio, Sacro",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Reggente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Reggente · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Reggente",
+       "resisteA": "Danno fisico, Armi da fuoco, Fuoco, Ghiaccio, Tuono, Vento, Sacro, Maledizione",
+       "deboleA": "Psicocinesi, Nucleare",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 16,
+      "tipo": "persona",
+      "nome": "Leone dei tetti",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Shiisaa · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Shiisaa",
+       "resisteA": "Danno fisico, Sacro (annulla)",
+       "deboleA": "Psicocinesi, Maledizione",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 17,
+      "tipo": "persona",
+      "nome": "Portatore di disgrazie",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Shiki-Ouji · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Shiki-Ouji",
+       "resisteA": "Danno fisico (annulla), Armi da fuoco (annulla), Sacro (annulla), Maledizione (annulla)",
+       "deboleA": "Nucleare",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 18,
+      "tipo": "persona",
+      "nome": "Spirito montano rumoroso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Sudama · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Sudama",
+       "resisteA": "Vento (respinge)",
+       "deboleA": "Ghiaccio, Nucleare",
+       "personalita": "Timida",
+       "note": "Ombra esclusiva del Dedalo di Chemdah."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     },
+     {
+      "ordine": 19,
+      "tipo": "persona",
+      "nome": "Cavaliere bellicoso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Eligor · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Eligor",
+       "resisteA": "Fuoco (dimezza), Maledizione (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Irritabile",
+       "note": "Ombra esclusiva del Dedalo di Chemdah (elencata due volte nella tabella)."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-04-kaitul",
+    "ordine": 3,
+    "nome": "Dedalo di Kaitul",
+    "descrizione": "10 Aree (Area 1-10); Sala d'attesa in Area 6; 20 Timbri totali Palazzo di Kaneshiro completato (sconfiggendo l'Ombra di Mogami in Chemdah si apre Kaitul). Le richieste vere e proprie richiedono anche il completamento del Palazzo di Futaba.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "sicura",
+      "nome": "Sala d'attesa - Area 6",
+      "descrizione": "Punto di viaggio veloce e salvataggio; l'ultima area (10) è anch'essa raggiungibile col Viaggio veloce.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Fogli d'alluminio e Mercurio",
+      "descrizione": "Componenti casuali utili per il Grimaldello duraturo (servono 20 Fogli d'alluminio e 10 unità di Mercurio).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "altro",
+      "nome": "Nuovi scambi",
+      "descrizione": "Con l'accesso a Kaitul si sbloccano da Jose: Ambra grigia RS/FR, Fiala delle vertigini L, Fiala della paura S.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Fango pulsante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Melma nera · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Melma nera",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza), Ghiaccio (dimezza), Maledizione (annulla)",
+       "deboleA": "Tuono, Psicocinesi, Sacro",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Diavolo dei raduni",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Choronzon · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Choronzon",
+       "resisteA": "Attacchi fisici (dimezza), Fuoco (assorbe)",
+       "deboleA": "Sacro",
+       "personalita": "Timida",
+       "note": "Ombra esclusiva del Dedalo di Kaitul."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Demone del tornado",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Fuu-Ki · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Fuu-Ki",
+       "resisteA": "Armi da fuoco (dimezza), Vento (assorbe)",
+       "deboleA": "Tuono",
+       "personalita": "Cupa",
+       "note": "Ombra esclusiva del Dedalo di Kaitul."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Maestra degli scherzi",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Pixie superiore · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Pixie superiore",
+       "resisteA": "Armi da fuoco (dimezza), Nucleare (dimezza)",
+       "deboleA": "Tuono, Vento",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Samurai assassino",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kin-Ki · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kin-Ki",
+       "resisteA": "Danni fisici (dimezza), Armi da fuoco (riflette)",
+       "deboleA": "-",
+       "personalita": "Irritabile",
+       "note": "Ombra esclusiva del Dedalo di Kaitul."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Monaco della valle",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kurama Tengu · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kurama Tengu",
+       "resisteA": "Ghiaccio (annulla), Vento (riflette), Sacro (dimezza), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Irritabile",
+       "note": "Ombra esclusiva del Dedalo di Kaitul."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Amante geloso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Leanan Sidhe · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Leanan Sidhe",
+       "resisteA": "Vento (dimezza), Psicocinesi (dimezza)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Felino asceso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Nekomata · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Nekomata",
+       "resisteA": "Psicocinesi (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Demone solenne",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Oni · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Oni",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "-",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Equino saggio",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Orobas · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Orobas",
+       "resisteA": "Vento (dimezza), Maledizione (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Guardiano bicefalo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Orthrus · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Orthrus",
+       "resisteA": "Fuoco (assorbe), Nucleare (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Collana della Regina",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Collana della Regina · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Collana della Regina",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Demone della battaglia",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Rakshasa · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Rakshasa",
+       "resisteA": "Danni fisici (dimezza), Armi da fuoco (annulla), Fuoco (dimezza), Maledizione (dimezza)",
+       "deboleA": "Vento, Sacro",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 16,
+      "tipo": "persona",
+      "nome": "Demone dell'acqua furioso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Sui-Ki · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Sui-Ki",
+       "resisteA": "Ghiaccio (assorbe), Tuono (dimezza)",
+       "deboleA": "Nucleare",
+       "personalita": "Cupa",
+       "note": "Ombra esclusiva del Dedalo di Kaitul."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 17,
+      "tipo": "persona",
+      "nome": "Vendicatore sconfitto",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Take-Minakata · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Take-Minakata",
+       "resisteA": "Tuono (respinge), Maledizione (dimezza)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     },
+     {
+      "ordine": 18,
+      "tipo": "persona",
+      "nome": "Dama cannibale",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Yaksini · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Yaksini",
+       "resisteA": "Armi da fuoco (annulla), Ghiaccio (dimezza)",
+       "deboleA": "Nucleare",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-05-akzeriyyuth",
+    "ordine": 4,
+    "nome": "Dedalo di Akzeriyyuth",
+    "descrizione": "Almeno 12 Aree; Aree di sosta in Area 4 e Area 8; 25 Timbri totali Palazzo di Futaba completato. Alcune richieste si sbloccano solo dopo il Palazzo di Okumura. Area più grande incontrata fino a quel punto; popolata quasi esclusivamente da Ombre già viste nel Palazzo di Futaba.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "La ricerca del potere",
+      "descrizione": "Trofeo d'argento ottenuto consegnando a Jose abbastanza timbri da massimizzare una categoria bonus (Denaro/Oggetti/PE).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Scansione dei Memento",
+      "descrizione": "Abilità di supporto di Futaba (Rango Confidente Eremita) che mappa un piano intero, mostrando tesori, Jose e Timbri presenti.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "altro",
+      "nome": "Nuovi scambi",
+      "descrizione": "Con l'accesso ad Akzeriyyuth si sbloccano da Jose: Idaten Ofuda, Kongou Ofuda, Rasetsu Ofuda, Kit energetico L, Anima da masticare, Fiala confusione L, Fiala dell'amnesia S.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Uomogufo minaccioso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Andras · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Andras",
+       "resisteA": "Ghiaccio (dimezza), Psicocinesi (dimezza), Maledizione (annulla)",
+       "deboleA": "Fuoco, Sacro",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Giudice delle anime",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Anubis · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Anubis",
+       "resisteA": "Armi da fuoco (dimezza), Sacro (annulla), Maledizione (annulla)",
+       "deboleA": "-",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Ladro delle tavole",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Anzu · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Anzu",
+       "resisteA": "Tuono (dimezza), Vento (respinge)",
+       "deboleA": "Armi da fuoco, Nucleare",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Signora del passaggio",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Iside · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Iside",
+       "resisteA": "Sacro (annulla)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Donna serpente strisciante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Lamia · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Lamia",
+       "resisteA": "Tuono (dimezza), Maledizione (annulla)",
+       "deboleA": "Ghiaccio, Nucleare",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Uomo serpente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Naga · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Naga",
+       "resisteA": "Armi da fuoco (dimezza), Tuono (annulla)",
+       "deboleA": "Vento",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Ghast",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Pisaca · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Pisaca",
+       "resisteA": "Tuono (dimezza), Maledizione (annulla)",
+       "deboleA": "Fuoco, Sacro",
+       "personalita": "Irritabile",
+       "note": "Ombra esclusiva del Dedalo di Akzeriyyuth."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Messo del letargo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Sandman · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Sandman",
+       "resisteA": "Vento (dimezza)",
+       "deboleA": "Fuoco, Tuono",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Pietra di Scone",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Pietra di Scone · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Pietra di Scone",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Fuoco",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Babbuino cantilenante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Thoth · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Thoth",
+       "resisteA": "Nucleare (annulla), Sacro (annulla), Maledizione (dimezza)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-06-adyeshach",
+    "ordine": 5,
+    "nome": "Dedalo di Adyeshach",
+    "descrizione": "13 Aree; Fermate in Area 5 e Area 9; 30 Timbri totali Palazzo di Okumura completato. Alcune richieste si sbloccano solo dopo il Palazzo di Niijima (Sae). Nemici in gran parte già incontrati nel Palazzo di Okumura.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Nuovi scambi",
+      "descrizione": "Con l'accesso ad Adyeshach si sbloccano da Jose: Fiala della paura L, Fiala soggiogamento S, Nirvana FO/AG/RS/MA/FR.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Farming EXP/Yen",
+      "descrizione": "Area consigliata per allenamento intensivo (fino a livello 60+) grazie alla densità di nemici e, se attiva, alla Lettura del denaro di Chihaya.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "persona",
+      "nome": "Divinità risvegliata",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Arahabaki · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Arahabaki",
+       "resisteA": "Attacchi fisici (respinge), Armi da fuoco (respinge), Sacro (dimezza), Maledizione (dimezza)",
+       "deboleA": "Psicocinesi, Nucleare",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Palindromo di turpitudine",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Belphegor · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Belphegor",
+       "resisteA": "Ghiaccio (dimezza), Tuono (dimezza), Nucleare (dimezza), Maledizione (respinge)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Subdolo pentacolo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Decarabia · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Decarabia",
+       "resisteA": "Fuoco (respinge), Nucleare (dimezza), Maledizione (dimezza)",
+       "deboleA": "Danni fisici",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Elefante ribelle",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Girimehkala · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Girimehkala",
+       "resisteA": "Attacchi fisici (respinge), Armi da fuoco (respinge), Fuoco (dimezza), Maledizione (annulla)",
+       "deboleA": "Sacro",
+       "personalita": "Irritabile",
+       "note": "Forma demoniaca della richiesta 'Lo zio ingordo' (Youji Isshiki)."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Stella senza desideri",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kaiwan · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kaiwan",
+       "resisteA": "Armi da fuoco (annulla), Psicocinesi (annulla)",
+       "deboleA": "Nucleare",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Koh-i-Noor",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Koh-i-Noor · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Koh-i-Noor",
+       "resisteA": "Attacchi fisici (dimezza)",
+       "deboleA": "Armi da fuoco",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Spirito divoravita",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kumbhanda · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kumbhanda",
+       "resisteA": "Fuoco (annulla), Maledizione (dimezza)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Fantasma fuso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Legione · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Legione",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza), Fuoco (dimezza), Psicocinesi (dimezza), Maledizione (annulla)",
+       "deboleA": "Sacro",
+       "personalita": "Giocosa",
+       "note": "Ombra esclusiva del Dedalo di Adyeshach; forma demoniaca della richiesta 'Mille volti e mille...debiti' (Fumio Akitsu)."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Portatrice di rovina",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Lilim · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Lilim",
+       "resisteA": "Ghiaccio (dimezza), Maledizione (annulla)",
+       "deboleA": "Vento, Sacro",
+       "personalita": "Cupa",
+       "note": "Forma demoniaca della richiesta 'La mamma manager' (Mitsuyo Togo), incontrata però nel Dedalo di Akzeriyyuth."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Sole oscuro",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mithras · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mithras",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza), Fuoco (assorbe), Nucleare (respinge)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Falena vampirica",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mothman · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mothman",
+       "resisteA": "Tuono (annulla), Psicocinesi (dimezza)",
+       "deboleA": "Armi da fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Pernice invocatempeste",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Wakinyan · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Wakinyan",
+       "resisteA": "Tuono (assorbe)",
+       "deboleA": "Psicocinesi, Maledizione",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-07-sheriruth",
+    "ordine": 6,
+    "nome": "Dedalo di Sheriruth",
+    "descrizione": "Almeno 14 Aree; 30 Timbri totali Aver completato interamente il Palazzo di Shido (boss sconfitto). Settima area, atmosfera in bianco e nero; ambienti bui, consigliato il Terzo occhio.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Nuovi scambi",
+      "descrizione": "Con l'accesso a Sheriruth si sbloccano da Jose: Pane per l'anima, Fiala dell'amnesia L, Fiala disperazione S.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "altro",
+      "nome": "Accesso a Iweleth bloccato",
+      "descrizione": "Dopo l'Area 14 (richiesta 'Il capoccia dello show business') l'area successiva (Dedalo di Iweleth) resta interdetta fino al 24 dicembre (Sabato 12/24).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "persona",
+      "nome": "Pachiderma benevolo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Ganesha · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Ganesha",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza), Vento (assorbe)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "persona",
+      "nome": "Avvoltoio arrogante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Jatayu · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Jatayu",
+       "resisteA": "Ghiaccio (dimezza), Vento (respinge), Sacro (dimezza)",
+       "deboleA": "Nucleare",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "persona",
+      "nome": "Ragazza di montagna",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kikuri-Hime · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kikuri-Hime",
+       "resisteA": "Vento (annulla), Sacro (dimezza)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Sacrificio lamentoso",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kushinada · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kushinada",
+       "resisteA": "Sacro (respinge)",
+       "deboleA": "Ghiaccio, Nucleare",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Giudice finale",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Norna · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Norna",
+       "resisteA": "Tuono (respinge), Vento (assorbe), Sacro (dimezza)",
+       "deboleA": "-",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Orlov",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Orlov · personalità: -",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Orlov",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Maledizione",
+       "personalita": "-"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Leopardo crudele",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Ose · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Ose",
+       "resisteA": "Armi da fuoco (annulla), Fuoco (dimezza), Maledizione (annulla)",
+       "deboleA": "Sacro",
+       "personalita": "Irritabile",
+       "note": "Forma demoniaca della richiesta 'I vincenti non imbrogliano' (Yoshikuni Nejima), incontrata però nel Dedalo di Akzeriyyuth."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Guerriero divino",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Potestà · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Potestà",
+       "resisteA": "Vento (dimezza), Sacro (annulla)",
+       "deboleA": "Maledizione",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Regina di Mezzanotte",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Regina Mab · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Regina Mab",
+       "resisteA": "Fuoco (annulla), Tuono (dimezza)",
+       "deboleA": "Vento",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Strega del sabba",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Rangda · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Rangda",
+       "resisteA": "Attacchi fisici (respinge), Armi da fuoco (respinge), Fuoco (annulla), Maledizione (annulla)",
+       "deboleA": "Tuono, Sacro",
+       "personalita": "Cupa",
+       "note": "Forma demoniaca della richiesta 'Una piccola richiesta d'aiuto' (Kuniko Kagami), incontrata però nel Dedalo di Da'at."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Pavida signora dell'ombra",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Skadi · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Skadi",
+       "resisteA": "Ghiaccio (respinge), Maledizione (annulla)",
+       "deboleA": "-",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Bestia inespressiva",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Unicorno · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Unicorno",
+       "resisteA": "Ghiaccio (annulla), Psicocinesi (dimezza)",
+       "deboleA": "Maledizione",
+       "personalita": "Timida",
+       "note": "Forma demoniaca della richiesta 'L'idol e l'unicorno' (Anji Fuwa), incontrata però nel Dedalo di Da'at."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Guerriera dell'oltretomba",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Valchiria · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Valchiria",
+       "resisteA": "Armi da fuoco (dimezza), Ghiaccio (respinge), Sacro (annulla)",
+       "deboleA": "Fuoco",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Mastino dell'Ade",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Cerbero · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Cerbero",
+       "resisteA": "Fuoco (assorbe), Nucleare (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 16,
+      "tipo": "persona",
+      "nome": "Demonessa sanguinaria",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Dakini · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Dakini",
+       "resisteA": "Armi da fuoco (annulla), Fuoco (dimezza)",
+       "deboleA": "-",
+       "personalita": "Giocosa",
+       "note": "Forma demoniaca della richiesta 'Una madre aggressiva' (Hanae Oda), incontrata però nel Dedalo di Adyeshach."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 17,
+      "tipo": "persona",
+      "nome": "Stella egocentrica",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Narciso · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Narciso",
+       "resisteA": "Tuono (annulla), Vento (dimezza), Sacro (dimezza)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 18,
+      "tipo": "persona",
+      "nome": "Suonatrice di vina",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Sarasvati · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Sarasvati",
+       "resisteA": "Ghiaccio (annulla), Tuono (dimezza)",
+       "deboleA": "Nucleare",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 19,
+      "tipo": "persona",
+      "nome": "Signore delle nevi",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Re Frost · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Re Frost",
+       "resisteA": "Ghiaccio (assorbe), Sacro (annulla)",
+       "deboleA": "-",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 20,
+      "tipo": "persona",
+      "nome": "Bellezza distruttiva",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Parvati · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Parvati",
+       "resisteA": "Ghiaccio (respinge), Psicocinesi (dimezza), Sacro (dimezza)",
+       "deboleA": "Maledizione",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 21,
+      "tipo": "persona",
+      "nome": "Furia nera",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Kali · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Kali",
+       "resisteA": "Armi da fuoco (respinge), Fuoco (annulla), Psicocinesi (respinge), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 22,
+      "tipo": "persona",
+      "nome": "Leone danzante",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Barong · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Barong",
+       "resisteA": "Armi da fuoco (dimezza), Tuono (dimezza), Sacro (annulla)",
+       "deboleA": "Vento, Maledizione",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 23,
+      "tipo": "persona",
+      "nome": "Regina degli scandali",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Titania · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Titania",
+       "resisteA": "Nucleare (dimezza), Sacro (dimezza), Maledizione (dimezza)",
+       "deboleA": "Psicocinesi",
+       "personalita": "Timida",
+       "note": "Forma demoniaca (co-boss) della richiesta 'Le fatiche di una maid in cattedra' (Sig.ra Takase), incontrata però nel Dedalo di Chemdah."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 24,
+      "tipo": "persona",
+      "nome": "Oratore del Mare",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Forneus · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Forneus",
+       "resisteA": "Ghiaccio (assorbe), Psicocinesi (annulla)",
+       "deboleA": "Tuono",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 25,
+      "tipo": "persona",
+      "nome": "Capro nero",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Baphomet · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Baphomet",
+       "resisteA": "Fuoco (dimezza), Maledizione (annulla)",
+       "deboleA": "Sacro",
+       "personalita": "Timida",
+       "note": "Forma demoniaca della richiesta 'Smascheriamo i ciarlatani' (Yuichi Fukurai), incontrata però nel Dedalo di Kaitul."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 26,
+      "tipo": "persona",
+      "nome": "Dio-uccello furente",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Garuda · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Garuda",
+       "resisteA": "Vento (dimezza), Sacro (respinge)",
+       "deboleA": "-",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 27,
+      "tipo": "persona",
+      "nome": "Agile re delle scimmie",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Hanuman · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Hanuman",
+       "resisteA": "Sacro (dimezza), Psicocinesi (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 28,
+      "tipo": "persona",
+      "nome": "Re saggio infuriato",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Atavaka · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Atavaka",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (annulla), Fuoco (respinge), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 29,
+      "tipo": "persona",
+      "nome": "Re infedele dei sogni",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Oberon · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Oberon",
+       "resisteA": "Tuono (dimezza), Psicocinesi (annulla)",
+       "deboleA": "Nucleare",
+       "personalita": "Irritabile",
+       "note": "Forma demoniaca (co-boss) della richiesta 'Le fatiche di una maid in cattedra' (Sig. Takase), incontrata però nel Dedalo di Chemdah."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 30,
+      "tipo": "persona",
+      "nome": "Amul. dell'Imperatore",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Amuleto dell'Imperatore · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Amuleto dell'Imperatore",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     },
+     {
+      "ordine": 31,
+      "tipo": "persona",
+      "nome": "Teschio di Cristallo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Teschio di Cristallo · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Teschio di Cristallo",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Vento",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-08-iweleth",
+    "ordine": 7,
+    "nome": "Dedalo di Iweleth",
+    "descrizione": "Non numerato ad 'Aree' come le zone precedenti: si articola in 'Profondità dei Memento' (Entrata, Corridoio della prigione I-III, Vuoto cavernoso I-II, Santuario, ???) e 'Mondo del clifoto' (Piazza stazione Shibuya, Cammino per il Santo Graal I-IV) Sblocco: 24 dicembre (Sabato 12/24). Sblocco legato alla trama del terzo semestre (dopo la sconfitta del Santo Graal/Yaldabaoth nel finale 'originale'). Area completamente diversa dalle precedenti: un dungeon lineare e scriptato di fine gioco, con enigmi (piattaforme da colorare), NON contiene Richieste dei Memento.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Nessuna Richiesta",
+      "descrizione": "A differenza delle altre 8 aree, il Dedalo di Iweleth non ospita alcuna Richiesta dei Memento: è interamente dedicato alla trama del finale 'vero' (in P5 originale) del gioco.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "sicura",
+      "nome": "Corridoio superiore / Corridoio inferiore",
+      "descrizione": "Due Safe Room con viaggio veloce lungo il percorso delle 'Profondità dei Memento'.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "puzzle",
+      "nome": "Piattaforme blu/gialle",
+      "descrizione": "Puzzle ambientali in cui bisogna colorare di blu tutte le piastrelle di un pannello camminandoci sopra, per sbloccare porte.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "boss",
+      "nome": "Primo sacerdote x2",
+      "descrizione": "Mini-boss forzato nel 'Corridoio della prigione - Parte I'.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "boss",
+      "nome": "Tesoro dei Memento?",
+      "descrizione": "Livello 75, 10.000 HP, 999 SP. Battaglia non vincibile per copione (si perde per forza): possiede solo 'Freccia di luce' e una tecnica autocurativa.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "boss",
+      "nome": "Santo Graal (rivincita)",
+      "descrizione": "Livello 75, 10.000 HP, 999 SP; 10.970 PE, 30.000 Yen. Il vero boss finale di Persona 5 originale, qui non ancora finale. Tagliare le linee di rifornimento rende il combattimento gestibile.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "boss",
+      "nome": "Dio del controllo Yaldabaoth",
+      "descrizione": "Livello 75, 15.000 HP, 999 SP. Forma finale del boss 'vero' di Persona 5 originale (in Royal non è il boss finale in assoluto).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "Primo sacerdote",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Melchizedek · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Melchizedek",
+       "resisteA": "Psicocinesi (dimezza), Sacro (assorbe), Maledizione (annulla)",
+       "deboleA": "Vento",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Custode rogo sacrificale",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Moloch · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Moloch",
+       "resisteA": "Fuoco (assorbe), Tuono (dimezza), Vento (dimezza), Psicocinesi (assorbe), Maledizione (annulla)",
+       "deboleA": "Gelo",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "La prima strega",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Lilith · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Lilith",
+       "resisteA": "Ghiaccio (respinge), Nucleare (respinge), Maledizione (annulla)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Vendicatore nero",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Chernobog · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Chernobog",
+       "resisteA": "Arma da fuoco (dimezza), Ghiaccio (assorbe), Tuono (annulla), Maledizione (assorbe)",
+       "deboleA": "Fuoco, Sacro",
+       "personalita": "Cupa",
+       "note": "Forma demoniaca della richiesta 'Raggirare gli anziani? Non si fa!' (Yoshihito Wakasa), incontrata però nel Dedalo di Adyeshach."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Signore del tuono",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Thor · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Thor",
+       "resisteA": "Attacchi fisici (dimezza), Tuono (annulla), Sacro (dimezza), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Serpenti ubriachi",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Yamata-no-Orochi · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Yamata-no-Orochi",
+       "resisteA": "Attacchi fisici (dimezza), Ghiaccio (assorbe), Vento (dimezza), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Diamante Hope",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Diamante Hope · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Diamante Hope",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Re abissale dell'avarizia",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Abaddon · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Abaddon",
+       "resisteA": "Attacchi fisici (assorbe), Armi da fuoco (assorbe), Maledizione (assorbe), Sacro (dimezza)",
+       "deboleA": "-",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     },
+     {
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Teschio di Cristallo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Teschio di Cristallo · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Teschio di Cristallo",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Vento",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+     }
+    ]
+   },
+   {
+    "chiave": "mementos-09-daat",
+    "ordine": 8,
+    "nome": "Dedalo di Da'at",
+    "descrizione": "Almeno 15 Piani (si sale anziché scendere); Fermate al Piano 5 e al Piano 11; 40 Timbri totali; oltre il Piano 15 la 'Sala di controllo cognitivo' Sblocco: 20 gennaio (Venerdì 1/20). Sblocco per esigenze di trama del terzo semestre. Area strettamente legata alla trama del terzo semestre di Persona 5 Royal (Palazzo di Maruki); a differenza delle altre aree, qui si sale anziché scendere.",
+    "punti": [
+     {
+      "ordine": 0,
+      "tipo": "altro",
+      "nome": "Nuovi scambi",
+      "descrizione": "Con l'accesso a Da'at si sbloccano da Jose: Soma, Fiala soggiogamento L (oltre a tutto l'assortimento precedente).",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 1,
+      "tipo": "oggetto",
+      "nome": "123 Timbri totali (gioco completo)",
+      "descrizione": "Il Dedalo di Da'at porta il totale dei Timbri raccoglibili in tutti i Memento a 123; raccoglierli tutti permette lo scontro segreto con Jose.",
+      "esauribile": true,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 2,
+      "tipo": "boss",
+      "nome": "Jose, studente di umanità",
+      "descrizione": "Livello ?, 9.999 HP, 999 SP, ~20.000 PE, ~90.000 Yen. Compare nella Sala di controllo cognitivo SOLO se sono stati raccolti tutti i 123 Timbri dei Memento. Nessun bottino garantito, ma vittoria = trofeo 'Senpai della vita' + oggetto 'Vaschetta a stella' (raddoppia i fiori raccolti nei Memento). Debolezze: nessuna. Resistenze: Attacchi fisici.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 3,
+      "tipo": "altro",
+      "nome": "Sala di controllo cognitivo (oltre Piano 15)",
+      "descrizione": "Porta a una scena d'intermezzo che estende un percorso nel Palazzo di Maruki.",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 4,
+      "tipo": "altro",
+      "nome": "Stanze dei Mietitori",
+      "descrizione": "Da qui in poi si può scegliere se scappare o combattere il Mietitore (prima non era possibile scegliere).",
+      "esauribile": false,
+      "dettagli": {},
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 5,
+      "tipo": "persona",
+      "nome": "Primo sacerdote",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Melchizedek · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Melchizedek",
+       "resisteA": "Psicocinesi (dimezza), Sacro (assorbe), Maledizione (annulla)",
+       "deboleA": "Vento",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 6,
+      "tipo": "persona",
+      "nome": "Custode rogo sacrificale",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Moloch · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Moloch",
+       "resisteA": "Fuoco (assorbe), Tuono (dimezza), Vento (dimezza), Psicocinesi (assorbe), Maledizione (annulla)",
+       "deboleA": "Gelo",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 7,
+      "tipo": "persona",
+      "nome": "La prima strega",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Lilith · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Lilith",
+       "resisteA": "Ghiaccio (respinge), Nucleare (respinge), Maledizione (annulla)",
+       "deboleA": "Fuoco",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 8,
+      "tipo": "persona",
+      "nome": "Vendicatore nero",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Chernobog · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Chernobog",
+       "resisteA": "Arma da fuoco (dimezza), Ghiaccio (assorbe), Tuono (annulla), Maledizione (assorbe)",
+       "deboleA": "Fuoco, Sacro",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 9,
+      "tipo": "persona",
+      "nome": "Signore del tuono",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Thor · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Thor",
+       "resisteA": "Attacchi fisici (dimezza), Tuono (annulla), Sacro (dimezza), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 10,
+      "tipo": "persona",
+      "nome": "Serpenti ubriachi",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Yamata-no-Orochi · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Yamata-no-Orochi",
+       "resisteA": "Attacchi fisici (dimezza), Ghiaccio (assorbe), Vento (dimezza), Maledizione (dimezza)",
+       "deboleA": "-",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 11,
+      "tipo": "persona",
+      "nome": "Diamante Hope",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Diamante Hope · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Diamante Hope",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Ghiaccio",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 12,
+      "tipo": "persona",
+      "nome": "Inquisitore crudele",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Dominazione · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Dominazione",
+       "resisteA": "Nucleare (respinge), Sacro (annulla), Maledizione (dimezza)",
+       "deboleA": "Tuono",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 13,
+      "tipo": "persona",
+      "nome": "Signore dei cenotafi",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mot · personalità: Timida",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mot",
+       "resisteA": "Armi da fuoco (dimezza), Tuono (assorbe), Maledizione (respinge)",
+       "deboleA": "Vento",
+       "personalita": "Timida"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 14,
+      "tipo": "persona",
+      "nome": "Re abissale dell'avarizia",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Abaddon · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Abaddon",
+       "resisteA": "Attacchi fisici (assorbe), Armi da fuoco (assorbe), Maledizione (assorbe), Sacro (dimezza)",
+       "deboleA": "-",
+       "personalita": "Irritabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 15,
+      "tipo": "persona",
+      "nome": "Svettante re dei desideri",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Mara · personalità: Irritabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Mara",
+       "resisteA": "Armi da fuoco (annulla), Fuoco (assorbe), Psicocinesi (respinge), Sacro (dimezza), Maledizione (annulla)",
+       "deboleA": "-",
+       "personalita": "Irritabile",
+       "note": "Forma demoniaca della richiesta 'Il capoccia dello show business' (Shiro Asakura)."
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 16,
+      "tipo": "persona",
+      "nome": "Straziato re dei desideri",
+      "descrizione": "Ombra presente nel Dedalo · maschera: - · personalità: Non reclutabile",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "-",
+       "resisteA": "-",
+       "deboleA": "-",
+       "personalita": "Non reclutabile"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 17,
+      "tipo": "persona",
+      "nome": "Assassino di fuoco",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Trono · personalità: Cupa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Trono",
+       "resisteA": "Fuoco (annulla), Vento (annulla), Sacro (respinge)",
+       "deboleA": "Nucleare",
+       "personalita": "Cupa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     },
+     {
+      "ordine": 18,
+      "tipo": "persona",
+      "nome": "Teschio di Cristallo",
+      "descrizione": "Ombra presente nel Dedalo · maschera: Teschio di Cristallo · personalità: Giocosa",
+      "esauribile": false,
+      "dettagli": {
+       "maschera": "Teschio di Cristallo",
+       "resisteA": "Attacchi fisici (dimezza), Armi da fuoco (dimezza)",
+       "deboleA": "Vento",
+       "personalita": "Giocosa"
+      },
+      "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+     }
+    ]
+   }
+  ],
+  "fonti": [
+   "https://www.allgamestaff.it/persona-5-royal/memento/",
+   "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  ]
  }
 ]

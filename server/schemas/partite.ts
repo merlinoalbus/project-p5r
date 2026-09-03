@@ -154,6 +154,7 @@ export const bodySalvaCiclo = z.object({
 });
 export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
 export const paramsPartitaCiclo = z.object({ id: z.coerce.number().int().positive(), cicloId: z.coerce.number().int().positive() });
+export const bodyStatoRichiesta = z.object({ richiesta: z.string().min(1).max(120), stato: z.enum(['accettata', 'completata']).nullable() });
 export const bodyStatoPunto = z.object({ punto: z.string().min(1).max(200), stato: z.enum(['ottenuto', 'esaurito']).nullable() });
 export const bodyDomandaFatta = z.object({ fatta: z.boolean(), conoscenza: z.boolean().optional() });
 export const paramsPartitaDomanda = z.object({ id: z.coerce.number().int().positive(), domandaId: z.coerce.number().int().positive() });

@@ -23,13 +23,14 @@ describe('API dungeon', () => {
   });
   afterAll(() => closeDb());
 
-  it('elenco e scheda: 9 dungeon in ordine, aree e punti con chiave stabile, tipi ammessi, fonti', async () => {
+  it('elenco e scheda: 10 dungeon in ordine, aree e punti con chiave stabile, tipi ammessi, fonti', async () => {
     const lista = (await request(app).get('/api/compendio/dungeon')).body.data as DungeonRiassuntoDto[];
-    expect(lista).toHaveLength(9);
-    expect(lista.map((d) => d.chiave)).toEqual(['kamoshida', 'madarame', 'kaneshiro', 'futaba', 'okumura', 'niijima', 'shido', 'iweleth', 'maruki']);
+    expect(lista).toHaveLength(10);
+    expect(lista.map((d) => d.chiave)).toEqual(['kamoshida', 'madarame', 'kaneshiro', 'futaba', 'okumura', 'niijima', 'shido', 'iweleth', 'maruki', 'mementos']);
     expect(lista[0]).toMatchObject({ nome: 'Palazzo di Kamoshida', tipo: 'palazzo', gestiti: null });
-    expect(lista.reduce((s, d) => s + d.punti, 0)).toBe(524);
-    expect(lista.reduce((s, d) => s + d.aree, 0)).toBe(107);
+    expect(lista.filter((d) => d.tipo === 'palazzo').reduce((s, d) => s + d.punti, 0)).toBe(524);
+    expect(lista.filter((d) => d.tipo === 'palazzo').reduce((s, d) => s + d.aree, 0)).toBe(107);
+    expect(lista.find((d) => d.chiave === 'mementos')).toMatchObject({ tipo: 'mementos', aree: 9, punti: 164 });
     const k = (await request(app).get('/api/compendio/dungeon/kamoshida')).body.data as DungeonDettaglioDto;
     expect(k.aree).toHaveLength(18);
     expect(k.aree[0].ordine).toBe(0);

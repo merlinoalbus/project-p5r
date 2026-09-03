@@ -70,6 +70,12 @@ export interface FusioneSeed {
 }
 
 /** Confidente (dato di gioco). */
+/** Richieste dei Mementos e Jose (guida allgamestaff). */
+export interface MementosSeed {
+  richieste: Array<{ chiave: string; nome: string; committente: string; disponibileDal: string; scadenza: string; area: string; areaChiave: string | null; piano: string; bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean }; ricompense: string[]; confidente: { chiave: string; rango?: number | null } | null; note: string; fonte: string }>;
+  jose: Record<string, unknown>;
+}
+
 /** Dungeon (Palazzi e Dedali) con aree e punti di interesse (guida allgamestaff). */
 export interface DungeonSeed {
   chiave: string;

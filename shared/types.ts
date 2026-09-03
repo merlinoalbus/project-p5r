@@ -727,6 +727,42 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Richieste dei Mementos e Jose (Fase 7.2) ----
+
+export type StatoRichiesta = 'accettata' | 'completata';
+
+export interface RichiestaDto {
+  chiave: string;
+  nome: string;
+  committente: string;
+  disponibileDal: string;
+  scadenza: string;
+  area: string;
+  areaChiave: string | null;
+  piano: string;
+  bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean };
+  ricompense: string[];
+  confidente: { chiave: string; nome: string; rango: number | null } | null;
+  note: string;
+  fonte: string;
+  stato: StatoRichiesta | null;
+}
+
+export interface JoseDto {
+  introduzione: string;
+  fiori: { descrizione: string } | string | null;
+  timbri: { descrizione: string } | string | null;
+  bossSegreto: { nome: string; condizione: string } | null;
+  scambi: Array<{ nome: string; effetto: string; costo: number | string; requisito: string }>;
+}
+
+export interface RichiesteDto {
+  richieste: RichiestaDto[];
+  jose: JoseDto | null;
+  completate: number;
+  totale: number;
+}
+
 // ---- Dungeon: Palazzi e Dedali (Fase 7.1) ----
 
 export type StatoPunto = 'ottenuto' | 'esaurito';

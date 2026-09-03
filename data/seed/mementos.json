@@ -1,0 +1,1193 @@
+{
+ "richieste": [
+  {
+   "chiave": "un-ex-piuttosto-appiccicoso",
+   "nome": "Un ex piuttosto appiccicoso",
+   "committente": "Tutorial (legata direttamente al Palazzo di Madarame)",
+   "disponibileDal": "7 maggio",
+   "scadenza": "23 dicembre (Venerdì 12/23), estesa al 1 febbraio con il terzo semestre",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "piano": "Area 1",
+   "bersaglio": {
+    "nome": "Natsuhiko Nakanohara",
+    "livello": null,
+    "formaDemoniaca": "Obariyon",
+    "debolezze": [
+     "Tuono"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Perla dell'attaccamento (accessorio, effetto Annulla Amnesia)",
+    "485 PE",
+    "6.500 Yen"
+   ],
+   "confidente": null,
+   "note": "Funge da tutorial delle Richieste dei Memento; sblocca l'incontro con Jose. Difficoltà D.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "un-bullo-che-abbaia-e-morde",
+   "nome": "Un bullo che abbaia e morde",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "9 maggio",
+   "scadenza": "23 dicembre, estesa al 1 febbraio (terzo semestre)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "piano": "Area 2",
+   "bersaglio": {
+    "nome": "Daisuke Takanashi",
+    "livello": null,
+    "formaDemoniaca": "Jack Frost",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Frullato proteico"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": null
+   },
+   "note": "Difficoltà D. Richiesta obbligatoria per il Confidente della Luna (Mishima).",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "bullismo-sui-bulli",
+   "nome": "Bullismo sui bulli",
+   "committente": "Ascoltare Takanashi e Sakoda vicino al Cancello della scuola",
+   "disponibileDal": "Dopo aver completato 'Un bullo che abbaia e morde', Rango Confidente Luna 3, e il Palazzo di Kaneshiro",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "piano": "Area 5",
+   "bersaglio": {
+    "nome": "Yoshimori Sakoda",
+    "livello": null,
+    "formaDemoniaca": "Black Frost",
+    "debolezze": [
+     "Sacro"
+    ],
+    "resistenze": [
+     "Ghiaccio (annulla)"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Fiocco di neve malvagio (oggetto chiave, per fusione di Frost Nero)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": 3
+   },
+   "note": "Difficoltà D. Frase finale suggerita: 'Hai perso perché sei debole'. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "se-scomparissero-i-gatti",
+   "nome": "Se scomparissero i gatti",
+   "committente": "Ascoltare la madre dall'aspetto gentile e un anziano a Yongen-Jaya",
+   "disponibileDal": "23 maggio",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "piano": "Area 6",
+   "bersaglio": {
+    "nome": "Ryoko Aino",
+    "livello": null,
+    "formaDemoniaca": "Nekomata",
+    "debolezze": [
+     "Vento"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Fermaglio per gatti"
+   ],
+   "confidente": null,
+   "note": "Difficoltà D. Richiede risposte corrette in sequenza: 'Calmati.' -> 'Sono molte, le palle di neve?' -> 'Quei gatti sono infelici adesso.' -> 'Palla di neve non c'e' piu'...'; con la risposta sbagliata bisogna abbattere di nuovo l'Ombra e riprovare.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "il-senso-della-vita-nella-terza-eta",
+   "nome": "Il senso della vita nella terza età",
+   "committente": "Ascoltare il bevitore di sakè e un uomo con grembiule a Kichijoji",
+   "disponibileDal": "5 giugno",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "piano": "Area 3",
+   "bersaglio": {
+    "nome": "Heiji Ono",
+    "livello": null,
+    "formaDemoniaca": "Koropokkuru",
+    "debolezze": [
+     "Fuoco"
+    ],
+    "resistenze": [
+     "Armi da fuoco",
+     "Elettricità",
+     "Nucleare (secondo fonte incrociata EN)"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Cintura del fastidio"
+   ],
+   "confidente": null,
+   "note": "Difficoltà D. Attenzione a Mabufula (danno di Ghiaccio a tutto il gruppo).",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "ladri-fantasma-vs-ladri-e-basta",
+   "nome": "Ladri fantasma VS ladri e basta",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "18 giugno",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "piano": "Area 4",
+   "bersaglio": {
+    "nome": "Kazuya Makigami",
+    "livello": null,
+    "formaDemoniaca": "Mithras",
+    "debolezze": [
+     "Maledizione"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Vecchia chiave"
+   ],
+   "confidente": null,
+   "note": "Difficoltà D. Combattimento con evocazioni multiple.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "il-sadismo-e-un-gesto-damore",
+   "nome": "Il sadismo è un gesto d'amore",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "6 giugno",
+   "scadenza": "23 dicembre; se non completata entro tale data, il bersaglio si sposta nel Dedalo di Da'at (Area 1) nel terzo semestre",
+   "area": "Dedalo di Aiyatsbus (Area 7) / Dedalo di Da'at (Area 1) se rimandata al terzo semestre",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "piano": "Area 7 (Aiyatsbus) / Area 1 (Da'at)",
+   "bersaglio": {
+    "nome": "Hikari Shimizu",
+    "livello": null,
+    "formaDemoniaca": "Yaksini",
+    "debolezze": [
+     "Fuoco",
+     "Sacro"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Spadafrusta (arma per Panther)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà D. Attenzione a 'Carica' quando gli HP del boss sono bassi.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "un-part-time-infernale",
+   "nome": "Un part-time infernale",
+   "committente": "Rango Confidente Luna (Mishima) 4",
+   "disponibileDal": "6 giugno, Rango Confidente Luna 4",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "piano": "Area 1",
+   "bersaglio": {
+    "nome": "Nozomi Odo",
+    "livello": null,
+    "formaDemoniaca": "Setanta",
+    "debolezze": [],
+    "resistenze": [
+     "Danni fisici",
+     "Armi da fuoco",
+     "Maledizione"
+    ],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Dolci cinesi (libro)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": 4
+   },
+   "note": "Difficoltà C. Frase finale: 'Finalmente l'hai capito'. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "medicina-amara",
+   "nome": "Medicina amara",
+   "committente": "Rango Confidente Morte (Tae Takemi) 7",
+   "disponibileDal": "Rango Confidente Morte 7",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "piano": "Area 2",
+   "bersaglio": {
+    "nome": "Shoichi Oyamada",
+    "livello": null,
+    "formaDemoniaca": "Thoth",
+    "debolezze": [],
+    "resistenze": [
+     "Attacchi elementali (maggior parte)"
+    ],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Mediarama (carta abilità)"
+   ],
+   "confidente": {
+    "chiave": "takemi",
+    "rango": 7
+   },
+   "note": "Difficoltà C. Frase finale: 'Avevi altre soluzioni'.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "un-fidanzato-violento",
+   "nome": "Un fidanzato violento",
+   "committente": "Confrontarsi con Chihaya Mifune riguardo alla falsa Pietra Sacra",
+   "disponibileDal": "Dopo aver parlato con Chihaya",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "piano": "Area 3",
+   "bersaglio": {
+    "nome": "Yuya Uchimura",
+    "livello": null,
+    "formaDemoniaca": "Fuu-Ki",
+    "debolezze": [
+     "Psicocinesi (Psio)"
+    ],
+    "resistenze": [
+     "Danni fisici",
+     "Armi da fuoco"
+    ],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Ramo del sonno (arma per Skull)"
+   ],
+   "confidente": {
+    "chiave": "chihaya",
+    "rango": null
+   },
+   "note": "Difficoltà C. Legata alla trama del Confidente Fortuna (Chihaya).",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "le-fatiche-di-una-maid-in-cattedra",
+   "nome": "Le fatiche di una maid in cattedra",
+   "committente": "Rango Confidente Temperanza (Kawakami) 8",
+   "disponibileDal": "Rango Confidente Temperanza 8",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "piano": "Area 7",
+   "bersaglio": {
+    "nome": "Toshio e Hiromi Takase (coppia, doppio boss)",
+    "livello": null,
+    "formaDemoniaca": "Oberon (Sig. Takase) e Titania (Sig.ra Takase)",
+    "debolezze": [
+     "Psicocinesi (Sig. Takase)",
+     "Fuoco (Sig.ra Takase)"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Catena dell'invidia (arma per Ann, alta probabilità di Disperazione)"
+   ],
+   "confidente": {
+    "chiave": "kawakami",
+    "rango": 8
+   },
+   "note": "Difficoltà C. Doppio boss.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "la-stalker-informatica",
+   "nome": "La stalker informatica",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "10 luglio",
+   "scadenza": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 2) nel terzo semestre",
+   "area": "Dedalo di Chemdah (Area 8) / Dedalo di Da'at (Area 2) se rimandata",
+   "areaChiave": "mementos-03-chemdah",
+   "piano": "Area 8 (Chemdah) / Area 2 (Da'at)",
+   "bersaglio": {
+    "nome": "Yumeko Mogami",
+    "livello": null,
+    "formaDemoniaca": "Bugs",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Palla peli appiccicosa (materiale di fusione)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà C. Bersaglio visibile nel mondo reale: si vede Yumeko Mogami registrare e pedinare uno studente alla Shujin Academy.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "giustizia-per-i-gatti",
+   "nome": "Giustizia per i gatti",
+   "committente": "Lavorare al minimarket",
+   "disponibileDal": "4 agosto, Rango Confidente Luna 3",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 1",
+   "bersaglio": {
+    "nome": "Kazuo Tsuboi",
+    "livello": null,
+    "formaDemoniaca": "Pisaca",
+    "debolezze": [
+     "Fuoco",
+     "Sacro"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Scimitarra insanguinata"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": 3
+   },
+   "note": "Difficoltà C. Frase finale: 'Devi soffrire...'. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "smascheriamo-i-ciarlatani",
+   "nome": "Smascheriamo i ciarlatani",
+   "committente": "Rango Confidente Fortuna (Chihaya) 7",
+   "disponibileDal": "Rango Confidente Fortuna 7",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 3",
+   "bersaglio": {
+    "nome": "Yuichi Fukurai",
+    "livello": null,
+    "formaDemoniaca": "Baphomet",
+    "debolezze": [
+     "Ghiaccio",
+     "Sacro"
+    ],
+    "resistenze": [
+     "Maledizione",
+     "Fuoco"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Mano del profeta (arma per Makoto)"
+   ],
+   "confidente": {
+    "chiave": "chihaya",
+    "rango": 7
+   },
+   "note": "Difficoltà C. Frase finale: 'E dopo averli ingannati?'. Bersaglio necessario per proseguire il Rango Confidente di Chihaya.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "affari-loschi-nellombra",
+   "nome": "Affari loschi nell'ombra",
+   "committente": "Rango Confidente Appeso (Iwai) 7",
+   "disponibileDal": "Rango Confidente Appeso 7, dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 4",
+   "bersaglio": {
+    "nome": "Akimitsu Tsuda",
+    "livello": null,
+    "formaDemoniaca": "Belphegor",
+    "debolezze": [],
+    "resistenze": [
+     "Sacro"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Fascia strana (armatura, +Annulla Paura)"
+   ],
+   "confidente": {
+    "chiave": "iwai",
+    "rango": 7
+   },
+   "note": "Difficoltà C.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "chi-e-laggressore",
+   "nome": "Chi è l'aggressore?",
+   "committente": "Lavorare al negozio di fiori",
+   "disponibileDal": "3 agosto",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 5",
+   "bersaglio": {
+    "nome": "Taizo Naguri",
+    "livello": null,
+    "formaDemoniaca": "Kin-Ki",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Carica (carta abilità)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà C. Concludendo con un Assalto/Colpo tecnico/Colpo fortunato si possono ottenere fino a 60.000 Yen extra. Frase finale: 'Costituisciti'.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "non-siamo-i-tuoi-schiavi",
+   "nome": "Non siamo i tuoi schiavi",
+   "committente": "Lavorare al bar Crossroads",
+   "disponibileDal": "2 agosto",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 8",
+   "bersaglio": {
+    "nome": "Shinsuke Kishi",
+    "livello": null,
+    "formaDemoniaca": "Kumbhanda",
+    "debolezze": [
+     "Sacro"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Parchi divertimento (libro)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": null
+   },
+   "note": "Difficoltà C. Frase finale: 'Doveva servirti da lezione'. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "lottare-per-la-liberta-di-stampa",
+   "nome": "Lottare per la libertà di stampa",
+   "committente": "Rango Confidente Diavolo (Ohya) 7",
+   "disponibileDal": "Rango Confidente Diavolo 7",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 9",
+   "bersaglio": {
+    "nome": "Shinpei Honjo",
+    "livello": null,
+    "formaDemoniaca": "Take-Minakata",
+    "debolezze": [
+     "Vento"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Recupero 3 (carta abilità)"
+   ],
+   "confidente": {
+    "chiave": "ohya",
+    "rango": 7
+   },
+   "note": "Difficoltà C. Frase finale: 'Non per Ohya'.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "un-intruso-a-yongen-jaya",
+   "nome": "Un intruso a Yongen-Jaya",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "30 agosto",
+   "scadenza": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 6) nel terzo semestre",
+   "area": "Dedalo di Kaitul (Area 10) / Dedalo di Da'at (Area 6) se rimandata",
+   "areaChiave": "mementos-04-kaitul",
+   "piano": "Area 10 (Kaitul) / Area 6 (Da'at)",
+   "bersaglio": {
+    "nome": "Yasuo Jochi",
+    "livello": null,
+    "formaDemoniaca": "Ippon-Datara",
+    "debolezze": [],
+    "resistenze": [
+     "Fuoco"
+    ],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Shitamachi rinato (libro)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": null
+   },
+   "note": "Difficoltà C. Ultimo bersaglio prima dell'apertura del Dedalo di Akzeriyyuth. Frase finale: 'Vattene da Yongen'. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "mille-volti-e-mille-debiti",
+   "nome": "Mille volti e mille…debiti",
+   "committente": "Rango Confidente Luna (Mishima) 8",
+   "disponibileDal": "19 settembre, Rango Confidente Luna 8, dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "piano": "Area 3",
+   "bersaglio": {
+    "nome": "Fumio Akitsu",
+    "livello": null,
+    "formaDemoniaca": "Legione",
+    "debolezze": [],
+    "resistenze": [
+     "Vento"
+    ],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Termopili (carta abilità)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": 8
+   },
+   "note": "Difficoltà B. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "i-vincenti-non-imbrogliano",
+   "nome": "I vincenti non imbrogliano",
+   "committente": "Parlare con il giocatore alla sala giochi di Shibuya",
+   "disponibileDal": "4 settembre (Parte 1, dopo Palazzo di Futaba); Parte 2 dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "piano": "Area 5",
+   "bersaglio": {
+    "nome": "Yoshikuni Nejima",
+    "livello": null,
+    "formaDemoniaca": "Ose",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Annulla att. fisici (carta abilità)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà B. Richiesta 'particolare' in due parti: nella Parte 1 tutti gli attacchi mancano automaticamente e dopo 3 turni si viene espulsi; la Parte 2 si vince con un 'Abbattimento acrobatico' scriptato (Su, poi Triangolo). Confidente collegato: oda_torre.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "la-mamma-manager",
+   "nome": "La mamma manager",
+   "committente": "Rango Confidente Stella (Hifumi Togo) 7",
+   "disponibileDal": "Rango Confidente Stella 7, dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "piano": "Area 6",
+   "bersaglio": {
+    "nome": "Mitsuyo Togo",
+    "livello": null,
+    "formaDemoniaca": "Lilim",
+    "debolezze": [
+     "Sacro"
+    ],
+    "resistenze": [
+     "Quasi tutti gli elementi tranne Sacro"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Catena di perline"
+   ],
+   "confidente": null,
+   "note": "Difficoltà B. Non presente esplicitamente nella tabella principale della guida Richieste, ma descritta nella pagina dedicata al Dedalo di Akzeriyyuth; nome inglese 'Upstaging the Stage Mother'. Confidente collegato: togo_stella.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "chiave": "il-netturbino",
+   "nome": "Il \"Netturbino\"",
+   "committente": "Rango Confidente Luna (Mishima)",
+   "disponibileDal": "14 ottobre, dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 9) nel terzo semestre",
+   "area": "Dedalo di Akzeriyyuth (Area 12) / Dedalo di Da'at (Area 9) se rimandata",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "piano": "Area 12 (Akzeriyyuth) / Area 9 (Da'at)",
+   "bersaglio": {
+    "nome": "Yohei Kiritani",
+    "livello": null,
+    "formaDemoniaca": "Rakshasa",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Rimonta (carta abilità, utile per il Rango Confidente con le Gemelle)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": null
+   },
+   "note": "Difficoltà B. Curiosità: Yohei Kiritani appare come mendicante alla Stazione di Shibuya nel mondo reale. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "lo-zio-ingordo",
+   "nome": "Lo zio ingordo",
+   "committente": "Parlare con Futaba (Confidente Eremita)",
+   "disponibileDal": "Rango Confidente Gerofante (Sojiro Sakura) 8; può essere avviata in anticipo parlando con Futaba anche senza aver sbloccato il Dedalo di Adyeshach",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "piano": "Non specificato dalla guida Allgamestaff (nessuna sotto-sezione dedicata nella pagina del Dedalo di Adyeshach)",
+   "bersaglio": {
+    "nome": "Youji Isshiki",
+    "livello": null,
+    "formaDemoniaca": "Girimekhala",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Venture Saber / Spadone dell'impresa (arma) - nome italiano non confermato da Allgamestaff"
+   ],
+   "confidente": {
+    "chiave": "sojiro",
+    "rango": 8
+   },
+   "note": "ATTENZIONE - dato incompleto: Allgamestaff cita questa richiesta (nome, bersaglio, forma demoniaca) nella pagina 'Richieste nei Memento' e nel testo del Dedalo di Adyeshach ('parlando con Futaba, anche se non avete ancora sbloccato il Dedalo di Adyeshach'), ma NON dedica a questa richiesta una sotto-sezione con piano/area precisa, a differenza delle altre. Piano, data esatta e nome italiano della ricompensa integrati/ipotizzati dalla Megami Tensei Wiki (EN) e vanno verificati in gioco. Squadra fissa richiesta: solo Joker e Oracle (Futaba).",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "e-una-figlia-o-un-buono-pasto",
+   "nome": "È una figlia o un buono pasto?",
+   "committente": "Rango Confidente Eremita (Futaba) 7",
+   "disponibileDal": "Rango Confidente Eremita 7, dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "piano": "Area 3",
+   "bersaglio": {
+    "nome": "Kouta e Asami Magario (coppia, doppio boss)",
+    "livello": null,
+    "formaDemoniaca": "Incubo (Sig. Magario) e Succube (Sig.ra Magario)",
+    "debolezze": [
+     "Fuoco (Sig. Magario)",
+     "Ghiaccio (Sig.ra Magario)"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Crescita 3 (carta abilità)"
+   ],
+   "confidente": {
+    "chiave": "futaba",
+    "rango": 7
+   },
+   "note": "Difficoltà A. Doppio boss; consigliato equipaggiare Cerotti alla caffeina e non portare Crow.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "chiave": "una-madre-aggressiva",
+   "nome": "Una madre aggressiva",
+   "committente": "Rango Confidente Torre (Shinya Oda) 8",
+   "disponibileDal": "Rango Confidente Torre 8, dopo il Palazzo di Okumura",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "piano": "Area 11",
+   "bersaglio": {
+    "nome": "Hanae Oda",
+    "livello": null,
+    "formaDemoniaca": "Dakini",
+    "debolezze": [
+     "Fuoco"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Soma (consumabile, cura HP e SP al 100%)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà A. Non presente esplicitamente nella tabella principale della guida Richieste, descritta nella pagina dedicata al Dedalo di Adyeshach; nome inglese 'A Mother's Aggression'. Confidente collegato: oda_torre.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "chiave": "raggirare-gli-anziani-non-si-fa",
+   "nome": "Raggirare gli anziani? Non si fa!",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "25 novembre, dopo il Palazzo di Sae (Niijima)",
+   "scadenza": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 12) nel terzo semestre",
+   "area": "Dedalo di Adyeshach (Area 13) / Dedalo di Da'at (Area 12) se rimandata",
+   "areaChiave": "mementos-06-adyeshach",
+   "piano": "Area 13 (Adyeshach) / Area 12 (Da'at)",
+   "bersaglio": {
+    "nome": "Yoshihito Wakasa",
+    "livello": null,
+    "formaDemoniaca": "Chernobog",
+    "debolezze": [],
+    "resistenze": [],
+    "vulnerabileConfusione": true
+   },
+   "ricompense": [
+    "Veste haten (armatura)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà A.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "la-ballata-del-rubacuori",
+   "nome": "La ballata del rubacuori",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima (esclusiva Persona 5 Royal)",
+   "disponibileDal": "10 dicembre, dopo il Palazzo di Shido",
+   "scadenza": "23 dicembre, estesa al 1 febbraio",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "piano": "Area 8",
+   "bersaglio": {
+    "nome": "Hikaru Arihara",
+    "livello": null,
+    "formaDemoniaca": "Tam Lin",
+    "debolezze": [],
+    "resistenze": [
+     "Fuoco",
+     "Psicocinesi"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Corona del tumulto (accessorio)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": null
+   },
+   "note": "Difficoltà A. Contenuto esclusivo di Persona 5 Royal. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "il-capoccia-dello-show-business",
+   "nome": "Il capoccia dello show business",
+   "committente": "Sito dei Simpatizzanti Fantasma / Mishima",
+   "disponibileDal": "3 dicembre, dopo il Palazzo di Shido",
+   "scadenza": "23 dicembre; se non completata, bersaglio spostato nel Dedalo di Da'at (Area 14) nel terzo semestre",
+   "area": "Dedalo di Sheriruth (Area 14) / Dedalo di Da'at (Area 14) se rimandata",
+   "areaChiave": "mementos-07-sheriruth",
+   "piano": "Area 14 (Sheriruth)",
+   "bersaglio": {
+    "nome": "Shiro Asakura",
+    "livello": null,
+    "formaDemoniaca": "Mara",
+    "debolezze": [
+     "Nucleare"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Gilet immortale (armatura)"
+   ],
+   "confidente": {
+    "chiave": "mishima",
+    "rango": null
+   },
+   "note": "Difficoltà A/S. Curiosità: Shiro Asakura visibile nel mondo reale molestando una donna a Shinjuku sia prima che dopo la richiesta. Richiesta obbligatoria per il Confidente della Luna.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "una-piccola-richiesta-daiuto",
+   "nome": "Una piccola richiesta d'aiuto",
+   "committente": "Non specificato da Allgamestaff (contenuto esclusivo terzo semestre)",
+   "disponibileDal": "13 gennaio, dopo aver raggiunto il terzo semestre",
+   "scadenza": "1 febbraio",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "piano": "Piano 3",
+   "bersaglio": {
+    "nome": "Kuniko Kagami (chiamata 'Ombra di Kagami' da Allgamestaff)",
+    "livello": null,
+    "formaDemoniaca": "Rangda",
+    "debolezze": [
+     "Sacro"
+    ],
+    "resistenze": [
+     "Attacchi fisici e da arma da fuoco (respinge)"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "An. inferno a spirale (accessorio, attiva Mamudoon)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà S. Esclusiva del terzo semestre. Nome completo del bersaglio ('Kuniko Kagami') e data (13 gennaio) integrati dalla Megami Tensei Wiki: Allgamestaff usa solo 'Ombra di Kagami' senza fornire una data esplicita.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "chiave": "per-il-mio-bene",
+   "nome": "Per il mio bene",
+   "committente": "Non specificato da Allgamestaff (contenuto esclusivo terzo semestre)",
+   "disponibileDal": "14 gennaio, dopo aver raggiunto il terzo semestre",
+   "scadenza": "1 febbraio",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "piano": "Piano 7",
+   "bersaglio": {
+    "nome": "Nao Minamoto (chiamata 'Ombra di Minamoto' da Allgamestaff)",
+    "livello": null,
+    "formaDemoniaca": "Yoshitsune",
+    "debolezze": [],
+    "resistenze": [
+     "Fuoco"
+    ],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Ofuda della forza x8"
+   ],
+   "confidente": null,
+   "note": "Difficoltà S. Esclusiva del terzo semestre. Nome completo del bersaglio e data (14 gennaio) integrati dalla Megami Tensei Wiki.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "chiave": "lidol-e-lunicorno",
+   "nome": "L'idol e l'unicorno",
+   "committente": "Ascoltare Lily-Nyan e Fuwa dopo aver ricevuto un SMS",
+   "disponibileDal": "Il giorno dopo aver completato il Palazzo finale (Maruki); esclusiva terzo semestre",
+   "scadenza": "1 febbraio",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "piano": "Area 13",
+   "bersaglio": {
+    "nome": "Anji Fuwa",
+    "livello": null,
+    "formaDemoniaca": "Unicorno",
+    "debolezze": [
+     "Maledizione"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Centro perfetto (carta abilità)",
+    "Nuovo CD di Star Lilina (traccia 'He's a Trickster☆', ottenibile parlando con Lily-Nyan ad Akihabara dopo la richiesta)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà S. Non è un vero combattimento: bisogna colpire l'Unicorno con un attacco di Maledizione per avviare una Rapina, poi scegliere in ordine: 'E alla tua famiglia non pensi?' -> 'Non parli con tuo figlio?' -> 'Forse tuo figlio lo pensa.' Se 'Falsità in scena' si attiva lo stesso giorno, il gioco fa partire prima questa.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  },
+  {
+   "chiave": "falsita-in-scena",
+   "nome": "Falsità in scena",
+   "committente": "Ascoltare i cittadini di Kichijoji, poi due studenti dopo un SMS",
+   "disponibileDal": "Il giorno dopo aver completato il Palazzo finale (Maruki); esclusiva terzo semestre",
+   "scadenza": "1 febbraio",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "piano": "Area 15",
+   "bersaglio": {
+    "nome": "Izuo Amasaki",
+    "livello": null,
+    "formaDemoniaca": "Macabre / descritto da Allgamestaff come 'Ballerino mortale'",
+    "debolezze": [
+     "Sacro"
+    ],
+    "resistenze": [],
+    "vulnerabileConfusione": false
+   },
+   "ricompense": [
+    "Cintura eccentrica (aumenta le probabilità di infliggere alterazioni negative)"
+   ],
+   "confidente": null,
+   "note": "Difficoltà S. Per farla comparire dopo 'L'idol e l'unicorno' bisogna uscire e rientrare in classe, altrimenti si attiva automaticamente il giorno successivo.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/"
+  }
+ ],
+ "jose": {
+  "introduzione": "Jose è un ragazzino misterioso vestito di bianco (lo stesso personaggio incontrabile nel Covo dei Ladri) incontrato per la prima volta dopo aver completato la richiesta 'Un ex piuttosto appiccicoso'. Studia gli umani e chiede di raccogliere 'fiori' per lui in cambio di ricompense.",
+  "fiori": {
+   "descrizione": "Valuta di scambio esclusiva dei Memento: si trovano intrappolati in bolle di sapone (più luminose del bottino normale) esplorando le aree. Si perdono se si esce dai Memento senza averli spesi da Jose. Servono per acquistare oggetti nel 'Negozio di Jose' (più l'oggetto è raro, più fiori servono) e per resettare i punti timbro investiti nella cognizione ambientale (più punti si resettano, più fiori servono).",
+   "oggettoSpeciale": "Vaschetta a stella: ottenuta sconfiggendo il boss segreto Jose nella Sala di controllo cognitivo (Dedalo di Da'at); raddoppia i fiori raccolti nei Memento."
+  },
+  "timbri": {
+   "descrizione": "Podi lasciati da Jose nelle varie aree; ne danno uno per podio in posizione casuale. Raccogliendone di più si ottengono punti spendibili per far cambiare a Jose la 'cognizione ambientale' dei Memento, aumentando a scelta la quantità di Denaro, Oggetti o PE ottenibili esplorando. Gli investimenti sono resettabili spendendo fiori (il costo cresce con i punti già investiti). Lo stato della cognizione ambientale attuale si consulta con R1 (mappa principale).",
+   "totale": "123 Timbri in tutto il gioco secondo la pagina del Dedalo di Da'at (somma dei conteggi dichiarati per le singole aree, dove riportati: 8 ad Aiyatsbus, 20 a Kaitul, 25 ad Akzeriyyuth, 30 ad Adyeshach, 30 a Sheriruth, 40 a Da'at - la somma di questi valori supera 123, quindi c'è una discrepanza nella guida: vedi rapporto.md).",
+   "ricompensaCompletamento": "Raccoglierli tutti non è obbligatorio; dà una ricompensa nel Covo dei Ladri. Raccogliendoli tutti nel terzo semestre si sblocca il boss segreto 'Jose, studente di umanità' nella Sala di controllo cognitivo (Dedalo di Da'at) e un oggetto decorativo esclusivo per il Covo dei Ladri.",
+   "trofei": [
+    "Il cliente preferito di Jose (bronzo, primo scambio fiori)",
+    "Filatelico Fantasma (bronzo, primo scambio timbri)",
+    "La ricerca del potere (argento, prima categoria bonus massimizzata)"
+   ]
+  },
+  "bossSegreto": {
+   "nome": "Jose, studente di umanità",
+   "condizione": "Raccogliere tutti i 123 Timbri dei Memento (incluso il Dedalo di Da'at) e recarsi nella Sala di controllo cognitivo oltre il Piano 15 del Dedalo di Da'at.",
+   "statistiche": {
+    "livello": "?",
+    "hp": 9999,
+    "sp": 999,
+    "pe": "~20.000",
+    "yen": "~90.000",
+    "debolezze": "Nessuna",
+    "resistenze": "Attacchi fisici",
+    "bottinoGarantito": "Nessuno"
+   },
+   "abilita": [
+    "Deriva (attacco fisico di gruppo)",
+    "Palla (palla elementale/di stato che colpisce tutti, es. Palla di fuoco, Palla confusa)",
+    "Fuochi d'artificio speciali (danno ritardato e grave a tutto il gruppo, prevenibile mettendosi in Guardia)"
+   ],
+   "ricompensa": [
+    "Trofeo 'Senpai della vita' (Covo dei Ladri)",
+    "Vaschetta a stella (raddoppia i fiori raccolti)"
+   ]
+  },
+  "scambi": [
+   {
+    "nome": "Fiala delle vertigini S",
+    "effetto": "Chance alta di infliggere Vertigini a un nemico",
+    "costo": 30,
+    "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+   },
+   {
+    "nome": "Fiala del Sonno S",
+    "effetto": "Chance alta di infliggere Sonno a un nemico",
+    "costo": 40,
+    "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+   },
+   {
+    "nome": "Goccia dell'anima",
+    "effetto": "Ripristina 10 SP di un alleato",
+    "costo": 15,
+    "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+   },
+   {
+    "nome": "Polvere d'anima",
+    "effetto": "Ripristina 50 SP di un alleato",
+    "costo": 75,
+    "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+   },
+   {
+    "nome": "Kit energetico S",
+    "effetto": "Usare solo in posti sicuri: ripristina il 20% degli SP di tutti gli alleati",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Aiyatsbus"
+   },
+   {
+    "nome": "Carta bianca",
+    "effetto": "Una carta bianca su cui non c'è scritto nulla (base per trasmutazioni)",
+    "costo": 15,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Fiala confusione S",
+    "effetto": "Chance alta di infliggere Confusione a un nemico",
+    "costo": 65,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Fiala del sonno L",
+    "effetto": "Chance media di infliggere Sonno a tutti i nemici",
+    "costo": 40,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Ambra grigia MA",
+    "effetto": "Aumenta Ma di una Persona di 2",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Ambra grigia AG",
+    "effetto": "Aumenta Ag di una Persona di 2",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Ambra grigia FO",
+    "effetto": "Aumenta Fo di una Persona di 2",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Kogatana nera",
+    "effetto": "Spada in grado di mutare forma (base per trasmutazioni)",
+    "costo": 30,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Replica d'arma",
+    "effetto": "Replica d'arma in grado di operare trasmutazioni",
+    "costo": 30,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Veste nera",
+    "effetto": "Una veste nera che ha il potere di mutare forma (base per trasmutazioni)",
+    "costo": 30,
+    "requisito": "Aver sbloccato il Dedalo di Chemdah"
+   },
+   {
+    "nome": "Ambra grigia RS",
+    "effetto": "Aumenta Rs di una Persona di 2",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Kaitul"
+   },
+   {
+    "nome": "Ambra grigia FR",
+    "effetto": "Aumenta Fr di una Persona di 2",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Kaitul"
+   },
+   {
+    "nome": "Fiala delle vertigini L",
+    "effetto": "Chance media di infliggere Vertigini a tutti i nemici",
+    "costo": 40,
+    "requisito": "Aver sbloccato il Dedalo di Kaitul"
+   },
+   {
+    "nome": "Fiala della paura S",
+    "effetto": "Chance alta di infliggere Paura a un nemico",
+    "costo": 65,
+    "requisito": "Aver sbloccato il Dedalo di Kaitul"
+   },
+   {
+    "nome": "Idaten Ofuda",
+    "effetto": "Potenzia precisione ed elusione per tutti gli alleati per tre turni",
+    "costo": 70,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Kongou Ofuda",
+    "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
+    "costo": 70,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Rasetsu Ofuda",
+    "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
+    "costo": 70,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Kit energetico L",
+    "effetto": "Usare solo in posti sicuri: ripristina il 40% degli SP di tutti gli alleati",
+    "costo": 210,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Anima da masticare",
+    "effetto": "Ripristina 100 SP di un alleato",
+    "costo": 170,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Fiala confusione L",
+    "effetto": "Chance media di infliggere Confusione a tutti i nemici",
+    "costo": 70,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Fiala dell'amnesia S",
+    "effetto": "Chance alta di infliggere Amnesia a un nemico",
+    "costo": 30,
+    "requisito": "Aver sbloccato il Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Fiala della paura L",
+    "effetto": "Chance media di infliggere Paura a tutti i nemici",
+    "costo": 70,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Fiala soggiogamento S",
+    "effetto": "Chance alta di infliggere Soggiogamento a un nemico",
+    "costo": 70,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Nirvana FO",
+    "effetto": "Aumenta Fo di una Persona di 3",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Nirvana AG",
+    "effetto": "Aumenta Ag di una Persona di 3",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Nirvana RS",
+    "effetto": "Aumenta Rs di una Persona di 3",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Nirvana MA",
+    "effetto": "Aumenta Ma di una Persona di 3",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Nirvana FR",
+    "effetto": "Aumenta Fr di una Persona di 3",
+    "costo": 80,
+    "requisito": "Aver sbloccato il Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Pane per l'anima",
+    "effetto": "Ripristina del tutto gli SP di un alleato",
+    "costo": 450,
+    "requisito": "Aver sbloccato il Dedalo di Sheriruth"
+   },
+   {
+    "nome": "Fiala dell'amnesia L",
+    "effetto": "Chance media di infliggere Amnesia a tutti i nemici",
+    "costo": 40,
+    "requisito": "Aver sbloccato il Dedalo di Sheriruth"
+   },
+   {
+    "nome": "Fiala disperazione S",
+    "effetto": "Chance alta di infliggere Disperazione a un nemico",
+    "costo": 100,
+    "requisito": "Aver sbloccato il Dedalo di Sheriruth"
+   },
+   {
+    "nome": "Soma",
+    "effetto": "Ripristina del tutto gli HP e gli SP di tutti gli alleati",
+    "costo": 520,
+    "requisito": "Aver sbloccato il Dedalo di Da'at"
+   },
+   {
+    "nome": "Fiala soggiogamento L",
+    "effetto": "Chance media di infliggere Soggiogamento a tutti i nemici",
+    "costo": 90,
+    "requisito": "Aver sbloccato il Dedalo di Da'at"
+   }
+  ]
+ }
+}

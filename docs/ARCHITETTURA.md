@@ -177,6 +177,12 @@ Seed `data/seed/dungeon.json` (normalizzato dalle nove ricerche sui Palazzi: are
 Le piante delle aree sono immagini dell'utente nell'ambito `mappa` (tabella `immagine`, chiave = chiave dell'area), mai nel repository.
 `MappaInterattiva` (FE) fa zoom/trascinamento con trasformazioni CSS e posiziona gli spilli in percentuale.
 
+### Mementos e Richieste (Fase 7.2)
+I nove Dedali sono aree del dungeon `mementos` (stesse tabelle e mappe della 7.1; le Ombre per Dedalo sono punti «persona» con i dati
+in `dettagli`). Migrazione 014: `richiesta` (chiave stabile, bersaglio e ricompense in JSON, FK opzionali ad area e Confidente),
+`richiesta_partita` (accettata/completata), `dati_guida` (JSON per chiave: «jose», poi «battaglia»). `richiesteService` espone elenco con
+stato, aggiornamento con evento al completamento e i dati di Jose.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|
