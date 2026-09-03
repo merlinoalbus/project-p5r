@@ -17,6 +17,7 @@ import { CalendarioPage } from './pages/CalendarioPage';
 import { GuidaPage } from './pages/GuidaPage';
 import { DungeonPage } from './pages/DungeonPage';
 import { DungeonDettaglioPage } from './pages/DungeonDettaglioPage';
+import { RichiestePage } from './pages/RichiestePage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -42,6 +43,7 @@ export const router = createBrowserRouter([
       { path: 'guida/calendario', element: <CalendarioPage /> },
       { path: 'guida/dungeon', element: <DungeonPage /> },
       { path: 'guida/dungeon/:chiave', element: <DungeonDettaglioPage /> },
+      { path: 'guida/richieste', element: <RichiestePage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

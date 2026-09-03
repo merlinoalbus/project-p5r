@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -51,6 +51,7 @@ interface SeedCompleto {
   domande: DomandeSeed;
   calendario: CalendarioSeed;
   dungeon: DungeonSeed[];
+  mementos: MementosSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -78,6 +79,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     domande: JSON.parse(contenuti['domande.json']) as DomandeSeed,
     calendario: JSON.parse(contenuti['calendario.json']) as CalendarioSeed,
     dungeon: JSON.parse(contenuti['dungeon.json']) as DungeonSeed[],
+    mementos: JSON.parse(contenuti['mementos.json']) as MementosSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -328,6 +330,21 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const r of db.prepare('SELECT chiave FROM punto_interesse').all() as Array<{ chiave: string }>) if (!chiaviPunti.has(r.chiave)) db.prepare('DELETE FROM punto_interesse WHERE chiave = ?').run(r.chiave);
     for (const r of db.prepare('SELECT chiave FROM dungeon_area').all() as Array<{ chiave: string }>) if (!chiaviAree.has(r.chiave)) db.prepare('DELETE FROM dungeon_area WHERE chiave = ?').run(r.chiave);
     for (const r of db.prepare('SELECT chiave FROM dungeon').all() as Array<{ chiave: string }>) if (!chiaviDungeon.has(r.chiave)) db.prepare('DELETE FROM dungeon WHERE chiave = ?').run(r.chiave);
+
+    // ---- Richieste dei Mementos e Jose (Fase 7.2): upsert per chiave, rimozione degli orfani ----
+    const insRic = db.prepare(`INSERT INTO richiesta (chiave, ordine, nome, committente, disponibile_dal, scadenza, area, area_chiave, piano, bersaglio_json, ricompense_json, confidente_chiave, confidente_rango, note, fonte)
+      VALUES (@chiave, @ordine, @nome, @committente, @disponibile_dal, @scadenza, @area, @area_chiave, @piano, @bersaglio_json, @ricompense_json, @confidente_chiave, @confidente_rango, @note, @fonte)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, committente = excluded.committente, disponibile_dal = excluded.disponibile_dal, scadenza = excluded.scadenza, area = excluded.area,
+        area_chiave = excluded.area_chiave, piano = excluded.piano, bersaglio_json = excluded.bersaglio_json, ricompense_json = excluded.ricompense_json, confidente_chiave = excluded.confidente_chiave, confidente_rango = excluded.confidente_rango, note = excluded.note, fonte = excluded.fonte`);
+    const chiaviRichieste = new Set<string>();
+    seed.mementos.richieste.forEach((r, i) => {
+      chiaviRichieste.add(r.chiave);
+      const conf = r.confidente && chiaviConfidenti.has(r.confidente.chiave) ? r.confidente : null;
+      insRic.run({ chiave: r.chiave, ordine: i, nome: r.nome, committente: r.committente, disponibile_dal: r.disponibileDal, scadenza: r.scadenza, area: r.area, area_chiave: r.areaChiave && chiaviAree.has(r.areaChiave) ? r.areaChiave : null, piano: r.piano,
+        bersaglio_json: JSON.stringify(r.bersaglio), ricompense_json: JSON.stringify(r.ricompense), confidente_chiave: conf?.chiave ?? null, confidente_rango: conf?.rango ?? null, note: r.note, fonte: r.fonte });
+    });
+    for (const r of db.prepare('SELECT chiave FROM richiesta').all() as Array<{ chiave: string }>) if (!chiaviRichieste.has(r.chiave)) db.prepare('DELETE FROM richiesta WHERE chiave = ?').run(r.chiave);
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('jose', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.mementos.jose));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)
