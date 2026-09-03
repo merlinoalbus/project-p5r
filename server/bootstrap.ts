@@ -24,6 +24,7 @@ import { getDb } from './db/dbService.js';
 /** Costruisce l'applicazione HTTP senza aprire una porta di rete. */
 export function createApp(): Express {
   const app = express();
+  app.disable('x-powered-by');
 
   // ---- Middleware globali ----
   app.use(requestContextMiddleware);

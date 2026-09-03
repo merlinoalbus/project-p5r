@@ -15,6 +15,8 @@ export const config = {
   // per il dev server Vite e l'ambiente esterno vince su --env-file.
   port: parseInt(process.env.BE_PORT || process.env.PORT || '3101', 10),
   dataDir: path.resolve(process.env.DATA_DIR || './data'),
+  /** Cartella del dataset Royal caricato al boot (nell'immagine Docker: /app/data/seed). */
+  seedDir: path.resolve(process.env.SEED_DIR || './data/seed'),
   logLevel: process.env.LOG_LEVEL || 'info',
 
   /** Nome del file SQLite dentro `dataDir`. */

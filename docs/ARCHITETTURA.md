@@ -30,13 +30,13 @@ realizzeranno secondo `docs/ROADMAP.md`.
 | Runtime | Node ≥ 22, TypeScript 5.9, ESM (`"type": "module"`) |
 | Frontend | React 19, react-router 7, zustand 5, Tailwind 4 (plugin Vite, config CSS-first), Vite 8 |
 | Backend | Express 5, better-sqlite3 12, zod 4, pino 10, tsx (esegue i `.ts` a runtime, anche in produzione) |
-| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route |
+| Test | Vitest 4 (+ jsdom e Testing Library per i componenti), supertest per le route (`server/bootstrap.test.ts`, `server/db/migrationRunner.test.ts`) |
 | Qualità | ESLint 9 flat config, `tsc -b` su 4 progetti (app / node / server / test) |
 
 ## 3. Struttura del repository
 ```
 server/
-  index.ts            boot: initDb → runBootBackup → runMigrations → (caricaSeed, previsto) → listen
+  index.ts            boot: initDb → runBootBackup → runMigrations → (caricaSeed, previsto) → listen; SIGINT/SIGTERM → server.close + closeDb
   bootstrap.ts        factory Express: middleware in ordine, router, health/config, 404, errorHandler
   config.ts           unica lettura delle env (BE_PORT/PORT, DATA_DIR, LOG_LEVEL, SEED_DIR previsto)
   middleware/         requestContext (requestId + logger), responseShape ({data}), validate (zod), errorHandler
@@ -98,5 +98,6 @@ livelli), `alberoFusione` (branch-and-bound su costo `27L²+126L+2147`, profondi
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
 - CI (`.github/workflows/ci.yml`): typecheck, lint strict su `server/`, lint informativo, test, audit.
 - Immagini (`docker-publish.yml`): dopo il gate `verify`, build & push su GHCR `merlinoalbus/project-p5r-{backend,frontend}` con tag `latest` e `sha`.
+- Il backend in Docker gira come `node --import tsx server/index.ts` (PID 1 = node, riceve SIGTERM da `docker stop`).
 - Runtime (`docker-compose.yml`, stack Portainer dal repo): BE host 13821 → 3101, FE nginx host 13820 → 80,
   volume `project_p5r_data` su `/data` (DB creato al primo boot, seed nell'immagine), label watchtower per l'aggiornamento automatico.

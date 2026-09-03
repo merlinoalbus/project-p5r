@@ -11,11 +11,10 @@
 import type { Request, Response, NextFunction } from 'express';
 import { HttpError } from '../utils/httpError.js';
 import { getRequestLogger, getRequestId } from './requestContext.js';
-import { logger as rootLogger } from '../utils/logger.js';
 
 /** Converte gli errori applicativi nell'envelope HTTP comune. */
 export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
-  const log = getRequestLogger() ?? rootLogger;
+  const log = getRequestLogger();
   const requestId = getRequestId();
 
   if (err instanceof HttpError) {

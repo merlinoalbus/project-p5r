@@ -34,7 +34,7 @@ Altri comandi: `npm run typecheck`, `npm run lint`, `npm test`, `npm run build`.
 server/        Express: config, bootstrap, middleware, db (migrazioni), routes, services, schemas
 src/           React: pages, components (layout tablet-first), stores, services/api, hooks
 shared/        tipi condivisi FE/BE (solo tipi e costanti pure)
-data/seed/     dataset Persona 5 Royal normalizzato (versionato, caricato al boot)
+data/seed/     dataset Persona 5 Royal normalizzato (versionato, caricato al boot — dallo step 0.2)
 scripts/       gestione server + pipeline di acquisizione/verifica del dataset
 docs/          riferimenti di dominio, decisioni, prompt grafici
 ```
@@ -50,4 +50,5 @@ docs/          riferimenti di dominio, decisioni, prompt grafici
 ## Fonti dei dati
 
 Il compendio Royal è derivato dal dataset Apache-2.0 di [chinhodado/persona5_calculator](https://github.com/chinhodado/persona5_calculator)
-con verifica incrociata su [aqiu384/megaten-fusion-tool](https://github.com/aqiu384/megaten-fusion-tool). Vedi `NOTICE`.
+con verifica incrociata su [aqiu384/megaten-fusion-tool](https://github.com/aqiu384/megaten-fusion-tool).
+Il dataset normalizzato e il file `NOTICE` con le attribuzioni arrivano con lo step 0.2 (`docs/ROADMAP.md`).

@@ -19,8 +19,8 @@ italiana tramite la tabella `traduzione`.
 - `docs/ROADMAP.md` — fasi/step con stato (fatto / in corso / da fare) e criteri di completamento
 - `docs/DECISIONI.md` — registro delle decisioni prese con l'utente (data + motivazione)
 - `docs/riferimenti/` — conoscenza di dominio (meccaniche di gioco, mappa dei moduli della guida)
-- `docs/grafica/` — prompt per la generazione degli asset grafici in stile P5R
-- `NOTICE` — attribuzioni delle fonti dati (Apache-2.0)
+- `docs/grafica/` — prompt per la generazione degli asset grafici in stile P5R (dallo step 0.6)
+- `NOTICE` — attribuzioni delle fonti dati (Apache-2.0) (dallo step 0.2)
 
 ## Convenzioni tecniche (ereditate da project-jira, stesso autore)
 - Backend: `server/index.ts` → `initDb` → `runBootBackup` → `runMigrations` → `caricaSeed` → `listen`.
