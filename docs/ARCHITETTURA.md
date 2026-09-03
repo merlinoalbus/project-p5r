@@ -117,6 +117,12 @@ docs/                 documentazione di bordo e riferimenti di dominio
 - Testi canonici (nomi Persona/skill, chiavi arcana/elementi, effetti, descrizioni) restano in inglese Royal nelle tabelle di
     gioco; la resa italiana si legge da `traduzione(ambito, chiave)`; i DTO espongono `nomeIt` per skill e Persona (fallback al canonico).
 
+### Storico (Fase 5.1)
+Migrazione 005: `evento_partita` (partita_id, tipo, titolo, dettaglio, dati_json, persona_id, created_at) con indici per partita/tipo/Persona.
+`storicoService.registraEvento` viene chiamata dentro le transazioni di `partiteService` (atomicità con la modifica); i tipi e le
+etichette italiane stanno in `shared/eventi.ts` (usati anche dal frontend per i filtri per gruppo). Lettura paginata con cursore
+(`prima` = id dell'ultimo evento ricevuto) e totale del filtro; eliminazione singola per correggere errori.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

@@ -464,6 +464,31 @@ export interface PersonaPossedutaDto {
   updatedAt: string;
 }
 
+// ---- Storico (Fase 5.1) ----
+
+export interface EventoPartitaDto {
+  id: number;
+  tipo: string;
+  /** Etichetta italiana del tipo e gruppo per i filtri. */
+  tipoNome: string;
+  gruppo: 'partita' | 'doti' | 'confidenti' | 'persona' | 'velluto' | 'obiettivi';
+  titolo: string;
+  dettaglio: string;
+  dati: Record<string, unknown>;
+  personaId: number | null;
+  personaNome: string | null;
+  personaNomeIt: string | null;
+  createdAt: string;
+}
+
+export interface StoricoDto {
+  eventi: EventoPartitaDto[];
+  /** Cursore (`prima`) per la pagina successiva, null se non ci sono altri eventi. */
+  prossimo: number | null;
+  /** Totale degli eventi che soddisfano il filtro. */
+  totale: number;
+}
+
 // ---- Immagini ----
 
 /** Voce del catalogo dei riferimenti (solo link) con lo stato nella propria istanza. */

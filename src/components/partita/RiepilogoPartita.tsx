@@ -3,6 +3,8 @@
 // ============================================================
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { StoricoPartita } from './StoricoPartita';
 import { aggiornaPartita } from '../../services/api';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
@@ -91,6 +93,13 @@ export function RiepilogoPartita({ partita }: Props) {
           <button type="button" className={`btn ${allarme ? 'btn-primary' : 'btn-secondary'}`} onClick={() => void cambiaAllarme(!allarme)}>
             {allarme ? 'Allarme ATTIVO — disattiva' : 'Attiva Allarme'}
           </button>
+        </div>
+        <div className="card flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="form-label m-0">Ultimi eventi</span>
+            <Link to="/partita?scheda=storico" className="text-[12px] text-primary">Tutto lo storico</Link>
+          </div>
+          <StoricoPartita key={partita.updatedAt} partitaId={partita.id} perPagina={5} compatto />
         </div>
         <div className="card text-[13px] text-text-secondary flex flex-col gap-1">
           <span className="form-label m-0">Info</span>

@@ -76,5 +76,14 @@ const campiPosseduta = {
   skillIds: z.array(z.number().int().positive()).max(8).optional(),
 };
 
-export const bodyAggiungiPosseduta = z.object({ personaId: z.number().int().positive(), ...campiPosseduta });
+export const bodyAggiungiPosseduta = z.object({ personaId: z.number().int().positive(), ...campiPosseduta, origine: z.string().max(200).optional() });
+
+export const queryStorico = z.object({
+  limite: z.coerce.number().int().min(1).max(200).optional(),
+  prima: z.coerce.number().int().positive().optional(),
+  /** Tipi separati da virgola. */
+  tipi: z.string().max(1000).optional(),
+  persona: z.coerce.number().int().positive().optional(),
+});
+export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);
