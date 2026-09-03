@@ -4517,7 +4517,7 @@
       },
       {
         "nome": "Resist Forget",
-        "livello": 11
+        "livello": 10
       },
       {
         "nome": "Defense Master",
@@ -5184,12 +5184,12 @@
         "livello": 11
       },
       {
-        "nome": "Resist Forget",
+        "nome": "Maragi",
         "livello": 12
       },
       {
-        "nome": "Maragi",
-        "livello": 13
+        "nome": "Resist Forget",
+        "livello": 12
       },
       {
         "nome": "Burn Boost",
@@ -5381,7 +5381,7 @@
       },
       {
         "nome": "Sharp Student",
-        "livello": 17
+        "livello": 16
       },
       {
         "nome": "Counter",
@@ -6493,11 +6493,11 @@
         "livello": 0
       },
       {
-        "nome": "Dodge Psy",
+        "nome": "Sledgehammer",
         "livello": 27
       },
       {
-        "nome": "Sledgehammer",
+        "nome": "Dodge Psy",
         "livello": 28
       },
       {
@@ -6633,11 +6633,11 @@
         "livello": 13
       },
       {
-        "nome": "Tarukaja",
+        "nome": "Fear Boost",
         "livello": 14
       },
       {
-        "nome": "Fear Boost",
+        "nome": "Tarukaja",
         "livello": 15
       },
       {
@@ -11323,11 +11323,11 @@
       },
       {
         "nome": "Tarukaja",
-        "livello": 5
+        "livello": 4
       },
       {
         "nome": "Resist Confuse",
-        "livello": 6
+        "livello": 5
       }
     ],
     "areeMementos": [

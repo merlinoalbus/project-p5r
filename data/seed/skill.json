@@ -1,5 +1,18 @@
 [
   {
+    "nome": "+15% EXP",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "EXP +15% after battle",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
     "nome": "Abysmal Surge",
     "elemento": "ailment",
     "costo": {
@@ -175,7 +188,7 @@
     "unica": null
   },
   {
-    "nome": "All-out Attack Boost",
+    "nome": "All-Out Attack Boost",
     "elemento": "passive",
     "costo": {
       "tipo": "nessuno",
@@ -385,19 +398,6 @@
     "effetto": "Automatic Tarukaja at the start of battle.",
     "fontiEsecuzione": [],
     "fonteCarta": null,
-    "negoziazione": null,
-    "unica": null
-  },
-  {
-    "nome": "Attract",
-    "elemento": "support",
-    "costo": {
-      "tipo": "sp",
-      "valore": 4
-    },
-    "effetto": "Raises chance of being targeted",
-    "fontiEsecuzione": [],
-    "fonteCarta": "Fusion Mutation",
     "negoziazione": null,
     "unica": null
   },
@@ -908,7 +908,7 @@
     "unica": null
   },
   {
-    "nome": "Conceal",
+    "nome": "Concealment",
     "elemento": "support",
     "costo": {
       "tipo": "sp",
@@ -2060,19 +2060,6 @@
     "unica": null
   },
   {
-    "nome": "EXP Boost",
-    "elemento": "passive",
-    "costo": {
-      "tipo": "nessuno",
-      "valore": 0
-    },
-    "effetto": "EXP +15% after battle",
-    "fontiEsecuzione": [],
-    "fonteCarta": null,
-    "negoziazione": null,
-    "unica": null
-  },
-  {
     "nome": "Explosive Scheme",
     "elemento": "trait",
     "costo": {
@@ -2856,6 +2843,19 @@
     "unica": null
   },
   {
+    "nome": "Hide",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Lowers chance of being targeted",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
     "nome": "High Counter",
     "elemento": "passive",
     "costo": {
@@ -2901,7 +2901,7 @@
     "elemento": "healing",
     "costo": {
       "tipo": "sp",
-      "valore": 26
+      "valore": 27
     },
     "effetto": "Revive all allies with 100% HP",
     "fontiEsecuzione": [],
@@ -3269,7 +3269,7 @@
     "unica": null
   },
   {
-    "nome": "Kuzunoha's Order",
+    "nome": "Kuzunoha Emblem",
     "elemento": "passive",
     "costo": {
       "tipo": "nessuno",
@@ -3350,8 +3350,8 @@
     "nome": "Life Leech",
     "elemento": "almighty",
     "costo": {
-      "tipo": "nessuno",
-      "valore": 0
+      "tipo": "sp",
+      "valore": 3
     },
     "effetto": "Drains 150 HP from 1 foe.",
     "fontiEsecuzione": [],
@@ -4303,7 +4303,7 @@
     "elemento": "almighty",
     "costo": {
       "tipo": "sp",
-      "valore": 54
+      "valore": 55
     },
     "effetto": "Deal severe Almighty damage to all foes.",
     "fontiEsecuzione": [],
@@ -4526,6 +4526,19 @@
     "unica": null
   },
   {
+    "nome": "Null Bless/Curse",
+    "elemento": "passive",
+    "costo": {
+      "tipo": "nessuno",
+      "valore": 0
+    },
+    "effetto": "Nullifies damage from Bless and Curse attacks",
+    "fontiEsecuzione": [],
+    "fonteCarta": null,
+    "negoziazione": null,
+    "unica": null
+  },
+  {
     "nome": "Null Brainwash",
     "elemento": "passive",
     "costo": {
@@ -4689,19 +4702,6 @@
       "valore": 0
     },
     "effetto": "Impart immunity against Ice attacks.",
-    "fontiEsecuzione": [],
-    "fonteCarta": null,
-    "negoziazione": null,
-    "unica": null
-  },
-  {
-    "nome": "Null Mortal",
-    "elemento": "passive",
-    "costo": {
-      "tipo": "nessuno",
-      "valore": 0
-    },
-    "effetto": "Nullifies damage from Bless and Curse attacks",
     "fontiEsecuzione": [],
     "fonteCarta": null,
     "negoziazione": null,
@@ -5777,10 +5777,10 @@
   },
   {
     "nome": "Reverse Rub",
-    "elemento": "ailment",
+    "elemento": "almighty",
     "costo": {
-      "tipo": "nessuno",
-      "valore": 0
+      "tipo": "sp",
+      "valore": 5
     },
     "effetto": "Inflict Rage (100%) to 1 ally.",
     "fontiEsecuzione": [],
@@ -5877,7 +5877,7 @@
     "unica": "Daisoujou"
   },
   {
-    "nome": "Samurai's Ruling",
+    "nome": "Samurai Spirit",
     "elemento": "passive",
     "costo": {
       "tipo": "nessuno",
@@ -5916,7 +5916,7 @@
     "unica": "Goemon"
   },
   {
-    "nome": "Self-Destruct",
+    "nome": "Self-destruct",
     "elemento": "almighty",
     "costo": {
       "tipo": "nessuno",
@@ -6114,8 +6114,8 @@
     "nome": "Spirit Leech",
     "elemento": "almighty",
     "costo": {
-      "tipo": "nessuno",
-      "valore": 0
+      "tipo": "sp",
+      "valore": 3
     },
     "effetto": "Drains 150 SP from 1 foe.",
     "fontiEsecuzione": [],
@@ -6146,19 +6146,6 @@
       "valore": 0
     },
     "effetto": "Increases chance of inflicting Shock on downed foes",
-    "fontiEsecuzione": [],
-    "fonteCarta": null,
-    "negoziazione": null,
-    "unica": null
-  },
-  {
-    "nome": "Stealth",
-    "elemento": "passive",
-    "costo": {
-      "tipo": "nessuno",
-      "valore": 0
-    },
-    "effetto": "Lowers chance of being targeted",
     "fontiEsecuzione": [],
     "fonteCarta": null,
     "negoziazione": null,
@@ -6437,6 +6424,19 @@
     "fontiEsecuzione": [],
     "fonteCarta": null,
     "negoziazione": "Foolish Monk (Koppa Tengu)",
+    "unica": null
+  },
+  {
+    "nome": "Taunting Aura",
+    "elemento": "support",
+    "costo": {
+      "tipo": "sp",
+      "valore": 4
+    },
+    "effetto": "Raises chance of being targeted",
+    "fontiEsecuzione": [],
+    "fonteCarta": "Fusion Mutation",
+    "negoziazione": null,
     "unica": null
   },
   {

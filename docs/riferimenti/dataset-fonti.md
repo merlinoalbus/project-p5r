@@ -51,3 +51,22 @@ Logica (in `src/app/compendium/fusions/*.ts`): stesse regole della fonte primari
 - bonus di livello dal rango del Confidente dell'arcano risultante;
 - Allarme delle fusioni (statistiche, slot extra, inceppamento), Potenziamento/Forca, Addestramento;
 - risposte dei Confidenti, domande in classe, calendario (fonte: guida allgamestaff.it, inserimento dati ad hoc).
+
+## Esito della verifica incrociata e arbitrato (2026-09-03)
+Confronto eseguito da `scripts/seed/verificaIncrociata.ts` (report in `data/seed/verifica-incrociata.md`), discrepanze
+arbitrate con una terza fonte: Megami Tensei Wiki (sezioni "Persona 5 Royal", wikitext via `api.php`; megatenwiki.com irraggiungibile).
+
+Coincidono al 100%: livello e arcano delle 232 Persona, statistiche, tratti, tabella arcana 24×24 (276 coppie), 24 ricette
+speciali, 9 Demoni del Tesoro con 216 modificatori.
+
+Pattern emerso: **chinhodado conserva in più punti i valori di P5 base** (nomi `Absorb…`, `Conceal`, `Stealth`, livelli di
+Genbu/Hua Po/Kin-Ki/Kodama/Pixie); **aqiu384 è più fedele a Royal** su nomi e livelli, ma ricostruisce male i nomi degli
+oggetti da esecuzione (`Assault Dive Belt`, `Kill Rush Belt`…) e toglie a Power la debolezza all'Arma da fuoco (è l'Ombra a non averla).
+
+Correzioni applicate (tutte in `scripts/seed/correzioniRoyal.json`, con URL): 18 rinomine di skill al nome Royal, 9 livelli
+di apprendimento, 5 costi/elementi di skill. Mantenuta la fonte primaria dove confermata (Gatling Blows, Arsène, Power,
+eredità di Clotho/Hecatoncheires/Mandrake, nomi degli oggetti) e dove non verificabile (eredità di Macabre e Maria,
+Famine's Scream, Summon, Guiding Tendril, Great Aim) — elencate nel file per una futura verifica in gioco.
+
+Restano "solo in aqiu384" le skill dei compagni (Showtime, `Pressing Stance`, `Cripple`…) e alcune passive da accessorio:
+non appartengono alle Persona del compendio e non entrano nel seed (moduli futuri: battaglia/inventario).

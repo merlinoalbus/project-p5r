@@ -1,7 +1,7 @@
 {
-  "_nota": "Correzioni applicate ai dati grezzi della fonte primaria PRIMA della normalizzazione. Ogni voce cita la fonte. Le rinomine allineano i nomi alla localizzazione inglese di Persona 5 ROYAL (la fonte primaria conserva alcuni nomi della versione base).",
+  "_nota": "Correzioni applicate ai dati grezzi della fonte primaria (chinhodado) PRIMA della normalizzazione. Ogni voce cita la fonte. Arbitrato del 2026-09-03 con terza fonte (Megami Tensei Wiki, sezioni 'Persona 5 Royal' lette via api.php wikitext) sulle discrepanze fra chinhodado (A) e aqiu384 (B): dettagli in docs/riferimenti/dataset-fonti.md. Le rinomine allineano i nomi alla localizzazione inglese di Persona 5 ROYAL.",
   "rinominaSkill": [
-    { "da": "Absorb Phys", "a": "Drain Phys", "fonte": "P5R rinomina 'Absorb' in 'Drain' — confermato da aqiu384 roy-skill-data.json" },
+    { "da": "Absorb Phys", "a": "Drain Phys", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills — in Royal 'Absorb' è 'Drain'" },
     { "da": "Absorb Fire", "a": "Drain Fire", "fonte": "idem" },
     { "da": "Absorb Ice", "a": "Drain Ice", "fonte": "idem" },
     { "da": "Absorb Elec", "a": "Drain Elec", "fonte": "idem" },
@@ -9,11 +9,50 @@
     { "da": "Absorb Psy", "a": "Drain Psy", "fonte": "idem" },
     { "da": "Absorb Nuke", "a": "Drain Nuke", "fonte": "idem" },
     { "da": "Absorb Bless", "a": "Drain Bless", "fonte": "idem" },
-    { "da": "Absorb Curse", "a": "Drain Curse", "fonte": "idem" }
+    { "da": "Absorb Curse", "a": "Drain Curse", "fonte": "idem" },
+    { "da": "Conceal", "a": "Concealment", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills (Support › Non-negatable)" },
+    { "da": "Stealth", "a": "Hide", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills (Passive › Evasion)" },
+    { "da": "Attract", "a": "Taunting Aura", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills" },
+    { "da": "EXP Boost", "a": "+15% EXP", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills (Passive › Post-battle)" },
+    { "da": "Kuzunoha's Order", "a": "Kuzunoha Emblem", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills" },
+    { "da": "Samurai's Ruling", "a": "Samurai Spirit", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills" },
+    { "da": "Null Mortal", "a": "Null Bless/Curse", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills" },
+    { "da": "Self-Destruct", "a": "Self-destruct", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills (enemy-exclusive)" },
+    { "da": "All-out Attack Boost", "a": "All-Out Attack Boost", "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills" }
   ],
   "rinominaOggetti": [],
-  "livelliSkill": [],
+  "livelliSkill": [
+    { "persona": "Genbu", "skill": "Resist Forget", "livello": 10, "fonte": "https://megamitensei.fandom.com/wiki/Genbu (sezione P5R: Patra 8, Resist Forget 10, Mabufu 11) — A=11 è il valore P5 base, B=9 errato" },
+    { "persona": "Hua Po", "skill": "Maragi", "livello": 12, "fonte": "https://megamitensei.fandom.com/wiki/Hua_Po (P5R) — A=13 è P5 base" },
+    { "persona": "Ippon-Datara", "skill": "Sharp Student", "livello": 16, "fonte": "https://megamitensei.fandom.com/wiki/Ippon-Datara" },
+    { "persona": "Kin-Ki", "skill": "Dodge Psy", "livello": 28, "fonte": "https://megamitensei.fandom.com/wiki/Kin-Ki (P5R; in P5 base i due livelli erano invertiti)" },
+    { "persona": "Kin-Ki", "skill": "Sledgehammer", "livello": 27, "fonte": "https://megamitensei.fandom.com/wiki/Kin-Ki" },
+    { "persona": "Kodama", "skill": "Tarukaja", "livello": 15, "fonte": "https://megamitensei.fandom.com/wiki/Kodama (P5R; in P5 base invertiti)" },
+    { "persona": "Kodama", "skill": "Fear Boost", "livello": 14, "fonte": "https://megamitensei.fandom.com/wiki/Kodama" },
+    { "persona": "Pixie", "skill": "Tarukaja", "livello": 4, "fonte": "https://megamitensei.fandom.com/wiki/Pixie (P5R)" },
+    { "persona": "Pixie", "skill": "Resist Confuse", "livello": 5, "fonte": "https://megamitensei.fandom.com/wiki/Pixie (P5R)" }
+  ],
   "affinita": [],
   "eredita": [],
-  "campiSkill": []
+  "campiSkill": [
+    { "skill": "Holy Benevolence", "costo": 2700, "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills (Healing, 27 SP)" },
+    { "skill": "Life Leech", "costo": 300, "fonte": "https://megamitensei.fandom.com/wiki/Life_Leech (3 SP)" },
+    { "skill": "Morning Star", "costo": 5500, "fonte": "https://megamitensei.fandom.com/wiki/List_of_Persona_5_Royal_Skills (Almighty, 55 SP)" },
+    { "skill": "Reverse Rub", "elemento": "almighty", "costo": 500, "fonte": "https://megamitensei.fandom.com/wiki/Reverse_Rub (Almighty, 5 SP, enemy-exclusive)" },
+    { "skill": "Spirit Leech", "costo": 300, "fonte": "https://megamitensei.fandom.com/wiki/Spirit_Leech (3 SP)" }
+  ],
+  "_confermate_fonte_primaria": [
+    "Gatling Blows (una sola t): https://megamitensei.fandom.com/wiki/Gatling_Blow (DISPLAYTITLE Gatling Blows)",
+    "Arsène (con accento): https://megamitensei.fandom.com/wiki/Ars%C3%A8ne",
+    "Izanagi: Dodge Phys 22; Izanagi Picaro: Null Phys 25; Koppa Tengu: Rage Boost 14",
+    "Power: debole ad Arma da fuoco e Oscurità (è l'Ombra P5R a non esserlo più): https://megamitensei.fandom.com/wiki/Power",
+    "Eredità: Clotho Healing, Hecatoncheires Physical, Mandrake Electric",
+    "Oggetti da esecuzione: Emperor's Charm R, Gatling Belt, Assault Belt, Rush Belt, Myriad Slash Belt, Brave Belt (aqiu384 li ricostruisce dal nome della skill)"
+  ],
+  "_non_verificabili": [
+    "Eredità di Macabre (A: Curse, B: Ailment) e Maria (A: Healing, B: Bless): wiki senza dato; si mantiene A",
+    "Famine's Scream costo (A: nessuno, B: 8 SP) e Summon elemento (A: almighty, B: support): skill esclusive dei nemici, wiki senza dato; si mantiene A",
+    "Guiding Tendril (A: support, B: almighty): l'effetto nel dataset ('atterra tutti i nemici, solo in imboscata') è di supporto; si mantiene A",
+    "Great Aim (precisione Arma da fuoco +5%): nessuna pagina wiki; aqiu384 la chiama 'Gun Accuracy +5%'. NON è 'Snipe' (che in Royal è 'Gun Boost', già presente): si mantiene A"
+  ]
 }
