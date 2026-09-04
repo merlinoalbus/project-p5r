@@ -21,6 +21,8 @@ export interface AsseStella {
   testo?: ReactNode;
   /** Asset predefinito del badge al vertice (es. `doti/coraggio-senza-testo`), con riserva sull'etichetta. */
   badge?: string;
+  /** Asset grafico sotto il badge (es. tassello del rango `ui/rango-3`), con riserva sul testo. */
+  badgeSotto?: string;
 }
 
 interface Props {
@@ -34,6 +36,8 @@ interface Props {
   selezionato?: string | null;
   etichettaAria: string;
   animato?: boolean;
+  /** Altezza in px del badge ai vertici (default 28). */
+  badgeAltezza?: number;
   className?: string;
 }
 
@@ -73,15 +77,16 @@ function useValoriAnimati(bersaglio: number[], animato: boolean): number[] {
 }
 
 /** Radar a N assi con griglia, poligono dei valori e vertici etichettati (badge o testo). */
-export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, selezionato = null, etichettaAria, animato = true, className }: Props) {
+export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, selezionato = null, etichettaAria, animato = true, badgeAltezza = 28, className }: Props) {
   const n = Math.max(3, assi.length);
   const valori = useValoriAnimati(assi.map((a) => limita(a.valore)), animato);
   const anelli = Array.from({ length: livelli }, (_, k) => poligonoStella(Array.from({ length: n }, () => (RAGGIO * (k + 1)) / livelli)));
   const raggiValori = assi.map((_, i) => RAGGIO * (valori[i] ?? 0));
   const descrizione = assi.map((a) => `${a.etichetta}: ${Math.round(limita(a.valore) * 100)}%`).join(', ');
+  const altezzaBadge = `${arrotonda((badgeAltezza / dimensione) * 100)}cqw`;
 
   return (
-    <div className={`relative select-none ${className ?? ''}`} style={{ width: dimensione, height: dimensione, maxWidth: '100%' }}>
+    <div className={`relative select-none ${className ?? ''}`} style={{ width: dimensione, maxWidth: '100%', aspectRatio: '1 / 1', containerType: 'inline-size' }}>
       <svg viewBox="0 0 100 100" className="block w-full h-full overflow-visible" role="img" aria-label={`${etichettaAria}: ${descrizione}`}>
         {anelli.map((p, k) => (
           <polygon key={k} points={p} fill={k === livelli - 1 ? 'rgba(255,255,255,0.03)' : 'none'} stroke={k === livelli - 1 ? 'var(--color-text-muted)' : 'var(--color-border)'} strokeWidth={k === livelli - 1 ? 0.6 : 0.35} />
@@ -100,19 +105,26 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
       {assi.map((a, i) => {
         const [x, y] = puntoStella(i, n, RAGGIO_ETICHETTE);
         const stile = { left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' } as const;
+        // Il badge scala con la larghezza reale del riquadro (unità di contenitore): stessa proporzione su ogni schermo.
         const contenuto = (
           <>
-            <AssetImg nome={a.badge ?? null} alt="" decorativa className="h-7 w-auto max-w-[96px] object-contain drop-shadow" fallback={<span className="text-[12px] font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
-            {a.testo !== undefined && <span className="text-[11px] text-text-secondary leading-tight">{a.testo}</span>}
+            <span className="relative inline-block">
+              <AssetImg nome={a.badge ?? null} alt="" decorativa className="block w-auto object-contain drop-shadow" style={{ height: altezzaBadge, maxWidth: `calc(${altezzaBadge} * 3)` }} fallback={<span className="text-[12px] font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
+              {a.badgeSotto && (
+                <AssetImg nome={a.badgeSotto} alt="" decorativa className="absolute w-auto object-contain drop-shadow" style={{ height: `calc(${altezzaBadge} * 0.66)`, right: `calc(${altezzaBadge} * -0.22)`, bottom: `calc(${altezzaBadge} * -0.2)` }} fallback={a.testo !== undefined ? <span className="absolute -right-1 -bottom-2 chip chip--attivo text-[10px] leading-none py-0.5 px-1.5">{a.testo}</span> : null} />
+              )}
+            </span>
+            {!a.badgeSotto && a.testo !== undefined && <span className="chip chip--attivo text-[11px] leading-none py-0.5 px-2">{a.testo}</span>}
           </>
         );
-        const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap ${selezionato === a.chiave ? 'text-primary' : 'text-text'}`;
+        // Nome dell'asse in un suggerimento al passaggio del mouse (o al fuoco): i badge sono icone senza testo.
+        const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap con-suggerimento ${selezionato === a.chiave ? 'text-primary' : 'text-text'}`;
         return onScegli ? (
-          <button key={a.chiave} type="button" className={`${classi} touch bg-transparent border-0 p-1 cursor-pointer`} style={stile} onClick={() => onScegli(a.chiave)} aria-pressed={selezionato === a.chiave} aria-label={a.etichetta}>
+          <button key={a.chiave} type="button" className={`${classi} touch bg-transparent border-0 p-1 cursor-pointer`} style={stile} onClick={() => onScegli(a.chiave)} aria-pressed={selezionato === a.chiave} aria-label={a.etichetta} title={a.etichetta} data-suggerimento={a.etichetta}>
             {contenuto}
           </button>
         ) : (
-          <span key={a.chiave} className={classi} style={stile} aria-hidden="true">
+          <span key={a.chiave} className={classi} style={stile} aria-hidden="true" title={a.etichetta} data-suggerimento={a.etichetta} tabIndex={-1}>
             {contenuto}
           </span>
         );

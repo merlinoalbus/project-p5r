@@ -51,7 +51,7 @@ export function ScortaPersona({ partitaId }: Props) {
           {dati?.map((p) => (
             <li key={p.id} className="card flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={64} />
+                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={64} />
                 <span className="w-11 h-11 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary" title="Livello">{p.livello}</span>
                 <Link to={`/compendio/persona/${p.personaId}`} className="font-semibold text-[15px] no-underline text-text hover:text-primary">{p.nomeIt}</Link>
                 {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}

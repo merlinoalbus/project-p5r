@@ -450,6 +450,17 @@ Stile e regole di §8 (testo in maiuscolo a ritaglio, variante `-senza-testo`).
 | `vuoto-cicli.png` | NESSUN CICLO | due frecce che si inseguono attorno a una maschera |
 | `vuoto-storico.png` | NESSUN EVENTO | orologio da parete con una pagina strappata |
 
+## 14. Personaggi non Confidenti (5) — `personaggi/<chiave>.png` (768×1024, trasparente) — richiesti il 2026-09-04
+Stesse regole e stile dei ritratti «fedeli» dei Confidenti (§9, variante `-fedele`): mezzo busto, sfondo trasparente, nessun testo.
+Chiavi cablate in Guida → Personaggi (cast) e Guida → Sfide (boss segreti).
+| File | Personaggio | Descrizione per il prompt |
+|---|---|---|
+| `joker.png` | Protagonista (Joker) | studente con capelli neri arruffati e occhiali, uniforme della Shujin; sguardo sereno; in alternativa la maschera bianca da ladro fantasma |
+| `caroline.png` | Caroline | gemella custode della Stanza di Velluto con divisa blu e cappello, benda sull'occhio sinistro, manganello, espressione severa |
+| `justine.png` | Justine | gemella custode con divisa blu e cappello, benda sull'occhio destro, cartella con appunti, espressione calma |
+| `jose.png` | Jose | bambino misterioso dei Mementos con tuta bianca, cappello e piccola auto giocattolo |
+| `lavenza.png` | Lavenza | assistente della Stanza di Velluto con abito blu, lunghi capelli biondi e il grande libro dei Compendi |
+
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.
 2. Icone elementi (4), affinità (5), navigazione (7.1) → usate in ogni scheda.

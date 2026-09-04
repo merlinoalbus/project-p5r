@@ -2,7 +2,7 @@
 // storicoService — registrazione e lettura degli eventi della partita (Fase 5.1)
 // ============================================================
 
-import { nowIso, prepared } from '../db/dbService.js';
+import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { ETICHETTE_EVENTO, TIPI_EVENTO, type TipoEvento } from '../../shared/eventi.js';
@@ -70,6 +70,17 @@ export function storico(partitaId: number, filtro: FiltroStorico = {}): StoricoD
 }
 
 /** Elimina una voce dello storico (correzione di un errore dell'utente). */
+/** Elimina più voci dello storico in una transazione; restituisce quante ne ha trovate ed eliminate. */
+export function eliminaEventi(partitaId: number, ids: number[]): number {
+  const unici = [...new Set(ids)];
+  let eliminati = 0;
+  const db = getDb();
+  db.transaction(() => {
+    for (const id of unici) eliminati += prepared('DELETE FROM evento_partita WHERE id = ? AND partita_id = ?').run(id, partitaId).changes;
+  })();
+  return eliminati;
+}
+
 export function eliminaEvento(partitaId: number, eventoId: number): void {
   const info = prepared('DELETE FROM evento_partita WHERE id = ? AND partita_id = ?').run(eventoId, partitaId);
   if (info.changes === 0) throw httpErrors.notFound('evento-non-trovato', `L'evento ${eventoId} non esiste in questa partita.`);

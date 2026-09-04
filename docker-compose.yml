@@ -33,7 +33,6 @@ services:
       - PORT=3101
       - DATA_DIR=/data
       - SEED_DIR=/app/data/seed
-      - RIFERIMENTI_DIR=/app/data/riferimenti
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
       # DB SQLite + WAL + backups/ sopravvivono agli update di immagine.

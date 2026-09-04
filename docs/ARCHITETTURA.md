@@ -46,7 +46,7 @@ server/
                       confidenti, compendio personale, Persona possedute), immagini (PUT grezzo image/*, import da URL, file)
   services/seed/      caricaSeed.ts: carica data/seed nel DB al boot (hash in seed_meta, upsert per nome, traduzioni utente intoccabili)
   services/           traduzioniService (cache in memoria, `t(ambito, chiave)`), compendioService, partiteService, immaginiService,
-                      catalogoRiferimentiService; fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani
+                      fusione/motoreFusione.ts (motore puro su snapshot in memoria), fusione/alberoFusione.ts (piani
                       ricorsivi) e fusione/fusioneService.ts (DTO)
   schemas/            zod: comuni (id, booleani da query, livello), compendio, traduzioni, partite, immagini
   utils/              logger, httpError
@@ -68,7 +68,7 @@ src/
                       PianiFusione (albero ricorsivo con foglie scorta/Registro/cattura, opzioni, skill richieste con badge per nodo),
                       PannelloEredita (slot, bacino, tratti), SelettoreSkill (scelta multi-skill con ricerca), CercaSkill (ricette valide per skill),
                       PannelloVelluto (sconto/Allarme/Gemelle/ranghi), ForcaIsolamento (calcolatori Forca e Isolamento sulla scorta)
-  components/impostazioni/ GestionePartite, ImportaRiferimenti (catalogo link → importazione a lotti di 10 con avanzamento ed esiti), TraduzioniEditor
+  components/impostazioni/ GestionePartite, ImmaginiCaricate (rimozione per ambito o totale), CaratteriEditor, TraduzioniEditor
   pages/              Home, Compendio (232 Persona, filtri client-side), PersonaDettaglio, Glossario (termini per categoria), Skill (525, filtri), SkillDettaglio,
                       Fusione (due arcani, matrice 24×24, ricette speciali, Demoni del Tesoro), Partita (schede), Impostazioni, NotFound
   stores/             configStore, notificationStore, glossarioStore (rese italiane, caricato una volta), partitaStore (partite + attiva),
@@ -76,8 +76,6 @@ src/
   utils/              constants, elementi, punti (formato/anteprima punti Confidente), assetPredefiniti (chiavi manifest per entità)
 vite/                 assetPredefiniti.ts — plugin: manifest degli asset in public/asset/ (dinamico in dev, emesso in build)
 public/asset/         asset grafici predefiniti (vedi README.md e docs/grafica/prompt-immagini.md); vuoto nel repo finché non consegnati
-data/riferimenti/     immagini.json — catalogo di SOLI LINK alle immagini ufficiali sul Megami Tensei Wiki (Arcani, Confidenti, Persona),
-                      letto dal BE (`RIFERIMENTI_DIR`, nell'immagine /app/data/riferimenti); importazione nella propria istanza dalle Impostazioni
   services/api/       _httpClient (timeout+retry), _helpers (envelope, ApiError, queryString), sistema, compendio, traduzioni, partite, immagini
   hooks/, utils/      useDocumentTitle, useCarica (stato di caricamento derivato, senza setState negli effetti), constants, elementi (colori)
 data/seed/            dataset Royal normalizzato in JSON (persona, skill, oggetti, fusione, traduzioni, versione), versionato,
@@ -236,7 +234,7 @@ chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta 
 | Font (Fase 11.1) | `GET /api/font` (stato dei ruoli display/menu/decor), `GET /api/font/:ruolo/file`, `PUT /api/font/:ruolo` (file come corpo grezzo fino a 4 MB, formato TTF/OTF/WOFF/WOFF2 riconosciuto dalla firma), `DELETE /api/font/:ruolo`; file in `DATA_DIR/font/<ruolo>.<formato>`, nessuna tabella |
 | Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti` (punti, rango, nomeRango, sogliaProssima, mancanti, ranghi[]), `PATCH /:id/doti/:chiave {punti|delta|note 1–3 + libro/fortuna}`; `GET /:id/confidenti` (punti, puntiNecessari, mancanti, personaArcanoInScorta), `PUT /:id/confidenti/:chiave {sbloccato,rango,punti|deltaPunti|noteRisposta 1–3|regalo|uscita + bonusArcano/esame/invito,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
 | Fusione | `GET /api/fusione/fondi?a&b&partita|dlc` (esito con motivo), `GET /api/fusione/ricette/:personaId?partita|dlc&livelloMax&limite` (totale, totaleSenzaFiltri, ricette per costo), `GET /api/fusione/con/:personaId?…` (fusioni con la Persona come ingrediente), `GET /api/fusione/piani/:personaId?partita&profondita≤4&alternative≤10&catture&limitaLivello|livelloMax&skill=id,…(≤4)&slotFortunato` (piani ricorsivi con propagazione delle skill), `GET /api/fusione/velluto?partita` (sconto, Allarme, Gemelle, ranghi per arcano), `GET /api/fusione/eredita?a&b&partita&livelloA&livelloB` (slot, candidate, tratti), `GET /api/fusione/cerca-skill?skill=id,…(≤4)&risultato&partita&livelloMax&limite` (ricette che consentono le skill) |
-| Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave`; catalogo dei riferimenti (solo link): `GET /catalogo?ambito` (voci + `presente`), `POST /catalogo/importa {ambito, chiavi ≤20, sovrascrivi}` → `{importate, saltate, fallite[{chiave, motivo}]}` |
+| Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /api/immagini?ambito` (rimozione multipla, 12.1), `DELETE /:ambito/:chiave`; catalogo dei riferimenti (solo link): `GET /catalogo?ambito` (voci + `presente`), `POST /catalogo/importa {ambito, chiavi ≤20, sovrascrivi}` → `{importate, saltate, fallite[{chiave, motivo}]}` |
 Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti da `traduzioniService`.
 
 ## 6. Motore di fusione *(fasi 1–4 realizzate)*
@@ -343,6 +341,21 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 - **Battaglia**: debolezze e resistenze delle Ombre e dei boss come chip dell'elemento con icona (`utils/elementiGuida.ts` riconosce i nomi
   italiani della guida: «Tuono» → elettricità, «Maledizione (dimezza)» → oscurità, «Attacchi fisici» → fisico…), testo della guida invariato.
 - **Regola di leggibilità nella data compatta**: solo il numero del giorno resta in display (20 px); mese e giorno della settimana sono nel sans.
+
+### Correzioni dal test (Fase 12.1)
+- Catalogo dei riferimenti rimosso (l'app ha la propria grafica): niente `RIFERIMENTI_DIR`, niente `data/riferimenti/`; resta il caricamento
+  singolo da `ImmagineEntita` e la rimozione multipla (`DELETE /api/immagini?ambito`, sezione «Immagini caricate» in Impostazioni,
+  cache di esistenza azzerata da `immaginiCache.azzeraCacheImmagini`).
+- Compendio: filtri nell'URL (`q`, `arcana`, `lvMin`, `lvMax`, `ordine`, `dir`, `dlc`, `catturabili`, `el`, `aff`, `img`) così il ritorno dalla scheda
+  li conserva; ricerca e ordinamento sempre visibili, il resto in un pannello «Filtri» a gruppi etichettati (`.pannello-filtri`) con chip dei
+  filtri attivi rimovibili e «Azzera»; `utils/ultimaPersona.ts` ricorda in sessionStorage la Persona aperta e la lista la evidenzia (`.card--evidenza`) al ritorno.
+- Scheda Persona: stella con scala unica 0–99 (default) o adattata, ingrandimento in `Modal`; storico con `POST /api/partite/:id/storico/elimina`
+  (`storicoService.eliminaEventi`, transazione) e selezione multipla nel componente; `SelettorePosseduta` + `AnteprimaPersona` (miniatura
+  non interattiva: immagine caricata → asset `persona/<slug>` → iniziali) al posto delle tendine di Forca e Isolamento.
+- Font dell'utente con `unicode-range` al latino di base: i glifi accentati mappati ma vuoti (P5 Hatty) arrivano dal font di riserva.
+- `StellaCinque`: riquadro quadrato (`aspect-ratio`) con `container-type: inline-size`; i badge ai vertici hanno altezza in `cqw` (proporzione
+  `badgeAltezza/dimensione`) così restano in scala su ogni schermo; `badgeSotto` (tassello del rango) sta in angolo al badge; nome dell'asse in un
+  suggerimento al passaggio del mouse (`.con-suggerimento`, `data-suggerimento`).
 
 ## 8. Build, test, deploy
 - Test (Vitest, 83 file / 236 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),

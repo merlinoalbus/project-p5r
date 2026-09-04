@@ -11,6 +11,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { Spinner } from '../shared/PageState';
 import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
+import { SelettorePosseduta } from './SelettorePosseduta';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -51,12 +52,7 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
         <p className="m-0 text-[13px] text-text-muted">Servono almeno due Persona nella scorta della partita attiva.</p>
       ) : (
         <>
-          <label className="form-label">Ricevente
-            <select className="form-input mt-1" value={riceventeId ?? ''} onChange={(e) => setRiceventeId(e.target.value ? Number(e.target.value) : null)} aria-label="Persona ricevente">
-              <option value="">Scegli dalla scorta…</option>
-              {scorta.map((p) => <option key={p.id} value={p.id}>{p.nomeIt} · {p.arcanaNome} · livello {p.livello}</option>)}
-            </select>
-          </label>
+          <SelettorePosseduta etichetta="Persona ricevente" persone={scorta} sceltaId={riceventeId} onScegli={setRiceventeId} />
           {ricevente && (
             <>
               <div className="text-[12px] text-text-muted">Confidente {ricevente.arcanaNome}: rango {rangoDi(ricevente.arcana)}{igorMax ? ' · Igor al massimo' : ''}{allarme ? ' · Allarme attivo' : ''}</div>
@@ -124,12 +120,7 @@ function Isolamento({ scorta, velluto, partitaId, onScortaCambiata }: { scorta: 
       <p className="m-0 text-[13px] text-text-secondary">Sbloccato al rango 3 delle Gemelle. La Persona in isolamento impara una skill di resistenza contro la sua debolezza (il tier dipende dal suo livello al deposito) e, bruciando un incenso, guadagna statistiche ogni 2 giorni (raddoppiate durante l'Allarme). Attenzione: avviso al giorno {ISOLAMENTO_AVVISO.giornoAvviso}, perdita al giorno {ISOLAMENTO_AVVISO.giornoPerdita}.</p>
       {rangoGemelle < 3 && <p className="m-0 text-[12px] text-warning">Gemelle al rango {rangoGemelle}: l'Isolamento non è ancora sbloccato nella partita attiva.</p>}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <label className="form-label">Persona
-          <select className="form-input mt-1" value={possedutaId ?? ''} onChange={(e) => setPossedutaId(e.target.value ? Number(e.target.value) : null)} aria-label="Persona da isolare">
-            <option value="">Dalla scorta…</option>
-            {scorta.map((p) => <option key={p.id} value={p.id}>{p.nomeIt} · livello {p.livello}</option>)}
-          </select>
-        </label>
+        <div className="sm:col-span-3"><SelettorePosseduta etichetta="Persona da isolare" persone={scorta} sceltaId={possedutaId} onScegli={setPossedutaId} /></div>
         <label className="form-label">Incenso
           <select className="form-input mt-1" value={incensoChiave} onChange={(e) => setIncensoChiave(e.target.value)} aria-label="Incenso">
             {INCENSI.map((i) => <option key={i.chiave} value={i.chiave}>{i.nome}{i.prezzo ? ` · ${i.prezzo.toLocaleString('it-IT')} ¥` : ' · fiori'}</option>)}

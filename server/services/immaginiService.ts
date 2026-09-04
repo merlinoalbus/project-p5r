@@ -118,6 +118,18 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
   return salvaImmagine(ambito, chiave, mime, contenuto, u.toString());
 }
 
+/** Rimuove tutte le immagini caricate di un ambito (o di tutta l'istanza): file e righe; restituisce quante erano. */
+export function eliminaImmaginiAmbito(ambito?: string): number {
+  const righe = (ambito
+    ? prepared('SELECT * FROM immagine WHERE ambito = ?').all(ambito)
+    : prepared('SELECT * FROM immagine').all()) as RigaImmagine[];
+  getDb().transaction(() => {
+    for (const r of righe) prepared('DELETE FROM immagine WHERE id = ?').run(r.id);
+  })();
+  for (const r of righe) fs.rmSync(path.join(dirImmagini(r.ambito), r.nome_file), { force: true });
+  return righe.length;
+}
+
 export function eliminaImmagine(ambito: string, chiave: string): void {
   const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
   if (!r) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);

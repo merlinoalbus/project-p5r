@@ -121,6 +121,20 @@ predefiniti open source nel repo, stati vuoti con l'illustrazione neutra finché
 | 11.5 | Guida, giorno per giorno, calendario e sezioni: data grande in stile P5, icona del meteo (`meteo/*` appena consegnate), blocchi giorno/sera con icone, Confidenti e luoghi con ritratti e miniature delle mappe; città, negozi, attività, battaglia e oggetti con icone di categoria e copertine | ✅ 2026-09-04(approvato dal validatore dopo le correzioni) |
 | 11.6 | Asset aggiuntivi per Codex, prompt in `docs/grafica/prompt-immagini.md`: `ui/nav-guida`, 15 icone delle sezioni della Guida, 10 emblemi di Palazzi e Dedali senza spoiler, icone giorno/sera, 4 illustrazioni per gli stati vuoti (obiettivi, piani, cicli, storico); l'app li usa appena presenti nel manifest, con fallback vettoriali fino ad allora | ✅ 2026-09-04(approvato dal validatore) |
 
+## Fase 12 — Correzioni dal test e gestione della partita (note dell'utente del 2026-09-04)
+
+Decisioni dell'utente: il catalogo dei riferimenti dal wiki è superfluo (l'app ha la propria grafica) e viene rimosso, resta il
+caricamento singolo di un'immagine dal riquadro di ogni entità con «Rimuovi tutte» in Impostazioni; la stella delle statistiche
+mostra di default la scala unica 0–99 (adattata a richiesta) e si ingrandisce al tocco; i filtri del compendio vivono nell'URL.
+
+| Step | Contenuto | Stato |
+|---|---|---|
+| 12.1 | Correzioni rapide: rimozione del catalogo dei riferimenti (rotte, servizio, UI, cartella e variabili d'ambiente) e sezione «Immagini caricate» con rimozione per ambito o totale (`DELETE /api/immagini?ambito`); nome italiano nel dettaglio delle immagini; compendio con filtri nell'URL (ricerca, arcano, livello minimo e massimo, ordinamento con verso, affinità per elemento e tipo, immagine personalizzata presente/assente) ordinati in un pannello a gruppi etichettati con chip dei filtri attivi e «Azzera», e ritorno dalla scheda alla Persona vista, evidenziata; nome della statistica al passaggio del mouse sui vertici della stella (icone senza testo); stella delle statistiche con scala unica 0–99 di default, «adatta» a richiesta e ingrandimento in finestra; storico con selezione multipla ed eliminazione in blocco (`POST /api/partite/:id/storico/elimina`); Forca e Isolamento con selettori a miniature (`SelettorePosseduta`, `AnteprimaPersona`); logo e nome dell'app più grandi; font dell'utente limitati ai caratteri che possiedono (`unicode-range`, le accentate dal font di riserva); Doti con targhette grandi, tassello grafico del rango (`ui/rango-N`) in angolo alla targhetta sui vertici della stella (in scala con la larghezza reale del riquadro), intestazioni «Rango · tassello · qualificatore» in carattere P5 e modificatori (Fortuna ×1,5, Libro) come pulsanti a tasselli con icona; prompt §14 per Protagonista, Caroline, Justine, Jose e Lavenza con chiavi cablate in Personaggi e Sfide | ✅ 2026-09-04 |
+| 12.2 | Statistiche con bonus (base del livello + bonus per statistica, migrazione) e compendio personale con istantanea di livello, bonus e skill al momento della registrazione, ripristinata dall'evocazione | ⏳ |
+| 12.3 | Semafori dei Confidenti (requisiti per rango dalla guida: data di sblocco, Doti, Persona dell'arcano, richieste dei Mementos, Palazzi, meteo, altri Confidenti; conferma manuale per i requisiti non verificabili) e punti dalle azioni della guida (Doti «+N», note dei Confidenti alla spunta, libri e film) | ⏳ (in attesa delle risposte dell'utente) |
+| 12.4 | Partita e Guida giorno per giorno: scheda «Oggi» nella Partita, collegamenti al punto esatto delle pagine, azioni consigliate in oro e bloccate in grigio con motivo | ⏳ |
+| 12.5 | Cicli di fusione: partner distinti, anelli minimi e massimi | ⏳ |
+
 ## Requisiti trasversali (sempre validi)
 - Tutto in italiano; nomi Persona originali; skill con chiave canonica + resa IT modificabile.
 - Tablet-first ma **anche mobile** (375px) e desktop.

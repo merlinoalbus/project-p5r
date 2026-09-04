@@ -19,6 +19,8 @@ export const FAMIGLIA_FONT: Record<RuoloFont, string> = { display: 'P5R Display'
 
 const FORMATO_CSS: Record<FormatoFont, string> = { ttf: 'truetype', otf: 'opentype', woff: 'woff', woff2: 'woff2' };
 const ID_STYLE = 'p5r-font-utente';
+/** Latino di base, punteggiatura, virgolette e simboli comuni: mai le lettere accentate (U+00C0–U+00FF, tranne ×). */
+export const INTERVALLO_FONT_UTENTE = 'U+0020-007E, U+00A0-00BF, U+00D7, U+2010-2027, U+20AC';
 
 /** Regole @font-face per i ruoli con un file caricato (la data di aggiornamento nel querystring invalida la cache). */
 export function regoleFontFace(elenco: FontDto[]): string {
@@ -26,7 +28,8 @@ export function regoleFontFace(elenco: FontDto[]): string {
     .filter((f) => f.presente && f.formato && f.url)
     .map((f) => {
       const url = `${API_BASE_URL}/font/${encodeURIComponent(f.ruolo)}/file?v=${encodeURIComponent(f.aggiornato ?? '')}`;
-      return `@font-face { font-family: "${FAMIGLIA_FONT[f.ruolo]}"; src: url("${url}") format("${FORMATO_CSS[f.formato as FormatoFont]}"); font-display: swap; }`;
+      // unicode-range limitato al latino di base: le lettere accentate (spesso mappate ma vuote nei font della comunità) arrivano dal font di riserva
+      return `@font-face { font-family: "${FAMIGLIA_FONT[f.ruolo]}"; src: url("${url}") format("${FORMATO_CSS[f.formato as FormatoFont]}"); font-display: swap; unicode-range: ${INTERVALLO_FONT_UTENTE}; }`;
     })
     .join('\n');
 }

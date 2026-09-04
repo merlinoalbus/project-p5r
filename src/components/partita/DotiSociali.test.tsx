@@ -41,9 +41,9 @@ describe('DotiSociali', () => {
     expect(screen.getByLabelText('Fascino: aggiungi 3 note (5 punti)')).toBeInTheDocument();
 
     // fortuna ×1,5 per difetto: 3 / 4 / 7; libro: 3 note = 7 (con fortuna 10)
-    await act(async () => { screen.getByRole('button', { name: '×1,5 Fortuna' }).click(); });
+    await act(async () => { screen.getByRole('button', { name: 'Fortuna ×1,5: lettura della fortuna di Chihaya' }).click(); });
     expect(screen.getByLabelText('Fascino: aggiungi 2 note (4 punti)')).toBeInTheDocument();
-    await act(async () => { screen.getByRole('button', { name: 'Libro (3 note = 7)' }).click(); });
+    await act(async () => { screen.getByRole('button', { name: 'Libro: 3 note valgono 7 punti' }).click(); });
     expect(screen.getByLabelText('Fascino: aggiungi 3 note (10 punti)')).toBeInTheDocument();
 
     await act(async () => { screen.getByLabelText('Fascino: aggiungi 3 note (10 punti)').click(); });

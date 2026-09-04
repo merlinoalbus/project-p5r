@@ -12,6 +12,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { SfideDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { AssetImg } from '../components/shared/AssetImg';
 
 const SCHEDE = [['battaglie', 'Battaglie Sfida'], ['boss', 'Boss segreti'], ['magnate', 'Magnate'], ['tratti', 'Tratti']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -56,7 +57,7 @@ function SchedaBoss({ d }: { d: SfideDto }) {
     <div className="flex flex-col gap-2 text-[13px]">
       {d.bossSegreti.map((b) => (
         <section key={b.chiave} className="card flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
+          <div className="flex flex-wrap items-center gap-2">{(b.chiave === 'gemelle-custodi' ? ['caroline', 'justine'] : [b.chiave]).map((k) => <AssetImg key={k} nome={`personaggi/${k}`} alt="" decorativa className="h-16 w-auto object-contain" fallback={null} />)}<h2 className="m-0 text-[15px] font-semibold">{b.nome}</h2>{b.livelloConsigliato && <span className="chip">livello {b.livelloConsigliato}</span>}{!b.verificato && <span className="chip text-[11px]">da fonte secondaria</span>}</div>
           <Voce titolo="Dove">{b.dove}</Voce>
           <Voce titolo="Quando">{b.quando}</Voce>
           <Elenco titolo="Requisiti" voci={b.requisiti} />

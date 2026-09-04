@@ -11,6 +11,7 @@ import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import type { PersonaggioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { AssetImg } from '../components/shared/AssetImg';
 
 function Personaggio({ p }: { p: PersonaggioDto }) {
   const [aperto, setAperto] = useState(false);
@@ -18,7 +19,7 @@ function Personaggio({ p }: { p: PersonaggioDto }) {
   const nota = (campo: string) => (secondari.has(campo) ? <span className="text-[11px] text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
     <li className="card flex gap-3">
-      {p.confidente ? <ImmagineEntita ambito="confidente" chiave={p.confidente} etichetta={p.nome} dimensione={88} forma="carta" /> : <div className="w-[88px] h-[176px] rounded-lg bg-bg-tertiary border border-border flex items-center justify-center text-2xl font-black text-text-muted shrink-0">{p.nome.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase() ?? '').join('')}</div>}
+      {p.confidente ? <ImmagineEntita ambito="confidente" chiave={p.confidente} etichetta={p.nome} dimensione={88} forma="carta" /> : <AssetImg nome={`personaggi/${p.chiave}`} alt={p.nome} className="w-[88px] h-[176px] object-cover rounded-lg shrink-0" fallback={<div className="w-[88px] h-[176px] rounded-lg bg-bg-tertiary border border-border flex items-center justify-center text-2xl font-black text-text-muted shrink-0">{p.nome.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase() ?? '').join('')}</div>} />}
       <div className="flex flex-col gap-1 text-[13px] min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <strong className="text-[16px]">{p.nome}</strong>

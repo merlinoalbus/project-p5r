@@ -10,8 +10,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { StoricoPartita } from './StoricoPartita';
 import type { EventoPartitaDto, StoricoDto } from '../../types';
 
-const { getStorico, eliminaEvento } = vi.hoisted(() => ({ getStorico: vi.fn(), eliminaEvento: vi.fn() }));
-vi.mock('../../services/api', () => ({ getStorico, eliminaEvento }));
+const { getStorico, eliminaEvento, eliminaEventi } = vi.hoisted(() => ({ getStorico: vi.fn(), eliminaEvento: vi.fn(), eliminaEventi: vi.fn()}));
+vi.mock('../../services/api', () => ({ getStorico, eliminaEvento, eliminaEventi}));
 vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
 
 function ev(id: number, tipo: string, titolo: string, extra: Partial<EventoPartitaDto> = {}): EventoPartitaDto {
@@ -61,5 +61,21 @@ describe('StoricoPartita', () => {
     getStorico.mockResolvedValue({ eventi: [], prossimo: null, totale: 0 });
     render(<MemoryRouter><StoricoPartita partitaId={7} /></MemoryRouter>);
     expect(await screen.findByText('Nessun evento')).toBeInTheDocument();
+  });
+
+  it('seleziona più voci e le elimina insieme', async () => {
+    const evento = (id: number, titolo: string) => ({ id, tipo: 'partita-livello', tipoNome: 'Livello', gruppo: 'partita' as const, titolo, dettaglio: '', dati: {}, personaId: null, personaNome: null, personaNomeIt: null, createdAt: '2026-09-04T10:00:00.000Z' });
+    getStorico.mockResolvedValue({ eventi: [evento(1, 'Livello 2'), evento(2, 'Livello 3'), evento(3, 'Livello 4')], totale: 3, prossimo: null });
+    eliminaEventi.mockResolvedValue({ eliminati: 2 });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<MemoryRouter><StoricoPartita partitaId={7} perPagina={10} /></MemoryRouter>);
+    await screen.findByText('Livello 2');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Seleziona la voce Livello 2' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Seleziona la voce Livello 4' }));
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Elimina selezionate (2)' })); });
+    expect(eliminaEventi).toHaveBeenCalledWith(7, [1, 3]);
+    expect(screen.queryByText('Livello 2')).not.toBeInTheDocument();
+    expect(screen.getByText('Livello 3')).toBeInTheDocument();
+    expect(screen.getByText('1 evento')).toBeInTheDocument();
   });
 });

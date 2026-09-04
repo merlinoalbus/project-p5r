@@ -281,6 +281,14 @@ describe('API', () => {
       expect(Buffer.from(file.body).equals(png)).toBe(true);
       const lista = await request(app).get('/api/immagini?ambito=arcana');
       expect(lista.body.data).toHaveLength(1);
+      // rimozione multipla per ambito e globale (12.1)
+      expect((await request(app).put('/api/immagini/persona/Pixie').set('Content-Type', 'image/png').send(png)).status).toBe(201);
+      expect((await request(app).delete('/api/immagini?ambito=arcana')).body.data).toEqual({ eliminate: 1 });
+      expect((await request(app).get('/api/immagini?ambito=arcana')).body.data).toHaveLength(0);
+      expect((await request(app).get('/api/immagini?ambito=persona')).body.data).toHaveLength(1);
+      expect((await request(app).delete('/api/immagini')).body.data).toEqual({ eliminate: 1 });
+      expect((await request(app).get('/api/immagini')).body.data).toHaveLength(0);
+      expect(fs.readdirSync(path.join(dataDir, 'immagini', 'persona'))).toHaveLength(0);
       const sost = await request(app).put('/api/immagini/arcana/Fool').set('Content-Type', 'image/webp').send(Buffer.from('RIFF'));
       expect(sost.body.data.mime).toBe('image/webp');
       expect(fs.readdirSync(path.join(dataDir, 'immagini', 'arcana'))).toHaveLength(1);
