@@ -38,7 +38,7 @@
     {
      "dote": null,
      "note": null,
-     "condizione": "Ogni partita garantisce un incremento CASUALE di una dote tra Conoscenza, Fascino, Coraggio e Abilita (esclusa la Gentilezza); la fonte non specifica il numero di note per vittoria"
+     "condizione": "Ogni partita garantisce un incremento CASUALE di una dote tra Conoscenza, Fascino, Coraggio e Perizia (esclusa la Gentilezza); la fonte non specifica il numero di note per vittoria"
     }
    ],
    "altriEffetti": "Aumenta il Rango Tecnico condiviso dalla squadra: piu danni con attacchi tecnici, maggiore probabilita di atterramento (100% a Rango 4) e piu combinazioni elementali.",
@@ -62,10 +62,10 @@
     {
      "dote": "perizia",
      "note": null,
-     "condizione": "1 punto Abilita per sessione in cui si cattura almeno un pesce (fonte non specifica se equivale a 1 nota)"
+     "condizione": "1 punto Perizia per sessione in cui si cattura almeno un pesce (fonte non specifica se equivale a 1 nota)"
     }
    ],
-   "altriEffetti": "Numero di tentativi = Rango Abilita + 2. I pesci catturati fruttano da 20 a 5.500 punti (Covo dei Ladri) a seconda di specie/dimensione.",
+   "altriEffetti": "Numero di tentativi = Rango Perizia + 2. I pesci catturati fruttano da 20 a 5.500 punti (Covo dei Ladri) a seconda di specie/dimensione.",
    "regole": "Costo 3.000 yen di giorno, 1.000 yen di sera. Prima sessione: 7 Boilie piccole gratis + 3 Boilie medie a fine sessione. Si regola direzione/potenza/distanza del lancio, poi si mantiene l'icona del galleggiante nella zona rossa durante il recupero.",
    "premi": "Libro 'Lo zen della pesca' aggiunge mirino e Terzo Occhio per identificare pesci speciali.",
    "paga": null,
@@ -81,7 +81,7 @@
    "luogoChiave": "ichigaya",
    "fascia": "entrambe",
    "costo": 1200,
-   "sblocco": "Guardiano: Abilita Rango 4; Boss: dopo cattura del Guardiano, Abilita Rango 5",
+   "sblocco": "Guardiano: Perizia Rango 4; Boss: dopo cattura del Guardiano, Perizia Rango 5",
    "doti": [],
    "altriEffetti": null,
    "regole": "Richiede l'esca speciale 'Boilie sospetto' (1.200 punti). Il Guardiano compare al 7 tentativo in condizioni normali, ma gia al 1 tentativo con pioggia o neve di sera.",
@@ -151,7 +151,7 @@
     {
      "dote": "perizia",
      "note": null,
-     "condizione": "Completare il minigioco aumenta l'Abilita (Proficiency); numero di note non specificato dalla fonte secondaria"
+     "condizione": "Completare il minigioco aumenta l'Perizia (Proficiency); numero di note non specificato dalla fonte secondaria"
     }
    ],
    "altriEffetti": "Tre livelli di difficolta per velocita della palla: Beginner 70km/h (500 yen), Intermediate 90km/h (1.000 yen), Advanced 130km/h (3.000 yen). Il libro 'La scienza del baseball' (Hinokuniya, 2.800 yen, dopo prima visita alle gabbie) sblocca il Terzo Occhio per rallentare il tempo.",
@@ -380,7 +380,7 @@
    "luogoChiave": "shibuya",
    "fascia": "entrambe",
    "costo": 1500,
-   "sblocco": "Tre sfide progressive: Comet Burger (Coraggio/Conoscenza/Abilita Rango 2), Gravity Burger (Rango 3), Cosmo Town Burger (Rango 4)",
+   "sblocco": "Tre sfide progressive: Comet Burger (Coraggio/Conoscenza/Perizia Rango 2), Gravity Burger (Rango 3), Cosmo Town Burger (Rango 4)",
    "doti": [
     {
      "dote": "coraggio",
@@ -659,7 +659,7 @@
     {
      "dote": "perizia",
      "note": null,
-     "condizione": "+2 punti Abilita a turno"
+     "condizione": "+2 punti Perizia a turno"
     }
    ],
    "altriEffetti": "Quiz a memoria sugli ordini dei clienti.",
@@ -678,7 +678,7 @@
    "luogoChiave": "shinjuku",
    "fascia": "sera",
    "costo": 0,
-   "sblocco": "Confidente di Ichiko Ohya avviato; Gentilezza Rango 3; Abilita Rango 3",
+   "sblocco": "Confidente di Ichiko Ohya avviato; Gentilezza Rango 3; Perizia Rango 3",
    "doti": [
     {
      "dote": "gentilezza",
@@ -686,7 +686,7 @@
      "condizione": "+2 punti Gentilezza a turno, invariato anche di domenica"
     }
    ],
-   "altriEffetti": "La domenica si puo ottenere un punto bonus in una dote a scelta parlando con i clienti al bancone (Coraggio, Abilita, Fascino; la Conoscenza non risulta tra le opzioni secondo le fonti consultate). Gestito da Lala Escargot.",
+   "altriEffetti": "La domenica si puo ottenere un punto bonus in una dote a scelta parlando con i clienti al bancone (Coraggio, Perizia, Fascino; la Conoscenza non risulta tra le opzioni secondo le fonti consultate). Gestito da Lala Escargot.",
    "regole": "Solo turni serali.",
    "premi": null,
    "paga": "7.200 yen a turno (12.000 yen di domenica)",
