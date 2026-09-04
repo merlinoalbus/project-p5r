@@ -26,7 +26,7 @@ function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<s
   const secondari = new Set(p.campiDaFontiSecondarie);
   const nota = (campo: string) => (secondari.has(campo) ? <span className="text-[11px] text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
-    <li className={`card flex gap-3 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
+    <li className={`card flex gap-3 min-w-0 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
       {p.confidente ? <ImmagineEntita ambito="confidente" chiave={p.confidente} etichetta={p.nome} dimensione={88} forma="carta" /> : <AssetImg nome={`personaggi/${p.chiave}`} alt={p.nome} className="w-[88px] h-[176px] object-cover rounded-lg shrink-0" fallback={<div className="w-[88px] h-[176px] rounded-lg bg-bg-tertiary border border-border flex items-center justify-center text-2xl font-black text-text-muted shrink-0">{p.nome.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase() ?? '').join('')}</div>} />}
       <div className="flex flex-col gap-1 text-[13px] min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
@@ -78,7 +78,7 @@ export function PersonaggiPage() {
           {gruppi.map((g) => (
             <section key={g.nome} className="flex flex-col gap-2">
               <h2 className="m-0 text-[15px] font-semibold">{g.nome}</h2>
-              <ul className="m-0 p-0 list-none grid gap-2 xl:grid-cols-2" aria-label={g.nome}>
+              <ul className="m-0 p-0 list-none grid gap-2 grid-cols-[minmax(0,1fr)] xl:grid-cols-2" aria-label={g.nome}>
                 {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} idCompendio={idCompendio} />)}
               </ul>
             </section>
