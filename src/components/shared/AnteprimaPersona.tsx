@@ -18,10 +18,12 @@ interface Props {
   etichetta?: string;
   dimensione?: number;
   className?: string;
+  /** Mostra la figura intera (object-contain) su fondo scuro invece di ritagliarla. */
+  contieni?: boolean;
 }
 
 /** Quadrato con l'immagine della Persona o le iniziali, senza comportamenti al tocco. */
-export function AnteprimaPersona({ nome, etichetta, dimensione = 40, className }: Props) {
+export function AnteprimaPersona({ nome, etichetta, dimensione = 40, className, contieni }: Props) {
   const [caricata, setCaricata] = useState<boolean | null>(null);
   const asset = useAsset(`persona/${slug(nome)}`);
   useEffect(() => {
@@ -34,7 +36,7 @@ export function AnteprimaPersona({ nome, etichetta, dimensione = 40, className }
   const iniziali = testo.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
   return (
     <span className={`inline-flex items-center justify-center shrink-0 overflow-hidden bg-bg-tertiary border border-border ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} aria-hidden={src ? undefined : true}>
-      {src ? <img src={src} alt={testo} className="w-full h-full object-cover" draggable={false} /> : <span className="font-display text-text-muted" style={{ fontSize: Math.max(12, Math.round(dimensione / 2.6)) }}>{iniziali}</span>}
+      {src ? <img src={src} alt={testo} className={`w-full h-full ${contieni ? 'object-contain p-[2px]' : 'object-cover'}`} draggable={false} /> : <span className="font-display text-text-muted" style={{ fontSize: Math.max(12, Math.round(dimensione / 2.6)) }}>{iniziali}</span>}
     </span>
   );
 }
