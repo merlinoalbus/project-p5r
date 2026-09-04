@@ -73,6 +73,18 @@ export interface FusioneSeed {
 /** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
 export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
 
+/** Completamento (guida allgamestaff): trofei più sezioni di consultazione (finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo). */
+export interface CompletamentoSeed {
+  trofei: Array<{ chiave: string; ordine: number; nome: string; nomeEn: string | null; tipo: 'bronzo' | 'argento' | 'oro' | 'platino'; descrizione: string; come: string; mancabile: boolean | null; quando: string | null; fonte: string; verificato: boolean }>;
+  finali: unknown[];
+  covo: Record<string, unknown>;
+  dlc: unknown[];
+  meteo: unknown[];
+  nuovaPartitaPlus: Record<string, unknown>;
+  differenzeRoyal: string[];
+  tempo: Record<string, unknown>;
+}
+
 /** Percorso giorno per giorno (soluzione allgamestaff): giorni con azioni e riferimenti risolti alle chiavi dell'app. */
 export interface PercorsoSeed {
   fonti: Array<{ nome: string; url: string; lingua: string; copertura: string }>;

@@ -14,6 +14,7 @@ import { attivitaTutte } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
+import { completamento } from '../services/completamentoService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -66,6 +67,9 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/completamento', validate({ query: queryDomande }), (req, res) => {
+  res.json(completamento((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
   res.json(indicePercorso((req.query as unknown as { partita?: number }).partita));
