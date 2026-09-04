@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { IconaScheda } from '../components/shared/IconaAzione';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -19,6 +20,7 @@ import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
 import { OggiPartita } from '../components/partita/OggiPartita';
+import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
@@ -61,13 +63,14 @@ export function PartitaPage() {
               {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
               {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
+              <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} />
             </div>
           </IntestazionePagina>
-          <div className="flex gap-1.5 flex-wrap">
+          <FilaScorrevole role="tablist" aria-label="Schede della partita">
             {SCHEDE.map((s) => (
               <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
             ))}
-          </div>
+          </FilaScorrevole>
           {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}

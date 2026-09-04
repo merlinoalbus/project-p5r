@@ -18,6 +18,7 @@ import { IconaAzione } from '../shared/IconaAzione';
 const AMBITI: Array<{ chiave: AmbitoImmagine; nome: string }> = [
   { chiave: 'persona', nome: 'Persona' },
   { chiave: 'confidente', nome: 'Confidenti' },
+  { chiave: 'personaggio', nome: 'Personaggi' },
   { chiave: 'arcana', nome: 'Arcani' },
   { chiave: 'skill', nome: 'Skill' },
   { chiave: 'mappa', nome: 'Mappe scaricate' },

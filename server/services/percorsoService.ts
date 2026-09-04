@@ -73,7 +73,8 @@ export function statoAzione(a: AzioneSeed, conf: Map<string, ConfidentePartitaDt
   if (atteso !== null && c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto` };
   if (!c.sbloccato && (atteso ?? 1) > 1) return { tipo: 'bloccata', motivo: 'Confidente non ancora sbloccato nella partita' };
   const obiettivo = atteso ?? c.rango + 1;
-  const sem = c.semafori.find((s) => s.rango === obiettivo) ?? c.semafori[0];
+  // Solo il semaforo del rango obiettivo: un rango senza requisiti e libero (non si ripiega sul rango successivo).
+  const sem = c.semafori.find((s) => s.rango === obiettivo);
   if (!sem || sem.requisiti.length === 0) return { tipo: 'neutra', motivo: null };
   const rossi = sem.requisiti.filter((r) => r.stato === 'rosso');
   if (rossi.length > 0) return { tipo: 'bloccata', motivo: rossi.map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo)).join(' · ') };

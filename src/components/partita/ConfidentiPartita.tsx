@@ -25,6 +25,9 @@ import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { SemaforiRango } from './SemaforiRango';
 import { IconMaschera } from '../shared/iconeGuida';
 import { IconaAzione } from '../shared/IconaAzione';
+import { useSuggerimenti } from '../../stores/suggerimentiStore';
+import { classiSuggerito } from '../../utils/suggerimenti';
+import { TargaSuggerito } from '../shared/Suggerito';
 
 interface Props {
   partitaId: number;
@@ -45,6 +48,7 @@ function gruppoDi(c: ConfidentePartitaDto): 'attivi' | 'bloccati' {
 export function ConfidentiPartita({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
+  const sugg = useSuggerimenti();
   const [modifica, setModifica] = useState<ConfidentePartitaDto | null>(null);
   const [note, setNote] = useState('');
   // Moltiplicatori globali (valgono per tutte le card finché l'utente non li cambia).
@@ -116,7 +120,16 @@ export function ConfidentiPartita({ partitaId }: Props) {
       </p>
       {GRUPPI.map(({ chiave: gruppo, titolo, descrizione }) => {
         const elenco = (dati ?? []).filter((c) => gruppoDi(c) === gruppo);
-        if (elenco.length === 0) return null;
+        // Il gruppo degli attivi resta visibile anche vuoto (a inizio partita lo e): senza spiegazione sembrerebbe che i Confidenti manchino.
+        if (elenco.length === 0) {
+          if (gruppo !== 'attivi' || !dati || dati.length === 0) return null;
+          return (
+            <section key={gruppo} className="flex flex-col gap-2 mb-4" aria-label={titolo}>
+              <h3 className="m-0 font-display text-[19px] uppercase">{titolo}</h3>
+              <p className="m-0 text-[13px] text-text-secondary">Nessun Confidente è ancora avviabile: compariranno qui appena i requisiti del primo rango saranno soddisfatti (giorno di gioco, Dote sociale, Persona dell'arcano, Palazzo o richiesta).</p>
+            </section>
+          );
+        }
         return (
         <section key={gruppo} className="flex flex-col gap-2 mb-4" aria-label={titolo}>
           <div className="flex items-baseline gap-2 flex-wrap">
@@ -130,7 +143,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
           const aPunti = c.rango < 10 && c.puntiNecessari !== null && c.puntiNecessari > 0;
           const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === 10 ? 1 : 0;
           return (
-            <li key={c.chiave} className={`card poster relative overflow-hidden flex gap-3 ${c.sbloccato ? '' : 'opacity-75'} ${c.bloccato ? 'poster--bloccato' : ''}`} aria-label={c.bloccato ? `${c.nome}: bloccato per il rango ${c.bloccato.rango}` : undefined}>
+            <li key={c.chiave} className={`card poster relative overflow-hidden flex gap-3 ${c.sbloccato ? '' : 'opacity-75'} ${c.bloccato ? 'poster--bloccato' : ''} ${classiSuggerito(sugg.evidenziato('confidenti', c.chiave))}`} aria-label={c.bloccato ? `${c.nome}: bloccato per il rango ${c.bloccato.rango}` : undefined}>
               <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa className="poster__filigrana" fallback={null} />
               <div className="relative shrink-0 self-start">
                 <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={128} forma="carta" adatta="copri" modificabile />
@@ -151,6 +164,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                     <h3 className="m-0 font-display uppercase text-[22px] leading-none tracking-wide truncate" title={c.nome}>{c.nome}</h3>
                     <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
                       <span className="chip">{c.arcanaNome}</span>
+                      {sugg.evidenziato('confidenti', c.chiave) && <TargaSuggerito motivo={sugg.motivo('confidenti', c.chiave)} compatta />}
                       {c.regaliFatti.length > 0 && <span className="text-[12px] text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
                     </div>
                   </div>
@@ -221,7 +235,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 )}
 
                 <div className="flex items-center gap-2 flex-wrap mt-auto">
-                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : 'Bloccato'} dettaglio={c.rango > 0 ? 'dal rango 1' : c.bloccato ? 'requisiti mancanti' : undefined} disabled={occ || c.rango > 0 || (!c.sbloccato && !!c.bloccato)} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : 'bloccato'}`} />
+                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : c.bloccato ? 'Bloccato' : 'Da sbloccare'} dettaglio={c.rango > 0 ? 'dal rango 1' : c.bloccato ? 'requisiti mancanti' : 'quando lo incontri in gioco'} disabled={occ || c.rango > 0 || (!c.sbloccato && !!c.bloccato)} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : c.bloccato ? 'bloccato dai requisiti' : 'da sbloccare quando lo incontri'}`} />
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={() => { setModifica(c); setNote(c.note); }} />
                 </div>
                 {c.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap line-clamp-2">{c.note}</p>}
