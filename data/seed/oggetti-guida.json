@@ -22,7 +22,7 @@
   },
   {
    "nome": "Medicina",
-   "nomeEn": null,
+   "nomeEn": "Medicine",
    "categoria": "cura",
    "effetto": "Ripristina 50 HP di un alleato",
    "dove": "Ricompensa: Morgana (11 aprile), Ryuji (12 aprile)",
@@ -32,7 +32,7 @@
   },
   {
    "nome": "Recup-RO: 50 mg",
-   "nomeEn": null,
+   "nomeEn": "Recov-R: 50mg",
    "categoria": "cura",
    "effetto": "Ripristina 50 HP di un alleato",
    "dove": "Clinica Takemi, Yongen-Jaya (da 16 aprile; sconto a Rango Morte alto, 400¥)",
@@ -42,7 +42,7 @@
   },
   {
    "nome": "Recup-RO: 100 mg",
-   "nomeEn": null,
+   "nomeEn": "Recov-R: 100mg",
    "categoria": "cura",
    "effetto": "Ripristina 100 HP di un alleato",
    "dove": "Clinica Takemi (da 16 aprile, sconto 800¥); Televendite (9.980¥)",
@@ -52,7 +52,7 @@
   },
   {
    "nome": "Gelatina viennese",
-   "nomeEn": null,
+   "nomeEn": "Viennese Jelly",
    "categoria": "cura",
    "effetto": "Ridona 100 HP a un alleato",
    "dove": "Prossimo Asso, Centro commerciale sotterraneo Shibuya (da 18 aprile)",
@@ -62,7 +62,7 @@
   },
   {
    "nome": "Takemedic",
-   "nomeEn": null,
+   "nomeEn": "Takemedic",
    "categoria": "cura",
    "effetto": "Ripristina 200 HP di un alleato",
    "dove": "Clinica Takemi (Rango Morte 5; sconto 1.700¥)",
@@ -72,7 +72,7 @@
   },
   {
    "nome": "Sandwich inzuppato",
-   "nomeEn": null,
+   "nomeEn": "Dipped Katsu Sando",
    "categoria": "cura",
    "effetto": "Ripristina 200 HP di un alleato",
    "dove": "Panetteria Yon-Germain (giorni di pioggia, 1 al giorno); gratis dal Frigorifero del Leblanc in date specifiche",
@@ -82,7 +82,7 @@
   },
   {
    "nome": "Dango lunare",
-   "nomeEn": null,
+   "nomeEn": "Moon Dango",
    "categoria": "cura",
    "effetto": "Ripristina 200 HP di un alleato",
    "dove": "Super Muramasa, Yongen-Jaya (autunno); Televendite (4.800¥)",
@@ -112,7 +112,7 @@
   },
   {
    "nome": "Takemedic-All",
-   "nomeEn": null,
+   "nomeEn": "Takemedic-All",
    "categoria": "cura",
    "effetto": "Ripristina 50 HP di tutti gli alleati",
    "dove": "Clinica Takemi (Rango Morte 1; sconto 950¥)",
@@ -122,7 +122,7 @@
   },
   {
    "nome": "Takemedic-All V",
-   "nomeEn": null,
+   "nomeEn": "Takemedic-All V",
    "categoria": "cura",
    "effetto": "Ripristina 100 HP di tutti gli alleati",
    "dove": "Clinica Takemi (Rango Morte 1; sconto 1.800¥)",
@@ -132,7 +132,7 @@
   },
   {
    "nome": "Takemedic-All Z",
-   "nomeEn": null,
+   "nomeEn": "Takemedic-All Z",
    "categoria": "cura",
    "effetto": "Ripristina 200 HP di tutti gli alleati",
    "dove": "Clinica Takemi (Rango Morte 5; sconto 4.200¥)",
@@ -162,7 +162,7 @@
   },
   {
    "nome": "Vino della grazia",
-   "nomeEn": null,
+   "nomeEn": "Wine of Grace",
    "categoria": "cura",
    "effetto": "Ridona tutti gli HP a tutti gli alleati",
    "dove": "Chiesa di Kanda (domenica)",
@@ -172,7 +172,7 @@
   },
   {
    "nome": "Cioccolato osechi",
-   "nomeEn": null,
+   "nomeEn": "Osechi Chocolate",
    "categoria": "cura",
    "effetto": "Ripristina tutti gli HP di tutti gli alleati",
    "dove": "Triple Seven, Central Street (da 13 gennaio, 1 a settimana)",
@@ -182,7 +182,7 @@
   },
   {
    "nome": "IV 50",
-   "nomeEn": null,
+   "nomeEn": "Healing IV",
    "categoria": "cura",
    "effetto": "Ripristina il 50% degli HP di tutti gli alleati (solo in posti sicuri)",
    "dove": "Clinica Takemi (da 16 aprile); DLC",
@@ -192,7 +192,7 @@
   },
   {
    "nome": "IV 100",
-   "nomeEn": null,
+   "nomeEn": "Rejuvenating IV",
    "categoria": "cura",
    "effetto": "Ripristina il 100% degli HP di tutti gli alleati (solo in posti sicuri)",
    "dove": "Clinica Takemi (Rango Morte 3; sconto 1.800¥)",
@@ -212,7 +212,7 @@
   },
   {
    "nome": "Beni-Azuma",
-   "nomeEn": null,
+   "nomeEn": "Beni-Azuma",
    "categoria": "sp",
    "effetto": "Ripristina 10 SP di un alleato",
    "dove": "Venditore di patate dolci, Yongen-Jaya (da 9 ottobre, 1 al giorno); Televendite (9.800¥)",
@@ -222,7 +222,7 @@
   },
   {
    "nome": "Sakura Mochi",
-   "nomeEn": null,
+   "nomeEn": "Sakura Mochi",
    "categoria": "sp",
    "effetto": "Ridona 10 SP a un alleato",
    "dove": "Televendite (24 aprile)",
@@ -232,7 +232,7 @@
   },
   {
    "nome": "Katsu a pezzettoni",
-   "nomeEn": null,
+   "nomeEn": "Chunky Katsu",
    "categoria": "sp",
    "effetto": "Ripristina 30 SP di un alleato",
    "dove": "Friggitoria Macelleria Hagoromo, Kichijoji (da 5 giugno, domenica sera)",
@@ -252,7 +252,7 @@
   },
   {
    "nome": "Yaki-Imo leggendario",
-   "nomeEn": null,
+   "nomeEn": "Legendary Yaki-Imo",
    "categoria": "sp",
    "effetto": "Ripristina 50 SP di un alleato",
    "dove": "Venditore di patate dolci (inverno, 1 a settimana); Televendite (9.800¥); Frigorifero Leblanc (15 ottobre)",
@@ -292,7 +292,7 @@
   },
   {
    "nome": "Taiyaki di Sadayo",
-   "nomeEn": null,
+   "nomeEn": "Sadayo Taiyaki",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Ricompensa: Festival scolastico con Sadayo Kawakami",
@@ -302,7 +302,7 @@
   },
   {
    "nome": "Amezaiku di Sakura",
-   "nomeEn": null,
+   "nomeEn": "Sakura Amezaiku",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Ricompensa: Festival scolastico con Haru",
@@ -312,7 +312,7 @@
   },
   {
    "nome": "Hot dog di Ryuji",
-   "nomeEn": null,
+   "nomeEn": "Ryuji Dog",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Ricompensa: Festival scolastico con Ryuji",
@@ -322,7 +322,7 @@
   },
   {
    "nome": "Kit energetico S",
-   "nomeEn": null,
+   "nomeEn": "Stamina Kit S",
    "categoria": "sp",
    "effetto": "Ripristina il 20% degli SP di tutti gli alleati (solo in posti sicuri)",
    "dove": "Ricompensa Morgana (Palazzo di Kamoshida), Jose nei Memento (80 Fiori, 2 al giorno)",
@@ -332,7 +332,7 @@
   },
   {
    "nome": "Kit energetico L",
-   "nomeEn": null,
+   "nomeEn": "Stamina Kit L",
    "categoria": "sp",
    "effetto": "Ripristina il 40% degli SP di tutti gli alleati (solo in posti sicuri)",
    "dove": "DLC; Jose nei Memento (210 Fiori, 1 al giorno)",
@@ -362,7 +362,7 @@
   },
   {
    "nome": "Soma",
-   "nomeEn": null,
+   "nomeEn": "Soma",
    "categoria": "cura",
    "effetto": "Ripristina interamente HP e SP di tutti gli alleati",
    "dove": "Forzieri (vari Palazzi e Dedali), Negozi del Palazzo di Niijima (350 Monete), Jose nei Memento (520 Fiori, 1 al giorno), Richieste, DLC, ricompensa battaglia Caroline/Justine",
@@ -392,7 +392,7 @@
   },
   {
    "nome": "Band-Ace",
-   "nomeEn": null,
+   "nomeEn": "Band-Ace",
    "categoria": "cura",
    "effetto": "Rianima un alleato caduto con il 50% degli HP",
    "dove": "Bonus per file di salvataggio di Persona 5 importato",
@@ -402,7 +402,7 @@
   },
   {
    "nome": "Rianidrin",
-   "nomeEn": null,
+   "nomeEn": "Revivadrin",
    "categoria": "cura",
    "effetto": "Rianima un alleato caduto con il 50% degli HP",
    "dove": "Clinica Takemi (da 16 aprile); Televendite (9.980¥); scambio gacha di Akihabara (da 2 settembre)",
@@ -422,7 +422,7 @@
   },
   {
    "nome": "Unguento vitale",
-   "nomeEn": null,
+   "nomeEn": "Life Ointment",
    "categoria": "cura",
    "effetto": "Rianima un alleato con il 100% degli HP",
    "dove": "Clinica Takemi (Rango Morte 5; sconto 3.200¥), scambio gacha Kin-Ki kink",
@@ -432,7 +432,7 @@
   },
   {
    "nome": "Melon pan",
-   "nomeEn": null,
+   "nomeEn": "Melon Pan",
    "categoria": "cura",
    "effetto": "Rianima un alleato caduto con il 100% degli HP",
    "dove": "Panetteria Yon-Germain (estate, 1 a settimana); Televendite (fino a 69.800¥)",
@@ -452,7 +452,7 @@
   },
   {
    "nome": "Reviv-all",
-   "nomeEn": null,
+   "nomeEn": "Reviv-All",
    "categoria": "cura",
    "effetto": "Rianima tutti gli alleati caduti con il 50% degli HP",
    "dove": "Clinica Takemi (Rango Morte 10)",
@@ -462,7 +462,7 @@
   },
   {
    "nome": "Rinnov-all",
-   "nomeEn": null,
+   "nomeEn": "Renew-All",
    "categoria": "cura",
    "effetto": "Rianima tutti gli alleati caduti con il 100% degli HP",
    "dove": "Clinica Takemi (Rango Morte 10)",
@@ -472,7 +472,7 @@
   },
   {
    "nome": "Pappa reale R",
-   "nomeEn": null,
+   "nomeEn": "Royal Jelly R",
    "categoria": "cura",
    "effetto": "Rianima tutti gli alleati caduti con il 100% degli HP",
    "dove": "Televendite (29 gennaio)",
@@ -482,7 +482,7 @@
   },
   {
    "nome": "Panfritto",
-   "nomeEn": null,
+   "nomeEn": "Fried Bread",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Negozio scolastico",
@@ -492,7 +492,7 @@
   },
   {
    "nome": "Re Karaage",
-   "nomeEn": null,
+   "nomeEn": "Karaage King",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Triple Seven (da 18 aprile)",
@@ -502,7 +502,7 @@
   },
   {
    "nome": "Starvicks",
-   "nomeEn": null,
+   "nomeEn": "Starvicks",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -512,7 +512,7 @@
   },
   {
    "nome": "Second Maid",
-   "nomeEn": null,
+   "nomeEn": "Second Maid",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari); Televendite (2.980¥)",
@@ -522,7 +522,7 @@
   },
   {
    "nome": "Earl Green",
-   "nomeEn": null,
+   "nomeEn": "Earl Green",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -532,7 +532,7 @@
   },
   {
    "nome": "Manta",
-   "nomeEn": null,
+   "nomeEn": "Manta",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -542,7 +542,7 @@
   },
   {
    "nome": "Nastea",
-   "nomeEn": null,
+   "nomeEn": "Nastea",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -552,7 +552,7 @@
   },
   {
    "nome": "1UP",
-   "nomeEn": null,
+   "nomeEn": "1UP",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -562,7 +562,7 @@
   },
   {
    "nome": "Durian au lait",
-   "nomeEn": null,
+   "nomeEn": "Durian-au-Lait",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -572,7 +572,7 @@
   },
   {
    "nome": "Acqua di Udagawa",
-   "nomeEn": null,
+   "nomeEn": "Udagawa Water",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -582,7 +582,7 @@
   },
   {
    "nome": "Joylent",
-   "nomeEn": null,
+   "nomeEn": "Joylent",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -592,7 +592,7 @@
   },
   {
    "nome": "Punch non filtrato",
-   "nomeEn": null,
+   "nomeEn": "Raw Punch",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Distributori automatici (vari)",
@@ -612,7 +612,7 @@
   },
   {
    "nome": "Sandwich",
-   "nomeEn": null,
+   "nomeEn": "Sandwich",
    "categoria": "cura",
    "effetto": "Ripristina 10 HP",
    "dove": "Panetteria Yon-Germain; Frigorifero Leblanc",
@@ -632,7 +632,7 @@
   },
   {
    "nome": "Nikuman straniero",
-   "nomeEn": null,
+   "nomeEn": "Foreign Nikuman",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP",
    "dove": "Triple Seven (da 18 aprile)",
@@ -642,7 +642,7 @@
   },
   {
    "nome": "Jagariko",
-   "nomeEn": null,
+   "nomeEn": "Jagariko",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP",
    "dove": "Triple Seven; ricompensa Maruki (Rango 3)",
@@ -652,7 +652,7 @@
   },
   {
    "nome": "Patatine saturnine",
-   "nomeEn": null,
+   "nomeEn": "Saturn Fries",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP",
    "dove": "Burger Shop (da 18 aprile)",
@@ -662,7 +662,7 @@
   },
   {
    "nome": "Dr. Salt NEO",
-   "nomeEn": null,
+   "nomeEn": "Dr. Salt NEO",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP",
    "dove": "Distributori automatici (vari), Sala giochi, scambio gacha",
@@ -672,7 +672,7 @@
   },
   {
    "nome": "Oh! Shiruko",
-   "nomeEn": null,
+   "nomeEn": "Oh! Shiruko",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP",
    "dove": "Distributori automatici; Televendite (29.800¥)",
@@ -692,7 +692,7 @@
   },
   {
    "nome": "Amazake definitivo",
-   "nomeEn": null,
+   "nomeEn": "Ultimate Amazake",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP",
    "dove": "Distributori automatici; Televendite (29.800¥)",
@@ -712,7 +712,7 @@
   },
   {
    "nome": "Danish di frutta",
-   "nomeEn": null,
+   "nomeEn": "Fruit Danish",
    "categoria": "cura",
    "effetto": "Ripristina 30 HP",
    "dove": "Panetteria Yon-Germain; Frigorifero Leblanc",
@@ -722,7 +722,7 @@
   },
   {
    "nome": "Soda di Udagawa",
-   "nomeEn": null,
+   "nomeEn": "Udagawa Soda",
    "categoria": "cura",
    "effetto": "Ripristina 30 HP",
    "dove": "Distributore di Akihabara (da 2 settembre)",
@@ -732,7 +732,7 @@
   },
   {
    "nome": "Nikuman gustoso",
-   "nomeEn": null,
+   "nomeEn": "Juicy Nikuman",
    "categoria": "cura",
    "effetto": "Ripristina 30 HP",
    "dove": "Street food Houraku, Kichijoji (da 5 giugno)",
@@ -742,7 +742,7 @@
   },
   {
    "nome": "Nikuman alla napoletana",
-   "nomeEn": null,
+   "nomeEn": "Napolitan Nikuman",
    "categoria": "cura",
    "effetto": "Ripristina 50 HP",
    "dove": "Street food Houraku, Kichijoji (da 5 giugno)",
@@ -752,7 +752,7 @@
   },
   {
    "nome": "Nikuman piccante",
-   "nomeEn": null,
+   "nomeEn": "Peppery Nikuman",
    "categoria": "cura",
    "effetto": "Ripristina 100 HP",
    "dove": "Street food Houraku, Kichijoji (da 5 giugno)",
@@ -762,7 +762,7 @@
   },
   {
    "nome": "Zuppa di zucca",
-   "nomeEn": null,
+   "nomeEn": "Pumpkin Soup",
    "categoria": "cura",
    "effetto": "Ripristina 100 HP",
    "dove": "Televendite (2 ottobre)",
@@ -772,7 +772,7 @@
   },
   {
    "nome": "Pane autunnale",
-   "nomeEn": null,
+   "nomeEn": "Autumn Bread",
    "categoria": "cura",
    "effetto": "Ripristina 200 HP",
    "dove": "Negozio scolastico (venerdì d'autunno, 1 a settimana)",
@@ -782,7 +782,7 @@
   },
   {
    "nome": "Soba calmante",
-   "nomeEn": null,
+   "nomeEn": "Soothing Soba",
    "categoria": "cura",
    "effetto": "Ridona 200 HP",
    "dove": "Triple Seven (estate, 1 a settimana)",
@@ -792,7 +792,7 @@
   },
   {
    "nome": "Frullato proteico",
-   "nomeEn": null,
+   "nomeEn": "Protein",
    "categoria": "cura",
    "effetto": "Ripristina il 30% degli HP",
    "dove": "Discount Rocinante (da 18 aprile), DLC, Richieste; Televendite (fino a 12.800¥)",
@@ -802,7 +802,7 @@
   },
   {
    "nome": "Frullato iperproteico",
-   "nomeEn": null,
+   "nomeEn": "Moist Protein",
    "categoria": "cura",
    "effetto": "Ridona il 30% degli HP",
    "dove": "Prossimo Asso (giorni di pioggia, 1 al giorno); Televendite (fino a 12.800¥)",
@@ -812,7 +812,7 @@
   },
   {
    "nome": "Proteine d'importazione",
-   "nomeEn": null,
+   "nomeEn": "Imported Protein",
    "categoria": "cura",
    "effetto": "Ripristina il 30% degli HP",
    "dove": "Prossimo Asso (da 5 giugno, 1 al mese); Televendite (fino a 39.800¥)",
@@ -822,7 +822,7 @@
   },
   {
    "nome": "Big Bang Burger",
-   "nomeEn": null,
+   "nomeEn": "Big Bang Burger",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP a tutti gli alleati",
    "dove": "Burger Shop (da 18 aprile), ricompense challenge",
@@ -832,7 +832,7 @@
   },
   {
    "nome": "Tris di calamari",
-   "nomeEn": null,
+   "nomeEn": "Squid Tri-Pack",
    "categoria": "cura",
    "effetto": "Ripristina 20 HP a tutti gli alleati",
    "dove": "Super Muramasa (da 18 aprile)",
@@ -842,7 +842,7 @@
   },
   {
    "nome": "Carne in scatola spec.",
-   "nomeEn": null,
+   "nomeEn": "Corned Beef Special",
    "categoria": "cura",
    "effetto": "Ripristina 40 HP a tutti gli alleati",
    "dove": "Verdura MealPort, Kichijoji (da 5 giugno)",
@@ -852,7 +852,7 @@
   },
   {
    "nome": "Festa in lattina",
-   "nomeEn": null,
+   "nomeEn": "Party in a Can",
    "categoria": "cura",
    "effetto": "Ripristina 40 HP a tutti gli alleati",
    "dove": "Televendite (24 aprile)",
@@ -862,7 +862,7 @@
   },
   {
    "nome": "Frutta secca",
-   "nomeEn": null,
+   "nomeEn": "Mixed Nuts",
    "categoria": "cura",
    "effetto": "Ripristina 40 HP a tutti gli alleati",
    "dove": "Super Muramasa (da 18 aprile)",
@@ -872,7 +872,7 @@
   },
   {
    "nome": "Panino terrestre",
-   "nomeEn": null,
+   "nomeEn": "Earth Burger",
    "categoria": "cura",
    "effetto": "Ripristina 40 HP di un alleato",
    "dove": "Burger Shop (da 18 aprile)",
@@ -882,7 +882,7 @@
   },
   {
    "nome": "Agodashi Oden",
-   "nomeEn": null,
+   "nomeEn": "Agodashi Oden",
    "categoria": "cura",
    "effetto": "Ripristina 50 HP a tutti gli alleati",
    "dove": "Triple Seven (inverno, 1 a settimana)",
@@ -892,7 +892,7 @@
   },
   {
    "nome": "Natto rugiadoso",
-   "nomeEn": null,
+   "nomeEn": "Drizzled Natto",
    "categoria": "cura",
    "effetto": "Ripristina 80 HP a tutti gli alleati",
    "dove": "Taisho Store (giorni di pioggia, 1 al giorno)",
@@ -902,7 +902,7 @@
   },
   {
    "nome": "Pacco di frutta primav.",
-   "nomeEn": null,
+   "nomeEn": "Spring Fruit Pack",
    "categoria": "cura",
    "effetto": "Ripristina 80 HP a tutti gli alleati",
    "dove": "Super Muramasa (da 18 aprile); Televendite (5.980¥)",
@@ -912,7 +912,7 @@
   },
   {
    "nome": "Cereali assortiti",
-   "nomeEn": null,
+   "nomeEn": "Cereal Multi-Pack",
    "categoria": "cura",
    "effetto": "Ripristina 80 HP a tutti gli alleati",
    "dove": "Verdura MealPort (da 5 giugno)",
@@ -922,7 +922,7 @@
   },
   {
    "nome": "Bomba di popcorn",
-   "nomeEn": null,
+   "nomeEn": "Popcorn Bomb",
    "categoria": "cura",
    "effetto": "Ripristina 100 HP a tutti gli alleati",
    "dove": "Verdura MealPort (da 5 giugno)",
@@ -932,7 +932,7 @@
   },
   {
    "nome": "Panino lunare",
-   "nomeEn": null,
+   "nomeEn": "Moon Burger",
    "categoria": "cura",
    "effetto": "Ripristina 120 HP a tutti gli alleati",
    "dove": "Burger Shop (autunno)",
@@ -942,7 +942,7 @@
   },
   {
    "nome": "Panino supernova",
-   "nomeEn": null,
+   "nomeEn": "Supernova Burger",
    "categoria": "cura",
    "effetto": "Ripristina 200 HP a tutti gli alleati",
    "dove": "Big Bang Burger (massimizzando il Rango di Haru)",
@@ -952,7 +952,7 @@
   },
   {
    "nome": "Arginade",
-   "nomeEn": null,
+   "nomeEn": "Arginade",
    "categoria": "sp",
    "effetto": "Ripristina 5 SP",
    "dove": "Distributori automatici (vari), Sala giochi",
@@ -1022,7 +1022,7 @@
   },
   {
    "nome": "Curry decente",
-   "nomeEn": null,
+   "nomeEn": "Decent Curry",
    "categoria": "sp",
    "effetto": "Ripristina 20 SP a tutti gli alleati",
    "dove": "Preparazione al Leblanc (Rango Ierofante 4) oppure insegnato da Kawakami",
@@ -1062,7 +1062,7 @@
   },
   {
    "nome": "Curry infernale",
-   "nomeEn": null,
+   "nomeEn": "Inferno Curry",
    "categoria": "sp",
    "effetto": "Ripristina 50 SP a tutti gli alleati",
    "dove": "Preparazione del curry sbagliata al Leblanc",
@@ -1072,7 +1072,7 @@
   },
   {
    "nome": "Curry del maestro",
-   "nomeEn": null,
+   "nomeEn": "Master Curry",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP a tutti gli alleati",
    "dove": "Preparazione al Leblanc (Rango Ierofante 10)",
@@ -1082,7 +1082,7 @@
   },
   {
    "nome": "Chimaki speciale",
-   "nomeEn": null,
+   "nomeEn": "Special Chimaki",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Street food Houraku (da 13 gennaio)",
@@ -1102,7 +1102,7 @@
   },
   {
    "nome": "Cioccolato di Ryuji",
-   "nomeEn": null,
+   "nomeEn": "Ryuji's Chocolate",
    "categoria": "sp",
    "effetto": "Ripristina 10 SP di un alleato",
    "dove": "Dono di Ryuji, 14 febbraio (se il protagonista è senza fidanzata)",
@@ -1112,7 +1112,7 @@
   },
   {
    "nome": "Cioccolato di Sojiro",
-   "nomeEn": null,
+   "nomeEn": "Sojiro's Chocolate",
    "categoria": "sp",
    "effetto": "Ripristina 10 SP di un alleato",
    "dove": "Dono di Sojiro, 14 febbraio (se il protagonista non ha una fidanzata)",
@@ -1122,7 +1122,7 @@
   },
   {
    "nome": "Giri choco di Sae",
-   "nomeEn": null,
+   "nomeEn": "Sae's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Sae, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1132,7 +1132,7 @@
   },
   {
    "nome": "Giri choco di Ann",
-   "nomeEn": null,
+   "nomeEn": "Ann's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Ann, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1142,7 +1142,7 @@
   },
   {
    "nome": "Giri choco di Makoto",
-   "nomeEn": null,
+   "nomeEn": "Makoto's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Makoto, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1152,7 +1152,7 @@
   },
   {
    "nome": "Giri choco di Futaba",
-   "nomeEn": null,
+   "nomeEn": "Futaba's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Futaba, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1162,7 +1162,7 @@
   },
   {
    "nome": "Giri choco di Haru",
-   "nomeEn": null,
+   "nomeEn": "Haru's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Haru, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1182,7 +1182,7 @@
   },
   {
    "nome": "Giri choco di Takemi",
-   "nomeEn": null,
+   "nomeEn": "Takemi's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Takemi, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1192,7 +1192,7 @@
   },
   {
    "nome": "Giri choco di Chihaya",
-   "nomeEn": null,
+   "nomeEn": "Chihaya's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Chihaya, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1202,7 +1202,7 @@
   },
   {
    "nome": "Giri choco di Ohya",
-   "nomeEn": null,
+   "nomeEn": "Ohya's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Ohya, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1212,7 +1212,7 @@
   },
   {
    "nome": "Giri choco di Hifumi",
-   "nomeEn": null,
+   "nomeEn": "Hifumi's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Hifumi, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1222,7 +1222,7 @@
   },
   {
    "nome": "Giri choco di Sumire",
-   "nomeEn": null,
+   "nomeEn": "Sumire's Giri-Choco",
    "categoria": "sp",
    "effetto": "Ripristina 100 SP di un alleato",
    "dove": "Dono di Sumire, 15 febbraio (rapporto di amicizia, Rango massimo)",
@@ -1432,7 +1432,7 @@
   },
   {
    "nome": "Panino con yakisoba",
-   "nomeEn": null,
+   "nomeEn": "Yakisoba Pan",
    "categoria": "battaglia",
    "effetto": "Ripristina 50 HP",
    "dove": "Negozio scolastico (venerdì, 1 a settimana)",
@@ -1442,7 +1442,7 @@
   },
   {
    "nome": "Sicchenina",
-   "nomeEn": null,
+   "nomeEn": "Sikkenine",
    "categoria": "battaglia",
    "effetto": "Ripristina 50 HP, riduce precisione ed elusione",
    "dove": "Farmacia Aohige (da 18 aprile)",
@@ -1452,7 +1452,7 @@
   },
   {
    "nome": "Porzione di torimeshi",
-   "nomeEn": null,
+   "nomeEn": "Torimeshi Ration",
    "categoria": "battaglia",
    "effetto": "Ripristina 50 HP, cura la Fame",
    "dove": "Televendite; Distributore militare (Negozio Softair Untouchable)",
@@ -1472,7 +1472,7 @@
   },
   {
    "nome": "Wafer dei ladri",
-   "nomeEn": null,
+   "nomeEn": "Phantom Wafers",
    "categoria": "stato",
    "effetto": "Ripristina 50 HP, cura le alterazioni di stato",
    "dove": "Negozi (28 agosto - 10 ottobre); Televendite; ricompensa Maruki (Rango 7)",
@@ -1492,7 +1492,7 @@
   },
   {
    "nome": "Miso di stella marina",
-   "nomeEn": null,
+   "nomeEn": "Miso Starfish",
    "categoria": "battaglia",
    "effetto": "Ripristina 100 HP, riduce attacco/difesa",
    "dove": "Distributore di Akihabara (da 2 settembre)",
@@ -1502,7 +1502,7 @@
   },
   {
    "nome": "Curry alla fragola",
-   "nomeEn": null,
+   "nomeEn": "Strawberry Curry",
    "categoria": "battaglia",
    "effetto": "Ripristina 100 HP, riduce difesa/precisione/elusione",
    "dove": "Distributore di Akihabara; scambio gacha",
@@ -1512,7 +1512,7 @@
   },
   {
    "nome": "Sicchenina A",
-   "nomeEn": null,
+   "nomeEn": "Sikkenine A",
    "categoria": "battaglia",
    "effetto": "Ripristina 100 HP, riduce attacco",
    "dove": "Farmacia Aohige (da 18 aprile)",
@@ -1522,7 +1522,7 @@
   },
   {
    "nome": "Sicchenina EX",
-   "nomeEn": null,
+   "nomeEn": "Sikkenine EX",
    "categoria": "battaglia",
    "effetto": "Ripristina 200 HP, riduce difesa",
    "dove": "Farmacia Aohige (da 18 aprile)",
@@ -1572,7 +1572,7 @@
   },
   {
    "nome": "Salsa rancida",
-   "nomeEn": null,
+   "nomeEn": "Rancid Gravy",
    "categoria": "battaglia",
    "effetto": "Ripristina il 30% degli HP, potenzia precisione/elusione, riduce attacco",
    "dove": "Distributore di Akihabara; scambio gacha",
@@ -1592,7 +1592,7 @@
   },
   {
    "nome": "Razione D",
-   "nomeEn": null,
+   "nomeEn": "D Ration",
    "categoria": "battaglia",
    "effetto": "Ridona il 10% degli SP, riduce attacco",
    "dove": "Distributore militare (7-19 dicembre)",
@@ -1622,7 +1622,7 @@
   },
   {
    "nome": "Porzione di osechi",
-   "nomeEn": null,
+   "nomeEn": "Osechi Ration",
    "categoria": "battaglia",
    "effetto": "Ridona il 30% degli SP, abbassa tutte le statistiche",
    "dove": "Distributore militare (13 gennaio - 2 febbraio)",
@@ -1632,7 +1632,7 @@
   },
   {
    "nome": "Porzione di Mont Blanc",
-   "nomeEn": null,
+   "nomeEn": "Mont Blanc Ration",
    "categoria": "battaglia",
    "effetto": "Ripristina 50 HP, cura la Fame",
    "dove": "Distributore militare (13 gennaio - 2 febbraio)",
@@ -1642,7 +1642,7 @@
   },
   {
    "nome": "Porzione di kebab",
-   "nomeEn": null,
+   "nomeEn": "Kebab Ration",
    "categoria": "battaglia",
    "effetto": "Ridona il 30% degli HP, potenzia elusione/precisione, riduce attacco",
    "dove": "Distributore militare (13 gennaio - 2 febbraio)",
@@ -1652,7 +1652,7 @@
   },
   {
    "nome": "Stufato misterioso",
-   "nomeEn": null,
+   "nomeEn": "Mystery Stew",
    "categoria": "battaglia",
    "effetto": "Ridona il 30% degli SP, abbassa tutte le statistiche",
    "dove": "Distributore di Akihabara; scambio gacha",
@@ -1662,7 +1662,7 @@
   },
   {
    "nome": "Creatura",
-   "nomeEn": null,
+   "nomeEn": "Creature",
    "categoria": "stato",
    "effetto": "Cura un alleato addormentato",
    "dove": "Sala giochi (da 18 aprile); Distributore di Akihabara",
@@ -1772,7 +1772,7 @@
   },
   {
    "nome": "Gomma non statica",
-   "nomeEn": null,
+   "nomeEn": "Non-Static Gum",
    "categoria": "stato",
    "effetto": "Cura un alleato Folgorato",
    "dove": "Chiosco della stazione KiyasuKu; ricompensa Maruki (Rango 2)",
@@ -1782,7 +1782,7 @@
   },
   {
    "nome": "Nohar-M",
-   "nomeEn": null,
+   "nomeEn": "Nohar-M",
    "categoria": "stato",
    "effetto": "Cura In fiamme, Congelamento e Folgorazione",
    "dove": "Clinica Takemi (da 16 aprile); Forzieri (Dedali); Negoziazioni",
@@ -1792,7 +1792,7 @@
   },
   {
    "nome": "Gel rilassante",
-   "nomeEn": null,
+   "nomeEn": "Relax Gel",
    "categoria": "stato",
    "effetto": "Cura Furia, Soggiogamento, Confusione, Paura e Disperazione",
    "dove": "Clinica Takemi (da 16 aprile); Forzieri (vari Palazzi); Televendite; Palazzo di Maruki; Negoziazioni",
@@ -1812,7 +1812,7 @@
   },
   {
    "nome": "Hiranya",
-   "nomeEn": null,
+   "nomeEn": "Hiranya",
    "categoria": "stato",
    "effetto": "Cura tutte le alterazioni negative non speciali",
    "dove": "Forzieri (vari Palazzi e Dedali), Negoziazioni",
@@ -1842,7 +1842,7 @@
   },
   {
    "nome": "Aroma rinfrescante",
-   "nomeEn": null,
+   "nomeEn": "Refresh Aroma",
    "categoria": "stato",
    "effetto": "Cura tutte le alterazioni negative",
    "dove": "Body Chop (autunno, 1 a settimana); Televendite (39.800¥)",
@@ -1852,7 +1852,7 @@
   },
   {
    "nome": "Ceneri del pentimento",
-   "nomeEn": null,
+   "nomeEn": "Repentance Ashes",
    "categoria": "stato",
    "effetto": "Cura tutte le alterazioni di tutti gli alleati",
    "dove": "Chiesa di Kanda (domenica)",
@@ -1862,7 +1862,7 @@
   },
   {
    "nome": "Amrita Soda",
-   "nomeEn": null,
+   "nomeEn": "Amrita Soda",
    "categoria": "stato",
    "effetto": "Cura tutte le alterazioni di tutti gli alleati",
    "dove": "Forziere del Palazzo di Maruki; Negoziazioni (Garuda, Dioniso)",
@@ -1872,7 +1872,7 @@
   },
   {
    "nome": "Daifuku alla fragola",
-   "nomeEn": null,
+   "nomeEn": "Strawberry Daifuku",
    "categoria": "stato",
    "effetto": "Cura tutte le alterazioni e ridona tutti gli HP",
    "dove": "Televendite (22 gennaio); scambio con il Mercante Sakai (in cambio di una cartolina, 2-8 ottobre)",
@@ -2042,7 +2042,7 @@
   },
   {
    "nome": "Homunculus",
-   "nomeEn": null,
+   "nomeEn": "Homunculus",
    "categoria": "battaglia",
    "effetto": "Protegge una volta dalla morte istantanea",
    "dove": "Affari Loschi di Tanaka (grado Caos), Forzieri (vari Palazzi/Dedali), DLC, Negoziazioni (Trono)",
@@ -2052,7 +2052,7 @@
   },
   {
    "nome": "Unguento magico",
-   "nomeEn": null,
+   "nomeEn": "Magic Ointment",
    "categoria": "battaglia",
    "effetto": "Respinge una volta gli attacchi magici non divini",
    "dove": "Clinica Takemi (Rango Morte 10), Forzieri (Kamoshida, Okumura), Televendite, Negoziazioni",
@@ -2102,7 +2102,7 @@
   },
   {
    "nome": "Rasetsu Ofuda",
-   "nomeEn": null,
+   "nomeEn": "Rasetsu Ofuda",
    "categoria": "battaglia",
    "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
    "dove": "Forzieri (vari), Jose nei Memento (70 Fiori, 5 al giorno), Televendite (12.800¥), Negoziazioni",
@@ -2112,7 +2112,7 @@
   },
   {
    "nome": "Idaten Ofuda",
-   "nomeEn": null,
+   "nomeEn": "Idaten Ofuda",
    "categoria": "battaglia",
    "effetto": "Potenzia precisione ed elusione di tutti gli alleati per 3 turni",
    "dove": "Forzieri (vari), Jose nei Memento (70 Fiori, 5 al giorno), Televendite (12.800¥), ricompensa Gabbie, Negoziazioni",
@@ -2122,7 +2122,7 @@
   },
   {
    "nome": "Kongou Ofuda",
-   "nomeEn": null,
+   "nomeEn": "Kongou Ofuda",
    "categoria": "battaglia",
    "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
    "dove": "Forzieri (vari), Jose nei Memento (70 Fiori, 5 al giorno), Televendite (12.800¥), Negoziazioni",
@@ -2152,7 +2152,7 @@
   },
   {
    "nome": "Trambusto S",
-   "nomeEn": null,
+   "nomeEn": "Hustle S",
    "categoria": "battaglia",
    "effetto": "Aumenta la probabilità di critico di un alleato",
    "dove": "Prossimo Asso (da 18 aprile), Televendite",
@@ -2222,7 +2222,7 @@
   },
   {
    "nome": "Kajaclear-R",
-   "nomeEn": null,
+   "nomeEn": "Kajaclear-R",
    "categoria": "battaglia",
    "effetto": "Rimuove i malus alle statistiche di un alleato",
    "dove": "Clinica Takemi (Rango Morte 3; sconto 1.900¥)",
@@ -2282,7 +2282,7 @@
   },
   {
    "nome": "Kundaclear-R",
-   "nomeEn": null,
+   "nomeEn": "Kundaclear-R",
    "categoria": "battaglia",
    "effetto": "Rimuove i malus alle statistiche di un alleato",
    "dove": "Clinica Takemi (Rango Morte 3; sconto 1.900¥)",
@@ -2402,7 +2402,7 @@
   },
   {
    "nome": "Tavola Ouija",
-   "nomeEn": null,
+   "nomeEn": "Ouija Board",
    "categoria": "battaglia",
    "effetto": "Media probabilità di infliggere morte istantanea di tipo Maledetto",
    "dove": "Affari Loschi di Tanaka, online (grado Oscurità)",
@@ -2528,7 +2528,7 @@
   },
   {
    "nome": "Medaglia di Kamoshida",
-   "nomeEn": null,
+   "nomeEn": "Kamoshida's Medal",
    "tipo": "chiave",
    "uso": "Oggetto di trama: medaglia d'oro vinta in una competizione internazionale",
    "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
@@ -2627,7 +2627,7 @@
   },
   {
    "nome": "Diario di Kaneshiro",
-   "nomeEn": null,
+   "nomeEn": "Kaneshiro's Journal",
    "tipo": "chiave",
    "uso": "Contiene indizi cifrati (R=C=0, I=1, H=2) per risolvere un enigma del Palazzo",
    "dove": "Palazzo di Kaneshiro, dopo aver sconfitto il trio Fuu-Ki, Sui-Ki e Kin-Ki",
@@ -2726,7 +2726,7 @@
   },
   {
    "nome": "Chiave elettr. security",
-   "nomeEn": null,
+   "nomeEn": "Security Keycard",
    "tipo": "chiave",
    "uso": "Apre porte nel Palazzo di Niijima",
    "dove": "Palazzo di Niijima, sconfiggendo le Regine di Mezzanotte",
@@ -3212,7 +3212,7 @@
   },
   {
    "nome": "Gomitolo di seta",
-   "nomeEn": null,
+   "nomeEn": "Silk Yarn",
    "tipo": "materiale",
    "uso": "Materiale base per la fabbricazione di strumenti di infiltrazione (es. Grimaldello, Nebbia ipnotica, Trappola del Tesoro, Faretto)",
    "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (1.150¥, da 18 aprile, 3 a settimana); drop da Mandragora e Jack-o'-lantern (Palazzo di Kamoshida); tesori di quasi tutti i Palazzi; Dedali di Qimranut, Aiyatsbus, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
@@ -3221,7 +3221,7 @@
   },
   {
    "nome": "Pergamena spessa",
-   "nomeEn": null,
+   "nomeEn": "Thick Parchment",
    "tipo": "materiale",
    "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Muro di fumo, Palla evanescente, Faretto)",
    "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (1.900¥, da 18 aprile, 3 a settimana); tesori di quasi tutti i Palazzi; Dedali di Chemdah, Kaitul, Sheriruth, Da'at",
@@ -3230,7 +3230,7 @@
   },
   {
    "nome": "Fibbia di latta",
-   "nomeEn": null,
+   "nomeEn": "Tin Clasp",
    "tipo": "materiale",
    "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Grimaldello)",
    "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (2.050¥, da 18 aprile, 3 a settimana); drop da Incubo (Palazzo di Kamoshida); tesori di quasi tutti i Palazzi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
@@ -3239,7 +3239,7 @@
   },
   {
    "nome": "Balsamo vegetale",
-   "nomeEn": null,
+   "nomeEn": "Plant Balm",
    "tipo": "materiale",
    "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Goho-M, Muro di fumo, Aroma calmante, Nebbia ipnotica, Trappola del Tesoro, Palla evanescente)",
    "dove": "Fiorista Rafflesia, Centro commerciale sotterraneo di Shibuya (2.600¥, da 18 aprile, 2 a settimana); drop da Bicorno e Pixie (Palazzo di Kamoshida); tesori di quasi tutti i Palazzi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
@@ -3248,7 +3248,7 @@
   },
   {
    "nome": "Sughero",
-   "nomeEn": null,
+   "nomeEn": "Cork Bark",
    "tipo": "materiale",
    "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Trappola del Tesoro, Faretto)",
    "dove": "Fiorista Rafflesia, Shibuya (2.900¥, da 18 aprile, 2 a settimana); tesori della maggior parte dei Palazzi; Dedali di Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
@@ -3257,7 +3257,7 @@
   },
   {
    "nome": "Sabbia ferrea",
-   "nomeEn": null,
+   "nomeEn": "Iron Sand",
    "tipo": "materiale",
    "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Nebbia ipnotica)",
    "dove": "Negozio di elettronica Akiba, Akihabara (3.350¥, da 1° settembre, 3 a settimana); tesori dal Palazzo di Kaneshiro in poi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
@@ -3266,7 +3266,7 @@
   },
   {
    "nome": "Lente condensante",
-   "nomeEn": null,
+   "nomeEn": "Condenser Lens",
    "tipo": "materiale",
    "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Ribalta)",
    "dove": "Negozio di elettronica Akiba, Akihabara (3.600¥, da 1° settembre, 3 a settimana); tesori dal Palazzo di Kaneshiro in poi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
@@ -3275,7 +3275,7 @@
   },
   {
    "nome": "Foglio d'alluminio",
-   "nomeEn": null,
+   "nomeEn": "Aluminum Sheet",
    "tipo": "materiale",
    "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Grimaldello duraturo, Ribalta)",
    "dove": "Negozio di elettronica Akiba, Akihabara (4.400¥, da 1° settembre, 2 a settimana); tesori dal Palazzo di Futaba in poi; Dedali di Kaitul, Sheriruth, Da'at",
@@ -3284,7 +3284,7 @@
   },
   {
    "nome": "Cuoio conciato",
-   "nomeEn": null,
+   "nomeEn": "Tanned Leather",
    "tipo": "materiale",
    "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Ribalta)",
    "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (4.800¥, da 1° settembre, 3 a settimana); tesori dal Palazzo di Futaba in poi; Dedali di Kaitul, Sheriruth, Da'at",
@@ -3293,7 +3293,7 @@
   },
   {
    "nome": "Fosforo rosso",
-   "nomeEn": null,
+   "nomeEn": "Red Phosphorus",
    "tipo": "materiale",
    "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione",
    "dove": "Negozio di elettronica Akiba, Akihabara (6.250¥, da 1° settembre, 2 a settimana); tesori dal Palazzo di Futaba in poi; Dedali di Kaitul, Sheriruth, Da'at",
@@ -3302,7 +3302,7 @@
   },
   {
    "nome": "Mercurio",
-   "nomeEn": null,
+   "nomeEn": "Liquid Mercury",
    "tipo": "materiale",
    "uso": "Materiale avanzato raro per la fabbricazione di strumenti di infiltrazione (es. Grimaldello duraturo)",
    "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (6.600¥, da 1° ottobre, 1 a settimana); tesori dal Palazzo di Niijima in poi; Dedali di Kaitul, Sheriruth, Da'at",
@@ -3311,7 +3311,7 @@
   },
   {
    "nome": "Kogatana nera",
-   "nomeEn": null,
+   "nomeEn": "Black Kogatana",
    "tipo": "materiale",
    "uso": "Oggetto \"mutageno\": sacrificato insieme a una Persona nella fusione speciale (Trasmutazione) introdotta in Royal per trasferire tratti",
    "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (1.000¥, da 1° agosto); Affari Loschi di Tanaka, online (grado Oscurità, 1.000¥); scambio con il Mercante Sakai",
@@ -3347,7 +3347,7 @@
   },
   {
    "nome": "Incenso FR",
-   "nomeEn": null,
+   "nomeEn": "Incense ST",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
    "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
@@ -3356,7 +3356,7 @@
   },
   {
    "nome": "Incenso MA",
-   "nomeEn": null,
+   "nomeEn": "Incense MA",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
    "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
@@ -3365,7 +3365,7 @@
   },
   {
    "nome": "Incenso AG",
-   "nomeEn": null,
+   "nomeEn": "Incense AG",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
    "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
@@ -3374,7 +3374,7 @@
   },
   {
    "nome": "Incenso RS",
-   "nomeEn": null,
+   "nomeEn": "Incense EN",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
    "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
@@ -3383,7 +3383,7 @@
   },
   {
    "nome": "Incenso FO",
-   "nomeEn": null,
+   "nomeEn": "Incense LU",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
    "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
@@ -3392,7 +3392,7 @@
   },
   {
    "nome": "Muschio FR-MA",
-   "nomeEn": null,
+   "nomeEn": "Musk ST-MA",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
    "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
@@ -3401,7 +3401,7 @@
   },
   {
    "nome": "Muschio FR-AG",
-   "nomeEn": null,
+   "nomeEn": "Musk ST-AG",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
    "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
@@ -3410,7 +3410,7 @@
   },
   {
    "nome": "Muschio MA-RS",
-   "nomeEn": null,
+   "nomeEn": "Musk MA-EN",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
    "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
@@ -3419,7 +3419,7 @@
   },
   {
    "nome": "Muschio MA-FO",
-   "nomeEn": null,
+   "nomeEn": "Musk MA-LU",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
    "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
@@ -3428,7 +3428,7 @@
   },
   {
    "nome": "Muschio RS-AG",
-   "nomeEn": null,
+   "nomeEn": "Musk EN-AG",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
    "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
@@ -3437,7 +3437,7 @@
   },
   {
    "nome": "Sandalo rasta",
-   "nomeEn": null,
+   "nomeEn": "Rasta Sandalwood",
    "tipo": "materiale",
    "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per potenziare la Persona imprigionata; variante di incenso di fascia alta",
    "dove": "Mantra Ganda, Kichijoji (14.000¥, disponibile dal 1° ottobre)",

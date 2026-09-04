@@ -110,6 +110,17 @@ describe('API', () => {
     expect(agi.nomeIt).toBe('Agi');
     const regent = ((await request(app).get('/api/compendio/persona?q=Regent')).body.data as Array<{ nome: string; nomeIt: string }>).find((p) => p.nome === 'Regent')!;
     expect(regent.nomeIt).toBe('Reggente');
+    // 10.4: localizzazione completa — ricerca anche per nome italiano (senza accenti) e nomi dell'equipaggiamento
+    const resistFire = ((await request(app).get('/api/compendio/skill?q=resiste fuoco')).body.data as Array<{ nome: string; nomeIt: string }>).find((s) => s.nome === 'Resist Fire')!;
+    expect(resistFire.nomeIt).toBe('Resiste fuoco');
+    const cerbero = ((await request(app).get('/api/compendio/persona?q=Cerbero')).body.data as Array<{ nome: string; nomeIt: string }>).find((p) => p.nome === 'Cerberus')!;
+    expect(cerbero.nomeIt).toBe('Cerbero');
+    const bastone = ((await request(app).get('/api/compendio/oggetti?q=bastone di ars')).body.data as Array<{ nome: string; nomeIt: string | null }>).find((o) => o.nome === "Arsène's Cane")!;
+    expect(bastone.nomeIt).toBe('Bastone di Arsène');
+    expect(((await request(app).get('/api/compendio/oggetti?q=Cane')).body.data as Array<{ nome: string }>).some((o) => o.nome === "Arsène's Cane")).toBe(true);
+    const arsene = ((await request(app).get('/api/compendio/persona?q=Arsene')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Arsène')!;
+    const detArsene = (await request(app).get(`/api/compendio/persona/${arsene.id}`)).body.data as PersonaDettaglioDto;
+    expect(detArsene).toMatchObject({ oggetto: "Arsène's Cane", oggettoNomeIt: 'Bastone di Arsène' });
     const termini = await request(app).get('/api/compendio/termini');
     expect(termini.body.data).toHaveLength(56);
     expect(termini.body.data.find((t: { chiave: string }) => t.chiave === 'Hold Up')).toMatchObject({ nome: 'Rapina', categoria: 'battaglia' });

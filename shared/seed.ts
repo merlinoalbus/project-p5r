@@ -222,8 +222,10 @@ export interface TraduzioniSeed {
   fontiCarta: Record<string, string>;
   /** Nome skill EN canonico → nome italiano ufficiale (dalla guida; copertura parziale, fallback al nome canonico). */
   skill: Record<string, string>;
-  /** Nome Persona EN → nome italiano (solo quando diverso). */
+  /** Nome Persona EN → nome italiano della guida (copertura completa, nomi identici inclusi). */
   persone: Record<string, string>;
+  /** Nome dell'equipaggiamento EN (armi, protezioni, accessori) → nome italiano della guida, abbinato per statistiche, effetto o esecuzione. */
+  oggetti?: Record<string, string>;
   /** Termini di gioco della localizzazione italiana. */
   termini: TermineSeed[];
 }
