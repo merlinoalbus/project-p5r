@@ -340,9 +340,12 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   ritratto del Confidente, emblema del Palazzo o `IconaCategoria` del tipo.
 - **Copertine e categorie**: `MiniaturaMappa` (mappa del quartiere già scaricata nell'istanza, altrimenti icona) nelle schede della città;
   `IconaCategoria` (cartiglio rosso con icona) per tipi di negozio, categorie degli oggetti e schede delle attività.
+- **Battaglia**: debolezze e resistenze delle Ombre e dei boss come chip dell'elemento con icona (`utils/elementiGuida.ts` riconosce i nomi
+  italiani della guida: «Tuono» → elettricità, «Maledizione (dimezza)» → oscurità, «Attacchi fisici» → fisico…), testo della guida invariato.
+- **Regola di leggibilità nella data compatta**: solo il numero del giorno resta in display (20 px); mese e giorno della settimana sono nel sans.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 81 file / 231 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 83 file / 236 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
