@@ -89,8 +89,8 @@ export function EditorMappaPage() {
               onAggiungiImmagine={(id, file, didascalia) => esegui(() => aggiungiImmagineSpillo(id, file, didascalia), 'Schermata aggiunta allo spillo (resta nella tua istanza).')}
               onDidascalia={(id, didascalia) => esegui(() => aggiornaImmagineSpillo(id, { didascalia }), 'Didascalia salvata.')}
               onEliminaImmagine={(id) => esegui(() => eliminaImmagineSpillo(id), 'Schermata eliminata.')}
-              onEsportaLuogo={(immaginiSpilli) => void esegui(async () => {
-                const { nome, blob } = await esportaPacchettoRepository(chiave, immaginiSpilli);
+              onEsportaLuogo={() => void esegui(async () => {
+                const { nome, blob } = await esportaPacchettoRepository(chiave);
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url; a.download = nome; a.click();
@@ -161,7 +161,7 @@ interface PropsPannello {
   onAggiungiImmagine: (id: number, file: File, didascalia: string) => Promise<void>;
   onDidascalia: (immagineId: number, didascalia: string) => Promise<void>;
   onEliminaImmagine: (immagineId: number) => Promise<void>;
-  onEsportaLuogo: (immaginiSpilli: boolean) => void;
+  onEsportaLuogo: () => void;
   onCreaMappaCollegata: (s: SpilloDto) => Promise<void>;
   onSalvaMappa: (dati: Parameters<typeof aggiornaMappa>[1]) => Promise<void>;
   onImmagine: (file: File) => Promise<void>;
@@ -179,7 +179,6 @@ function PannelloEditor(p: PropsPannello) {
   const inputImmagine = useRef<HTMLInputElement | null>(null);
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
-  const [conSchermate, setConSchermate] = useState(false);
   const scaricabile = mappa.entita?.tipo === 'area' || mappa.entita?.tipo === 'quartiere';
   return (
     <>
@@ -239,10 +238,9 @@ function PannelloEditor(p: PropsPannello) {
 
       <section className="visore-mappa__sezione" aria-label="Esportazione e importazione">
         <h3 className="visore-mappa__intestazione">Repository</h3>
-        <p className="m-0 text-[12px] text-text-muted">«Esporta questo luogo» produce uno ZIP da estrarre nella radice del repository: `data/seed/mappe/{mappa.chiave}.json` (questa mappa con le sue discendenti e gli spilli) e le immagini di base in `public/asset/mappe/`. Nel repository pubblico solo immagini tue o generate, mai schermate ufficiali.</p>
+        <p className="m-0 text-[12px] text-text-muted">«Esporta questo luogo» produce uno ZIP completo (questa mappa con le discendenti, gli spilli, le immagini di base e le schermate degli spilli, puntate come asset) da consegnare per il repository: estratto nella radice diventa dato preimpostato dell'app (`data/seed/mappe/{mappa.chiave}.json` + `public/asset/`).</p>
         <div className="flex flex-wrap gap-1.5 items-center">
-          <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta questo luogo" dettaglio="ZIP per il repository" disabled={occupato} onClick={() => p.onEsportaLuogo(conSchermate)} />
-          <label className="flex items-center gap-1 text-[12px]"><input type="checkbox" checked={conSchermate} onChange={(e) => setConSchermate(e.target.checked)} /> Includi le schermate degli spilli</label>
+          <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Esporta questo luogo" dettaglio="ZIP completo per il repository" disabled={occupato} onClick={p.onEsportaLuogo} />
         </div>
         <p className="m-0 text-[12px] text-text-muted">«Esporta» salva invece tutte le mappe in un JSON (con le immagini dell'istanza in base64) per copie e trasferimenti; «Importa» legge lo stesso formato.</p>
         <input ref={inputImporta} type="file" accept="application/json,.json" className="sr-only" aria-label="File del pacchetto da importare" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImporta(f, sovrascrivi); e.target.value = ''; }} />

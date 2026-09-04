@@ -118,7 +118,7 @@ profondità del punto 10, oltre all'interfaccia).
 
 ## 6. Formato di esportazione e seed del repository (punto 1)
 
-Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il repository l'editor produce inoltre uno ZIP per luogo (radice + discendenti) con `data/seed/mappe/<chiave>.json` e gli asset in `public/asset/mappe/` (e `public/asset/spilli/` se richiesto), scritto da `server/utils/zip.ts` senza dipendenze; il seed carica `mappe-editor.json` e poi `data/seed/mappe/*.json`. Nel repository pubblico solo immagini proprie o generate.
+Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il repository l'editor produce inoltre uno ZIP per luogo (radice + discendenti) con `data/seed/mappe/<chiave>.json` e gli asset in `public/asset/mappe/` (e `public/asset/spilli/` se richiesto), scritto da `server/utils/zip.ts` senza dipendenze; il seed carica `mappe-editor.json` e poi `data/seed/mappe/*.json`. Decisione dell'utente (2026-09-04 sera): il pacchetto è completo, immagini di base e schermate degli spilli comprese, puntate come asset; l'utente lo consegna e viene caricato come dato preimpostato dell'app (supera la precedente esclusione delle piante scaricate).
 
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
 altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine }] }] }`. Lo stesso file, con le
