@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**665 file richiesti: 640 completati e approvati, 25 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**665 file richiesti: 665 completati e approvati, 0 ancora da consegnare.** La Fase 11.6 (§13), gli spilli (§18) e le mappe (§19) sono completi e validati.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -50,7 +50,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | ui (schede Partita e Fusione, §16) | 18 | 17 | 1 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
 | ui (spilli, §18) | 19 | 19 | 0 |
-| mappe (§19) | 25 | 0 | 25 |
+| mappe (§19) | 25 | 25 | 0 |
 | guida (sezione Mappe, §20) | 1 | 0 | 1 |
 
 ## Elenco degli asset da consegnare
@@ -106,31 +106,31 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
 
 ### mappe (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-yongen-jaya.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shibuya.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shinjuku.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-kichijoji.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-akihabara.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shujin-academy.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-kanda-jinbocho.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ikebukuro.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-harajuku.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ueno.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-inokashira-park.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-odaiba.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shinagawa.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-nakano.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ogikubo.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-yokohama-chinatown.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-maihama.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-roppongi.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-tsukishima.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-meiji-shrine.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ichigaya.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-suidobashi.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-asakusa.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-yongen-jaya.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shibuya.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shinjuku.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-kichijoji.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-akihabara.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shujin-academy.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-kanda-jinbocho.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ikebukuro.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-harajuku.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ueno.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-inokashira-park.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-odaiba.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shinagawa.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-nakano.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ogikubo.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-yokohama-chinatown.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-maihama.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-roppongi.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-tsukishima.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-meiji-shrine.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ichigaya.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-suidobashi.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-asakusa.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
 
 ### ui — azioni (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-regalo.png` — 128×128 (§17)
