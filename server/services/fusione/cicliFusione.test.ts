@@ -107,7 +107,8 @@ describe('cicliFusione', () => {
     const jack = personaFusione(idDi('Jack Frost'))!;
     const disp: Disponibilita = { scorta: new Map(), registro: new Set(ctx.ammesse.filter((p) => p.livello <= 40).map((p) => p.id)) };
     const inizio = Date.now();
-    const lunghi = cicliFusione(jack, ctx, disp, { lunghezzaMax: 15, lunghezzaMin: 8, alternative: 2, catture: false, livelloMax: null });
+    // budget esplicito e contenuto: il test verifica le regole delle catene lunghe, non le prestazioni della ricerca completa
+    const lunghi = cicliFusione(jack, ctx, disp, { lunghezzaMax: 15, lunghezzaMin: 8, alternative: 2, catture: false, livelloMax: null, budget: 20000 });
     // il budget di ricerca limita il lavoro: anche con la suite in parallelo la ricerca resta entro un minuto
     expect(Date.now() - inizio).toBeLessThan(60000);
     for (const c of lunghi) {
