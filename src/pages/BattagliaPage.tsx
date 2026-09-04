@@ -12,6 +12,8 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { BattagliaDto, OmbraDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { ElementoChip } from '../components/compendio/ElementoChip';
+import { chiaveElementoDaTesto } from '../utils/elementiGuida';
 
 const SCHEDE = [
   ['ombre', 'Ombre per area'],
@@ -31,6 +33,12 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
 }
 
 /** Elemento base di una debolezza/resistenza («Tuono (dimezza)» → «Tuono»). */
+/** Debolezza o resistenza della guida: chip dell'elemento con icona se riconosciuto, altrimenti chip testuale (il testo resta quello della guida). */
+function ChipElementoGuida({ testo }: { testo: string }) {
+  const chiave = chiaveElementoDaTesto(testo);
+  return chiave ? <ElementoChip elemento={chiave} nome={testo} piccolo /> : <span className="chip">{testo}</span>;
+}
+
 function elementoBase(v: string): string {
   return v.replace(/\s*\(.*\)\s*$/, '').trim();
 }
@@ -80,8 +88,8 @@ function SchedaOmbre({ ombre }: { ombre: OmbraDto[] }) {
               <Link to={o.areaChiave ? `/guida/dungeon/${o.dungeonChiave}?area=${o.areaChiave}` : `/guida/dungeon/${o.dungeonChiave}`} className="text-[12px] text-text-muted ml-auto">{o.area ?? o.dungeon}</Link>
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-              <span><strong className="text-text">Debole a:</strong> {o.debolezze.length > 0 ? o.debolezze.join(', ') : 'nessuna nota'}</span>
-              {o.resistenze.length > 0 && <span className="text-text-secondary"><strong className="text-text">Resiste:</strong> {o.resistenze.join(', ')}</span>}
+              <span className="flex flex-wrap items-center gap-1.5"><strong className="text-text">Debole a:</strong> {o.debolezze.length > 0 ? o.debolezze.map((d) => <ChipElementoGuida key={d} testo={d} />) : 'nessuna nota'}</span>
+              {o.resistenze.length > 0 && <span className="flex flex-wrap items-center gap-1.5 text-text-secondary"><strong className="text-text">Resiste:</strong> {o.resistenze.map((r) => <ChipElementoGuida key={r} testo={r} />)}</span>}
             </div>
           </li>
         ))}
@@ -212,7 +220,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         <Voce titolo="Livello consigliato">{m.livelloConsigliato}</Voce>
         <Voce titolo="Abilità">{m.abilita.join('; ')}</Voce>
         <Voce titolo="Immunità">{m.immunita.join(', ')}</Voce>
-        <Voce titolo="Debolezze">{m.debolezze && m.debolezze.length > 0 ? m.debolezze.join(', ') : 'nessuna'}</Voce>
+        <Voce titolo="Debolezze">{m.debolezze && m.debolezze.length > 0 ? <span className="flex flex-wrap items-center gap-1.5">{m.debolezze.map((d) => <ChipElementoGuida key={d} testo={d} />)}</span> : 'nessuna'}</Voce>
         <ol className="m-0 pl-4">{m.strategia.map((s) => <li key={s}>{s}</li>)}</ol>
         <Voce titolo="Ricompense">{m.ricompense}</Voce>
         <Fonte url={m.urlFonte} />
