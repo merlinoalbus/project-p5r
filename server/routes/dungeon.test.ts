@@ -43,9 +43,14 @@ describe('API dungeon', () => {
         expect(tipi.has(p.tipo)).toBe(true);
         expect(p.nome.length).toBeGreaterThan(0);
         expect(p.stato).toBeNull();
-        expect(p.marcatore).toBeNull();
+        // 7.4b: spillo preposizionato dal seed (percentuali) oppure nessuno
+        if (p.marcatore) {
+          expect(p.marcatore.x).toBeGreaterThanOrEqual(0); expect(p.marcatore.x).toBeLessThanOrEqual(100);
+          expect(p.marcatore.y).toBeGreaterThanOrEqual(0); expect(p.marcatore.y).toBeLessThanOrEqual(100);
+        }
       }
     }
+    expect(k.aree.flatMap((a) => a.punti).filter((p) => p.marcatore)).toHaveLength(21);
     expect(k.aree.flatMap((a) => a.punti).filter((p) => p.tipo === 'volonta')).toHaveLength(3);
     expect(k.aree.flatMap((a) => a.punti).some((p) => p.tipo === 'boss')).toBe(true);
     expect(k.fonti.every((f) => f.startsWith('http'))).toBe(true);
