@@ -59,18 +59,20 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
 export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta, inizialeId, onSalvato }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [lunghezza, setLunghezza] = useState(3);
+  const [lunghezzaMin, setLunghezzaMin] = useState(2);
+  const [partnerDistinti, setPartnerDistinti] = useState(true);
   const [alternative, setAlternative] = useState(5);
   const [catture, setCatture] = useState(false);
   const [limitaLivello, setLimitaLivello] = useState(true);
   const [salvati, setSalvati] = useState<Record<string, true>>({});
   const { dati, caricamento, errore } = useCarica(
-    () => (scelta ? getCicliFusione(scelta.id, { partita: partitaId ?? undefined, lunghezza, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null }) : Promise.resolve(null)),
-    [scelta?.id, partitaId, lunghezza, alternative, catture, limitaLivello, livelloProtagonista],
+    () => (scelta ? getCicliFusione(scelta.id, { partita: partitaId ?? undefined, lunghezza, lunghezzaMin: Math.min(lunghezzaMin, lunghezza), partnerDistinti, alternative, catture, limitaLivello: limitaLivello && livelloProtagonista !== null }) : Promise.resolve(null)),
+    [scelta?.id, partitaId, lunghezza, lunghezzaMin, partnerDistinti, alternative, catture, limitaLivello, livelloProtagonista],
   );
 
   const salva = async (c: CicloFusioneDto, i: number) => {
     if (!partitaId || !scelta) return;
-    const chiave = `${scelta.id}|${i}|${lunghezza}|${alternative}|${catture}|${limitaLivello}`;
+    const chiave = `${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;
     try {
       await salvaCiclo(partitaId, { personaId: scelta.id, anelli: c.anelli.map((a) => ({ ingredienteId: a.ingrediente.id, partnerId: a.partner.id, risultatoId: a.risultato.id })), nome: `Ciclo ${i + 1} per ${scelta.nomeIt}` });
       setSalvati((m) => ({ ...m, [chiave]: true }));
@@ -90,11 +92,17 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
       {scelta && (
         <>
           <div className="flex flex-wrap items-center gap-2 text-[13px]">
-            <label className="flex items-center gap-1.5 touch">Anelli al massimo
-              <select className="form-input w-auto" value={lunghezza} onChange={(e) => setLunghezza(Number(e.target.value))} aria-label="Numero massimo di anelli">
+            <span className="flex items-center gap-1.5" role="group" aria-label="Numero di anelli">
+              Anelli da
+              <select className="form-input form-input--compatto" value={Math.min(lunghezzaMin, lunghezza)} onChange={(e) => setLunghezzaMin(Number(e.target.value))} aria-label="Numero minimo di anelli">
+                {[2, 3, 4, 5].filter((n) => n <= lunghezza).map((n) => <option key={n} value={n}>{n}</option>)}
+              </select>
+              a
+              <select className="form-input form-input--compatto" value={lunghezza} onChange={(e) => { const v = Number(e.target.value); setLunghezza(v); if (lunghezzaMin > v) setLunghezzaMin(v); }} aria-label="Numero massimo di anelli">
                 {[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
-            </label>
+            </span>
+            <button type="button" className={`chip touch ${partnerDistinti ? 'chip--attivo' : ''}`} onClick={() => setPartnerDistinti((v) => !v)} aria-pressed={partnerDistinti} title="Ogni partner compare una sola volta nella catena: a ogni giro servono Persona diverse fra loro">Partner distinti</button>
             <label className="flex items-center gap-1.5 touch">Alternative
               <select className="form-input w-auto" value={alternative} onChange={(e) => setAlternative(Number(e.target.value))} aria-label="Numero di alternative">
                 {[3, 5, 8, 12].map((n) => <option key={n} value={n}>{n}</option>)}
@@ -118,7 +126,7 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
               </p>
               <div className="flex flex-col gap-3">
                 {dati.cicli.map((c, i) => {
-                  const chiave = `${scelta.id}|${i}|${lunghezza}|${alternative}|${catture}|${limitaLivello}`;
+                  const chiave = `${scelta.id}|${i}|${lunghezzaMin}-${lunghezza}|${partnerDistinti}|${alternative}|${catture}|${limitaLivello}`;
                   return <SchedaCiclo key={i} ciclo={c} indice={i} onSalva={partitaId ? () => void salva(c, i) : undefined} salvato={salvati[chiave] === true} />;
                 })}
               </div>

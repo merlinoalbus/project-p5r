@@ -37,6 +37,10 @@ export interface CicloFusione {
 export interface OpzioniCicli {
   /** Numero massimo di anelli (2–5). */
   lunghezzaMax: number;
+  /** Numero minimo di anelli (2–lunghezzaMax, default 2). */
+  lunghezzaMin?: number;
+  /** Ogni partner compare una sola volta lungo la catena (default true): a ogni giro servono Persona diverse. */
+  partnerDistinti?: boolean;
   alternative: number;
   /** Ammette partner da catturare (costo 0, ma non ripetibile a piacere). */
   catture: boolean;
@@ -73,6 +77,8 @@ function fusioniDa(persona: PersonaFusione, ctx: Contesto, cache: Map<number, Ri
 /** Cicli che partono e tornano a `target`, ordinati per costo per iterazione, poi per lunghezza. */
 export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniCicli): CicloFusione[] {
   const lunghezzaMax = Math.max(2, Math.min(5, opz.lunghezzaMax));
+  const lunghezzaMin = Math.max(2, Math.min(lunghezzaMax, opz.lunghezzaMin ?? 2));
+  const partnerDistinti = opz.partnerDistinti ?? true;
   const ventaglio = Math.max(5, Math.min(80, opz.ventaglio ?? 40));
   const budget = Math.max(1000, Math.min(200000, opz.budget ?? 40000));
   let esaminatiTotali = 0;
@@ -95,6 +101,7 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
       const res = ric.risultato;
       if (res.id !== target.id && visitati.has(res.id)) continue;
       if (res.id !== target.id && res.rara) continue;
+      if (partnerDistinti && anelli.some((a) => a.partner.id === partner.id)) continue;
       if (opz.livelloMax !== null && res.livello > opz.livelloMax) continue;
       const m = modoPartner(partner, disp, opz);
       if (!m) continue;
@@ -110,7 +117,7 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
       if (++esaminatiTotali > budget) return;
       const anello: AnelloCiclo = { ingrediente: corrente, partner: c.partner, partnerModo: c.modo, partnerCosto: c.costoPartner, risultato: c.ric.risultato, tipo: c.ric.tipo };
       if (c.ric.risultato.id === target.id) {
-        if (anelli.length + 1 >= 2) {
+        if (anelli.length + 1 >= lunghezzaMin) {
           const tutti = [...anelli, anello];
           inserisci({
             anelli: tutti, costo: costoTot, lunghezza: tutti.length,

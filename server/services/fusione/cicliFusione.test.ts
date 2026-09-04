@@ -74,4 +74,24 @@ describe('cicliFusione', () => {
     const conScorta = cicliFusione(jack, ctx, { scorta: new Map([[partner.id, 1]]), registro: new Set() }, { lunghezzaMax: 3, alternative: 3, catture: true, livelloMax: 20 });
     expect(conScorta.some((c) => c.anelli.some((a) => a.partner.id === partner.id && a.partnerModo === 'scorta'))).toBe(true);
   });
+
+  it('rispetta il numero minimo di anelli e, con partner distinti, non ripete lo stesso partner nella catena', () => {
+    const ctx = creaContesto([]);
+    const jack = personaFusione(idDi('Jack Frost'))!;
+    const disp: Disponibilita = { scorta: new Map(), registro: new Set(ctx.ammesse.filter((p) => p.livello <= 30).map((p) => p.id)) };
+    const lunghi = cicliFusione(jack, ctx, disp, { lunghezzaMax: 4, lunghezzaMin: 3, alternative: 6, catture: false, livelloMax: null });
+    expect(lunghi.length).toBeGreaterThan(0);
+    for (const c of lunghi) {
+      expect(c.lunghezza).toBeGreaterThanOrEqual(3);
+      expect(c.lunghezza).toBeLessThanOrEqual(4);
+      const partner = c.anelli.map((a) => a.partner.id);
+      expect(new Set(partner).size).toBe(partner.length);
+    }
+    // minimo maggiore del massimo: il minimo viene ridotto al massimo (nessun errore, catene di 2)
+    const corti = cicliFusione(jack, ctx, disp, { lunghezzaMax: 2, lunghezzaMin: 5, alternative: 3, catture: false, livelloMax: null });
+    for (const c of corti) expect(c.lunghezza).toBe(2);
+    // senza il vincolo dei partner distinti l'insieme dei cicli non è mai più piccolo
+    const liberi = cicliFusione(jack, ctx, disp, { lunghezzaMax: 4, lunghezzaMin: 3, partnerDistinti: false, alternative: 6, catture: false, livelloMax: null });
+    expect(liberi.length).toBeGreaterThanOrEqual(lunghi.length);
+  });
 });

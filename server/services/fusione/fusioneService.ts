@@ -219,6 +219,8 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
 
 export interface OpzioniCicliDto extends OpzioniContesto {
   lunghezza?: number;
+  lunghezzaMin?: number;
+  partnerDistinti?: boolean;
   alternative?: number;
   catture?: boolean;
   limitaLivello?: boolean;
@@ -234,7 +236,8 @@ export function cicliDto(personaId: number, opz: OpzioniCicliDto): CicliFusioneD
     const r = prepared('SELECT livello_protagonista FROM partita WHERE id = ?').get(opz.partitaId) as { livello_protagonista: number } | undefined;
     livelloMax = r?.livello_protagonista ?? null;
   }
-  const opzioni = { lunghezzaMax: opz.lunghezza ?? 3, alternative: opz.alternative ?? 5, catture: opz.catture ?? false, livelloMax };
+  const lunghezzaMax = opz.lunghezza ?? 3;
+  const opzioni = { lunghezzaMax, lunghezzaMin: Math.min(lunghezzaMax, opz.lunghezzaMin ?? 2), partnerDistinti: opz.partnerDistinti ?? true, alternative: opz.alternative ?? 5, catture: opz.catture ?? false, livelloMax };
   const cicli = cicliFusione(target, ctx, disp, opzioni);
   const sconto = scontoPartita(opz.partitaId).sconto;
   const ranghi = ranghiPerArcana(opz.partitaId);

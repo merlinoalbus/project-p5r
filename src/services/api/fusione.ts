@@ -45,8 +45,8 @@ export const cercaPerSkill = (skill: number[], opz: { partita?: number; risultat
 export const getVelluto = (partita: number): Promise<VellutoDto> => apiGet(`/fusione/velluto${queryString({ partita })}`);
 
 /** Cicli di fusione X → … → X con partner procurabili nella partita. */
-export const getCicliFusione = (id: number, opz: { partita?: number; lunghezza?: number; alternative?: number; catture?: boolean; limitaLivello?: boolean } = {}): Promise<CicliFusioneDto> =>
-  apiGet(`/fusione/cicli/${id}${queryString({ partita: opz.partita, lunghezza: opz.lunghezza, alternative: opz.alternative, catture: opz.catture === undefined ? undefined : String(opz.catture), limitaLivello: opz.limitaLivello === undefined ? undefined : String(opz.limitaLivello) })}`);
+export const getCicliFusione = (id: number, opz: { partita?: number; lunghezza?: number; lunghezzaMin?: number; partnerDistinti?: boolean; alternative?: number; catture?: boolean; limitaLivello?: boolean } = {}): Promise<CicliFusioneDto> =>
+  apiGet(`/fusione/cicli/${id}${queryString({ partita: opz.partita, lunghezza: opz.lunghezza, lunghezzaMin: opz.lunghezzaMin, partnerDistinti: opz.partnerDistinti === undefined ? undefined : String(opz.partnerDistinti), alternative: opz.alternative, catture: opz.catture === undefined ? undefined : String(opz.catture), limitaLivello: opz.limitaLivello === undefined ? undefined : String(opz.limitaLivello) })}`);
 
 export const getFusioniCon = (personaId: number, opz: OpzioniFusione = {}): Promise<RicetteFusioneDto> =>
   apiGet(`/fusione/con/${personaId}${queryString({ partita: opz.partita, livelloMax: opz.livelloMax, limite: opz.limite })}`);
