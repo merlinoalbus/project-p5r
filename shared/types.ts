@@ -1302,24 +1302,6 @@ export interface StoricoDto {
 
 // ---- Immagini ----
 
-/** Voce del catalogo dei riferimenti (solo link) con lo stato nella propria istanza. */
-export interface VoceCatalogoDto {
-  ambito: 'arcana' | 'confidente' | 'persona' | 'skill' | 'mappa' | 'altro';
-  chiave: string;
-  url: string;
-  fonte: string | null;
-  nota: string | null;
-  /** true se nell'istanza esiste già un'immagine per l'entità (caricata o importata). */
-  presente: boolean;
-}
-
-/** Esito di un lotto di importazione dal catalogo. */
-export interface EsitoImportazioneCatalogoDto {
-  importate: string[];
-  saltate: string[];
-  fallite: Array<{ chiave: string; motivo: string }>;
-}
-
 export interface ImmagineDto {
   id: number;
   ambito: string;

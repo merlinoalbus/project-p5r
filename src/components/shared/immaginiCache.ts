@@ -18,6 +18,12 @@ export function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   return p;
 }
 
+/** Svuota la cache di esistenza (dopo una rimozione multipla): i riquadri rileggono l'elenco al prossimo montaggio. */
+export function azzeraCacheImmagini(ambito?: AmbitoImmagine): void {
+  if (ambito) elenchi.delete(ambito);
+  else elenchi.clear();
+}
+
 /** Aggiorna la cache di esistenza quando un'immagine viene creata fuori dai riquadri (es. pianta scaricata dalla guida). */
 export function segnaImmaginePresente(ambito: AmbitoImmagine, chiave: string): void {
   void chiaviPresenti(ambito).then((set) => set.add(chiave));

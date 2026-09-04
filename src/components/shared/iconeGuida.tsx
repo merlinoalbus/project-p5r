@@ -205,3 +205,14 @@ export function IconGioco(p: IconProps) {
     </svg>
   );
 }
+
+/** Libro aperto (modificatore «libro» delle Doti, letture). */
+export function IconLibro(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M3 5.5A2 2 0 0 1 5 4h4.5a3 3 0 0 1 2.5 1.3A3 3 0 0 1 14.5 4H19a2 2 0 0 1 2 2v12.5a1 1 0 0 1-1 1h-5.5a2.5 2.5 0 0 0-2.1 1.1.5.5 0 0 1-.8 0A2.5 2.5 0 0 0 9.5 19.5H4a1 1 0 0 1-1-1z" />
+      <path d="M12 6.5v13" />
+      <path d="M6.5 8.5h3M6.5 11.5h3M14.5 8.5h3M14.5 11.5h3" />
+    </svg>
+  );
+}

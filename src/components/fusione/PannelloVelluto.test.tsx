@@ -12,7 +12,7 @@ import { ForcaIsolamento } from './ForcaIsolamento';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 
 const { getPossedute, getSuggerimentoIsolamento, eseguiIsolamento } = vi.hoisted(() => ({ getPossedute: vi.fn(), getSuggerimentoIsolamento: vi.fn(), eseguiIsolamento: vi.fn() }));
-vi.mock('../../services/api', () => ({ getPossedute, getSuggerimentoIsolamento, eseguiIsolamento }));
+vi.mock('../../services/api', () => ({ getPossedute, getSuggerimentoIsolamento, eseguiIsolamento, getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file` }));
 vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
 
 const velluto: VellutoDto = {
@@ -73,8 +73,8 @@ describe('ForcaIsolamento', () => {
       posseduta(13, 3, 'Regent', 'Emperor', 'Imperatore', 10),
     ]);
     render(<MemoryRouter><ForcaIsolamento persone={persone} partitaId={1} velluto={velluto} /></MemoryRouter>);
-    const ricevente = await screen.findByLabelText('Persona ricevente');
-    await act(async () => { fireEvent.change(ricevente, { target: { value: '11' } }); });
+    const ricevente = await screen.findByRole('button', { name: 'Persona ricevente: Arsène' });
+    await act(async () => { fireEvent.click(ricevente); });
     // ricevente Arsène (Matto, rango 10 → Igor al massimo ×4,0): Regent è un Tesoro (×3) → 12; Pixie livello 30 > 20 → ×0,5 → 2
     const righe = screen.getByRole('list', { name: 'Sacrifici possibili' }).querySelectorAll('li');
     expect(righe).toHaveLength(2);
@@ -86,7 +86,7 @@ describe('ForcaIsolamento', () => {
     // Isolamento: Gemelle rango 4 → 3 giorni; incenso base 4 giorni → 2 applicazioni +2; Pixie livello 30 → Evade
     expect(screen.getByText(/Durata dell'addestramento/).textContent).toMatch(/3 giorni/);
     expect(screen.getByText(/applicazioni →/).textContent).toMatch(/2 applicazioni → \+2 per statistica/);
-    await act(async () => { fireEvent.change(screen.getByLabelText('Persona da isolare'), { target: { value: '12' } }); });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Persona da isolare: Pixie' })); });
     expect(screen.getByText(/resistenza ottenuta di tier/).textContent).toMatch(/Evade/);
     expect(screen.getByText(/resistenza ottenuta di tier/).textContent).toMatch(/sotto il livello 34/);
   });

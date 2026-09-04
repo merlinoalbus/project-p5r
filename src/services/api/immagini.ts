@@ -2,7 +2,7 @@
 // API immagini — elenco, caricamento file, import da URL, rimozione
 // ============================================================
 
-import type { EsitoImportazioneCatalogoDto, ImmagineDto, VoceCatalogoDto } from '../../types';
+import type { ImmagineDto } from '../../types';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPut, apiPost, queryString } from './_helpers';
@@ -43,11 +43,10 @@ export async function caricaImmagine(ambito: AmbitoImmagine, chiave: string, fil
 export const importaImmagineDaUrl = (ambito: AmbitoImmagine, chiave: string, url: string): Promise<ImmagineDto> =>
   apiPost(`/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/da-url`, { url }, { timeoutMs: 60_000, maxRetries: 0 });
 
-export const getCatalogoRiferimenti = (ambito?: AmbitoImmagine): Promise<VoceCatalogoDto[]> => apiGet(`/immagini/catalogo${queryString({ ambito })}`);
 
-/** Importa un lotto (max 20 chiavi) dal catalogo dei riferimenti; tempi lunghi: nessun retry automatico. */
-export const importaCatalogoRiferimenti = (ambito: AmbitoImmagine, chiavi: string[], sovrascrivi = false): Promise<EsitoImportazioneCatalogoDto> =>
-  apiPost('/immagini/catalogo/importa', { ambito, chiavi, sovrascrivi }, { timeoutMs: 120_000, maxRetries: 0 });
 
 export const eliminaImmagine = (ambito: AmbitoImmagine, chiave: string): Promise<void> =>
   apiDelete(`/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}`);
+
+/** Rimuove tutte le immagini caricate di un ambito (o di tutta l'istanza). */
+export const eliminaImmagini = (ambito?: AmbitoImmagine): Promise<{ eliminate: number }> => apiDelete(`/immagini${queryString({ ambito })}`);

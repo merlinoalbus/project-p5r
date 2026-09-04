@@ -9,10 +9,9 @@
 
 import express, { Router } from 'express';
 import { validate } from '../middleware/validate.js';
-import { bodyDaUrl, bodyImportaCatalogo, paramsImmagine, queryCatalogo, queryImmagini } from '../schemas/immagini.js';
-import { elencaCatalogo, importaDaCatalogo } from '../services/catalogoRiferimentiService.js';
+import { bodyDaUrl, paramsImmagine, queryImmagini } from '../schemas/immagini.js';
 import {
-  MAX_BYTE_IMMAGINE, eliminaImmagine, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, salvaImmagine, type AmbitoImmagine,
+  MAX_BYTE_IMMAGINE, eliminaImmagine, eliminaImmaginiAmbito, elencaImmagini, fileImmagine, importaImmagineDaUrl, leggiImmagine, salvaImmagine, type AmbitoImmagine,
 } from '../services/immaginiService.js';
 import { httpErrors } from '../utils/httpError.js';
 
@@ -22,14 +21,9 @@ router.get('/', validate({ query: queryImmagini }), (req, res) => {
   res.json(elencaImmagini((req.query as { ambito?: string }).ambito));
 });
 
-// Catalogo dei riferimenti (solo link) — prima delle route parametriche /:ambito/:chiave.
-router.get('/catalogo', validate({ query: queryCatalogo }), (req, res) => {
-  res.json(elencaCatalogo((req.query as { ambito?: AmbitoImmagine }).ambito));
-});
-
-router.post('/catalogo/importa', validate({ body: bodyImportaCatalogo }), async (req, res) => {
-  const { ambito, chiavi, sovrascrivi } = req.body as { ambito: AmbitoImmagine; chiavi: string[]; sovrascrivi?: boolean };
-  res.json(await importaDaCatalogo(ambito, chiavi, sovrascrivi === true));
+// Rimozione multipla: tutte le immagini di un ambito (query `ambito`) o di tutta l'istanza.
+router.delete('/', validate({ query: queryImmagini }), (req, res) => {
+  res.json({ eliminate: eliminaImmaginiAmbito((req.query as { ambito?: string }).ambito) });
 });
 
 router.get('/:ambito/:chiave', validate({ params: paramsImmagine }), (req, res) => {

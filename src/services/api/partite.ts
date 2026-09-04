@@ -128,3 +128,5 @@ export const getSuggerimentoIsolamento = (id: number, possedutaId: number): Prom
 export const getStorico = (id: number, opz: { limite?: number; prima?: number; tipi?: string[]; persona?: number } = {}): Promise<StoricoDto> =>
   apiGet(`/partite/${id}/storico${queryString({ limite: opz.limite, prima: opz.prima, tipi: opz.tipi?.join(','), persona: opz.persona })}`);
 export const eliminaEvento = (id: number, eventoId: number): Promise<void> => apiDelete(`/partite/${id}/storico/${eventoId}`);
+/** Elimina più voci dello storico in una volta. */
+export const eliminaEventi = (id: number, ids: number[]): Promise<{ eliminati: number }> => apiPost(`/partite/${id}/storico/elimina`, { ids });

@@ -12,6 +12,10 @@ import type { PersonaRiassuntoDto } from '../../types';
 
 interface Props {
   persona: PersonaRiassuntoDto;
+  /** Evidenzia la piastrella (ritorno dalla scheda). */
+  evidenziata?: boolean;
+  /** Chiamata quando si apre la scheda (per ricordare la Persona). */
+  onApri?: () => void;
 }
 
 /** Badge di stato da asset (`ui/badge-*`) con riserva sul chip testuale. */
@@ -20,12 +24,12 @@ export function BadgeStato({ nome, testo }: { nome: 'dlc' | 'tesoro' | 'speciale
 }
 
 /** Piastrella cliccabile verso la scheda; l'arte si ingrandisce senza seguire il collegamento (si sostituisce dalla scheda di dettaglio, per evitare caricamenti accidentali scorrendo la griglia). */
-export function PiastrellaPersona({ persona: p }: Props) {
+export function PiastrellaPersona({ persona: p, evidenziata, onApri }: Props) {
   return (
-    <li className="min-w-0">
-      <Link to={`/compendio/persona/${p.id}`} className="card card--cliccabile piastrella no-underline text-text flex flex-col gap-2 h-full" aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}`}>
+    <li className="min-w-0" id={`persona-${p.id}`}>
+      <Link to={`/compendio/persona/${p.id}`} className={`card card--cliccabile piastrella no-underline text-text flex flex-col gap-2 h-full ${evidenziata ? 'card--evidenza' : ''}`} aria-label={`${p.nomeIt}, ${p.arcanaNome}, livello ${p.livello}`} onClick={onApri}>
         <div className="relative flex justify-center">
-          <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={150} forma="quadrata" adatta="copri" /></span>
+          <span onClick={(e) => e.preventDefault()} className="inline-flex"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={150} forma="quadrata" adatta="copri" /></span>
           <LivelloBadge livello={p.livello} className="absolute -left-2 -top-2" />
           <AssetImg nome={`arcani/icona/${slug(p.arcana)}`} alt="" decorativa className="absolute -right-1 -top-1 w-9 h-9 object-contain drop-shadow" fallback={null} />
           {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="absolute right-0 bottom-0 w-12 h-12 object-contain drop-shadow" fallback={null} />}

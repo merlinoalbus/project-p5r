@@ -114,4 +114,20 @@ describe('API storico', () => {
     await request(app).delete(`/api/partite/${altra.body.data.id}`);
     expect((await request(app).get(`/api/partite/${altra.body.data.id}/storico`)).status).toBe(404);
   });
+
+  it('elimina più voci in una volta (ids non esistenti o di altre partite ignorati)', async () => {
+    const p = await request(app).post('/api/partite').send({ nome: 'Multi', livelloProtagonista: 3, difficolta: 'normale' });
+    const id = (p.body.data as { id: number }).id;
+    await request(app).put(`/api/partite/${id}`).send({ livelloProtagonista: 4 });
+    await request(app).put(`/api/partite/${id}`).send({ livelloProtagonista: 5 });
+    await request(app).put(`/api/partite/${id}`).send({ livelloProtagonista: 6 });
+    const s = (await request(app).get(`/api/partite/${id}/storico`)).body.data as StoricoDto;
+    expect(s.totale).toBeGreaterThanOrEqual(3);
+    const ids = s.eventi.slice(0, 2).map((e) => e.id);
+    const esito = await request(app).post(`/api/partite/${id}/storico/elimina`).send({ ids: [...ids, 999999] });
+    expect(esito.status).toBe(200);
+    expect(esito.body.data).toEqual({ eliminati: 2 });
+    expect(((await request(app).get(`/api/partite/${id}/storico`)).body.data as StoricoDto).totale).toBe(s.totale - 2);
+    expect((await request(app).post(`/api/partite/${id}/storico/elimina`).send({ ids: [] })).status).toBe(400);
+  });
 });

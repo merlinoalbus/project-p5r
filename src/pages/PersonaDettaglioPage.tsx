@@ -28,6 +28,7 @@ import { LivelloBadge } from '../components/compendio/LivelloBadge';
 import { BadgeStato } from '../components/compendio/PiastrellaPersona';
 import { getFusioniCon, getRicettePer, getPossedute } from '../services/api';
 import { RicettaRiga } from '../components/fusione/RicettaRiga';
+import { Modal } from '../components/shared/Modal';
 
 const NOMI_STATISTICHE: Record<(typeof ORDINE_STATISTICHE)[number], string> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
@@ -106,7 +107,12 @@ export function PersonaDettaglioPage() {
   const sfondoHero = useAsset('sfondi/mementos');
   // La stella mostra la forma delle statistiche: il tetto segue il valore più alto (arrotondato alla decina), così anche a livello 1 si legge.
   const statisticheMostrate = statisticheAlLivello ?? p?.statistiche ?? { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
-  const tettoStella = Math.min(MASSIMO_STATISTICA, Math.max(10, Math.ceil(Math.max(...ORDINE_STATISTICHE.map((k) => statisticheMostrate[k])) / 10) * 10));
+  const [scalaUnica, setScalaUnica] = useState(true);
+  const [stellaIngrandita, setStellaIngrandita] = useState(false);
+  const tettoAdattato = Math.min(MASSIMO_STATISTICA, Math.max(10, Math.ceil(Math.max(...ORDINE_STATISTICHE.map((k) => statisticheMostrate[k])) / 10) * 10));
+  const tettoStella = scalaUnica ? MASSIMO_STATISTICA : tettoAdattato;
+  const assiStella = ORDINE_STATISTICHE.map((k) => ({ chiave: k, etichetta: NOMI_STATISTICHE[k], valore: statisticheMostrate[k] / tettoStella, badge: `ui/stat-${k}`, testo: statisticheMostrate[k] }));
+  const etichettaStella = `${p && livelloScelto > p.livello ? `Statistiche stimate al livello ${livelloScelto}` : `Statistiche al livello ${p?.livello ?? ''}`}, scala 0–${tettoStella}`;
   const aggiungi = async () => {
     if (!attiva || !p) return;
     setOccupato(true);
@@ -135,7 +141,7 @@ export function PersonaDettaglioPage() {
           >
             <div className="shrink-0 w-full lg:w-[440px]">
               <CorniceArte>
-                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={280} forma="orizzontale" modificabile />
+                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={280} forma="orizzontale" modificabile />
               </CorniceArte>
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-3">
@@ -173,14 +179,22 @@ export function PersonaDettaglioPage() {
                 </div>
               </div>
               <div className="grid gap-4 md:grid-cols-[230px_1fr] items-center">
-                <div className="flex flex-col items-center gap-1">
-                  <StellaCinque
-                    assi={ORDINE_STATISTICHE.map((k) => ({ chiave: k, etichetta: NOMI_STATISTICHE[k], valore: statisticheMostrate[k] / tettoStella, badge: `ui/stat-${k}`, testo: statisticheMostrate[k] }))}
-                    dimensione={230}
-                    etichettaAria={`${livelloScelto > p.livello ? `Statistiche stimate al livello ${livelloScelto}` : `Statistiche al livello ${p.livello}`}, scala 0–${tettoStella}`}
-                  />
-                  <span className="text-[11px] text-text-muted">Forma delle statistiche · scala 0–{tettoStella} (massimo {MASSIMO_STATISTICA})</span>
+                <div className="flex flex-col items-center gap-1.5">
+                  <button type="button" className="bg-transparent border-0 p-0 cursor-zoom-in" onClick={() => setStellaIngrandita(true)} aria-label="Ingrandisci la stella delle statistiche">
+                    <StellaCinque assi={assiStella} dimensione={230} etichettaAria={etichettaStella} />
+                  </button>
+                  <div className="flex items-center gap-1.5 flex-wrap justify-center" role="group" aria-label="Scala della stella">
+                    <button type="button" className={`chip touch ${scalaUnica ? 'chip--attivo' : ''}`} onClick={() => setScalaUnica(true)} aria-pressed={scalaUnica}>Scala 0–{MASSIMO_STATISTICA}</button>
+                    <button type="button" className={`chip touch ${scalaUnica ? '' : 'chip--attivo'}`} onClick={() => setScalaUnica(false)} aria-pressed={!scalaUnica}>Adatta (0–{tettoAdattato})</button>
+                  </div>
+                  <span className="text-[11px] text-text-muted">Tocca la stella per ingrandirla</span>
                 </div>
+                <Modal titolo={`${p.nomeIt} — statistiche`} aperta={stellaIngrandita} onChiudi={() => setStellaIngrandita(false)} larga>
+                  <div className="flex flex-col items-center gap-3">
+                    <StellaCinque assi={assiStella} dimensione={460} badgeAltezza={40} etichettaAria={etichettaStella} />
+                    <span className="text-[12px] text-text-muted">Scala 0–{tettoStella}{scalaUnica ? '' : ` (adattata; massimo ${MASSIMO_STATISTICA})`}</span>
+                  </div>
+                </Modal>
               <StatisticheBarre
                 statistiche={statisticheAlLivello ?? p.statistiche}
                 base={livelloScelto > p.livello ? p.statistiche : undefined}

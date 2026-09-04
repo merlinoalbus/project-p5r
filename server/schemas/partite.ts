@@ -166,4 +166,5 @@ export const bodyDomandaFatta = z.object({ fatta: z.boolean(), conoscenza: z.boo
 export const paramsPartitaDomanda = z.object({ id: z.coerce.number().int().positive(), domandaId: z.coerce.number().int().positive() });
 export const bodyRegalo = z.object({ regalo: z.string().min(1).max(120), fatto: z.boolean() });
 export const paramsPartitaEvento = z.object({ id: z.coerce.number().int().positive(), eventoId: z.coerce.number().int().positive() });
+export const bodyEliminaEventi = z.object({ ids: z.array(z.number().int().positive()).min(1).max(500) });
 export const bodyAggiornaPosseduta = z.object(campiPosseduta);

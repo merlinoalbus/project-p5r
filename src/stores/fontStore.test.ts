@@ -15,6 +15,7 @@ describe('fontStore', () => {
     expect(css).toContain('font-family: "P5R Display"');
     expect(css).toContain('/api/font/display/file?v=2026-09-04T05%3A00%3A00.000Z');
     expect(css).toContain('format("truetype")');
+    expect(css).toContain('unicode-range: U+0020-007E');
     expect(css).toContain('font-family: "P5R Decor"');
     expect(css).toContain('format("woff2")');
     expect(css).not.toContain('P5R Menu');

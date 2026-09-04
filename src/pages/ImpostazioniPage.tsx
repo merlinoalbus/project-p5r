@@ -8,7 +8,7 @@ import { useGlossarioStore } from '../stores/glossarioStore';
 import { GestionePartite } from '../components/impostazioni/GestionePartite';
 import { TraduzioniEditor } from '../components/impostazioni/TraduzioniEditor';
 import { CaratteriEditor } from '../components/impostazioni/CaratteriEditor';
-import { ImportaRiferimenti } from '../components/impostazioni/ImportaRiferimenti';
+import { ImmaginiCaricate } from '../components/impostazioni/ImmaginiCaricate';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
@@ -47,7 +47,7 @@ export function ImpostazioniPage() {
       <CaratteriEditor />
       <section className="card flex flex-col gap-3">
         <h2 className="m-0 text-[15px] font-semibold">Immagini degli Arcani</h2>
-        <p className="m-0 text-[13px] text-text-secondary">Carica le tue carte (vedi <code>docs/grafica/prompt-immagini.md</code>): hanno la precedenza sulla grafica predefinita e vengono usate nel compendio e nei Confidenti.</p>
+        <p className="m-0 text-[13px] text-text-secondary">Tocca una carta per sostituirla con un tuo file: le immagini caricate hanno la precedenza sulla grafica predefinita e vengono usate nel compendio e nei Confidenti.</p>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
           {glossario?.arcani.map((a) => (
             <div key={a.chiave} className="flex flex-col items-center gap-1">
@@ -57,7 +57,7 @@ export function ImpostazioniPage() {
           ))}
         </div>
       </section>
-      <ImportaRiferimenti />
+      <ImmaginiCaricate />
       <TraduzioniEditor />
       <section className="card text-[13px] text-text-secondary">
         <h2 className="m-0 mb-1 text-[15px] font-semibold text-text">Informazioni</h2>
