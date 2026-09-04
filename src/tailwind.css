@@ -431,6 +431,38 @@
   }
   .poster__rango { position: absolute; right: -14px; bottom: -8px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7)); }
 
+  /* ---- Compendio: livello in stile P5, piastrelle, cornice dell'arte, hero della scheda ---- */
+  .livello-p5 {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    padding: 3px 10px 1px;
+    background: var(--color-primary);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 20px;
+    line-height: 1;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+    white-space: nowrap;
+  }
+  .livello-p5__etichetta { font-family: var(--font-sans); font-size: 10px; font-weight: 700; text-transform: uppercase; opacity: 0.85; }
+  .livello-p5--grande { font-size: 32px; padding: 5px 16px 3px; }
+  .livello-p5--grande .livello-p5__etichetta { font-size: 12px; }
+  .piastrella { transition: transform 0.15s, border-color 0.15s; }
+  .piastrella:hover { transform: translateY(-2px); }
+  .cornice-arte {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+  .cornice-arte--riserva { border: 2px solid var(--color-border); background: rgba(0, 0, 0, 0.35); }
+  .cornice-arte__interno { position: absolute; inset: 9% 8%; display: flex; align-items: center; justify-content: center; }
+  .cornice-arte__interno > * { max-width: 100%; max-height: 100%; }
+  .hero-persona { background-size: cover; background-position: center; }
+
   /* ---- Etichette di navigazione in carattere «menu» ---- */
   .voce-menu { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400; }
 

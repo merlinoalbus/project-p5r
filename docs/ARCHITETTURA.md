@@ -308,6 +308,18 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   tasselli e nomi in evidenza (display, ≥ 17 px: anche il menu laterale), parole brevi dei tasselli rossi (menu), titoli degli stati
   vuoti e dei messaggi (decor, ≥ 26 px); pulsanti, chip, barra in basso e testi usano sempre il sans.
 
+### Impatto visivo — Partita (11.2) e Compendio (11.3)
+- **Doti**: `utils/doti.ts` (avanzamento continuo per rango con nucleo minimo) alimenta `StellaCinque` in `DotiSociali` (vertice → scheda
+  della dote) e nella Home; le schede compatte conservano note, modificatori, −1/+1 e soglie.
+- **Confidenti «poster»**: ritratto a tutta altezza (`ImmagineEntita` forma carta, adatta copri), filigrana `arcani/<slug>-senza-testo`,
+  badge del rango dentro `AnelloAvanzamento` (progressbar accessibile), nome in display; stessa logica di punti e moltiplicatori.
+- **Compendio**: preferenza `vistaPersona` (piastrelle/elenco, localStorage) nel `preferenzeStore`; `PiastrellaPersona` (arte 150,
+  `LivelloBadge` in stile P5, icona dell'arcano, `BadgeStato` da `ui/badge-*` con riserva chip, `ui/tesoro-*` per i Demoni del Tesoro,
+  affinità compatte); elenco compatto come alternativa.
+- **Scheda Persona**: hero a tutta larghezza con sfondo `sfondi/mementos`, arte dentro `CorniceArte` (`ui/cornice-scheda`, riserva con bordo),
+  arcano, livello grande, badge, statistiche a pentagono (`StellaCinque` con `ui/stat-*`) accanto alle barre; sezioni in due colonne da `xl`;
+  icone degli elementi grandi nelle skill.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 20 file / 79 casi): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).

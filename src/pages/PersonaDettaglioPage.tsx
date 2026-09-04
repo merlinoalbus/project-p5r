@@ -17,9 +17,19 @@ import { StatisticheBarre } from '../components/compendio/StatisticheBarre';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { RicettaSpecialeDto } from '../types';
-import { statistichePerLivello } from '../../shared/statistiche';
+import { MASSIMO_STATISTICA, statistichePerLivello } from '../../shared/statistiche';
+import { ORDINE_STATISTICHE } from '../utils/elementi';
+import { slug } from '../../shared/slug';
+import { useAsset } from '../stores/assetStore';
+import { AssetImg } from '../components/shared/AssetImg';
+import { StellaCinque } from '../components/shared/StellaCinque';
+import { CorniceArte } from '../components/compendio/CorniceArte';
+import { LivelloBadge } from '../components/compendio/LivelloBadge';
+import { BadgeStato } from '../components/compendio/PiastrellaPersona';
 import { getFusioniCon, getRicettePer, getPossedute } from '../services/api';
 import { RicettaRiga } from '../components/fusione/RicettaRiga';
+
+const NOMI_STATISTICHE: Record<(typeof ORDINE_STATISTICHE)[number], string> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
   return (
@@ -93,6 +103,10 @@ export function PersonaDettaglioPage() {
   const livelloScelto = p ? Math.min(99, Math.max(p.livello, livello ?? p.livello)) : 1;
   const statisticheAlLivello = p ? statistichePerLivello(p.statistiche, p.livello, livelloScelto) : null;
 
+  const sfondoHero = useAsset('sfondi/mementos');
+  // La stella mostra la forma delle statistiche: il tetto segue il valore più alto (arrotondato alla decina), così anche a livello 1 si legge.
+  const statisticheMostrate = statisticheAlLivello ?? p?.statistiche ?? { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
+  const tettoStella = Math.min(MASSIMO_STATISTICA, Math.max(10, Math.ceil(Math.max(...ORDINE_STATISTICHE.map((k) => statisticheMostrate[k])) / 10) * 10));
   const aggiungi = async () => {
     if (!attiva || !p) return;
     setOccupato(true);
@@ -115,42 +129,64 @@ export function PersonaDettaglioPage() {
             <IconChevronLeft size={18} /> Indietro
           </button>
 
-          <div className="card flex flex-col sm:flex-row gap-4">
-            <div className="flex sm:flex-col gap-3 items-start">
-              <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={240} forma="orizzontale" modificabile className="max-w-full" />
-              <ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={72} forma="carta" />
+          <section
+            className="hero-persona card relative overflow-hidden flex flex-col lg:flex-row gap-5"
+            style={sfondoHero ? { backgroundImage: `linear-gradient(90deg, rgba(11, 11, 14, 0.94), rgba(11, 11, 14, 0.78)), url("${sfondoHero}")` } : undefined}
+          >
+            <div className="shrink-0 w-full lg:w-[440px]">
+              <CorniceArte>
+                <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={280} forma="orizzontale" modificabile />
+              </CorniceArte>
             </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="titolo-display m-0">{p.nomeIt}</h1>
-                {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
-                <span className="chip chip--attivo">{p.arcanaNome}</span>
-                <span className="chip">Livello {p.livello}</span>
-                {p.dlc && <span className="chip">DLC{p.dlcSet ? ` ${p.dlcSet}` : ''}</span>}
-                {p.rara && <span className="chip">Demone del Tesoro</span>}
-                {p.speciale && <span className="chip">Fusione speciale</span>}
-                {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
+            <div className="flex-1 min-w-0 flex flex-col gap-3">
+              <div className="flex items-start gap-3">
+                <ImmagineEntita ambito="arcana" chiave={p.arcana} etichetta={p.arcanaNome} dimensione={64} forma="carta" />
+                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="titolo-display m-0">{p.nomeIt}</h1>
+                    <LivelloBadge livello={p.livello} grande />
+                    {p.rara && <AssetImg nome={`ui/tesoro-${slug(p.nome)}`} alt="" decorativa className="h-12 w-12 object-contain drop-shadow" fallback={null} />}
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
+                    <span className="chip chip--attivo">{p.arcanaNome}</span>
+                    {p.dlc && <BadgeStato nome="dlc" testo={`DLC${p.dlcSet ? ` ${p.dlcSet}` : ''}`} />}
+                    {p.rara && <BadgeStato nome="tesoro" testo="Demone del Tesoro" />}
+                    {p.speciale && <BadgeStato nome="speciale" testo="Fusione speciale" />}
+                    {p.richiedeConfidenteMax && <span className="chip">Richiede Confidente al massimo</span>}
+                  </div>
+                  <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
+                    <span>Eredità: <strong className="text-text">{p.ereditaNome ?? '—'}</strong></span>
+                    {p.notaNome && <span className="text-warning">{p.notaNome}</span>}
+                    {p.areeMementos.length > 0 && (
+                      <span>Mementos: <strong className="text-text">{p.areeMementos.map((a) => a.nome).join(', ')}</strong>{p.pianiMementos ? ` — ${p.pianiMementos}` : ''}</span>
+                    )}
+                    {p.negoziazione && <span>Ombra: <strong className="text-text">{p.negoziazione.titoloNome}</strong></span>}
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <label className="text-[13px] text-text-secondary flex items-center gap-2">
+                      Livello
+                      <input type="number" min={p.livello} max={99} className="form-input w-[84px]" value={livelloScelto} onChange={(e) => setLivello(Math.min(99, Math.max(p.livello, Number(e.target.value) || p.livello)))} aria-label="Livello per la stima delle statistiche" />
+                    </label>
+                    <input type="range" min={p.livello} max={99} value={livelloScelto} onChange={(e) => setLivello(Number(e.target.value))} className="flex-1 min-w-[140px] touch" aria-label="Livello (cursore)" />
+                  </div>
+                </div>
               </div>
-              <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
-                <span>Eredità: <strong className="text-text">{p.ereditaNome ?? '—'}</strong></span>
-                {p.notaNome && <span className="text-warning">{p.notaNome}</span>}
-                {p.areeMementos.length > 0 && (
-                  <span>Mementos: <strong className="text-text">{p.areeMementos.map((a) => a.nome).join(', ')}</strong>{p.pianiMementos ? ` — ${p.pianiMementos}` : ''}</span>
-                )}
-                {p.negoziazione && <span>Ombra: <strong className="text-text">{p.negoziazione.titoloNome}</strong></span>}
-              </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <label className="text-[13px] text-text-secondary flex items-center gap-2">
-                  Livello
-                  <input type="number" min={p.livello} max={99} className="form-input w-[84px]" value={livelloScelto} onChange={(e) => setLivello(Math.min(99, Math.max(p.livello, Number(e.target.value) || p.livello)))} aria-label="Livello per la stima delle statistiche" />
-                </label>
-                <input type="range" min={p.livello} max={99} value={livelloScelto} onChange={(e) => setLivello(Number(e.target.value))} className="flex-1 min-w-[140px] touch" aria-label="Livello (cursore)" />
-              </div>
+              <div className="grid gap-4 md:grid-cols-[230px_1fr] items-center">
+                <div className="flex flex-col items-center gap-1">
+                  <StellaCinque
+                    assi={ORDINE_STATISTICHE.map((k) => ({ chiave: k, etichetta: NOMI_STATISTICHE[k], valore: statisticheMostrate[k] / tettoStella, badge: `ui/stat-${k}`, testo: statisticheMostrate[k] }))}
+                    dimensione={230}
+                    etichettaAria={`${livelloScelto > p.livello ? `Statistiche stimate al livello ${livelloScelto}` : `Statistiche al livello ${p.livello}`}, scala 0–${tettoStella}`}
+                  />
+                  <span className="text-[11px] text-text-muted">Forma delle statistiche · scala 0–{tettoStella} (massimo {MASSIMO_STATISTICA})</span>
+                </div>
               <StatisticheBarre
                 statistiche={statisticheAlLivello ?? p.statistiche}
                 base={livelloScelto > p.livello ? p.statistiche : undefined}
                 didascalia={livelloScelto > p.livello ? `Stima al livello ${livelloScelto}: +3 punti per livello ripartiti in proporzione alle statistiche base (livello ${p.livello}); in gioco la ripartizione varia.` : `Statistiche base al livello ${p.livello}.`}
               />
+              </div>
               {attiva && !p.rara && (
                 <div className="flex items-center gap-2 flex-wrap mt-1">
                   <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void aggiungi()}>
@@ -168,8 +204,10 @@ export function PersonaDettaglioPage() {
                 />
               )}
             </div>
-          </div>
+          </section>
 
+          <div className="grid gap-4 xl:grid-cols-2 items-start">
+          <div className="flex flex-col gap-4">
           <section className="card">
             <h2 className="m-0 mb-3 text-[15px] font-semibold">Affinità</h2>
             <AffinitaGriglia affinita={p.affinita} />
@@ -185,7 +223,7 @@ export function PersonaDettaglioPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <Link to={`/skill/${s.id}`} className="font-semibold no-underline text-text hover:text-primary">{s.nomeIt}</Link>
                       {s.nomeIt !== s.nome && <span className="text-[12px] text-text-muted">{s.nome}</span>}
-                      <ElementoChip elemento={s.elemento} nome={s.elementoNome} piccolo />
+                      <ElementoChip elemento={s.elemento} nome={s.elementoNome} />
                       <span className="text-[12px] text-text-muted">{s.costo.testo}</span>
                     </div>
                     <div className="text-[13px] text-text-secondary">{s.effettoNome}</div>
@@ -194,6 +232,8 @@ export function PersonaDettaglioPage() {
               ))}
             </ul>
           </section>
+          </div>
+          <div className="flex flex-col gap-4">
 
           {p.trattoDettaglio && (
             <section className="card">
@@ -241,6 +281,8 @@ export function PersonaDettaglioPage() {
               )}
             </dl>
           </section>
+          </div>
+          </div>
         </div>
       )}
     </PageState>

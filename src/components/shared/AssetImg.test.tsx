@@ -42,7 +42,7 @@ describe('AssetImg', () => {
 
   it('la preferenza sopravvive al ricaricamento tramite localStorage e regge uno storage rotto', () => {
     usePreferenzeStore.getState().impostaGraficaPredefinita(false);
-    expect(JSON.parse(localStorage.getItem('p5r-preferenze')!)).toEqual({ graficaPredefinita: false });
+    expect(JSON.parse(localStorage.getItem('p5r-preferenze')!)).toEqual({ graficaPredefinita: false, vistaPersona: 'piastrelle' });
     localStorage.setItem('p5r-preferenze', '{non-json');
     // lo store legge al primo import: qui verifichiamo solo che la scrittura non esploda con storage pieno/rotto
     const originale = Storage.prototype.setItem;

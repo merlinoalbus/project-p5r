@@ -1,5 +1,5 @@
 // ============================================================
-// CompendioPage — elenco delle 232 Persona con filtri (client-side)
+// CompendioPage — le 232 Persona con filtri (client-side): piastrelle con arte grande (default) o elenco compatto
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -9,18 +9,23 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { getPersone } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
+import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
+import { BadgeStato, PiastrellaPersona } from '../components/compendio/PiastrellaPersona';
+import { LivelloBadge } from '../components/compendio/LivelloBadge';
 import { IconChevronRight } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Ordine = 'livello' | 'nome' | 'arcana';
 
-/** Elenco Persona: ricerca, arcano, intervallo di livello, DLC/rare/speciali, ordinamento. */
+/** Elenco Persona: ricerca, arcano, intervallo di livello, DLC/rare/speciali, ordinamento; vista a piastrelle o compatta ricordata per dispositivo. */
 export function CompendioPage() {
   useDocumentTitle('Compendio');
   const glossario = useGlossarioStore((s) => s.glossario);
+  const vista = usePreferenzeStore((s) => s.vistaPersona);
+  const impostaVista = usePreferenzeStore((s) => s.impostaVistaPersona);
   const { dati, caricamento, errore, ricarica } = useCarica(() => getPersone(), []);
   const [q, setQ] = useState('');
   const [arcana, setArcana] = useState('');
@@ -52,7 +57,16 @@ export function CompendioPage() {
       <IntestazionePagina
         titolo="Compendio"
         sottotitolo="Tutte le Persona di Royal con affinità, skill, statistiche e i modi per ottenerle; tocca una scheda per il dettaglio."
-        azioni={<><Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link><span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span></>}
+        azioni={
+          <>
+            <div className="flex gap-1" role="group" aria-label="Vista">
+              <button type="button" className={`chip touch ${vista === 'piastrelle' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('piastrelle')} aria-pressed={vista === 'piastrelle'}>Piastrelle</button>
+              <button type="button" className={`chip touch ${vista === 'elenco' ? 'chip--attivo' : ''}`} onClick={() => impostaVista('elenco')} aria-pressed={vista === 'elenco'}>Elenco</button>
+            </div>
+            <Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link>
+            <span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
+          </>
+        }
       />
 
       <div className="flex flex-wrap gap-2 items-center">
@@ -79,21 +93,25 @@ export function CompendioPage() {
       <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
         {filtrate.length === 0 ? (
           <EmptyState title="Nessuna Persona corrisponde ai filtri" hint="Prova ad allargare l'intervallo di livello o a cambiare arcano." />
+        ) : vista === 'piastrelle' ? (
+          <ul className="m-0 p-0 list-none grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5" aria-label="Persona">
+            {filtrate.map((p) => <PiastrellaPersona key={p.id} persona={p} />)}
+          </ul>
         ) : (
-          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2">
+          <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Persona">
             {filtrate.map((p) => (
               <li key={p.id}>
                 <Link to={`/compendio/persona/${p.id}`} className="card card--cliccabile flex items-center gap-3 no-underline text-text">
-                  <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={56} /></span>
-                  <div className="w-12 h-12 rounded-md bg-bg-tertiary flex items-center justify-center font-bold text-primary text-[18px] shrink-0" title="Livello">{p.livello}</div>
+                  <span onClick={(e) => e.preventDefault()} className="shrink-0"><ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nome} dimensione={64} adatta="copri" /></span>
+                  <LivelloBadge livello={p.livello} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-[15px] truncate">{p.nomeIt}</span>
+                      <span className="font-display uppercase text-[18px] leading-none truncate">{p.nomeIt}</span>
                       {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted truncate">{p.nome}</span>}
                       <span className="chip">{p.arcanaNome}</span>
-                      {p.dlc && <span className="chip">DLC</span>}
-                      {p.rara && <span className="chip">Tesoro</span>}
-                      {p.speciale && <span className="chip">Speciale</span>}
+                      {p.dlc && <BadgeStato nome="dlc" testo="DLC" />}
+                      {p.rara && <BadgeStato nome="tesoro" testo="Tesoro" />}
+                      {p.speciale && <BadgeStato nome="speciale" testo="Speciale" />}
                       {p.richiedeConfidenteMax && <span className="chip">Confidente max</span>}
                     </div>
                     <div className="mt-1.5">
