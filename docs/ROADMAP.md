@@ -161,15 +161,15 @@ degli spilli è disponibile solo nell'editor.
 
 | Step | Contenuto | Stato |
 |---|---|---|
-| 14.1 | «Come ottenere» (ricette per una Persona): da elenco testuale a piastrelle con miniature degli ingredienti, arcani, livelli e costo; ordinamento e filtri | ⏳ |
-| 14.2 | «Fusioni con»: miniatura della Persona in ogni combinazione, risultato in evidenza con la sua arte; asset più forti del testo | ⏳ |
-| 14.3 | Piano di fusione: messaggio esplicito quando il bersaglio non si ottiene per fusione (Arsène è la Persona iniziale: nessuna ricetta produce un Matto di livello 1, quindi con «Bagno di sangue» richiesto la ricerca è vuota per costruzione; idem per le Persona speciali, rare o dei Confidenti al massimo) e quando le skill richieste non sono ereditabili dal bersaglio; albero del piano con miniature e frecce; casi di test sui bersagli non fondibili | ⏳ |
-| 14.4 | Cerca per skill: interfaccia guidata (cosa fa, passi: scegli le skill → risultati con miniature, livello e arcano, filtri) | ⏳ |
-| 14.5 | Cicli di fusione: catena ad anelli con miniature, frecce e costo per giro (con 12.5) | ⏳ |
-| 14.6 | Forca e Isolamento: elementi visivi (ricevente, sacrifici con miniature e moltiplicatori grafici, incensi con icone) e revisione funzionale | ⏳ |
-| 14.7 | «Due arcani», «Matrice completa» e «Demoni del Tesoro» nascosti all'utente finale (viste di calcolo interne: restano API e test, raggiungibili solo con `?strumenti=1`) | ⏳ |
-| 14.8 | Ricette speciali: schede con miniature degli ingredienti, riordino per Persona e livello | ⏳ |
-| 14.9 | Pulsanti e schede della Fusione con asset grafici censiti (come 12.6) | ⏳ |
+| 14.1 | «Come ottenere»: righe delle ricette con `PersonaChip` (miniatura dell'utente → asset → iniziali, nome, livello, evidenza della scorta), tipo e costo allineati a destra | ✅ 2026-09-04 |
+| 14.2 | «Fusioni con»: stesse righe con miniature, risultato in evidenza (bordo rosso, nome in carattere display, miniatura più grande) | ✅ 2026-09-04 |
+| 14.3 | Piano di fusione: `motivo` dal server (`non-fondibile` per Demoni del Tesoro, Persona iniziale, speciali senza ricetta, Persona che nessuna coppia produce; `skill-non-ereditabili` quando il tipo di eredità del bersaglio non ammette l'elemento) mostrato in un riquadro esplicito (il caso Arsène + Bagno di sangue spiega che Arsène non nasce da alcuna fusione); albero con `PersonaChip`, modo con icona (scorta, Registro, cattura, fusione); test API | ✅ 2026-09-04 |
+| 14.4 | Cerca per skill: tre passi guidati (skill, risultato facoltativo, ricette), risultati possibili con miniatura e numero di ricette, spiegazione tecnica in un riquadro a scomparsa | ✅ 2026-09-04 |
+| 14.5 | Cicli di fusione: anelli numerati con `PersonaChip` (ingrediente, partner con modo e costo, risultato in evidenza), «Salva ciclo» visivo | ✅ 2026-09-04 |
+| 14.6 | Forca e Isolamento: sacrifici con miniatura e nome in carattere display, moltiplicatore EXP come tassello; selettori a miniature già dal 12.1; revisione funzionale: nessun difetto trovato nei calcoli (test esistenti verdi) | ✅ 2026-09-04 |
+| 14.7 | «Due arcani», «Matrice completa» e «Demoni del Tesoro» fuori dalle schede: visibili solo con `?strumenti=1` (API e test invariati) | ✅ 2026-09-04 |
+| 14.8 | Ricette speciali: schede in griglia con risultato in evidenza e ingredienti con miniatura, ordinate per livello del risultato, conteggio e stato «tutti in scorta» | ✅ 2026-09-04 |
+| 14.9 | Schede della Fusione con icona (`IconaScheda` `fusione-*`, prompt §16: 17 icone) e pulsanti già convertiti in 12.8 | ✅ 2026-09-04 |
 
 ## Decisioni e forniture aperte (aggiornato il 2026-09-04)
 

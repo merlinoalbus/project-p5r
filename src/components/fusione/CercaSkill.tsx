@@ -11,6 +11,7 @@ import { SelettoreSkill } from './SelettoreSkill';
 import { RicettaRiga } from './RicettaRiga';
 import { Spinner } from '../shared/PageState';
 import type { PersonaRiassuntoDto, SkillRiassuntoDto } from '../../types';
+import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -34,17 +35,41 @@ export function CercaSkill({ persone, partitaId, livelloProtagonista, inScorta }
 
   return (
     <div className="flex flex-col gap-3">
-      {skill.dati ? <SelettoreSkill skill={skill.dati} scelte={scelte} onCambia={setScelte} /> : <div className="flex justify-center py-4"><Spinner /></div>}
-      <SelettorePersona etichetta="Risultato desiderato (facoltativo)" persone={persone} scelta={risultato} onScegli={setRisultato} senzaRare inScorta={inScorta} />
+      <div className="passo-guida">
+        <span className="passo-guida__numero" aria-hidden="true">1</span>
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <span className="font-display uppercase text-[18px] leading-none">Scegli le skill che la Persona deve avere</span>
+          <span className="text-[12px] text-text-secondary">Fino a 4 skill: l'app cerca le fusioni in cui gli ingredienti le possiedono e il risultato può ereditarle tutte insieme.</span>
+          {skill.dati ? <SelettoreSkill skill={skill.dati} scelte={scelte} onCambia={setScelte} /> : <div className="flex justify-center py-4"><Spinner /></div>}
+        </div>
+      </div>
+      <div className="passo-guida">
+        <span className="passo-guida__numero" aria-hidden="true">2</span>
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <span className="font-display uppercase text-[18px] leading-none">Facoltativo: la Persona che vuoi ottenere</span>
+          <span className="text-[12px] text-text-secondary">Senza una scelta vedi tutte le Persona che possono nascere con quelle skill; toccane una per restringere.</span>
+          <SelettorePersona etichetta="Risultato desiderato (facoltativo)" persone={persone} scelta={risultato} onScegli={setRisultato} senzaRare inScorta={inScorta} />
+        </div>
+      </div>
+      <div className="passo-guida">
+        <span className="passo-guida__numero" aria-hidden="true">3</span>
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <span className="font-display uppercase text-[18px] leading-none">Ricette trovate</span>
+          <span className="text-[12px] text-text-secondary">Ordinate per costo; «Pronta» se hai già tutti gli ingredienti nella scorta.</span>
+        </div>
+      </div>
       <div className="flex flex-wrap items-center gap-2 text-[13px]">
         <button type="button" className={`chip touch ${soloLivello ? 'chip--attivo' : ''}`} disabled={!livelloProtagonista} onClick={() => setSoloLivello((v) => !v)} aria-pressed={soloLivello}>
           Fino al livello {livelloProtagonista ?? '—'} del protagonista
         </button>
         {dati && <span className="text-text-muted ml-auto">{dati.totale} ricette · {dati.perRisultato.length} Persona</span>}
       </div>
-      <p className="m-0 text-[12px] text-text-muted">
+      <details className="text-[12px] text-text-muted">
+        <summary className="cursor-pointer touch">Come funziona la ricerca</summary>
+        <p className="m-0 mt-1">
         Una ricetta è valida se il tipo di eredità del risultato ammette le skill, gli ingredienti le possiedono (skill della scorta se possedute, altrimenti al livello base) e il numero da ereditare non supera gli slot scelti a mano (il gioco ne assegna sempre uno a caso).
       </p>
+      </details>
       {ids.length === 0 ? null : errore ? (
         <p className="m-0 text-[13px] text-error">{errore}</p>
       ) : caricamento && !dati ? (
@@ -56,8 +81,9 @@ export function CercaSkill({ persone, partitaId, livelloProtagonista, inScorta }
           {!risultato && dati.perRisultato.length > 1 && (
             <div className="flex flex-wrap gap-1.5">
               {dati.perRisultato.slice(0, 24).map((r) => (
-                <button key={r.persona.id} type="button" className="chip touch" onClick={() => setRisultato(persone.find((p) => p.id === r.persona.id) ?? null)} title={`${r.ricette} ricette, dal costo di ${r.costoMinimo.toLocaleString('it-IT')} ¥`}>
-                  {r.persona.nomeIt} <span className="opacity-70">L{r.persona.livello} · {r.ricette}</span>
+                <button key={r.persona.id} type="button" className="persona-chip touch cursor-pointer" onClick={() => setRisultato(persone.find((p) => p.id === r.persona.id) ?? null)} title={`${r.ricette} ricette, dal costo di ${r.costoMinimo.toLocaleString('it-IT')} ¥`}>
+                  <AnteprimaPersona nome={r.persona.nome} etichetta={r.persona.nomeIt} dimensione={32} />
+                  <span className="persona-chip__testo"><span className="persona-chip__nome">{r.persona.nomeIt}</span><span className="persona-chip__livello">L{r.persona.livello} · {r.ricette} {r.ricette === 1 ? 'ricetta' : 'ricette'}</span></span>
                 </button>
               ))}
             </div>

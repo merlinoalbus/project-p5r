@@ -14,6 +14,7 @@ import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../..
 import { SelettorePosseduta } from './SelettorePosseduta';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -62,10 +63,11 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
                 {candidati.map(({ p, esito }) => (
                   <li key={p.id} className="py-2 flex flex-col gap-0.5 text-[13px]">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold">{p.nomeIt}</span>
+                      <AnteprimaPersona nome={p.nome} etichetta={p.nomeIt} dimensione={40} />
+                      <span className="font-display uppercase text-[17px] leading-none">{p.nomeIt}</span>
                       <span className="text-text-muted">{p.arcanaNome} · livello {p.livello}</span>
                       {p.carica && <span className="chip" title="Creata durante l'Allarme: alla Forca provoca un incidente garantito con +10 punti">gialla</span>}
-                      <span className="ml-auto font-black tabular-nums">EXP ×{esito.moltiplicatore.toLocaleString('it-IT')}</span>
+                      <span className="ml-auto chip chip--attivo font-black tabular-nums">EXP ×{esito.moltiplicatore.toLocaleString('it-IT')}</span>
                       <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Esegui" onClick={() => setSacrificioId(p.id)} />
                     </div>
                     <div className="text-[12px] text-text-muted">

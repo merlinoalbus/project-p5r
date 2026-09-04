@@ -74,7 +74,7 @@ del personaggio (Guida → Personaggi): striscia con la Persona iniziale e le ev
 | `vanadis.png` | Vanadis | Kasumi Yoshizawa — seconda forma (risveglio) |
 | `ella.png` | Ella | Kasumi Yoshizawa — terza forma (Royal) |
 
-## 16. Icone delle schede della Partita (9) — `ui/scheda-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+## 16. Icone delle schede della Partita e della Fusione (17) — `ui/scheda-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo). L'app le mostra a 16 px accanto al nome
 della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda (lo stato attivo lo dà lo sfondo rosso del tassello).
 | File | Scheda | Soggetto |
@@ -88,6 +88,14 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-cicli.png` | Cicli | due frecce in cerchio |
 | `scheda-storico.png` | Storico | orologio da taschino |
 | `scheda-riepilogo.png` | Riepilogo | tre barre di altezza crescente |
+| `scheda-fusione-calcolatore.png` | Fusione → Calcolatore A + B | due carte che si fondono in una scintilla |
+| `scheda-fusione-ricette.png` | Fusione → Come ottenere | ampolla da alchimista |
+| `scheda-fusione-con.png` | Fusione → Fusioni con… | ramificazione da una carta |
+| `scheda-fusione-piani.png` | Fusione → Piano di fusione | blocco degli appunti con albero |
+| `scheda-fusione-skill.png` | Fusione → Cerca per skill | stella con lente |
+| `scheda-fusione-cicli.png` | Fusione → Cicli di fusione | frecce in cerchio |
+| `scheda-fusione-forca.png` | Fusione → Forca e Isolamento | ghigliottina stilizzata |
+| `scheda-fusione-speciali.png` | Fusione → Ricette speciali | pergamena con sigillo |
 
 ## 17. Icone delle azioni (45) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo, nessun numero salvo dove indicato). L'app le

@@ -326,6 +326,8 @@ export interface PianiFusioneDto {
   sconto: number;
   /** Esemplari in scorta e Persona nel Registro considerati (dalla partita). */
   disponibilita: { scorta: number; registro: number };
+  /** Perché non ci può essere alcun piano (bersaglio non fondibile o skill non ereditabili), altrimenti null. */
+  motivo: { codice: 'non-fondibile' | 'skill-non-ereditabili' | 'skill-senza-fonte' | 'limite-livello'; testo: string } | null;
 }
 
 /** Skill candidata all'eredità in una fusione. */

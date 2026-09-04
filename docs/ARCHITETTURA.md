@@ -395,6 +395,13 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   incontri con un Confidente col bonus dell'arcano dalla scorta) e li registra in `azione_partita.effetti_json` (migrazione 025) per annullarli
   togliendo la spunta; `AzionePercorsoDto.effetti`; scelta delle note nella pagina Percorso.
 
+### Fusione: revisione visiva (Fase 14)
+- `components/fusione/PersonaChip.tsx`: tassello con `AnteprimaPersona`, nome e livello (variante `evidenza` per risultato/bersaglio, `inScorta`);
+  usato in `RicettaRiga`, `AlberoPiano`, `CicliFusione`, ricette speciali e (come pulsante) nei risultati di «Cerca per skill».
+- `pianiDto` restituisce `motivo` (`non-fondibile` | `skill-non-ereditabili`) calcolato con `ricettePer`, `tipoEredita` ed `elementoEreditabile`
+  prima di cercare i piani; il frontend lo mostra in un riquadro dedicato.
+- `FusionePage`: schede principali con `IconaScheda fusione-*`; le viste di calcolo (Due arcani, Matrice, Demoni del Tesoro) solo con `?strumenti=1`.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 83 file / 242 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).

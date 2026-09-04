@@ -162,7 +162,7 @@
    {
     "tipo": "data",
     "dal": "05-19",
-    "testo": "Rango 1 disponibile da subito dopo l'accesso alla Stanza di Velluto (fine Palazzo Madarame); date consigliate dalla guida per procedere in modo efficiente: 19 maggio (R1), 8 giugno (R2-R4), 26 giugno "
+    "testo": "Rango 1 disponibile da subito dopo l'accesso alla Stanza di Velluto (fine Palazzo Madarame); date consigliate dalla guida per procedere in modo efficiente: 19 maggio (R1), 8 giugno (R2-R4), 26 giugno (R5), 1 agosto/6 settembre (R6), 6 settembre (R7-R8), 6 novembre (R9-R10)"
    },
    {
     "tipo": "manuale",
@@ -233,6 +233,12 @@
     "dote": "fascino",
     "rango": 3,
     "testo": "Dote Fascino >= 3;"
+   },
+   {
+    "tipo": "confidente",
+    "confidente": "yusuke",
+    "rango": 2,
+    "testo": "si sblocca dopo aver raggiunto il Rango 2 del confidente di Yusuke (Imperatore), che menziona la giocatrice di shogi a Kanda"
    }
   ]
  },
@@ -360,7 +366,7 @@
   "requisiti": [
    {
     "tipo": "richiesta",
-    "richiesta": "Affari loschi nell",
+    "richiesta": "Affari loschi nell'ombra",
     "testo": "Richiede il completamento della richiesta Memento 'Affari loschi nell'ombra'."
    }
   ]
@@ -381,7 +387,7 @@
    {
     "tipo": "data",
     "dal": "01-12",
-    "testo": "Il Confidente si blocca a Rango 5 fino al 22 dicembre e riprende dal 12 gennaio, condizionato dall'aver completato il Rango 10 del Confidente del Consigliere Maruki (Sacerdote) durante la Terza Semest"
+    "testo": "Il Confidente si blocca a Rango 5 fino al 22 dicembre e riprende dal 12 gennaio, condizionato dall'aver completato il Rango 10 del Confidente del Consigliere Maruki (Sacerdote) durante la Terza Semestre."
    }
   ]
  },
@@ -423,9 +429,10 @@
   "rango": 6.0,
   "requisiti": [
    {
-    "tipo": "palazzo",
-    "dungeon": "maruki",
-    "testo": "18 gennaio (mercoledì), galleria a Kichijoji — sblocco richiede aver completato il Rango 10 del Confidente di Maruki (Sacerdote) e l'evento del 12 gennaio nel Palazzo di Maruki (in cui Sumire si unisc"
+    "tipo": "confidente",
+    "confidente": "maruki",
+    "rango": 10,
+    "testo": "18 gennaio (mercoledì), galleria a Kichijoji — sblocco richiede aver completato il Rango 10 del Confidente di Maruki (Sacerdote) e l'evento del 12 gennaio nel Palazzo di Maruki (in cui Sumire si unisce col nome in codice 'Violet')."
    }
   ]
  },
@@ -963,8 +970,7 @@
   "rango": 8.0,
   "requisiti": [
    {
-    "tipo": "palazzo",
-    "dungeon": "okumura",
+    "tipo": "manuale",
     "testo": "Richiede di essere usciti dal Palazzo di Okumura, l'abilità 'Massaggio speciale' di Kawakami e una Lettura delle affinità da Chihaya (Fortuna Rango 5, 5.000¥)."
    }
   ]

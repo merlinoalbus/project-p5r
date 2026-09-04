@@ -10,7 +10,7 @@ import { AssetImg } from './AssetImg';
 import { IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconElenco, IconEvoca, IconGioca, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMatita, IconMedaglia, IconMessaggio, IconNegozio, IconOrologio, IconPersone, IconPodio, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita } from './iconeGuida';
 
 export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro';
-export type ChiaveScheda = 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo';
+export type ChiaveScheda = 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo' | 'fusione-speciali' | 'fusione-forca' | 'fusione-cicli' | 'fusione-skill' | 'fusione-piani' | 'fusione-con' | 'fusione-ricette' | 'fusione-calcolatore';
 
 const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = {
   'regalo': (d) => <IconRegalo size={d} />,
@@ -70,6 +70,14 @@ const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = 
   cicli: (d) => <IconCiclo size={d} />,
   storico: (d) => <IconOrologio size={d} />,
   riepilogo: (d) => <IconRiepilogo size={d} />,
+  'fusione-speciali': (d) => <IconRegalo size={d} />,
+  'fusione-forca': (d) => <IconMedaglia size={d} />,
+  'fusione-cicli': (d) => <IconCiclo size={d} />,
+  'fusione-skill': (d) => <IconStella size={d} />,
+  'fusione-piani': (d) => <IconAppunti size={d} />,
+  'fusione-con': (d) => <IconAlbero size={d} />,
+  'fusione-ricette': (d) => <IconRicetta size={d} />,
+  'fusione-calcolatore': (d) => <IconEvoca size={d} />,
 };
 
 interface Props<C extends string> {

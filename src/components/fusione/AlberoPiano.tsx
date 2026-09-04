@@ -2,12 +2,14 @@
 // AlberoPiano — albero di un piano di fusione (nodo ricorsivo) riusato da «Piano di fusione» e dai piani salvati
 // ============================================================
 
-import { Link } from 'react-router-dom';
+import { PersonaChip } from './PersonaChip';
+import { IconaAzione, type ChiaveAzione } from '../shared/IconaAzione';
 import { formattaYen } from '../../utils/punti';
 import type { NodoPianoDto } from '../../types';
 
 const NOME_MODO: Record<NodoPianoDto['modo'], string> = { scorta: 'In scorta', registro: 'Dal Registro', cattura: 'Da catturare', fusione: 'Fusione' };
 const NOME_TIPO: Record<string, string> = { normale: 'normale', 'stesso-arcano': 'stesso arcano', tesoro: 'con Demone del Tesoro', speciale: 'speciale' };
+const ICONA_MODO: Record<NodoPianoDto['modo'], ChiaveAzione> = { scorta: 'raggiunto', registro: 'evoca', cattura: 'mappa', fusione: 'ricetta' };
 
 interface Props {
   nodo: NodoPianoDto;
@@ -24,10 +26,9 @@ export function NodoPiano({ nodo, radice, inScorta }: Props) {
   return (
     <li className="flex flex-col gap-1">
       <div className={`flex flex-wrap items-center gap-2 py-1 ${radice ? 'text-[15px]' : 'text-[13px]'}`}>
-        <Link to={`/compendio/persona/${p.id}`} className={`chip touch no-underline ${radice || possedutaOra ? 'chip--attivo' : ''}`} title={`${p.arcanaNome} · livello ${p.livello}${possedutaOra ? ' · ora in scorta' : ''}`}>
-          {p.nomeIt} <span className="opacity-70">L{p.livello}</span>{possedutaOra && inScorta && nodo.modo !== 'scorta' ? ' ✓' : ''}
-        </Link>
-        <span className={`text-[12px] ${classeModo}`}>
+        <PersonaChip p={p} evidenza={radice} inScorta={possedutaOra} suffisso={possedutaOra && inScorta && nodo.modo !== 'scorta' ? ' ✓' : ''} title={`${p.arcanaNome} · livello ${p.livello}${possedutaOra ? ' · ora in scorta' : ''}`} />
+        <span className={`chip chip--icona text-[11px] ${classeModo}`}>
+          <IconaAzione chiave={ICONA_MODO[nodo.modo]} dimensione={13} />
           {nodo.modo === 'fusione' ? `${NOME_MODO.fusione} ${NOME_TIPO[nodo.tipo ?? 'normale']}` : NOME_MODO[nodo.modo]}
           {nodo.modo === 'registro' && ` · ${formattaYen(nodo.costo)}`}
         </span>
@@ -38,7 +39,7 @@ export function NodoPiano({ nodo, radice, inScorta }: Props) {
         ))}
       </div>
       {nodo.figli.length > 0 && (
-        <ul className="m-0 p-0 list-none pl-4 ml-2 border-l border-border-light flex flex-col">
+        <ul className="m-0 p-0 list-none pl-4 ml-3 border-l-2 border-border flex flex-col">
           {nodo.figli.map((f, i) => <NodoPiano key={`${f.persona.id}-${i}`} nodo={f} inScorta={inScorta} />)}
         </ul>
       )}

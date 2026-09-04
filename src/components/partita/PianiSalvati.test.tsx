@@ -37,7 +37,7 @@ describe('PianiSalvati', () => {
     expect(screen.getByRole('list', { name: 'Passi eseguibili' }).querySelector('a')).toHaveAttribute('href', '/fusione?vista=calcolatore&a=1&b=2');
     expect(await screen.findByRole('button', { name: 'Esegui' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra albero' }));
-    expect(screen.getByRole('link', { name: /Arsène/ })).toHaveClass('chip--attivo');
+    expect(screen.getByRole('link', { name: /Arsène/ })).toHaveClass('persona-chip--scorta');
     // rinomina
     fireEvent.click(screen.getByRole('button', { name: /Il mio piano/ }));
     aggiornaPianoSalvato.mockResolvedValue({ ...piano, titolo: 'Nuovo titolo' });
