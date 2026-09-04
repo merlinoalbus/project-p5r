@@ -20,6 +20,9 @@ import { avanzamentoDote, quotaVersoProssimoRango } from '../../utils/doti';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { useSuggerimenti } from '../../stores/suggerimentiStore';
+import { classiSuggerito } from '../../utils/suggerimenti';
+import { TargaSuggerito } from '../shared/Suggerito';
 
 interface Props {
   partitaId: number;
@@ -37,6 +40,7 @@ export function DotiSociali({ partitaId }: Props) {
   const [fortuna, setFortuna] = useState(false);
   const [libro, setLibro] = useState(false);
   const [selezionata, setSelezionata] = useState<string | null>(null);
+  const sugg = useSuggerimenti();
 
   const modifica = async (chiave: string, mod: ModificaDote) => {
     if (!dati) return;
@@ -60,8 +64,8 @@ export function DotiSociali({ partitaId }: Props) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="grid gap-3 items-start md:grid-cols-[minmax(340px,460px)_1fr] md:h-full md:min-h-0 md:items-stretch">
-        <section className="card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible md:min-h-0" aria-label="Stella delle Doti">
+      <div className="grid gap-3 items-start grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] md:h-full md:min-h-0 md:items-stretch">
+        <section className="card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible min-w-0 md:min-h-0" aria-label="Stella delle Doti">
           <div className="w-full flex justify-center px-[12%]">
             <StellaCinque
               assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
@@ -81,11 +85,12 @@ export function DotiSociali({ partitaId }: Props) {
           </div>
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
         </section>
-        <ul className="m-0 p-0 list-none flex flex-col gap-2 md:min-h-0 md:overflow-y-auto md:pr-1">
+        <ul className="m-0 p-0 list-none flex flex-col gap-2 min-w-0 md:min-h-0 md:overflow-y-auto md:pr-1">
           {dati?.map((d) => (
-            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-1.5 py-2 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''}`}>
+            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-1.5 py-2 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''} ${classiSuggerito(sugg.evidenziato('doti', d.chiave))}`}>
               <CartaDote
                 dote={d}
+                suggerita={sugg.evidenziato('doti', d.chiave) ? sugg.motivo('doti', d.chiave) : null}
                 azioni={(
                   <div className="flex flex-wrap items-center gap-1.5 shrink-0">
                     {([1, 2, 3] as const).map((n) => (
@@ -115,7 +120,7 @@ export function DotiSociali({ partitaId }: Props) {
 }
 
 /** Intestazione compatta della dote: targhetta, rango con titolo, punti, barra e — sulla stessa riga — i pulsanti delle note. */
-function CartaDote({ dote: d, azioni }: { dote: DoteSocialePartitaDto; azioni?: ReactNode }) {
+function CartaDote({ dote: d, azioni, suggerita }: { dote: DoteSocialePartitaDto; azioni?: ReactNode; suggerita?: string | null }) {
   const quota = Math.round(quotaVersoProssimoRango(d) * 100);
   const prossimo = d.ranghi.find((r) => r.rango === d.rango + 1);
   return (
@@ -128,6 +133,7 @@ function CartaDote({ dote: d, azioni }: { dote: DoteSocialePartitaDto; azioni?: 
           <AssetImg nome={`ui/rango-${d.rango}`} alt="" decorativa className="h-9 w-auto object-contain" fallback={<span className="font-display text-[20px] leading-none" aria-hidden="true">{d.rango}</span>} />
           <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">{d.nomeRango}</span>
         </span>
+        {suggerita !== null && suggerita !== undefined && <TargaSuggerito motivo={suggerita} compatta />}
         <span className="ml-auto font-display text-[26px] leading-none tabular-nums">{d.punti}<span className="text-[12px] font-sans text-text-muted"> punti</span></span>
       </div>
       <div className="h-2 bg-bg-tertiary overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={d.sogliaProssima === null ? 100 : quota} aria-label={`Progresso verso il rango ${d.rango + 1}`}>

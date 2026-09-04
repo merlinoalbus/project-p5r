@@ -10,8 +10,12 @@ import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { MiniaturaMappa } from '../components/guida/MiniaturaMappa';
 import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 export function CittaPage() {
+  const sugg = useSuggerimenti();
   useDocumentTitle('La città');
   const dati = useCarica(() => getQuartieri(), []);
   const q = dati.dati;
@@ -24,10 +28,11 @@ export function CittaPage() {
           <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
             {q.map((x) => (
               <li key={x.chiave}>
-                <Link to={`/guida/citta/${x.chiave}`} className="card card--cliccabile piastrella no-underline text-text flex gap-3 h-full">
+                <Link to={`/guida/citta/${x.chiave}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-3 h-full ${classiSuggerito(sugg.evidenziato('quartieri', x.chiave))}`}>
                   <MiniaturaMappa chiave={`citta-${x.chiave}`} etichetta={x.nome} larghezza={112} altezza={84} className="shrink-0" />
                   <span className="flex flex-col gap-1 min-w-0">
                   <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>
+                  {sugg.evidenziato('quartieri', x.chiave) && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>
                   {x.sblocco && <span className="text-[12px] text-text-muted">Sblocco: {x.sblocco}</span>}
                   {x.descrizione && <span className="text-[12px] text-text-secondary line-clamp-2">{x.descrizione}</span>}

@@ -315,8 +315,8 @@
   "requisiti": [
    {
     "tipo": "data",
-    "dal": "04-12",
-    "testo": "Rango 1: 12 aprile (dopo l'incursione nel Palazzo di Kamoshida)"
+    "dal": "04-11",
+    "testo": "Rango 1: 11 aprile, la sera, al risveglio nella Stanza di Velluto (guida giorno per giorno)."
    }
   ]
  },
@@ -1008,8 +1008,8 @@
   "requisiti": [
    {
     "tipo": "data",
-    "dal": "04-18",
-    "testo": "18 aprile"
+    "dal": "04-16",
+    "testo": "Rango 1: 16 aprile, con la prima visita alla Clinica Takemi (guida giorno per giorno)."
    }
   ]
  },
@@ -1104,8 +1104,8 @@
   "requisiti": [
    {
     "tipo": "data",
-    "dal": "06-18",
-    "testo": "18 giugno"
+    "dal": "06-14",
+    "testo": "Rango 1: 14 giugno, parlando con Yusuke a scuola (guida giorno per giorno)."
    },
    {
     "tipo": "persona-arcano",

@@ -10,6 +10,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import type { CompletamentoDto, TrofeoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
@@ -65,9 +66,9 @@ export function CompletamentoPage() {
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Trofei, finali e Covo dei Ladri" sottotitolo={<>{d.trofei.length} trofei con come e quando ottenerli, i finali con le condizioni e le date, il Covo dei Ladri con sfide e premi, i DLC, gli effetti del meteo, la Nuova Partita+ e le regole del tempo.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.ottenuti} trofei ottenuti.` : ' Attiva una partita per spuntare i trofei ottenuti.'}</>} />
-          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
+          <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
-          </div>
+          </FilaScorrevole>
           {scheda === 'trofei' && (
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-1.5">

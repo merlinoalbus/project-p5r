@@ -43,18 +43,26 @@ describe('API suggerimenti del giorno', () => {
     }
   });
 
-  it('un Palazzo suggerito accende la sua mappa; un Confidente accende il luogo dove si incontra, il quartiere e la mappa del quartiere', async () => {
-    // 12 aprile: esplorazione del Palazzo di Kamoshida e cena con Ryuji
+  it('un Palazzo suggerito accende la sua mappa e le sue aree; un’azione bloccata dal meteo non viene suggerita', async () => {
+    // 12 aprile: esplorazione del Palazzo di Kamoshida e cena con Ryuji, ma quel giorno piove
     await request(app).put(`/api/partite/${id}/giorno`).send({ data: '04-12' });
     const s = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;
     expect(s.giorno).toBe('04-12');
     expect(s.dungeon).toContain('kamoshida');
     expect(s.mappe).toContain('dungeon-kamoshida');
-    expect(s.confidenti).toContain('ryuji');
-    // Ryuji si incontra in luoghi della città: il luogo, il quartiere e la mappa del quartiere sono accesi
-    const luoghiRyuji = s.luoghi.filter((l) => l.includes('/'));
-    expect(luoghiRyuji.length).toBeGreaterThan(0);
-    for (const l of luoghiRyuji) expect(s.quartieri).toContain(l.split('/')[0]);
+    expect(s.aree.length).toBeGreaterThan(0);
+    // il rango 1 di Ryuji richiede che non piova: il 12 aprile piove, quindi non è un suggerimento del giorno
+    expect(s.confidenti).not.toContain('ryuji');
+  });
+
+  it('un Confidente suggerito accende il luogo dove si incontra, il quartiere e la mappa del quartiere', async () => {
+    // 18 aprile (nuvoloso): primo incontro con Tae Takemi in clinica
+    await request(app).put(`/api/partite/${id}/giorno`).send({ data: '04-18' });
+    const s = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;
+    expect(s.confidenti).toContain('takemi');
+    const luoghi = s.luoghi.filter((l) => l.includes('/'));
+    expect(luoghi.length).toBeGreaterThan(0);
+    for (const l of luoghi) expect(s.quartieri).toContain(l.split('/')[0]);
     for (const q of s.quartieri) expect(s.mappe).toContain(`citta-${q}`);
   });
 

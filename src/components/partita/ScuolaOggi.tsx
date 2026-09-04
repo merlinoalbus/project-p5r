@@ -38,22 +38,23 @@ export function ScuolaOggi({ partita }: { partita: PartitaDto }) {
     [domande.dati, oggi],
   );
 
-  // Le domande d'esame stanno sia nell'elenco generale (tipo `esame-*`, con la risposta) sia dentro gli esami:
-  // si uniscono per testo così la finestra non ripete la stessa domanda due volte.
+  // Le domande d'esame stanno in due elenchi diversi e NON sono le stesse: dentro `esami` c'è una voce per ogni domanda,
+  // numerata; nell'elenco generale c'è una sola voce riassuntiva della giornata («Serie di domande su…») con tutte le
+  // risposte in fila. Si usano quindi le domande dell'esame quando ci sono, e il riassunto solo come ripiego.
   const dEsame: DomandaEsame[] = useMemo(() => {
     if (!oggi) return [];
-    const fuse = new Map<string, DomandaEsame>();
+    const granulari: DomandaEsame[] = [];
     for (const e of domande.dati?.esami ?? []) {
-      for (const q of e.domande) if (q.data === oggi) fuse.set(q.domanda.trim().toLowerCase(), { esame: e.nome, ordine: q.ordine, domanda: q.domanda, risposta: q.risposta });
+      for (const q of e.domande) if (q.data === oggi) granulari.push({ esame: e.nome, ordine: q.ordine, domanda: q.domanda, risposta: q.risposta });
     }
+    if (granulari.length > 0) return [...granulari].sort((a, b) => a.ordine - b.ordine);
+    const riassunti: DomandaEsame[] = [];
     for (const d of domande.dati?.domande ?? []) {
       if (d.data !== oggi || (d.tipo !== 'esame-medio' && d.tipo !== 'esame-finale')) continue;
-      const chiave = d.domanda.trim().toLowerCase();
-      if (fuse.has(chiave)) continue;
       const esame = (domande.dati?.esami ?? []).find((e) => e.date.includes(oggi));
-      fuse.set(chiave, { esame: esame?.nome ?? (d.tipo === 'esame-finale' ? 'Esame finale' : 'Esame'), ordine: 0, domanda: d.domanda, risposta: d.risposte.map((r) => r.testo).join(' → ') });
+      riassunti.push({ esame: esame?.nome ?? (d.tipo === 'esame-finale' ? 'Esame finale' : 'Esame'), ordine: riassunti.length + 1, domanda: d.domanda, risposta: d.risposte.map((r) => r.testo).join(' → ') });
     }
-    return [...fuse.values()].sort((a, b) => a.ordine - b.ordine);
+    return riassunti;
   }, [domande.dati, oggi]);
 
   const cruciOggi: CruciverbaDto | null = useMemo(

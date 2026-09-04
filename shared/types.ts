@@ -923,9 +923,15 @@ export interface SuggerimentiOggiDto {
   /** Giorno corrente della partita ('MM-GG'); null se non impostato. Non si chiama `data` per non sembrare l'envelope delle risposte. */
   giorno: string | null;
   confidenti: string[];
+  /** Personaggi della guida legati ai Confidenti suggeriti. */
+  personaggi: string[];
   dungeon: string[];
+  /** Aree del Palazzo o del dedalo suggerito. */
+  aree: string[];
   libri: string[];
   film: string[];
+  /** Articoli a scaffale corrispondenti ai libri e ai film suggeriti. */
+  articoli: string[];
   attivita: string[];
   richieste: string[];
   negozi: string[];

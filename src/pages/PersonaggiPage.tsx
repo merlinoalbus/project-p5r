@@ -7,6 +7,7 @@ import { getPersonaggi } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import type { PersonaggioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -15,17 +16,22 @@ import { PersonaDelPersonaggio } from '../components/guida/PersonaDelPersonaggio
 import { getPersone } from '../services/api';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<string, number> }) {
   const [aperto, setAperto] = useState(false);
+  const sugg = useSuggerimenti();
   const secondari = new Set(p.campiDaFontiSecondarie);
   const nota = (campo: string) => (secondari.has(campo) ? <span className="text-[11px] text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
   return (
-    <li className="card flex gap-3">
+    <li className={`card flex gap-3 ${classiSuggerito(sugg.evidenziato('personaggi', p.chiave))}`}>
       {p.confidente ? <ImmagineEntita ambito="confidente" chiave={p.confidente} etichetta={p.nome} dimensione={88} forma="carta" /> : <AssetImg nome={`personaggi/${p.chiave}`} alt={p.nome} className="w-[88px] h-[176px] object-cover rounded-lg shrink-0" fallback={<div className="w-[88px] h-[176px] rounded-lg bg-bg-tertiary border border-border flex items-center justify-center text-2xl font-black text-text-muted shrink-0">{p.nome.split(/\s+/).slice(0, 2).map((s) => s[0]?.toUpperCase() ?? '').join('')}</div>} />}
       <div className="flex flex-col gap-1 text-[13px] min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <strong className="text-[16px]">{p.nome}</strong>
+          {sugg.evidenziato('personaggi', p.chiave) && <TargaSuggerito motivo={sugg.motivo('personaggi', p.chiave)} compatta />}
           {p.nomeCodice && <span className="chip chip--attivo">{p.nomeCodice}</span>}
           {p.arcano && <span className="chip">{p.arcano}</span>}
           {p.giocabile && <span className="chip text-[11px]">giocabile</span>}
@@ -65,10 +71,10 @@ export function PersonaggiPage() {
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Personaggi" sottotitolo="Il cast di Persona 5 Royal presentato senza spoiler: chi sono, il loro ruolo, le Persona, le armi e il ruolo in battaglia; ogni Confidente rimanda alla sua scheda con risposte e abilità." />
-          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Gruppi">
+          <FilaScorrevole role="tablist" aria-label="Gruppi">
             <button type="button" role="tab" aria-selected={gruppo === ''} className={`chip touch ${gruppo === '' ? 'chip--attivo' : ''}`} onClick={() => setGruppo('')}>Tutti</button>
             {d.gruppi.map((g) => <button key={g.nome} type="button" role="tab" aria-selected={gruppo === g.nome} className={`chip touch ${gruppo === g.nome ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.nome)}>{g.nome} ({g.membri.length})</button>)}
-          </div>
+          </FilaScorrevole>
           {gruppi.map((g) => (
             <section key={g.nome} className="flex flex-col gap-2">
               <h2 className="m-0 text-[15px] font-semibold">{g.nome}</h2>
