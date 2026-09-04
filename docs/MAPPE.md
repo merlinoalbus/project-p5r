@@ -118,6 +118,8 @@ profondità del punto 10, oltre all'interfaccia).
 
 ## 6. Formato di esportazione e seed del repository (punto 1)
 
+Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il repository l'editor produce inoltre uno ZIP per luogo (radice + discendenti) con `data/seed/mappe/<chiave>.json` e gli asset in `public/asset/mappe/` (e `public/asset/spilli/` se richiesto), scritto da `server/utils/zip.ts` senza dipendenze; il seed carica `mappe-editor.json` e poi `data/seed/mappe/*.json`. Nel repository pubblico solo immagini proprie o generate.
+
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
 altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine }] }] }`. Lo stesso file, con le
 immagini in `public/asset/mappe/`, è letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`): un `POST /importa` dello
@@ -133,8 +135,8 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - Spilli: icona per tipo (`IconaSpillo`: asset §18 → SVG di riserva) su goccia colorata, dimensione costante a ogni zoom (scala inversa),
   raggruppamento («+3») quando si sovrappongono sotto lo zoom minimo, etichetta al passaggio del mouse; legenda laterale con i tipi presenti,
   conteggi e filtri per tipo; ricerca per nome.
-- Click su uno spillo → scheda (pannello laterale o foglio in basso su schermi stretti): nome, descrizione, immagine dell'entità collegata,
-  azioni: «Apri mappa» (passaggio), «Ottenuto/Esaurito» (punto di dungeon, già API), «Raccolto» (collezionabile), articoli del negozio
+- Click su uno spillo → popup ancorato allo spillo e scheda nel pannello: nome, descrizione, immagine dell'entità collegata (mappa e Confidente: negozi, luoghi, punti e richieste non hanno immagini nell'app; lo spillo può però avere le proprie schermate di riferimento, 13.3),
+  azioni: «Apri mappa» (passaggio), «Ottenuto/Esaurito/Riapri» (punto di dungeon, stessi stati della Guida), «Raccolto» (collezionabile), articoli del negozio con acquisto
   (`negozi.json`: nome, prezzo, disponibilità, stato «comprato» della partita), «Scheda del Confidente», «Richiesta».
 - Raccolti nascosti per default; interruttore «Mostra anche i raccolti» (punto 9) con conteggio; stato per partita attiva.
 - In uso normale nessun posizionamento: nessun click sulla mappa modifica dati (punto 10). Il pulsante «Modifica mappa» apre l'editor.
@@ -148,7 +150,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
 - Gestione dell'albero: crea mappa (tipo, nome, genitore), rinomina, sposta, elimina; anteprima delle miniature.
-- Esporta (ZIP) e Importa dalla stessa schermata.
+- Esporta (ZIP per luogo, JSON di tutto) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); passaggi automatici verso le mappe figlie da trascinare; nessuno stato «non salvato»: ogni modifica è salvata subito.
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)
 
@@ -182,7 +184,7 @@ quartieri; per le aree dei Palazzi l'immagine di base la fornisce l'utente dall'
 
 ## 13. Ordine di lavoro
 
-Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeService`, rotte, schemi, seed `mappe-editor.json`, client API, test `mappe-editor.test.ts`); pacchetto di esportazione in JSON con immagini base64 (§6), non ZIP. **13.2 fatto** (`VisoreMappa`, `IconaSpillo`, `MappaPage`, rotte `/guida/mappe`): il modello di mapgenie.io è stato verificato dal vivo (barra laterale a sinistra con categorie e conteggi, popup ancorato, controlli in basso a destra, trovati tracciati) e il visore lo segue; il §7 resta valido con queste precisazioni.
+Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeService`, rotte, schemi, seed `mappe-editor.json`, client API, test `mappe-editor.test.ts`); pacchetto di esportazione in JSON con immagini base64 (§6), non ZIP. **13.2 fatto** (`VisoreMappa`, `IconaSpillo`, `MappaPage`, rotte `/guida/mappe`): il modello di mapgenie.io è stato verificato dal vivo (barra laterale a sinistra con categorie e conteggi, popup ancorato, controlli in basso a destra, trovati tracciati) e il visore lo segue; il §7 resta valido con queste precisazioni. **13.3 fatto** (`EditorMappaPage`, schermate degli spilli con migrazione 028, riferimenti cercati, passaggi automatici, ZIP per luogo, seed `data/seed/mappe/*.json`); mappa globale di Tokyo e mappa verticale dei Mementos = immagini dell'utente nell'istanza con quartieri/Dedali come passaggi; accessi a Palazzi e Mementos = passaggi dentro le mappe dei luoghi (stazione di Shibuya per i Mementos).
 
 13.1 modello + API + migrazione + esportazione/importazione → 13.2 visore → 13.3 editor → 13.4 integrazione → 13.5/12.4 home «Oggi» →
 13.6 asset (i prompt §18/§19 sono già censiti; l'app funziona con le riserve SVG e con le immagini caricate dall'utente).

@@ -1379,6 +1379,8 @@ export interface MappaRiassuntoDto {
 
 export interface DettaglioSpilloDto {
   tipo: TipoRiferimento;
+  /** Immagine dell'entità collegata quando esiste (mappa: sua immagine di base o asset; Confidente: ritratto caricato o asset). */
+  immagine?: { url: string | null; asset: string | null } | null;
   mappa?: { chiave: string; nome: string; tipo: TipoMappa };
   punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; stato: string | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
@@ -1405,7 +1407,18 @@ export interface SpilloDto {
   /** Raccolto nella partita (o punto già gestito nella Guida). */
   raccolto: boolean;
   dettaglio: DettaglioSpilloDto | null;
+  /** Schermate di riferimento (istanza o asset del repository), in ordine. */
+  immagini: ImmagineSpilloDto[];
   updatedAt: string;
+}
+
+export interface ImmagineSpilloDto {
+  id: number;
+  /** URL dell'immagine dell'istanza (null per gli asset del repository). */
+  url: string | null;
+  asset: string | null;
+  didascalia: string;
+  ordine: number;
 }
 
 export interface MappaDto extends MappaRiassuntoDto {
@@ -1426,7 +1439,7 @@ export interface EsportazioneMappeDto {
   mappe: Array<{
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number }>;
+    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
 }

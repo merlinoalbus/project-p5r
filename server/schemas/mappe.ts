@@ -11,6 +11,9 @@ const entita = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().mi
 
 export const paramsMappa = z.object({ chiave: chiaveMappa });
 export const paramsSpillo = z.object({ id: z.coerce.number().int().positive() });
+export const queryEsporta = z.object({ radice: chiaveMappa.optional(), immaginiSpilli: z.enum(['0', '1']).optional() });
+export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });
+export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
 export const queryMappa = z.object({ partita: z.coerce.number().int().positive().optional() });
 export const bodyCreaMappa = z.object({
   chiave: chiaveMappa, nome: z.string().min(1).max(120), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
@@ -23,4 +26,5 @@ export const bodyCreaSpillo = z.object({
 });
 export const bodyAggiornaSpillo = bodyCreaSpillo.partial().extend({ mappa: chiaveMappa.optional() });
 export const bodyRaccolto = z.object({ raccolto: z.boolean() });
+export const queryRiferimenti = z.object({ tipo: z.enum(TIPI_RIFERIMENTO), q: z.string().max(120).optional().default(''), limite: z.coerce.number().int().min(1).max(100).optional() });
 export const bodyImporta = z.object({ pacchetto: z.object({ versione: z.literal(1), mappe: z.array(z.object({ chiave: z.string(), nome: z.string(), tipo: z.string() }).passthrough()).max(2000), immagini: z.record(z.string(), z.object({ mime: z.string(), base64: z.string() })).optional() }).passthrough(), sovrascrivi: z.boolean().optional() });

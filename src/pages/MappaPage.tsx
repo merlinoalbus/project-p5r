@@ -6,15 +6,18 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getAlberoMappe, getMappa, impostaSpilloRaccolto } from '../services/api';
+import { getAlberoMappe, getMappa, impostaAcquisto, impostaSpilloRaccolto, impostaStatoPunto } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { VisoreMappa } from '../components/mappe/VisoreMappa';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaSpillo } from '../components/mappe/IconaSpillo';
 import { NOME_TIPO_MAPPA } from '../../shared/spilli';
 import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
+import type { StatoPuntoMappa } from '../components/mappe/VisoreMappa';
 
 export function MappaPage() {
   const { chiave } = useParams<{ chiave: string }>();
@@ -83,6 +86,32 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
     }
   };
 
+  /** Stato del punto della Guida (ottenuto/esaurito/riaperto): lo spillo collegato segue lo stato (raccolto se gestito). */
+  const statoPunto = async (s: SpilloDto, stato: StatoPuntoMappa) => {
+    if (!partitaId || s.dettaglio?.tipo !== 'punto' || !s.dettaglio.punto) return;
+    const punto = s.dettaglio.punto;
+    try {
+      const aggiornato = await impostaStatoPunto(partitaId, punto.chiave, stato);
+      setAggiornati((m) => new Map(m).set(s.id, { ...s, raccolto: aggiornato.stato !== null, dettaglio: { ...s.dettaglio!, punto: { ...punto, stato: aggiornato.stato } } }));
+      notifica('success', stato === null ? `«${s.nome}» riaperto.` : `«${s.nome}» segnato come ${stato}.`);
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    }
+  };
+
+  /** Acquisto di un articolo del negozio collegato allo spillo. */
+  const acquisto = async (s: SpilloDto, articoloChiave: string, fatto: boolean) => {
+    if (!partitaId || !s.dettaglio?.negozio) return;
+    const negozio = s.dettaglio.negozio;
+    try {
+      const a = await impostaAcquisto(partitaId, articoloChiave, fatto);
+      setAggiornati((m) => new Map(m).set(s.id, { ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } }));
+      notifica('success', fatto ? `«${a.nomeIt ?? a.nome}» segnato come comprato.` : `«${a.nomeIt ?? a.nome}» riaperto.`);
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    }
+  };
+
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={ricarica}>
       {mappa && (
@@ -92,7 +121,10 @@ function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: numb
           partitaId={partitaId}
           onNaviga={(k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`)}
           onRaccolto={raccolto}
+          onStatoPunto={statoPunto}
+          onAcquisto={acquisto}
           onChiudi={() => navigate('/guida/mappe')}
+          azioni={<CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />}
         />
       )}
     </PageState>
