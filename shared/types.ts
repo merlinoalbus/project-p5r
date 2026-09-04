@@ -918,6 +918,28 @@ export interface RiferimentoAzioneDto {
 }
 
 /** Stato dell'azione nella partita (12.4): consigliata (requisiti del rango soddisfatti), bloccata (requisiti rossi, con motivo), neutra. */
+/** Chiavi da evidenziare in oro nell'interfaccia: entità coinvolte nelle azioni ancora da fare del giorno corrente (12.4). */
+export interface SuggerimentiOggiDto {
+  /** Giorno corrente della partita ('MM-GG'); null se non impostato. Non si chiama `data` per non sembrare l'envelope delle risposte. */
+  giorno: string | null;
+  confidenti: string[];
+  dungeon: string[];
+  libri: string[];
+  film: string[];
+  attivita: string[];
+  richieste: string[];
+  negozi: string[];
+  /** Chiavi dei luoghi della città («<quartiere>/<luogo>»). */
+  luoghi: string[];
+  quartieri: string[];
+  doti: string[];
+  /** Chiavi delle mappe a livelli e id degli spilli da accendere nel visore. */
+  mappe: string[];
+  spilli: number[];
+  /** Perché una chiave è suggerita: testo dell'azione della guida. */
+  motivi: Array<{ categoria: string; chiave: string; azione: string; fascia: 'giorno' | 'sera' }>;
+}
+
 export interface StatoAzioneDto {
   tipo: 'consigliata' | 'bloccata' | 'neutra';
   motivo: string | null;

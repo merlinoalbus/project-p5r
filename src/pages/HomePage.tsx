@@ -72,7 +72,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
               </Link>
             )}
             <div className="flex flex-col gap-2 min-w-0 flex-1">
-              <div className="kpi-griglia grid grid-cols-3 gap-1.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              <div className="kpi-griglia">
                 {doti.dati?.map((d) => (
                   <Link key={d.chiave} to="/partita?scheda=doti" className="kpi-tile kpi-tile--compatto no-underline text-text">
                     <span className="kpi-label">{d.nome}</span>

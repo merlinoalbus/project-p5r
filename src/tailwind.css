@@ -50,6 +50,8 @@
   --color-primary: #e5352b;
   --color-primary-hover: #ff4d42;
   --color-primary-bg: rgba(229, 53, 43, 0.14);
+  /* oro dei suggerimenti del giorno (12.4) */
+  --color-oro: #f5c542;
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
@@ -187,6 +189,9 @@
   .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
   .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
   .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 6px; }
+  /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
+  .btn-nota { font-size: 12px; padding: 3px 8px; min-height: 30px; --btn-taglio: 5px; gap: 5px; }
+  @media (pointer: coarse) { .btn-nota { min-height: 44px; padding: 6px 12px; font-size: 13px; } }
 
   /* ---- Pulsanti visivi: icona + titolo «display» + dettaglio (mai solo testo grigio) ---- */
   .btn-visivo { justify-content: flex-start; text-align: left; padding: 5px 14px 5px 10px; gap: 9px; }
@@ -390,9 +395,20 @@
   }
 
   /* Tessera compatta dei KPI (Home in una schermata) */
+  /* Punteggi delle Doti: tante colonne quante ne stanno, etichette troncate invece che traboccanti */
+  .kpi-griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 6px; min-width: 0; }
   .kpi-tile--compatto { padding: 5px 8px; min-width: 0; border-radius: var(--radius-md); }
+  .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
   .kpi-tile--compatto .kpi-value { font-size: 20px; line-height: 1.05; }
+
+  /* ---- Suggerimenti del giorno (12.4): alone dorato sulle entità da toccare per seguire la guida ---- */
+  .suggerito { position: relative; border-color: var(--color-oro, #f5c542) !important; box-shadow: 0 0 0 1px var(--color-oro, #f5c542), 0 0 16px rgba(245, 197, 66, .28); }
+  .suggerito--riga { background: color-mix(in srgb, #f5c542 12%, transparent); box-shadow: inset 3px 0 0 var(--color-oro, #f5c542); border-color: transparent !important; }
+  .suggerito--chip { --chip-sfondo: color-mix(in srgb, #f5c542 20%, var(--color-bg-secondary)); --chip-bordo: var(--color-oro, #f5c542); color: #f5c542; box-shadow: none; }
+  .targa-suggerito { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #1a1405; background: var(--color-oro, #f5c542); clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%); }
+  .targa-suggerito--compatta { padding: 1px 5px; font-size: 10px; }
+  .targa-suggerito > svg { flex-shrink: 0; }
 
   /* ---- Confidenti bloccati dai requisiti (12.3): carta spenta, motivi in evidenza ---- */
   .poster--bloccato { filter: grayscale(.85); opacity: .7; }
@@ -750,3 +766,12 @@
     color: var(--color-text-muted);
   }
 }
+
+/* ============================================================
+   Testo per soli lettori di schermo: ancorato all'origine del blocco contenitore.
+   Senza `top/left` il riquadro da 1px resta nella sua posizione statica: dentro un elenco che scorre
+   finisce oltre il fondo del contenitore e — non essendo il contenitore un blocco contenitore per gli
+   assoluti — allunga il documento, facendo comparire una seconda barra di scorrimento.
+   Regola fuori da ogni @layer: vince sull'utility di Tailwind senza !important.
+   ============================================================ */
+.sr-only { top: 0; left: 0; }

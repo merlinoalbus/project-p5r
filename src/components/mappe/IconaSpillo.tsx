@@ -12,14 +12,19 @@ function base(d: number) {
   return { width: d, height: d, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true as const };
 }
 
-/** Riserve SVG (tratto semplice, leggibile a 16–20 px) per i quattordici tipi del registro. */
+/** Riserve SVG (tratto semplice, leggibile a 16–20 px) per tutti i tipi del registro. */
 const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   passaggio: (d) => <svg {...base(d)}><path d="M5 21V9a7 7 0 0 1 14 0v12" /><path d="M9 21v-6h6v6" /><path d="M12 6v4" /><path d="M10 8l2 2 2-2" /></svg>,
   negozio: (d) => <svg {...base(d)}><path d="M4 9l1.5-4h13L20 9" /><path d="M5 9v11h14V9" /><path d="M9 20v-6h6v6" /></svg>,
   forziere: (d) => <svg {...base(d)}><rect x="3" y="8" width="18" height="12" rx="2" /><path d="M3 12h18" /><path d="M7 8V6a5 5 0 0 1 10 0v2" /><path d="M12 12v3" /></svg>,
   tesoro: (d) => <svg {...base(d)}><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20" /><path d="M9 3l3 6 3-6" /><path d="M9 9l3 12 3-12" /></svg>,
+  'tesoro-palazzo': (d) => <svg {...base(d)}><path d="M4 18h16" /><path d="M5 18l-1.5-9 4.5 3.5L12 5l4 7.5 4.5-3.5L19 18z" /><path d="M12 9.5v.01" /></svg>,
+  'seme-bramosia': (d) => <svg {...base(d)}><path d="M12 3l4 5-4 13-4-13z" /><path d="M8 8h8" /><path d="M4.5 5.5l1 1M19.5 5.5l-1 1" /></svg>,
+  'oggetto-chiave': (d) => <svg {...base(d)}><circle cx="8" cy="8" r="4" /><path d="M11 11l9 9" /><path d="M17 17l2-2" /><path d="M14.5 14.5l2-2" /></svg>,
   boss: (d) => <svg {...base(d)}><path d="M4 8l3 2 5-6 5 6 3-2-2 9H6z" /><path d="M8 20h8" /><path d="M9 14h.01M15 14h.01" /></svg>,
   miniboss: (d) => <svg {...base(d)}><path d="M12 3a7 7 0 0 0-7 7v4h3v4h8v-4h3v-4a7 7 0 0 0-7-7z" /><path d="M9 11h.01M15 11h.01" /><path d="M10 18v3M14 18v3" /></svg>,
+  nemico: (d) => <svg {...base(d)}><path d="M5 4l3 3M19 4l-3 3" /><path d="M12 5a7 7 0 0 0-7 7v3a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-3a7 7 0 0 0-7-7z" /><path d="M9 12l1.5 1.5M15 12l-1.5 1.5" /><path d="M10 18l2-2 2 2" /></svg>,
+  'punto-sensibile': (d) => <svg {...base(d)}><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="1.6" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>,
   sicura: (d) => <svg {...base(d)}><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5 4.5-5" /></svg>,
   scorciatoia: (d) => <svg {...base(d)}><path d="M4 18L20 6" /><path d="M14 6h6v6" /><path d="M4 6l16 12" /><path d="M14 18h6v-6" /></svg>,
   confidente: (d) => <svg {...base(d)}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 5a3 3 0 0 1 0 6" /><path d="M17.5 14.5a5.5 5.5 0 0 1 4 5.5" /></svg>,
