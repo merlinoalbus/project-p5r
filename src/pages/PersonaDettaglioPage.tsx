@@ -27,24 +27,28 @@ import { CorniceArte } from '../components/compendio/CorniceArte';
 import { LivelloBadge } from '../components/compendio/LivelloBadge';
 import { BadgeStato } from '../components/compendio/PiastrellaPersona';
 import { getFusioniCon, getRicettePer, getPossedute } from '../services/api';
-import { RicettaRiga } from '../components/fusione/RicettaRiga';
+import { OperatoreRicetta, RicettaRiga } from '../components/fusione/RicettaRiga';
+import { PersonaChip } from '../components/fusione/PersonaChip';
 import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 
 const NOMI_STATISTICHE: Record<(typeof ORDINE_STATISTICHE)[number], string> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
+/** Ricetta speciale come riga di tasselli (stessa resa delle ricette di fusione: 14.10). */
 function Ricetta({ r }: { r: RicettaSpecialeDto }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 text-[13px]">
+    <div className="ricetta-riga__persone">
       {r.ingredienti.map((i, idx) => (
-        <span key={i.id} className="flex items-center gap-1">
-          <Link to={`/compendio/persona/${i.id}`} className="chip touch no-underline">{i.nomeIt}</Link>
-          {idx < r.ingredienti.length - 1 && <span className="text-text-muted">+</span>}
+        <span key={i.id} className="ricetta-riga__gruppo">
+          <PersonaChip p={i} />
+          {idx < r.ingredienti.length - 1 && <OperatoreRicetta tipo="piu" />}
         </span>
       ))}
-      <span className="text-text-muted mx-1">→</span>
-      <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo touch no-underline">{r.risultato.nomeIt}</Link>
+      <span className="ricetta-riga__gruppo">
+        <OperatoreRicetta tipo="risultato" />
+        <PersonaChip p={r.risultato} evidenza />
+      </span>
     </div>
   );
 }

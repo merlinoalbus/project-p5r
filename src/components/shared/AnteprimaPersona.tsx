@@ -6,9 +6,8 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
-import { urlImmagine } from '../../services/api';
 import { useAsset } from '../../stores/assetStore';
-import { chiaviPresenti } from './immaginiCache';
+import { chiaviPresenti, urlImmagineVersionata } from './immaginiCache';
 import { slug } from '../../../shared/slug';
 
 interface Props {
@@ -32,7 +31,7 @@ export function AnteprimaPersona({ nome, etichetta, dimensione = 40, className, 
     return () => { annullato = true; };
   }, [nome]);
   const testo = etichetta ?? nome;
-  const src = caricata ? urlImmagine('persona', nome) : asset;
+  const src = caricata ? urlImmagineVersionata('persona', nome) : asset;
   const iniziali = testo.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
   return (
     <span className={`inline-flex items-center justify-center shrink-0 overflow-hidden bg-bg-tertiary border border-border ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} aria-hidden={src ? undefined : true}>

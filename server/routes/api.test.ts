@@ -200,7 +200,7 @@ describe('API', () => {
     // Confidenti: 23 righe, rango implica sblocco
     const conf = await request(app).get(`/api/partite/${id}/confidenti`);
     expect(conf.body.data).toHaveLength(23);
-    const ryuji = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 3 });
+    const ryuji = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ forza: true, rango: 3 });
     // Ryuji al rango 3 ha bisogno di 30 punti per il rango 4
     expect(ryuji.body.data).toMatchObject({ chiave: 'ryuji', rango: 3, sbloccato: true, arcanaNome: 'Carro', punti: 0, puntiNecessari: 30, mancanti: 30 });
     // Note della risposta: 2 note = 10 punti base; con Persona dell'arcano ×1,5 → 15; regalo 50 × 1,5 × 1,2 (esame top 10) = 90
@@ -214,14 +214,14 @@ describe('API', () => {
     const corretto = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ deltaPunti: -100 });
     expect(corretto.body.data).toMatchObject({ punti: 7.5, mancanti: 22.5 });
     // al cambio di rango i punti ripartono da zero (nessun riporto dell'eccedenza)
-    const salito = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 4 });
+    const salito = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ forza: true, rango: 4 });
     expect(salito.body.data).toMatchObject({ rango: 4, punti: 0, puntiNecessari: 20 });
     // Confidenti a progressione non a punti: soglia nulla
     const igor = (conf.body.data as Array<{ chiave: string; puntiNecessari: number | null }>).find((c) => c.chiave === 'igor')!;
     expect(igor.puntiNecessari).toBeNull();
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 11 })).status).toBe(400);
     // Invariante: rango > 0 forza lo sblocco anche se il client manda sbloccato=false
-    const forzato = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ sbloccato: false, rango: 5 });
+    const forzato = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ forza: true, sbloccato: false, rango: 5 });
     expect(forzato.body.data).toMatchObject({ sbloccato: true, rango: 5 });
     const bloccato = await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ sbloccato: false, rango: 0 });
     expect(bloccato.body.data).toMatchObject({ sbloccato: false, rango: 0 });

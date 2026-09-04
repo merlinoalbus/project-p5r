@@ -11,8 +11,8 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
-import { caricaImmagine, eliminaImmagine, importaImmagineDaUrl, urlImmagine, type AmbitoImmagine } from '../../services/api';
-import { chiaviPresenti, versioniImmagini as versioni } from './immaginiCache';
+import { caricaImmagine, eliminaImmagine, importaImmagineDaUrl,  type AmbitoImmagine } from '../../services/api';
+import { chiaviPresenti, urlImmagineVersionata, registraImmagine, versioniImmagini as versioni } from './immaginiCache';
 import { notifica } from '../../stores/notificationStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
 import { altezzaPerForma, chiaviAssetPredefinito, type FormaImmagine, type FormaRiquadro } from '../../utils/assetPredefiniti';
@@ -81,7 +81,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     if (!file) return;
     setOccupato(true);
     try {
-      await caricaImmagine(ambito, chiave, file);
+      const creata = await caricaImmagine(ambito, chiave, file);
+      registraImmagine(ambito, chiave, creata.createdAt);
       await dopoCambio(true);
       notifica('success', 'Immagine caricata.');
     } catch (err) {
@@ -96,7 +97,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
     if (!url.trim()) return;
     setOccupato(true);
     try {
-      await importaImmagineDaUrl(ambito, chiave, url.trim());
+      const importata = await importaImmagineDaUrl(ambito, chiave, url.trim());
+      registraImmagine(ambito, chiave, importata.createdAt);
       await dopoCambio(true);
       setModalitaUrl(false);
       setUrl('');
@@ -130,7 +132,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const raggio = forma === 'tonda' ? '9999px' : 'var(--radius-lg)';
   const altezza = altezzaPerForma(forma, dimensione);
   const iniziali = etichetta.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
-  const srcUtente = presente ? `${urlImmagine(ambito, chiave)}?v=${versione}` : null;
+  const srcUtente = presente ? `${urlImmagineVersionata(ambito, chiave)}&r=${versione}` : null;
   const mostraAlternativa = !!urlAlternativa && (passaggio || alternativaFissa);
   const src = mostraAlternativa ? urlAlternativa : (srcUtente ?? urlPredefinito);
   const origine = mostraAlternativa

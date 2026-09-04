@@ -485,6 +485,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   mancanti: number | null;
   /** True se nella scorta della partita c'è almeno una Persona dello stesso arcano (bonus ×1,5 nel gioco). */
   personaArcanoInScorta: boolean;
+  /** Blocco del rango successivo: requisiti non verdi (né confermati) del semaforo; null se libero. Il server rifiuta gli aumenti di rango bloccati. */
+  bloccato: { rango: number; motivi: string[] } | null;
   /** Regali già consegnati in questa partita (nomi). */
   regaliFatti: string[];
   note: string;
@@ -502,6 +504,8 @@ export type BonusEsame = 'primo' | 'top10';
  * moltiplicatori `bonusArcano` ×1,5, `esame` ×1,5/×1,2 e `invito` ×1,2 (cumulativi).
  */
 export interface ModificaConfidente {
+  /** Salta il blocco dei requisiti (semafori non verdi): scelta esplicita dell'utente, registrata nello storico. */
+  forza?: boolean;
   sbloccato?: boolean;
   rango?: number;
   punti?: number;
@@ -913,6 +917,12 @@ export interface RiferimentoAzioneDto {
   chiave: string;
 }
 
+/** Stato dell'azione nella partita (12.4): consigliata (requisiti del rango soddisfatti), bloccata (requisiti rossi, con motivo), neutra. */
+export interface StatoAzioneDto {
+  tipo: 'consigliata' | 'bloccata' | 'neutra';
+  motivo: string | null;
+}
+
 export interface AzionePercorsoDto {
   indice: number;
   fascia: 'giorno' | 'sera';
@@ -926,6 +936,10 @@ export interface AzionePercorsoDto {
   fatta: boolean;
   /** Punti applicati alla spunta (Fase 12.3): Doti «+N» dalle note della guida e note del Confidente; annullati togliendo la spunta. */
   effetti: EffettiAzioneDto | null;
+  /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
+  stato: StatoAzioneDto | null;
+  /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
+  mappa: { chiave: string; spilloId: number | null } | null;
 }
 
 export interface PercorsoGiornoRiassuntoDto {
@@ -1379,6 +1393,8 @@ export interface MappaRiassuntoDto {
 
 export interface DettaglioSpilloDto {
   tipo: TipoRiferimento;
+  /** Immagine dell'entità collegata quando esiste (mappa: sua immagine di base o asset; Confidente: ritratto caricato o asset). */
+  immagine?: { url: string | null; asset: string | null } | null;
   mappa?: { chiave: string; nome: string; tipo: TipoMappa };
   punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; stato: string | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
@@ -1405,7 +1421,18 @@ export interface SpilloDto {
   /** Raccolto nella partita (o punto già gestito nella Guida). */
   raccolto: boolean;
   dettaglio: DettaglioSpilloDto | null;
+  /** Schermate di riferimento (istanza o asset del repository), in ordine. */
+  immagini: ImmagineSpilloDto[];
   updatedAt: string;
+}
+
+export interface ImmagineSpilloDto {
+  id: number;
+  /** URL dell'immagine dell'istanza (null per gli asset del repository). */
+  url: string | null;
+  asset: string | null;
+  didascalia: string;
+  ordine: number;
 }
 
 export interface MappaDto extends MappaRiassuntoDto {
@@ -1426,7 +1453,9 @@ export interface EsportazioneMappeDto {
   mappe: Array<{
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number }>;
+    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
+  /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */
+  provenienze?: Array<{ mappa: string; origineUrl: string }>;
 }

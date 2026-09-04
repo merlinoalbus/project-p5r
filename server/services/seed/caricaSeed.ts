@@ -73,6 +73,8 @@ interface SeedCompleto {
   descrizioniPersona: DescrizionePersonaSeed[];
   requisitiConfidenti: RequisitiRangoSeed[];
   mappeEditor: EsportazioneMappeDto;
+  /** Pacchetti esportati dall'editor per luogo (`data/seed/mappe/*.json`), in ordine di nome. */
+  mappeExtra: EsportazioneMappeDto[];
   hash: string;
 }
 
@@ -87,12 +89,22 @@ function leggiSeed(seedDir: string): SeedCompleto {
   const versione = fs.existsSync(fileVersione) ? (JSON.parse(fs.readFileSync(fileVersione, 'utf-8')) as { versione?: number }).versione ?? 0 : 0;
   const hash = createHash('sha256');
   for (const nome of FILE_SEED) hash.update(nome).update('\0').update(contenuti[nome]).update('\0');
+  const dirMappe = path.join(seedDir, 'mappe');
+  const mappeExtra: EsportazioneMappeDto[] = [];
+  if (fs.existsSync(dirMappe)) {
+    for (const nome of fs.readdirSync(dirMappe).filter((f) => f.endsWith('.json')).sort()) {
+      const testo = fs.readFileSync(path.join(dirMappe, nome), 'utf-8');
+      hash.update(`mappe/${nome}`).update('\0').update(testo).update('\0');
+      mappeExtra.push(JSON.parse(testo) as EsportazioneMappeDto);
+    }
+  }
   return {
     versione,
     persone: JSON.parse(contenuti['persona.json']) as PersonaSeed[],
     descrizioniPersona: JSON.parse(contenuti['descrizioni-persona.json']) as DescrizionePersonaSeed[],
     requisitiConfidenti: JSON.parse(contenuti['confidenti-requisiti.json']) as RequisitiRangoSeed[],
     mappeEditor: JSON.parse(contenuti['mappe-editor.json']) as EsportazioneMappeDto,
+    mappeExtra,
     skill: JSON.parse(contenuti['skill.json']) as SkillSeed[],
     oggetti: JSON.parse(contenuti['oggetti.json']) as OggettoSeed[],
     fusione: JSON.parse(contenuti['fusione.json']) as FusioneSeed,
@@ -139,6 +151,8 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     traduzioni: (db.prepare('SELECT COUNT(*) AS n FROM traduzione').get() as { n: number }).n,
   });
   if (!forza && leggiMeta(db, 'hash') === seed.hash) {
+    // le mappe strutturali e i passaggi automatici si allineano a ogni avvio (idempotente, mai sopra le modifiche dell'utente)
+    sincronizzaMappe(db);
     return { caricato: false, versione: seed.versione, hash: seed.hash, conteggi: conteggi() };
   }
 
@@ -581,6 +595,7 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     // ---- Mappe dell'editor (Fase 13): albero dalle entità della guida + spilli dai marcatori, poi le mappe pubblicate nel repository ----
     sincronizzaMappe(db);
     if (seed.mappeEditor.mappe.length > 0) importaMappe(seed.mappeEditor, { origine: 'seed' });
+    for (const pacchetto of seed.mappeExtra) if (pacchetto.mappe.length > 0) importaMappe(pacchetto, { origine: 'seed' });
 
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');
     insMeta.run('hash', seed.hash);

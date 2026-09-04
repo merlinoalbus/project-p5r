@@ -17,7 +17,7 @@ import { httpErrors } from '../utils/httpError.js';
 import type { ImmagineDto } from '../../shared/types.js';
 
 /** Ambiti ammessi per le immagini. */
-export const AMBITI_IMMAGINE = ['arcana', 'confidente', 'persona', 'skill', 'mappa', 'altro'] as const;
+export const AMBITI_IMMAGINE = ['arcana', 'confidente', 'persona', 'skill', 'mappa', 'spillo', 'altro'] as const;
 export type AmbitoImmagine = (typeof AMBITI_IMMAGINE)[number];
 
 const ESTENSIONE_PER_MIME: Record<string, string> = {

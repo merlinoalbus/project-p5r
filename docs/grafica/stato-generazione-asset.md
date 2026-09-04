@@ -46,11 +46,12 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | guida | 15 | 15 | 0 |
 | palazzi | 10 | 10 | 0 |
 | personaggi | 10 | 10 | 0 |
-| ui (schede Partita e Fusione, §16) | 17 | 17 | 0 |
 | ui (azioni, §17) | 46 | 46 | 0 |
+| ui (schede Partita e Fusione, §16) | 18 | 17 | 1 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
 | ui (spilli, §18) | 19 | 19 | 0 |
 | mappe (§19) | 25 | 0 | 25 |
+| guida (sezione Mappe, §20) | 1 | 0 | 1 |
 
 ## Elenco degli asset da consegnare
 

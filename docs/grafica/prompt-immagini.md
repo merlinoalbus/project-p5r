@@ -74,7 +74,7 @@ del personaggio (Guida → Personaggi): striscia con la Persona iniziale e le ev
 | `vanadis.png` | Vanadis | Kasumi Yoshizawa — seconda forma (risveglio) |
 | `ella.png` | Ella | Kasumi Yoshizawa — terza forma (Royal) |
 
-## 16. Icone delle schede della Partita e della Fusione (17) — `ui/scheda-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+## 16. Icone delle schede della Partita e della Fusione (18) — `ui/scheda-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo). L'app le mostra a 16 px accanto al nome
 della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda (lo stato attivo lo dà lo sfondo rosso del tassello).
 | File | Scheda | Soggetto |
@@ -88,6 +88,7 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-cicli.png` | Cicli | due frecce in cerchio |
 | `scheda-storico.png` | Storico | orologio da taschino |
 | `scheda-riepilogo.png` | Riepilogo | tre barre di altezza crescente |
+| `scheda-oggi.png` | Oggi (guida del giorno corrente con la mappa) | calendario con il giorno cerchiato e un piccolo spillo a goccia |
 | `scheda-fusione-calcolatore.png` | Fusione → Calcolatore A + B | due carte che si fondono in una scintilla |
 | `scheda-fusione-ricette.png` | Fusione → Come ottenere | ampolla da alchimista |
 | `scheda-fusione-con.png` | Fusione → Fusioni con… | ramificazione da una carta |
@@ -208,3 +209,9 @@ e vengono pubblicate nel repository. Nessun testo dentro l'immagine (nomi e spil
 | `citta-suidobashi.png` | Suidobashi (Dome Town) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
 | `citta-asakusa.png` | Asakusa | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
 | `citta-mementos.png` | Mementos (ingresso) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+
+## 20. Icona della sezione «Mappe» della Guida (1) — `guida/mappe.png` (256×256, trasparente) — richiesta il 2026-09-04 (Fase 13.4)
+Stessa famiglia delle icone delle sezioni della Guida (§13): tratto bianco spesso con ombra rossa sfalsata, nessun testo.
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `guida/mappe.png` | piastrella «Mappe» nell'indice della Guida (Tokyo, quartieri, Palazzi e Dedali a livelli) | mappa ripiegata con uno spillo a goccia piantato sopra |
