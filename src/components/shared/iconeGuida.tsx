@@ -504,3 +504,30 @@ export function IconFiltro(p: IconProps) {
     </svg>
   );
 }
+
+/** Lente con «+»: ingrandisci. */
+export function IconZoomPiu(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /><path d="M11 8v6M8 11h6" />
+    </svg>
+  );
+}
+
+/** Lente con «−»: riduci. */
+export function IconZoomMeno(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /><path d="M8 11h6" />
+    </svg>
+  );
+}
+
+/** Quattro frecce verso gli angoli: adatta alla finestra. */
+export function IconAdatta(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" /><path d="M4 4l5 5M20 4l-5 5M20 20l-5-5M4 20l5-5" />
+    </svg>
+  );
+}

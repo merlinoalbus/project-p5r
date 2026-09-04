@@ -3,7 +3,7 @@
 // Test ConfidentiPartita — note della risposta, bonus arcano dalla scorta, soglie, annulla ultimo
 // ============================================================
 
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { ConfidentiPartita } from './ConfidentiPartita';
 import type { ConfidentePartitaDto, ModificaConfidente } from '../../types';
@@ -26,7 +26,7 @@ vi.mock('../../services/api', () => ({
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
   return {
     chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
-    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], personaArcanoInScorta: false, note: '', semafori: [], updatedAt: null,
+    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], personaArcanoInScorta: false, note: '', semafori: [], bloccato: null, updatedAt: null,
     ...sovrascrivi,
   };
 }
@@ -39,6 +39,30 @@ beforeEach(() => {
 });
 
 describe('ConfidentiPartita', () => {
+  it('un Confidente bloccato dai requisiti è spento, mostra i motivi e non permette «+» né lo sblocco', async () => {
+    getConfidentiPartita.mockResolvedValue([
+      confidente({ chiave: 'makoto', nome: 'Makoto Niijima', arcana: 'Priestess', arcanaNome: 'Papessa', sbloccato: false, rango: 0, bloccato: { rango: 1, motivi: ['Dote sociale Conoscenza a rango 3. (Conoscenza: rango 1 di 3)', '26 luglio (oggi è il 04-09)'] } }),
+      confidente({}),
+    ]);
+    render(<MemoryRouter><ConfidentiPartita partitaId={7} /></MemoryRouter>);
+    const carta = await screen.findByRole('listitem', { name: 'Makoto Niijima: bloccato per il rango 1' });
+    expect(carta).toHaveClass('poster--bloccato');
+    expect(within(carta).getByText('Dote sociale Conoscenza a rango 3. (Conoscenza: rango 1 di 3)')).toBeInTheDocument();
+    expect(within(carta).getByRole('button', { name: /Rango di Makoto Niijima più uno/ })).toBeDisabled();
+    expect(within(carta).getByRole('button', { name: /Makoto Niijima: bloccato/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Rango di Ryuji Sakamoto più uno' })).not.toBeDisabled();
+    // due gruppi: il bloccato sta in fondo, in «Non ancora disponibili»
+    const attivi = screen.getByRole('region', { name: 'Attivi e sbloccabili' });
+    const bloccati = screen.getByRole('region', { name: 'Non ancora disponibili' });
+    expect(within(attivi).getByText('Ryuji Sakamoto')).toBeInTheDocument();
+    expect(within(bloccati).getByText('Makoto Niijima')).toBeInTheDocument();
+    expect(attivi.compareDocumentPosition(bloccati) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // via d'uscita esplicita: forza il rango bloccato
+    aggiornaConfidente.mockResolvedValue(confidente({ chiave: 'makoto', nome: 'Makoto Niijima', rango: 1, sbloccato: true, bloccato: null }));
+    await act(async () => { fireEvent.click(within(bloccati).getByRole('button', { name: /segna comunque il rango 1/i })); });
+    expect(aggiornaConfidente).toHaveBeenCalledWith(7, 'makoto', { rango: 1, forza: true });
+  });
+
   it('propone il bonus arcano dalla scorta e invia note, moltiplicatori e annulla ultimo', async () => {
     getConfidentiPartita.mockResolvedValue([confidente({ regaliFatti: [], personaArcanoInScorta: true })]);
     aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 15, mancanti: 5 }));

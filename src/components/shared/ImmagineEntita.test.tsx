@@ -55,7 +55,7 @@ describe('ImmagineEntita', () => {
     render(<ImmagineEntita ambito="altro" chiave="prova" etichetta="Prova Entità" modificabile dimensione={120} forma="orizzontale" />);
 
     const img = await screen.findByRole('img', { name: 'Prova Entità' });
-    expect(img).toHaveAttribute('src', '/api/immagini/altro/prova/file?v=0');
+    expect(img).toHaveAttribute('src', '/api/immagini/altro/prova/file?v=x-0&r=0');
     expect(img.className).toContain('object-contain');
     const riquadro = screen.getByRole('button', { name: /Immagine di Prova Entità/ });
     expect(riquadro).toHaveStyle({ width: '120px', height: '90px' });
@@ -76,7 +76,7 @@ describe('ImmagineEntita', () => {
     await act(async () => { within(finestra).getByRole('button', { name: 'Importa' }).click(); });
     expect(importaImmagineDaUrl).toHaveBeenCalledWith('altro', 'prova', 'https://esempio.it/a.png');
     const img2 = await within(finestra).findByRole('img', { name: 'Prova Entità' });
-    expect(img2.getAttribute('src')).toMatch(/\?v=[1-9]\d*$/);
+    expect(img2.getAttribute('src')).toMatch(/&r=[1-9]\d*$/);
     // la card fuori dalla finestra mostra la stessa immagine aggiornata
     expect(within(riquadro).getByRole('img').getAttribute('src')).toBe(img2.getAttribute('src'));
   });

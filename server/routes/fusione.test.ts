@@ -214,8 +214,8 @@ describe('API fusione', () => {
     expect(vuoto.arcani.length).toBeGreaterThanOrEqual(22);
     expect(vuoto.arcani.every((a) => a.rango === 0 && a.moltiplicatoreExp === 1)).toBe(true);
     // Confidenti: Gemelle (Forza) al rango 5, Igor (Matto) al 3 → sblocchi e moltiplicatori
-    expect((await request(app).put(`/api/partite/${partitaId}/confidenti/gemelle`).send({ rango: 5 })).status).toBe(200);
-    expect((await request(app).put(`/api/partite/${partitaId}/confidenti/igor`).send({ rango: 3 })).status).toBe(200);
+    expect((await request(app).put(`/api/partite/${partitaId}/confidenti/gemelle`).send({ forza: true, rango: 5 })).status).toBe(200);
+    expect((await request(app).put(`/api/partite/${partitaId}/confidenti/igor`).send({ forza: true, rango: 3 })).status).toBe(200);
     expect((await request(app).put(`/api/partite/${partitaId}`).send({ allarmeAttivo: true })).status).toBe(200);
     // Registro: registra il 25% delle Persona non DLC → sconto 10%
     const tutte = (await request(app).get('/api/compendio/persona?limite=500')).body.data as PersonaRiassuntoDto[];

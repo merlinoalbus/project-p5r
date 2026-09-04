@@ -14,6 +14,8 @@ import type { CicloSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { PersonaChip } from '../fusione/PersonaChip';
+import { OperatoreRicetta } from '../fusione/RicettaRiga';
 
 interface Props {
   partitaId: number;
@@ -68,9 +70,9 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
         {ciclo.anelli.map((x, i) => (
           <li key={i} className={`flex flex-wrap items-center gap-1.5 text-[13px] rounded-md px-1 ${i === ciclo.anelloCorrente ? 'bg-primary-bg' : ''}`}>
             <button type="button" className={`chip touch ${i === ciclo.anelloCorrente ? 'chip--attivo' : ''}`} onClick={() => void impostaAnello(i)} title="Imposta come anello corrente" aria-pressed={i === ciclo.anelloCorrente}>{i + 1}</button>
-            <span>{x.ingrediente.nomeIt}</span><span aria-hidden="true">+</span><span>{x.partner.nomeIt}</span>
+            <PersonaChip p={x.ingrediente} /><OperatoreRicetta tipo="piu" /><PersonaChip p={x.partner} />
             <span className="text-[12px] text-text-muted">{NOME_MODO[x.partnerModo]}{x.partnerModo === 'registro' ? ` · ${formattaYen(x.partnerCosto)}` : ''}</span>
-            <span aria-hidden="true">→</span><span className="font-semibold">{x.risultato.nomeIt}</span>
+            <OperatoreRicetta tipo="risultato" /><PersonaChip p={x.risultato} evidenza />
             {x.bonusLivelli.max > 0 && <span className="text-[12px] text-text-muted">+{x.bonusLivelli.min === x.bonusLivelli.max ? x.bonusLivelli.min : `${x.bonusLivelli.min}…${x.bonusLivelli.max}`} livelli</span>}
           </li>
         ))}

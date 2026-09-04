@@ -6,13 +6,32 @@
 // esistenti) e alla fine di `caricaSeed` (istanze nuove e reseed).
 //   - `tokyo` (città) → `citta-<quartiere>` (quartiere, entità quartiere, asset `mappe/citta-<q>`, immagine dell'istanza se già scaricata)
 //   - `dungeon-<chiave>` (palazzo | dedalo, asset `palazzi/<chiave>`) → `<area>` (area, entità area, immagine dell'istanza se presente)
-//   - spilli: uno per marcatore dei punti (riferimento `punto`) e dei luoghi (riferimento `luogo`), stessa origine del marcatore.
+//   - spilli: uno per marcatore dei punti (riferimento `punto`) e dei luoghi (riferimento `luogo`), stessa origine del marcatore;
+//     passaggi verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da posizionare nell'editor.
 // ============================================================
 
 import type { AppDatabase } from '../../db/dbService.js';
 import { DEFINIZIONI_SPILLO, spilloPerLuogo, spilloPerPunto } from '../../../shared/spilli.js';
 
 function adesso(): string { return new Date().toISOString(); }
+
+/** Posizioni (in percentuale) dei quartieri sulla mappa globale di Tokyo del gioco (stima dalla mappa ufficiale: da rifinire nell'editor). */
+const POSIZIONI_TOKYO: Record<string, [number, number]> = {
+  'citta-ogikubo': [16.5, 23], 'citta-nakano': [23, 26], 'citta-shinjuku': [30, 28], 'citta-ikebukuro': [38.5, 20], 'citta-ichigaya': [41.5, 29],
+  'citta-ueno': [62.5, 19], 'citta-suidobashi': [59.5, 27], 'citta-asakusa': [75.5, 17.5], 'citta-akihabara': [70.5, 29.5], 'citta-kanda-jinbocho': [69, 38.5],
+  'citta-meiji-shrine': [20, 37.5], 'citta-harajuku': [28, 38.5], 'citta-inokashira-park': [10, 41.5], 'citta-kichijoji': [14, 47], 'citta-maihama': [92, 45],
+  'citta-shibuya': [34.5, 49.5], 'citta-mementos': [36, 56], 'citta-shujin-academy': [45, 46.5], 'citta-roppongi': [54, 55], 'citta-tsukishima': [85, 61],
+  'citta-yongen-jaya': [18, 56], 'citta-shinagawa': [60, 68], 'citta-yokohama-chinatown': [9, 76], 'citta-odaiba': [74, 79],
+};
+
+/** Posizione di partenza del passaggio verso una mappa figlia: Tokyo dalla tabella, Mementos lungo la discesa verticale, altrimenti griglia. */
+function posizionePassaggio(radice: string, figlia: string, i: number, n: number): [number, number] {
+  if (radice === 'tokyo' && POSIZIONI_TOKYO[figlia]) return POSIZIONI_TOKYO[figlia];
+  if (radice === 'dungeon-mementos') return [i % 2 === 0 ? 44 : 56, Math.min(95, 10 + (i * 80) / Math.max(1, n - 1))];
+  const colonne = Math.max(1, Math.ceil(Math.sqrt(n)));
+  const righe = Math.max(1, Math.ceil(n / colonne));
+  return [10 + (80 * (i % colonne)) / Math.max(1, colonne - 1), 10 + (80 * Math.floor(i / colonne)) / Math.max(1, righe - 1)];
+}
 
 export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number } {
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
@@ -68,6 +87,17 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
       spilli++;
     }
+  }
+  // ---- Passaggi automatici verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree): posizioni predefinite (Tokyo dalla mappa ufficiale, Mementos in verticale) o griglia, da trascinare nell'editor ----
+  const figlieDi = db.prepare("SELECT chiave, nome FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, chiave");
+  for (const radice of db.prepare("SELECT chiave FROM mappa WHERE origine = 'seed' AND (tipo = 'citta' OR tipo = 'palazzo' OR tipo = 'dedalo')").all() as Array<{ chiave: string }>) {
+    const figlie = figlieDi.all(radice.chiave) as Array<{ chiave: string; nome: string }>;
+    figlie.forEach((f, i) => {
+      if (esiste.get('mappa', f.chiave)) return;
+      const [x, y] = posizionePassaggio(radice.chiave, f.chiave, i, figlie.length);
+      insSpillo.run(radice.chiave, 'passaggio', f.nome, '', Math.round(x * 10) / 10, Math.round(y * 10) / 10, 'mappa', f.chiave, 0, i, 'seed', t);
+      spilli++;
+    });
   }
   return { mappe, spilli };
 }
