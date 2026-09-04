@@ -45,6 +45,12 @@ function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
   return p;
 }
 
+/** Aggiorna la cache di esistenza quando un'immagine viene creata fuori dal componente (es. pianta scaricata dalla guida). */
+export function segnaImmaginePresente(ambito: AmbitoImmagine, chiave: string): void {
+  void chiaviPresenti(ambito).then((set) => set.add(chiave));
+  versioni.set(`${ambito}/${chiave}`, (versioni.get(`${ambito}/${chiave}`) ?? 0) + 1);
+}
+
 /** Riquadro immagine con ingrandimento e gestione del caricamento (file o URL). */
 export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, modificabile, forma = 'quadrata', adatta = 'contieni', className }: Props) {
   const idImmagine = `${ambito}/${chiave}`;

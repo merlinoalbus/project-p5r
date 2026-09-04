@@ -10,7 +10,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
-import { ImmagineEntita } from '../components/shared/ImmagineEntita';
+import { ImmagineEntita, segnaImmaginePresente } from '../components/shared/ImmagineEntita';
 import { IconChevronLeft } from '../components/shared/icons';
 import { MappaInterattiva } from '../components/guida/MappaInterattiva';
 import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
@@ -47,7 +47,7 @@ export function DungeonDettaglioPage() {
   const [posizionamento, setPosizionamento] = useState(false);
   const [mappaVersione, setMappaVersione] = useState(0);
   // Pianta pubblicata dalla guida ma non ancora nell'istanza: viene scaricata appena l'area è aperta (una richiesta per area)
-  const download = useCarica(() => (area && !area.mappa && area.pianta ? scaricaPianta(area.chiave) : Promise.resolve(null)), [area?.chiave, area?.mappa, area?.pianta?.url]);
+  const download = useCarica(() => (area && !area.mappa && area.pianta ? scaricaPianta(area.chiave).then((r) => { segnaImmaginePresente('mappa', r.area); return r; }) : Promise.resolve(null)), [area?.chiave, area?.mappa, area?.pianta?.url]);
   const scaricata = !!area && !!download.dati && download.dati.area === area.chiave;
   const mappaPronta = !!area && (area.mappa || mappaVersione > 0 || scaricata);
 
