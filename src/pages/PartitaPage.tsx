@@ -19,6 +19,7 @@ import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
 import { OggiPartita } from '../components/partita/OggiPartita';
+import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
@@ -61,6 +62,7 @@ export function PartitaPage() {
               {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
               {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
               {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
+              <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} />
             </div>
           </IntestazionePagina>
           <div className="flex gap-1.5 flex-wrap">

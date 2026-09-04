@@ -1062,6 +1062,22 @@
  },
  {
   "confidente": "yoshida",
+  "rango": 1,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "05-01",
+    "testo": "Dall'inizio di maggio, la domenica sera in Piazza della Stazione a Shibuya."
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Comizio all’aperto: non disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "yoshida",
   "rango": 2.0,
   "requisiti": [
    {

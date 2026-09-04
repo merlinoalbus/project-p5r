@@ -46,7 +46,10 @@ describe('API semafori dei Confidenti', () => {
     const eventi = (await request(app).get(`/api/partite/${id}/storico`)).body.data as { eventi: Array<{ titolo: string }> };
     expect(eventi.eventi.some((e) => e.titolo.includes('nonostante i requisiti'))).toBe(true);
     // un Confidente senza requisiti per il rango successivo non è bloccato e sale liberamente
-    const libero = conf.find((c) => c.bloccato === null && c.rango < 10)!;
+    // (dopo la forzatura Yusuke è al rango 1 e il rango 2 non ha requisiti: al primo giorno tutti i ranghi 1 sono vincolati)
+    const aggiornati = (await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[];
+    const libero = aggiornati.find((c) => c.bloccato === null && c.rango < 10)!;
+    expect(libero).toBeDefined();
     expect((await request(app).put(`/api/partite/${id}/confidenti/${libero.chiave}`).send({ rango: libero.rango + 1 })).status).toBe(200);
     // una Persona dell'Imperatore in scorta → verde
     const eligor = ((await request(app).get('/api/compendio/persona?q=Eligor')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Eligor')!;

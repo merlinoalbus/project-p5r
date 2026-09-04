@@ -6,7 +6,7 @@
 // `ui/spillo-<tipo>` (prompt §18) con riserva SVG in codice (`IconaSpillo`).
 // ============================================================
 
-export const TIPI_SPILLO = ['passaggio', 'negozio', 'forziere', 'tesoro', 'boss', 'miniboss', 'sicura', 'scorciatoia', 'confidente', 'attivita', 'ristorante', 'distributore', 'treno', 'nota'] as const;
+export const TIPI_SPILLO = ['passaggio', 'negozio', 'forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'sicura', 'scorciatoia', 'confidente', 'attivita', 'ristorante', 'distributore', 'treno', 'nota'] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
 
 export const TIPI_RIFERIMENTO = ['mappa', 'negozio', 'punto', 'luogo', 'confidente', 'richiesta', 'attivita'] as const;
@@ -26,8 +26,13 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   negozio: { nome: 'Negozio', colore: '#22c55e', collezionabile: false, riferimento: 'negozio' },
   forziere: { nome: 'Forziere', colore: '#eab308', collezionabile: true, riferimento: 'punto' },
   tesoro: { nome: 'Tesoro', colore: '#a855f7', collezionabile: true, riferimento: 'punto' },
+  'tesoro-palazzo': { nome: 'Tesoro del Palazzo', colore: '#d946ef', collezionabile: true, riferimento: 'punto' },
+  'seme-bramosia': { nome: 'Seme della bramosia', colore: '#c85cff', collezionabile: true, riferimento: 'punto' },
+  'oggetto-chiave': { nome: 'Oggetto chiave', colore: '#fbbf24', collezionabile: true, riferimento: 'punto' },
   boss: { nome: 'Boss', colore: '#e5352b', collezionabile: true, riferimento: 'punto' },
   miniboss: { nome: 'Miniboss', colore: '#f97316', collezionabile: true, riferimento: 'punto' },
+  nemico: { nome: 'Nemico', colore: '#b0b0c0', collezionabile: false, riferimento: 'punto' },
+  'punto-sensibile': { nome: 'Punto sensibile', colore: '#7fd8c8', collezionabile: false, riferimento: 'punto' },
   sicura: { nome: 'Stanza sicura', colore: '#38bdf8', collezionabile: false, riferimento: 'punto' },
   scorciatoia: { nome: 'Scorciatoia', colore: '#9ca3af', collezionabile: false, riferimento: 'punto' },
   confidente: { nome: 'Confidente', colore: '#ec4899', collezionabile: false, riferimento: 'confidente' },
@@ -42,9 +47,13 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
 export function spilloPerPunto(tipoPunto: string): TipoSpillo {
   switch (tipoPunto) {
     case 'forziere': case 'forziere-chiuso': return 'forziere';
-    case 'oggetto': case 'volonta': case 'tesoro': return 'tesoro';
+    case 'oggetto': return 'oggetto-chiave';
+    case 'volonta': return 'seme-bramosia';
+    case 'tesoro': return 'tesoro-palazzo';
+    case 'puzzle': return 'punto-sensibile';
     case 'boss': return 'boss';
-    case 'miniboss': case 'ombra-sciagura': return 'miniboss';
+    case 'miniboss': return 'miniboss';
+    case 'ombra-sciagura': return 'nemico';
     case 'sicura': return 'sicura';
     case 'scorciatoia': return 'scorciatoia';
     default: return 'nota';
