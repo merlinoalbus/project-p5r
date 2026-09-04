@@ -1,7 +1,7 @@
 # Asset grafici predefiniti
 
 Copiare qui i file generati seguendo `docs/grafica/prompt-immagini.md`, nelle sottocartelle e con i nomi indicati
-(`arcani/fool.png`, `arcani/icona/fool.png`, `confidenti/ryuji.png`, `persona/jack-frost.png`, `elementi/fire.png`,
+(`arcani/fool.png`, `arcani/icona/fool.png`, `confidenti/ryuji-fedele.png` (ritratto fedele, mostrato di default) e `confidenti/ryuji.png` (versione stilizzata, al passaggio del mouse), `persona/jack-frost.png`, `elementi/fire.png`,
 `affinita/wk.png`, `doti/coraggio.png`, `ui/nav-home.png`, `ui/rango-1.png` … `ui/rango-max.png`, `identita/logo-orizzontale.png`,
 `sfondi/pattern-nero.webp`, `illustrazioni/vuoto-persona.png`, …).
 

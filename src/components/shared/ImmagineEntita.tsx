@@ -4,6 +4,8 @@
 //
 // Catena: immagine caricata dall'utente per (ambito, chiave) → asset grafico predefinito
 // (public/asset, se presente e se la preferenza è attiva) → riquadro con le iniziali.
+// Confidenti: di default il ritratto «fedele» (`confidenti/<chiave>-fedele`); al passaggio del mouse (o con il
+// pulsante nella finestra, per il tocco) si vede la versione stilizzata (`confidenti/<chiave>`), se presente.
 // L'immagine non viene mai ritagliata (object-contain) e un tocco la apre a tutto schermo; in modalità
 // modificabile i comandi (scegli file, importa da URL, rimuovi) stanno nella finestra, non nella card.
 // ============================================================
@@ -52,6 +54,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const [modalitaUrl, setModalitaUrl] = useState(false);
   const [url, setUrl] = useState('');
   const [occupato, setOccupato] = useState(false);
+  const [passaggio, setPassaggio] = useState(false);
+  const [alternativaFissa, setAlternativaFissa] = useState(false);
   const inputFile = useRef<HTMLInputElement>(null);
   const formaAsset: FormaImmagine = forma === 'orizzontale' ? 'quadrata' : forma;
   const [primaria, riserva] = chiaviAssetPredefinito(ambito, chiave, formaAsset, dimensione);
@@ -59,6 +63,9 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const urlRiserva = useAsset(riserva);
   const urlPredefinito = urlPrimario ?? urlRiserva;
   const nomePredefinito = urlPrimario ? primaria : urlRiserva ? riserva : null;
+  // Versione alternativa (stilizzata) dei Confidenti: l'asset `confidenti/<chiave>`, mostrato al passaggio del mouse
+  // sia sopra il ritratto fedele sia sopra l'immagine caricata dall'utente
+  const urlAlternativa = ambito === 'confidente' && urlRiserva && (urlPrimario || presente) ? urlRiserva : null;
   const segnaMancante = useAssetStore((s) => s.segnaMancante);
 
   useEffect(() => {
@@ -135,8 +142,15 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
   const altezza = altezzaPerForma(forma, dimensione);
   const iniziali = etichetta.split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('');
   const srcUtente = presente ? `${urlImmagine(ambito, chiave)}?v=${versione}` : null;
-  const src = srcUtente ?? urlPredefinito;
-  const origine = srcUtente ? 'Immagine caricata da te' : urlPredefinito ? 'Grafica predefinita dell\'app' : 'Nessuna immagine: mostrate le iniziali';
+  const mostraAlternativa = !!urlAlternativa && (passaggio || alternativaFissa);
+  const src = mostraAlternativa ? urlAlternativa : (srcUtente ?? urlPredefinito);
+  const origine = mostraAlternativa
+    ? 'Grafica predefinita dell\'app: versione stilizzata'
+    : srcUtente
+      ? (urlAlternativa ? 'Immagine caricata da te (passa il mouse per la versione stilizzata)' : 'Immagine caricata da te')
+      : urlPredefinito
+        ? (urlAlternativa ? 'Grafica predefinita dell\'app: ritratto fedele (passa il mouse per la versione stilizzata)' : 'Grafica predefinita dell\'app')
+        : 'Nessuna immagine: mostrate le iniziali';
   const classeAdatta = adatta === 'copri' ? 'object-cover' : 'object-contain';
 
   const immagine = (grande: boolean) =>
@@ -164,6 +178,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
         style={{ width: dimensione, height: altezza, borderRadius: raggio }}
         aria-label={`Immagine di ${etichetta}${modificabile ? ' (tocca per ingrandire o cambiare)' : ' (tocca per ingrandire)'}`}
         onClick={() => setAperta(true)}
+        onMouseEnter={() => setPassaggio(true)}
+        onMouseLeave={() => setPassaggio(false)}
       >
         {immagine(false)}
       </button>
@@ -190,6 +206,7 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
                 <button type="button" className="btn btn-primary" disabled={occupato || !url.trim()} onClick={() => void suImporta()}>Importa</button>
               </>
             )}
+            {urlAlternativa && <button type="button" className="btn btn-secondary" onClick={() => setAlternativaFissa((v) => !v)} aria-pressed={alternativaFissa}>{alternativaFissa ? (srcUtente ? 'Immagine principale' : 'Ritratto fedele') : 'Versione stilizzata'}</button>}
             <button type="button" className="btn btn-ghost" onClick={chiudi}>Chiudi</button>
           </>
         }
