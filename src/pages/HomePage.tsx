@@ -2,6 +2,7 @@
 // HomePage — cruscotto: partita attiva, Doti, scorciatoie
 // ============================================================
 
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
@@ -10,6 +11,9 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { StellaCinque } from '../components/shared/StellaCinque';
+import { AssetImg } from '../components/shared/AssetImg';
+import { IconMaschera } from '../components/shared/iconeGuida';
+import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
 
 /** Pagina iniziale con lo stato della partita attiva e gli accessi rapidi. */
@@ -18,6 +22,12 @@ export function HomePage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const doti = useCarica(() => (attiva ? getDoti(attiva.id) : Promise.resolve(null)), [attiva?.id]);
   const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve(null)), [attiva?.id]);
+  // Arcani con almeno una Persona in scorta: i Confidenti di quell'arcano ricevono il bonus ×1,5 sui punti.
+  const arcaniInScorta = useMemo(() => {
+    const visti = new Map<string, string>();
+    for (const p of scorta.dati ?? []) if (!visti.has(p.arcana)) visti.set(p.arcana, p.arcanaNome);
+    return [...visti.entries()].map(([chiave, nome]) => ({ chiave, nome }));
+  }, [scorta.dati]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -32,8 +42,8 @@ export function HomePage() {
           </div>
           <div className="flex gap-4 flex-wrap items-center">
             {doti.dati && doti.dati.length > 0 && (
-              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0" aria-label="Apri le Doti sociali">
-                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}-senza-testo`, testo: `Rango ${d.rango}` }))} dimensione={220} etichettaAria="Stella delle Doti sociali" />
+              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-8 py-3" aria-label="Apri le Doti sociali">
+                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={300} badgeAltezza={40} etichettaAria="Stella delle Doti sociali" />
               </Link>
             )}
             <div className="flex gap-2 flex-wrap">
@@ -49,6 +59,18 @@ export function HomePage() {
             </Link>
             </div>
           </div>
+          {scorta.dati && (
+            <div className="flex flex-wrap items-center gap-1.5" aria-label="Arcani potenziati dalla scorta">
+              <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati · Confidenti ×1,5 con una Persona in scorta</span>
+              {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
+              {arcaniInScorta.map((a) => (
+                <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
+                  <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
+                  {a.nome}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <div className="card text-[13px] text-text-secondary">

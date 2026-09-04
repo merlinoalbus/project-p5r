@@ -12,6 +12,8 @@ import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
 import { formattaYen } from '../../utils/punti';
 import type { CicloSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconCestino, IconEvoca, IconGioca, IconRicetta } from '../shared/iconeGuida';
 
 interface Props {
   partitaId: number;
@@ -79,18 +81,16 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
           <span className={`chip ${av.ingredientePossedutaId ? 'chip--attivo' : ''}`}>{a.ingrediente.nomeIt}: {av.ingredientePossedutaId ? 'in scorta' : 'non in scorta'}</span>
           <span className={`chip ${av.partnerPossedutaId ? 'chip--attivo' : ''}`}>{a.partner.nomeIt}: {av.partnerPossedutaId ? 'in scorta' : av.partnerRegistrato ? 'da evocare dal Registro' : a.partnerModo === 'cattura' ? 'da catturare' : 'da procurare'}</span>
           {!av.partnerPossedutaId && (
-            <button type="button" className="btn btn-secondary btn-sm" disabled={occupato} onClick={() => void procuraPartner()}>
-              {av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaYen(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`}
-            </button>
+            <PulsanteVisivo compatto icona={<IconEvoca size={20} />} titolo={av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaYen(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`} disabled={occupato} onClick={() => void procuraPartner()} />
           )}
-          {!av.ingredientePossedutaId && ciclo.anelloCorrente === 0 && <Link to={`/fusione?vista=piani&piani=${a.ingrediente.id}`} className="btn btn-ghost btn-sm no-underline">Come ottenere {a.ingrediente.nomeIt}</Link>}
+          {!av.ingredientePossedutaId && ciclo.anelloCorrente === 0 && <CollegamentoVisivo to={`/fusione?vista=piani&piani=${a.ingrediente.id}`} tono="fantasma" compatto icona={<IconRicetta size={20} />} titolo={`Come ottenere ${a.ingrediente.nomeIt}`} />}
           {!av.ingredientePossedutaId && ciclo.anelloCorrente > 0 && <span className="text-[12px] text-warning">Il risultato dell'anello precedente non è in scorta: reimposta l'anello corrente.</span>}
-          <button type="button" className="btn btn-primary btn-sm" disabled={!av.eseguibile} onClick={() => setEsecuzione(true)}>Esegui anello {ciclo.anelloCorrente + 1}</button>
+          <PulsanteVisivo tono="primario" compatto icona={<IconGioca size={20} />} titolo={`Esegui anello ${ciclo.anelloCorrente + 1}`} disabled={!av.eseguibile} onClick={() => setEsecuzione(true)} />
         </div>
       </div>
       {ciclo.note && <div className="text-[13px] text-text-secondary">{ciclo.note}</div>}
       <div className="flex flex-wrap gap-1.5">
-        <button type="button" className="btn btn-ghost btn-sm touch text-error" onClick={onElimina}>Elimina</button>
+        <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo="Elimina" onClick={onElimina} />
       </div>
       {esecuzione && av.ingredientePossedutaId && av.partnerPossedutaId && (
         <EseguiFusioneModal partitaId={partitaId} possedutaIds={[av.ingredientePossedutaId, av.partnerPossedutaId]} risultatoId={a.risultato.id} onChiudi={() => setEsecuzione(false)} onEseguita={() => void dopoEsecuzione()} />
