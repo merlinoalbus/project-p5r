@@ -9,8 +9,10 @@ import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
 import { verificaObiettivi } from './obiettiviService.js';
+import { semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } from './semaforiService.js';
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
+  SemaforiRangoDto,
 } from '../../shared/types.js';
 
 interface RigaPartita {
@@ -209,8 +211,21 @@ export function confidenti(partitaId: number): ConfidentePartitaDto[] {
       mancanti: c.rango >= 10 || c.punti_necessari === null ? null : round2(Math.max(0, c.punti_necessari - c.punti)),
       personaArcanoInScorta: c.in_scorta === 1,
       regaliFatti: regaliFattiDi(partitaId, c.chiave),
-      note: c.note, updatedAt: c.updated_at,
-    }));
+      note: c.note, semafori: [] as SemaforiRangoDto[], updatedAt: c.updated_at,
+    }))
+    .map((c, _i, tutti) => ({ ...c, semafori: semaforiConfidente(c.chiave, c.rango, statoSemafori(partitaId, tutti)) }));
+}
+
+let cacheStato: { partitaId: number; firma: string; stato: StatoPartitaSemafori } | null = null;
+/** Stato della partita per i semafori, calcolato una volta per chiamata (stessa firma dei ranghi). */
+function statoSemafori(partitaId: number, confidentiPartita: Array<{ chiave: string; rango: number }>): StatoPartitaSemafori {
+  const firma = `${partitaId}|${confidentiPartita.map((c) => `${c.chiave}:${c.rango}`).join(',')}|${(prepared('SELECT updated_at FROM partita WHERE id = ?').get(partitaId) as { updated_at: string } | undefined)?.updated_at ?? ''}`;
+  if (cacheStato && cacheStato.partitaId === partitaId && cacheStato.firma === firma) return cacheStato.stato;
+  const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
+  const ranghi = new Map(confidentiPartita.map((c) => [c.chiave, c.rango]));
+  const stato = statoPartitaSemafori(partitaId, ranghi, doti);
+  cacheStato = { partitaId, firma, stato };
+  return stato;
 }
 
 function regaliFattiDi(partitaId: number, chiave: string): string[] {

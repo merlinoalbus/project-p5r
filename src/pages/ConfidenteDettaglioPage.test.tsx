@@ -29,7 +29,7 @@ const dettaglio: ConfidenteDettaglioDto = {
   disponibilita: { giorni: ['Lunedì', 'Martedì'], fasce: ['Giorno'], luogo: 'Clinica Takemi', sbloccoData: '18 aprile', sbloccoRequisiti: '', note: 'Anche con pioggia.' },
   noteGenerali: '', fonti: ['https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/'],
 };
-const stato: ConfidentePartitaDto = { chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13, sbloccato: true, rango: 1, punti: 0, puntiNecessari: 10, mancanti: 10, personaArcanoInScorta: false, regaliFatti: ['Castella'], note: '', updatedAt: null };
+const stato: ConfidentePartitaDto = { chiave: 'takemi', nome: 'Takemi', arcana: 'Death', arcanaNome: 'Morte', ordine: 13, sbloccato: true, rango: 1, punti: 0, puntiNecessari: 10, mancanti: 10, personaArcanoInScorta: false, semafori: [], regaliFatti: ['Castella'], note: '', updatedAt: null };
 
 describe('ConfidenteDettaglioPage', () => {
   it('mostra prossimo rango, abilità sbloccate, scelte migliori/romantiche e regali con spunta per la partita', async () => {

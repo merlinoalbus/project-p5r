@@ -10,7 +10,7 @@
 // ============================================================
 
 import { useState } from 'react';
-import { aggiornaConfidente, getConfidentiPartita } from '../../services/api';
+import { aggiornaConfidente, getConfidentiPartita, confermaRequisitoConfidente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
@@ -22,6 +22,7 @@ import { slug } from '../../../shared/slug';
 import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { SemaforiRango } from './SemaforiRango';
 import { IconMaschera } from '../shared/iconeGuida';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -65,6 +66,18 @@ export function ConfidentiPartita({ partitaId }: Props) {
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
       return null;
+    } finally {
+      setOccupato(null);
+    }
+  };
+
+  const conferma = async (c: ConfidentePartitaDto, rango: number, indice: number, confermato: boolean) => {
+    setOccupato(c.chiave);
+    try {
+      const agg = await confermaRequisitoConfidente(partitaId, c.chiave, rango, indice, confermato);
+      imposta((dati ?? []).map((x) => (x.chiave === agg.chiave ? agg : x)));
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     } finally {
       setOccupato(null);
     }
@@ -139,6 +152,9 @@ export function ConfidentiPartita({ partitaId }: Props) {
                   <p className="m-0 text-[13px] text-text-muted">Progressione senza punti (storia, richieste di Mementos o fusioni): nessuna nota da contare per questo Confidente.</p>
                 )}
                 {c.rango === 10 && <p className="m-0 text-[13px] text-text-muted">Rango massimo raggiunto.</p>}
+                {c.semafori.length > 0 && c.rango < 10 && (
+                  <SemaforiRango semafori={c.semafori[0]} compatto occupato={occ} onConferma={(rango, r, confermato) => void conferma(c, rango, r.indice, confermato)} />
+                )}
                 {aPunti && (
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center gap-2 text-[13px] flex-wrap">

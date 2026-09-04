@@ -24,14 +24,14 @@ import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
 import type {
-  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed,
+  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed, RequisitiRangoSeed,
 } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json', 'descrizioni-persona.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -68,6 +68,7 @@ interface SeedCompleto {
   oggettiGuida: OggettiGuidaSeed;
   doti: DoteSeed[];
   descrizioniPersona: DescrizionePersonaSeed[];
+  requisitiConfidenti: RequisitiRangoSeed[];
   hash: string;
 }
 
@@ -86,6 +87,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     versione,
     persone: JSON.parse(contenuti['persona.json']) as PersonaSeed[],
     descrizioniPersona: JSON.parse(contenuti['descrizioni-persona.json']) as DescrizionePersonaSeed[],
+    requisitiConfidenti: JSON.parse(contenuti['confidenti-requisiti.json']) as RequisitiRangoSeed[],
     skill: JSON.parse(contenuti['skill.json']) as SkillSeed[],
     oggetti: JSON.parse(contenuti['oggetti.json']) as OggettoSeed[],
     fusione: JSON.parse(contenuti['fusione.json']) as FusioneSeed,
@@ -563,6 +565,14 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
     // ---- Meta ----
+    // ---- Requisiti per rango dei Confidenti (Fase 12.3): ricaricati integralmente dal seed ----
+    db.prepare('DELETE FROM confidente_requisito').run();
+    const insReq = db.prepare('INSERT INTO confidente_requisito (confidente_chiave, rango, indice, tipo, dati_json, testo) VALUES (?, ?, ?, ?, ?, ?)');
+    for (const v of seed.requisitiConfidenti) {
+      if (!db.prepare('SELECT 1 FROM confidente WHERE chiave = ?').get(v.confidente)) throw new Error(`seed: requisiti per un Confidente sconosciuto '${v.confidente}'`);
+      v.requisiti.forEach((r, i) => { const { tipo, testo, ...dati } = r; insReq.run(v.confidente, v.rango, i, tipo, JSON.stringify(dati), testo); });
+    }
+
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');
     insMeta.run('hash', seed.hash);
     insMeta.run('versione', String(seed.versione));

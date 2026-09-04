@@ -4,13 +4,14 @@
 
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto } from '../services/api';
+import { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, confermaRequisitoConfidente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
+import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { DialogoConfidenteDto } from '../types';
 
@@ -53,6 +54,20 @@ export function ConfidenteDettaglioPage() {
   const regaliFatti = useMemo(() => new Set(mio?.regaliFatti ?? []), [mio]);
   const prossimo = mio ? mio.rango + 1 : null;
 
+  const [confermaInCorso, setConfermaInCorso] = useState(false);
+  const conferma = async (rango: number, indice: number, confermato: boolean) => {
+    if (!attiva) return;
+    setConfermaInCorso(true);
+    try {
+      await confermaRequisitoConfidente(attiva.id, chiave, rango, indice, confermato);
+      await stato.ricarica();
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+    } finally {
+      setConfermaInCorso(false);
+    }
+  };
+
   const segnaRegalo = async (nome: string, fatto: boolean) => {
     if (!attiva) return;
     try {
@@ -91,6 +106,9 @@ export function ConfidenteDettaglioPage() {
           {prossimo !== null && prossimo <= 10 && c.dialoghi.some((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo) && (
             <section className="card flex flex-col gap-2 border-primary">
               <h2 className="m-0 text-[15px] font-semibold">Prossimo passo: rango {prossimo}</h2>
+              {mio && mio.semafori.length > 0 && mio.semafori[0].rango <= prossimo && (
+                <SemaforiRango semafori={mio.semafori[0]} occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} />
+              )}
               <ul className="m-0 p-0 list-none flex flex-col gap-2">
                 {c.dialoghi.filter((d) => d.rango !== null && d.rango > (mio?.rango ?? 0) && d.rango <= prossimo).map((d) => (
                   <DialogoRango key={d.id} d={d} aperto onToggle={() => undefined} />
@@ -99,6 +117,12 @@ export function ConfidenteDettaglioPage() {
             </section>
           )}
 
+          {mio && mio.semafori.length > 1 && (
+            <section className="card flex flex-col gap-3">
+              <h2 className="m-0 text-[15px] font-semibold">Requisiti dei ranghi successivi</h2>
+              {mio.semafori.slice(1).map((sr) => <SemaforiRango key={sr.rango} semafori={sr} compatto occupato={confermaInCorso} onConferma={(rango, r, confermato) => void conferma(rango, r.indice, confermato)} />)}
+            </section>
+          )}
           <section className="card flex flex-col gap-2">
             <h2 className="m-0 text-[15px] font-semibold">Abilità per rango</h2>
             {c.abilita.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessuna abilità documentata.</p> : (

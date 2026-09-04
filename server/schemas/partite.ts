@@ -54,6 +54,8 @@ export const bodyConfidente = z
     message: 'Indicare una sola sorgente di punti fra note della risposta, regalo, uscita, deltaPunti e punti.',
   });
 
+export const bodyRequisito = z.object({ rango: z.number().min(1).max(10), indice: z.number().int().min(0).max(50), confermato: z.boolean() });
+
 export const bodyCompendio = z.object({
   registrata: z.boolean(),
   livelloRegistrato: livello.nullable().optional(),

@@ -383,6 +383,16 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   fonte_descrizione` dopo l'upsert delle Persona (migrazione 024 aggiunge le colonne). Testi originali sull'origine della figura, mai il testo
   del gioco. `PersonaDettaglioDto.descrizione/fonteDescrizione`; scheda con riquadro «Chi è» ad altezza fissa e scorrimento verticale.
 
+### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
+- `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
+  confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
+- `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, boss segnati, richieste completate, ranghi, giorno e meteo
+  correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
+  `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
+- Percorso: `impostaAzione` applica alla spunta gli effetti della guida (`dotiDalleNote`: «Perizia +2» = 2 punti; `noteRisposta` 1–3 per gli
+  incontri con un Confidente col bonus dell'arcano dalla scorta) e li registra in `azione_partita.effetti_json` (migrazione 025) per annullarli
+  togliendo la spunta; `AzionePercorsoDto.effetti`; scelta delle note nella pagina Percorso.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 83 file / 242 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).

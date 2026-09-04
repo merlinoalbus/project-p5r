@@ -34,6 +34,23 @@ export interface PersonaSeed {
   pianiMementos: string | null;
 }
 
+/** Requisito strutturato per raggiungere un rango di un Confidente (Fase 12.3). */
+export type RequisitoSeed =
+  | { tipo: 'dote'; dote: string; rango: number; testo: string }
+  | { tipo: 'persona-arcano'; arcano: string; testo: string }
+  | { tipo: 'palazzo'; dungeon: string; testo: string }
+  | { tipo: 'richiesta'; richiesta: string; testo: string }
+  | { tipo: 'confidente'; confidente: string; rango: number; testo: string }
+  | { tipo: 'data'; dal: string; testo: string }
+  | { tipo: 'meteo'; condizione: 'non-piove'; testo: string }
+  | { tipo: 'manuale'; testo: string };
+
+export interface RequisitiRangoSeed {
+  confidente: string;
+  rango: number;
+  requisiti: RequisitoSeed[];
+}
+
 /** Descrizione originale di una Persona (origine della figura) con fonte sintetica. */
 export interface DescrizionePersonaSeed {
   nome: string;
