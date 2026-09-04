@@ -27,6 +27,8 @@ import { NegoziPage } from './pages/NegoziPage';
 import { PercorsoPage } from './pages/PercorsoPage';
 import { CompletamentoPage } from './pages/CompletamentoPage';
 import { SfidePage } from './pages/SfidePage';
+import { PersonaggiPage } from './pages/PersonaggiPage';
+import { OggettiPage } from './pages/OggettiPage';
 import { NegozioPage } from './pages/NegozioPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
@@ -61,6 +63,8 @@ export const router = createBrowserRouter([
       { path: 'guida/cruciverba', element: <CruciverbaPage /> },
       { path: 'guida/completamento', element: <CompletamentoPage /> },
       { path: 'guida/sfide', element: <SfidePage /> },
+      { path: 'guida/personaggi', element: <PersonaggiPage /> },
+      { path: 'guida/oggetti', element: <OggettiPage /> },
       { path: 'guida/percorso', element: <PercorsoPage /> },
       { path: 'guida/percorso/:data', element: <PercorsoPage /> },
       { path: 'guida/negozi', element: <NegoziPage /> },

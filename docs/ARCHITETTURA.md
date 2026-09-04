@@ -220,6 +220,13 @@ alternative; gli spilli del seed hanno `origine = 'seed'` e il reseed non tocca 
 Migrazione 022: `pianta_quartiere` e `marcatore_luogo` (origine seed/utente). L'immagine del quartiere vive in `immagine` (ambito «mappa»,
 chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta etichette e colori per tipo e viene riusata per i luoghi.
 
+### Personaggi (Fase 10.3)
+`personaggi.json` è consultazione pura in `dati_guida` («personaggi»); il campo `confidente` collega alla scheda e al ritratto del Confidente
+(`ImmagineEntita` ambito «confidente», con la coppia fedele/stilizzata della 10.1).
+
+### Oggetti della guida (Fase 10.2)
+`oggetti-guida.json` è consultazione pura in `dati_guida`; distinto dal compendio `oggetti` (equipaggiamento con statistiche) e dai cataloghi dei negozi (prezzi per punto vendita).
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

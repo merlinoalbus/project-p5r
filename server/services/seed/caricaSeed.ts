@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, PercorsoSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -62,6 +62,8 @@ interface SeedCompleto {
   sfide: SfideSeed;
   mappe: MappeSeed;
   mappeCitta: MappeCittaSeed;
+  personaggi: PersonaggiSeed;
+  oggettiGuida: OggettiGuidaSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -100,6 +102,8 @@ function leggiSeed(seedDir: string): SeedCompleto {
     sfide: JSON.parse(contenuti['sfide.json']) as SfideSeed,
     mappe: JSON.parse(contenuti['mappe.json']) as MappeSeed,
     mappeCitta: JSON.parse(contenuti['mappe-citta.json']) as MappeCittaSeed,
+    personaggi: JSON.parse(contenuti['personaggi.json']) as PersonaggiSeed,
+    oggettiGuida: JSON.parse(contenuti['oggetti-guida.json']) as OggettiGuidaSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -511,6 +515,13 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     }
     for (const r of db.prepare('SELECT quartiere_chiave FROM pianta_quartiere').all() as Array<{ quartiere_chiave: string }>) if (!quartieriConMappa.has(r.quartiere_chiave)) db.prepare('DELETE FROM pianta_quartiere WHERE quartiere_chiave = ?').run(r.quartiere_chiave);
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('mappe-citta-assenti', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(Object.fromEntries(seed.mappeCitta.quartieri.filter((m) => !m.url && m.note).map((m) => [m.quartiereChiave, m.note]))));
+
+    // ---- Personaggi (Fase 10.3): consultazione in dati_guida, con controllo dei Confidenti collegati ----
+    for (const q of seed.personaggi.personaggi) if (q.confidente !== null && !chiaviConfidenti.has(q.confidente)) throw new Error(`Seed personaggi: Confidente sconosciuto '${q.confidente}' per '${q.chiave}'.`);
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('personaggi', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.personaggi));
+
+    // ---- Oggetti della guida (Fase 10.2): consultazione in dati_guida ----
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('oggetti-guida', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.oggettiGuida));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)
