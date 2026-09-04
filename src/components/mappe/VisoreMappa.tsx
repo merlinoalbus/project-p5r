@@ -120,7 +120,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   const [ricerca, setRicerca] = useState('');
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
-  const [pannelloAperto, setPannelloAperto] = useState(true);
+  // Incorporato in una pagina lo spazio è poco: il pannello è chiuso finché l'utente non lo apre; a schermo intero è aperto.
+  // Stato derivato (nessun effetto che sincronizza): `null` = comportamento predefinito del contesto.
+  const [pannelloScelto, setPannelloScelto] = useState<boolean | null>(null);
+  const pannelloAperto = pannelloScelto ?? !incorporato;
   const [occupato, setOccupato] = useState(false);
   const assetBase = useAsset(mappa.asset);
   const src = mappa.immagineUrl ?? assetBase ?? null;
@@ -328,7 +331,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         </nav>
         <div className="visore-mappa__strumenti">
           {azioni}
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => setPannelloAperto((v) => !v)} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => setPannelloScelto(!pannelloAperto)} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
           {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
         </div>
       </header>
@@ -490,7 +493,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   {selezionato.dettaglio?.tipo === 'mappa' && selezionato.dettaglio.mappa && <PulsanteVisivo tono="primario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo={`Apri: ${selezionato.dettaglio.mappa.nome}`} onClick={() => onNaviga(selezionato.dettaglio!.mappa!.chiave)} />}
                   {partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {(selezionato.dettaglio?.negozio || selezionato.dettaglio?.tipo === 'punto' || selezionato.dettaglio?.tipo === 'luogo' || selezionato.dettaglio?.tipo === 'confidente' || selezionato.dettaglio?.tipo === 'richiesta') && (
-                    <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Dettagli" onClick={() => setPannelloAperto(true)} />
+                    <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Dettagli" onClick={() => setPannelloScelto(true)} />
                   )}
                 </div>
               </div>
