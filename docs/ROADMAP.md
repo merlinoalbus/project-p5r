@@ -73,7 +73,7 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 |---|---|---|
 | 7.4 | Piante dei dungeon con spilli preposizionati: seed di soli collegamenti alle immagini pubblicate (mai nel repo), scaricate nell'istanza al primo uso, coordinate dei punti di interesse già fissate | ⬜ (ricerca piante in corso) |
 | 7.5a | Cruciverba di Leblanc: 38 cruciverba (data, indizio, risposta italiana e inglese) con spunta per partita ed evento; migrazione 016; `GET /api/compendio/cruciverba?partita`, `PUT /api/partite/:id/cruciverba`; pagina «Guida → Cruciverba di Leblanc» | ✅ 2026-09-04 |
-| 7.5b | Guida giorno per giorno: percorso completo data per data (trama, cosa fare di giorno e di sera, dove, risposte giuste, avvisi sulle scadenze) con data corrente della partita e azioni spuntabili | ⬜ (ricerca in corso) |
+| 7.5b | Guida giorno per giorno: seed `percorso.json` (346 giorni dal 9 aprile al 20 marzo dalla soluzione allgamestaff: trama, vincoli, meteo, azioni di giorno e di sera con tipo, riferimento risolto alle chiavi dell'app — Confidenti, dungeon, Richieste, libri, film, attività, negozi, Doti — rango atteso, note, avvisi, fonte; 47 giorni non coperti dalle fonti segnalati); migrazione 018 (`giorno_percorso`, `azione_partita`); giorno corrente = `partita.data_gioco`; `GET /api/compendio/percorso?partita`, `/percorso/:data`, `PUT /api/partite/:id/percorso`, `PUT /api/partite/:id/giorno`; pagina «Guida → Guida giorno per giorno» (apre il giorno corrente, mese/giorno, precedente/successivo, azioni spuntabili con collegamenti alle schede con le risposte, «Segna come giorno corrente») | ⏳ in validazione |
 
 ## Fase 8 — Città, attività, inventario
 

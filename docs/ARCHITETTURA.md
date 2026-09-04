@@ -199,6 +199,11 @@ Migrazione 017: `negozio` (FK opzionali a quartiere e Confidente), `articolo` (c
 effetto, statistiche, disponibilità, `verificato`), `acquisto_partita`. `negoziService` espone elenco, scheda con acquisti, ricerca
 (LIKE su nome/effetto/negozio, filtro categoria e destinatario con «tutti», massimo 300 risultati) e spunta con evento «acquisto».
 
+### Guida giorno per giorno (Fase 7.5b)
+`giorno_percorso` (data 'MM-GG', azioni in JSON con riferimento risolto in fase di build del seed) e `azione_partita` (data + indice
+dell'azione). Il giorno corrente è `partita.data_gioco`. `percorsoService`: indice leggero, scheda del giorno con precedente/successivo,
+spunta con evento «percorso», impostazione del giorno corrente.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|
