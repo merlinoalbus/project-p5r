@@ -727,6 +727,25 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Cruciverba di Leblanc (Fase 7.5) ----
+
+export interface CruciverbaDto {
+  /** 'MM-GG' del calendario di gioco. */
+  giorno: string;
+  indizio: string;
+  risposta: string;
+  rispostaEn: string | null;
+  fonte: string;
+  /** Risolto nella partita. */
+  fatto: boolean;
+}
+
+export interface CruciverbaTuttiDto {
+  cruciverba: CruciverbaDto[];
+  risolti: number;
+  totale: number;
+}
+
 // ---- Città, attività, libri e film (Fase 8.1) ----
 
 export type DoteChiave = 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia';

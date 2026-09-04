@@ -8,7 +8,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyCruciverba, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
@@ -18,6 +18,7 @@ import { impostaDomandaFatta } from '../services/domandeService.js';
 import { impostaStatoPunto } from '../services/dungeonService.js';
 import { impostaStatoRichiesta } from '../services/richiesteService.js';
 import { impostaLettura } from '../services/attivitaService.js';
+import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
@@ -73,6 +74,10 @@ router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChi
   res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.regalo, b.fatto));
 });
 
+router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciverba }), (req, res) => {
+  const b = req.body as { data: string; fatto: boolean };
+  res.json(impostaCruciverba(Number(req.params.id), b.data, b.fatto));
+});
 router.put('/:id/letture', validate({ params: paramsPartita, body: bodyLettura }), (req, res) => {
   const b = req.body as { tipo: 'libro' | 'film'; chiave: string; fatto: boolean };
   res.json(impostaLettura(Number(req.params.id), b.tipo, b.chiave, b.fatto));

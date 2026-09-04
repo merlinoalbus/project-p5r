@@ -11,6 +11,7 @@ import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { dettaglioQuartiere, elencaQuartieri } from '../services/cittaService.js';
 import { attivitaTutte } from '../services/attivitaService.js';
+import { cruciverba } from '../services/cruciverbaService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -62,6 +63,9 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
+  res.json(cruciverba((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/citta', (_req, res) => {
   res.json(elencaQuartieri());

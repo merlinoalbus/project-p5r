@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CruciverbaSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -55,6 +55,7 @@ interface SeedCompleto {
   battaglia: BattagliaSeed;
   citta: CittaSeed;
   attivita: AttivitaSeed;
+  cruciverba: CruciverbaSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -86,6 +87,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     battaglia: JSON.parse(contenuti['battaglia.json']) as BattagliaSeed,
     citta: JSON.parse(contenuti['citta.json']) as CittaSeed,
     attivita: JSON.parse(contenuti['attivita.json']) as AttivitaSeed,
+    cruciverba: JSON.parse(contenuti['cruciverba.json']) as CruciverbaSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -397,6 +399,13 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     const chiaviFilm = new Set<string>();
     for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, prezzo: f.prezzo, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
     for (const r of db.prepare('SELECT chiave FROM film').all() as Array<{ chiave: string }>) if (!chiaviFilm.has(r.chiave)) db.prepare('DELETE FROM film WHERE chiave = ?').run(r.chiave);
+
+    // ---- Cruciverba (Fase 7.5): upsert per data, rimozione orfani; le spunte per partita restano ----
+    const insC = db.prepare(`INSERT INTO cruciverba (data, ordine, indizio, risposta, risposta_en, fonte) VALUES (@data, @ordine, @indizio, @risposta, @risposta_en, @fonte)
+      ON CONFLICT(data) DO UPDATE SET ordine = excluded.ordine, indizio = excluded.indizio, risposta = excluded.risposta, risposta_en = excluded.risposta_en, fonte = excluded.fonte`);
+    const dateCruciverba = new Set<string>();
+    for (const c of seed.cruciverba.cruciverba) { dateCruciverba.add(c.data); insC.run({ data: c.data, ordine: c.ordine, indizio: c.indizio, risposta: c.risposta, risposta_en: c.rispostaEn, fonte: c.fonte }); }
+    for (const r of db.prepare('SELECT data FROM cruciverba').all() as Array<{ data: string }>) if (!dateCruciverba.has(r.data)) db.prepare('DELETE FROM cruciverba WHERE data = ?').run(r.data);
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

@@ -22,6 +22,7 @@ import { migration012 } from './012_calendario.js';
 import { migration013 } from './013_dungeon.js';
 import { migration014 } from './014_richieste.js';
 import { migration015 } from './015_citta.js';
+import { migration016 } from './016_cruciverba.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015];
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016];
