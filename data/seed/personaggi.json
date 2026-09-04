@@ -1,0 +1,1021 @@
+{
+ "personaggi": [
+  {
+   "chiave": "joker",
+   "ordine": 0,
+   "nome": "Protagonista",
+   "nomeCodice": "Joker",
+   "confidente": null,
+   "arcano": "Matto",
+   "ruolo": "Protagonista e leader dei Ladri Fantasma. Studente trasferito che, dopo un incidente, risveglia la capacità di usare una Persona; alloggia presso il Leblanc e frequenta la Shujin Academy.",
+   "presentazione": "Trasferitosi a Tokyo poco prima dell'inizio dell'anno scolastico, trova alloggio in una caffetteria gestita da un amico di famiglia. Appare tranquillo ed educato, ma sotto i panni di Ladro Fantasma mostra un lato ben diverso, dividendosi tra la vita da studente e le attività notturne del gruppo.",
+   "persona": [
+    "Arsène",
+    "Satanael"
+   ],
+   "armi": {
+    "mischia": "Coltelli",
+    "distanza": "Pistole"
+   },
+   "battaglia": "Wild Card: nessuna affinità elementale fissa. Può equipaggiare ed evocare qualsiasi Persona posseduta e cambiarla anche a metà scontro, adattandosi a qualunque elemento o ruolo (attacco, magia, supporto, cura).",
+   "scuola": "Shujin Academy (2° anno)",
+   "eta": null,
+   "doppiatori": {
+    "jp": "Jun Fukuyama",
+    "en": "Xander Mobus"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://megamitensei.fandom.com/wiki/Wild_Card"
+    }
+   ]
+  },
+  {
+   "chiave": "ryuji",
+   "ordine": 1,
+   "nome": "Ryuji Sakamoto",
+   "nomeCodice": "Skull",
+   "confidente": "ryuji",
+   "arcano": "Carro",
+   "ruolo": "Compagno di classe del protagonista e primo alleato tra i Ladri Fantasma; ex atleta di atletica, diretto e a tratti brusco ma leale.",
+   "presentazione": "Sedicenne della Shujin Academy, è considerato un ragazzo problematico ed evitato per il suo comportamento diretto, conseguenza di un incidente avvenuto in passato. Dopo aver incontrato il protagonista viene coinvolto nel risveglio del proprio potere.",
+   "persona": [
+    "Captain Kidd",
+    "Seiten Taisei",
+    "William"
+   ],
+   "armi": {
+    "mischia": "Bastoni e mazze",
+    "distanza": "Fucili a pompa"
+   },
+   "battaglia": "Attaccante fisico pesante con supporto di magia Elettrica; funge da \"tank\" del gruppo e può potenziare l'attacco della squadra (Tarukaja/Matarukaja).",
+   "scuola": "Shujin Academy",
+   "eta": "16 anni",
+   "doppiatori": {
+    "jp": "Mamoru Miyano",
+    "en": "Max Mittelman"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://gamerant.com/persona-5-royal-best-equipment-ryuji-aka-skull/"
+    }
+   ]
+  },
+  {
+   "chiave": "ann",
+   "ordine": 2,
+   "nome": "Ann Takamaki",
+   "nomeCodice": "Panther",
+   "confidente": "ann",
+   "arcano": "Amanti",
+   "ruolo": "Compagna di classe del protagonista, per metà americana; sincera e innocente dietro l'aspetto appariscente, seconda a unirsi ai Ladri Fantasma.",
+   "presentazione": "Studentessa del secondo anno dal grande fascino, si sente isolata e fatica a integrarsi con gli altri. Dopo aver incontrato il protagonista viene coinvolta nel risveglio del potere della propria Persona.",
+   "persona": [
+    "Carmen",
+    "Ecate",
+    "Célestine"
+   ],
+   "armi": {
+    "mischia": "Fruste",
+    "distanza": "Mitragliette"
+   },
+   "battaglia": "Attaccante magica specializzata in Fuoco, capace di infliggere Bruciatura sui nemici; dispone anche di qualche abilità di cura minore.",
+   "scuola": "Shujin Academy (2° anno)",
+   "eta": null,
+   "doppiatori": {
+    "jp": "Nana Mizuki",
+    "en": "Erika Harlacher"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://megamitensei.fandom.com/wiki/Party/Ann_Takamaki"
+    }
+   ]
+  },
+  {
+   "chiave": "morgana",
+   "ordine": 3,
+   "nome": "Morgana",
+   "nomeCodice": "Mona",
+   "confidente": "morgana",
+   "arcano": "Mago",
+   "ruolo": "Creatura misteriosa dall'aspetto felino salvata dal protagonista e Ryuji in un Palazzo; vive con il protagonista e funge da navigatore strategico del gruppo. Tiene a precisare di non essere un gatto.",
+   "presentazione": "Comprende il linguaggio umano e può cambiare outfit e forma fisica. Nonostante il carattere pungente e le frequenti frecciate, si dimostra un alleato leale dei Ladri Fantasma.",
+   "persona": [
+    "Zorro",
+    "Mercurio",
+    "Diego"
+   ],
+   "armi": {
+    "mischia": "Spade",
+    "distanza": "Fionde"
+   },
+   "battaglia": "Supporto e cura del gruppo tramite magia di Vento; grazie all'alta agilità agisce spesso per primo, risultando un ottimo guaritore d'emergenza.",
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": "Ikue Ōtani",
+    "en": "Cassandra Lee Morris"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://megamitensei.fandom.com/wiki/Party/Morgana"
+    }
+   ]
+  },
+  {
+   "chiave": "yusuke",
+   "ordine": 4,
+   "nome": "Yusuke Kitagawa",
+   "nomeCodice": "Fox",
+   "confidente": "yusuke",
+   "arcano": "Imperatore",
+   "ruolo": "Studente modello del dipartimento di belle arti, cresciuto da un rinomato artista dopo la morte della madre; il suo cammino incrocia quello dei Ladri Fantasma.",
+   "presentazione": "Giovane affascinante ed eccentrico, dedica la propria vita alla pittura grazie a un talento naturale, fino a un evento che lo porta a unirsi al gruppo.",
+   "persona": [
+    "Goemon",
+    "Kamu Susano-o",
+    "Gorokichi"
+   ],
+   "armi": {
+    "mischia": "Katana",
+    "distanza": "Fucili d'assalto"
+   },
+   "battaglia": "Attaccante in prima linea con abilità Fisiche e di Ghiaccio (può infliggere Congelamento); buon equilibrio tra potenza offensiva e resistenza.",
+   "scuola": "Kosei High School (dipartimento di Belle Arti)",
+   "eta": null,
+   "doppiatori": {
+    "jp": "Tomokazu Sugita",
+    "en": "Matthew Mercer"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://brightrockmedia.com/persona-5-royal-yusuke-persona-skills-and-build-guide/"
+    }
+   ]
+  },
+  {
+   "chiave": "makoto",
+   "ordine": 5,
+   "nome": "Makoto Niijima",
+   "nomeCodice": "Queen",
+   "confidente": "makoto",
+   "arcano": "Papessa",
+   "ruolo": "Presidentessa del consiglio studentesco della Shujin Academy, seria e diligente; indaga sui Ladri Fantasma prima di unirsi a loro.",
+   "presentazione": "Studentessa del terzo anno dal rendimento impeccabile, molto stimata dal corpo docenti. Dopo aver sospettato che i Ladri Fantasma fossero studenti della sua scuola, arriva a confrontarsi direttamente con il protagonista.",
+   "persona": [
+    "Ioanna",
+    "Anat",
+    "Agnes"
+   ],
+   "armi": {
+    "mischia": "Tirapugni",
+    "distanza": "Revolver"
+   },
+   "battaglia": "Membro versatile e bilanciato: magia Nucleare, abilità fisiche, supporto/cura e debuff; spesso considerata il personaggio più completo della squadra.",
+   "scuola": "Shujin Academy (3° anno) — presidentessa del consiglio studentesco",
+   "eta": null,
+   "doppiatori": {
+    "jp": "Rina Satō",
+    "en": "Cherami Leigh"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://megamitensei.fandom.com/wiki/Party/Makoto_Niijima"
+    }
+   ]
+  },
+  {
+   "chiave": "futaba",
+   "ordine": 6,
+   "nome": "Futaba Sakura",
+   "nomeCodice": "Oracle",
+   "confidente": "futaba",
+   "arcano": "Eremita",
+   "ruolo": "Ragazza dotata di capacità fuori dal comune in calcolo e programmazione; vive isolata con pochi contatti umani prima di contattare i Ladri Fantasma.",
+   "presentazione": "Nonostante il suo talento straordinario, ha enormi difficoltà nelle relazioni interpersonali. Sviluppa un forte interesse per i Ladri Fantasma e li contatta con un metodo del tutto inaspettato.",
+   "persona": [
+    "Necronomicon",
+    "Prometeo",
+    "Al Azif"
+   ],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": "Navigatrice/supporto: non occupa uno slot da combattimento attivo. Analizza le debolezze nemiche, applica potenziamenti e debuff e cura i compagni non in campo al termine dello scontro.",
+   "scuola": null,
+   "eta": "15 anni",
+   "doppiatori": {
+    "jp": "Aoi Yūki",
+    "en": "Erica Lindbeck"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://megamitensei.fandom.com/wiki/Party/Futaba_Sakura"
+    }
+   ]
+  },
+  {
+   "chiave": "haru",
+   "ordine": 7,
+   "nome": "Haru Okumura",
+   "nomeCodice": "Noir",
+   "confidente": "haru",
+   "arcano": "Imperatrice",
+   "ruolo": "Studentessa del terzo anno alla Shujin Academy, gentile e appassionata di giardinaggio; mantiene riserbo sulla propria vita privata agiata.",
+   "presentazione": "Il suo modo di parlare e comportarsi tradisce un'educazione agiata, ma evita accuratamente di parlare della propria vita privata, mantenendo un alone di mistero sulla situazione familiare.",
+   "persona": [
+    "Milady",
+    "Astarte",
+    "Lucy"
+   ],
+   "armi": {
+    "mischia": "Asce",
+    "distanza": "Lanciagranate"
+   },
+   "battaglia": "Attaccante magica ad area specializzata in Psicocinesi, capace di infliggere danni elevati a tutto il gruppo nemico; può colpire anche con l'arma a distanza.",
+   "scuola": "Shujin Academy (3° anno)",
+   "eta": null,
+   "doppiatori": {
+    "jp": "Haruka Tomatsu",
+    "en": "Xanthe Huynh"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://hardcoregamer.com/persona-5-the-phantom-x-noir-build-guide/"
+    }
+   ]
+  },
+  {
+   "chiave": "akechi",
+   "ordine": 8,
+   "nome": "Goro Akechi",
+   "nomeCodice": "Crow",
+   "confidente": "akechi",
+   "arcano": "Giustizia",
+   "ruolo": "Giovane detective molto popolare in televisione per aver risolto numerosi casi; studente di un altro istituto, il suo percorso incrocia quello dei Ladri Fantasma.",
+   "presentazione": "Studente del terzo anno dall'intelligenza brillante, soprannominato \"detective\" per i casi risolti. L'aspetto affascinante e le apparizioni televisive ne hanno accresciuto la popolarità.",
+   "persona": [
+    "Robin Hood",
+    "Loki",
+    "Ervardo"
+   ],
+   "armi": {
+    "mischia": "Sciabole",
+    "distanza": "Pistole"
+   },
+   "battaglia": "Attaccante versatile con abilità Divine, di Maledizione e Almighty, oltre a colpi fisici; punta sulla varietà offensiva per superare le resistenze nemiche.",
+   "scuola": "3° anno, istituto non specificato (diverso dalla Shujin Academy)",
+   "eta": "17 anni",
+   "doppiatori": {
+    "jp": "Sōichirō Hoshi",
+    "en": "Robbie Daymond"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://brightrockmedia.com/2020/04/12/persona-5-royal-akechi-persona-skills-and-build-guide/"
+    }
+   ]
+  },
+  {
+   "chiave": "kasumi",
+   "ordine": 9,
+   "nome": "Kasumi Yoshizawa",
+   "nomeCodice": "Violet",
+   "confidente": "kasumi",
+   "arcano": "Fede",
+   "ruolo": "Trasferita alla Shujin Academy nello stesso periodo del protagonista; ginnasta di grande talento sin dalle scuole medie, carattere gentile e determinato.",
+   "presentazione": "L'istituto ripone in lei grandi aspettative grazie agli eccellenti risultati sportivi. Il suo carattere la rende una presenza subito riconoscibile a scuola. Personaggio esclusivo di Persona 5 Royal.",
+   "persona": [
+    "Cenerentola",
+    "Vanadis",
+    "Ella"
+   ],
+   "armi": {
+    "mischia": "Stocchi",
+    "distanza": "Fucili d'assalto"
+   },
+   "battaglia": "Attaccante versatile con abilità Divine e Fisiche.",
+   "scuola": "Shujin Academy",
+   "eta": null,
+   "doppiatori": {
+    "jp": "Sora Amamiya",
+    "en": "Laura Post"
+   },
+   "giocabile": true,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "battaglia",
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "battaglia",
+     "fonte": "https://samurai-gamers.com/persona-5/cendrillon-persona-stats-and-skills/"
+    }
+   ]
+  },
+  {
+   "chiave": "sojiro",
+   "ordine": 10,
+   "nome": "Sojiro Sakura",
+   "nomeCodice": null,
+   "confidente": "sojiro",
+   "arcano": "Ierofante",
+   "ruolo": "Proprietario del caffè Leblanc a Yongen-Jaya; ospita il protagonista durante il suo anno di libertà vigilata e sviluppa con lui un legame di fiducia crescente.",
+   "presentazione": "Il protagonista alloggia presso il suo locale. Confidente di riferimento per la vita quotidiana del protagonista a Tokyo.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-sojiro-ierofante/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "kawakami",
+   "ordine": 11,
+   "nome": "Sadayo Kawakami",
+   "nomeCodice": null,
+   "confidente": "kawakami",
+   "arcano": "Temperanza",
+   "ruolo": "Insegnante di Economia domestica e docente della classe del protagonista alla Shujin Academy.",
+   "presentazione": "Confidente disponibile presso la scuola; il legame con lei nasce nel contesto scolastico del protagonista.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": "Shujin Academy (insegnante)",
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-kawakami-temperanza/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "takemi",
+   "ordine": 12,
+   "nome": "Tae Takemi",
+   "nomeCodice": null,
+   "confidente": "takemi",
+   "arcano": "Morte",
+   "ruolo": "Medico presso la Clinica Takemi a Yongen-Jaya, descritta come una \"dottoressa punk\"; il protagonista la aiuta partecipando a sperimentazioni cliniche.",
+   "presentazione": "Confidente legata al mondo medico, disponibile presso la propria clinica a Yongen-Jaya.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "iwai",
+   "ordine": 13,
+   "nome": "Munehisa Iwai",
+   "nomeCodice": null,
+   "confidente": "iwai",
+   "arcano": "Appeso",
+   "ruolo": "Gestore del negozio di softair \"Untouchable\"; figura chiave per la personalizzazione delle armi da fuoco dei Ladri Fantasma.",
+   "presentazione": "Confidente legato all'equipaggiamento del gruppo; sviluppare il legame con lui sblocca potenziamenti progressivi per le armi.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-iwai-appeso/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "ohya",
+   "ordine": 14,
+   "nome": "Ichiko Ohya",
+   "nomeCodice": null,
+   "confidente": "ohya",
+   "arcano": "Diavolo",
+   "ruolo": "Giornalista incontrata dal protagonista; confidente legata al mondo dell'informazione.",
+   "presentazione": "Confidente conosciuta in un bar di Shinjuku; la relazione sociale con il protagonista si sviluppa nel corso del gioco.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-ohya-diavolo/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "chihaya",
+   "ordine": 15,
+   "nome": "Chihaya Mifune",
+   "nomeCodice": null,
+   "confidente": "chihaya",
+   "arcano": "Fortuna",
+   "ruolo": "Veggente/cartomante che il protagonista incontra a Shinjuku.",
+   "presentazione": "Confidente legata alla divinazione; la relazione con lei si sviluppa attorno alle sue letture.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-chihaya-fortuna/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "shinya",
+   "ordine": 16,
+   "nome": "Shinya Oda",
+   "nomeCodice": null,
+   "confidente": "shinya",
+   "arcano": "Torre",
+   "ruolo": "Giovane prodigio dei videogiochi arcade, coinvolto dai Ladri Fantasma per una missione nei Memento.",
+   "presentazione": "Gamer dotato di notevoli abilità che diventa alleato del gruppo dopo essere stato coinvolto in una richiesta di collaborazione.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-shinya-torre/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "hifumi",
+   "ordine": 17,
+   "nome": "Hifumi Togo",
+   "nomeCodice": null,
+   "confidente": "hifumi",
+   "arcano": "Stella",
+   "ruolo": "Giocatrice professionista di Shogi; insegna al protagonista le strategie del gioco.",
+   "presentazione": "Confidente scoperta dal gruppo tramite un messaggio; il legame si basa inizialmente su lezioni di Shogi.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-hifumi-stella/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori",
+    "scuola"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    },
+    {
+     "campo": "scuola",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "yoshida",
+   "ordine": 18,
+   "nome": "Toranosuke Yoshida",
+   "nomeCodice": null,
+   "confidente": "yoshida",
+   "arcano": "Sole",
+   "ruolo": "Politico indipendente e oratore di strada.",
+   "presentazione": "Confidente legato alla sfera politica; il protagonista può sostenerne i discorsi pubblici.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-yoshida-sole/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "mishima",
+   "ordine": 19,
+   "nome": "Yuuki Mishima",
+   "nomeCodice": null,
+   "confidente": "mishima",
+   "arcano": "Luna",
+   "ruolo": "Compagno di scuola del protagonista; gestisce il sito web dei sostenitori dei Ladri Fantasma e desidera aiutarli in ogni modo possibile.",
+   "presentazione": "Confidente scolastico, sostenitore dichiarato dei Ladri Fantasma fin dai primi tempi.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": "Shujin Academy",
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-mishima-luna/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "maruki",
+   "ordine": 20,
+   "nome": "Takuto Maruki",
+   "nomeCodice": null,
+   "confidente": "maruki",
+   "arcano": "Consigliere",
+   "ruolo": "Nuovo psicologo scolastico assunto dalla Shujin Academy dopo gli incidenti che hanno coinvolto alcuni studenti; offre supporto psicologico ai ragazzi. Personaggio esclusivo di Persona 5 Royal.",
+   "presentazione": "Descritto come un tipo alquanto curioso e ben visto dalle studentesse; dedito alla ricerca accademica, tende a dilungarsi in discussioni teoriche ma mostra sempre gentilezza e disponibilità verso i suoi pazienti.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": "Shujin Academy (consulente)",
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-maruki-consigliere/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "sae",
+   "ordine": 21,
+   "nome": "Sae Niijima",
+   "nomeCodice": null,
+   "confidente": "sae",
+   "arcano": "Giudizio",
+   "ruolo": "Procuratrice e sorella maggiore di Makoto; il legame con lei si sviluppa nella cornice dell'interrogatorio del protagonista ed è definito \"atipico\" rispetto agli altri Confidenti.",
+   "presentazione": "Confidente inserita nella struttura narrativa a cornice del gioco; la guida italiana avverte che approfondirne il legame può contenere spoiler sugli eventi di gioco.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-sae-giudizio/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "igor",
+   "ordine": 22,
+   "nome": "Igor",
+   "nomeCodice": null,
+   "confidente": "igor",
+   "arcano": "Matto",
+   "ruolo": "Misterioso padrone della Stanza di Velluto; guida il protagonista nella fusione e nella gestione delle Persona.",
+   "presentazione": "Anziano uomo spesso immerso nei propri pensieri, dietro le sbarre della prigione della Stanza di Velluto. Fin dal primo incontro predice che il futuro del protagonista è destinato alla rovina, ma decide comunque di offrirgli il proprio aiuto.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": "David Lodge"
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [
+    "doppiatori.jp"
+   ],
+   "fontiSecondarie": [
+    {
+     "campo": "doppiatori.jp",
+     "fonte": "https://en.wikipedia.org/wiki/List_of_Persona_5_characters"
+    }
+   ]
+  },
+  {
+   "chiave": "caroline",
+   "ordine": 23,
+   "nome": "Caroline",
+   "nomeCodice": null,
+   "confidente": null,
+   "arcano": "Forza",
+   "ruolo": "Gemella custode della prigione nella Stanza di Velluto, al servizio di Igor; assiste il protagonista nel suo percorso insieme alla sorella Justine.",
+   "presentazione": "Personalità autoritaria e impulsiva: è la \"poliziotta cattiva\" del duo di custodi della Stanza di Velluto.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": "Carrie Keranen"
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [],
+   "fontiSecondarie": []
+  },
+  {
+   "chiave": "justine",
+   "ordine": 24,
+   "nome": "Justine",
+   "nomeCodice": null,
+   "confidente": null,
+   "arcano": "Forza",
+   "ruolo": "Gemella custode della prigione nella Stanza di Velluto, al servizio di Igor; assiste il protagonista nel suo percorso insieme alla sorella Caroline.",
+   "presentazione": "Personalità calma, riflessiva e composta: è la \"poliziotta buona\" del duo di custodi della Stanza di Velluto.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": "Carrie Keranen"
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/personaggi/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [],
+   "fontiSecondarie": []
+  },
+  {
+   "chiave": "jose",
+   "ordine": 25,
+   "nome": "Jose",
+   "nomeCodice": null,
+   "confidente": null,
+   "arcano": null,
+   "ruolo": "Personaggio enigmatico esclusivo di Persona 5 Royal; venditore che si incontra nei Memento.",
+   "presentazione": "Raccoglie fiori per trasformarli in misteriose bevande, convinto che questo lo aiuti a comprendere meglio gli esseri umani. In cambio offre oggetti, accessori e la possibilità di modificare la struttura dei Memento tramite i timbri raccolti, aumentando le ricompense ottenibili.",
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-jose/",
+   "verificato": true,
+   "campiDaFontiSecondarie": [],
+   "fontiSecondarie": []
+  }
+ ],
+ "gruppi": [
+  {
+   "nome": "Ladri Fantasma",
+   "membri": [
+    "joker",
+    "ryuji",
+    "ann",
+    "morgana",
+    "yusuke",
+    "makoto",
+    "futaba",
+    "haru",
+    "akechi",
+    "kasumi"
+   ]
+  },
+  {
+   "nome": "Stanza di Velluto",
+   "membri": [
+    "igor",
+    "caroline",
+    "justine"
+   ]
+  },
+  {
+   "nome": "Confidenti",
+   "membri": [
+    "ryuji",
+    "ann",
+    "yusuke",
+    "makoto",
+    "futaba",
+    "haru",
+    "akechi",
+    "kasumi",
+    "morgana",
+    "igor",
+    "sojiro",
+    "kawakami",
+    "takemi",
+    "iwai",
+    "ohya",
+    "chihaya",
+    "shinya",
+    "hifumi",
+    "yoshida",
+    "mishima",
+    "maruki",
+    "sae"
+   ]
+  },
+  {
+   "nome": "Terzo Semestre (Royal)",
+   "membri": [
+    "kasumi",
+    "maruki",
+    "jose"
+   ]
+  }
+ ]
+}

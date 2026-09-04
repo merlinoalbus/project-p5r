@@ -727,6 +727,48 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Oggetti della guida (Fase 10.2) ----
+
+export interface OggettiGuidaDto {
+  consumabili: Array<{ nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean }>;
+  chiaveEMateriali: Array<{ nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean }>;
+  fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean }> };
+  personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string };
+  abiti: { introduzione: string; elenco: Array<{ nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
+  scambi: Array<{ venditore: string; dove: string; quando: string; offerte: Array<{ ricevi: string; dai: string; note: string | null }>; fonte: string; verificato: boolean }>;
+}
+
+// ---- Personaggi senza spoiler (Fase 10.3) ----
+
+export interface PersonaggioDto {
+  chiave: string;
+  nome: string;
+  nomeCodice: string | null;
+  /** Chiave del Confidente nell'app, se esiste. */
+  confidente: string | null;
+  arcano: string | null;
+  ruolo: string;
+  presentazione: string;
+  /** Persona iniziale ed evoluzioni. */
+  persona: string[];
+  armi: { mischia: string | null; distanza: string | null };
+  battaglia: string | null;
+  scuola: string | null;
+  eta: string | null;
+  doppiatori: { jp: string | null; en: string | null };
+  giocabile: boolean;
+  fonte: string;
+  verificato: boolean;
+  /** Campi presi da fonti secondarie (non dalla guida italiana). */
+  campiDaFontiSecondarie: string[];
+  fontiSecondarie: Array<{ campo: string | null; fonte: string }>;
+}
+
+export interface PersonaggiDto {
+  personaggi: PersonaggioDto[];
+  gruppi: Array<{ nome: string; membri: string[] }>;
+}
+
 // ---- Sfide: Battaglie Sfida, boss segreti, Magnate, tratti (Fase 9.2) ----
 
 export interface BattagliaSfidaDto {

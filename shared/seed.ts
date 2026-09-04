@@ -85,6 +85,12 @@ export interface MappeSeed {
     marcatori?: Array<{ punto: string; x: number; y: number }> }>;
 }
 
+/** Oggetti della guida (consumabili, chiave e materiali, fabbricazione, personalizzazione armi, abiti, scambi): consultazione in JSON. */
+export type OggettiGuidaSeed = Record<string, unknown>;
+
+/** Personaggi senza spoiler (guida allgamestaff + fonti secondarie segnalate per campo). */
+export type PersonaggiSeed = Record<string, unknown> & { personaggi: Array<{ chiave: string; confidente: string | null }> };
+
 /** Sfide (guida allgamestaff): Battaglie Sfida, boss segreti, Magnate, tratti; contenuti di consultazione in JSON. */
 export type SfideSeed = Record<string, unknown>;
 
