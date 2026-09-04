@@ -14,7 +14,7 @@ import { formattaYen } from '../../utils/punti';
 import type { PianoSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconAlbero, IconCestino, IconMatita, IconRicalcola } from '../shared/iconeGuida';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -39,7 +39,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
             <button type="submit" className="btn btn-primary btn-sm">Ok</button>
           </form>
         ) : (
-          <button type="button" className="chip chip--icona touch" onClick={() => setModificaTitolo(true)} title="Rinomina">{piano.titolo || 'Senza titolo'}<IconMatita size={13} /></button>
+          <button type="button" className="chip chip--icona touch" onClick={() => setModificaTitolo(true)} title="Rinomina">{piano.titolo || 'Senza titolo'}<IconaAzione chiave="modifica" dimensione={13} /></button>
         )}
         {piano.obiettivoId && <Link to="/partita?scheda=obiettivi" className="chip no-underline" title={`Obiettivo ${piano.obiettivoStato ?? ''}`}>Obiettivo{piano.obiettivoStato === 'raggiunto' ? ' raggiunto' : ''}</Link>}
         <span className="ml-auto font-black tabular-nums">{formattaYen(piano.costo)}</span>
@@ -63,7 +63,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
                 <span aria-hidden="true">→</span>
                 <Link to={p.ingredienti.length === 2 ? `/fusione?vista=calcolatore&a=${p.ingredienti[0].id}&b=${p.ingredienti[1].id}` : `/fusione?vista=ricette&ricette=${p.risultato.id}`} className="chip no-underline font-semibold">{p.risultato.nomeIt}</Link>
                 <span className="text-[12px] text-text-muted">fusione {p.tipo === 'speciale' ? 'speciale' : p.tipo === 'stesso-arcano' ? 'stesso arcano' : p.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'normale'}{p.skillPortate.length ? ` · eredita ${p.skillPortate.map((s) => s.nomeIt).join(', ')}` : ''}</span>
-                {p.ingredienti.every((ing) => possedutaDi.has(ing.id)) && <button type="button" className="btn btn-primary btn-sm" onClick={() => setPassoInEsecuzione(i)}>Esegui</button>}
+                {p.ingredienti.every((ing) => possedutaDi.has(ing.id)) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Esegui" onClick={() => setPassoInEsecuzione(i)} />}
               </li>
             ))}
           </ul>
@@ -73,9 +73,9 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
       )}
       {piano.note && <div className="text-[13px] text-text-secondary">{piano.note}</div>}
       <div className="flex flex-wrap gap-1.5">
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconAlbero size={20} />} titolo={aperto ? 'Nascondi albero' : 'Mostra albero'} onClick={() => setAperto((a) => !a)} aria-expanded={aperto} />
-        <CollegamentoVisivo to={`/fusione?vista=piani&piani=${piano.personaId}${piano.skill.length ? `&skill=${piano.skill.map((s) => s.id).join(',')}` : ''}`} tono="fantasma" compatto icona={<IconRicalcola size={20} />} titolo="Ricalcola" />
-        <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo="Elimina" onClick={onElimina} />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="albero" dimensione={20} />} titolo={aperto ? 'Nascondi albero' : 'Mostra albero'} onClick={() => setAperto((a) => !a)} aria-expanded={aperto} />
+        <CollegamentoVisivo to={`/fusione?vista=piani&piani=${piano.personaId}${piano.skill.length ? `&skill=${piano.skill.map((s) => s.id).join(',')}` : ''}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricalcola" />
+        <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" onClick={onElimina} />
       </div>
       {aperto && <AlberoPiano radice={piano.piano.radice} inScorta={inScorta} />}
       {passoInEsecuzione !== null && av.passi[passoInEsecuzione] && (
@@ -125,7 +125,7 @@ export function PianiSalvati({ partitaId }: Props) {
         I piani salvati dalla vista «Piano di fusione» restano qui con l'avanzamento ricalcolato sulla scorta di adesso: foglie già possedute, fusioni già fatte e passi eseguibili subito.
         {obiettivoId && <> Filtro: solo i piani dell'obiettivo. <Link to="/partita?scheda=piani" className="text-primary">Tutti i piani</Link></>}
       </p>
-      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void lista.ricarica()}>Riprova</button></div>}
+      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
         <EmptyState illustrazione="vuoto-piani" title="Nessun piano salvato" hint="Calcola un piano nella pagina Fusione («Piano di fusione») e premi «Salva piano»." action={<Link to="/fusione?vista=piani" className="btn btn-primary no-underline">Vai ai piani di fusione</Link>} />

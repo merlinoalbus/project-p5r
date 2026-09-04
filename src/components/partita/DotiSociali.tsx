@@ -15,11 +15,11 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { AssetImg } from '../shared/AssetImg';
-import { IconEvoca, IconLibro } from '../shared/iconeGuida';
 import { StellaCinque } from '../shared/StellaCinque';
 import { avanzamentoDote, quotaVersoProssimoRango } from '../../utils/doti';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -73,8 +73,8 @@ export function DotiSociali({ partitaId }: Props) {
           <div className="w-full flex flex-col items-center gap-1.5" role="group" aria-label="Modificatori delle note">
             <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
             <div className="flex flex-wrap justify-center gap-2">
-              <PulsanteVisivo attivo={fortuna} icona={<AssetImg nome="confidenti/chihaya" alt="" decorativa className="h-7 w-7 object-cover object-top rounded-full border border-white/40" fallback={<IconEvoca size={22} />} />} titolo="Fortuna ×1,5" dettaglio="lettura di Chihaya" onClick={() => setFortuna((v) => !v)} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)" />
-              <PulsanteVisivo attivo={libro} icona={<IconLibro size={24} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
+              <PulsanteVisivo attivo={fortuna} icona={<IconaAzione chiave="fortuna" dimensione={24} />} titolo="Fortuna ×1,5" dettaglio="lettura di Chihaya" onClick={() => setFortuna((v) => !v)} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)" />
+              <PulsanteVisivo attivo={libro} icona={<IconaAzione chiave="libro" dimensione={24} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
             </div>
           </div>
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>

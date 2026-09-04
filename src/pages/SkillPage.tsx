@@ -13,6 +13,8 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { ORDINE_ELEMENTI_SKILL, coloreElemento } from '../utils/elementi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { AssetImg } from '../components/shared/AssetImg';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 /** Elenco skill: ricerca su nome ed effetto italiano, filtro per elemento. */
 export function SkillPage() {
@@ -40,16 +42,17 @@ export function SkillPage() {
       />
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o effetto…" />
       <div className="flex gap-1.5 flex-wrap">
-        <button type="button" className={`chip touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')} aria-pressed={elemento === ''}>Tutti</button>
+        <button type="button" className={`chip chip--icona touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')} aria-pressed={elemento === ''}><IconaAzione chiave="tutti" dimensione={14} />Tutti</button>
         {ORDINE_ELEMENTI_SKILL.map((el) => (
           <button
             key={el}
             type="button"
-            className="chip touch"
+            className="chip chip--icona touch"
             style={elemento === el ? { borderColor: coloreElemento(el), color: coloreElemento(el), background: `color-mix(in srgb, ${coloreElemento(el)} 16%, transparent)` } : undefined}
             onClick={() => setElemento(el)}
             aria-pressed={elemento === el}
           >
+            <AssetImg nome={`elementi/${el}`} alt="" decorativa className="w-5 h-5 object-contain" fallback={<span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: coloreElemento(el) }} aria-hidden="true" />} />
             {glossario?.elementiSkill[el] ?? el}
           </button>
         ))}

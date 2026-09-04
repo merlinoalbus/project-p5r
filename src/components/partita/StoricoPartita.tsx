@@ -12,8 +12,10 @@ import { EmptyState, Spinner } from '../shared/PageState';
 import type { EventoPartitaDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconAltro, IconAnnullaCerchio, IconBersaglio, IconCarte, IconCestino, IconElenco, IconEvoca, IconMappa, IconPersone, IconRiepilogo, IconSpunta, IconStella } from '../shared/iconeGuida';
+import { IconMappa } from '../shared/iconeGuida';
 import type { ReactNode } from 'react';
+import { IconaAzione, IconaScheda } from '../shared/IconaAzione';
+import { AssetImg } from '../shared/AssetImg';
 
 interface Props {
   partitaId: number;
@@ -25,7 +27,7 @@ interface Props {
 
 type Gruppo = (typeof GRUPPI_EVENTO)[number]['chiave'] | 'tutti';
 
-const ICONE_GRUPPO: Partial<Record<Gruppo, ReactNode>> = { partita: <IconRiepilogo size={14} />, doti: <IconStella size={14} />, confidenti: <IconPersone size={14} />, persona: <IconCarte size={14} />, velluto: <IconEvoca size={14} />, obiettivi: <IconBersaglio size={14} />, dungeon: <IconMappa size={14} /> };
+const ICONE_GRUPPO: Partial<Record<Gruppo, ReactNode>> = { partita: <IconaScheda chiave="riepilogo" dimensione={14} />, doti: <IconaScheda chiave="doti" dimensione={14} />, confidenti: <IconaScheda chiave="confidenti" dimensione={14} />, persona: <IconaScheda chiave="scorta" dimensione={14} />, velluto: <IconaAzione chiave="evoca" dimensione={14} />, obiettivi: <IconaScheda chiave="obiettivi" dimensione={14} />, dungeon: <AssetImg nome="guida/dungeon" alt="" decorativa className="w-[14px] h-[14px] object-contain" fallback={<IconMappa size={14} />} /> };
 
 /** Pagine caricate con «Carica altri», legate al filtro per cui sono state richieste. */
 interface PagineExtra {
@@ -101,14 +103,14 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
     <div className="flex flex-col gap-3">
       {!compatto && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <button type="button" className={`chip chip--icona touch ${gruppo === 'tutti' ? 'chip--attivo' : ''}`} onClick={() => setGruppo('tutti')} aria-pressed={gruppo === 'tutti'}><IconElenco size={14} />Tutti</button>
+          <button type="button" className={`chip chip--icona touch ${gruppo === 'tutti' ? 'chip--attivo' : ''}`} onClick={() => setGruppo('tutti')} aria-pressed={gruppo === 'tutti'}><IconaAzione chiave="tutti" dimensione={14} />Tutti</button>
           {GRUPPI_EVENTO.map((g) => (
-            <button key={g.chiave} type="button" className={`chip chip--icona touch ${gruppo === g.chiave ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.chiave)} aria-pressed={gruppo === g.chiave}>{ICONE_GRUPPO[g.chiave] ?? <IconElenco size={14} />}{g.nome}</button>
+            <button key={g.chiave} type="button" className={`chip chip--icona touch ${gruppo === g.chiave ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.chiave)} aria-pressed={gruppo === g.chiave}>{ICONE_GRUPPO[g.chiave] ?? <IconaAzione chiave="tutti" dimensione={14} />}{g.nome}</button>
           ))}
           {eventi && <span className="ml-auto text-[12px] text-text-muted">{totale} {totale === 1 ? 'evento' : 'eventi'}</span>}
         </div>
       )}
-      {prima.errore && <div className="text-[13px] text-error">{prima.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void prima.ricarica()}>Riprova</button></div>}
+      {prima.errore && <div className="text-[13px] text-error">{prima.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void prima.ricarica()} /></div>}
       {!eventi && !prima.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {eventi && eventi.length === 0 && (
         compatto
@@ -117,9 +119,9 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
       )}
       {!compatto && eventi && eventi.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-[12px]" role="group" aria-label="Selezione multipla">
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconSpunta size={20} />} titolo="Seleziona tutte le voci visibili" onClick={() => setSelezionati(Object.fromEntries(eventi.map((e) => [e.id, true as const])))} />
-          <PulsanteVisivo tono="fantasma" compatto icona={<IconAnnullaCerchio size={20} />} titolo="Deseleziona" disabled={idSelezionati.length === 0} onClick={() => setSelezionati({})} />
-          <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo={`Elimina selezionate (${idSelezionati.length})`} disabled={idSelezionati.length === 0 || eliminazioneMultipla} onClick={() => void eliminaSelezionati()} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Seleziona tutte le voci visibili" onClick={() => setSelezionati(Object.fromEntries(eventi.map((e) => [e.id, true as const])))} />
+          <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Deseleziona" disabled={idSelezionati.length === 0} onClick={() => setSelezionati({})} />
+          <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo={`Elimina selezionate (${idSelezionati.length})`} disabled={idSelezionati.length === 0 || eliminazioneMultipla} onClick={() => void eliminaSelezionati()} />
         </div>
       )}
       {eventi && eventi.length > 0 && (
@@ -137,14 +139,14 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
                   {e.personaId && <> · <Link to={`/compendio/persona/${e.personaId}`} className="text-primary">{e.personaNomeIt}</Link></>}
                 </div>
               </div>
-              {!compatto && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconCestino size={20} />} titolo="Elimina" onClick={() => void elimina(e)} aria-label={`Elimina la voce ${e.titolo}`} />}
+              {!compatto && <PulsanteVisivo tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" onClick={() => void elimina(e)} aria-label={`Elimina la voce ${e.titolo}`} />}
             </li>
           ))}
         </ol>
       )}
       {!compatto && prossimo !== null && (
         <div className="flex justify-center">
-          <PulsanteVisivo icona={<IconAltro size={22} />} titolo={caricamentoAltri ? 'Caricamento…' : 'Carica altri'} disabled={caricamentoAltri} onClick={() => void caricaAltri()} />
+          <PulsanteVisivo icona={<IconaAzione chiave="carica-altri" dimensione={22} />} titolo={caricamentoAltri ? 'Caricamento…' : 'Carica altri'} disabled={caricamentoAltri} onClick={() => void caricaAltri()} />
         </div>
       )}
     </div>
