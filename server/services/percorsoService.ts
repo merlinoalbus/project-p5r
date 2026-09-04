@@ -10,7 +10,6 @@ import type { AzionePercorsoDto, PercorsoGiornoDto, PercorsoIndiceDto } from '..
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
 type AzioneSeed = Omit<AzionePercorsoDto, 'indice' | 'fatta'>;
 
-const PRIMO_GIORNO = '04-09';
 
 function partitaEsiste(partitaId: number): void {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
@@ -53,13 +52,6 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
     giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
   };
-}
-
-/** Giorno del percorso da mostrare per la partita: il giorno corrente, altrimenti il primo. */
-export function giornoIniziale(partitaId?: number): string {
-  const corrente = dataCorrente(partitaId);
-  if (corrente && prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(corrente)) return corrente;
-  return (prepared('SELECT data FROM giorno_percorso ORDER BY ordine LIMIT 1').get() as { data: string } | undefined)?.data ?? PRIMO_GIORNO;
 }
 
 /** Segna (o toglie) un'azione del giorno come fatta nella partita; evento alla prima spunta. */

@@ -30,7 +30,7 @@ function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
-          {link ? <Link to={link} className="chip chip--attivo no-underline text-[11px]">{a.riferimentoTesto ?? link}</Link> : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
+          {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]">{link.etichetta}</Link> : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
           {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
           {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
         </span>
