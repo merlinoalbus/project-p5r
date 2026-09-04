@@ -103,6 +103,9 @@ export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
   oggettoECarta: boolean;
   oggettoDescrizione: string | null;
   oggettoAllarmeDescrizione: string | null;
+  /** Nomi italiani degli oggetti da esecuzione (dalla guida), null se non abbinati. */
+  oggettoNomeIt: string | null;
+  oggettoAllarmeNomeIt: string | null;
   trattoDettaglio: SkillRiassuntoDto | null;
   skill: SkillAppresaDto[];
   areeMementos: Array<{ chiave: string; nome: string }>;
@@ -134,6 +137,8 @@ export interface SkillDettaglioDto extends SkillRiassuntoDto {
 export interface OggettoDto {
   id: number;
   nome: string;
+  /** Nome italiano dell'equipaggiamento (dalla guida), null se non abbinato. */
+  nomeIt: string | null;
   categoria: string;
   categoriaNome: string;
   vincolo: string | null;

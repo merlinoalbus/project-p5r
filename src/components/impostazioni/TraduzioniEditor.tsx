@@ -17,6 +17,7 @@ const NOMI_AMBITO: Record<string, string> = {
   vincoloOggetto: 'Vincoli degli oggetti', areaMementos: 'Aree di Mementos', doteSociale: 'Doti sociali', notaPersona: 'Note delle Persona',
   fonteEsclusiva: 'Fonti esclusive', effettoSkill: 'Effetti delle skill', descrizioneOggetto: 'Descrizioni degli oggetti',
   negoziazione: 'Titoli di negoziazione', fonteCarta: 'Fonti delle carte abilità',
+  skill: 'Nomi delle skill', persona: 'Nomi delle Persona', oggetto: 'Nomi dell’equipaggiamento', termine: 'Termini di gioco',
 };
 
 /** Editor: scegli l'ambito, cerca, modifica in linea, ripristina il testo del seed. */

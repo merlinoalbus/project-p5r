@@ -230,9 +230,9 @@ export function PersonaDettaglioPage() {
             <h2 className="m-0 mb-2 text-[15px] font-semibold">Esecuzione (Stanza di Velluto)</h2>
             <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[13px]">
               <dt className="text-text-muted">Normale</dt>
-              <dd className="m-0"><strong>{p.oggetto}</strong>{p.oggettoDescrizione && <span className="text-text-secondary"> — {p.oggettoDescrizione}</span>}</dd>
+              <dd className="m-0"><strong>{p.oggettoNomeIt ?? p.oggetto}</strong>{p.oggettoNomeIt && p.oggettoNomeIt !== p.oggetto && <span className="text-text-muted"> ({p.oggetto})</span>}{p.oggettoDescrizione && <span className="text-text-secondary"> — {p.oggettoDescrizione}</span>}</dd>
               <dt className="text-text-muted">Con Allarme</dt>
-              <dd className="m-0"><strong>{p.oggettoAllarme}</strong>{p.oggettoAllarmeDescrizione && <span className="text-text-secondary"> — {p.oggettoAllarmeDescrizione}</span>}</dd>
+              <dd className="m-0"><strong>{p.oggettoAllarmeNomeIt ?? p.oggettoAllarme}</strong>{p.oggettoAllarmeNomeIt && p.oggettoAllarmeNomeIt !== p.oggettoAllarme && <span className="text-text-muted"> ({p.oggettoAllarme})</span>}{p.oggettoAllarmeDescrizione && <span className="text-text-secondary"> — {p.oggettoAllarmeDescrizione}</span>}</dd>
               {p.carteDaEsecuzione.length > 0 && (
                 <>
                   <dt className="text-text-muted">Carte abilità</dt>

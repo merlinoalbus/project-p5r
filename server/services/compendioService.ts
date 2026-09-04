@@ -5,6 +5,7 @@
 import { getDb, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { extra, mappaAmbito, t, tOpz, vociAmbito } from './traduzioniService.js';
+import { corrispondeRicerca } from '../../shared/testo.js';
 import type {
   AffinitaDto, ArcanaDto, ConfidenteDettaglioDto, ConfidenteDto, CostoSkillDto, GlossarioDto, OggettoDto, PersonaDettaglioDto,
   PersonaRiassuntoDto, RegoleFusioneDto, RicettaSpecialeDto, SkillAppresaDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
@@ -146,10 +147,6 @@ export interface FiltroPersona {
 export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
   const cond: string[] = [];
   const par: unknown[] = [];
-  if (f.q) {
-    cond.push('p.nome LIKE ?');
-    par.push(`%${f.q}%`);
-  }
   if (f.arcana) {
     cond.push('p.arcana = ?');
     par.push(f.arcana);
@@ -180,7 +177,9 @@ export function elencaPersona(f: FiltroPersona = {}): PersonaRiassuntoDto[] {
   }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
   const righe = getDb().prepare(`SELECT p.* FROM persona p JOIN arcana a ON a.chiave = p.arcana ${where} ORDER BY p.livello, a.ordine, p.nome`).all(...par) as RigaPersona[];
-  return righe.map(personaRiassunto);
+  const dto = righe.map(personaRiassunto);
+  const q = f.q;
+  return q ? dto.filter((p) => corrispondeRicerca(q, p.nome, p.nomeIt)) : dto;
 }
 
 export function dettaglioPersona(id: number): PersonaDettaglioDto {
@@ -206,6 +205,7 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
     nota: r.nota, notaNome: tOpz('notaPersona', r.nota),
     oggetto: r.oggetto, oggettoAllarme: r.oggetto_allarme, oggettoECarta: r.oggetto_e_carta === 1,
     oggettoDescrizione: descrizioneOggetto(r.oggetto), oggettoAllarmeDescrizione: descrizioneOggetto(r.oggetto_allarme),
+    oggettoNomeIt: tOpz('oggetto', r.oggetto), oggettoAllarmeNomeIt: tOpz('oggetto', r.oggetto_allarme),
     trattoDettaglio: trattoRiga ? skillRiassunto(trattoRiga) : null,
     skill, areeMementos: aree, pianiMementos: r.piani_mementos,
     ricettaSpeciale: ricetta, ingredienteDi, dlcSet, carteDaEsecuzione: carte,
@@ -223,16 +223,14 @@ export interface FiltroSkill {
 export function elencaSkill(f: FiltroSkill = {}): SkillRiassuntoDto[] {
   const cond: string[] = [];
   const par: unknown[] = [];
-  if (f.q) {
-    cond.push('(nome LIKE ? OR effetto LIKE ?)');
-    par.push(`%${f.q}%`, `%${f.q}%`);
-  }
   if (f.elemento) {
     cond.push('elemento = ?');
     par.push(f.elemento);
   }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
-  return (getDb().prepare(`SELECT * FROM skill ${where} ORDER BY nome`).all(...par) as RigaSkill[]).map(skillRiassunto);
+  const dto = (getDb().prepare(`SELECT * FROM skill ${where} ORDER BY nome`).all(...par) as RigaSkill[]).map(skillRiassunto);
+  const q = f.q;
+  return q ? dto.filter((s) => corrispondeRicerca(q, s.nome, s.nomeIt, s.effetto, s.effettoNome)) : dto;
 }
 
 export function dettaglioSkill(id: number): SkillDettaglioDto {
@@ -258,19 +256,17 @@ export function dettaglioSkill(id: number): SkillDettaglioDto {
 export function elencaOggetti(f: { q?: string; categoria?: string } = {}): OggettoDto[] {
   const cond: string[] = [];
   const par: unknown[] = [];
-  if (f.q) {
-    cond.push('nome LIKE ?');
-    par.push(`%${f.q}%`);
-  }
   if (f.categoria) {
     cond.push('categoria = ?');
     par.push(f.categoria);
   }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
-  return (getDb().prepare(`SELECT * FROM oggetto ${where} ORDER BY categoria, nome`).all(...par) as RigaOggetto[]).map((o) => ({
-    id: o.id, nome: o.nome, categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
+  const dto: OggettoDto[] = (getDb().prepare(`SELECT * FROM oggetto ${where} ORDER BY categoria, nome`).all(...par) as RigaOggetto[]).map((o) => ({
+    id: o.id, nome: o.nome, nomeIt: tOpz('oggetto', o.nome), categoria: o.categoria, categoriaNome: t('tipoOggetto', o.categoria),
     vincolo: o.vincolo, vincoloNome: tOpz('vincoloOggetto', o.vincolo), descrizione: o.descrizione, descrizioneNome: t('descrizioneOggetto', o.descrizione),
   }));
+  const q = f.q;
+  return q ? dto.filter((o) => corrispondeRicerca(q, o.nome, o.nomeIt)) : dto;
 }
 
 /** Scheda completa di un Confidente: abilità, dialoghi, regali, disponibilità (dal seed allgamestaff). */

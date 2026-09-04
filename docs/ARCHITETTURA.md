@@ -104,7 +104,7 @@ docs/                 documentazione di bordo e riferimenti di dominio
   - **dati di gioco** (`arcana`, `persona` + `persona_affinita` + `persona_skill`, `skill` + `skill_fonte_esecuzione`, `oggetto`,
     `fusione_arcana`, `fusione_speciale` + `_ingrediente`, `tesoro` + `tesoro_modificatore`, `eredita_matrice`, `dlc_set` + `_persona`,
     `confidente` + `confidente_rango` (punti necessari per rango, 0 = non a punti), `dote_sociale` + `dote_sociale_rango` (5 ranghi
-    con nome e soglia), `traduzione` (compresi gli ambiti `skill`, `persona`, `termine` della localizzazione italiana ufficiale
+    con nome e soglia), `traduzione` (compresi gli ambiti `skill`, `persona`, `oggetto`, `termine` della localizzazione italiana ufficiale
     dalla guida allgamestaff, vedi `docs/riferimenti/glossario-localizzazione.md`), `seed_meta`): caricati da `caricaSeed` al boot. Hash del contenuto del seed in
     `seed_meta` → reseed solo quando il seed cambia; `persona`/`skill`/`oggetto`/`confidente` in UPSERT per chiave naturale
     (id stabili, mai cancellazioni), relazioni di gioco svuotate e ricaricate, `traduzione` con `fonte='utente'` mai sovrascritta;
@@ -115,7 +115,8 @@ docs/                 documentazione di bordo e riferimenti di dominio
   proporzione alle statistiche base; il BE espone per ogni Persona posseduta `statistiche` (registrate dall'utente oppure stimate al livello) e
   `statisticheBaseLivello`; la scheda Persona ha il cursore del livello con stima e differenza.
 - Testi canonici (nomi Persona/skill, chiavi arcana/elementi, effetti, descrizioni) restano in inglese Royal nelle tabelle di
-    gioco; la resa italiana si legge da `traduzione(ambito, chiave)`; i DTO espongono `nomeIt` per skill e Persona (fallback al canonico).
+    gioco; la resa italiana si legge da `traduzione(ambito, chiave)`; i DTO espongono `nomeIt` per skill e Persona (fallback al canonico) e per l'equipaggiamento (`null` se la guida non lo nomina);
+    la ricerca del compendio (Persona, skill, oggetti) confronta nome canonico e nome italiano senza accenti né punteggiatura (`shared/testo.ts`).
 
 ### Storico (Fase 5.1)
 Migrazione 005: `evento_partita` (partita_id, tipo, titolo, dettaglio, dati_json, persona_id, created_at) con indici per partita/tipo/Persona.

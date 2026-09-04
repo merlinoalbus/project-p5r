@@ -4,6 +4,7 @@ Formato: data · decisione · motivazione · chi (U = utente, IA = assistente su
 
 | Data | Decisione | Motivazione | Chi |
 |---|---|---|---|
+| 2026-09-04 | Localizzazione 10.4: le rese italiane di skill, Persona ed equipaggiamento vengono solo dalla guida allgamestaff (nessuna traduzione inventata: chi manca resta col nome canonico); le voci già presenti non vengono mai sovrascritte dal seed arricchito; l'equipaggiamento è abbinato per statistiche/effetto/esecuzione e i 3 abbinamenti «probabili» sono accettati solo con nome ed effetto concordanti; i nomi inglesi dei consumabili della guida sono dedotti (prezzo/effetto) e servono solo alla ricerca: scartati quelli a bassa confidenza non identici | i nomi devono essere quelli che l'utente legge nel gioco in italiano; l'inglese resta come chiave canonica e aiuto alla ricerca | U/IA |
 | 2026-09-03 | Nuovo repo separato `C:\Repository\project-p5r`, stesso stack/convenzioni di project-jira | isolamento totale, nessun rischio di regressione, riuso di pattern collaudati | U |
 | 2026-09-03 | Versione del gioco: **Persona 5 Royal** (non vanilla) | dataset `*Royal` (Faith, Councillor, tratti, allarme, Kichijoji…) | U |
 | 2026-09-03 | Tutto in italiano (UI, API, schema, commenti); nomi Persona originali; skill con chiave canonica EN + resa IT in tabella `traduzione` editabile | localizzazione italiana ufficiale non disponibile come dataset; serve restare agganciati alle fonti aggiornabili | U/IA |

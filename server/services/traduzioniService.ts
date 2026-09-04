@@ -147,6 +147,7 @@ function testoDalSeed(ambito: string, chiave: string, seedDir: string): string |
     // Localizzazione italiana dalla guida (step 0.11)
     case 'skill': return tr.skill?.[chiave] ?? null;
     case 'persona': return tr.persone?.[chiave] ?? null;
+    case 'oggetto': return tr.oggetti?.[chiave] ?? null;
     case 'termine': return tr.termini?.find((t) => t.chiave === chiave)?.nome ?? null;
     default: return null;
   }

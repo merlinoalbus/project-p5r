@@ -1,8 +1,5 @@
 // ============================================================
-// testo — normalizzazione per la ricerca (minuscole, senza accenti né punteggiatura)
+// testo — normalizzazione per la ricerca (implementazione condivisa in shared/testo.ts)
 // ============================================================
 
-/** «Jack-o'-Lantern» → «jack o lantern»: confronto insensibile a maiuscole, accenti e punteggiatura. */
-export function normalizzaTesto(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-}
+export { normalizzaTesto, corrispondeRicerca } from '../../shared/testo';
