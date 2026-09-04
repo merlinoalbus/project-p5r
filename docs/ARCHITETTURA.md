@@ -407,6 +407,18 @@ dei marcatori e delle piante restano per le pagine attuali finché 13.4 non le s
 quelli aggiunti dall'utente su una mappa del seed; `spillo.tipo` è validato dall'applicazione (zod + registro) e non da un CHECK, perché il
 registro dei tipi può crescere senza migrazioni.
 
+### Visore delle mappe (Fase 13.2)
+Modello di mapgenie.io osservato dal vivo: barra laterale a sinistra con categorie e conteggi, «Mostra tutti/Nascondi tutti», ricerca,
+segnalini a dimensione costante con icona per categoria, popup ancorato al segnalino, controlli dello zoom in basso a destra, tracciamento
+dei trovati. `src/components/mappe/VisoreMappa.tsx`: zoom espresso rispetto al minimo «adatta» (stato `null` = adatta, così nessun effetto
+imposta lo stato: `zoom = zoomEsplicito ?? zoomMin`), rotellina non passiva registrata a mano (React registra `wheel` come passivo),
+pinch con due puntatori, trascinamento, doppio click per adattare; il livello è scalato (`translate(pan) scale(zoom)`) e gli elementi
+ancorati (spilli, gruppi, popup) usano `scale(1/zoom) translate(…)` con origine 0 0 per restare a dimensione costante con la punta
+sulle coordinate; raggruppamento «+n» per celle di 30 px sotto 1,6× il minimo. `IconaSpillo` (asset `ui/spillo-<tipo>` → riserva
+SVG); `SchedaSpillo` con le azioni per tipo di riferimento; strumenti dell'editor (13.3) passati via `editor` (seleziona/sposta,
+aggiungi). Pagina `MappaPage` (`/guida/mappe`, `/guida/mappe/:chiave`) con lo stato «raccolto» della partita attiva; i raccolti
+sostituiscono lo spillo nel DTO locale senza ricaricare la mappa.
+
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
   confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
@@ -426,7 +438,7 @@ registro dei tipi può crescere senza migrazioni.
 - Tasselli Persona (`PersonaChip`, `.persona-chip*`): taglio diagonale, cornice rossa con la figura intera (`AnteprimaPersona contieni`), nome nel carattere P5 (17/19 px), tessera «Lv N», icona dell'arcano (`arcani/icona/<slug>`), rombo dorato per le rare, spunta verde d'angolo per la scorta (classe `persona-chip--scorta` conservata per i test). Operatori `OperatoreRicetta` («+» rosso, freccia bianca) condivisi da `RicettaRiga`, `CicliFusione` e ricette speciali; righe `.ricetta-riga` con tipo a etichetta, costo P5 e barra rossa quando tutti gli ingredienti sono in scorta; anche «Fusioni speciali» della scheda Persona usa gli stessi tasselli.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 86 file / 252 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 88 file / 261 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla

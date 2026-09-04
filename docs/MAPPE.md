@@ -182,7 +182,7 @@ quartieri; per le aree dei Palazzi l'immagine di base la fornisce l'utente dall'
 
 ## 13. Ordine di lavoro
 
-Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeService`, rotte, schemi, seed `mappe-editor.json`, client API, test `mappe-editor.test.ts`); pacchetto di esportazione in JSON con immagini base64 (§6), non ZIP.
+Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeService`, rotte, schemi, seed `mappe-editor.json`, client API, test `mappe-editor.test.ts`); pacchetto di esportazione in JSON con immagini base64 (§6), non ZIP. **13.2 fatto** (`VisoreMappa`, `IconaSpillo`, `MappaPage`, rotte `/guida/mappe`): il modello di mapgenie.io è stato verificato dal vivo (barra laterale a sinistra con categorie e conteggi, popup ancorato, controlli in basso a destra, trovati tracciati) e il visore lo segue; il §7 resta valido con queste precisazioni.
 
 13.1 modello + API + migrazione + esportazione/importazione → 13.2 visore → 13.3 editor → 13.4 integrazione → 13.5/12.4 home «Oggi» →
 13.6 asset (i prompt §18/§19 sono già censiti; l'app funziona con le riserve SVG e con le immagini caricate dall'utente).
