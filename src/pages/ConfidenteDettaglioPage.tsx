@@ -145,7 +145,7 @@ export function ConfidenteDettaglioPage() {
           </section>
 
           {c.fonti.length > 0 && (
-            <p className="m-0 text-[12px] text-text-muted">Fonti: {c.fonti.map((f, i) => <a key={i} href={f} target="_blank" rel="noreferrer" className="text-primary">{new URL(f).hostname}{i < c.fonti.length - 1 ? ', ' : ''}</a>)}</p>
+            <p className="m-0 text-[11px] text-text-muted">Fonti: {c.fonti.map((f, i) => <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{new URL(f).hostname}{i < c.fonti.length - 1 ? ', ' : ''}</a>)}</p>
           )}
         </div>
       )}
