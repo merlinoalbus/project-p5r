@@ -66,6 +66,8 @@ describe('Piante delle aree', () => {
     expect(res.body.data).toMatchObject({ area, mime: 'image/png', fonte: 'test' });
     const k = (await request(app).get('/api/compendio/dungeon/kamoshida')).body.data as DungeonDettaglioDto;
     expect(k.aree.find((a) => a.chiave === area)?.mappa).toBe(true);
+    expect(k.aree.find((a) => a.chiave === area)?.piantaScaricata).toEqual({ url: `http://127.0.0.1:${porta}/pianta.png`, fonte: 'test', pagina: null });
+    expect(k.aree.find((a) => a.chiave === 'kamoshida-01-cancello-del-castello-ingresso')?.piantaScaricata).toBeNull();
     expect((await request(app).post('/api/mappe/piante/area-inesistente/scarica')).status).toBe(404);
     getDb().prepare('UPDATE pianta_area SET url = ?, alternative_json = ? WHERE area_chiave = ?').run(`http://127.0.0.1:${porta}/manca.jpg`, '[]', 'kamoshida-03-edificio-ovest-1p');
     expect((await request(app).post('/api/mappe/piante/kamoshida-03-edificio-ovest-1p/scarica')).status).toBe(400);

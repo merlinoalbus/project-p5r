@@ -1126,9 +1126,10 @@ export interface AreaDungeonDto {
   ordine: number;
   nome: string;
   descrizione: string;
-  /** L'utente ha importato la pianta dell'area (immagine ambito «mappa»). */
   /** Immagine della pianta presente nell'istanza (ambito «mappa»). */
   mappa: boolean;
+  /** Fonte da cui la pianta presente è stata davvero scaricata (principale o alternativa); null se caricata dall'utente o assente. */
+  piantaScaricata: { url: string; fonte: string; pagina: string | null } | null;
   /** Collegamento alla pianta pubblicata (null se nessuna guida la offre). */
   pianta: PiantaAreaDto | null;
   /** Motivo dell'assenza della pianta, se noto (es. piani generati proceduralmente). */
@@ -1257,4 +1258,6 @@ export interface ImmagineDto {
   byte: number;
   url: string;
   createdAt: string;
+  /** Indirizzo da cui l'immagine è stata scaricata (import da URL, piante delle guide); null per i file caricati. */
+  origineUrl: string | null;
 }
