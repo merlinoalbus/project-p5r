@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**484 file richiesti: 235 completati e approvati, 249 ancora da consegnare.**
+**484 file richiesti: 252 completati e approvati, 232 ancora da consegnare.**
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -42,7 +42,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | illustrazioni | 15 | 15 | 0 |
 | confidenti | 46 | 46 | 0 |
 | persona | 232 | 0 | 232 |
-| meteo | 17 | 0 | 17 |
+| meteo | 17 | 17 | 0 |
 
 ## Elenco completo
 
@@ -283,23 +283,23 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 
 ### meteo
 
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/sereno.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/nuvoloso.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/pioggia.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/temporale.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/neve.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/nebbia.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/caldo.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/freddo.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/polline.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/tifone.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-mattina.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-pausa-pranzo.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-dopo-la-scuola.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-sera.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-notte.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-giornata.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/meteo/fascia-senza-testo.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/sereno.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/nuvoloso.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/pioggia.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/temporale.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/neve.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/nebbia.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/caldo.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/freddo.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/polline.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/tifone.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-mattina.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-pausa-pranzo.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-dopo-la-scuola.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-sera.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-notte.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-giornata.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-senza-testo.png` — 600×160
 
 ## Sorgenti degli splash completati
 
