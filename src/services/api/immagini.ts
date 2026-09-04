@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPut, apiPost, queryString } from './_helpers';
 
-export type AmbitoImmagine = 'arcana' | 'confidente' | 'persona' | 'skill' | 'mappa' | 'altro';
+export type AmbitoImmagine = 'arcana' | 'confidente' | 'persona' | 'skill' | 'mappa' | 'spillo' | 'altro';
 
 /** Spillo di un punto sulla mappa della sua area (x, y in percentuale; null rimuove). */
 export const impostaMarcatore = (punto: string, posizione: { x: number; y: number } | null): Promise<{ x: number; y: number } | null> =>

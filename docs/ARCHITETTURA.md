@@ -418,6 +418,23 @@ sulle coordinate; raggruppamento «+n» per celle di 30 px sotto 1,6× il minimo
 SVG); `SchedaSpillo` con le azioni per tipo di riferimento; strumenti dell'editor (13.3) passati via `editor` (seleziona/sposta,
 aggiungi). Pagina `MappaPage` (`/guida/mappe`, `/guida/mappe/:chiave`) con lo stato «raccolto» della partita attiva; i raccolti
 sostituiscono lo spillo nel DTO locale senza ricaricare la mappa.
+Azioni per partita dal visore: «Raccolto/Riapri» (collezionabili), «Ottenuto/Esaurito/Riapri» per gli spilli collegati a un punto della
+Guida (`impostaStatoPunto`, stessi stati della scheda del Palazzo) e acquisto degli articoli del negozio collegato (`impostaAcquisto`);
+`DettaglioSpilloDto.immagine` porta l'immagine dell'entità collegata quando esiste (mappa, Confidente).
+
+### Editor delle mappe (Fase 13.3)
+`src/pages/EditorMappaPage.tsx` riusa `VisoreMappa` con `editor` (strumento seleziona/sposta o aggiungi, spillo selezionato, click sulla
+mappa, fine trascinamento) e con `pannello`/`intestazione` propri. Ogni modifica è salvata subito via API e la mappa viene ricaricata
+senza smontare il visore (`isLoading` solo senza dati: zoom e posizione restano). Riferimenti cercati con `GET /api/mappe/riferimenti`
+(`cercaRiferimenti`: LIKE su nome/chiave per tipo). Schermate degli spilli: migrazione 028 `spillo_immagine` (immagine dell'istanza
+nell'ambito «spillo» oppure `asset` del repository, didascalia, ordine), rotte `POST /api/mappe/spilli/:id/immagini` (corpo `image/*`),
+`PUT/DELETE /api/mappe/spilli/immagini/:id`; `SpilloDto.immagini` e `GalleriaSpillo` nel visore. `sincronizzaMappe` crea anche i passaggi
+verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da trascinare nell'editor: la mappa globale di Tokyo
+e la mappa verticale dei Mementos sono immagini dell'utente nell'istanza (mai nel repository) con i quartieri e i Dedali come passaggi;
+gli accessi ai Palazzi e ai Mementos sono passaggi dentro le mappe dei luoghi (es. la stazione di Shibuya). Esportazione: `esportaMappe(radice)`
+limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «store» in `server/utils/zip.ts`) con `data/seed/mappe/<chiave>.json`
+(immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>` solo se richieste) e i file in `public/asset/`;
+`caricaSeed` importa `mappe-editor.json` e poi ogni `data/seed/mappe/*.json` (nell'hash del seed).
 
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
@@ -438,7 +455,7 @@ sostituiscono lo spillo nel DTO locale senza ricaricare la mappa.
 - Tasselli Persona (`PersonaChip`, `.persona-chip*`): taglio diagonale, cornice rossa con la figura intera (`AnteprimaPersona contieni`), nome nel carattere P5 (17/19 px), tessera «Lv N», icona dell'arcano (`arcani/icona/<slug>`), rombo dorato per le rare, spunta verde d'angolo per la scorta (classe `persona-chip--scorta` conservata per i test). Operatori `OperatoreRicetta` («+» rosso, freccia bianca) condivisi da `RicettaRiga`, `CicliFusione` e ricette speciali; righe `.ricetta-riga` con tipo a etichetta, costo P5 e barra rossa quando tutti gli ingredienti sono in scorta; anche «Fusioni speciali» della scheda Persona usa gli stessi tasselli.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 88 file / 261 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 90 file / 270 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla

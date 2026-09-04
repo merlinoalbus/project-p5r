@@ -43,6 +43,30 @@ export const eliminaSpillo = (id: number): Promise<void> => apiDelete(`/mappe/sp
 /** Segna uno spillo come raccolto (o non raccolto) nella partita. */
 export const impostaSpilloRaccolto = (partitaId: number, spilloId: number, raccolto: boolean): Promise<SpilloDto> => apiPut(`/partite/${partitaId}/spilli/${spilloId}`, { raccolto });
 
-/** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64). */
-export const esportaMappe = (): Promise<EsportazioneMappeDto> => apiGet('/mappe/esporta', { timeoutMs: 120_000 });
+export interface RiferimentoTrovatoApi { tipo: TipoRiferimento; chiave: string; nome: string; dettaglio: string }
+/** Entità collegabili a uno spillo (editor): per tipo e testo. */
+export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30): Promise<RiferimentoTrovatoApi[]> => apiGet(`/mappe/riferimenti${queryString({ tipo, q, limite })}`);
+
+/** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */
+export const esportaMappe = (radice?: string, immaginiSpilli = false): Promise<EsportazioneMappeDto> => apiGet(`/mappe/esporta${queryString({ radice, immaginiSpilli: immaginiSpilli ? '1' : undefined })}`, { timeoutMs: 120_000 });
+
+/** ZIP per il repository (seed del luogo + asset): restituisce il file e il nome suggerito. */
+export async function esportaPacchettoRepository(radice: string, immaginiSpilli: boolean): Promise<{ nome: string; blob: Blob }> {
+  const res = await httpFetch(`${API_BASE_URL}/mappe/esporta.zip${queryString({ radice, immaginiSpilli: immaginiSpilli ? '1' : undefined })}`, { method: 'GET' }, { maxRetries: 0, timeoutMs: 120_000 });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(res.status, body?.error?.code ?? 'http-error', body?.error?.message ?? `Esportazione fallita (${res.status})`, body?.error?.details, body?.requestId);
+  }
+  return { nome: `mappa-${radice}.zip`, blob: await res.blob() };
+}
+
+/** Schermata di riferimento di uno spillo (file dell'utente, resta nell'istanza). */
+export async function aggiungiImmagineSpillo(spilloId: number, file: File, didascalia = ''): Promise<SpilloDto> {
+  const res = await httpFetch(`${API_BASE_URL}/mappe/spilli/${spilloId}/immagini${queryString({ didascalia: didascalia || undefined })}`, { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } }, { maxRetries: 0, timeoutMs: 120_000 });
+  const body = await res.json();
+  if (!res.ok) throw new ApiError(res.status, body?.error?.code ?? 'http-error', body?.error?.message ?? `Caricamento fallito (${res.status})`, body?.error?.details, body?.requestId);
+  return body.data as SpilloDto;
+}
+export const aggiornaImmagineSpillo = (id: number, dati: { didascalia?: string; ordine?: number }): Promise<SpilloDto> => apiPut(`/mappe/spilli/immagini/${id}`, dati);
+export const eliminaImmagineSpillo = (id: number): Promise<SpilloDto> => apiDelete(`/mappe/spilli/immagini/${id}`);
 export const importaMappe = (pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[] }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });
