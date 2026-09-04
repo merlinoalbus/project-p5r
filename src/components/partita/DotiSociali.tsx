@@ -92,7 +92,7 @@ export function DotiSociali({ partitaId }: Props) {
                 dote={d}
                 suggerita={sugg.evidenziato('doti', d.chiave) ? sugg.motivo('doti', d.chiave) : null}
                 azioni={(
-                  <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                  <div className="flex flex-wrap items-center gap-1.5 min-w-0 max-w-full">
                     {([1, 2, 3] as const).map((n) => (
                       <button
                         key={n}

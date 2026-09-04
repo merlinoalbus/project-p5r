@@ -2,8 +2,9 @@
 // IconaSpillo — icona di uno spillo per tipo: asset `ui/spillo-<tipo>` (prompt §18) con riserva SVG in codice (Fase 13.2)
 // ============================================================
 
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { AssetImg } from '../shared/AssetImg';
+import { useAsset } from '../../stores/assetStore';
 import type { TipoSpillo } from '../../../shared/spilli';
 
 interface Props { tipo: TipoSpillo; dimensione?: number; className?: string }
@@ -38,4 +39,31 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
 /** Icona di uno spillo (asset quando consegnato, altrimenti riserva SVG). */
 export function IconaSpillo({ tipo, dimensione = 20, className }: Props) {
   return <AssetImg nome={`ui/spillo-${tipo}`} alt="" decorativa className={className ?? 'object-contain'} style={{ width: dimensione, height: dimensione }} fallback={(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(dimensione)} />;
+}
+
+/**
+ * Spillo sulla mappa. Le immagini `ui/spillo-<tipo>` consegnate sono già uno spillo completo (forma e colore compresi):
+ * quando l'asset c'è viene mostrato intero, con la punta sul punto ancorato; in sua assenza resta la goccia colorata
+ * con il disegno di riserva al centro.
+ */
+export function SpilloGrafico({ tipo, colore, altezza = 40 }: { tipo: TipoSpillo; colore: string; altezza?: number }) {
+  const url = useAsset(`ui/spillo-${tipo}`);
+  if (url) return <img src={url} alt="" className="spillo-mappa__figura" style={{ height: altezza }} draggable={false} />;
+  return (
+    <span className="spillo-mappa__goccia" style={{ '--colore-spillo': colore } as CSSProperties}>
+      {(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(18)}
+    </span>
+  );
+}
+
+/** Pallino di legenda, elenco e popup: la stessa immagine dello spillo in piccolo, oppure il cerchio colorato col disegno. */
+export function PuntoSpillo({ tipo, colore, grande }: { tipo: TipoSpillo; colore: string; grande?: boolean }) {
+  const url = useAsset(`ui/spillo-${tipo}`);
+  const dimensione = grande ? 20 : 12;
+  if (url) return <img src={url} alt="" className={`spillo-mappa__punto-figura ${grande ? 'spillo-mappa__punto-figura--grande' : ''}`} draggable={false} />;
+  return (
+    <span className={`spillo-mappa__punto ${grande ? 'spillo-mappa__punto--grande' : ''}`} style={{ background: colore }} aria-hidden="true">
+      {(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(dimensione)}
+    </span>
+  );
 }

@@ -17,7 +17,7 @@ import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { VisoreMappa, GalleriaSpillo, type StrumentiEditor } from '../components/mappe/VisoreMappa';
-import { IconaSpillo } from '../components/mappe/IconaSpillo';
+import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
@@ -192,7 +192,7 @@ function PannelloEditor(p: PropsPannello) {
           <div className="editor-mappa__palette" role="group" aria-label="Tipo del nuovo spillo">
             {TIPI_SPILLO.map((t) => (
               <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} onClick={() => p.onTipoNuovo(t)}>
-                <span className="spillo-mappa__punto" style={{ background: DEFINIZIONI_SPILLO[t].colore }} aria-hidden="true"><IconaSpillo tipo={t} dimensione={12} /></span>
+                <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
                 <span className="truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
               </button>
             ))}
@@ -289,7 +289,7 @@ function FormSpillo({ spillo: s, occupato, onSalva, onElimina, onCreaMappaColleg
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
-        <span className="spillo-mappa__punto spillo-mappa__punto--grande" style={{ background: DEFINIZIONI_SPILLO[tipo].colore }} aria-hidden="true"><IconaSpillo tipo={tipo} dimensione={20} /></span>
+        <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
           <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">x {s.x}% · y {s.y}% · {s.origine}</p>

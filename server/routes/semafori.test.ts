@@ -28,26 +28,26 @@ describe('API semafori dei Confidenti', () => {
     const conf = (await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[];
     // ogni Confidente espone i semafori dei ranghi superiori a quello attuale, in ordine
     for (const c of conf) for (let i = 1; i < c.semafori.length; i++) expect(c.semafori[i].rango).toBeGreaterThan(c.semafori[i - 1].rango);
-    // Yusuke: il rango 1 apre il 18 giugno (Royal), al primo giorno di gioco la data e rossa
-    const yusuke = conf.find((c) => c.chiave === 'yusuke')!;
-    const dataYusuke = yusuke.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data');
-    expect(dataYusuke).toBeDefined();
-    expect(dataYusuke!.stato).toBe('rosso');
+    // Hifumi: il rango 1 apre «soltanto a partire dal 28 giugno» (Royal), al primo giorno di gioco la data e rossa
+    const hifumi = conf.find((c) => c.chiave === 'hifumi')!;
+    const dataHifumi = hifumi.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data');
+    expect(dataHifumi).toBeDefined();
+    expect(dataHifumi!.stato).toBe('rosso');
     // bloccato: il rango 1 non è raggiungibile (né lo sblocco) finché i requisiti non sono verdi; il server rifiuta con 409
-    expect(yusuke.bloccato).toMatchObject({ rango: 1 });
-    expect(yusuke.bloccato!.motivi.length).toBeGreaterThan(0);
-    const rifiuto = await request(app).put(`/api/partite/${id}/confidenti/yusuke`).send({ rango: 1 });
+    expect(hifumi.bloccato).toMatchObject({ rango: 1 });
+    expect(hifumi.bloccato!.motivi.length).toBeGreaterThan(0);
+    const rifiuto = await request(app).put(`/api/partite/${id}/confidenti/hifumi`).send({ rango: 1 });
     expect(rifiuto.status).toBe(409);
     expect(rifiuto.body.error.code).toBe('confidente-bloccato');
-    expect((await request(app).put(`/api/partite/${id}/confidenti/yusuke`).send({ sbloccato: true })).status).toBe(409);
+    expect((await request(app).put(`/api/partite/${id}/confidenti/hifumi`).send({ sbloccato: true })).status).toBe(409);
     // via d'uscita esplicita: `forza` passa e resta nello storico
-    const forzato = await request(app).put(`/api/partite/${id}/confidenti/yusuke`).send({ forza: true, rango: 1 });
+    const forzato = await request(app).put(`/api/partite/${id}/confidenti/hifumi`).send({ forza: true, rango: 1 });
     expect(forzato.status).toBe(200);
     expect((forzato.body.data as ConfidentePartitaDto).rango).toBe(1);
     const eventi = (await request(app).get(`/api/partite/${id}/storico`)).body.data as { eventi: Array<{ titolo: string }> };
     expect(eventi.eventi.some((e) => e.titolo.includes('nonostante i requisiti'))).toBe(true);
     // un Confidente senza requisiti per il rango successivo non è bloccato e sale liberamente
-    // (dopo la forzatura Yusuke è al rango 1 e il rango 2 non ha requisiti: al primo giorno tutti i ranghi 1 sono vincolati)
+    // (Yusuke e Takemi al rango 1 non hanno requisiti imposti: salgono liberamente)
     const aggiornati = (await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[];
     const libero = aggiornati.find((c) => c.bloccato === null && c.rango < 10)!;
     expect(libero).toBeDefined();

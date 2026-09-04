@@ -1,5 +1,5 @@
 // ============================================================
-// HomePage — cruscotto in una schermata: a sinistra Doti e guida del giorno, a destra accessi rapidi e mappa navigabile
+// HomePage — cruscotto in una schermata: Doti e guida del giorno a sinistra, mappa navigabile a destra (accessi rapidi solo senza partita)
 // ============================================================
 //
 // Su desktop e tablet la pagina riempie l'area di lettura senza scorrimento (`.home`): scorrono solo l'elenco delle azioni del giorno
@@ -38,7 +38,7 @@ function AccessiRapidi() {
   );
 }
 
-/** Cruscotto della partita attiva: Doti e guida del giorno a sinistra, accessi rapidi e mappa a destra. */
+/** Cruscotto della partita attiva: Doti e guida del giorno a sinistra, mappa a tutta altezza a destra. */
 function HomeConPartita({ partita }: { partita: PartitaDto }) {
   const doti = useCarica(() => getDoti(partita.id), [partita.id]);
   const scorta = useCarica(() => getPossedute(partita.id), [partita.id]);
@@ -64,12 +64,12 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
             <span className="chip">Liv. {partita.livelloProtagonista}</span>
             {partita.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
+          <div className="home-carta__riga">
             {doti.dati && doti.dati.length > 0 && (
-              // Larghezza legata alla finestra: su telefono la stella occupa quasi tutta la colonna, da md in su torna
-              // legata all'altezza (la Home deve restare in una schermata). Il rientro percentuale lascia spazio alle
-              // targhette dei vertici, che sporgono oltre il riquadro della stella.
-              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 py-1 w-[min(58vw,250px)] sm:w-[min(32vw,200px)] md:w-[clamp(150px,20vh,240px)] lg:w-[clamp(200px,30vh,320px)]" aria-label="Apri le Doti sociali">
+              // Larghezza della stella e disposizione della riga in `.home-carta__stella` / `.home-carta__riga` (src/tailwind.css):
+              // su telefono comanda la larghezza, da tablet l'altezza (la Home resta in una schermata) e nella colonna stretta del
+              // desktop le tessere scendono sotto la stella. Il rientro percentuale lascia spazio alle targhette dei vertici.
+              <Link to="/partita?scheda=doti" className="home-carta__stella no-underline text-text shrink-0 py-1" aria-label="Apri le Doti sociali">
                 <div className="w-full flex justify-center px-[11%]">
                   <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={420} badgeAltezza={62} etichettaAria="Stella delle Doti sociali" />
                 </div>
@@ -109,7 +109,6 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
         <div className="flex-1 min-h-0 riempi-figli">{guidaPronta ? <OggiGuida oggi={oggi} riempi /> : statoOggi}</div>
       </section>
 
-      <div className="home-accessi"><AccessiRapidi /></div>
       {guidaPronta && <div className="home-mappa riempi-figli"><OggiMappa oggi={oggi} riempi /></div>}
     </div>
   );

@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 import type { MappaDto, SpilloDto } from '../../types';
 import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_SPILLO, type TipoSpillo } from '../../../shared/spilli';
 import { useAsset } from '../../stores/assetStore';
-import { IconaSpillo } from './IconaSpillo';
+import { IconaSpillo, PuntoSpillo, SpilloGrafico } from './IconaSpillo';
 import { PulsanteVisivo, CollegamentoVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconMappa } from '../shared/iconeGuida';
@@ -380,7 +380,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <li key={t}>
                     <button type="button" className={`visore-mappa__categoria ${attivo ? '' : 'visore-mappa__categoria--nascosta'}`} aria-pressed={attivo}
                       onClick={() => setTipiNascosti((prev) => { const n = new Set(prev); if (n.has(t)) n.delete(t); else n.add(t); return n; })}>
-                      <span className="spillo-mappa__punto" style={{ background: DEFINIZIONI_SPILLO[t].colore }} aria-hidden="true"><IconaSpillo tipo={t} dimensione={12} /></span>
+                      <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
                       <span className="flex-1 min-w-0 truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
                       <span className="tabular-nums text-text-muted">{delTipo.length}</span>
                     </button>
@@ -419,7 +419,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
               {visibili.map((s) => (
                 <li key={s.id}>
                   <button type="button" className={`visore-mappa__voce ${s.id === selezionatoId ? 'visore-mappa__voce--attiva' : ''} ${s.raccolto ? 'opacity-60' : ''}`} onClick={() => { seleziona(s.id); centraSu(s); }} aria-pressed={s.id === selezionatoId}>
-                    <span className="spillo-mappa__punto" style={{ background: s.colore }} aria-hidden="true"><IconaSpillo tipo={s.tipo} dimensione={12} /></span>
+                    <PuntoSpillo tipo={s.tipo} colore={s.colore} />
                     <span className="flex-1 min-w-0 truncate">{s.nome}</span>
                     <span className="text-[11px] text-text-muted">{s.tipoNome}{s.raccolto ? ' · raccolto' : ''}</span>
                   </button>
@@ -469,7 +469,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   }}
                   onClick={(e) => { e.stopPropagation(); if (editor?.strumento === 'aggiungi') return; seleziona(attivo ? null : s.id); }}
                 >
-                  <span className="spillo-mappa__goccia"><IconaSpillo tipo={s.tipo} dimensione={18} /></span>
+                  <SpilloGrafico tipo={s.tipo} colore={s.colore} />
                   <span className="spillo-mappa__etichetta">{s.nome}</span>
                 </button>
               );
@@ -477,7 +477,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
             {selezionato && !editor && singoli.some((s) => s.id === selezionato.id) && (
               <div className="spillo-popup" role="dialog" aria-label={selezionato.nome} style={{ left: `${selezionato.x}%`, top: `${selezionato.y}%`, transform: `scale(${1 / zoom}) translate(-50%, calc(-100% - 42px))` }} onPointerDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
                 <div className="flex items-start gap-2">
-                  <span className="spillo-mappa__punto" style={{ background: selezionato.colore }} aria-hidden="true"><IconaSpillo tipo={selezionato.tipo} dimensione={12} /></span>
+                  <PuntoSpillo tipo={selezionato.tipo} colore={selezionato.colore} />
                   <div className="flex-1 min-w-0">
                     <strong className="block text-[13px] leading-tight">{selezionato.nome}</strong>
                     <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ' · raccolto' : ''}</span>
@@ -568,7 +568,7 @@ export function SchedaSpillo({ spillo: s, partitaId, occupato, onNaviga, onRacco
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Scheda: ${s.nome}`}>
       <div className="flex items-start gap-2">
-        <span className="spillo-mappa__punto spillo-mappa__punto--grande" style={{ background: s.colore }} aria-hidden="true"><IconaSpillo tipo={s.tipo} dimensione={20} /></span>
+        <PuntoSpillo tipo={s.tipo} colore={s.colore} grande />
         <ImmagineRiferimento immagine={d?.immagine} nome={s.nome} />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>

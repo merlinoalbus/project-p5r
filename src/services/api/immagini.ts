@@ -7,7 +7,7 @@ import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, queryString } from './_helpers';
 
-export type AmbitoImmagine = 'arcana' | 'confidente' | 'persona' | 'skill' | 'mappa' | 'spillo' | 'altro';
+export type AmbitoImmagine = 'arcana' | 'confidente' | 'personaggio' | 'persona' | 'skill' | 'mappa' | 'spillo' | 'altro';
 
 export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 
