@@ -357,7 +357,9 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   titolo in carattere display (17 px) e dettaglio nel sans; toni primario/secondario/fantasma/pericolo, `attivo` per gli interruttori; usato in tutta
   la sezione Partita al posto dei pulsanti grigi di solo testo (regola dell'utente 2026-09-04). Schede e filtri: `chip chip--icona` con icona.
   Dal 12.8 la stessa regola vale in tutte le sezioni (pagine della Guida, Compendio, Impostazioni, finestre delle immagini e delle mappe,
-  selettori della Fusione): i soli pulsanti di solo testo rimasti sono gli «Annulla» delle finestre modali.
+  selettori della Fusione, «Filtri» del Compendio, «Salva piano», «Azzera i bonus», gli «Annulla» inline): i soli pulsanti di solo testo rimasti sono
+  gli «Annulla» delle finestre modali. La variante compatta (`.btn-visivo--compatto`) riduce spaziature e icona ma mantiene i 44 px di altezza minima
+  richiesti dalla regola tablet-first (`.touch`).
   Le icone vengono da `shared/IconaAzione.tsx` (`IconaAzione` → asset `ui/azione-<chiave>` §17, `IconaScheda` → `ui/scheda-<chiave>` §16, riserva SVG
   di `iconeGuida`): le chiavi sono il censimento degli asset richiesti a Codex.
 - `StellaCinque`: riquadro quadrato (`aspect-ratio`) con `container-type: inline-size`; i badge ai vertici hanno altezza in `cqw` (proporzione
@@ -403,7 +405,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 - `FusionePage`: schede principali con `IconaScheda fusione-*`; le viste di calcolo (Due arcani, Matrice, Demoni del Tesoro) solo con `?strumenti=1`.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 83 file / 242 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 85 file / 246 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla

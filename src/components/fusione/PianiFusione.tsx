@@ -13,6 +13,7 @@ import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
 import type { PersonaRiassuntoDto, PianiFusioneDto, PianoFusioneDto, SkillRiassuntoDto } from '../../types';
 import { IconaAzione } from '../shared/IconaAzione';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -38,9 +39,7 @@ function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; in
         </span>
         <span className="ml-auto font-black tabular-nums text-[16px]">{formattaYen(piano.costo)}</span>
         {onSalva && (
-          <button type="button" className={`btn btn-sm ${salvato ? 'btn-ghost' : 'btn-secondary'}`} onClick={onSalva} disabled={salvato} title="Salva questo piano nella partita: l'avanzamento verrà ricalcolato sulla scorta">
-            {salvato ? 'Salvato ✓' : 'Salva piano'}
-          </button>
+          <PulsanteVisivo tono={salvato ? 'fantasma' : 'secondario'} compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={salvato ? 'Salvato ✓' : 'Salva piano'} onClick={onSalva} disabled={salvato} title="Salva questo piano nella partita: l'avanzamento verrà ricalcolato sulla scorta" />
         )}
       </div>
       <AlberoPiano radice={piano.radice} />

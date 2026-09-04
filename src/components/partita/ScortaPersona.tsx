@@ -230,7 +230,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
               ))}
             </div>
             <div className="flex justify-end">
-              <button type="button" className="btn btn-ghost btn-sm" disabled={ORDINE_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })}>Azzera i bonus</button>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera i bonus" disabled={ORDINE_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })} />
             </div>
           </div>
           <StatisticheBarre
