@@ -11,6 +11,7 @@ export function NotFoundPage() {
   useDocumentTitle('Pagina non trovata');
   return (
     <EmptyState
+      illustrazione="vuoto-partita-senza-testo"
       title="Pagina non trovata"
       hint="L'indirizzo richiesto non corrisponde a nessuna sezione dell'app."
       action={

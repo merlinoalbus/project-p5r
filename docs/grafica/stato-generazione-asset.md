@@ -2,9 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**484 file richiesti: 309 completati e approvati, 175 ancora da consegnare.**
-
-Persona completate e approvate: **57**. Persona generate e in validazione: **30**. Persona ancora da generare: **145**.
+**521 file richiesti: 235 completati e approvati, 286 ancora da consegnare** (37 aggiunti il 2026-09-04 con la Fase 11.6: §13 di `prompt-immagini.md`).
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -40,73 +38,61 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | elementi | 16 | 16 | 0 |
 | affinita | 12 | 12 | 0 |
 | doti | 12 | 12 | 0 |
-| ui | 47 | 47 | 0 |
-| illustrazioni | 15 | 15 | 0 |
+| ui | 51 | 47 | 4 |
+| illustrazioni | 23 | 15 | 8 |
 | confidenti | 46 | 46 | 0 |
 | persona | 232 | 57 | 175 |
 | meteo | 17 | 17 | 0 |
+| guida | 15 | 0 | 15 |
+| palazzi | 10 | 0 | 10 |
 
-## Elenco completo
+## Elenco
+### ui
+- [ ] **DA CONSEGNARE** — `public/asset/ui/nav-guida.png` — 256×256 (§13.1)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/nav-guida-attiva.png` — 256×256 (§13.1)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/giorno.png` — 256×256 (§13.4)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/sera.png` — 256×256 (§13.4)
+
+### illustrazioni
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-obiettivi.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-obiettivi-senza-testo.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-piani.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-piani-senza-testo.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-cicli.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-cicli-senza-testo.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-storico.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-storico-senza-testo.png` — 1200×800 (§13.5)
+
+### guida
+- [ ] **DA CONSEGNARE** — `public/asset/guida/percorso.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/domande.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/cruciverba.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/calendario.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/dungeon.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/richieste.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/battaglia.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/citta.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/negozi.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/attivita.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/completamento.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/sfide.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/personaggi.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/oggetti.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/confidenti.png` — 256×256 (§13.2)
+
+### palazzi
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/kamoshida.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/madarame.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/kaneshiro.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/futaba.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/okumura.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/niijima.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/shido.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/iweleth.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/maruki.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/mementos.png` — 512×512 (§13.3)
 
 ### persona
-
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/arsene.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/jack-o-lantern.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/pixie.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/agathion.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/mandrake.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/bicorn.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/cait-sith.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/incubus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kelpie.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/saki-mitama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/silky.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/genbu.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/succubus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/obariyon.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/angel.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/berith.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/hua-po.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/koropokkuru.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/mokoi.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/regent.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/slime.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/apsaras.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/jack-frost.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kodama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/koppa-tengu.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orpheus-f.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kushi-mitama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/onmoraki.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/ame-no-uzume.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/ippon-datara.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orpheus-f-picaro.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/archangel.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/inugami.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/makami.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/queens-necklace.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/shiisaa.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/eligor.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/high-pixie.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kaguya.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/suzaku.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/matador.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/nekomata.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orobas.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/sudama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/black-ooze.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/shiki-ouji.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/flauros.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/leanan-sidhe.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/izanagi.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/nue.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/oni.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/stone-of-scone.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/yaksini.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orthrus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/phoenix.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/jikokuten.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/nigi-mitama.png` — 768×768
 - [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/fuu-ki.png` — 768×768
 - [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/izanagi-picaro.png` — 768×768
 - [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/sandman.png` — 768×768
@@ -282,29 +268,3 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [ ] **DA CONSEGNARE** — `public/asset/persona/lucifer.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/maria.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/satanael.png` — 768×768
-
-### meteo
-
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/sereno.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/nuvoloso.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/pioggia.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/temporale.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/neve.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/nebbia.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/caldo.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/freddo.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/polline.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/tifone.png` — 256×256
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-mattina.png` — 600×160
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-pausa-pranzo.png` — 600×160
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-dopo-la-scuola.png` — 600×160
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-sera.png` — 600×160
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-notte.png` — 600×160
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-giornata.png` — 600×160
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/meteo/fascia-senza-testo.png` — 600×160
-
-## Sorgenti degli splash completati
-
-Recuperate le bozze esistenti e generate soltanto le due varianti senza testo mancanti. Esportazione WEBP lossless mediante scale-up Lanczos uniforme autorizzato, senza ritagli o deformazioni. Tutti e quattro i file finali sono approvati.
-
-Cartella sorgenti: `C:/Users/rober/.codex/generated_images/01a06714-03f1-7730-85d6-8727247cf881/`.

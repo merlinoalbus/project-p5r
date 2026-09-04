@@ -80,7 +80,7 @@ font "che ballano", layout a griglia irregolare; ordine di lavoro colore → log
 | Giudizio | ✔ https://static.wikia.nocookie.net/megamitensei/images/a/ab/P5_Judgement_Arcana.png/revision/latest?cb=20160916144550 |
 | Mondo | ✔ https://static.wikia.nocookie.net/megamitensei/images/2/2b/P5_World_Arcana.png/revision/latest?cb=20160916144637 |
 | Consigliere (P5R) | ✔ https://static.wikia.nocookie.net/megamitensei/images/5/5b/P5_Royal_Consultant_Arcana.png/revision/latest?cb=20200508064739 |
-| Fede (P5R) | nessuna carta sul wiki; icona Confidente di Kasumi in stile carta: ✔ https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 (Consigliere analoga: ✔ https://static.wikia.nocookie.net/megamitensei/images/8/80/Persona_5_Confidant_Guides_Icon_%28Councillor%29_-_Takuto_Maruki.png/revision/latest?cb=20210309075901) |
+| Fede (P5R) | ✔ https://static.wikia.nocookie.net/megamitensei/images/e/e6/Faith.png/revision/latest?cb=20200508064816 (carta "LA FOI"; `FaithArcana.png` è la variante alterata). Ispirazione secondaria, icona Confidente di Kasumi in stile carta: ✔ https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 (Consigliere analoga: ✔ https://static.wikia.nocookie.net/megamitensei/images/8/80/Persona_5_Confidant_Guides_Icon_%28Councillor%29_-_Takuto_Maruki.png/revision/latest?cb=20210309075901) |
 
 ## 5. Loghi e simboli
 - ✔ https://upload.wikimedia.org/wikipedia/commons/c/cd/Persona_5_logo.svg (pagina https://commons.wikimedia.org/wiki/File:Persona_5_logo.svg) e variante nera ✔ https://upload.wikimedia.org/wikipedia/commons/6/66/Persona_5_logo_black.svg — logo vettoriale.
@@ -123,5 +123,5 @@ font "che ballano", layout a griglia irregolare; ordine di lavoro colore → log
 - https://www.artstation.com/artwork/3932RB — concept "P5R Mobile" (reinterpretazione della UI di battaglia).
 
 ## Buchi residui
-- Nessuna carta tarocco dell'arcano **Fede** disponibile: il prompt dovrà descriverla (stile delle altre carte + simbolo delle stelle dell'icona di Kasumi).
+- Carta dell'arcano **Fede** reperita in seguito sulla pagina wiki "Faith Arcana" (vedi §4): figura papale in trono con due accoliti incatenati, titolo "LA FOI"; il prompt in `prompt-immagini.md` va allineato a questo riferimento.
 - Screenshot con la tabella statistiche FR/MA/RS/AG/FO ben leggibile: solo nella Game UI Database (✋).

@@ -1,0 +1,157 @@
+[
+  {
+    "chiave": "conoscenza",
+    "nome": "Conoscenza",
+    "ranghi": [
+      {
+        "rango": 1,
+        "nome": "Ignorante",
+        "soglia": 0
+      },
+      {
+        "rango": 2,
+        "nome": "Diligente",
+        "soglia": 34
+      },
+      {
+        "rango": 3,
+        "nome": "Studioso",
+        "soglia": 82
+      },
+      {
+        "rango": 4,
+        "nome": "Dotto",
+        "soglia": 126
+      },
+      {
+        "rango": 5,
+        "nome": "Erudito",
+        "soglia": 192
+      }
+    ]
+  },
+  {
+    "chiave": "fascino",
+    "nome": "Fascino",
+    "ranghi": [
+      {
+        "rango": 1,
+        "nome": "Indifferente",
+        "soglia": 0
+      },
+      {
+        "rango": 2,
+        "nome": "Interessante",
+        "soglia": 6
+      },
+      {
+        "rango": 3,
+        "nome": "Affascinante",
+        "soglia": 52
+      },
+      {
+        "rango": 4,
+        "nome": "Carismatico",
+        "soglia": 92
+      },
+      {
+        "rango": 5,
+        "nome": "Irresistibile",
+        "soglia": 132
+      }
+    ]
+  },
+  {
+    "chiave": "coraggio",
+    "nome": "Coraggio",
+    "ranghi": [
+      {
+        "rango": 1,
+        "nome": "Pavido",
+        "soglia": 0
+      },
+      {
+        "rango": 2,
+        "nome": "Audace",
+        "soglia": 11
+      },
+      {
+        "rango": 3,
+        "nome": "Coraggioso",
+        "soglia": 38
+      },
+      {
+        "rango": 4,
+        "nome": "Temerario",
+        "soglia": 68
+      },
+      {
+        "rango": 5,
+        "nome": "Cuor di leone",
+        "soglia": 113
+      }
+    ]
+  },
+  {
+    "chiave": "gentilezza",
+    "nome": "Gentilezza",
+    "ranghi": [
+      {
+        "rango": 1,
+        "nome": "Inoffensivo",
+        "soglia": 0
+      },
+      {
+        "rango": 2,
+        "nome": "Gentile",
+        "soglia": 14
+      },
+      {
+        "rango": 3,
+        "nome": "Empatico",
+        "soglia": 47
+      },
+      {
+        "rango": 4,
+        "nome": "Altruista",
+        "soglia": 92
+      },
+      {
+        "rango": 5,
+        "nome": "Angelico",
+        "soglia": 136
+      }
+    ]
+  },
+  {
+    "chiave": "perizia",
+    "nome": "Perizia",
+    "ranghi": [
+      {
+        "rango": 1,
+        "nome": "Incapace",
+        "soglia": 0
+      },
+      {
+        "rango": 2,
+        "nome": "Decente",
+        "soglia": 12
+      },
+      {
+        "rango": 3,
+        "nome": "Bravo",
+        "soglia": 34
+      },
+      {
+        "rango": 4,
+        "nome": "Asso",
+        "soglia": 60
+      },
+      {
+        "rango": 5,
+        "nome": "Migliore",
+        "soglia": 87
+      }
+    ]
+  }
+]

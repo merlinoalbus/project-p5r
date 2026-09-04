@@ -17,6 +17,8 @@ export const config = {
   dataDir: path.resolve(process.env.DATA_DIR || './data'),
   /** Cartella del dataset Royal caricato al boot (nell'immagine Docker: /app/data/seed). */
   seedDir: path.resolve(process.env.SEED_DIR || './data/seed'),
+  /** Cartella del catalogo dei riferimenti (solo link; nell'immagine Docker: /app/data/riferimenti). */
+  riferimentiDir: path.resolve(process.env.RIFERIMENTI_DIR || './data/riferimenti'),
   logLevel: process.env.LOG_LEVEL || 'info',
 
   /** Nome del file SQLite dentro `dataDir`. */
