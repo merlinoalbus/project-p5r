@@ -8,7 +8,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico,
 } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
@@ -21,6 +21,7 @@ import { impostaLettura } from '../services/attivitaService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
 import { impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
+import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
 import { eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
@@ -76,6 +77,10 @@ router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChi
   res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.regalo, b.fatto));
 });
 
+router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }), (req, res) => {
+  const b = req.body as { trofeo: string; ottenuto: boolean };
+  res.json(impostaTrofeo(Number(req.params.id), b.trofeo, b.ottenuto));
+});
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
   const b = req.body as { data: string; indice: number; fatta: boolean };
   res.json(impostaAzione(Number(req.params.id), b.data, b.indice, b.fatta));

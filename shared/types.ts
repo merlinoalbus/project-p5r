@@ -727,6 +727,35 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Completamento: trofei, finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo (Fase 9.1) ----
+
+export interface TrofeoDto {
+  chiave: string;
+  nome: string;
+  nomeEn: string | null;
+  tipo: 'bronzo' | 'argento' | 'oro' | 'platino';
+  descrizione: string;
+  come: string;
+  mancabile: boolean | null;
+  quando: string | null;
+  fonte: string;
+  verificato: boolean;
+  /** Ottenuto nella partita. */
+  ottenuto: boolean;
+}
+
+export interface CompletamentoDto {
+  trofei: TrofeoDto[];
+  ottenuti: number;
+  finali: Array<{ chiave: string; nome: string; condizioni: string[]; date: string[]; descrizione: string; fonte: string }>;
+  covo: { introduzione: string; medaglie: string; sfide: Array<{ nome: string; requisito: string; medaglie: number | null }>; premi: Array<{ nome: string; costo: number | null; sblocco: string | null; effetto: string | null }>; fonte: string };
+  dlc: Array<{ nome: string; contenuto: string; note: string | null; fonte: string }>;
+  meteo: Array<{ condizione: string; effetti: string[]; fonte: string }>;
+  nuovaPartitaPlus: { trasferito: string[]; nonTrasferito: string[]; note: string; fonte: string };
+  differenzeRoyal: string[];
+  tempo: { fasce: string[]; regole: string[]; fonte: string };
+}
+
 // ---- Guida giorno per giorno (Fase 7.5b) ----
 
 export interface RiferimentoAzioneDto {

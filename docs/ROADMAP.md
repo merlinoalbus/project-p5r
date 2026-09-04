@@ -84,7 +84,14 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 | 8.3 | Mappe della città in modalità guida: piante dei quartieri con spilli sui luoghi (stesso meccanismo della 7.4) | ⬜ |
 
 ⬜ 8 (voce precedente) Inventario (negozi, oggetti, armi, accessori, abiti) · Attività (mini-giochi, lavori, libri, DVD) · **Mappe della città in modalità guida** (richiesta utente 2026-09-03: luoghi con cosa offrono; per negozi e punti sensibili elenco di oggetti, armi, accessori, abiti e opzioni disponibili, con date/condizioni)
-⬜ 9 Trofei, finali, Covo dei Ladri
+## Fase 9 — Completamento, sfide, boss
+
+| Step | Contenuto | Stato |
+|---|---|---|
+| 9.1 | Completamento: seed `completamento.json` (53 trofei con nome italiano e inglese, tipo, come e quando; 6 finali con condizioni e date; Covo dei Ladri con 52 sfide e 36 voci di catalogo; 12 DLC; 11 voci sugli effetti del meteo; Nuova Partita+; differenze Royal/vanilla; fasce orarie e regole del tempo); migrazione 019 (`trofeo`, `trofeo_partita`), consultazione in `dati_guida`; `GET /api/compendio/completamento?partita`, `PUT /api/partite/:id/trofei` (evento «trofeo»); pagina «Guida → Trofei, finali e Covo dei Ladri» a schede | ⏳ in validazione |
+| 9.2 | Sfide e boss: 7 Battaglie Sfida (regole, nemici, punteggi, ricompense, strategia), boss segreti (Jose, Gemelle Custodi, Lavenza), Magnate, domande del game show in TV (nelle Domande), tratti delle Persona con effetto in italiano | ⬜ (dati raccolti) |
+
+⬜ 9 (voce precedente) Trofei, finali, Covo dei Ladri
 
 ## Requisiti trasversali (sempre validi)
 - Tutto in italiano; nomi Persona originali; skill con chiave canonica + resa IT modificabile.

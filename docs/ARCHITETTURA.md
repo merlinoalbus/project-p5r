@@ -204,6 +204,10 @@ effetto, statistiche, disponibilità, `verificato`), `acquisto_partita`. `negozi
 dell'azione). Il giorno corrente è `partita.data_gioco`. `percorsoService`: indice leggero, scheda del giorno con precedente/successivo,
 spunta con evento «percorso», impostazione del giorno corrente.
 
+### Completamento (Fase 9.1)
+Migrazione 019: `trofeo` (chiave stabile, tipo, come/quando, `verificato`) e `trofeo_partita`; finali, Covo dei Ladri, DLC, meteo, Nuova Partita+,
+differenze e tempo sono JSON in `dati_guida` («completamento»). `completamentoService`: elenco con ottenuti, spunta con evento «trofeo».
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

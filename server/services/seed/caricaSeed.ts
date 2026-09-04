@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CruciverbaSeed, NegoziSeed, PercorsoSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, NegoziSeed, PercorsoSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -58,6 +58,7 @@ interface SeedCompleto {
   cruciverba: CruciverbaSeed;
   negozi: NegoziSeed;
   percorso: PercorsoSeed;
+  completamento: CompletamentoSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -92,6 +93,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     cruciverba: JSON.parse(contenuti['cruciverba.json']) as CruciverbaSeed,
     negozi: JSON.parse(contenuti['negozi.json']) as NegoziSeed,
     percorso: JSON.parse(contenuti['percorso.json']) as PercorsoSeed,
+    completamento: JSON.parse(contenuti['completamento.json']) as CompletamentoSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -447,6 +449,17 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       insG.run({ data: g.data, ordine: g.ordine, giorno_settimana: g.giornoSettimana, fase: g.fase, trama: g.trama, vincoli_json: JSON.stringify(g.vincoli), meteo: g.meteo, azioni_json: JSON.stringify(g.azioni), avvisi_json: JSON.stringify(g.avvisi), fonte: g.fonte, coperto: g.coperto ? 1 : 0 });
     }
     for (const r of db.prepare('SELECT data FROM giorno_percorso').all() as Array<{ data: string }>) if (!dateGiorni.has(r.data)) db.prepare('DELETE FROM giorno_percorso WHERE data = ?').run(r.data);
+
+    // ---- Completamento (Fase 9.1): trofei con upsert per chiave e rimozione orfani (i trofei ottenuti per partita restano); il resto in dati_guida ----
+    const insTrofeo = db.prepare(`INSERT INTO trofeo (chiave, ordine, nome, nome_en, tipo, descrizione, come, mancabile, quando, fonte, verificato)
+      VALUES (@chiave, @ordine, @nome, @nome_en, @tipo, @descrizione, @come, @mancabile, @quando, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_en = excluded.nome_en, tipo = excluded.tipo, descrizione = excluded.descrizione, come = excluded.come, mancabile = excluded.mancabile, quando = excluded.quando, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const chiaviTrofei = new Set<string>();
+    for (const t of seed.completamento.trofei) { chiaviTrofei.add(t.chiave); insTrofeo.run({ chiave: t.chiave, ordine: t.ordine, nome: t.nome, nome_en: t.nomeEn, tipo: t.tipo, descrizione: t.descrizione, come: t.come, mancabile: t.mancabile === null ? null : t.mancabile ? 1 : 0, quando: t.quando, fonte: t.fonte, verificato: t.verificato ? 1 : 0 }); }
+    for (const r of db.prepare('SELECT chiave FROM trofeo').all() as Array<{ chiave: string }>) if (!chiaviTrofei.has(r.chiave)) db.prepare('DELETE FROM trofeo WHERE chiave = ?').run(r.chiave);
+    const { trofei: _trofei, ...consultazione } = seed.completamento;
+    void _trofei;
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('completamento', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(consultazione));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)
