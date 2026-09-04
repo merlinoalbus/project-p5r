@@ -9,3 +9,4 @@ export * from './traduzioni';
 export * from './partite';
 export * from './immagini';
 export * from './fusione';
+export * from './font';

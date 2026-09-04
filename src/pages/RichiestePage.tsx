@@ -11,6 +11,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import type { RichiestaDto, StatoRichiesta } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Filtro = 'tutte' | 'da-fare' | 'accettate' | 'completate';
 
@@ -71,10 +72,7 @@ export function RichiestePage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Richieste dei Mementos</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">{d.totale} Richieste dalla guida allgamestaff: committente, date, Dedalo e area, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.completate} completate.` : ' Attiva una partita per segnare accettate e completate.'}</p>
-          </div>
+          <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste dalla guida allgamestaff: committente, date, Dedalo e area, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.completate} completate.` : ' Attiva una partita per segnare accettate e completate.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             {([['tutte', 'Tutte'], ['da-fare', 'Da fare'], ['accettate', 'Accettate'], ['completate', 'Completate']] as Array<[Filtro, string]>).map(([k, l]) => (
               <button key={k} type="button" className={`chip touch ${filtro === k ? 'chip--attivo' : ''}`} onClick={() => setFiltro(k)} aria-pressed={filtro === k}>{l}</button>

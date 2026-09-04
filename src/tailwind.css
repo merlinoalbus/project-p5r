@@ -17,6 +17,14 @@
 
 @source "./**/*.{ts,tsx}";
 
+/* ---- Font predefiniti liberi (public/font/, vedi LICENZE.md). Le famiglie "P5R Display" / "P5R Menu" / "P5R Decor"
+   esistono solo se l'utente ha caricato i propri font (Impostazioni → Caratteri): le regole @font-face relative le genera
+   il frontend (stores/fontStore.ts). Senza di esse il browser passa al font libero successivo nella lista. ---- */
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("/font/inter-latin.woff2") format("woff2"); }
+@font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap; src: url("/font/anton-latin.woff2") format("woff2"); }
+@font-face { font-family: "Bebas Neue"; font-style: normal; font-weight: 400; font-display: swap; src: url("/font/bebas-neue-latin.woff2") format("woff2"); }
+@font-face { font-family: "Special Elite"; font-style: normal; font-weight: 400; font-display: swap; src: url("/font/special-elite-latin.woff2") format("woff2"); }
+
 @theme {
   --spacing: 4px;
   --text-xs: 12px;
@@ -88,6 +96,10 @@
 
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  /* Ruoli tipografici (Fase 11): prima il font dell'utente, poi il predefinito libero, poi le riserve di sistema. */
+  --font-display: "P5R Display", "Anton", Impact, "Arial Narrow Bold", sans-serif;
+  --font-menu: "P5R Menu", "Bebas Neue", "Anton", Impact, sans-serif;
+  --font-decor: "P5R Decor", "Special Elite", "Courier New", monospace;
 }
 
 @layer base {
@@ -115,6 +127,8 @@
   }
   @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes spin { to { transform: rotate(360deg); } }
+  /* otto fotogrammi in sequenza: ogni immagine è visibile per 1/8 del ciclo (ritardi negativi nel componente) */
+  @keyframes fotogramma { 0%, 12.4% { opacity: 1; } 12.5%, 100% { opacity: 0; } }
   @keyframes scale-in {
     from { transform: scale(0.95); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -125,55 +139,55 @@
   /* ---- Bersaglio touch minimo (tablet) ---- */
   .touch { min-height: 44px; min-width: 44px; }
 
-  /* ---- Pulsanti ---- */
+  /* ---- Pulsanti: parallelogramma a taglio diagonale disegnato in CSS (nitido a ogni dimensione), carattere «menu».
+     Il riquadro del pulsante resta rettangolare (outline di focus visibile); bordo e riempimento sono due livelli
+     sotto il testo ritagliati con clip-path. ---- */
   .btn {
-    padding: 10px 16px;
+    --btn-sfondo: transparent;
+    --btn-bordo: transparent;
+    --btn-taglio: 8px;
+    position: relative;
+    isolation: isolate;
+    padding: 8px 20px;
     min-height: 44px;
-    border-radius: var(--radius-md);
-    font-size: 14px;
-    font-weight: 600;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-family: var(--font-menu);
+    font-size: 17px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1;
     cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s, opacity 0.15s;
   }
+  .btn::before, .btn::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    clip-path: polygon(var(--btn-taglio) 0, 100% 0, calc(100% - var(--btn-taglio)) 100%, 0 100%);
+    transition: background-color 0.15s;
+  }
+  .btn::before { inset: 0; background: var(--btn-bordo); }
+  .btn::after { inset: 1px; background: var(--btn-sfondo); }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary {
-    background: var(--color-primary);
-    color: var(--color-text-on-primary);
-    border-color: var(--color-primary);
-  }
-  .btn-primary:hover:not(:disabled) {
-    background: var(--color-primary-hover);
-    border-color: var(--color-primary-hover);
-  }
-  .btn-secondary {
-    background: var(--color-surface);
-    color: var(--color-text);
-    border-color: var(--color-border);
-  }
-  .btn-secondary:hover:not(:disabled) {
-    background: var(--color-bg-tertiary);
-    border-color: var(--color-primary);
-  }
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--color-text-secondary);
-  }
-  .btn-ghost:hover:not(:disabled) { color: var(--color-text); }
-  .btn-danger {
-    background: transparent;
-    color: var(--color-error);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-  }
-  .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.12); }
-  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; }
+  .btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+  .btn-primary { --btn-sfondo: var(--color-primary); --btn-bordo: var(--color-primary); color: var(--color-text-on-primary); }
+  .btn-primary:hover:not(:disabled) { --btn-sfondo: var(--color-primary-hover); --btn-bordo: var(--color-primary-hover); }
+  .btn-secondary { --btn-sfondo: var(--color-surface); --btn-bordo: var(--color-border); color: var(--color-text); }
+  .btn-secondary:hover:not(:disabled) { --btn-sfondo: var(--color-bg-tertiary); --btn-bordo: var(--color-primary); }
+  .btn-ghost { color: var(--color-text-secondary); }
+  .btn-ghost:hover:not(:disabled) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
+  .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
+  .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
+  .btn-sm { font-size: 15px; padding: 6px 14px; min-height: 44px; --btn-taglio: 6px; }
 
   /* ---- Modali ---- */
   .modal-overlay {
@@ -302,22 +316,26 @@
 
   /* ---- Card ---- */
   .card {
-    background: var(--color-bg-secondary);
+    background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     padding: 16px;
     transition: border-color 0.15s;
   }
   .card--cliccabile { cursor: pointer; }
   .card--cliccabile:hover { border-color: var(--color-primary); }
 
-  /* ---- Chip ---- */
+  /* ---- Chip: etichetta a taglio diagonale (stessa tecnica dei pulsanti) ---- */
   .chip {
+    --chip-sfondo: var(--color-surface);
+    --chip-bordo: transparent;
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 3px 9px;
-    border-radius: var(--radius-full);
+    padding: 4px 11px;
+    border-radius: 0;
     font-size: 12px;
     font-weight: 600;
     /* i chip lunghi (effetti dei regali, livelli, note) vanno a capo invece di uscire dallo schermo */
@@ -325,15 +343,82 @@
     text-align: left;
     max-width: 100%;
     line-height: 1.25;
-    border: 1px solid transparent;
-    background: var(--color-surface);
+    border: 0;
+    background: transparent;
     color: var(--color-text-secondary);
   }
-  .chip--attivo {
-    background: var(--color-primary-bg);
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+  .chip::before, .chip::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
   }
+  .chip::before { inset: 0; background: var(--chip-bordo); }
+  .chip::after { inset: 1px; background: var(--chip-sfondo); }
+  .chip:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  .chip--attivo {
+    --chip-sfondo: color-mix(in srgb, var(--color-primary) 18%, var(--color-bg-secondary));
+    --chip-bordo: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* ---- Intestazione «hero» e titoli a tasselli (stile Persona 5) ---- */
+  .intestazione { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 6px 0 4px; }
+  .titolo-tasselli {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: clamp(26px, 3.4vw, 42px);
+    line-height: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 8px;
+  }
+  .intestazione--compatta .titolo-tasselli { font-size: clamp(22px, 2.4vw, 30px); }
+  .tassello {
+    display: inline-block;
+    padding: 5px 10px 3px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    clip-path: polygon(3% 0, 100% 2%, 98% 100%, 0 96%);
+    transform: rotate(-1.4deg);
+  }
+  .titolo-tasselli .tassello:nth-child(even) {
+    background: var(--color-primary);
+    color: #fff;
+    transform: rotate(1.1deg);
+    clip-path: polygon(0 3%, 98% 0, 100% 97%, 2% 100%);
+  }
+  /* titolo in carattere display senza tasselli (schede di dettaglio con immagine accanto) */
+  .titolo-display { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; font-size: clamp(24px, 2.6vw, 34px); line-height: 1; }
+  .intestazione__illustrazione { max-height: 120px; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
+  @media (max-width: 640px) { .intestazione__illustrazione { max-height: 72px; } }
+
+  /* ---- Sfondo a tema della sezione (asset «sfondi/*»): livello sotto il contenuto con velo scuro per la leggibilità ---- */
+  .sfondo-sezione {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation: fade-in 0.5s ease-out;
+  }
+  .sfondo-sezione::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(11, 11, 14, 0.7) 0%, rgba(11, 11, 14, 0.84) 50%, rgba(11, 11, 14, 0.93) 100%);
+  }
+
+  /* ---- Caricamento a fotogrammi (illustrazioni/caricamento-1…8) ---- */
+  .fotogramma { opacity: 0; animation: fotogramma 0.8s steps(1, end) infinite; }
+
+  /* ---- Etichette di navigazione in carattere «menu» ---- */
+  .voce-menu { font-family: var(--font-menu); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 400; }
 
   /* ---- KPI ---- */
   .kpi-tile {

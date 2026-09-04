@@ -121,7 +121,7 @@ export function CicliSalvati({ partitaId }: Props) {
       {lista.errore && <div className="text-[13px] text-error">{lista.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void lista.ricarica()}>Riprova</button></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
-        <EmptyState icon="🔁" title="Nessun ciclo salvato" hint="Trova un ciclo nella pagina Fusione («Cicli di fusione») e premi «Salva ciclo»." action={<Link to="/fusione?vista=cicli" className="btn btn-primary no-underline">Vai ai cicli di fusione</Link>} />
+        <EmptyState illustrazione="vuoto-cicli" title="Nessun ciclo salvato" hint="Trova un ciclo nella pagina Fusione («Cicli di fusione») e premi «Salva ciclo»." action={<Link to="/fusione?vista=cicli" className="btn btn-primary no-underline">Vai ai cicli di fusione</Link>} />
       )}
       {lista.dati && lista.dati.length > 0 && (
         <div className="flex flex-col gap-3">

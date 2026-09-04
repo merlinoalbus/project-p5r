@@ -10,7 +10,6 @@ import { aggiornaPartita, getPersone, getPossedute, getRegoleFusione, getVelluto
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
-import { useAsset } from '../stores/assetStore';
 import { Calcolatore } from '../components/fusione/Calcolatore';
 import { RicettePersona } from '../components/fusione/RicettePersona';
 import { PianiFusione } from '../components/fusione/PianiFusione';
@@ -19,6 +18,7 @@ import { PannelloVelluto } from '../components/fusione/PannelloVelluto';
 import { ForcaIsolamento } from '../components/fusione/ForcaIsolamento';
 import { CicliFusione } from '../components/fusione/CicliFusione';
 import { notifica } from '../stores/notificationStore';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
 const VISTE: Array<[Vista, string]> = [
@@ -54,10 +54,6 @@ export function FusionePage() {
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
   const skillParam = (params.get('skill') ?? '').split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
   const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
-  const sfondoAllarme = useAsset('sfondi/stanza-velluto-allarme');
-  const sfondoBase = useAsset('sfondi/stanza-velluto');
-  // Con l'Allarme delle fusioni attivo nella partita lo sfondo passa alla variante «allarme» (se l'asset esiste).
-  const sfondoVelluto = attiva?.allarmeAttivo && sfondoAllarme ? sfondoAllarme : sfondoBase;
 
   const nome = (chiave: string) => glossario?.arcani.find((x) => x.chiave === chiave)?.nome ?? chiave;
   const risultato = useMemo(() => {
@@ -79,15 +75,7 @@ export function FusionePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1
-        className={`m-0 text-2xl font-bold ${sfondoVelluto ? 'rounded-lg px-4 py-6 bg-cover bg-center [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]' : ''}`}
-        style={sfondoVelluto ? { backgroundImage: `linear-gradient(rgba(11,11,14,0.35), rgba(11,11,14,0.75)), url("${sfondoVelluto}")` } : undefined}
-      >
-        Fusione
-      </h1>
-      <p className="m-0 text-[13px] text-text-secondary">
-        Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.
-      </p>
+      <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.</>} />
       <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
       <div className="flex gap-1.5 flex-wrap">
         {VISTE.map(([k, l]) => (

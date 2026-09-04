@@ -3,14 +3,13 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { getTermini } from '../services/api';
 import { PageState, EmptyState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
-import { IconChevronLeft } from '../components/shared/icons';
 import type { TermineDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 const NOMI_CATEGORIA: Record<string, string> = {
   battaglia: 'Battaglia',
@@ -48,12 +47,12 @@ export function GlossarioPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link to="/compendio" className="btn btn-ghost self-start -ml-2 no-underline"><IconChevronLeft size={18} /> Compendio</Link>
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
-        <h1 className="m-0 text-2xl font-bold">Glossario dei termini</h1>
-        <span className="text-[13px] text-text-muted">{dati ? `${filtrati.length} di ${dati.length}` : ''}</span>
-      </div>
-      <p className="m-0 text-[13px] text-text-secondary">Termini della localizzazione italiana ufficiale di Persona 5 Royal con il corrispondente inglese, ricavati dalla guida allgamestaff.it. Modificabili in Impostazioni → Traduzioni (ambito «termine»).</p>
+      <IntestazionePagina
+        titolo="Glossario dei termini"
+        indietro={{ to: '/compendio', etichetta: 'Compendio' }}
+        sottotitolo={<>Termini della localizzazione italiana ufficiale di Persona 5 Royal con il corrispondente inglese, ricavati dalla guida allgamestaff.it. Modificabili in Impostazioni → Traduzioni (ambito «termine»).</>}
+        azioni={<span className="text-[13px] text-text-muted">{dati ? `${filtrati.length} di ${dati.length}` : ''}</span>}
+      />
       <div className="flex flex-wrap gap-2 items-center">
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca in italiano o inglese…" />
         <div className="flex gap-1.5 flex-wrap">

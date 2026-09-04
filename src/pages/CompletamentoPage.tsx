@@ -11,6 +11,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import type { CompletamentoDto, TrofeoDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 const SCHEDE = [['trofei', 'Trofei'], ['finali', 'Finali'], ['covo', 'Covo dei Ladri'], ['dlc', 'DLC'], ['meteo', 'Meteo'], ['ng', 'Nuova Partita+'], ['tempo', 'Tempo e fasce']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -63,10 +64,7 @@ export function CompletamentoPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Trofei, finali e Covo dei Ladri</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">{d.trofei.length} trofei con come e quando ottenerli, i finali con le condizioni e le date, il Covo dei Ladri con sfide e premi, i DLC, gli effetti del meteo, la Nuova Partita+ e le regole del tempo.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.ottenuti} trofei ottenuti.` : ' Attiva una partita per spuntare i trofei ottenuti.'}</p>
-          </div>
+          <IntestazionePagina titolo="Trofei, finali e Covo dei Ladri" sottotitolo={<>{d.trofei.length} trofei con come e quando ottenerli, i finali con le condizioni e le date, il Covo dei Ladri con sfide e premi, i DLC, gli effetti del meteo, la Nuova Partita+ e le regole del tempo.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.ottenuti} trofei ottenuti.` : ' Attiva una partita per spuntare i trofei ottenuti.'}</>} />
           <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
           </div>

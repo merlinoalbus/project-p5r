@@ -134,6 +134,22 @@ export interface SkillDettaglioDto extends SkillRiassuntoDto {
   fontiEsecuzione: Array<{ id: number; nome: string }>;
 }
 
+/** Ruoli tipografici dell'interfaccia: titoli/numeri, menu/pulsanti, tasselli decorativi. */
+export type RuoloFont = 'display' | 'menu' | 'decor';
+export type FormatoFont = 'ttf' | 'otf' | 'woff' | 'woff2';
+
+/** Stato del font caricato dall'utente per un ruolo (file nella cartella dati dell'istanza, mai nel repository). */
+export interface FontDto {
+  ruolo: RuoloFont;
+  presente: boolean;
+  formato: FormatoFont | null;
+  byte: number;
+  /** Data di modifica del file (ISO), usata per invalidare la cache del browser. */
+  aggiornato: string | null;
+  /** URL del file (`/api/font/<ruolo>/file`), null se assente. */
+  url: string | null;
+}
+
 export interface OggettoDto {
   id: number;
   nome: string;

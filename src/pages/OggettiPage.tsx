@@ -11,6 +11,7 @@ import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 const SCHEDE = [['consumabili', 'Consumabili'], ['chiave', 'Chiave e materiali'], ['fabbricazione', 'Fabbricazione'], ['armi', 'Personalizzazione armi'], ['abiti', 'Abiti e lavanderia'], ['scambi', 'Scambi']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -179,10 +180,7 @@ export function OggettiPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Oggetti, materiali e fabbricazione</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Le armi, le protezioni e gli accessori sono nel Compendio; i prezzi dei negozi in Negozi e inventario.</p>
-          </div>
+          <IntestazionePagina titolo="Oggetti, materiali e fabbricazione" sottotitolo={<>{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Le armi, le protezioni e gli accessori sono nel Compendio; i prezzi dei negozi in Negozi e inventario.</>} />
           <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'consumabili' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
           </div>

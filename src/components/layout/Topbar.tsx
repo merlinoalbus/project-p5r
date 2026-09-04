@@ -30,7 +30,7 @@ export function Topbar() {
         />
       </Link>
       {sezione && (
-        <span className="text-[14px] text-text-secondary truncate hidden md:inline">
+        <span className="voce-menu text-[16px] text-text-secondary truncate hidden md:inline">
           <span className="text-text-muted mr-2">/</span>
           {sezione.label}
         </span>

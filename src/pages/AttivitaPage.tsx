@@ -12,6 +12,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { NOME_DOTE, NOME_FASCIA, NOME_TIPO_ATTIVITA } from '../utils/citta';
 import type { AttivitaDto, AttivitaTutteDto, FilmDto, LibroDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['libri', 'Libri'], ['film', 'Film e DVD']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -104,10 +105,7 @@ export function AttivitaPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Attività e Doti sociali</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">Mini-giochi, lavori, studio, libri e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.libriLetti} libri letti, ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare libri letti e film visti.'}</p>
-          </div>
+          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori, studio, libri e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.libriLetti} libri letti, ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare libri letti e film visti.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
               {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}

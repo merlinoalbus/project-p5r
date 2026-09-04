@@ -34,7 +34,7 @@ export function NegozioPage() {
           <button type="button" className="btn btn-ghost btn-sm self-start touch" onClick={() => navigate('/guida/negozi')}><IconChevronLeft size={16} /> Negozi</button>
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="m-0 text-2xl font-bold">{n.nome}</h1>
+              <h1 className="titolo-display m-0">{n.nome}</h1>
               <span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>
               {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
             </div>

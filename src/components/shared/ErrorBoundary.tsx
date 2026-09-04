@@ -5,6 +5,7 @@
 // ============================================================
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { useAssetStore } from '../../stores/assetStore';
 
 interface Props {
   children: ReactNode;
@@ -41,10 +42,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const illustrazione = useAssetStore.getState().manifest?.file['illustrazioni/errore-senza-testo'] ?? null;
       return (
         <div className="flex flex-col items-center justify-center h-screen p-8 font-sans bg-[#0b0b0e] text-[#ececf1]">
           <div className="max-w-[520px] text-center p-8 rounded-lg bg-[#14141a] border border-[#e5352b] shadow-[0_4px_24px_rgba(229,53,43,0.2)]">
-            <h2 className="text-[#e5352b] m-0 mb-4 text-[1.3rem]">Qualcosa è andato storto</h2>
+            {illustrazione && <img src={illustrazione} alt="" className="max-h-[150px] w-auto object-contain mx-auto mb-4" draggable={false} />}
+            <h2 className="text-[#e5352b] m-0 mb-4 text-[1.3rem] font-display uppercase tracking-wide">Qualcosa è andato storto</h2>
             <p className="text-[#a3a3b3] m-0 mb-4 text-[0.95rem] leading-normal">
               Si è verificato un errore nell'applicazione. I dati salvati non sono stati persi.
             </p>

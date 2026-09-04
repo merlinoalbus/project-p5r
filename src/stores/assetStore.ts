@@ -53,6 +53,17 @@ export const useAssetStore = create<AssetState>((set, get) => ({
  * URL dell'asset predefinito `nome` (chiave del manifest, es. "arcani/fool"), oppure null se la grafica
  * predefinita è disattivata, il manifest non lo contiene o il file è risultato mancante.
  */
+/**
+ * URL di più asset con una sola sottoscrizione (stessa regola di `useAsset`): null per ciascun asset
+ * disattivato, assente o mancante. Utile per i fotogrammi del caricamento e per le catene di riserva.
+ */
+export function useAssetMulti(nomi: ReadonlyArray<string | null | undefined>): Array<string | null> {
+  const attiva = usePreferenzeStore((s) => s.graficaPredefinita);
+  const file = useAssetStore((s) => s.manifest?.file);
+  const mancanti = useAssetStore((s) => s.mancanti);
+  return nomi.map((nome) => (attiva && nome && file?.[nome] && !mancanti[nome] ? file[nome] : null));
+}
+
 export function useAsset(nome: string | null | undefined): string | null {
   const attiva = usePreferenzeStore((s) => s.graficaPredefinita);
   const url = useAssetStore((s) => (nome ? s.manifest?.file[nome] ?? null : null));

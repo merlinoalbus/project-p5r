@@ -13,6 +13,7 @@ import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO, PERSONAGGI } from '../utils/negozi';
 import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import type { NegozioRiassuntoDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 export function NegoziPage() {
   useDocumentTitle('Negozi e inventario');
@@ -38,10 +39,7 @@ export function NegoziPage() {
     <PageState isLoading={negozi.caricamento && !negozi.dati} error={negozi.errore} onRetry={() => void negozi.ricarica()}>
       {negozi.dati && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Negozi e inventario</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">{negozi.dati.length} negozi e punti di acquisto con {negozi.dati.reduce((s, n) => s + n.articoli, 0)} articoli: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</p>
-          </div>
+          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{negozi.dati.length} negozi e punti di acquisto con {negozi.dati.reduce((s, n) => s + n.articoli, 0)} articoli: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
           <div className="flex flex-col gap-1.5">
             <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
             <div className="flex flex-wrap gap-1.5">

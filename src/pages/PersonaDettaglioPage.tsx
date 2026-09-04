@@ -122,7 +122,7 @@ export function PersonaDettaglioPage() {
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="m-0 text-2xl font-bold">{p.nomeIt}</h1>
+                <h1 className="titolo-display m-0">{p.nomeIt}</h1>
                 {p.nomeIt !== p.nome && <span className="chip" title="Nome nella localizzazione inglese">{p.nome}</span>}
                 <span className="chip chip--attivo">{p.arcanaNome}</span>
                 <span className="chip">Livello {p.livello}</span>

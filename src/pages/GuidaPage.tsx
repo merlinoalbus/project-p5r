@@ -5,15 +5,13 @@
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../components/shared/icons';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 export function GuidaPage() {
   useDocumentTitle('Guida');
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="m-0 text-2xl font-bold">Guida</h1>
-        <p className="m-0 mt-1 text-[13px] text-text-secondary">La guida italiana allgamestaff resa consultabile in gioco, con lo stato della tua partita.</p>
-      </div>
+      <IntestazionePagina titolo="Guida" sottotitolo="La guida italiana allgamestaff resa consultabile in gioco, con lo stato della tua partita." />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Link to="/guida/percorso" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Guida giorno per giorno</strong><br /><span className="text-[12px] text-text-secondary">Cosa fare oggi, di giorno e di sera: Confidenti, Palazzi, Doti, acquisti, avvisi sulle scadenze; giorno corrente e azioni spuntabili</span></span></Link>
         <Link to="/guida/domande" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Domande in classe ed esami</strong><br /><span className="text-[12px] text-text-secondary">Risposte corrette per data, prossime domande, spunta «fatta»</span></span></Link>

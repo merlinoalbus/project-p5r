@@ -13,6 +13,7 @@ import { PageState, EmptyState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { AffinitaGriglia } from '../components/compendio/AffinitaGriglia';
 import { IconChevronRight } from '../components/shared/icons';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Ordine = 'livello' | 'nome' | 'arcana';
 
@@ -48,13 +49,11 @@ export function CompendioPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
-        <h1 className="m-0 text-2xl font-bold">Compendio</h1>
-        <div className="flex items-baseline gap-3">
-          <Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link>
-          <span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span>
-        </div>
-      </div>
+      <IntestazionePagina
+        titolo="Compendio"
+        sottotitolo="Tutte le Persona di Royal con affinità, skill, statistiche e i modi per ottenerle; tocca una scheda per il dettaglio."
+        azioni={<><Link to="/compendio/glossario" className="chip touch no-underline">Glossario dei termini</Link><span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length} Persona` : ''}</span></>}
+      />
 
       <div className="flex flex-wrap gap-2 items-center">
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona o arcano…" />

@@ -124,7 +124,7 @@ export function PianiSalvati({ partitaId }: Props) {
       {lista.errore && <div className="text-[13px] text-error">{lista.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void lista.ricarica()}>Riprova</button></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
-        <EmptyState icon="🗺️" title="Nessun piano salvato" hint="Calcola un piano nella pagina Fusione («Piano di fusione») e premi «Salva piano»." action={<Link to="/fusione?vista=piani" className="btn btn-primary no-underline">Vai ai piani di fusione</Link>} />
+        <EmptyState illustrazione="vuoto-piani" title="Nessun piano salvato" hint="Calcola un piano nella pagina Fusione («Piano di fusione») e premi «Salva piano»." action={<Link to="/fusione?vista=piani" className="btn btn-primary no-underline">Vai ai piani di fusione</Link>} />
       )}
       {lista.dati && lista.dati.length > 0 && (
         <div className="flex flex-col gap-3">

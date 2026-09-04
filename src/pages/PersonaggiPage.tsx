@@ -10,6 +10,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import type { PersonaggioDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 function Personaggio({ p }: { p: PersonaggioDto }) {
   const [aperto, setAperto] = useState(false);
@@ -57,10 +58,7 @@ export function PersonaggiPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Personaggi</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">Il cast di Persona 5 Royal presentato senza spoiler: chi sono, il loro ruolo, le Persona, le armi e il ruolo in battaglia; ogni Confidente rimanda alla sua scheda con risposte e abilità.</p>
-          </div>
+          <IntestazionePagina titolo="Personaggi" sottotitolo="Il cast di Persona 5 Royal presentato senza spoiler: chi sono, il loro ruolo, le Persona, le armi e il ruolo in battaglia; ogni Confidente rimanda alla sua scheda con risposte e abilità." />
           <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Gruppi">
             <button type="button" role="tab" aria-selected={gruppo === ''} className={`chip touch ${gruppo === '' ? 'chip--attivo' : ''}`} onClick={() => setGruppo('')}>Tutti</button>
             {d.gruppi.map((g) => <button key={g.nome} type="button" role="tab" aria-selected={gruppo === g.nome} className={`chip touch ${gruppo === g.nome ? 'chip--attivo' : ''}`} onClick={() => setGruppo(g.nome)}>{g.nome} ({g.membri.length})</button>)}
