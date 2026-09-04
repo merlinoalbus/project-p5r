@@ -281,11 +281,11 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(conf.dettaglio?.immagine).toEqual({ url: null, asset: 'confidenti/ryuji-fedele' });
 
     // esportazione per luogo: solo il sottoalbero, sempre con le schermate degli spilli
-    const conSchermate = (await request(app).get('/api/mappe/esporta?radice=luogo-zip')).body.data as EsportazioneMappeDto;
-    expect(conSchermate.mappe.map((m) => m.chiave)).toEqual(['luogo-zip', 'luogo-zip-interno']);
-    expect(conSchermate.mappe[0].spilli[0].immagini).toHaveLength(2);
-    expect(conSchermate.mappe[0].spilli[0].immagini!.map((i) => i.didascalia).sort()).toEqual(['Seconda', 'Vista dalla scala']);
-    expect(conSchermate.mappe[0].spilli[0].immagini![0].mime).toBe('image/png');
+    const pacchettoLuogo = (await request(app).get('/api/mappe/esporta?radice=luogo-zip')).body.data as EsportazioneMappeDto;
+    expect(pacchettoLuogo.mappe.map((m) => m.chiave)).toEqual(['luogo-zip', 'luogo-zip-interno']);
+    expect(pacchettoLuogo.mappe[0].spilli[0].immagini).toHaveLength(2);
+    expect(pacchettoLuogo.mappe[0].spilli[0].immagini!.map((i) => i.didascalia).sort()).toEqual(['Seconda', 'Vista dalla scala']);
+    expect(pacchettoLuogo.mappe[0].spilli[0].immagini![0].mime).toBe('image/png');
     expect((await request(app).get('/api/mappe/esporta?radice=non-esiste')).status).toBe(404);
 
     // ZIP per il repository: LEGGIMI, seed del luogo con asset, immagini come file
@@ -309,7 +309,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(copia.asset).toBe('mappe/luogo-zip');
     expect(copia.spilli[0].immagini.map((i) => ({ asset: i.asset, url: i.url }))).toEqual([{ asset: 'spilli/luogo-zip/1-1', url: null }, { asset: 'spilli/luogo-zip/1-2', url: null }]);
     // reimportazione con schermate in base64: file creati nell'istanza
-    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { ...conSchermate, mappe: conSchermate.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-b64`, genitore: m.genitore === 'luogo-zip' ? 'luogo-zip-b64' : m.genitore })) } })).body.data).toMatchObject({ mappe: 2, immagini: 3 });
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { ...pacchettoLuogo, mappe: pacchettoLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-b64`, genitore: m.genitore === 'luogo-zip' ? 'luogo-zip-b64' : m.genitore })) } })).body.data).toMatchObject({ mappe: 2, immagini: 3 });
     const b64 = (await request(app).get('/api/mappe/luogo-zip-b64')).body.data as MappaDto;
     expect(b64.spilli[0].immagini.every((i) => i.url?.includes('/api/immagini/spillo/'))).toBe(true);
 
