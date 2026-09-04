@@ -12,6 +12,7 @@ import { battaglia } from '../services/battagliaService.js';
 import { dettaglioQuartiere, elencaQuartieri } from '../services/cittaService.js';
 import { attivitaTutte } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
+import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -19,6 +20,7 @@ import {
 } from '../services/compendioService.js';
 
 const queryDomande = z.object({ partita: z.coerce.number().int().positive().optional() });
+const queryArticoli = z.object({ q: z.string().min(1).max(80).optional(), categoria: z.enum(['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo', 'altro']).optional(), per: z.string().min(1).max(40).optional(), partita: z.coerce.number().int().positive().optional() });
 const queryCalendario = z.object({ partita: z.coerce.number().int().positive().optional(), mese: z.string().regex(/^(0[1-9]|1[0-2])$/).optional() });
 const router = Router();
 
@@ -63,6 +65,16 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/negozi', (_req, res) => {
+  res.json(elencaNegozi());
+});
+router.get('/negozi/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), query: queryDomande }), (req, res) => {
+  res.json(dettaglioNegozio(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
+});
+router.get('/articoli', validate({ query: queryArticoli }), (req, res) => {
+  const q = req.query as unknown as { q?: string; categoria?: string; per?: string; partita?: number };
+  res.json(ricercaArticoli({ q: q.q, categoria: q.categoria, per: q.per }, q.partita));
 });
 router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
   res.json(cruciverba((req.query as unknown as { partita?: number }).partita));

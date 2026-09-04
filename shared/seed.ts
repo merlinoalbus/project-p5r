@@ -73,6 +73,12 @@ export interface FusioneSeed {
 /** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
 export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
 
+/** Negozi e articoli (guida allgamestaff + fonti secondarie segnalate da `verificato`). */
+export interface NegoziSeed {
+  negozi: Array<{ chiave: string; ordine: number; nome: string; luogo: string; luogoChiave: string | null; tipo: string; gestore: string | null; confidente: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string;
+    articoli: Array<{ chiave: string; ordine: number; nome: string; nomeIt: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibileDal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: boolean }> }>;
+}
+
 /** Cruciverba di Leblanc (guida allgamestaff). */
 export interface CruciverbaSeed { cruciverba: Array<{ data: string; ordine: number; indizio: string; risposta: string; rispostaEn: string | null; fonte: string }> }
 

@@ -727,6 +727,56 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Negozi e inventario (Fase 8.2) ----
+
+export interface NegozioRiassuntoDto {
+  chiave: string;
+  nome: string;
+  luogo: string;
+  luogoChiave: string | null;
+  quartiereNome: string | null;
+  tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'distributore' | 'materiali' | 'misto' | 'altro';
+  gestore: string | null;
+  confidente: { chiave: string; nome: string } | null;
+  orari: string | null;
+  sblocco: string | null;
+  articoli: number;
+  verificati: number;
+}
+
+export interface ArticoloDto {
+  chiave: string;
+  negozioChiave: string;
+  negozioNome: string;
+  nome: string;
+  nomeIt: string | null;
+  categoria: 'arma' | 'protezione' | 'accessorio' | 'abito' | 'consumabile' | 'regalo' | 'materiale' | 'cibo' | 'altro';
+  /** Personaggio destinatario, «tutti», «party» o null se non indicato. */
+  per: string | null;
+  prezzo: number | null;
+  effetto: string | null;
+  statistiche: string | null;
+  disponibileDal: string | null;
+  condizione: string | null;
+  nota: string | null;
+  fonte: string;
+  verificato: boolean;
+  /** Acquistato/ottenuto nella partita. */
+  acquistato: boolean;
+}
+
+export interface NegozioDettaglioDto extends NegozioRiassuntoDto {
+  note: string | null;
+  fonte: string;
+  articoliElenco: ArticoloDto[];
+  acquistati: number;
+}
+
+export interface RicercaArticoliDto {
+  articoli: ArticoloDto[];
+  totale: number;
+}
+
 // ---- Cruciverba di Leblanc (Fase 7.5) ----
 
 export interface CruciverbaDto {

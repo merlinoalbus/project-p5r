@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CruciverbaTuttiDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CruciverbaTuttiDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
@@ -29,6 +29,12 @@ export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
 export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
 export const getOggetti = (f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
+/** Negozi con conteggi degli articoli. */
+export const getNegozi = (): Promise<NegozioRiassuntoDto[]> => apiGet('/compendio/negozi');
+/** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */
+export const getNegozio = (chiave: string, partita?: number): Promise<NegozioDettaglioDto> => apiGet(`/compendio/negozi/${encodeURIComponent(chiave)}${queryString({ partita })}`);
+/** Ricerca degli articoli in tutti i negozi. */
+export const ricercaArticoli = (filtro: { q?: string; categoria?: string; per?: string }, partita?: number): Promise<RicercaArticoliDto> => apiGet(`/compendio/articoli${queryString({ ...filtro, partita })}`);
 /** Cruciverba di Leblanc (con risolti della partita se indicata). */
 export const getCruciverba = (partita?: number): Promise<CruciverbaTuttiDto> => apiGet(`/compendio/cruciverba${queryString({ partita })}`);
 /** Quartieri della città con conteggi. */

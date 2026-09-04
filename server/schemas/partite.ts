@@ -154,6 +154,7 @@ export const bodySalvaCiclo = z.object({
 });
 export const bodyAggiornaCiclo = z.object({ nome: z.string().max(80).optional(), note: z.string().max(2000).optional(), anelloCorrente: z.number().int().min(0).max(4).optional(), iterazioni: z.number().int().min(0).max(9999).optional() });
 export const paramsPartitaCiclo = z.object({ id: z.coerce.number().int().positive(), cicloId: z.coerce.number().int().positive() });
+export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fatto: z.boolean() });
 export const bodyCruciverba = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/), fatto: z.boolean() });
 export const bodyLettura = z.object({ tipo: z.enum(['libro', 'film']), chiave: z.string().min(1).max(160), fatto: z.boolean() });
 export const bodyStatoRichiesta = z.object({ richiesta: z.string().min(1).max(120), stato: z.enum(['accettata', 'completata']).nullable() });

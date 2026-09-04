@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CruciverbaSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CruciverbaSeed, NegoziSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -56,6 +56,7 @@ interface SeedCompleto {
   citta: CittaSeed;
   attivita: AttivitaSeed;
   cruciverba: CruciverbaSeed;
+  negozi: NegoziSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -88,6 +89,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     citta: JSON.parse(contenuti['citta.json']) as CittaSeed,
     attivita: JSON.parse(contenuti['attivita.json']) as AttivitaSeed,
     cruciverba: JSON.parse(contenuti['cruciverba.json']) as CruciverbaSeed,
+    negozi: JSON.parse(contenuti['negozi.json']) as NegoziSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -406,6 +408,28 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     const dateCruciverba = new Set<string>();
     for (const c of seed.cruciverba.cruciverba) { dateCruciverba.add(c.data); insC.run({ data: c.data, ordine: c.ordine, indizio: c.indizio, risposta: c.risposta, risposta_en: c.rispostaEn, fonte: c.fonte }); }
     for (const r of db.prepare('SELECT data FROM cruciverba').all() as Array<{ data: string }>) if (!dateCruciverba.has(r.data)) db.prepare('DELETE FROM cruciverba WHERE data = ?').run(r.data);
+
+    // ---- Negozi e articoli (Fase 8.2): upsert per chiave stabile, rimozione orfani; gli acquisti per partita restano ----
+    const insN = db.prepare(`INSERT INTO negozio (chiave, ordine, nome, luogo, luogo_chiave, tipo, gestore, confidente_chiave, orari, sblocco, note, fonte)
+      VALUES (@chiave, @ordine, @nome, @luogo, @luogo_chiave, @tipo, @gestore, @confidente_chiave, @orari, @sblocco, @note, @fonte)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, tipo = excluded.tipo, gestore = excluded.gestore, confidente_chiave = excluded.confidente_chiave, orari = excluded.orari, sblocco = excluded.sblocco, note = excluded.note, fonte = excluded.fonte`);
+    const insArt = db.prepare(`INSERT INTO articolo (chiave, negozio_chiave, ordine, nome, nome_it, categoria, per, prezzo, effetto, statistiche, disponibile_dal, condizione, nota, fonte, verificato)
+      VALUES (@chiave, @negozio_chiave, @ordine, @nome, @nome_it, @categoria, @per, @prezzo, @effetto, @statistiche, @disponibile_dal, @condizione, @nota, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET negozio_chiave = excluded.negozio_chiave, ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, categoria = excluded.categoria, per = excluded.per, prezzo = excluded.prezzo, effetto = excluded.effetto,
+        statistiche = excluded.statistiche, disponibile_dal = excluded.disponibile_dal, condizione = excluded.condizione, nota = excluded.nota, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const chiaviNegozi = new Set<string>(); const chiaviArticoli = new Set<string>();
+    for (const n of seed.negozi.negozi) {
+      if (n.luogoChiave !== null && !chiaviQuartieri.has(n.luogoChiave)) throw new Error(`Seed negozi: quartiere sconosciuto '${n.luogoChiave}' per '${n.chiave}'.`);
+      if (n.confidente !== null && !chiaviConfidenti.has(n.confidente)) throw new Error(`Seed negozi: Confidente sconosciuto '${n.confidente}' per '${n.chiave}'.`);
+      chiaviNegozi.add(n.chiave);
+      insN.run({ chiave: n.chiave, ordine: n.ordine, nome: n.nome, luogo: n.luogo, luogo_chiave: n.luogoChiave, tipo: n.tipo, gestore: n.gestore, confidente_chiave: n.confidente, orari: n.orari, sblocco: n.sblocco, note: n.note, fonte: n.fonte });
+      for (const a of n.articoli) {
+        chiaviArticoli.add(a.chiave);
+        insArt.run({ chiave: a.chiave, negozio_chiave: n.chiave, ordine: a.ordine, nome: a.nome, nome_it: a.nomeIt, categoria: a.categoria, per: a.per, prezzo: a.prezzo, effetto: a.effetto, statistiche: a.statistiche, disponibile_dal: a.disponibileDal, condizione: a.condizione, nota: a.nota, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
+      }
+    }
+    for (const r of db.prepare('SELECT chiave FROM articolo').all() as Array<{ chiave: string }>) if (!chiaviArticoli.has(r.chiave)) db.prepare('DELETE FROM articolo WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare('SELECT chiave FROM negozio').all() as Array<{ chiave: string }>) if (!chiaviNegozi.has(r.chiave)) db.prepare('DELETE FROM negozio WHERE chiave = ?').run(r.chiave);
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)
