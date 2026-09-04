@@ -324,7 +324,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 - **Palazzi e Dedali**: `EmblemaDungeon` (`palazzi/<chiave>` → icona dell'arcano del sovrano → iniziale in display), `AnelloAvanzamento`
   con la quota dei punti gestiti nella partita, date e livello in chip brevi (`utils/testoBreve.ts`: `dataBreve`, `sintesi`) con il testo
   completo nel `title`; nella scheda del Palazzo i testi lunghi sono ripiegati con `TestoRipiegabile` («altro»/«meno»).
-- **Asset richiesti a Codex** (§13 di `docs/grafica/prompt-immagini.md`, registrati in `stato-generazione-asset.md`): `ui/nav-guida(-attiva)`,
+- **Asset richiesti a Codex** (§13 di `docs/grafica/prompt-immagini.md` (solo asset da consegnare; consegnati in `docs/grafica/archivio-grafico.md`), registrati in `stato-generazione-asset.md`): `ui/nav-guida(-attiva)`,
   15 `guida/*`, 10 `palazzi/*`, `ui/giorno`/`ui/sera`, 4 illustrazioni di stato vuoto (con varianti senza testo). Le chiavi sono già usate
   dai componenti: alla consegna nessuna modifica al codice.
 

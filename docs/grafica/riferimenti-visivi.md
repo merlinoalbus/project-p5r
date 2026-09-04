@@ -6,6 +6,9 @@ repository: sono opere di Atlus/Sega; gli asset dell'app sono originali, generat
 
 Legenda: ✔ verificato (immagine caricata) · ✋ pagina pubblica ma non verificabile automaticamente (aprire a mano).
 
+> Dal 2026-09-04 questo documento tiene solo i riferimenti utili agli asset ancora da produrre (§14–§19 di `prompt-immagini.md`):
+> icone di interfaccia (schede, azioni, spilli), personaggi e Persona dei personaggi, mappe illustrate. Il resto è in `archivio-grafico.md`.
+
 ## Principi di design dichiarati dagli autori
 ✔ https://personacentral.com/persona-5-panel-concept-development-ui/ — panel CEDEC 2017 di Masayoshi Sutoh (art director/lead UI):
 rosso "passionale" come unico colore guida, nessun sotto-colore; leggibilità affidata a bianco e nero; concept "pop punk";
@@ -26,17 +29,6 @@ font "che ballano", layout a griglia irregolare; ordine di lavoro colore → log
 - ✔ https://static.wikia.nocookie.net/megamitensei/images/6/64/P5_SplashScreen.png/revision/latest?cb=20191205165144 — splash con i Ladri Fantasma.
 - ✔ https://upload.wikimedia.org/wikipedia/en/a/a5/Persona_5_Palace_Combat.jpg — combattimento nel Palazzo (piccola).
 
-## 2. Stanza di Velluto / fusione
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/0/0e/P5R_RedAlert.jpg/revision/latest?cb=20200610202410 — menu Stanza di Velluto con **Allarme rosso**, bottoni a ritaglio bianchi su rosso scuro, Justine. **Riferimento primario**.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/5/5f/P5_velvet_room.jpg/revision/latest?cb=20150917145453 — prigione circolare blu con celle e lampadario.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/0/07/P5_Velvet_Room_title_screen.jpg/revision/latest?cb=20170617175011 — stessa sala senza HUD (sfondo).
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/9/99/P5-Prisoner.gif/revision/latest?cb=20161212203607 — protagonista dietro le sbarre.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/d/d1/P5_Fusion1.gif/revision/latest?cb=20220611072007 · ✔ https://static.wikia.nocookie.net/megamitensei/images/6/69/P5_Fusion2.gif/revision/latest?cb=20220611072244 — esecuzione alla ghigliottina.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/9/9b/P5_Caroline_and_Justine.png/revision/latest?cb=20160820081904 — Caroline e Justine.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/a/a0/Igor_%28Persona_5%29.png/revision/latest?cb=20160819124205 — Igor.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/b/b3/Velvet_Room_Concept_Art_P5.jpg/revision/latest?cb=20170220191238 — concept art della prigione.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/6/65/Persona_5_Royal_Fusion_Chart.png/revision/latest?cb=20191218153431 — tabella di fusione P5R (dati, non stile).
-
 ## 3. Icone elementi/affinità (sprite ~45×33 px, categoria https://megamitensei.fandom.com/wiki/Category:Persona_5_Icons)
 | Elemento (IT) | Riferimento | Aspetto |
 |---|---|---|
@@ -53,34 +45,6 @@ font "che ballano", layout a griglia irregolare; ordine di lavoro colore → log
 | Quasi-divino | ✔ https://static.wikia.nocookie.net/megamitensei/images/f/f3/Almighty_Icon_P5.png/revision/latest?cb=20160917155758 | raggiera grigio-bianca |
 | Guarigione | ✔ https://static.wikia.nocookie.net/megamitensei/images/c/cb/Healing_Icon_P5.png/revision/latest?cb=20160818043107 | — |
 | Alterazione | ✔ https://static.wikia.nocookie.net/megamitensei/images/5/5c/Ailment_Icon_P5.png/revision/latest?cb=20160818043515 | — |
-
-## 4. Carte degli Arcani (stile P5: titoli in francese sulla carta, es. "LE MAT"; categoria https://megamitensei.fandom.com/wiki/Category:Persona_5_Cards)
-| Arcano (IT) | Riferimento |
-|---|---|
-| Matto | ✔ https://static.wikia.nocookie.net/megamitensei/images/0/0b/P5_Fool_arcana_cooperation.png/revision/latest?cb=20160915143157 |
-| Mago | ✔ https://static.wikia.nocookie.net/megamitensei/images/e/e6/P5_Magician_arcana_cooperation.png/revision/latest?cb=20160915143227 |
-| Papessa | ✔ https://static.wikia.nocookie.net/megamitensei/images/c/c2/P5_Priestess_arcana_cooperation.png/revision/latest?cb=20160915143305 |
-| Imperatrice | ✔ https://static.wikia.nocookie.net/megamitensei/images/5/52/P5_Empress_arcana_cooperation.png/revision/latest?cb=20160915143515 |
-| Imperatore | ✔ https://static.wikia.nocookie.net/megamitensei/images/8/86/P5_Emperor_arcana_cooperation.png/revision/latest?cb=20160915143531 |
-| Ierofante | ✔ https://static.wikia.nocookie.net/megamitensei/images/d/d8/P5_Hierophant_Arcana.png/revision/latest?cb=20221219114835 |
-| Amanti | ✔ https://static.wikia.nocookie.net/megamitensei/images/4/4b/P5_Lover_arcana_cooperation.png/revision/latest?cb=20160915143551 |
-| Carro | ✔ https://static.wikia.nocookie.net/megamitensei/images/e/eb/P5_Chariot_arcana_cooperation.png/revision/latest?cb=20160915143624 |
-| Giustizia | ✔ https://static.wikia.nocookie.net/megamitensei/images/2/26/P5_Justice_Arcana.png/revision/latest?cb=20160916144454 |
-| Eremita | ✔ https://static.wikia.nocookie.net/megamitensei/images/5/57/P5_Hermit_Arcana.png/revision/latest?cb=20160916144512 |
-| Fortuna | ✔ https://static.wikia.nocookie.net/megamitensei/images/6/6a/P5_Wheel_of_Fortune_Arcana.png/revision/latest?cb=20160728020952 |
-| Forza | ✔ https://static.wikia.nocookie.net/megamitensei/images/0/02/P5_Strength_Arcana.png/revision/latest?cb=20160916144526 |
-| Appeso | ✔ https://static.wikia.nocookie.net/megamitensei/images/a/a1/P5_Hanged-Man_Arcana.png/revision/latest?cb=20160728021156 |
-| Morte | ✔ https://static.wikia.nocookie.net/megamitensei/images/a/a2/P5_Death_Arcana.png/revision/latest?cb=20160728021302 |
-| Temperanza | ✔ https://static.wikia.nocookie.net/megamitensei/images/f/f4/P5_Temperance_Arcana.png/revision/latest?cb=20160728021415 |
-| Diavolo | ✔ https://static.wikia.nocookie.net/megamitensei/images/5/55/P5_Devil_Arcana.png/revision/latest?cb=20160728021505 |
-| Torre | ✔ https://static.wikia.nocookie.net/megamitensei/images/3/3e/P5_Tower_Arcana.png/revision/latest?cb=20160728021547 |
-| Stella | ✔ https://static.wikia.nocookie.net/megamitensei/images/f/f0/P5_Star_Arcana.png/revision/latest?cb=20161104022713 |
-| Luna | ✔ https://static.wikia.nocookie.net/megamitensei/images/3/3d/P5_Moon_Arcana.png/revision/latest?cb=20160728021655 |
-| Sole | ✔ https://static.wikia.nocookie.net/megamitensei/images/3/38/P5_Sun_Arcana.png/revision/latest?cb=20160728021736 |
-| Giudizio | ✔ https://static.wikia.nocookie.net/megamitensei/images/a/ab/P5_Judgement_Arcana.png/revision/latest?cb=20160916144550 |
-| Mondo | ✔ https://static.wikia.nocookie.net/megamitensei/images/2/2b/P5_World_Arcana.png/revision/latest?cb=20160916144637 |
-| Consigliere (P5R) | ✔ https://static.wikia.nocookie.net/megamitensei/images/5/5b/P5_Royal_Consultant_Arcana.png/revision/latest?cb=20200508064739 |
-| Fede (P5R) | ✔ https://static.wikia.nocookie.net/megamitensei/images/e/e6/Faith.png/revision/latest?cb=20200508064816 (carta "LA FOI"; `FaithArcana.png` è la variante alterata). Ispirazione secondaria, icona Confidente di Kasumi in stile carta: ✔ https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 (Consigliere analoga: ✔ https://static.wikia.nocookie.net/megamitensei/images/8/80/Persona_5_Confidant_Guides_Icon_%28Councillor%29_-_Takuto_Maruki.png/revision/latest?cb=20210309075901) |
 
 ## 5. Loghi e simboli
 - ✔ https://upload.wikimedia.org/wikipedia/commons/c/cd/Persona_5_logo.svg (pagina https://commons.wikimedia.org/wiki/File:Persona_5_logo.svg) e variante nera ✔ https://upload.wikimedia.org/wikipedia/commons/6/66/Persona_5_logo_black.svg — logo vettoriale.
@@ -106,12 +70,6 @@ font "che ballano", layout a griglia irregolare; ordine di lavoro colore → log
 - Icone Confidenti in stile carta (pattern `Persona 5 Confidant Guides Icon (<Arcano>) - <Nome>.png`), es. Morgana ✔ https://static.wikia.nocookie.net/megamitensei/images/5/57/Persona_5_Confidant_Guides_Icon_%28Magician%29_-_Morgana.png/revision/latest?cb=20241201203706
 - Pagina wiki: https://megamitensei.fandom.com/wiki/Social_Stats
 
-## 8. Calendario e HUD data/meteo
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/3/34/P5_CalendarMenu.png/revision/latest?cb=20220530155054 — calendario del menu: griglia con numeri enormi rossi/bianchi/azzurri, "COMMAND" in diagonale. **Riferimento primario calendario**.
-- ✔ https://static.wikia.nocookie.net/megamitensei/images/1/1e/P5_CalendarSwitch.png/revision/latest?cb=20220530115406 — transizione di data con icone meteo e skyline b/n.
-- HUD in alto a sinistra (data, giorno, fascia oraria, meteo): ✔ https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_663171dc3afce8fe987e57e8659f91b69faa39bc.1920x1080.jpg · ✔ https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_ddcc016b8e5c434ccbd1a89c0157ce73acf905ae.1920x1080.jpg · ✔ https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_56f354736174fdb01b7b295b587ca72ca9254df7.1920x1080.jpg
-- ✔ https://www.rpgfan.com/wp-content/uploads/2020/06/Persona-5-Royal-Screenshot-140.jpg · ✔ https://www.rpgfan.com/wp-content/uploads/2020/06/Persona-5-Royal-Screenshot-163.jpg — minimappa, cartiglio del luogo, icona pioggia. Galleria: https://www.rpgfan.com/gallery/persona-5-royal-screenshots/
-
 ## 9. Palette colori
 - Ufficiale: nessun codice HEX dichiarato; il rosso guida va campionato dal logo SVG (§5) e dal box "Create New Personas" di `P5R_RedAlert.jpg` (§2).
 - Community (✋): https://www.color-hex.com/color-palette/1064437 (#0d0d0d, #d92323, #732424, #7b7b7b, #ffffff) · https://www.color-hex.com/color-palette/1019867 (#0d0d0d, #d92323, #732424, #8c6723, #f2e852) · https://colorswall.com/palette/146428 (#cc2c34, #922526, #673535, #be7f80, #d49c94, #d9d0d1).
@@ -122,6 +80,8 @@ font "che ballano", layout a griglia irregolare; ordine di lavoro colore → log
 - https://medium.com/@kinga.olszewska/interface-so-good-that-people-make-cosplay-of-it-persona-5-ui-controversial-yet-brilliant-ac1ec4b95229 · https://ridwankhan.com/the-ui-and-ux-of-persona-5-183180eb7cce · https://medium.com/design-bootcamp/how-persona-5s-ui-balances-both-style-and-substance-de8cb1b807ef
 - https://www.artstation.com/artwork/3932RB — concept "P5R Mobile" (reinterpretazione della UI di battaglia).
 
-## Buchi residui
-- Carta dell'arcano **Fede** reperita in seguito sulla pagina wiki "Faith Arcana" (vedi §4): figura papale in trono con due accoliti incatenati, titolo "LA FOI"; il prompt in `prompt-immagini.md` va allineato a questo riferimento.
-- Screenshot con la tabella statistiche FR/MA/RS/AG/FO ben leggibile: solo nella Game UI Database (✋).
+## Mappe illustrate (§19) e spilli (§18)
+- Stile «guida strategica» delle piante dei quartieri (sagome nere degli edifici, strade chiare, icone gialle): vedi le mappe annotate del gioco
+  su https://megamitensei.fandom.com/wiki/Category:Persona_5_Maps (solo ispirazione: le nostre piante sono illustrazioni originali, senza testo).
+- Spilli: gocce da mappa piene con simbolo bianco e contorno nero, come le icone di navigazione §7.1 già consegnate (`public/asset/ui/nav-*.png`)
+  e i marcatori di https://mapgenie.io (ispirazione per leggibilità e colori per tipo).
