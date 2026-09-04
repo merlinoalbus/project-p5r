@@ -81,8 +81,8 @@ router.put('/:id/trofei', validate({ params: paramsPartita, body: bodyTrofeo }),
   res.json(impostaTrofeo(Number(req.params.id), b.trofeo, b.ottenuto));
 });
 router.put('/:id/percorso', validate({ params: paramsPartita, body: bodyAzionePercorso }), (req, res) => {
-  const b = req.body as { data: string; indice: number; fatta: boolean };
-  res.json(impostaAzione(Number(req.params.id), b.data, b.indice, b.fatta));
+  const b = req.body as { data: string; indice: number; fatta: boolean; noteRisposta?: 1 | 2 | 3 };
+  res.json(impostaAzione(Number(req.params.id), b.data, b.indice, b.fatta, { noteRisposta: b.noteRisposta }));
 });
 router.put('/:id/giorno', validate({ params: paramsPartita, body: bodyGiornoCorrente }), (req, res) => {
   res.json(impostaGiornoCorrente(Number(req.params.id), (req.body as { data: string }).data));
