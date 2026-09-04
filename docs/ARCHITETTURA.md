@@ -384,7 +384,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   del gioco. `PersonaDettaglioDto.descrizione/fonteDescrizione`; scheda con riquadro «Chi è» ad altezza fissa e scorrimento verticale.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 82 file / 237 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 83 file / 242 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
