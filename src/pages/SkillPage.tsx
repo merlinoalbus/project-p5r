@@ -9,6 +9,7 @@ import { useCarica } from '../hooks/useCarica';
 import { getSkills } from '../services/api';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { ORDINE_ELEMENTI_SKILL, coloreElemento } from '../utils/elementi';
@@ -41,7 +42,7 @@ export function SkillPage() {
         azioni={<span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length}` : ''}</span>}
       />
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o effetto…" />
-      <div className="flex gap-1.5 flex-wrap">
+      <FilaScorrevole role="group" aria-label="Filtro per elemento">
         <button type="button" className={`chip chip--icona touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')} aria-pressed={elemento === ''}><IconaAzione chiave="tutti" dimensione={14} />Tutti</button>
         {ORDINE_ELEMENTI_SKILL.map((el) => (
           <button
@@ -56,7 +57,7 @@ export function SkillPage() {
             {glossario?.elementiSkill[el] ?? el}
           </button>
         ))}
-      </div>
+      </FilaScorrevole>
 
       <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
         {filtrate.length === 0 ? (

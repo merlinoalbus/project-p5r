@@ -458,7 +458,7 @@ export interface ModificaDote {
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
 export interface SemaforoRequisitoDto {
   indice: number;
-  tipo: 'dote' | 'persona-arcano' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
+  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */
@@ -918,6 +918,34 @@ export interface RiferimentoAzioneDto {
 }
 
 /** Stato dell'azione nella partita (12.4): consigliata (requisiti del rango soddisfatti), bloccata (requisiti rossi, con motivo), neutra. */
+/** Chiavi da evidenziare in oro nell'interfaccia: entità coinvolte nelle azioni ancora da fare del giorno corrente (12.4). */
+export interface SuggerimentiOggiDto {
+  /** Giorno corrente della partita ('MM-GG'); null se non impostato. Non si chiama `data` per non sembrare l'envelope delle risposte. */
+  giorno: string | null;
+  confidenti: string[];
+  /** Personaggi della guida legati ai Confidenti suggeriti. */
+  personaggi: string[];
+  dungeon: string[];
+  /** Aree del Palazzo o del dedalo suggerito. */
+  aree: string[];
+  libri: string[];
+  film: string[];
+  /** Articoli a scaffale corrispondenti ai libri e ai film suggeriti. */
+  articoli: string[];
+  attivita: string[];
+  richieste: string[];
+  negozi: string[];
+  /** Chiavi dei luoghi della città («<quartiere>/<luogo>»). */
+  luoghi: string[];
+  quartieri: string[];
+  doti: string[];
+  /** Chiavi delle mappe a livelli e id degli spilli da accendere nel visore. */
+  mappe: string[];
+  spilli: number[];
+  /** Perché una chiave è suggerita: testo dell'azione della guida. */
+  motivi: Array<{ categoria: string; chiave: string; azione: string; fascia: 'giorno' | 'sera' }>;
+}
+
 export interface StatoAzioneDto {
   tipo: 'consigliata' | 'bloccata' | 'neutra';
   motivo: string | null;

@@ -10,6 +10,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { segnaImmaginePresente } from '../components/shared/immaginiCache';
 import { IconChevronLeft } from '../components/shared/icons';
@@ -22,6 +23,8 @@ import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
 import type { AreaDungeonDto, PuntoInteresseDto, StatoPunto } from '../types';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
@@ -38,6 +41,7 @@ function Dettagli({ d }: { d: Record<string, unknown> }) {
 }
 
 export function DungeonDettaglioPage() {
+  const sugg = useSuggerimenti();
   const { chiave = '' } = useParams();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -112,13 +116,13 @@ export function DungeonDettaglioPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Aree">
+          <FilaScorrevole className="items-center" role="tablist" aria-label="Aree">
             {d.aree.map((a) => (
-              <button key={a.chiave} type="button" role="tab" className={`chip touch ${a.chiave === area.chiave ? 'chip--attivo' : ''}`} aria-selected={a.chiave === area.chiave} onClick={() => { setParams({ area: a.chiave }); setSelezionato(null); }} title={a.descrizione}>
+              <button key={a.chiave} type="button" role="tab" className={`chip touch ${a.chiave === area.chiave ? 'chip--attivo' : ''} ${classiSuggerito(sugg.evidenziato('aree', a.chiave), 'chip')}`} aria-selected={a.chiave === area.chiave} onClick={() => { setParams({ area: a.chiave }); setSelezionato(null); }} title={a.descrizione}>
                 {a.ordine + 1}. {a.nome}{a.mappa ? ' 🗺' : ''}
               </button>
             ))}
-          </div>
+          </FilaScorrevole>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">
             <section className="card flex flex-col gap-2">

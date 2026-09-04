@@ -173,10 +173,30 @@ degli spilli è disponibile solo nell'editor.
 | 14.10 | Resa grafica delle ricette (segnalazione del 2026-09-04: «grafica ancora misera e poco accattivante»): tasselli Persona a taglio diagonale con miniatura incorniciata in rosso (figura intera, non ritagliata), nome nel carattere P5, tessera del livello «Lv N», icona e nome dell'arcano, rombo dorato per le rare, spunta verde d'angolo per la scorta; operatori «+» e «→» come cerchi (rosso/bianco) anche nei cicli e nelle ricette speciali; righe con tipo a etichetta, costo nel carattere P5 e barra rossa per le ricette pronte; dopo il rigetto del validatore anche «Fusioni speciali» della scheda Persona usa gli stessi tasselli | ✅ 2026-09-04 |
 | 14.11 | Residui segnalati dal validatore di 14.10: «Cicli salvati» e «Piani salvati» della Partita e la finestra «Esegui la fusione dalla scorta» usavano ancora pillole grigie e «+»/«→» di solo testo → tasselli `PersonaChip` (risultato in evidenza, ingredienti in scorta evidenziati, «carica» come suffisso) e `OperatoreRicetta`; il collegamento al calcolatore/ricetta diventa un pulsante visivo | ✅ 2026-09-04 |
 
+## Fase 15 — Tre formati, alone dorato, scuola del giorno, requisiti Royal (note dell'utente del 2026-09-04)
+
+| # | Cosa | Stato |
+|---|---|---|
+| 15.1 | Pacchetti delle mappe sempre completi (immagini di base e schermate degli spilli incluse e puntate come asset) | ✅ 2026-09-04 |
+| 15.2 | Home in una schermata su desktop e tablet: griglia ad aree (`.home-griglia`: telefono incolonnato, tablet con guida e mappa affiancate, desktop a due colonne), stella dimensionata sulla larghezza (30vh su desktop), tessere dei punteggi 2/3/auto per riga; mobile scorre in verticale | ✅ 2026-09-04 |
+| 15.3 | Schermo intero della mappa reversibile; cache delle immagini (URL versionati + `immutable`) | ✅ 2026-09-04 |
+| 15.4 | Confidenti bloccati dai semafori: carta grigia, «+» e sblocco disattivati, motivi sulla carta, «Segna comunque» tracciato nello storico; due gruppi «Attivi e sbloccabili» / «Non ancora disponibili» (il primo resta visibile anche vuoto) | ✅ 2026-09-04 |
+| 15.5 | Alone dorato dei suggerimenti del giorno (`suggerimentiService`, `useSuggerimenti`, `TargaSuggerito`): Confidenti, Doti (lette dal testo dell'azione), Palazzi e aree, Richieste, Attività, libri e film, articoli e negozi, luoghi e quartieri, personaggi, mappe e spilli; le azioni bloccate dai requisiti non vengono suggerite; ricalcolo alla spunta | ✅ 2026-09-04 |
+| 15.6 | Scuola del giorno nell'intestazione della Partita (`ScuolaOggi`): domande in classe, domande d'esame (fonte granulare, riassunto solo di ripiego) e cruciverba del giorno corrente con la risposta | ✅ 2026-09-04 |
+| 15.7 | Cinque tipi di spillo mancanti (nemico, oggetto-chiave, punto-sensibile, tesoro-palazzo, seme-bramosia) con riclassificazione automatica degli spilli di seed esistenti a ogni sincronizzazione | ✅ 2026-09-04 |
+| 15.8 | Doppia barra verticale (regola `.sr-only { top:0; left:0 }` fuori dai layer), stella delle Doti grande e pulsanti compatti, cinque schede senza scorrimento | ✅ 2026-09-04 |
+| 15.9 | Tre formati sul continuo delle larghezze: barra superiore in 375 px, titolo a tasselli su una riga, file di schede/filtri scorrevoli sotto i 768 px (`FilaScorrevole`), nessuno sbordo orizzontale da 360 a 1440 px | ✅ 2026-09-04 |
+| 15.10 | Requisiti dei ranghi dei 23 Confidenti ricostruiti dalla guida Royal (due letture indipendenti con citazione letterale, fuse per concordanza): 143 ranghi / 174 semafori, niente «Persona dell'arcano» come obbligo, 6 manuali, nessuna data di rango 1 da «giorno consigliato» (Yusuke, Makoto, Chihaya, Takemi, Sojiro, Ohya senza data), vincolo meteo su ogni rango per chi non è mai disponibile con la pioggia, `persona-abilita` per le Gemelle, Haru Perizia massima al rango 4 | ✅ 2026-09-04 |
+| 15.11 | Report «Semafori e alone dorato» (artifact) e `docs/riferimenti/semafori-confidenti.md` generato dal seed (tabelle) con le note sulle date e sulla pioggia mantenute a mano | ✅ 2026-09-04 |
+| 15.12 | Home desktop (da 1360 px): via gli accessi rapidi (doppione della barra laterale), carta e guida del giorno nella colonna sinistra (5/12), mappa a tutta altezza a destra (7/12), stella limitata dalla colonna (`max(230px, min(40vh, 50cqw, 420px))`); tablet e telefono invariati | ✅ 2026-09-04 |
+| 15.13 | Spilli sulla mappa: l'immagine consegnata `ui/spillo-<tipo>` è già uno spillo intero e viene mostrata così (`SpilloGrafico`, `PuntoSpillo`); la goccia colorata col disegno resta solo come riserva | ✅ 2026-09-04 |
+| 15.14 | Personaggi: stesso riquadro `ImmagineEntita` per tutti (nuovo ambito `personaggio` per Protagonista, Stanza di Velluto e Jose, caricabile dalle Impostazioni), Lavenza aggiunta alla Stanza di Velluto, ingrandimento delle Persona dei Ladri Fantasma | ✅ 2026-09-04 |
+| 15.15 | `statoAzione` non ripiega più sul rango successivo quando il rango obiettivo non ha requisiti (un'azione di rango 1 di Takemi risultava bloccata dal rango 2) | ✅ 2026-09-04 |
+
 ## Decisioni e forniture aperte (aggiornato il 2026-09-04)
 
 - Risposte dell'utente attese: registrazione delle note alla spunta di un'azione Confidente (A: chiede «quante note?» con 2 preselezionato; B: assume 3; C: nessun automatismo — consigliata A); semafori non verificabili con conferma manuale; conferma della Fase 13 e delle sue due decisioni; conferma di 12.7; `concurrency` per ramo nel workflow CI (`cancel-in-progress: false`).
-- Asset da consegnare (Codex): personaggi §14 (5), schede §16 (9), azioni §17 (32), Persona dei personaggi §15 (27), spilli §18 (14), mappe di base §19 (25). Prompt tutti censiti in `docs/grafica/prompt-immagini.md`.
+- Asset da consegnare (Codex): personaggi §14 (5), schede §16 (9), azioni §17 (32), Persona dei personaggi §15 (27), spilli §18 (19, con i cinque nuovi: nemico, oggetto-chiave, punto-sensibile, tesoro-palazzo, seme-bramosia), mappe di base §19 (25). Prompt tutti censiti in `docs/grafica/prompt-immagini.md`.
 
 ## Requisiti trasversali (sempre validi)
 - Tutto in italiano; nomi Persona originali; skill con chiave canonica + resa IT modificabile.

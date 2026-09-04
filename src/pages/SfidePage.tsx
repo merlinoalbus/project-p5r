@@ -8,6 +8,7 @@ import { getSfide } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { SfideDto } from '../types';
@@ -133,9 +134,9 @@ export function SfidePage() {
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Battaglie Sfida, boss segreti e tratti" sottotitolo={<>Le {d.battaglieSfida.elenco.length} Battaglie Sfida con regole, nemici e ricompense; i boss segreti (Jose, Gemelle Custodi, Lavenza) con mosse e strategia; Magnate; i {d.tratti.elenco.length} tratti delle Persona con l'effetto in italiano. Le domande del game show in TV sono in <Link to="/guida/domande">Domande in classe ed esami</Link>.</>} />
-          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
+          <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'battaglie' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
-          </div>
+          </FilaScorrevole>
           {scheda === 'battaglie' && <SchedaBattaglie d={d} />}
           {scheda === 'boss' && <SchedaBoss d={d} />}
           {scheda === 'magnate' && <SchedaMagnate d={d} />}

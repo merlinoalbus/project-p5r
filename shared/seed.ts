@@ -38,6 +38,8 @@ export interface PersonaSeed {
 export type RequisitoSeed =
   | { tipo: 'dote'; dote: string; rango: number; testo: string }
   | { tipo: 'persona-arcano'; arcano: string; testo: string }
+  /** Una Persona precisa con una skill precisa nella scorta (richieste delle Gemelle Custodi). */
+  | { tipo: 'persona-abilita'; persona: string; abilita: string; testo: string }
   | { tipo: 'palazzo'; dungeon: string; testo: string }
   | { tipo: 'richiesta'; richiesta: string; testo: string }
   | { tipo: 'confidente'; confidente: string; rango: number; testo: string }
