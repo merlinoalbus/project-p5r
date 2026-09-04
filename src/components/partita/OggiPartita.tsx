@@ -8,7 +8,6 @@
 // ============================================================
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -21,10 +20,13 @@ import { IconChevronLeft, IconChevronRight } from '../shared/icons';
 import { dataGiocoTesto } from '../../utils/dateGioco';
 import type { AzionePercorsoDto, PartitaDto } from '../../types';
 
-interface Props { partita: PartitaDto }
+interface Props {
+  partita: PartitaDto;
+  /** Occupa tutta l'altezza del contenitore (Home senza scorrimento): la guida scorre nel suo riquadro, la mappa riempie la colonna. */
+  riempi?: boolean;
+}
 
-export function OggiPartita({ partita }: Props) {
-  const navigate = useNavigate();
+export function OggiPartita({ partita, riempi }: Props) {
   const partitaId = partita.id;
   const indice = useCarica(() => getPercorsoIndice(partitaId), [partitaId]);
   const [dataScelta, setDataScelta] = useState<string | null>(null);
@@ -50,8 +52,8 @@ export function OggiPartita({ partita }: Props) {
   return (
     <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>
       {indice.dati && g && (
-        <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4 items-start">
-          <div className="flex flex-col gap-3 min-w-0">
+        <div className={`grid grid-cols-1 ${riempi ? 'md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:h-full md:min-h-0 items-stretch' : 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-start'}`}>
+          <div className={`flex flex-col gap-3 min-w-0 ${riempi ? 'md:min-h-0 md:overflow-y-auto md:pr-1' : ''}`}>
             <div className="flex flex-wrap items-center gap-1.5">
               <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.precedente} onClick={() => setDataScelta(g.precedente)} aria-label="Giorno precedente"><IconChevronLeft size={16} /></button>
               <span className="font-display text-[19px] uppercase">{dataGiocoTesto(g.giorno)}</span>
@@ -65,13 +67,12 @@ export function OggiPartita({ partita }: Props) {
             {!indice.dati.dataCorrente && <p className="m-0 text-[12px] text-text-muted">Nessun giorno corrente impostato: scegli il giorno e premi «Segna come giorno corrente».</p>}
             <GiornoGuida g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={sullaMappa} azioneEvidenziata={mappa.azione} compatto />
           </div>
-          <div className="flex flex-col gap-1.5 min-w-0">
+          <div className={`flex flex-col gap-1.5 min-w-0 ${riempi ? 'md:min-h-0' : ''}`}>
             <div className="flex items-center gap-2 flex-wrap text-[12px] text-text-muted">
               <span>Mappa{mappa.azione !== null ? ' dell’azione scelta' : ' di Tokyo'}: tocca un quartiere o un passaggio per scendere di livello.</span>
               {mappa.chiave !== 'tokyo' && <button type="button" className="visore-mappa__azione-testo" onClick={() => setMappa({ chiave: 'tokyo', spilloId: null, azione: null })}>Torna a Tokyo</button>}
-              <button type="button" className="visore-mappa__azione-testo" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(mappa.chiave)}`)}>Schermo intero</button>
             </div>
-            <MappaIncorporata chiave={mappa.chiave} spilloIniziale={mappa.spilloId} partitaId={partitaId} altezza="max(560px, calc(100vh - 300px))" />
+            <MappaIncorporata chiave={mappa.chiave} spilloIniziale={mappa.spilloId} partitaId={partitaId} altezza={riempi ? undefined : 'max(560px, calc(100vh - 300px))'} className={riempi ? 'md:flex-1 md:min-h-0 h-[480px] md:h-auto' : undefined} />
           </div>
         </div>
       )}

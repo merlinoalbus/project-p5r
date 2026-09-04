@@ -3,8 +3,7 @@
 // ============================================================
 
 import { useEffect, useState } from 'react';
-import { urlImmagine } from '../../services/api';
-import { chiaviPresenti } from '../shared/immaginiCache';
+import { chiaviPresenti, urlImmagineVersionata } from '../shared/immaginiCache';
 import { IconMappa } from '../shared/iconeGuida';
 import { useAsset } from '../../stores/assetStore';
 
@@ -28,7 +27,7 @@ export function MiniaturaMappa({ chiave, etichetta, larghezza = 120, altezza = 8
   return (
     <span className={`miniatura-mappa ${className ?? ''}`} style={{ width: larghezza, height: altezza }}>
       {presente || asset ? (
-        <img src={presente ? urlImmagine('mappa', chiave) : asset!} alt={`Mappa: ${etichetta}`} className="w-full h-full object-cover" draggable={false} />
+        <img src={presente ? urlImmagineVersionata('mappa', chiave) : asset!} alt={`Mappa: ${etichetta}`} className="w-full h-full object-cover" draggable={false} />
       ) : (
         <span className="text-text-muted" aria-hidden="true"><IconMappa size={Math.round(altezza * 0.45)} /></span>
       )}

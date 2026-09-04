@@ -46,6 +46,8 @@ interface Props {
   /** Acquisto (o riapertura) di un articolo del negozio collegato allo spillo. */
   onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void> | void;
   onChiudi?: () => void;
+  /** Testo del pulsante di chiusura (predefinito «Chiudi»; «Torna alla pagina» per lo schermo intero aperto da una pagina). */
+  etichettaChiudi?: string;
   /** Altezza fissa dentro una pagina (home della Partita) invece dello schermo intero. */
   incorporato?: boolean;
   /** Azioni aggiuntive nella barra superiore (es. «Modifica mappa»). */
@@ -108,7 +110,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal ? `dal ${a.disponibileDal}` : 'sempre';
 }
 
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale }: Props) {
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
   const [natCaricata, setNatCaricata] = useState<Dimensioni | null>(null);
@@ -327,7 +329,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         <div className="visore-mappa__strumenti">
           {azioni}
           <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={pannelloAperto ? 'Nascondi pannello' : 'Pannello'} onClick={() => setPannelloAperto((v) => !v)} aria-expanded={pannelloAperto} aria-controls="visore-mappa-pannello" />
-          {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo="Chiudi" onClick={onChiudi} />}
+          {onChiudi && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="chiudi" dimensione={20} />} titolo={etichettaChiudi ?? 'Chiudi'} onClick={onChiudi} />}
         </div>
       </header>
 

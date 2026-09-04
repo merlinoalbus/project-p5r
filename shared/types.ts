@@ -485,6 +485,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   mancanti: number | null;
   /** True se nella scorta della partita c'è almeno una Persona dello stesso arcano (bonus ×1,5 nel gioco). */
   personaArcanoInScorta: boolean;
+  /** Blocco del rango successivo: requisiti non verdi (né confermati) del semaforo; null se libero. Il server rifiuta gli aumenti di rango bloccati. */
+  bloccato: { rango: number; motivi: string[] } | null;
   /** Regali già consegnati in questa partita (nomi). */
   regaliFatti: string[];
   note: string;
@@ -502,6 +504,8 @@ export type BonusEsame = 'primo' | 'top10';
  * moltiplicatori `bonusArcano` ×1,5, `esame` ×1,5/×1,2 e `invito` ×1,2 (cumulativi).
  */
 export interface ModificaConfidente {
+  /** Salta il blocco dei requisiti (semafori non verdi): scelta esplicita dell'utente, registrata nello storico. */
+  forza?: boolean;
   sbloccato?: boolean;
   rango?: number;
   punti?: number;

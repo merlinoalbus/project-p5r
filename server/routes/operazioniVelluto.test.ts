@@ -50,8 +50,8 @@ describe('API operazioni della Stanza di Velluto', () => {
     const confidenti = (await request(app).get('/api/compendio/confidenti')).body.data as Array<{ chiave: string; arcana: string }>;
     const conf = confidenti.find((c) => c.arcana === ant.risultato.arcana)!;
     expect(conf).toBeDefined();
-    await request(app).put(`/api/partite/${id}/confidenti/${conf.chiave}`).send({ rango: 5 });
-    await request(app).put(`/api/partite/${id}/confidenti/igor`).send({ rango: 7 });
+    await request(app).put(`/api/partite/${id}/confidenti/${conf.chiave}`).send({ forza: true, rango: 5 });
+    await request(app).put(`/api/partite/${id}/confidenti/igor`).send({ forza: true, rango: 7 });
     ant = (await request(app).post(`/api/partite/${id}/velluto/fusione/anteprima`).send({ possedutaIds: [a.id, b.id] })).body.data as AnteprimaFusioneDto;
     expect(ant.bonusLivelli).toMatchObject({ min: 3, max: 3, rangoMatto: 7, rangoArcano: 5 });
     expect(ant.livelloSuggerito).toBe(ant.livelloBase + 3);

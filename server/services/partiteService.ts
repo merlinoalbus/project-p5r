@@ -218,7 +218,7 @@ export function confidenti(partitaId: number): ConfidentePartitaDto[] {
       regaliFatti: regaliFattiDi(partitaId, c.chiave),
       note: c.note, semafori: [] as SemaforiRangoDto[], updatedAt: c.updated_at,
     }))
-    .map((c, _i, tutti) => ({ ...c, semafori: semaforiConfidente(c.chiave, c.rango, statoSemafori(partitaId, tutti)) }));
+    .map((c, _i, tutti) => { const semafori = semaforiConfidente(c.chiave, c.rango, statoSemafori(partitaId, tutti)); return { ...c, semafori, bloccato: bloccoRango(semafori, c.rango + 1) }; });
 }
 
 let cacheStato: { partitaId: number; firma: string; stato: StatoPartitaSemafori } | null = null;
@@ -252,6 +252,14 @@ export function impostaRegaloFatto(partitaId: number, chiave: string, regalo: st
   return confidenti(partitaId).find((c) => c.chiave === chiave)!;
 }
 
+/** Requisiti non verdi (né confermati) del semaforo di `rango`: il Confidente è bloccato finché non lo sono tutti. */
+export function bloccoRango(semafori: SemaforiRangoDto[], rango: number): { rango: number; motivi: string[] } | null {
+  const sem = semafori.find((s) => s.rango === rango);
+  if (!sem || sem.pronto || sem.requisiti.length === 0) return null;
+  const motivi = sem.requisiti.filter((r) => r.stato !== 'verde').map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo));
+  return motivi.length > 0 ? { rango, motivi } : null;
+}
+
 export function aggiornaConfidente(partitaId: number, chiave: string, dati: ModificaConfidente): ConfidentePartitaDto {
   rigaPartita(partitaId);
   if (!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(chiave)) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${chiave}' non esiste.`);
@@ -259,6 +267,17 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
   const rango = dati.rango ?? attuale.rango;
   // Invariante: un rango > 0 implica lo sblocco (anche se il client manda sbloccato=false).
   const sbloccato = rango > 0 ? true : (dati.sbloccato ?? attuale.sbloccato);
+  // Blocco (specifica 12.3): non si sale a un rango — né si sblocca il Confidente — finché i requisiti dei semafori non sono verdi o
+  // confermati. `forza` è la via d'uscita esplicita dell'utente (requisito valutato male, partita importata): passa e resta nello storico.
+  const primoRangoDaVerificare = attuale.rango + 1;
+  const ultimoRangoDaVerificare = rango > attuale.rango ? rango : sbloccato && !attuale.sbloccato ? 1 : 0;
+  const bloccoInfranto: Array<{ rango: number; motivi: string[] }> = [];
+  for (let r = primoRangoDaVerificare; r <= ultimoRangoDaVerificare; r++) {
+    const blocco = bloccoRango(attuale.semafori, r);
+    if (!blocco) continue;
+    if (!dati.forza) throw httpErrors.conflict('confidente-bloccato', `${attuale.nome}: rango ${r} non raggiungibile finché i requisiti non sono soddisfatti — ${blocco.motivi.join(' · ')}`, { rango: r, motivi: blocco.motivi });
+    bloccoInfranto.push(blocco);
+  }
   // Punti verso il rango successivo: al cambio di rango ripartono da zero (nessun riporto, come nel gioco), salvo valore esplicito.
   const incremento = (dati.deltaPunti ?? 0) + puntiConfidente(dati);
   let punti = dati.punti !== undefined ? dati.punti : rango !== attuale.rango ? 0 : attuale.punti + incremento;
@@ -269,6 +288,9 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
       .run(partitaId, chiave, sbloccato ? 1 : 0, rango, punti, dati.note ?? attuale.note, nowIso());
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(nowIso(), partitaId);
     if (sbloccato && !attuale.sbloccato) registraEvento(partitaId, 'confidente-sbloccato', `${attuale.nome} (${attuale.arcanaNome}) sbloccato`, '', { confidente: chiave });
+    for (const b of bloccoInfranto) {
+      registraEvento(partitaId, 'confidente-rango', `${attuale.nome}: rango ${b.rango} segnato nonostante i requisiti`, b.motivi.join(' · '), { confidente: chiave });
+    }
     if (rango !== attuale.rango) {
       registraEvento(partitaId, 'confidente-rango', `${attuale.nome} (${attuale.arcanaNome}): rango ${rango}${rango === 10 ? ' — massimo' : ''}`, `Da rango ${attuale.rango}.`, { confidente: chiave, da: attuale.rango, a: rango });
     }

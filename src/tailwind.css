@@ -367,6 +367,13 @@
   .spillo-popup__testo { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
   .spillo-popup__chiudi { background: none; border: 0; color: var(--color-text-muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; min-width: 28px; min-height: 28px; }
   .spillo-popup__chiudi:hover { color: var(--color-text); }
+  /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
+  @media (min-width: 768px) { .home, .scheda-riempi { height: calc(100vh - var(--altezza-cornice-pagina, 96px)); min-height: 0; } }
+  @media (min-width: 768px) { .scheda-riempi > .md\:flex-1 > * { height: 100%; min-height: 0; } }
+  /* ---- Confidenti bloccati dai requisiti (12.3): carta spenta, motivi in evidenza ---- */
+  .poster--bloccato { filter: grayscale(.85); opacity: .7; }
+  .poster--bloccato:hover, .poster--bloccato:focus-within { filter: grayscale(.5); opacity: .9; }
+  .blocco-confidente { display: flex; flex-direction: column; gap: 4px; padding: 6px 8px; border: 1px dashed var(--color-text-muted); }
   /* ---- Azioni della guida: consigliate in oro, bloccate in grigio (12.4) ---- */
   .azione { border-left: 3px solid transparent; padding-left: 6px; }
   .azione--consigliata { border-left-color: #f5c542; background: color-mix(in srgb, #f5c542 8%, transparent); }

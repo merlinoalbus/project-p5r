@@ -30,67 +30,78 @@ export function HomePage() {
     return [...visti.entries()].map(([chiave, nome]) => ({ chiave, nome }));
   }, [scorta.dati]);
 
+  const accessi = (
+    <nav className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-1 gap-2" aria-label="Accessi rapidi">
+      <Link to="/compendio" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2.5"><IconBook size={22} className="text-primary" /><span><strong>Compendio</strong><br /><span className="text-[12px] text-text-secondary">232 Persona</span></span></Link>
+      <Link to="/skill" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2.5"><IconBolt size={22} className="text-primary" /><span><strong>Skill</strong><br /><span className="text-[12px] text-text-secondary">525 skill in italiano</span></span></Link>
+      <Link to="/fusione" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2.5"><IconFusion size={22} className="text-primary" /><span><strong>Fusione</strong><br /><span className="text-[12px] text-text-secondary">Regole degli Arcani</span></span></Link>
+      <Link to="/partita" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2.5"><IconMask size={22} className="text-primary" /><span><strong>Partita</strong><br /><span className="text-[12px] text-text-secondary">Doti, Confidenti, scorta</span></span></Link>
+      <Link to="/guida" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2.5"><IconStar size={22} className="text-primary" /><span><strong>Guida</strong><br /><span className="text-[12px] text-text-secondary">Domande in classe, calendario, Confidenti</span></span></Link>
+    </nav>
+  );
+
   return (
-    <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Compagno di gioco" sottotitolo="Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita." illustrazione="identita/logo-senza-testo" />
+    <div className="home flex flex-col gap-3">
+      <IntestazionePagina titolo="Compagno di gioco" sottotitolo="Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita." illustrazione="identita/logo-senza-testo" compatta />
       {attiva ? (
-        <div className="card flex flex-col gap-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[12px] uppercase tracking-wide text-text-muted">Partita attiva</span>
-            <span className="font-semibold text-[16px]">{attiva.nome}</span>
-            <span className="chip">Liv. {attiva.livelloProtagonista}</span>
-            {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
-          </div>
-          <div className="flex flex-col items-center gap-3">
-            {doti.dati && doti.dati.length > 0 && (
-              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-12 pt-6 pb-4" aria-label="Apri le Doti sociali">
-                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={280} badgeAltezza={40} etichettaAria="Stella delle Doti sociali" />
-              </Link>
-            )}
-            <div className="flex gap-2 flex-wrap justify-center">
-            {doti.dati?.map((d) => (
-              <Link key={d.chiave} to="/partita?scheda=doti" className="kpi-tile no-underline text-text min-w-[110px]">
-                <span className="kpi-label">{d.nome}</span>
-                <span className="kpi-value">{d.punti}</span>
-              </Link>
-            ))}
-            <Link to="/partita?scheda=scorta" className="kpi-tile no-underline text-text min-w-[110px]">
-              <span className="kpi-label">Scorta</span>
-              <span className="kpi-value">{scorta.dati?.length ?? '…'}</span>
-            </Link>
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_260px] gap-3 shrink-0">
+          <div className="card flex flex-col gap-2 py-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[12px] uppercase tracking-wide text-text-muted">Partita attiva</span>
+              <span className="font-semibold text-[16px]">{attiva.nome}</span>
+              <span className="chip">Liv. {attiva.livelloProtagonista}</span>
+              {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
             </div>
-          </div>
-          {scorta.dati && (
-            <div className="flex flex-wrap items-center justify-center gap-1.5 text-center" aria-label="Arcani potenziati dalla scorta">
-              <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati · Confidenti ×1,5 con una Persona in scorta</span>
-              {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
-              {arcaniInScorta.map((a) => (
-                <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
-                  <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
-                  {a.nome}
+            <div className="flex flex-col md:flex-row items-center gap-3 md:gap-6">
+              {doti.dati && doti.dati.length > 0 && (
+                <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-8 pt-4 pb-2" aria-label="Apri le Doti sociali">
+                  <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={200} badgeAltezza={30} etichettaAria="Stella delle Doti sociali" />
                 </Link>
-              ))}
+              )}
+              <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex gap-2 flex-wrap justify-center md:justify-start">
+                  {doti.dati?.map((d) => (
+                    <Link key={d.chiave} to="/partita?scheda=doti" className="kpi-tile no-underline text-text min-w-[96px]">
+                      <span className="kpi-label">{d.nome}</span>
+                      <span className="kpi-value">{d.punti}</span>
+                    </Link>
+                  ))}
+                  <Link to="/partita?scheda=scorta" className="kpi-tile no-underline text-text min-w-[96px]">
+                    <span className="kpi-label">Scorta</span>
+                    <span className="kpi-value">{scorta.dati?.length ?? '…'}</span>
+                  </Link>
+                </div>
+                {scorta.dati && (
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5" aria-label="Arcani potenziati dalla scorta">
+                    <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati · Confidenti ×1,5 con una Persona in scorta</span>
+                    {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
+                    {arcaniInScorta.map((a) => (
+                      <Link key={a.chiave} to="/partita?scheda=confidenti" className="chip chip--icona chip--attivo no-underline" title={`Persona ${a.nome} in scorta: i Confidenti ${a.nome} guadagnano punti ×1,5`}>
+                        <AssetImg nome={`arcani/icona/${slug(a.chiave)}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={<IconMaschera size={14} />} />
+                        {a.nome}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
+          {accessi}
         </div>
       ) : (
-        <div className="card text-[13px] text-text-secondary">
-          Nessuna partita attiva: <Link to="/partita" className="text-primary">creane una</Link> per iniziare a tracciare Doti sociali, Confidenti e Persona.
-        </div>
+        <>
+          <div className="card text-[13px] text-text-secondary">
+            Nessuna partita attiva: <Link to="/partita" className="text-primary">creane una</Link> per iniziare a tracciare Doti sociali, Confidenti e Persona.
+          </div>
+          {accessi}
+        </>
       )}
       {attiva && (
-        <section className="flex flex-col gap-2" aria-label="Oggi nella partita">
-          <h2 className="m-0 font-display text-[20px] uppercase">Oggi</h2>
-          <OggiPartita key={attiva.id} partita={attiva} />
+        <section className="flex flex-col gap-1.5 md:flex-1 md:min-h-0" aria-label="Oggi nella partita">
+          <h2 className="m-0 font-display text-[19px] uppercase">Oggi</h2>
+          <div className="md:flex-1 md:min-h-0"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>
         </section>
       )}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Link to="/compendio" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Compendio</strong><br /><span className="text-[12px] text-text-secondary">232 Persona</span></span></Link>
-        <Link to="/skill" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBolt size={22} className="text-primary" /><span><strong>Skill</strong><br /><span className="text-[12px] text-text-secondary">525 skill in italiano</span></span></Link>
-        <Link to="/fusione" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconFusion size={22} className="text-primary" /><span><strong>Fusione</strong><br /><span className="text-[12px] text-text-secondary">Regole degli Arcani</span></span></Link>
-        <Link to="/partita" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconMask size={22} className="text-primary" /><span><strong>Partita</strong><br /><span className="text-[12px] text-text-secondary">Doti, Confidenti, scorta</span></span></Link>
-        <Link to="/guida" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Guida</strong><br /><span className="text-[12px] text-text-secondary">Domande in classe, calendario, Confidenti</span></span></Link>
-      </div>
     </div>
   );
 }
