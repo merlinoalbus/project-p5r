@@ -1,0 +1,1554 @@
+{
+ "domande": [
+  {
+   "data": "04-12",
+   "tipo": "classe",
+   "chi": "Prof. Ushimaru",
+   "domanda": "Secondo il Dizionario del Diavolo, quale fattore ha determinato il progresso dell'umanità?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Nemici (malfattori)"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "Traduzione parafrasata; risposta breve riportata fedelmente. Fonte inglese (cbr.com) rende l'opzione come \"Villains\".",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "04-19",
+   "tipo": "classe",
+   "chi": "Prof. Hiruta",
+   "domanda": "Illusione ottica: quale delle due righe (A o B) sembra più lunga?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Sono uguali"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "04-23",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Quale gara vinse l'imperatore Nerone alle antiche Olimpiadi?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Tutte (le gare a cui partecipò)"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "04-25",
+   "tipo": "classe",
+   "chi": "Prof. Kawakami (bonus su Ann)",
+   "domanda": "Qual è il significato originale dell'espressione \"È il mio paese, giusto o sbagliato che sia\"?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Lo sostieni incondizionatamente"
+    },
+    {
+     "ordine": 2,
+     "testo": "Hai il dovere di correggerlo/raddrizzarlo"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota, Fascino +1, punti Rango Ann",
+   "note": "Domanda a due passi. Alcune fonti inglesi (cbr.com) attribuiscono la domanda direttamente ad Ann anziché al professore; allgamestaff.it la presenta come domanda di Kawakami con ricaduta di bonus su Ann. Discrepanza segnalata in rapporto.md.",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; cbr.com/all-p5-p5r-classroom-exam-answers"
+  },
+  {
+   "data": "04-27",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Come si chiama il teorema matematico basato su questo numero (colorazione delle mappe)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Teorema dei quattro colori"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "04-30",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Catena di etimologia sulla parola tedesca \"Wunderkind\".",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "\"Wunder\" significa Wonder (meraviglia)"
+    },
+    {
+     "ordine": 2,
+     "testo": "\"Kind\" significa Child (bambino)"
+    },
+    {
+     "ordine": 3,
+     "testo": "Nel tuo caso specifico, \"Kind\" indica un prodigio"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota per passo",
+   "note": "Domanda a tre passi nella stessa lezione.",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-07",
+   "tipo": "classe",
+   "chi": "Prof. Kawakami",
+   "domanda": "Qual è la traduzione letterale dell'espressione francese \"femme fatale\"?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Donna fatale/irresistibile"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-10",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "In quale periodo storico giapponese fu attivo Minamoto no Yoshitsune?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Il periodo Heian"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-11",
+   "tipo": "esame-medio",
+   "chi": "Esame di metà semestre 1 (Maggio)",
+   "domanda": "Serie di domande su Minamoto no Yoshitsune e l'idioma \"favorire il magistrato debole\".",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La figura storica che ispirò l'idioma è Minamoto no Yoshitsune"
+    },
+    {
+     "ordine": 2,
+     "testo": "Il fratello di Yoshitsune si chiamava Minamoto no Yoritomo"
+    },
+    {
+     "ordine": 3,
+     "testo": "Lo scontro finale tra i due fratelli fu vinto da Yoritomo"
+    },
+    {
+     "ordine": 4,
+     "testo": "In racconti come questo, la gente tende a simpatizzare con i deboli"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "05-12",
+   "tipo": "esame-medio",
+   "chi": "Esame di metà semestre 1 (Maggio)",
+   "domanda": "Domande su un'illusione ottica e su teoria dei grafi/colorazione delle mappe.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La funzione cerebrale responsabile dell'illusione è la cognizione"
+    },
+    {
+     "ordine": 2,
+     "testo": "Entrambe le mappe mostrate possono essere colorate senza regioni adiacenti dello stesso colore"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "05-13",
+   "tipo": "esame-medio",
+   "chi": "Esame di metà semestre 1 (Maggio)",
+   "domanda": "Domande sul Dizionario del Diavolo e sull'archetipo della femme fatale.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "L'opera che definisce \"malfattore\" come fattore di progresso è Il Dizionario del Diavolo"
+    },
+    {
+     "ordine": 2,
+     "testo": "L'archetipo della donna misteriosa e seducente con secondi fini è la femme fatale"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "05-16",
+   "tipo": "classe",
+   "chi": "Prof. Maruki",
+   "domanda": "Come si chiama il fenomeno per cui credere in una terapia produce miglioramenti reali?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Effetto placebo"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-19",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Quale artista ukiyo-e del periodo Edo cambiò casa più di 100 volte?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Katsushika Hokusai"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-21",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Qual è il rapporto numerico della \"sezione argentea\"?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "1:1,414"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-23",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Da quali radici greche deriva il termine \"sinestesia\"?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "\"Syn\" = insieme"
+    },
+    {
+     "ordine": 2,
+     "testo": "\"Aisthesis\" = sensi"
+    },
+    {
+     "ordine": 3,
+     "testo": "Il significato completo è \"l'unione dei sensi\""
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota per passo",
+   "note": "Domanda a tre passi.",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-26",
+   "tipo": "classe",
+   "chi": "Prof. Kawakami",
+   "domanda": "A quale autore/personaggio si ispirò la scrittrice per creare Leblanc?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Arthur Conan Doyle"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-31",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Da quale figura storica deriva l'iconografia classica del pirata con gamba di legno?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "John Silver (personaggio letterario ispirato a figure storiche)"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-04",
+   "tipo": "classe",
+   "chi": "Prof. Maruki",
+   "domanda": "Come si chiama il fenomeno per cui una prima impressione condiziona i giudizi successivi?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Effetto alone"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-07",
+   "tipo": "classe",
+   "chi": "Prof. Hiruta",
+   "domanda": "Qual è la principale differenza biologica tra il granchio reale (King Crab) e un paguro/eremita?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Il numero di zampe"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-08",
+   "tipo": "classe",
+   "chi": "Prof. Maruki",
+   "domanda": "In cosa il totalitarismo si spinge oltre il semplice autoritarismo?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Nel controllare anche l'opinione/il pensiero pubblico"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-13",
+   "tipo": "classe",
+   "chi": "Prof. Hiruta",
+   "domanda": "Di che colore diventano alcuni oggetti/i capelli a contatto con determinati metalli o sostanze?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Verde"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-15",
+   "tipo": "classe",
+   "chi": "Prof. Ushimaru",
+   "domanda": "Tra banconote e monete, quale delle due viene emessa direttamente dal governo (e non dalla banca centrale)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Le monete"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-20",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Quale tra questi oggetti comuni contiene tracce di metalli rari/preziosi recuperabili?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Lo smartphone"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota, Fascino +1",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-23",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Quale ruolo ricoprì questa donna secondo la leggenda medievale (Papessa Giovanna)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Una papessa"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "06-27",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Quale animale compare in un modo di dire inglese legato al maltempo (equivalente di \"piove a catinelle\")?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Incerto: allgamestaff.it riporta \"pecore\", fonti inglesi (cbr.com) indicano \"cani\" (idioma \"raining cats and dogs\")"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "DISCREPANZA TRA FONTI non risolta: verificare con screenshot/video di gioco. Vedi rapporto.md.",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; cbr.com/all-p5-p5r-classroom-exam-answers"
+  },
+  {
+   "data": "06-29",
+   "tipo": "classe",
+   "chi": "Prof. Kawakami",
+   "domanda": "Cosa è inciso/scritto sul retro di questo pezzo (moneta antica)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Oro"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota, Fascino +1",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "07-01",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Qual è il significato originale dell'espressione cinese all'origine del nome dei baozi (involtini a forma di testa)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "\"Testa del barbaro\""
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "07-04",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Di chi è \"colpa\" se luglio e agosto hanno entrambi 31 giorni?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Di Giulio Cesare e Augusto"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "07-09",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Di quale poligono si tratta in questa figura geometrica?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Un triangolo"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "07-11",
+   "tipo": "classe",
+   "chi": "Prof. Maruki",
+   "domanda": "Domande a catena sulla memoria a lungo termine.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La memoria a lungo termine è composta da ricordi che durano a lungo"
+    },
+    {
+     "ordine": 2,
+     "testo": "La quantità di ricordi che possiamo trattenere è teoricamente infinita"
+    },
+    {
+     "ordine": 3,
+     "testo": "Con spazio infinito, i ricordi potrebbero essere conservati per sempre"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota per passo",
+   "note": "Domanda a tre passi.",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "07-12",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Cosa fece questo personaggio storico citato dal professore (ladro/criminale)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Commise dei furti"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "07-13",
+   "tipo": "esame-finale",
+   "chi": "Esame di fine semestre 1 (Luglio)",
+   "domanda": "Domande di geometria e su Il Romanzo dei Tre Regni / origine dei baozi.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Con C=28° e A=D=88°, gli angoli B ed E valgono 64 gradi"
+    },
+    {
+     "ordine": 2,
+     "testo": "Il creatore dei baozi ne Il Romanzo dei Tre Regni è Zhuge Liang"
+    },
+    {
+     "ordine": 3,
+     "testo": "Secondo la leggenda, al fiume venivano offerte teste di barbari per placarlo"
+    },
+    {
+     "ordine": 4,
+     "testo": "Zhuge Liang inventò i baozi per offrirli al posto delle teste umane"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "07-14",
+   "tipo": "esame-finale",
+   "chi": "Esame di fine semestre 1 (Luglio)",
+   "domanda": "Domande su un crostaceo (granchio reale) e sulla prima emissione di moneta in Giappone.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "L'organismo è il granchio reale, genere Paralithodes"
+    },
+    {
+     "ordine": 2,
+     "testo": "La prima emissione di banconote e monete giapponesi causò caos/confusione nell'economia"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "07-15",
+   "tipo": "esame-finale",
+   "chi": "Esame di fine semestre 1 (Luglio)",
+   "domanda": "Domande su un idioma norvegese sul maltempo e sui noodle somen del Tanabata.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "L'espressione italiana equivalente a \"piovono streghe\" è \"piove a catinelle\""
+    },
+    {
+     "ordine": 2,
+     "testo": "I noodle somen del Tanabata sono chiamati anche \"budella di demone\""
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "09-03",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Cosa rappresenta la mano destra alzata della statua religiosa?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Prosperità"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-06",
+   "tipo": "classe",
+   "chi": "Prof. Maruki",
+   "domanda": "Come si chiama il fenomeno per cui la lancetta dei secondi sembra fermarsi per un istante più a lungo?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Cronostasi"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-14",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Cosa offre in più un banco dei pegni rispetto a un normale negozio dell'usato?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Prestiti in denaro lasciando un oggetto in garanzia"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-17",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Quale possibile origine ha il detto \"il gatto ti ha mangiato la lingua\"?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "L'antica credenza che i gatti mangiassero le lingue umane"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-21",
+   "tipo": "classe",
+   "chi": "Prof. Kawakami",
+   "domanda": "In quale area geografica dell'Europa si trova la Repubblica Ceca?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Europa centrale"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-24",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Quante superfici bianche e quante nere compongono il classico pallone da calcio a pentagoni/esagoni?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "20 superfici bianche, 12 nere"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-28",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Cosa significa l'acronimo \"PVS\" (Phantom Vibration Syndrome)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "P = Phantom"
+    },
+    {
+     "ordine": 2,
+     "testo": "V = Vibration"
+    },
+    {
+     "ordine": 3,
+     "testo": "S = Syndrome"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota per passo",
+   "note": "Domanda a tre passi.",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "09-29",
+   "tipo": "classe",
+   "chi": "Prof. Ushimaru",
+   "domanda": "A quale ente/settore appartengono i pescatori tradizionali di cormorani del fiume Nagaragawa?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "L'Agenzia della Casa Imperiale"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "10-03",
+   "tipo": "classe",
+   "chi": "Prof. Hiruta",
+   "domanda": "Se tre angurie fossero disperse nell'universo (paragone sulla densità stellare), cosa rappresenterebbero?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Le stelle"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "10-06",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Chi diede il nome (e ne propose l'adozione) alla ghigliottina?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Joseph-Ignace Guillotin"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "10-11",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Nell'esperimento linguistico bouba/kiki, quale nome viene associato alla forma arrotondata \"B\"?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Bouba"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "10-17",
+   "tipo": "esame-medio",
+   "chi": "Esame di metà semestre 2 (Ottobre)",
+   "domanda": "Domande sul pallone da calcio classico e sulla trasmissione televisiva d'epoca.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Il pallone da calcio classico ha in totale 32 pannelli (20 bianchi + 12 neri)"
+    },
+    {
+     "ordine": 2,
+     "testo": "In passato il pallone era di un solo colore"
+    },
+    {
+     "ordine": 3,
+     "testo": "Le partite venivano un tempo trasmesse in immagini bianco e nero"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "10-18",
+   "tipo": "esame-medio",
+   "chi": "Esame di metà semestre 2 (Ottobre)",
+   "domanda": "Domande sulla ghigliottina e sui pescatori di cormorani a Nagaragawa.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Chi eseguiva materialmente le condanne era il boia Charles-Henri Sanson"
+    },
+    {
+     "ordine": 2,
+     "testo": "Pochi possono diventare pescatori di cormorani perché è una professione ereditaria"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "10-19",
+   "tipo": "esame-medio",
+   "chi": "Esame di metà semestre 2 (Ottobre)",
+   "domanda": "Domande sull'etimologia di \"robota\"/\"robot\" e sulla densità delle stelle nello spazio.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "\"Robota\", radice etimologica di \"robot\", significa \"lavoro forzato\""
+    },
+    {
+     "ordine": 2,
+     "testo": "La rarefazione delle stelle nello spazio profondo è paragonata a \"tre api in tutta Europa\""
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "10-22",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Qual è il totale che si ottiene sommando ogni riga, colonna e diagonale del quadrato magico mostrato?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "15"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "10-24",
+   "tipo": "classe",
+   "chi": "Prof. Maruki",
+   "domanda": "Qual è la ragione psicologica per cui i ricordi possono differire dalla realtà dei fatti?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La distorsione/bias della memoria"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-02",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Nel gergo dei ladri, cosa indica il termine tradotto come \"quota\" (tranche/spartizione)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Una quota della refurtiva"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-04",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Se nei semi delle carte i fiori rappresentano un bastone e i quadri il denaro, cosa rappresentano le picche?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Una spada"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-08",
+   "tipo": "classe",
+   "chi": "Prof. Ushimaru",
+   "domanda": "Qual è l'età minima richiesta per poter assistere a un processo in tribunale?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Nessuna età minima: chiunque può assistere"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-10",
+   "tipo": "classe",
+   "chi": "Prof. Kawakami",
+   "domanda": "Perché nel kanji raffigurante questo uccello manca il tratto dell'occhio (a differenza di altri uccelli)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Perché gli occhi del corvo sono difficili da distinguere (essendo tutto nero)"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-12",
+   "tipo": "classe",
+   "chi": "Prof. Hiruta",
+   "domanda": "Perché la propria voce registrata al telefono suona diversa da come la sentiamo normalmente?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Perché al telefono la voce viene sintetizzata/digitalizzata"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-14",
+   "tipo": "classe",
+   "chi": "Prof. Ushimaru",
+   "domanda": "Perché questo fenomeno (es. il cibo che cuoce diversamente) si verifica in un contesto specifico?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "A causa dell'altitudine"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-15",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Come fu punito pubblicamente questo criminale storico dopo la condanna?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La sua testa fu esposta in pubblico"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "11-17",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "Come si chiama questo grafico a spirale (indizio: il nome deriva dal guscio di una chiocciola)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Cocleoide"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "12-20",
+   "tipo": "esame-finale",
+   "chi": "Esame di fine semestre 2 (Dicembre)",
+   "domanda": "Domande sul grafico \"diablo\" e su un celebre ladro dell'epoca Edo.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Il grafico che prende il nome dal giocattolo cinese \"diablo\" è il grafico D"
+    },
+    {
+     "ordine": 2,
+     "testo": "Il celebre ladro dell'epoca Edo rubò più di un miliardo di yen (in valore equivalente)"
+    },
+    {
+     "ordine": 3,
+     "testo": "Fu condannato all'esposizione pubblica della testa"
+    },
+    {
+     "ordine": 4,
+     "testo": "I criminali venivano fatti sfilare in pubblico prima dell'esecuzione"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "12-21",
+   "tipo": "esame-finale",
+   "chi": "Esame di fine semestre 2 (Dicembre)",
+   "domanda": "Domande sui semi delle carte e su chi può assistere a un processo.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Il seme che rappresenta il Santo Graal nelle carte è Cuori"
+    },
+    {
+     "ordine": 2,
+     "testo": "Chiunque, persino un neonato, può assistere a un processo"
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "12-22",
+   "tipo": "esame-finale",
+   "chi": "Esame di fine semestre 2 (Dicembre)",
+   "domanda": "Domande sull'espressione \"primo ministro in nero\" e sull'etimologia di \"dokyuu\".",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "L'espressione \"primo ministro in nero\", riferita a chi controlla la politica nell'ombra, è usata in Giappone"
+    },
+    {
+     "ordine": 2,
+     "testo": "La parola inglese che ispirò l'iniziale \"do\" del termine \"dokyuu\" è \"Dreadnought\""
+    }
+   ],
+   "ricompensa": "Conoscenza (contribuisce al piazzamento in classifica)",
+   "note": "",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
+  },
+  {
+   "data": "01-11",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Cosa ci dice il numero elevatissimo di divinità venerate nello Shintoismo?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Quanto siano numerose"
+    },
+    {
+     "ordine": 2,
+     "testo": "L'espressione tradizionale è \"gli otto milioni di dèi\""
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota per passo",
+   "note": "Domanda a due passi. Esclusiva Royal (terzo semestre, gennaio).",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "01-14",
+   "tipo": "classe",
+   "chi": "Prof. Usami",
+   "domanda": "A quale luogo reale del Giappone è ispirata la terra immaginaria di \"Ihatov\" (Kenji Miyazawa)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La prefettura di Iwate"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota, Fascino +1",
+   "note": "Esclusiva Royal (terzo semestre, gennaio).",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "01-18",
+   "tipo": "classe",
+   "chi": "Prof. Inui",
+   "domanda": "Qual è il significato originale del termine tradotto con \"stupore\" (\"awful\")?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Degno di nota/notevole"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "Esclusiva Royal (terzo semestre, gennaio).",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "01-21",
+   "tipo": "classe",
+   "chi": "Prof. Ushimaru",
+   "domanda": "Cosa sta per calpestare la figura raffigurata (statua religiosa)?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Un serpente"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "Esclusiva Royal (terzo semestre, gennaio).",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "01-24",
+   "tipo": "classe",
+   "chi": "Prof. Chuono",
+   "domanda": "Catena di domande sul termine inglese \"salty\" riferito a una persona.",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Il termine di base descrive una persona generosa"
+    },
+    {
+     "ordine": 2,
+     "testo": "\"Salato\" (salty) in quel contesto ha una connotazione negativa"
+    },
+    {
+     "ordine": 3,
+     "testo": "Riferito a una persona, \"salty\" probabilmente significa risentito"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota per passo",
+   "note": "Domanda a tre passi. Esclusiva Royal (terzo semestre, gennaio).",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "01-27",
+   "tipo": "classe",
+   "chi": "Prof. Hiruta",
+   "domanda": "Secondo lo studio citato, fino a quanti \"gradi di separazione\" può propagarsi la felicità personale?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Agli amici degli amici degli amici (tre gradi di separazione)"
+    }
+   ],
+   "ricompensa": "Conoscenza +1 nota",
+   "note": "Esclusiva Royal (terzo semestre, gennaio).",
+   "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-19",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle due potrebbe essere classificata come lesione? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Produrre rumori molesti"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "05-26",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Qual è la risposta esatta? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La \"regina\" delle prove"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "06-02",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "I tutori non sono pagati"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "06-23",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle due rappresenta una frode? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Ordinare cibo senza soldi"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "08-04",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle due può essere considerata un furto? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Rubare un'auto e restituirla"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "09-22",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Qual è la pena prevista per chi costringe qualcuno ai lavori forzati?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Dieci anni di carcere"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "09-29",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti è diffamazione? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Pubblicare una fedina penale"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "11-10",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Chi detiene il potere in questo paese?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Noi, gli spettatori"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "11-24",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "La Dieta decide in base a un voto maggioritario, ma chi ha l'ultima parola se il voto è al 50%?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Lo Speaker della Camera"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "12-08",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Tentato omicidio"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "12-15",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Non dà vantaggi ai ricercati"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  }
+ ],
+ "esami": [
+  {
+   "chiave": "esame-1",
+   "nome": "Esame di metà semestre 1",
+   "date": [
+    "05-11",
+    "05-12",
+    "05-13"
+   ],
+   "dataRisultati": "05-20",
+   "domande": [
+    {
+     "data": "05-11",
+     "ordine": 1,
+     "domanda": "Figura storica che ispirò l'idioma \"favorire il magistrato debole\"",
+     "risposta": "Minamoto no Yoshitsune"
+    },
+    {
+     "data": "05-11",
+     "ordine": 2,
+     "domanda": "Nome del fratello di Yoshitsune",
+     "risposta": "Minamoto no Yoritomo"
+    },
+    {
+     "data": "05-11",
+     "ordine": 3,
+     "domanda": "Chi vinse lo scontro finale tra i due fratelli",
+     "risposta": "Yoritomo"
+    },
+    {
+     "data": "05-11",
+     "ordine": 4,
+     "domanda": "Con chi tende a simpatizzare la gente in racconti come questo",
+     "risposta": "Con i deboli"
+    },
+    {
+     "data": "05-12",
+     "ordine": 5,
+     "domanda": "Funzione cerebrale responsabile dell'illusione ottica mostrata",
+     "risposta": "La cognizione"
+    },
+    {
+     "data": "05-12",
+     "ordine": 6,
+     "domanda": "Quale mappa può essere colorata senza regioni adiacenti dello stesso colore",
+     "risposta": "Entrambe"
+    },
+    {
+     "data": "05-13",
+     "ordine": 7,
+     "domanda": "Opera che definisce \"malfattore\" come fattore di progresso umano",
+     "risposta": "Il Dizionario del Diavolo"
+    },
+    {
+     "data": "05-13",
+     "ordine": 8,
+     "domanda": "Archetipo della donna misteriosa e seducente con secondi fini",
+     "risposta": "Femme fatale"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "chiave": "esame-2",
+   "nome": "Esame di fine semestre 1",
+   "date": [
+    "07-13",
+    "07-14",
+    "07-15"
+   ],
+   "dataRisultati": "07-19",
+   "domande": [
+    {
+     "data": "07-13",
+     "ordine": 1,
+     "domanda": "Con C=28°, A=D=88°, quanto valgono B ed E",
+     "risposta": "64 gradi"
+    },
+    {
+     "data": "07-13",
+     "ordine": 2,
+     "domanda": "Creatore dei personaggi ne Il Romanzo dei Tre Regni citati",
+     "risposta": "Zhuge Liang"
+    },
+    {
+     "data": "07-13",
+     "ordine": 3,
+     "domanda": "Cosa veniva offerto al fiume per placarlo secondo la leggenda",
+     "risposta": "Teste di barbari"
+    },
+    {
+     "data": "07-13",
+     "ordine": 4,
+     "domanda": "Scopo per cui Zhuge Liang inventò i baozi",
+     "risposta": "Per offrirli al posto delle teste umane"
+    },
+    {
+     "data": "07-14",
+     "ordine": 5,
+     "domanda": "Nome e genere/famiglia dell'organismo (crostaceo) mostrato",
+     "risposta": "Granchio reale (Paralithodes)"
+    },
+    {
+     "data": "07-14",
+     "ordine": 6,
+     "domanda": "Effetto della prima emissione di banconote e monete in Giappone",
+     "risposta": "Caos/confusione nell'economia"
+    },
+    {
+     "data": "07-15",
+     "ordine": 7,
+     "domanda": "Espressione equivalente al detto norvegese \"piovono streghe\"",
+     "risposta": "Piove a catinelle"
+    },
+    {
+     "data": "07-15",
+     "ordine": 8,
+     "domanda": "Altro nome dei noodle somen mangiati a Tanabata",
+     "risposta": "Budella di demone"
+    }
+   ],
+   "note": ""
+  },
+  {
+   "chiave": "esame-3",
+   "nome": "Esame di metà semestre 2",
+   "date": [
+    "10-17",
+    "10-18",
+    "10-19"
+   ],
+   "dataRisultati": "10-24",
+   "domande": [
+    {
+     "data": "10-17",
+     "ordine": 1,
+     "domanda": "Totale pannelli (bianchi+neri) del pallone da calcio classico",
+     "risposta": "32 pannelli (20 bianchi, 12 neri)"
+    },
+    {
+     "data": "10-17",
+     "ordine": 2,
+     "domanda": "Colore del pallone da calcio in passato",
+     "risposta": "Era di un solo colore"
+    },
+    {
+     "data": "10-17",
+     "ordine": 3,
+     "domanda": "Come venivano trasmesse un tempo le partite in TV",
+     "risposta": "In immagini bianco e nero"
+    },
+    {
+     "data": "10-18",
+     "ordine": 4,
+     "domanda": "Chi eseguiva materialmente le condanne con la ghigliottina",
+     "risposta": "Charles-Henri Sanson"
+    },
+    {
+     "data": "10-18",
+     "ordine": 5,
+     "domanda": "Perché sono pochi a poter diventare pescatori di cormorani a Nagaragawa",
+     "risposta": "È una professione ereditaria"
+    },
+    {
+     "data": "10-19",
+     "ordine": 6,
+     "domanda": "Significato originale di \"robota\", radice etimologica di \"robot\"",
+     "risposta": "Lavoro forzato"
+    },
+    {
+     "data": "10-19",
+     "ordine": 7,
+     "domanda": "Termine per la rarefazione delle stelle nello spazio profondo",
+     "risposta": "Tre api in tutta Europa"
+    }
+   ],
+   "note": "allgamestaff.it elenca anche 10-22 (quadrato magico, risposta 15) e 10-24 (bias di memoria) come interrogazioni Usami/Maruki nello stesso periodo; non è chiaro dalle fonti se siano incluse nell'esame o restino interrogazioni ordinarie fuori sessione. Segnalato in rapporto.md."
+  },
+  {
+   "chiave": "esame-4",
+   "nome": "Esame di fine semestre 2",
+   "date": [
+    "12-20",
+    "12-21",
+    "12-22"
+   ],
+   "dataRisultati": "12-24",
+   "domande": [
+    {
+     "data": "12-20",
+     "ordine": 1,
+     "domanda": "Nome del grafico che prende il nome dal giocattolo cinese \"diablo\"",
+     "risposta": "Grafico D"
+    },
+    {
+     "data": "12-20",
+     "ordine": 2,
+     "domanda": "Quanto denaro rubò il celebre ladro dell'epoca Edo",
+     "risposta": "Più di un miliardo di yen (in valore equivalente)"
+    },
+    {
+     "data": "12-20",
+     "ordine": 3,
+     "domanda": "Punizione a cui fu condannato il criminale",
+     "risposta": "Esposizione pubblica della testa"
+    },
+    {
+     "data": "12-20",
+     "ordine": 4,
+     "domanda": "Dove venivano fatti sfilare i criminali prima dell'esecuzione",
+     "risposta": "In pubblico, per essere esibiti/derisi"
+    },
+    {
+     "data": "12-21",
+     "ordine": 5,
+     "domanda": "Seme delle carte che rappresenta il Santo Graal",
+     "risposta": "Cuori"
+    },
+    {
+     "data": "12-21",
+     "ordine": 6,
+     "domanda": "Chi può assistere a un processo secondo la legge citata",
+     "risposta": "Chiunque, persino un neonato"
+    },
+    {
+     "data": "12-22",
+     "ordine": 7,
+     "domanda": "Paese in cui si usa l'espressione \"primo ministro in nero\"",
+     "risposta": "Giappone"
+    },
+    {
+     "data": "12-22",
+     "ordine": 8,
+     "domanda": "Parola inglese che ispirò l'iniziale \"do\" del termine \"dokyuu\"",
+     "risposta": "Dreadnought"
+    }
+   ],
+   "note": ""
+  }
+ ],
+ "premi": {
+  "fascinoPerPiazzamento": {
+   "primi_10_(incluso_1_posto)": "Fascino +3",
+   "sopra_la_media": "Fascino +2",
+   "nella_media_o_sotto": "nessun bonus indicato dalle fonti consultate (INCERTO, non confermato con valori esatti)"
+  },
+  "moltiplicatoreConfidenti": "Il piazzamento in classifica applica un moltiplicatore ai punti Confidente guadagnati con Ryuji, Makoto, Haru, Sojiro, Kawakami e Kasumi, attivo fino alla pubblicazione dei risultati dell'esame successivo. Per il 1° posto il moltiplicatore indicato da una fonte inglese è x1.5 (equivalente al bonus di Arcana corrispondente); per il Top 10 un moltiplicatore simile ma non quantificato con precisione nelle fonti consultate (INCERTO).",
+  "requisitoConoscenza": {
+   "esame_maggio": "Rango Conoscenza 4 (Enciclopedico) raggiunto entro l'ultimo giorno d'esame, con tutte le risposte corrette",
+   "esame_luglio_ottobre_dicembre": "Rango Conoscenza 5 (Erudito) raggiunto entro l'ultimo giorno di ciascun esame, con tutte le risposte corrette",
+   "fonte": "samurai-gamers.com/persona-5/rank-first-in-the-exams-guide (dati riferiti a Persona 5 vanilla; non confermata l'identicità dei requisiti in Royal, vedi rapporto.md)"
+  },
+  "trofeo": "\"Un travestimento sapiente\" - ottenuto piazzandosi al 1° posto rispondendo correttamente a tutte le domande di un esame, secondo tuttotek.it",
+  "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; cross-check samurai-gamers.com/persona-5/rank-first-in-the-exams-guide",
+  "noteGenerali": "Persona 5 Royal prevede 4 sessioni d'esame effettive (metà semestre 1 - maggio, fine semestre 1 - luglio, metà semestre 2 - ottobre, fine semestre 2 - dicembre). Gli esami del terzo semestre (gennaio-febbraio, contenuto esclusivo Royal) sono menzionati/previsti nella narrazione ma non vengono mai effettivamente sostenuti dal giocatore, secondo allgamestaff.it e conferma incrociata da ricerca web."
+ }
+}

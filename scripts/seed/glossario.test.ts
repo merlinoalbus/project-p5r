@@ -2,7 +2,7 @@
 // Test glossario — traduzione delle fonti carta e coerenza delle mappe
 // ============================================================
 
-import { ARCANI, ELEMENTI_AFFINITA, COLONNE_EREDITA, STATISTICHE, traduciFonteCarta } from './glossario.js';
+import { ARCANI, CONFIDENTI, ELEMENTI_AFFINITA, COLONNE_EREDITA, STATISTICHE, traduciFonteCarta } from './glossario.js';
 
 describe('traduciFonteCarta', () => {
   it('traduce le visite al Jazz Club numerate e con date', () => {
@@ -33,6 +33,15 @@ describe('mappe del glossario', () => {
     expect(ARCANI).toHaveLength(24);
     expect(new Set(ARCANI.map((a) => a.chiave)).size).toBe(24);
     expect(ARCANI[ARCANI.length - 1].chiave).toBe('World');
+  });
+
+  it('ha 23 Confidenti con chiavi uniche, un arcano valido ciascuno e tutti gli arcani tranne Mondo coperti', () => {
+    expect(CONFIDENTI).toHaveLength(23);
+    expect(new Set(CONFIDENTI.map((c) => c.chiave)).size).toBe(23);
+    const arcani = new Set(ARCANI.map((a) => a.chiave));
+    for (const c of CONFIDENTI) expect(arcani.has(c.arcana)).toBe(true);
+    const coperti = new Set(CONFIDENTI.map((c) => c.arcana));
+    expect([...arcani].filter((a) => !coperti.has(a))).toEqual(['World']);
   });
 
   it('ha 10 affinità, 12 colonne di eredità e 5 statistiche', () => {

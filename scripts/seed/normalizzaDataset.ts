@@ -11,6 +11,8 @@
 //                              Tesoro, matrice di eredità, set DLC
 //   data/seed/traduzioni.json  glossario italiano (arcani, elementi, affinità,
 //                              statistiche, tipi di eredità, aree, effetti skill)
+//   data/seed/confidenti.json  i 23 Confidenti (chiave, nome, arcano)
+//   data/seed/doti.json        le 5 Doti sociali con ranghi e soglie
 //   data/seed/versione.json    versione del seed + commit delle fonti
 //
 // Chiavi JSON in italiano; i VALORI identificativi (nomi Persona/skill,
@@ -34,6 +36,7 @@ import {
   AREE_MEMENTOS,
   ARCANI,
   COLONNE_EREDITA,
+  CONFIDENTI,
   DOTI_SOCIALI,
   ELEMENTI_AFFINITA,
   ELEMENTI_SKILL,
@@ -97,105 +100,10 @@ interface DatiGrezziRoyal {
   inheritanceChartRoyal: Record<string, string[]>;
 }
 
-// ---- Tipi del seed normalizzato (esportati: li usa anche il caricatore) ----
+// ---- Tipi del seed: definiti in shared/seed.ts (usati anche dal backend) ----
 
-/** Persona del compendio Royal. */
-export interface PersonaSeed {
-  nome: string;
-  arcana: string;
-  livello: number;
-  /** Tipo di eredità delle skill (chiave di TIPI_EREDITA); null per i Demoni del Tesoro. */
-  eredita: string | null;
-  speciale: boolean;
-  rara: boolean;
-  dlc: boolean;
-  /** Richiede il rango massimo del Confidente dell'arcano (Persona finali). */
-  richiedeConfidenteMax: boolean;
-  nota: string | null;
-  oggetto: string;
-  oggettoAllarme: string;
-  /** true se l'esecuzione produce una carta abilità. */
-  oggettoECarta: boolean;
-  tratto: string;
-  /** 10 codici (ordine ELEMENTI_AFFINITA): '-', 'wk', 'rs', 'nu', 'rp', 'ab'. */
-  affinita: string[];
-  statistiche: { forza: number; magia: number; resistenza: number; agilita: number; fortuna: number };
-  /** Skill con livello di apprendimento (0 = innata), in ordine di livello. */
-  skill: Array<{ nome: string; livello: number }>;
-  /** Aree di Mementos dove si incontra (vuoto se non catturabile). */
-  areeMementos: string[];
-  pianiMementos: string | null;
-}
-
-/** Skill del compendio Royal. */
-export interface SkillSeed {
-  nome: string;
-  elemento: string;
-  /** Costo: SP, percentuale di HP o nessuno (passive/tratti). */
-  costo: { tipo: 'sp' | 'hp' | 'nessuno'; valore: number };
-  effetto: string;
-  /** Persona la cui esecuzione produce la carta di questa skill. */
-  fontiEsecuzione: string[];
-  /** Provenienza alternativa della carta abilità (evento, negozio…). */
-  fonteCarta: string | null;
-  /** Ombra da cui si ottiene per negoziazione. */
-  negoziazione: string | null;
-  /** Fonte esclusiva (Persona di un compagno, anello, nemici…), testo libero del dataset. */
-  unica: string | null;
-}
-
-/** Oggetto ottenibile per esecuzione. */
-export interface OggettoSeed {
-  nome: string;
-  categoria: string;
-  vincolo: string | null;
-  descrizione: string;
-}
-
-/** Regole di fusione. */
-export interface FusioneSeed {
-  arcani: string[];
-  tabella: Array<{ a: string; b: string; risultato: string }>;
-  speciali: Array<{ risultato: string; ingredienti: string[] }>;
-  tesori: { nomi: string[]; modificatori: Record<string, number[]> };
-  eredita: { tipi: string[]; colonne: string[]; matrice: Record<string, boolean[]> };
-  dlc: string[][];
-}
-
-/** Glossario italiano. */
-export interface TraduzioniSeed {
-  arcani: Array<{ chiave: string; nome: string; numero: number | null }>;
-  elementiSkill: Record<string, string>;
-  elementiAffinita: Array<{ chiave: string; nome: string; sigla: string }>;
-  affinita: Record<string, { nome: string; sigla: string }>;
-  tipiEredita: Record<string, string>;
-  colonneEredita: Array<{ chiave: string; nome: string }>;
-  statistiche: Array<{ chiave: string; nome: string; sigla: string }>;
-  tipiOggetto: Record<string, string>;
-  vincoliOggetto: Record<string, string>;
-  areeMementos: Record<string, string>;
-  dotiSociali: Array<{ chiave: string; nome: string }>;
-  notePersona: Record<string, string>;
-  fontiEsclusive: Record<string, string>;
-  /** Effetto skill EN → IT (copre il 100% degli effetti del seed). */
-  effettiSkill: Record<string, string>;
-  /** Descrizione oggetto EN → IT (copertura 100%). */
-  descrizioniOggetti: Record<string, string>;
-  /** Titolo dell'Ombra per la negoziazione EN → IT (traduzione non ufficiale, copertura 100%). */
-  negoziazioni: Record<string, string>;
-  /** Fonte carta del dataset → resa italiana (copertura 100%). */
-  fontiCarta: Record<string, string>;
-}
-
-/** Elenco delle stringhe prive di traduzione, per categoria. */
-export interface Mancanti {
-  effetti: string[];
-  oggetti: string[];
-  negoziazioni: string[];
-  fontiCarta: string[];
-  note: string[];
-  fontiEsclusive: string[];
-}
+export type { PersonaSeed, SkillSeed, OggettoSeed, FusioneSeed, ConfidenteSeed, DoteSeed, TraduzioniSeed, Mancanti } from '../../shared/seed.js';
+import type { PersonaSeed, SkillSeed, OggettoSeed, FusioneSeed, ConfidenteSeed, DoteSeed, TraduzioniSeed, Mancanti } from '../../shared/seed.js';
 
 // ---- Caricamento sandbox ----
 
@@ -502,6 +410,26 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
     return out;
   };
   const mancanti: Mancanti = { effetti: [], oggetti: [], negoziazioni: [], fontiCarta: [], note: [], fontiEsclusive: [] };
+  // Localizzazione italiana ufficiale (guida allgamestaff): skill, Persona e termini di gioco.
+  const loc = leggiJsonAccanto('localizzazione-it.json') as unknown as { skill?: Record<string, string>; persone?: Record<string, string>; termini?: Array<{ chiave: string; nome: string; categoria: string; definizione?: string; fonte?: string }> };
+  const nomiSkill = new Set(skill.map((s) => s.nome));
+  const skillIt: Record<string, string> = {};
+  for (const [en, it] of Object.entries(loc.skill ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+    if (!nomiSkill.has(en)) throw new Error(`localizzazione-it.json: skill sconosciuta '${en}'`);
+    if (it && it !== en) skillIt[en] = it;
+  }
+  const personeIt: Record<string, string> = {};
+  for (const [en, it] of Object.entries(loc.persone ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+    if (!nomiPersona.has(en)) throw new Error(`localizzazione-it.json: Persona sconosciuta '${en}'`);
+    if (it && it !== en) personeIt[en] = it;
+  }
+  const termini = [...(loc.termini ?? [])].sort((a, b) => a.categoria.localeCompare(b.categoria) || a.chiave.localeCompare(b.chiave));
+  const chiaviTermini = new Set<string>();
+  for (const tm of termini) {
+    if (!tm.chiave || !tm.nome || !tm.categoria) throw new Error(`localizzazione-it.json: termine incompleto ${JSON.stringify(tm)}`);
+    if (chiaviTermini.has(tm.chiave)) throw new Error(`localizzazione-it.json: termine duplicato '${tm.chiave}'`);
+    chiaviTermini.add(tm.chiave);
+  }
   const effettiSkill = copri(skill.map((s) => s.effetto), effettiIt, mancanti.effetti);
   const descrizioniOggetti = copri(oggetti.map((o) => o.descrizione), oggettiIt, mancanti.oggetti);
   // Il titolo di negoziazione è "Titolo (Persona)": si traduce il solo titolo.
@@ -532,20 +460,30 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
     tipiOggetto: TIPI_OGGETTO,
     vincoliOggetto: VINCOLI_OGGETTO,
     areeMementos: AREE_MEMENTOS,
-    dotiSociali: DOTI_SOCIALI,
+    dotiSociali: DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome })),
     notePersona: NOTE_PERSONA,
     fontiEsclusive: FONTI_ESCLUSIVE,
     effettiSkill,
     descrizioniOggetti,
     negoziazioni,
     fontiCarta,
+    skill: skillIt,
+    persone: personeIt,
+    termini,
   };
 
   // Timestamp stabile: se i dati generati sono identici a quelli già su disco,
   // si conserva il `generatoIl` precedente (rigenerazione idempotente).
   const fileVersione = path.join(DIR_SEED, 'versione.json');
   const precedente = fs.existsSync(fileVersione) ? (JSON.parse(fs.readFileSync(fileVersione, 'utf-8')) as { generatoIl?: string }) : null;
-  const dati: Record<string, unknown> = { 'persona.json': persone, 'skill.json': skill, 'oggetti.json': oggetti, 'fusione.json': fusione, 'traduzioni.json': traduzioni };
+  const confidenti: ConfidenteSeed[] = CONFIDENTI.map((c) => ({ ...c }));
+  for (const c of confidenti) if (!ARCANI_VALIDI.has(c.arcana)) throw new Error(`Confidente ${c.chiave}: arcana sconosciuto '${c.arcana}'`);
+  const doti: DoteSeed[] = DOTI_SOCIALI.map((d) => ({ chiave: d.chiave, nome: d.nome, ranghi: d.ranghi.map((r) => ({ ...r })) }));
+  for (const d of doti) {
+    if (d.ranghi.length !== 5 || d.ranghi[0].soglia !== 0) throw new Error(`Dote ${d.chiave}: attesi 5 ranghi con il primo a 0 punti`);
+    for (let i = 1; i < d.ranghi.length; i++) if (d.ranghi[i].soglia <= d.ranghi[i - 1].soglia) throw new Error(`Dote ${d.chiave}: soglie non crescenti`);
+  }
+  const dati: Record<string, unknown> = { 'persona.json': persone, 'skill.json': skill, 'oggetti.json': oggetti, 'fusione.json': fusione, 'traduzioni.json': traduzioni, 'confidenti.json': confidenti, 'doti.json': doti };
   const invariati = Object.entries(dati).every(([nome, d]) => {
     const f = path.join(DIR_SEED, nome);
     return fs.existsSync(f) && fs.readFileSync(f, 'utf-8') === JSON.stringify(d, null, 2) + '\n';
@@ -563,10 +501,15 @@ export function normalizzaTutto(): { mancanti: Mancanti } {
       oggetti: oggetti.length,
       ricetteSpeciali: fusione.speciali.length,
       tesori: fusione.tesori.nomi.length,
+      confidenti: confidenti.length,
+      doti: doti.length,
       effettiTradotti: Object.keys(effettiSkill).length,
       descrizioniOggettiTradotte: Object.keys(descrizioniOggetti).length,
       negoziazioniTradotte: Object.keys(negoziazioni).length,
       fontiCartaTradotte: Object.keys(fontiCarta).length,
+      skillLocalizzate: Object.keys(skillIt).length,
+      personeLocalizzate: Object.keys(personeIt).length,
+      termini: termini.length,
     },
   };
 

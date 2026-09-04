@@ -27,7 +27,7 @@ export default defineConfig([
 
   // Backend, shared e script (runtime Node, niente React)
   {
-    files: ['server/**/*.ts', 'shared/**/*.ts', 'scripts/**/*.ts', 'vite.config.ts', 'vitest.config.ts'],
+    files: ['server/**/*.ts', 'shared/**/*.ts', 'scripts/**/*.ts', 'vite/**/*.ts', 'vite.config.ts', 'vitest.config.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 2023,

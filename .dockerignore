@@ -5,6 +5,8 @@ data/*.db-shm
 data/*.db-wal
 data/backups
 data/seed/sorgenti
+data/immagini
+data/font
 coverage
 *.md
 *.log

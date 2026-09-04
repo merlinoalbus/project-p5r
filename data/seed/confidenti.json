@@ -1,0 +1,315 @@
+[
+  {
+    "chiave": "igor",
+    "nome": "Igor",
+    "arcana": "Fool"
+  },
+  {
+    "chiave": "morgana",
+    "nome": "Morgana",
+    "arcana": "Magician"
+  },
+  {
+    "chiave": "makoto",
+    "nome": "Makoto Niijima",
+    "arcana": "Priestess",
+    "puntiPerRango": [
+      0,
+      0,
+      15,
+      20,
+      20,
+      20,
+      30,
+      20,
+      55
+    ]
+  },
+  {
+    "chiave": "haru",
+    "nome": "Haru Okumura",
+    "arcana": "Empress",
+    "puntiPerRango": [
+      0,
+      0,
+      14,
+      28,
+      15,
+      20,
+      40,
+      22,
+      20
+    ]
+  },
+  {
+    "chiave": "yusuke",
+    "nome": "Yusuke Kitagawa",
+    "arcana": "Emperor",
+    "puntiPerRango": [
+      0,
+      0,
+      25,
+      15,
+      25,
+      20,
+      26,
+      22,
+      35
+    ]
+  },
+  {
+    "chiave": "sojiro",
+    "nome": "Sojiro Sakura",
+    "arcana": "Hierophant",
+    "puntiPerRango": [
+      0,
+      30,
+      40,
+      43,
+      20,
+      20,
+      14,
+      0,
+      40
+    ]
+  },
+  {
+    "chiave": "ann",
+    "nome": "Ann Takamaki",
+    "arcana": "Lovers",
+    "puntiPerRango": [
+      0,
+      35,
+      25,
+      20,
+      35,
+      45,
+      30,
+      67,
+      35
+    ]
+  },
+  {
+    "chiave": "ryuji",
+    "nome": "Ryuji Sakamoto",
+    "arcana": "Chariot",
+    "puntiPerRango": [
+      0,
+      20,
+      30,
+      20,
+      30,
+      45,
+      45,
+      60,
+      60
+    ]
+  },
+  {
+    "chiave": "akechi",
+    "nome": "Goro Akechi",
+    "arcana": "Justice",
+    "puntiPerRango": [
+      0,
+      0,
+      23,
+      40,
+      0,
+      55,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "chiave": "futaba",
+    "nome": "Futaba Sakura",
+    "arcana": "Hermit",
+    "puntiPerRango": [
+      0,
+      0,
+      10,
+      15,
+      26,
+      21,
+      0,
+      30,
+      35
+    ]
+  },
+  {
+    "chiave": "chihaya",
+    "nome": "Chihaya Mifune",
+    "arcana": "Fortune",
+    "puntiPerRango": [
+      0,
+      0,
+      15,
+      15,
+      15,
+      30,
+      20,
+      46,
+      21
+    ]
+  },
+  {
+    "chiave": "gemelle",
+    "nome": "Gemelle Custodi (Caroline e Justine)",
+    "arcana": "Strength"
+  },
+  {
+    "chiave": "iwai",
+    "nome": "Munehisa Iwai",
+    "arcana": "Hanged",
+    "puntiPerRango": [
+      0,
+      5,
+      15,
+      25,
+      40,
+      40,
+      0,
+      25,
+      40
+    ]
+  },
+  {
+    "chiave": "takemi",
+    "nome": "Tae Takemi",
+    "arcana": "Death",
+    "puntiPerRango": [
+      0,
+      0,
+      11,
+      20,
+      11,
+      11,
+      0,
+      42,
+      36
+    ]
+  },
+  {
+    "chiave": "kawakami",
+    "nome": "Sadayo Kawakami",
+    "arcana": "Temperance",
+    "puntiPerRango": [
+      0,
+      20,
+      37,
+      0,
+      11,
+      37,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "chiave": "ohya",
+    "nome": "Ichiko Ohya",
+    "arcana": "Devil",
+    "puntiPerRango": [
+      0,
+      0,
+      12,
+      15,
+      25,
+      22,
+      0,
+      21,
+      38
+    ]
+  },
+  {
+    "chiave": "shinya",
+    "nome": "Shinya Oda",
+    "arcana": "Tower",
+    "puntiPerRango": [
+      0,
+      0,
+      11,
+      14,
+      20,
+      25,
+      0,
+      0,
+      30
+    ]
+  },
+  {
+    "chiave": "hifumi",
+    "nome": "Hifumi Togo",
+    "arcana": "Star",
+    "puntiPerRango": [
+      0,
+      0,
+      10,
+      14,
+      14,
+      22,
+      0,
+      30,
+      30
+    ]
+  },
+  {
+    "chiave": "mishima",
+    "nome": "Yuuki Mishima",
+    "arcana": "Moon"
+  },
+  {
+    "chiave": "yoshida",
+    "nome": "Toranosuke Yoshida",
+    "arcana": "Sun",
+    "puntiPerRango": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "chiave": "sae",
+    "nome": "Sae Niijima",
+    "arcana": "Judgement"
+  },
+  {
+    "chiave": "kasumi",
+    "nome": "Kasumi Yoshizawa",
+    "arcana": "Faith",
+    "puntiPerRango": [
+      0,
+      15,
+      51,
+      20,
+      0,
+      0,
+      55,
+      40,
+      80
+    ]
+  },
+  {
+    "chiave": "maruki",
+    "nome": "Takuto Maruki",
+    "arcana": "Councillor",
+    "puntiPerRango": [
+      0,
+      0,
+      28,
+      42,
+      32,
+      28,
+      60,
+      30,
+      0
+    ]
+  }
+]
