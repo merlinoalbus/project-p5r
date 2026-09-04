@@ -950,6 +950,38 @@ Sette ritratti §9 generati con Imagegen e adattati proporzionalmente a 768×102
 | `public/asset/confidenti/sae.png` | `exec-fbfc10b9-1a8d-46eb-893a-357b0947b059.png` |
 | `public/asset/confidenti/maruki.png` | `exec-e53af0ed-3dcd-4574-9115-900254a21a66.png` |
 
+### Confidenti — varianti fedeli ai riferimenti originali
+
+Le 23 varianti sono state generate da Imagegen con prompt testuali ricavati dai riferimenti originali indicati dall’utente, mantenendo il linguaggio grafico dei primi ritratti. I riferimenti non sono stati allegati alla generazione, per evitare fondali incorporati. Tutte le sorgenti sono PNG RGBA con alfa nativo; la sola trasformazione applicata è la riduzione uniforme da 1086×1448 a 768×1024. Nessuno scontorno è stato eseguito. L’intera serie è approvata direttamente dall’utente.
+
+Riferimenti: https://steamcommunity.com/sharedfiles/filedetails/?id=2880260759 e https://steamcommunity.com/sharedfiles/filedetails/?id=3707344584
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/igor-fedele.png` | `exec-27a1daba-c273-4ad6-b71a-2d0a5f2f777a.png` |
+| `public/asset/confidenti/morgana-fedele.png` | `exec-d63af62c-3cea-45f4-be7f-c0ef17bcd124.png` |
+| `public/asset/confidenti/ryuji-fedele.png` | `exec-04c1f869-9a8a-45d6-aa2a-34fbc15972ba.png` |
+| `public/asset/confidenti/ann-fedele.png` | `exec-8c2aff5b-e60b-41ef-a01d-0172092a99c6.png` |
+| `public/asset/confidenti/yusuke-fedele.png` | `exec-21236ee4-7709-4fdd-ae05-0901b96b2d06.png` |
+| `public/asset/confidenti/makoto-fedele.png` | `exec-b318b87f-6047-4b66-bf86-6d9bdd8a4e32.png` |
+| `public/asset/confidenti/futaba-fedele.png` | `exec-9b18ea5d-b184-4f11-a767-5d55033c27dc.png` |
+| `public/asset/confidenti/haru-fedele.png` | `exec-809b6c96-947a-4014-9ef7-54d6851eec1b.png` |
+| `public/asset/confidenti/akechi-fedele.png` | `exec-3681445f-7746-47f5-8324-b91a132c0f9f.png` |
+| `public/asset/confidenti/kasumi-fedele.png` | `exec-31582521-468c-487b-a4c1-64b13450f8d8.png` |
+| `public/asset/confidenti/sojiro-fedele.png` | `exec-e38395f9-a202-4f0b-b6f7-a1a40a19c400.png` |
+| `public/asset/confidenti/takemi-fedele.png` | `exec-0559d0ac-9442-4911-a804-ec82decfc0ad.png` |
+| `public/asset/confidenti/kawakami-fedele.png` | `exec-da052745-2e14-495e-8d2a-75dd8d775ec4.png` |
+| `public/asset/confidenti/yoshida-fedele.png` | `exec-7c6b9f19-8f84-4886-8396-0d0e10837153.png` |
+| `public/asset/confidenti/mishima-fedele.png` | `exec-7f5ffc37-9e28-47ff-abd5-d42e45f065b0.png` |
+| `public/asset/confidenti/ohya-fedele.png` | `exec-ae194786-3cfc-4456-97eb-cc0e02f1a57c.png` |
+| `public/asset/confidenti/hifumi-fedele.png` | `exec-5474d538-f952-4af5-bc27-a5aa5b75d30b.png` |
+| `public/asset/confidenti/chihaya-fedele.png` | `exec-f623398a-7bce-4d0b-8414-cd3e795b5d9a.png` |
+| `public/asset/confidenti/iwai-fedele.png` | `exec-5a228a0d-d42e-42c6-bdf4-3a9291de826b.png` |
+| `public/asset/confidenti/shinya-fedele.png` | `exec-47eab5ca-9963-4be2-9ce9-7e34051e1ca8.png` |
+| `public/asset/confidenti/gemelle-fedele.png` | `exec-fa5c359e-8536-4387-8250-96048aa5d1ad.png` |
+| `public/asset/confidenti/sae-fedele.png` | `exec-d999b525-69b0-4017-a9e7-742a6e9c0acb.png` |
+| `public/asset/confidenti/maruki-fedele.png` | `exec-bcf9d92b-885b-4d97-8b3a-ad79af1fd1d4.png` |
+
 ## Impronte dei file completati
 
 Rilevano eventuali sostituzioni accidentali dei file approvati.
@@ -1168,3 +1200,26 @@ Rilevano eventuali sostituzioni accidentali dei file approvati.
 | `public/asset/confidenti/gemelle.png` | RGBA | 2ed91c653e29eb27922db4294f54ccdfdd0ccd0c2f89bc3f0048dbd869f44a49 |
 | `public/asset/confidenti/sae.png` | RGBA | 625a005e436ac93d7e4bf24a8bb2a3e53b9cbcc2721f23c490b27c17274f1ff0 |
 | `public/asset/confidenti/maruki.png` | RGBA | 36e4d5353a46d3778db2fc7d5d6905af1d490501a2e9b29a6bee62d8ec3e35d0 |
+| `public/asset/confidenti/akechi-fedele.png` | RGBA | 09d93cc95322b2aac4b7ec8f805757509849b10f822e902850a9612da55a03bd |
+| `public/asset/confidenti/ann-fedele.png` | RGBA | 2a522b39c18c07844376dd7fbc6a17ec70cfe1e9dafaa7bff7d5bf3f8427bc20 |
+| `public/asset/confidenti/chihaya-fedele.png` | RGBA | 5bd3b26cca9c7885b2eb2ae8c0e3d01e5965cdd7319a074ddf552da11e60ad58 |
+| `public/asset/confidenti/futaba-fedele.png` | RGBA | 1a85f051347781063fee15dfaa2335c83cae7e2d6a0368399bccfa927f280ffb |
+| `public/asset/confidenti/gemelle-fedele.png` | RGBA | 090acb92c59664a52aae48b414dd1716ad9059e9e7c8a2a49fb79d1067448fe3 |
+| `public/asset/confidenti/haru-fedele.png` | RGBA | c80c9d361f832b911d95d9161d9a3b55cbcf70c57fd14bba94ddd023e47df4b8 |
+| `public/asset/confidenti/hifumi-fedele.png` | RGBA | a8739ad8613e09182c6ce7732ac8b78da79bddaddf7dc8c4ff694305f6171281 |
+| `public/asset/confidenti/igor-fedele.png` | RGBA | a4b64dfcff31feaecee69e88191438c19719129682c9bc41bb3101ac5cf1a849 |
+| `public/asset/confidenti/iwai-fedele.png` | RGBA | ce41fa68b61e2ba3a9fd9c1e5cd7ff8f703b6e9bcc3f6ba9223f30247a616787 |
+| `public/asset/confidenti/kasumi-fedele.png` | RGBA | 0b5215abc4747600e0dafdc2edc34b44c07136fc66765dc9f408ee7c8fbab2cc |
+| `public/asset/confidenti/kawakami-fedele.png` | RGBA | 51fdd4f877567b47f24acff3c48ad9229e065d1b9b89935b2f4baedf9bf7537f |
+| `public/asset/confidenti/makoto-fedele.png` | RGBA | b9c9cc79bdba1b6a805d52e6f91e5872b8d97e3e0cf33f1b2e86f9bf5b77d6d8 |
+| `public/asset/confidenti/maruki-fedele.png` | RGBA | 5dba451f94fa521cb160696e3ccc25184f9aed63d2c95156325301018474c1b4 |
+| `public/asset/confidenti/mishima-fedele.png` | RGBA | 51823288d173584795d8c7826a1dd4d79e0ed28838d0955ef33161cf65428914 |
+| `public/asset/confidenti/morgana-fedele.png` | RGBA | 5e7d8f2dacb2e30f6b040cf307521d5f41df008d66267a036808c1f707a7a7a7 |
+| `public/asset/confidenti/ohya-fedele.png` | RGBA | 07733679d4f5eeb4fbd594db175094ed9ff8b2b5b293c3d72b0b7f8a5761e56d |
+| `public/asset/confidenti/ryuji-fedele.png` | RGBA | 2a5e3435d437e032886403346bbcd6f53b84435c3bf1857241cfb842863e0214 |
+| `public/asset/confidenti/sae-fedele.png` | RGBA | 16ba8a6cc7bc95ea42403ce05d06f2fbdaf5fdfd8f8b795786802009d6a4ad9b |
+| `public/asset/confidenti/shinya-fedele.png` | RGBA | 361a6f5837a425581dff7783ed2e8b2f09a4a96cb87694cf0d66546b40fa62ec |
+| `public/asset/confidenti/sojiro-fedele.png` | RGBA | e852dd4d8c20d7aab50c5e1f9e2532e9ec926a744b345176f1cbea8ea62a2347 |
+| `public/asset/confidenti/takemi-fedele.png` | RGBA | 1d58dd66e7ed021b340c153035e572900774fa06d0a6671c206d1b4e625fee29 |
+| `public/asset/confidenti/yoshida-fedele.png` | RGBA | 5140bc5b3b253eeaf2ed031b78f95574f72a36c5b7ae36b4a66751c0b4893c2f |
+| `public/asset/confidenti/yusuke-fedele.png` | RGBA | b1e7eac60d000055ecef9f6431e7714b8eb05bfbe2368fc087af969edf41755c |
