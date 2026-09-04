@@ -37,4 +37,18 @@ export const NOME_DOTE: Record<string, string> = {
   perizia: 'Perizia',
 };
 
+/** Colori degli spilli dei luoghi sulla mappa del quartiere. */
+export const COLORE_TIPO_LUOGO: Record<string, string> = {
+  negozio: '#e11d48',
+  ristorante: '#f97316',
+  attivita: '#a855f7',
+  confidente: '#facc15',
+  servizio: '#22c55e',
+  distributore: '#06b6d4',
+  'punto-interesse': '#3b82f6',
+  scuola: '#14b8a6',
+  trasporto: '#94a3b8',
+  altro: '#888888',
+};
+
 export const NOME_FASCIA: Record<string, string> = { giorno: 'giorno', sera: 'sera', entrambe: 'giorno e sera' };

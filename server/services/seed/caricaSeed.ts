@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeSeed, NegoziSeed, PercorsoSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, PercorsoSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -61,6 +61,7 @@ interface SeedCompleto {
   completamento: CompletamentoSeed;
   sfide: SfideSeed;
   mappe: MappeSeed;
+  mappeCitta: MappeCittaSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -98,6 +99,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     completamento: JSON.parse(contenuti['completamento.json']) as CompletamentoSeed,
     sfide: JSON.parse(contenuti['sfide.json']) as SfideSeed,
     mappe: JSON.parse(contenuti['mappe.json']) as MappeSeed,
+    mappeCitta: JSON.parse(contenuti['mappe-citta.json']) as MappeCittaSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -489,6 +491,26 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const r of db.prepare('SELECT area_chiave FROM pianta_area').all() as Array<{ area_chiave: string }>) if (!areeConPianta.has(r.area_chiave)) db.prepare('DELETE FROM pianta_area WHERE area_chiave = ?').run(r.area_chiave);
     const motiviAssenza = Object.fromEntries(seed.mappe.aree.filter((m) => !m.url && m.note).map((m) => [m.areaChiave, m.note]));
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('mappe-assenti', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(motiviAssenza));
+
+    // ---- Mappe dei quartieri (Fase 8.3): collegamenti con upsert e rimozione orfani; spilli dal seed solo dove l'utente non ne ha fissato uno ----
+    const insPQ = db.prepare(`INSERT INTO pianta_quartiere (quartiere_chiave, url, pagina, fonte, licenza, larghezza, altezza, note) VALUES (@quartiere_chiave, @url, @pagina, @fonte, @licenza, @larghezza, @altezza, @note)
+      ON CONFLICT(quartiere_chiave) DO UPDATE SET url = excluded.url, pagina = excluded.pagina, fonte = excluded.fonte, licenza = excluded.licenza, larghezza = excluded.larghezza, altezza = excluded.altezza, note = excluded.note`);
+    const insML = db.prepare(`INSERT INTO marcatore_luogo (luogo_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'seed')
+      ON CONFLICT(luogo_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at WHERE marcatore_luogo.origine = 'seed'`);
+    const quartieriConMappa = new Set<string>();
+    for (const m of seed.mappeCitta.quartieri) {
+      if (!chiaviQuartieri.has(m.quartiereChiave)) throw new Error(`Seed mappe-citta: quartiere sconosciuto '${m.quartiereChiave}'.`);
+      if (m.url) {
+        quartieriConMappa.add(m.quartiereChiave);
+        insPQ.run({ quartiere_chiave: m.quartiereChiave, url: m.url, pagina: m.pagina, fonte: m.fonte ?? '', licenza: m.licenza ?? '', larghezza: m.larghezza, altezza: m.altezza, note: m.note });
+      }
+      for (const s of m.marcatori ?? []) {
+        if (!chiaviLuoghi.has(s.luogo)) throw new Error(`Seed mappe-citta: luogo sconosciuto '${s.luogo}' per gli spilli di '${m.quartiereChiave}'.`);
+        insML.run(s.luogo, s.x, s.y, adesso);
+      }
+    }
+    for (const r of db.prepare('SELECT quartiere_chiave FROM pianta_quartiere').all() as Array<{ quartiere_chiave: string }>) if (!quartieriConMappa.has(r.quartiere_chiave)) db.prepare('DELETE FROM pianta_quartiere WHERE quartiere_chiave = ?').run(r.quartiere_chiave);
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('mappe-citta-assenti', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(Object.fromEntries(seed.mappeCitta.quartieri.filter((m) => !m.url && m.note).map((m) => [m.quartiereChiave, m.note]))));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

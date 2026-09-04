@@ -10,10 +10,23 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEve
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
 import type { PuntoInteresseDto } from '../../types';
 
+/** Elemento posizionabile sulla mappa (punto di interesse di un dungeon o luogo della città). */
+export interface PuntoMappa {
+  chiave: string;
+  nome: string;
+  tipo: string;
+  /** Gestito (ottenuto/esaurito): mostrato in trasparenza o nascosto. */
+  stato: string | null;
+  marcatore: { x: number; y: number } | null;
+}
+
 interface Props {
   /** URL dell'immagine della mappa (importata dall'utente). */
   src: string;
-  punti: PuntoInteresseDto[];
+  punti: PuntoMappa[] | PuntoInteresseDto[];
+  /** Etichette e colori per tipo (default: tipi dei dungeon). */
+  nomeTipo?: Record<string, string>;
+  coloreTipo?: Record<string, string>;
   selezionato: string | null;
   onSeleziona: (chiave: string | null) => void;
   /** In modalità posizionamento un tocco sulla mappa fissa lo spillo del punto selezionato. */
@@ -23,7 +36,7 @@ interface Props {
   mostraGestiti: boolean;
 }
 
-export function MappaInterattiva({ src, punti, selezionato, onSeleziona, posizionamento, onPosiziona, mostraGestiti }: Props) {
+export function MappaInterattiva({ src, punti, selezionato, onSeleziona, posizionamento, onPosiziona, mostraGestiti, nomeTipo = NOME_TIPO, coloreTipo = COLORE_TIPO }: Props) {
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const trascina = useRef<{ x: number; y: number; px: number; py: number; mosso: boolean } | null>(null);
@@ -57,7 +70,7 @@ export function MappaInterattiva({ src, punti, selezionato, onSeleziona, posizio
     setZoom((z) => Math.max(0.5, Math.min(6, z * (e.deltaY < 0 ? 1.15 : 1 / 1.15))));
   };
 
-  const visibili = punti.filter((p) => p.marcatore && (mostraGestiti || !p.stato));
+  const visibili = (punti as PuntoMappa[]).filter((p) => p.marcatore && (mostraGestiti || !p.stato));
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-1.5 text-[12px]">
@@ -82,10 +95,10 @@ export function MappaInterattiva({ src, punti, selezionato, onSeleziona, posizio
                 style={{ left: `${p.marcatore!.x}%`, top: `${p.marcatore!.y}%` }}
                 onClick={(e) => { e.stopPropagation(); onSeleziona(p.chiave === selezionato ? null : p.chiave); }}
                 onPointerDown={(e) => e.stopPropagation()}
-                aria-label={`${NOME_TIPO[p.tipo]}: ${p.nome}`}
+                aria-label={`${nomeTipo[p.tipo] ?? p.tipo}: ${p.nome}`}
                 title={p.nome}
               >
-                <span className={`rounded-full border-2 border-white shadow ${p.chiave === selezionato ? 'w-6 h-6' : 'w-4 h-4'} ${p.stato ? 'opacity-50' : ''}`} style={{ background: COLORE_TIPO[p.tipo], transform: `scale(${1 / Math.max(0.5, zoom)})` }} />
+                <span className={`rounded-full border-2 border-white shadow ${p.chiave === selezionato ? 'w-6 h-6' : 'w-4 h-4'} ${p.stato ? 'opacity-50' : ''}`} style={{ background: coloreTipo[p.tipo] ?? '#888', transform: `scale(${1 / Math.max(0.5, zoom)})` }} />
                 {p.chiave === selezionato && <span className="mt-0.5 px-1.5 py-0.5 rounded bg-bg text-[11px] whitespace-nowrap border border-border-light" style={{ transform: `scale(${1 / Math.max(0.5, zoom)})`, transformOrigin: 'top center' }}>{p.nome}</span>}
               </button>
             ))}

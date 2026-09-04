@@ -73,6 +73,11 @@ export interface FusioneSeed {
 /** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
 export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
 
+/** Mappe dei quartieri: collegamenti alle immagini pubblicate e spilli preposizionati dei luoghi. */
+export interface MappeCittaSeed {
+  quartieri: Array<{ quartiereChiave: string; url: string | null; pagina: string | null; fonte: string | null; licenza: string | null; larghezza: number | null; altezza: number | null; note: string; luoghiVisibili: string[]; marcatori: Array<{ luogo: string; x: number; y: number }> }>;
+}
+
 /** Piante delle aree dei dungeon: solo collegamenti alle immagini pubblicate (mai le immagini) e spilli preposizionati. */
 export interface MappeSeed {
   aree: Array<{ dungeonChiave: string; areaChiave: string; url: string | null; pagina: string | null; fonte: string | null; licenza: string | null; larghezza: number | null; altezza: number | null; copertura: string | null; copreAree: string[] | null; note: string;
