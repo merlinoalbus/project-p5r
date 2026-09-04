@@ -191,8 +191,8 @@ degli spilli è disponibile solo nell'editor.
 | 15.12 | Home desktop (da 1360 px): via gli accessi rapidi (doppione della barra laterale), carta e guida del giorno nella colonna sinistra (5/12), mappa a tutta altezza a destra (7/12), stella limitata dalla colonna (`max(230px, min(40vh, 50cqw, 420px))`); tablet e telefono invariati | ✅ 2026-09-04 |
 | 15.13 | Spilli sulla mappa: l'immagine consegnata `ui/spillo-<tipo>` è già uno spillo intero e viene mostrata così (`SpilloGrafico`, `PuntoSpillo`); la goccia colorata col disegno resta solo come riserva | ✅ 2026-09-04 |
 | 15.14 | Personaggi: stesso riquadro `ImmagineEntita` per tutti (nuovo ambito `personaggio` per Protagonista, Stanza di Velluto e Jose, caricabile dalle Impostazioni), Lavenza aggiunta alla Stanza di Velluto, ingrandimento delle Persona dei Ladri Fantasma | ✅ 2026-09-04 |
-| 15.16 | Modificatore «Anima da cineasta» (Royal): film e DVD salgono di uno scalino (2→3, 3→5, 5→7) prima del ×1,5 di Chihaya — terzo interruttore nel pannello Doti e applicazione automatica alla spunta delle azioni film/DVD della guida quando il libro risulta letto; le «+N» della guida sono note (2/3/5 punti), non punti | ✅ 2026-09-04 |
 | 15.15 | `statoAzione` non ripiega più sul rango successivo quando il rango obiettivo non ha requisiti (un'azione di rango 1 di Takemi risultava bloccata dal rango 2) | ✅ 2026-09-04 |
+| 15.16 | Modificatore «Anima da cineasta» (Royal): film e DVD salgono di uno scalino (2→3, 3→5, 5→7) prima del ×1,5 di Chihaya — terzo interruttore nel pannello Doti e applicazione automatica alla spunta delle azioni film/DVD della guida quando il libro risulta letto. Le «+N» della guida sono note (2/3/5 punti), non punti; i DVD danno sempre due note (3 punti, 5 col libro) anche se la guida li segna «+3»; le tre visite al cinema della guida sono collegate al film (`riferimento` di tipo `film`) | ✅ 2026-09-04 |
 
 ## Decisioni e forniture aperte (aggiornato il 2026-09-04)
 
