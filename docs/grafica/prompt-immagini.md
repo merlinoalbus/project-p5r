@@ -389,12 +389,74 @@ https://static.wikia.nocookie.net/megamitensei/images/1/1e/P5_CalendarSwitch.png
 Etichette del giorno (sprite testo) — `meteo/fascia-<chiave>.png` (600×160), chiavi `mattina`, `pausa-pranzo`, `dopo-la-scuola`, `sera`, `notte`, `giornata`: testi **MATTINA**, **PAUSA PRANZO**, **DOPO LA SCUOLA**, **SERA**, **NOTTE**, **GIORNATA** in lettering a ritaglio bianco su nero (variante `meteo/fascia-senza-testo.png`: sola targhetta vuota); ispirazione HUD:
 https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_663171dc3afce8fe987e57e8659f91b69faa39bc.1920x1080.jpg
 
+## 13. Guida, Palazzi e stati vuoti (Fase 11.6, richiesti il 2026-09-04)
+Chiavi già cablate nell'app: appena i file compaiono in `public/asset/` sostituiscono le riserve vettoriali.
+
+### 13.1 Icona di navigazione della Guida — `ui/nav-guida.png` + `ui/nav-guida-attiva.png` (256×256, trasparente)
+Stesse regole di §7.1 (bianco su trasparente; variante rossa `-attiva`). Soggetto: libro aperto con una stella a ritaglio che spunta dalle pagine.
+
+### 13.2 Icone delle sezioni della Guida (15) — `guida/<chiave>.png` (256×256, trasparente)
+Nessun testo, nessun personaggio (senza spoiler).
+```
+[blocco di stile] Icona piatta bianca con contorno nero e un accento rosso #e5352b, angoli tagliati, leggibile a 48 px,
+sfondo trasparente. Soggetto: <vedi tabella>.
+```
+| File | Soggetto |
+|---|---|
+| `percorso.png` | foglio di calendario con una stella e una freccia in avanti |
+| `domande.png` | banco di scuola con un punto interrogativo a ritaglio |
+| `cruciverba.png` | griglia di cruciverba con una matita |
+| `calendario.png` | calendario con nuvola e sole |
+| `dungeon.png` | maschera dei Ladri davanti a un portale |
+| `richieste.png` | busta chiusa con sigillo rosso |
+| `battaglia.png` | due spade incrociate con un lampo |
+| `citta.png` | skyline di Tokyo con torre e treno |
+| `negozi.png` | sacchetto della spesa con il simbolo dello yen |
+| `attivita.png` | manubrio, libro e videocassetta impilati |
+| `completamento.png` | coppa con corona d'alloro |
+| `sfide.png` | scudo con fiamma |
+| `personaggi.png` | tre sagome con maschera |
+| `oggetti.png` | zaino aperto con attrezzi |
+| `confidenti.png` | due mani che si stringono con un cuore |
+
+### 13.3 Emblemi dei Palazzi e dei Dedali (10) — `palazzi/<chiave>.png` (512×512, trasparente)
+Stemmi araldici a ritaglio in bianco, nero e rosso; NESSUN personaggio né volto (senza spoiler). Nessun testo.
+```
+[blocco di stile] Stemma araldico a ritaglio, bianco e nero con un accento rosso #e5352b, retino nelle ombre, forma a scudo
+irregolare con tagli diagonali, sfondo trasparente. Soggetto: <vedi tabella>.
+```
+| File | Soggetto |
+|---|---|
+| `kamoshida.png` | castello con torri e una corona |
+| `madarame.png` | cornice dorata di un quadro con un pennello |
+| `kaneshiro.png` | caveau di banca con un lucchetto |
+| `futaba.png` | piramide con un occhio in cima |
+| `okumura.png` | razzo e stazione spaziale con un ingranaggio |
+| `niijima.png` | fiche da casinò con una carta da gioco |
+| `shido.png` | nave da crociera su un'onda |
+| `iweleth.png` | grata di un pozzo con catene e una croce |
+| `maruki.png` | provetta di laboratorio con un fiore e un caduceo |
+| `mementos.png` | treno della metropolitana in un tunnel |
+
+### 13.4 Icone giorno e sera (2) — `ui/giorno.png`, `ui/sera.png` (256×256, trasparente)
+Nessun testo (le fasce testuali della giornata sono in §11). Stile di §4: `giorno.png` sole a raggi netti; `sera.png` luna crescente con una stella.
+
+### 13.5 Stati vuoti dedicati (4, con variante senza testo) — `illustrazioni/<nome>.png` (1200×800, trasparente)
+Stile e regole di §8 (testo in maiuscolo a ritaglio, variante `-senza-testo`).
+| File | Testo nell'immagine | Scena |
+|---|---|---|
+| `vuoto-obiettivi.png` | NESSUN OBIETTIVO | bersaglio con una freccia e una maschera appesa a un chiodo |
+| `vuoto-piani.png` | NESSUN PIANO | mappa arrotolata con una bussola |
+| `vuoto-cicli.png` | NESSUN CICLO | due frecce che si inseguono attorno a una maschera |
+| `vuoto-storico.png` | NESSUN EVENTO | orologio da parete con una pagina strappata |
+
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.
 2. Icone elementi (4), affinità (5), navigazione (7.1) → usate in ogni scheda.
 3. Carte degli Arcani (3) e icone arcano (3.1) → compendio e Confidenti.
 4. Doti sociali (6), badge (7.2–7.3), stati vuoti (8).
 5. Confidenti (9), poi le Persona (10) a lotti, infine meteo (11).
+6. Guida, Palazzi e stati vuoti (13): chiavi già cablate, l'app li mostra appena consegnati.
 
 Consegna: caricare i file in `public/asset/…` rispettando i nomi; l'app li sostituisce ai segnaposto vettoriali
 attuali (`src/components/shared/icons.tsx`) man mano che arrivano.

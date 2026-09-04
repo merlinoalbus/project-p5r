@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**484 file richiesti: 235 completati e approvati, 249 ancora da consegnare.**
+**521 file richiesti: 235 completati e approvati, 286 ancora da consegnare** (37 aggiunti il 2026-09-04 con la Fase 11.6: §13 di `prompt-immagini.md`).
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -38,11 +38,13 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | elementi | 16 | 16 | 0 |
 | affinita | 12 | 12 | 0 |
 | doti | 12 | 12 | 0 |
-| ui | 47 | 47 | 0 |
-| illustrazioni | 15 | 15 | 0 |
+| ui | 51 | 47 | 4 |
+| illustrazioni | 23 | 15 | 8 |
 | confidenti | 46 | 46 | 0 |
 | persona | 232 | 0 | 232 |
 | meteo | 17 | 0 | 17 |
+| guida | 15 | 0 | 15 |
+| palazzi | 10 | 0 | 10 |
 
 ## Elenco completo
 
@@ -240,6 +242,10 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-emperors-amulet.png` — 256×256
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-hope-diamond.png` — 256×256
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-orichalcum.png` — 256×256
+- [ ] **DA CONSEGNARE** — `public/asset/ui/nav-guida.png` — 256×256 (§13.1)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/nav-guida-attiva.png` — 256×256 (§13.1)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/giorno.png` — 256×256 (§13.4)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/sera.png` — 256×256 (§13.4)
 
 ### illustrazioni
 
@@ -258,6 +264,14 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-6.png` — 256×256
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-7.png` — 256×256
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-8.png` — 256×256
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-obiettivi.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-obiettivi-senza-testo.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-piani.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-piani-senza-testo.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-cicli.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-cicli-senza-testo.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-storico.png` — 1200×800 (§13.5)
+- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-storico-senza-testo.png` — 1200×800 (§13.5)
 
 ### confidenti
 
@@ -310,6 +324,35 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/gemelle-fedele.png` — 768×1024
 - [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/sae-fedele.png` — 768×1024
 - [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/maruki-fedele.png` — 768×1024
+
+### guida
+- [ ] **DA CONSEGNARE** — `public/asset/guida/percorso.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/domande.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/cruciverba.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/calendario.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/dungeon.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/richieste.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/battaglia.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/citta.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/negozi.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/attivita.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/completamento.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/sfide.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/personaggi.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/oggetti.png` — 256×256 (§13.2)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/confidenti.png` — 256×256 (§13.2)
+
+### palazzi
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/kamoshida.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/madarame.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/kaneshiro.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/futaba.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/okumura.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/niijima.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/shido.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/iweleth.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/maruki.png` — 512×512 (§13.3)
+- [ ] **DA CONSEGNARE** — `public/asset/palazzi/mementos.png` — 512×512 (§13.3)
 
 ### persona
 

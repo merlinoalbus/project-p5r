@@ -102,7 +102,7 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
         const stile = { left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' } as const;
         const contenuto = (
           <>
-            <AssetImg nome={a.badge ?? null} alt="" decorativa className="h-7 w-auto max-w-[96px] object-contain drop-shadow" fallback={<span className="font-menu text-[13px] uppercase tracking-wide">{a.etichetta}</span>} />
+            <AssetImg nome={a.badge ?? null} alt="" decorativa className="h-7 w-auto max-w-[96px] object-contain drop-shadow" fallback={<span className="text-[12px] font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
             {a.testo !== undefined && <span className="text-[11px] text-text-secondary leading-tight">{a.testo}</span>}
           </>
         );
