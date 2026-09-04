@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**654 file richiesti: 521 completati e approvati, 133 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**655 file richiesti: 521 completati e approvati, 134 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -45,7 +45,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | palazzi | 10 | 10 | 0 |
 | personaggi | 5 | 0 | 5 |
 | ui (schede Partita e Fusione, §16) | 17 | 0 | 17 |
-| ui (azioni, §17) | 45 | 0 | 45 |
+| ui (azioni, §17) | 46 | 0 | 46 |
 | persona-gruppo (§15) | 27 | 0 | 27 |
 | ui (spilli, §18) | 14 | 0 | 14 |
 | mappe (§19) | 25 | 0 | 25 |
@@ -170,6 +170,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-esaurito.png` — 128×128 (§17)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-accettata.png` — 128×128 (§17)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-negozio.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-filtri.png` — 128×128 (§17)
 
 ### ui — schede della Partita (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-doti.png` — 128×128 (§16)

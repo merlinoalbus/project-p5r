@@ -67,7 +67,7 @@ function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data
               <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => void cambia(true, n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'\u266a'.repeat(n)}</button>
             ))}
             <button type="button" className="chip touch" disabled={occupato} onClick={() => void cambia(true, undefined, true)}>Nessun punto</button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setChiediNote(false)}>Annulla</button>
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setChiediNote(false)} />
           </span>
         )}
       </div>

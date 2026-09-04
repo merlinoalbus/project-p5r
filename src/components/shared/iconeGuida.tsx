@@ -495,3 +495,12 @@ export function IconAltro(p: IconProps) {
     </svg>
   );
 }
+
+/** Imbuto: pannello dei filtri (chiave azione «filtri»). */
+export function IconFiltro(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M4 5h16l-6 8v6l-4-2v-4z" />
+    </svg>
+  );
+}

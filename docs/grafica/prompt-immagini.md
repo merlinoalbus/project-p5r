@@ -97,7 +97,7 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-fusione-forca.png` | Fusione → Forca e Isolamento | ghigliottina stilizzata |
 | `scheda-fusione-speciali.png` | Fusione → Ricette speciali | pergamena con sigillo |
 
-## 17. Icone delle azioni (45) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+## 17. Icone delle azioni (46) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo, nessun numero salvo dove indicato). L'app le
 mostra a 20–26 px dentro i pulsanti a tassello (fondo rosso quando il pulsante è acceso, bianco/nero quando è spento: il tratto bianco
 con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senza il file usa un'icona SVG in codice. Un file per chiave.
@@ -148,6 +148,7 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-esaurito.png` | Segna un punto come esaurito | scrigno aperto e vuoto |
 | `azione-accettata.png` | Richiesta accettata | stretta di mano |
 | `azione-negozio.png` | Articoli in vendita | insegna con borsa della spesa |
+| `azione-filtri.png` | Apre e chiude il pannello dei filtri del Compendio (acceso quando è aperto, con il conteggio dei filtri attivi accanto) | imbuto stilizzato con tre linee che vi scendono dentro |
 
 ## 18. Spilli delle mappe (14) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13)
 Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo

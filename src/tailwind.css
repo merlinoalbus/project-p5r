@@ -195,7 +195,7 @@
   .btn-visivo__testo { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; line-height: 1; min-width: 0; }
   .btn-visivo__titolo { font-family: var(--font-display); text-transform: uppercase; font-size: 17px; letter-spacing: .03em; white-space: nowrap; }
   .btn-visivo__dettaglio { font-family: var(--font-sans); font-size: 11px; opacity: .82; letter-spacing: 0; text-transform: none; white-space: nowrap; }
-  .btn-visivo--compatto { padding: 3px 10px 3px 8px; min-height: 38px; gap: 6px; }
+  .btn-visivo--compatto { padding: 3px 10px 3px 8px; min-height: 44px; gap: 6px; }
   .btn-visivo--compatto .btn-visivo__icona { width: 20px; height: 20px; }
   .chip--icona { gap: 6px; }
   .chip--icona > svg { flex-shrink: 0; }

@@ -172,9 +172,7 @@ export function CompendioPage() {
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => imposta('dir', decrescente ? 'asc' : 'desc', 'asc')} aria-label={decrescente ? 'Ordine decrescente: passa a crescente' : 'Ordine crescente: passa a decrescente'} title={decrescente ? 'Decrescente' : 'Crescente'}>
             {decrescente ? '↓' : '↑'}
           </button>
-          <button type="button" className={`btn btn-sm ${pannelloAperto ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPannelloAperto((v) => !v)} aria-expanded={pannelloAperto} aria-controls="pannello-filtri-compendio">
-            Filtri{filtriAttivi.length > 0 ? ` (${filtriAttivi.length})` : ''}
-          </button>
+          <PulsanteVisivo attivo={pannelloAperto} compatto icona={<IconaAzione chiave="filtri" dimensione={20} />} titolo="Filtri" dettaglio={filtriAttivi.length > 0 ? `(${filtriAttivi.length})` : undefined} onClick={() => setPannelloAperto((v) => !v)} aria-expanded={pannelloAperto} aria-controls="pannello-filtri-compendio" />
           {filtriAttivi.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera" onClick={azzeraFiltri} />}
         </div>
         {filtriAttivi.length > 0 && (

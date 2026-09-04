@@ -68,7 +68,7 @@ export function TraduzioniEditor() {
                 <div className="flex gap-2 items-start">
                   <textarea className="form-input min-h-[44px]" value={testo} onChange={(e) => setTesto(e.target.value)} autoFocus />
                   <button type="button" className="btn btn-primary btn-sm" disabled={!testo.trim()} onClick={() => void applica(t, testo.trim())}>Salva</button>
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => setInModifica(null)}>Annulla</button>
+                  <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setInModifica(null)} />
                 </div>
               ) : (
                 <div className="flex gap-2 items-center flex-wrap">
