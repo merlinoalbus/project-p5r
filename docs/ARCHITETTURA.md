@@ -194,6 +194,11 @@ Migrazione 015: `quartiere`, `luogo` (chiave `<quartiere>/<luogo>`, Confidenti e
 `attivita` (compresi i lavori, Doti in JSON), `libro`, `film`, `lettura_partita` (libri letti / film visti). Seed `citta.json` e
 `attivita.json` generati dalla ricerca (allgamestaff + fonti secondarie segnalate). `cittaService` e `attivitaService`; evento «lettura».
 
+### Negozi e inventario (Fase 8.2)
+Migrazione 017: `negozio` (FK opzionali a quartiere e Confidente), `articolo` (chiave `<negozio>/<slug>`, categoria, destinatario, prezzo,
+effetto, statistiche, disponibilità, `verificato`), `acquisto_partita`. `negoziService` espone elenco, scheda con acquisti, ricerca
+(LIKE su nome/effetto/negozio, filtro categoria e destinatario con «tutti», massimo 300 risultati) e spunta con evento «acquisto».
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

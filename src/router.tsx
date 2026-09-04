@@ -23,6 +23,8 @@ import { CittaPage } from './pages/CittaPage';
 import { QuartierePage } from './pages/QuartierePage';
 import { AttivitaPage } from './pages/AttivitaPage';
 import { CruciverbaPage } from './pages/CruciverbaPage';
+import { NegoziPage } from './pages/NegoziPage';
+import { NegozioPage } from './pages/NegozioPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -54,6 +56,8 @@ export const router = createBrowserRouter([
       { path: 'guida/citta/:chiave', element: <QuartierePage /> },
       { path: 'guida/attivita', element: <AttivitaPage /> },
       { path: 'guida/cruciverba', element: <CruciverbaPage /> },
+      { path: 'guida/negozi', element: <NegoziPage /> },
+      { path: 'guida/negozi/:chiave', element: <NegozioPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],

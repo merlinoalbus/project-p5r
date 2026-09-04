@@ -40,6 +40,7 @@ function Luogo({ l }: { l: LuogoDto }) {
           </table>
         </div>
       )}
+      {l.negozio && <Link to={`/guida/negozi/${l.negozio}`} className="btn btn-ghost btn-sm self-start no-underline">Articoli in vendita</Link>}
       {l.note && <p className="m-0 text-[12px] text-text-muted">{l.note}</p>}
       {l.fonte && <a href={l.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary self-start">fonte</a>}
     </li>

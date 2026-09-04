@@ -27,7 +27,7 @@
       "acquisti online Tanaka",
       "lettura libri"
      ],
-     "negozio": null,
+     "negozio": "leblanc",
      "piatti": [
       {
        "nome": "Caffè (varie miscele)",
@@ -302,7 +302,7 @@
      "attivita": [
       "lavoro part-time"
      ],
-     "negozio": "rafflesia",
+     "negozio": "fiorista-rafflesia",
      "piatti": null,
      "note": "Guadagno lavoro: 3.200¥ standard, fino a 7.800¥ con bouquet perfetto; +2 Gentilezza a turno. Possono comparire Yusuke e Haru come clienti.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/lavori-part-time/",
@@ -322,7 +322,7 @@
       "lettura",
       "acquisto libri"
      ],
-     "negozio": "taiheido",
+     "negozio": "libreria-taiheido",
      "piatti": null,
      "note": "Diversi libri sbloccano luoghi di hangout (es. Vague=Harajuku, Un acquario al giorno=Shinagawa, Vedetta lacustre=Ichigaya, Santuari di Tokyo=Meiji Shrine, Esplorando Nakano=Nakano); corrispondenze dedotte per coincidenza di titolo, non confermate esplicitamente riga per riga dalla guida.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
@@ -343,7 +343,7 @@
      "attivita": [
       "visione DVD"
      ],
-     "negozio": "scarlet",
+     "negozio": null,
      "piatti": null,
      "note": "Punto d'incontro anche per il Confidente Mishima (Luna) secondo fonte secondaria.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/",
@@ -402,7 +402,7 @@
      "attivita": [
       "lavoro part-time"
      ],
-     "negozio": "ore-no-beko",
+     "negozio": null,
      "piatti": null,
      "note": "Guadagno lavoro: 3.600¥ standard, fino a 8.800¥ con ordini perfetti; +2 Perizia a turno. Possono comparire Ryuji e Yoshida come clienti.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/lavori-part-time/",
@@ -443,7 +443,7 @@
      "attivita": [
       "sfida culinaria"
      ],
-     "negozio": null,
+     "negozio": "big-bang-burger",
      "piatti": [
       {
        "nome": "Big Bang Burger (sfida)",
@@ -487,7 +487,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "aohige",
+     "negozio": "farmacia-aohige",
      "piatti": null,
      "note": null,
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -504,7 +504,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "rocinante",
+     "negozio": "discount-rocinante",
      "piatti": null,
      "note": null,
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -538,7 +538,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "37-gradi",
+     "negozio": "37-gradi-celsius",
      "piatti": null,
      "note": "Situato nel Centro commerciale sotterraneo.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -555,7 +555,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "tsurukame",
+     "negozio": "tsurukame-diamond",
      "piatti": null,
      "note": "Situato nel Centro commerciale sotterraneo.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -606,7 +606,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "kiyasuku",
+     "negozio": "chiosco-kiyasuku",
      "piatti": null,
      "note": "Situato nel Sottopasso.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -623,7 +623,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "yon-germain",
+     "negozio": "panetteria-yon-germain",
      "piatti": null,
      "note": "Situata nel Sottopasso.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -712,7 +712,7 @@
      "attivita": [
       "lavoro part-time"
      ],
-     "negozio": null,
+     "negozio": "crossroads",
      "piatti": null,
      "note": "Punto di interesse più a nord-est di Shinjuku. Eventi ai ranghi 4 e 10 non disponibili con pioggia. Guadagno lavoro: 7.200¥ standard, 12.000¥ la domenica.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-ohya-diavolo/",
@@ -896,7 +896,7 @@
       "biliardo",
       "freccette"
      ],
-     "negozio": null,
+     "negozio": "penguin-sniper",
      "piatti": null,
      "note": "Akechi è generalmente trovato fuori da questo edificio.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-goro-akechi-giustizia/",
@@ -949,7 +949,7 @@
      "attivita": [
       "acquisto regali"
      ],
-     "negozio": "mitsubachi",
+     "negozio": "cartoleria-mitsubachi",
      "piatti": null,
      "note": null,
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -966,7 +966,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": null,
+     "negozio": "friggitoria-hagoromo",
      "piatti": [
       {
        "nome": "Katsu",
@@ -989,7 +989,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": null,
+     "negozio": "street-food-houraku",
      "piatti": [
       {
        "nome": "Nikuman",
@@ -1128,7 +1128,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": "akiba-electronics",
+     "negozio": "akiba",
      "piatti": null,
      "note": null,
      "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
@@ -1183,7 +1183,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": null,
+     "negozio": "distributori-automatici",
      "piatti": null,
      "note": "Rifornimento settimanale (lunedì); nuove bevande dal 1° settembre e dal 10 ottobre; esauriti durante ondate di calore.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
@@ -1304,7 +1304,7 @@
      "sblocco": null,
      "confidenti": [],
      "attivita": [],
-     "negozio": null,
+     "negozio": "distributori-automatici",
      "piatti": null,
      "note": "Rifornimento settimanale, esauriti durante ondate di calore.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
@@ -1355,7 +1355,7 @@
      "attivita": [
       "acquisto articoli religiosi (domenica)"
      ],
-     "negozio": null,
+     "negozio": "chiesa-kanda",
      "piatti": null,
      "note": "Generalmente disponibile con pioggia, tranne eventi dei Ranghi 4 e 6.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-hifumi-stella/",
@@ -1375,7 +1375,7 @@
       "lettura",
       "acquisto libri"
      ],
-     "negozio": "nagiuri",
+     "negozio": "libreria-nagiuri",
      "piatti": null,
      "note": "A Jinbocho, sbloccata al Rango 4 di Hifumi.",
      "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
@@ -1923,7 +1923,7 @@
      "sblocco": "appare casualmente nei Memento",
      "confidenti": [],
      "attivita": [],
-     "negozio": "jose",
+     "negozio": null,
      "piatti": null,
      "note": null,
      "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
