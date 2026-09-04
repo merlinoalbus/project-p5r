@@ -453,6 +453,8 @@ export interface ModificaDote {
   libro?: boolean;
   /** Moltiplicatore ×1,5 (lettura della fortuna di Chihaya), arrotondato per difetto. */
   fortuna?: boolean;
+  /** «Anima da cineasta» (Royal): film e DVD salgono di uno scalino (2→3, 3→5, 5→7), prima del ×1,5. */
+  cinema?: boolean;
 }
 
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
@@ -908,7 +910,8 @@ export interface CompletamentoDto {
 // ---- Guida giorno per giorno (Fase 7.5b) ----
 
 export interface EffettiAzioneDto {
-  doti: Array<{ chiave: string; nome: string; delta: number }>;
+  /** `delta` sono i punti applicati; `note` le note della guida da cui derivano (1–3); `cinema` se «Anima da cineasta» ha alzato lo scalino. */
+  doti: Array<{ chiave: string; nome: string; delta: number; note?: number; cinema?: boolean }>;
   confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
 }
 

@@ -33,6 +33,7 @@ export const bodyDote = z
     note: z.union([z.literal(1), z.literal(2), z.literal(3)]).optional(),
     libro: z.boolean().optional(),
     fortuna: z.boolean().optional(),
+    cinema: z.boolean().optional(),
   })
   .refine((v) => v.punti !== undefined || v.delta !== undefined || v.note !== undefined, { message: 'Indicare punti, delta oppure note.' });
 
