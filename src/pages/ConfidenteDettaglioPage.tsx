@@ -21,7 +21,7 @@ export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto;
     <li className="border border-border-light rounded-lg">
       <button type="button" className="w-full text-left px-3 py-2 flex items-center gap-2 touch" onClick={onToggle} aria-expanded={aperto}>
         <span className="font-semibold">Rango {d.etichetta}</span>
-        <span className="text-[12px] text-text-muted truncate">{d.note}</span>
+        <span className="text-[12px] text-text-muted">{d.note}</span>
         <span className="ml-auto text-[12px] text-text-muted">{d.scelte.length} {d.scelte.length === 1 ? 'scelta' : 'scelte'}</span>
       </button>
       {aperto && (

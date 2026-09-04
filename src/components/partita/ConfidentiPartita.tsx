@@ -91,14 +91,15 @@ export function ConfidentiPartita({ partitaId }: Props) {
           return (
             <li key={c.chiave} className={`card flex flex-col gap-3 ${c.sbloccato ? '' : 'opacity-75'}`}>
               <div className="flex gap-3 items-start">
-                <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={112} modificabile />
+                <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={96} modificabile />
                 <div className="flex-1 min-w-0 flex flex-col gap-1">
                   <span className="font-semibold text-[16px] leading-tight">{c.nome}</span>
                   <span className="chip self-start">{c.arcanaNome}</span>
-                  <Link to={`/confidenti/${c.chiave}`} className="text-[12px] text-primary no-underline">Scheda: risposte migliori, abilità, regali{c.regaliFatti.length ? ` (${c.regaliFatti.length} consegnati)` : ''} →</Link>
+                  {c.regaliFatti.length > 0 && <span className="text-[12px] text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
                 </div>
                 <ImmagineEntita ambito="arcana" chiave={c.arcana} etichetta={c.arcanaNome} dimensione={56} forma="carta" />
               </div>
+              <Link to={`/confidenti/${c.chiave}`} className="btn btn-secondary btn-sm self-start no-underline">Scheda: risposte migliori, abilità, regali →</Link>
               <div className="flex items-center gap-2">
                 <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango</span>
                 <button type="button" className="btn btn-secondary w-14" disabled={occ || c.rango === 0} onClick={() => void salva(c.chiave, { rango: c.rango - 1 })} aria-label={`Rango di ${c.nome} meno uno`}>−</button>
