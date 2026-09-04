@@ -203,7 +203,8 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
     livelloMax = r?.livello_protagonista ?? null;
   }
   const opzioni = { profondita: opz.profondita ?? 3, alternative: opz.alternative ?? 3, catture: opz.catture ?? true, livelloMax, slotFortunato: opz.slotFortunato ?? false };
-  const piani = pianiFusione(target, ctx, disp, { ...opzioni, skill: skillRichieste.map((s) => s.id) });
+  const motivo = motivoNessunPiano(target, ctx, skillRichieste, livelloMax, disp);
+  const piani = motivo ? [] : pianiFusione(target, ctx, disp, { ...opzioni, skill: skillRichieste.map((s) => s.id) });
   const sconto = scontoPartita(opz.partitaId).sconto;
   return {
     persona: personaDto(target),
@@ -212,7 +213,39 @@ export function pianiDto(personaId: number, opz: OpzioniPiani): PianiFusioneDto 
     skillRichieste,
     sconto,
     disponibilita: { scorta: [...disp.scorta.values()].reduce((a, b) => a + b, 0), registro: disp.registro.size },
+    motivo,
   };
+}
+
+/** Spiega perché nessun piano è possibile: il bersaglio non nasce da alcuna fusione, oppure non può ereditare le skill richieste. */
+function motivoNessunPiano(target: PersonaFusione, ctx: Contesto, skillRichieste: Array<{ id: number; nomeIt: string; elemento: string; elementoNome: string }>, livelloMax: number | null, disp: Disponibilita): PianiFusioneDto['motivo'] {
+  const nomeIt = t('persona', target.nome);
+  if (target.rara) return { codice: 'non-fondibile', testo: `${nomeIt} è un Demone del Tesoro: non si ottiene per fusione, si incontra nei Palazzi e nei Mementos.` };
+  if (ricettePer(target, ctx).length === 0) {
+    const perche = target.livello <= 1
+      ? 'è la Persona iniziale: nessuna coppia produce una Persona del suo arcano a livello 1'
+      : target.speciale ? 'ha solo una ricetta speciale i cui ingredienti non sono disponibili con i contenuti considerati' : 'nessuna coppia di Persona la produce con i contenuti considerati';
+    return { codice: 'non-fondibile', testo: `${nomeIt} non si ottiene per fusione: ${perche}. Si ottiene in altro modo (evento, cattura, Registro) e da lì si evoca.` };
+  }
+  const tipo = tipoEredita(target.id);
+  const nonEreditabili = skillRichieste.filter((s) => !elementoEreditabile(tipo, s.elemento));
+  if (nonEreditabili.length > 0) {
+    return { codice: 'skill-non-ereditabili', testo: `${nomeIt} non può ereditare ${nonEreditabili.map((s) => `${s.nomeIt} (${s.elementoNome})`).join(', ')}: il suo tipo di eredità non ammette ${nonEreditabili.length === 1 ? 'quell\'elemento' : 'quegli elementi'}.` };
+  }
+  // Fonti della skill: Persona che la conoscono già al livello base (o esemplari in scorta che la possiedono).
+  for (const sk of skillRichieste) {
+    const inScorta = [...(disp.skillScorta?.entries() ?? [])].some(([, set]) => set.has(sk.id));
+    if (inScorta) continue;
+    const fonti = prepared('SELECT p.nome, p.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? AND ps.livello <= p.livello ORDER BY p.livello').all(sk.id) as Array<{ nome: string; livello: number }>;
+    if (fonti.length === 0) {
+      const tardive = prepared('SELECT p.nome, ps.livello FROM persona_skill ps JOIN persona p ON p.id = ps.persona_id WHERE ps.skill_id = ? ORDER BY ps.livello LIMIT 3').all(sk.id) as Array<{ nome: string; livello: number }>;
+      return { codice: 'skill-senza-fonte', testo: `Nessuna Persona conosce ${sk.nomeIt} già al livello base: si impara salendo di livello${tardive.length ? ` (${tardive.map((x) => `${t('persona', x.nome)} al livello ${x.livello}`).join(', ')})` : ''}. Portane una in scorta con la skill appresa e riprova.` };
+    }
+    if (livelloMax !== null && fonti[0].livello > livelloMax) {
+      return { codice: 'limite-livello', testo: `Con il limite al livello ${livelloMax} nessun ingrediente può portare ${sk.nomeIt}: la Persona di livello più basso che la conosce dal livello base è ${t('persona', fonti[0].nome)} (livello ${fonti[0].livello}). Togli il limite o porta in scorta una Persona che l'ha imparata.` };
+    }
+  }
+  return null;
 }
 
 // ---- Cicli di fusione (Fase 5.5) ----

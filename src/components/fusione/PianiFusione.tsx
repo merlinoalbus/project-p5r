@@ -12,6 +12,7 @@ import { SelettoreSkill } from './SelettoreSkill';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
 import type { PersonaRiassuntoDto, PianiFusioneDto, PianoFusioneDto, SkillRiassuntoDto } from '../../types';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -48,6 +49,8 @@ function Piano({ piano, indice, onSalva, salvato }: { piano: PianoFusioneDto; in
 }
 
 /** Selezione del bersaglio, opzioni (profondità, catture, limite di livello, alternative) e piani ordinati per costo. */
+const TITOLO_MOTIVO: Record<NonNullable<PianiFusioneDto['motivo']>['codice'], string> = { 'non-fondibile': 'Non si ottiene per fusione', 'skill-non-ereditabili': 'Skill non ereditabili', 'skill-senza-fonte': 'Nessuna Persona ha questa skill dall’inizio', 'limite-livello': 'Limite di livello troppo basso' };
+
 export function PianiFusione({ persone, partitaId, livelloProtagonista, inizialeId, skillInizialiIds, obiettivoId }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [profondita, setProfondita] = useState(3);
@@ -114,6 +117,14 @@ export function PianiFusione({ persone, partitaId, livelloProtagonista, iniziale
             <p className="m-0 text-[13px] text-error">{errore}</p>
           ) : caricamento && !dati ? (
             <div className="flex justify-center py-6"><Spinner /></div>
+          ) : dati && dati.motivo ? (
+            <div className="card flex items-start gap-3 border-primary" role="status">
+              <IconaAzione chiave="annulla" dimensione={28} />
+              <div className="flex flex-col gap-1">
+                <span className="font-display uppercase text-[18px] leading-none">{TITOLO_MOTIVO[dati.motivo.codice]}</span>
+                <span className="text-[13px] text-text-secondary">{dati.motivo.testo}</span>
+              </div>
+            </div>
           ) : dati && dati.piani.length === 0 ? (
             <p className="m-0 text-[13px] text-text-muted">Nessun piano trovato con queste opzioni: aumenta la profondità, ammetti le catture, togli il limite di livello{skillScelte.length > 0 ? ' o riduci le skill richieste (verifica che il tipo di eredità del bersaglio le ammetta)' : ''}.</p>
           ) : dati ? (

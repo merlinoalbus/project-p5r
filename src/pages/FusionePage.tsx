@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiornaPartita, getPersone, getPossedute, getRegoleFusione, getVelluto } from '../services/api';
@@ -19,12 +19,16 @@ import { ForcaIsolamento } from '../components/fusione/ForcaIsolamento';
 import { CicliFusione } from '../components/fusione/CicliFusione';
 import { notifica } from '../stores/notificationStore';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { PersonaChip } from '../components/fusione/PersonaChip';
+import { IconaScheda, type ChiaveScheda } from '../components/shared/IconaAzione';
 
 type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
-const VISTE: Array<[Vista, string]> = [
-  ['calcolatore', 'Calcolatore A + B'], ['ricette', 'Come ottenere'], ['con', 'Fusioni con…'], ['piani', 'Piano di fusione'], ['skill', 'Cerca per skill'], ['cicli', 'Cicli di fusione'], ['forca', 'Forca e Isolamento'],
-  ['coppia', 'Due arcani'], ['matrice', 'Matrice completa'], ['speciali', 'Ricette speciali'], ['tesori', 'Demoni del Tesoro'],
+const VISTE: Array<[Vista, string, ChiaveScheda]> = [
+  ['calcolatore', 'Calcolatore A + B', 'fusione-calcolatore'], ['ricette', 'Come ottenere', 'fusione-ricette'], ['con', 'Fusioni con…', 'fusione-con'], ['piani', 'Piano di fusione', 'fusione-piani'],
+  ['skill', 'Cerca per skill', 'fusione-skill'], ['cicli', 'Cicli di fusione', 'fusione-cicli'], ['forca', 'Forca e Isolamento', 'fusione-forca'], ['speciali', 'Ricette speciali', 'fusione-speciali'],
 ];
+/** Viste di calcolo interne (tabelle degli arcani e dei Demoni del Tesoro): non per l'utente finale, raggiungibili con `?strumenti=1`. */
+const VISTE_STRUMENTI: Array<[Vista, string, ChiaveScheda]> = [['coppia', 'Due arcani', 'fusione-calcolatore'], ['matrice', 'Matrice completa', 'fusione-calcolatore'], ['tesori', 'Demoni del Tesoro', 'fusione-speciali']];
 
 /** Calcolatore di fusione (A + B, ricette per ottenere una Persona, fusioni con una Persona) e regole degli Arcani. */
 export function FusionePage() {
@@ -37,6 +41,8 @@ export function FusionePage() {
   const persone = useCarica(() => getPersone(), []);
   const scorta = useCarica(() => (attiva ? getPossedute(attiva.id) : Promise.resolve([])), [attiva?.id]);
   const inScorta = useMemo(() => new Set((scorta.dati ?? []).map((p) => p.personaId)), [scorta.dati]);
+  const perId = useMemo(() => new Map((persone.dati ?? []).map((p) => [p.id, p])), [persone.dati]);
+  const completa = (x: { id: number; nome: string; nomeIt: string }) => perId.get(x.id) ?? x;
   const velluto = useCarica(() => (attiva ? getVelluto(attiva.id) : Promise.resolve(null)), [attiva?.id, attiva?.allarmeAttivo, attiva?.updatedAt]);
   const cambiaAllarme = async (allarmeAttivo: boolean) => {
     if (!attiva) return;
@@ -50,7 +56,9 @@ export function FusionePage() {
   const [a, setA] = useState('');
   const [b, setB] = useState('');
   const vistaParam = params.get('vista');
-  const vista: Vista = VISTE.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
+  const strumenti = params.get('strumenti') === '1';
+  const visteMostrate = strumenti ? [...VISTE, ...VISTE_STRUMENTI] : VISTE;
+  const vista: Vista = visteMostrate.some(([k]) => k === vistaParam) ? (vistaParam as Vista) : params.has('ricette') ? 'ricette' : params.has('con') ? 'con' : params.has('piani') ? 'piani' : 'calcolatore';
   const setVista = (v: Vista) => setParams((p) => { const n = new URLSearchParams(p); n.set('vista', v); return n; });
   const skillParam = (params.get('skill') ?? '').split(',').map(Number).filter((n) => Number.isInteger(n) && n > 0);
   const idParam = (k: string) => { const v = Number(params.get(k)); return Number.isInteger(v) && v > 0 ? v : undefined; };
@@ -78,8 +86,8 @@ export function FusionePage() {
       <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.</>} />
       <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
       <div className="flex gap-1.5 flex-wrap">
-        {VISTE.map(([k, l]) => (
-          <button key={k} type="button" className={`chip touch ${vista === k ? 'chip--attivo' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k}>{l}</button>
+        {visteMostrate.map(([k, l, icona]) => (
+          <button key={k} type="button" className={`chip chip--icona touch ${vista === k ? 'chip--attivo' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k}><IconaScheda chiave={icona} dimensione={16} />{l}</button>
         ))}
       </div>
 
@@ -162,20 +170,27 @@ export function FusionePage() {
         )}
 
         {dati && vista === 'speciali' && (
-          <ul className="m-0 p-0 list-none flex flex-col gap-2">
-            {dati.speciali.map((r) => (
-              <li key={r.risultato.id} className="card flex flex-wrap items-center gap-1 text-[13px]">
-                {r.ingredienti.map((i, idx) => (
-                  <span key={i.id} className="flex items-center gap-1">
-                    <Link to={`/compendio/persona/${i.id}`} className="chip touch no-underline">{i.nomeIt}</Link>
-                    {idx < r.ingredienti.length - 1 && <span className="text-text-muted">+</span>}
-                  </span>
-                ))}
-                <span className="text-text-muted mx-1">→</span>
-                <Link to={`/compendio/persona/${r.risultato.id}`} className="chip chip--attivo touch no-underline">{r.risultato.nomeIt}</Link>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col gap-3">
+            <p className="m-0 text-[13px] text-text-secondary">{dati.speciali.length} ricette speciali: fusioni a più ingredienti prescritte dal gioco, in ordine di livello del risultato.</p>
+            <ul className="m-0 p-0 list-none grid gap-2 grid-cols-1 xl:grid-cols-2" aria-label="Ricette speciali">
+              {[...dati.speciali].sort((x, y) => (perId.get(x.risultato.id)?.livello ?? 0) - (perId.get(y.risultato.id)?.livello ?? 0) || x.risultato.nomeIt.localeCompare(y.risultato.nomeIt)).map((r) => (
+                <li key={r.risultato.id} className="card flex flex-col gap-2 text-[13px]">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <PersonaChip p={completa(r.risultato)} evidenza inScorta={inScorta.has(r.risultato.id)} />
+                    <span className="text-[12px] text-text-muted">{r.ingredienti.length} ingredienti{r.ingredienti.every((i) => inScorta.has(i.id)) ? ' · tutti in scorta' : ''}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5 pl-2 border-l-2 border-border">
+                    {r.ingredienti.map((i, idx) => (
+                      <span key={i.id} className="flex items-center gap-1.5">
+                        <PersonaChip p={completa(i)} inScorta={inScorta.has(i.id)} />
+                        {idx < r.ingredienti.length - 1 && <span className="text-text-muted" aria-hidden="true">+</span>}
+                      </span>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {dati && vista === 'tesori' && (

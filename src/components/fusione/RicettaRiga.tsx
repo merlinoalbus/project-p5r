@@ -2,8 +2,8 @@
 // RicettaRiga — una ricetta di fusione: ingredienti (con evidenza della scorta), risultato, tipo, costo
 // ============================================================
 
-import { Link } from 'react-router-dom';
-import type { PersonaFusioneDto, RicettaFusioneDto } from '../../types';
+import { PersonaChip } from './PersonaChip';
+import type { RicettaFusioneDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 
 const NOME_TIPO: Record<RicettaFusioneDto['tipo'], string> = {
@@ -12,15 +12,6 @@ const NOME_TIPO: Record<RicettaFusioneDto['tipo'], string> = {
   tesoro: 'Demone del Tesoro',
   speciale: 'Speciale',
 };
-
-function ChipPersona({ p, inScorta }: { p: PersonaFusioneDto; inScorta: boolean }) {
-  return (
-    <Link to={`/compendio/persona/${p.id}`} className={`chip touch no-underline ${inScorta ? 'chip--attivo' : ''}`} title={`${p.arcanaNome} · livello ${p.livello}${inScorta ? ' · nella scorta' : ''}`}>
-      {p.nomeIt} <span className="opacity-70">L{p.livello}</span>
-      {p.rara && <span aria-label="Demone del Tesoro" title="Demone del Tesoro"> ◆</span>}
-    </Link>
-  );
-}
 
 /** Riga compatta; se `mostraRisultato` è false si mostrano solo gli ingredienti (elenco "per ottenere X"). */
 export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ricetta: RicettaFusioneDto; inScorta?: Set<number>; mostraRisultato?: boolean }) {
@@ -31,14 +22,14 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
       <span className="flex flex-wrap items-center gap-1.5 min-w-0">
       {ricetta.ingredienti.map((p, idx) => (
         <span key={p.id} className="flex items-center gap-1.5">
-          <ChipPersona p={p} inScorta={scorta.has(p.id)} />
+          <PersonaChip p={p} inScorta={scorta.has(p.id)} />
           {idx < ricetta.ingredienti.length - 1 && <span className="text-text-muted">+</span>}
         </span>
       ))}
       {mostraRisultato && (
         <>
           <span className="text-text-muted mx-1">→</span>
-          <ChipPersona p={ricetta.risultato} inScorta={scorta.has(ricetta.risultato.id)} />
+          <PersonaChip p={ricetta.risultato} evidenza inScorta={scorta.has(ricetta.risultato.id)} />
         </>
       )}
       </span>

@@ -11,6 +11,9 @@ import { SelettorePersona } from './SelettorePersona';
 import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
 import type { CicloFusioneDto, PersonaRiassuntoDto } from '../../types';
+import { PersonaChip } from './PersonaChip';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -33,21 +36,23 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
           {ciclo.lunghezza} anelli · {ciclo.evocazioni} dal Registro{ciclo.catture > 0 ? ` · ${ciclo.catture} da catturare` : ''}{ciclo.dallaScorta > 0 ? ` · ${ciclo.dallaScorta} dalla scorta (solo la prima volta)` : ''}
         </span>
         <span className="ml-auto font-black tabular-nums text-[16px]" title="Costo di una iterazione (evocazioni dal Registro)">{formattaYen(ciclo.costo)} / giro</span>
-        {onSalva && <button type="button" className={`btn btn-sm ${salvato ? 'btn-ghost' : 'btn-secondary'}`} onClick={onSalva} disabled={salvato}>{salvato ? 'Salvato ✓' : 'Salva ciclo'}</button>}
+        {onSalva && <PulsanteVisivo tono={salvato ? 'fantasma' : 'secondario'} compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo={salvato ? 'Salvato ✓' : 'Salva ciclo'} onClick={onSalva} disabled={salvato} />}
       </div>
       <ol className="m-0 p-0 list-none flex flex-col gap-1" aria-label={`Anelli del ciclo ${indice + 1}`}>
         {ciclo.anelli.map((a, i) => (
           <li key={i} className="flex flex-wrap items-center gap-1.5 text-[13px]">
-            <span className="text-text-muted w-5">{i + 1}.</span>
-            <Link to={`/compendio/persona/${a.ingrediente.id}`} className={`chip touch no-underline ${i === 0 ? 'chip--attivo' : ''}`}>{a.ingrediente.nomeIt}</Link>
-            <span aria-hidden="true">+</span>
-            <Link to={`/compendio/persona/${a.partner.id}`} className="chip touch no-underline" title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`}>{a.partner.nomeIt}</Link>
-            <span className={`text-[12px] ${a.partnerModo === 'cattura' ? 'text-warning' : 'text-text-secondary'}`}>{NOME_MODO[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
-            <span aria-hidden="true">→</span>
-            <Link to={`/compendio/persona/${a.risultato.id}`} className={`chip touch no-underline ${i === ciclo.anelli.length - 1 ? 'chip--attivo' : ''}`}>{a.risultato.nomeIt} <span className="opacity-70">L{a.risultato.livello}</span></Link>
+            <span className="w-6 h-6 rounded-full bg-bg-tertiary text-text-muted text-[12px] font-semibold inline-flex items-center justify-center shrink-0" aria-hidden="true">{i + 1}</span>
+            <PersonaChip p={a.ingrediente} evidenza={i === 0} />
+            <span className="text-text-muted" aria-hidden="true">+</span>
+            <span className="inline-flex flex-col items-start gap-0.5">
+              <PersonaChip p={a.partner} title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`} />
+              <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
+            </span>
+            <span className="text-primary font-black" aria-hidden="true">→</span>
+            <PersonaChip p={a.risultato} evidenza={i === ciclo.anelli.length - 1} />
             <span className="text-[12px] text-text-muted">
               {a.tipo === 'tesoro' ? 'con Demone del Tesoro' : a.tipo === 'stesso-arcano' ? 'stesso arcano' : 'normale'}
-              {a.bonusLivelli.max > 0 ? ` · nasce +${a.bonusLivelli.min === a.bonusLivelli.max ? a.bonusLivelli.min : `${a.bonusLivelli.min}…${a.bonusLivelli.max}`} livelli (${a.risultato.arcanaNome} rango ${a.rangoArcano})` : ` · ${a.risultato.arcanaNome} rango 0: nessun bonus`}
+              {a.bonusLivelli.max > 0 ? ` · nasce +${a.bonusLivelli.min === a.bonusLivelli.max ? a.bonusLivelli.min : `${a.bonusLivelli.min}…${a.bonusLivelli.max}`} livelli (${a.risultato.arcanaNome} rango ${a.rangoArcano})` : ` · ${a.risultato.arcanaNome} rango ${a.rangoArcano}: nessun bonus`}
             </span>
           </li>
         ))}
