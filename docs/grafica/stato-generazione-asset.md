@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**655 file richiesti: 521 completati e approvati, 134 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**660 file richiesti: 531 completati e approvati, 129 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -25,6 +25,8 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - Ordine richiesto dall’utente: completare la categoria `persona` per ultima, dopo illustrazioni, confidenti e meteo.
 - Per ciascuno dei 23 Confidenti conservare la versione originale già generata e aggiungere una seconda variante `-fedele`, nello stesso stile ma basata sulle fattezze originali mostrate nella guida Steam indicata dall’utente.
 - Per ciascun asset `persona`, recuperare prima un riferimento visivo originale e tradurne i tratti riconoscibili in un prompt testuale preciso per la reinterpretazione richiesta dal §10. Usare lo stesso metodo approvato per i Confidenti fedeli: Imagegen senza riferimento allegato, stile uniforme, alfa nativo prodotto in generazione e nessuno scontorno successivo.
+- Per ciascuno dei cinque asset `personaggi`, produrre due versioni: `<chiave>.png` come reinterpretazione originale dalla descrizione del §14 e `<chiave>-fedele.png` nello stesso stile, dopo ricerca online del soggetto canonico e traduzione dei suoi tratti riconoscibili in un prompt testuale. Entrambe 768×1024, trasparenti e senza testo.
+- Anche per ciascuna delle 27 voci `persona-gruppo`, recuperare prima un riferimento canonico online e tradurne i tratti identificativi in un prompt testuale, senza allegare o copiare l'artwork ufficiale.
 
 ## Riepilogo
 
@@ -43,7 +45,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | meteo | 17 | 17 | 0 |
 | guida | 15 | 15 | 0 |
 | palazzi | 10 | 10 | 0 |
-| personaggi | 5 | 0 | 5 |
+| personaggi | 10 | 10 | 0 |
 | ui (schede Partita e Fusione, §16) | 17 | 0 | 17 |
 | ui (azioni, §17) | 46 | 0 | 46 |
 | persona-gruppo (§15) | 27 | 0 | 27 |
@@ -192,8 +194,13 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-speciali.png` — 128×128 (§16)
 
 ### personaggi
-- [ ] **DA CONSEGNARE** — `public/asset/personaggi/joker.png` — 768×1024 (§14)
-- [ ] **DA CONSEGNARE** — `public/asset/personaggi/caroline.png` — 768×1024 (§14)
-- [ ] **DA CONSEGNARE** — `public/asset/personaggi/justine.png` — 768×1024 (§14)
-- [ ] **DA CONSEGNARE** — `public/asset/personaggi/jose.png` — 768×1024 (§14)
-- [ ] **DA CONSEGNARE** — `public/asset/personaggi/lavenza.png` — 768×1024 (§14)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/joker.png` — 768×1024 (§14)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/joker-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/caroline.png` — 768×1024 (§14)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/caroline-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/justine.png` — 768×1024 (§14)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/justine-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/jose.png` — 768×1024 (§14)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/jose-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/lavenza.png` — 768×1024 (§14)
+- [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/lavenza-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
