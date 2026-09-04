@@ -27,7 +27,8 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
   const scorta = inScorta ?? new Set<number>();
   const tuttiInScorta = ricetta.ingredienti.every((i) => scorta.has(i.id));
   return (
-    <li className={`flex flex-wrap items-center gap-1.5 py-2 text-[13px] ${tuttiInScorta ? 'bg-primary-bg -mx-2 px-2 rounded-md' : ''}`}>
+    <li className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-2 text-[13px] ${tuttiInScorta ? 'bg-primary-bg -mx-2 px-2 rounded-md' : ''}`}>
+      <span className="flex flex-wrap items-center gap-1.5 min-w-0">
       {ricetta.ingredienti.map((p, idx) => (
         <span key={p.id} className="flex items-center gap-1.5">
           <ChipPersona p={p} inScorta={scorta.has(p.id)} />
@@ -40,10 +41,12 @@ export function RicettaRiga({ ricetta, inScorta, mostraRisultato = true }: { ric
           <ChipPersona p={ricetta.risultato} inScorta={scorta.has(ricetta.risultato.id)} />
         </>
       )}
-      <span className="flex-1" />
-      <span className="text-[12px] text-text-muted">{NOME_TIPO[ricetta.tipo]}</span>
-      <span className="text-[12px] font-semibold tabular-nums w-[84px] text-right">{formattaYen(ricetta.costo)}</span>
-      {tuttiInScorta && <span className="chip chip--attivo text-[11px]" title="Hai tutti gli ingredienti nella scorta">Pronta</span>}
+      </span>
+      <span className="flex items-center justify-end gap-2 whitespace-nowrap">
+        <span className="text-[12px] text-text-muted">{NOME_TIPO[ricetta.tipo]}</span>
+        <span className="text-[12px] font-semibold tabular-nums w-[84px] text-right">{formattaYen(ricetta.costo)}</span>
+        {tuttiInScorta && <span className="chip chip--attivo text-[11px]" title="Hai tutti gli ingredienti nella scorta">Pronta</span>}
+      </span>
     </li>
   );
 }

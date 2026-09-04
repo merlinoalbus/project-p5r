@@ -14,6 +14,9 @@ import { prezzoEvocazione, type Disponibilita } from './alberoFusione.js';
 
 export type ModoPartner = 'scorta' | 'registro' | 'cattura';
 
+/** Numero massimo di anelli ammesso per un ciclo. */
+export const LUNGHEZZA_MASSIMA = 15;
+
 export interface AnelloCiclo {
   ingrediente: PersonaFusione;
   partner: PersonaFusione;
@@ -35,7 +38,7 @@ export interface CicloFusione {
 }
 
 export interface OpzioniCicli {
-  /** Numero massimo di anelli (2–5). */
+  /** Numero massimo di anelli (2–15). */
   lunghezzaMax: number;
   /** Numero minimo di anelli (2–lunghezzaMax, default 2). */
   lunghezzaMin?: number;
@@ -76,11 +79,12 @@ function fusioniDa(persona: PersonaFusione, ctx: Contesto, cache: Map<number, Ri
 
 /** Cicli che partono e tornano a `target`, ordinati per costo per iterazione, poi per lunghezza. */
 export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Disponibilita, opz: OpzioniCicli): CicloFusione[] {
-  const lunghezzaMax = Math.max(2, Math.min(5, opz.lunghezzaMax));
+  const lunghezzaMax = Math.max(2, Math.min(LUNGHEZZA_MASSIMA, opz.lunghezzaMax));
   const lunghezzaMin = Math.max(2, Math.min(lunghezzaMax, opz.lunghezzaMin ?? 2));
   const partnerDistinti = opz.partnerDistinti ?? true;
   const ventaglio = Math.max(5, Math.min(80, opz.ventaglio ?? 40));
-  const budget = Math.max(1000, Math.min(200000, opz.budget ?? 40000));
+  // Catene lunghe: più candidati da esaminare, budget proporzionale (sempre limitato: protegge l'event loop).
+  const budget = Math.max(1000, Math.min(400000, opz.budget ?? 40000 + Math.max(0, lunghezzaMax - 5) * 25000));
   let esaminatiTotali = 0;
   const cache = new Map<number, RicettaFusione[]>();
   const trovati: CicloFusione[] = [];
@@ -104,6 +108,8 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
       // Partner distinti: mai il bersaglio, mai una Persona già consumata dalla catena (ingredienti e risultati intermedi),
       // mai un partner già usato: ogni anello richiede un esemplare procurato a parte.
       if (partnerDistinti && (partner.id === target.id || partner.id === corrente.id || visitati.has(partner.id) || anelli.some((a) => a.partner.id === partner.id || a.ingrediente.id === partner.id || a.risultato.id === partner.id))) continue;
+      // ...e un risultato intermedio non può coincidere con un partner già usato né con il partner di questo anello.
+      if (partnerDistinti && res.id !== target.id && (res.id === partner.id || anelli.some((a) => a.partner.id === res.id))) continue;
       if (opz.livelloMax !== null && res.livello > opz.livelloMax) continue;
       const m = modoPartner(partner, disp, opz);
       if (!m) continue;

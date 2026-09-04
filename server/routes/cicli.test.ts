@@ -55,7 +55,7 @@ describe('API cicli di fusione', () => {
     expect(c0.costo).toBe(c0.anelli.reduce((s, a) => s + a.partnerCosto, 0));
     expect(c0.anelli.every((a) => a.risultato.id === jack || a.risultato.livello <= 40)).toBe(true);
     for (let i = 1; i < con.cicli.length; i++) expect(con.cicli[i].costo).toBeGreaterThanOrEqual(con.cicli[i - 1].costo);
-    expect((await request(app).get(`/api/fusione/cicli/${jack}?lunghezza=9`)).status).toBe(400);
+    expect((await request(app).get(`/api/fusione/cicli/${jack}?lunghezza=16`)).status).toBe(400);
     expect((await request(app).get('/api/fusione/cicli/999999')).status).toBe(404);
 
     // salvataggio: validazione degli anelli (catena rotta / risultato sbagliato) e caso corretto

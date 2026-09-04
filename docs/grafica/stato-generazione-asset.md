@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**567 file richiesti: 521 completati e approvati, 46 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**633 file richiesti: 521 completati e approvati, 112 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Persona completate e approvate: **232**. Persona generate e in validazione: **0**. Persona da rigenerare: **0**.
 
@@ -50,8 +50,83 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | personaggi | 5 | 0 | 5 |
 | ui (schede Partita, §16) | 9 | 0 | 9 |
 | ui (azioni, §17) | 32 | 0 | 32 |
+| persona-gruppo (§15) | 27 | 0 | 27 |
+| ui (spilli, §18) | 14 | 0 | 14 |
+| mappe (§19) | 25 | 0 | 25 |
 
 ## Elenco completo
+
+### persona-gruppo (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/captain-kidd.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/seiten-taisei.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/william.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/carmen.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ecate.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/celestine.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/zorro.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/mercurio.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/diego.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/goemon.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/kamu-susano-o.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/gorokichi.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ioanna.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/anat.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/agnes.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/necronomicon.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/prometeo.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/al-azif.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/milady.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/astarte.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/lucy.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/robin-hood.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/loki.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ervardo.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/cenerentola.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/vanadis.png` — 768×768 (§15)
+- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ella.png` — 768×768 (§15)
+
+### ui — spilli (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-negozio.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-forziere.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-boss.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-miniboss.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sicura.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-scorciatoia.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-confidente.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-attivita.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-ristorante.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-distributore.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-treno.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-nota.png` — 128×128 (§18)
+
+### mappe (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-yongen-jaya.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shibuya.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shinjuku.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-kichijoji.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-akihabara.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shujin-academy.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-kanda-jinbocho.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ikebukuro.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-harajuku.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ueno.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-inokashira-park.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-odaiba.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shinagawa.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-nakano.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ogikubo.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-yokohama-chinatown.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-maihama.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-roppongi.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-tsukishima.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-meiji-shrine.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ichigaya.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-suidobashi.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-asakusa.png` — 2048×1536 (§19)
+- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
 
 ### ui — azioni (§17)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-regalo.png` — 128×128 (§17)

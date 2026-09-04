@@ -34,15 +34,15 @@ export function AffinitaGriglia({ affinita, compatta }: Props) {
     );
   }
   return (
-    <div className="grid grid-cols-5 lg:grid-cols-10 gap-2" aria-label="Affinità">
+    <div className="griglia-affinita gap-2" aria-label="Affinità">
       {affinita.map((a) => {
         const stile = STILE_AFFINITA[a.codice] ?? STILE_AFFINITA['-'];
         return (
           <div key={a.elemento} className={`flex flex-col items-center justify-center gap-1 rounded-lg py-2 px-1 text-center ${stile.classe}`} title={`${a.elementoNome}: ${a.codiceNome}`}>
             <AssetImg nome={`elementi/${a.elemento}`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
-            <span className="text-[12px] font-bold leading-tight" style={{ color: coloreElemento(a.elemento) }}>{a.elementoNome}</span>
+            <span className="text-[12px] font-bold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis" style={{ color: coloreElemento(a.elemento) }} title={a.elementoNome}>{a.elementoNome}</span>
             <AssetImg nome={`affinita/${a.codice === '-' ? 'normale' : a.codice}-senza-testo`} alt="" decorativa className="w-9 h-9 object-contain" fallback={null} />
-            <span className="text-[12px] font-semibold leading-tight">{a.codiceNome}</span>
+            <span className="text-[12px] font-semibold leading-tight whitespace-nowrap max-w-full overflow-hidden text-ellipsis">{a.codiceNome}</span>
           </div>
         );
       })}
