@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { useMappaPartita } from '../hooks/useMappaPartita';
@@ -69,15 +69,18 @@ function IndiceMappe() {
 /** Visore a schermo intero con lo stato della partita attiva. */
 function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: number | null }) {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const spilloIniziale = Number(params.get('spillo')) || null;
   const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId);
   useDocumentTitle(mappa ? `${mappa.nome} — Mappe` : 'Mappa');
   return (
     <PageState isLoading={caricamento && !mappa} error={errore} onRetry={ricarica}>
       {mappa && (
         <VisoreMappa
-          key={mappa.chiave}
+          key={`${mappa.chiave}-${spilloIniziale ?? ''}`}
           mappa={mappa}
           partitaId={partitaId}
+          selezioneIniziale={spilloIniziale}
           onNaviga={(k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`)}
           onRaccolto={raccolto}
           onStatoPunto={statoPunto}

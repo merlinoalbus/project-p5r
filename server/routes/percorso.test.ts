@@ -70,6 +70,29 @@ describe('API percorso giorno per giorno', () => {
     expect(dopo.dataCorrente).toBe('05-19');
   });
 
+  it('con la partita ogni azione ha lo stato (consigliata/bloccata/neutra con motivo) e, se ha un luogo, la mappa collegata', async () => {
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Oggi' })).body.data as { id: number }).id;
+    const senza = (await request(app).get('/api/compendio/percorso/04-12')).body.data as PercorsoGiornoDto;
+    expect(senza.azioni.every((a) => a.stato === null)).toBe(true);
+    const g = (await request(app).get(`/api/compendio/percorso/04-12?partita=${id}`)).body.data as PercorsoGiornoDto;
+    expect(g.azioni.length).toBeGreaterThan(0);
+    for (const a of g.azioni) {
+      expect(a.stato).not.toBeNull();
+      expect(['consigliata', 'bloccata', 'neutra']).toContain(a.stato!.tipo);
+      if (a.stato!.tipo === 'bloccata') expect(a.stato!.motivo).toBeTruthy();
+      if (a.riferimento?.tipo === 'dungeon') expect(a.mappa).toEqual({ chiave: `dungeon-${a.riferimento.chiave}`, spilloId: null });
+    }
+    // un giorno con un Confidente e rango atteso: lo stato riflette i semafori del rango (bloccata se un requisito è rosso)
+    const giorni = ((await request(app).get(`/api/compendio/percorso?partita=${id}`)).body.data as PercorsoIndiceDto).giorni.filter((x) => x.azioni > 0).slice(0, 40);
+    let trovata = false;
+    for (const x of giorni) {
+      const gg = (await request(app).get(`/api/compendio/percorso/${x.giorno}?partita=${id}`)).body.data as PercorsoGiornoDto;
+      const conf = gg.azioni.find((a) => a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && a.rangoAtteso !== null && a.rangoAtteso > 1);
+      if (conf) { trovata = true; expect(conf.stato!.tipo === 'bloccata' ? conf.stato!.motivo!.length > 0 : true).toBe(true); break; }
+    }
+    expect(trovata).toBe(true);
+  });
+
   it('alla spunta applica i punti della guida (Doti «+N» dalle note, note del Confidente scelte) e li annulla togliendo la spunta', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Effetti' })).body.data as { id: number }).id;
     const g = (await request(app).get(`/api/compendio/percorso/04-12?partita=${id}`)).body.data as PercorsoGiornoDto;

@@ -15,6 +15,7 @@ import { AssetImg } from '../components/shared/AssetImg';
 import { IconMaschera } from '../components/shared/iconeGuida';
 import { slug } from '../../shared/slug';
 import { avanzamentoDote } from '../utils/doti';
+import { OggiPartita } from '../components/partita/OggiPartita';
 
 /** Pagina iniziale con lo stato della partita attiva e gli accessi rapidi. */
 export function HomePage() {
@@ -76,6 +77,12 @@ export function HomePage() {
         <div className="card text-[13px] text-text-secondary">
           Nessuna partita attiva: <Link to="/partita" className="text-primary">creane una</Link> per iniziare a tracciare Doti sociali, Confidenti e Persona.
         </div>
+      )}
+      {attiva && (
+        <section className="flex flex-col gap-2" aria-label="Oggi nella partita">
+          <h2 className="m-0 font-display text-[20px] uppercase">Oggi</h2>
+          <OggiPartita key={attiva.id} partita={attiva} />
+        </section>
       )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Link to="/compendio" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Compendio</strong><br /><span className="text-[12px] text-text-secondary">232 Persona</span></span></Link>

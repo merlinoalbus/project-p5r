@@ -19,14 +19,19 @@ interface Props {
   versione?: string | number;
   /** Avvisa la pagina ospite dopo un'azione salvata dal visore (raccolto, punto della Guida, acquisto). */
   onCambiato?: () => void;
-  altezza?: number;
+  /** Altezza del riquadro (numero in px o espressione CSS, es. `calc(100vh - 220px)`); predefinita 560 px. */
+  altezza?: number | string;
   className?: string;
+  /** Spillo da selezionare e centrare all'apertura. */
+  spilloIniziale?: number | null;
+  /** Partita per lo stato degli spilli (predefinita: quella attiva). */
+  partitaId?: number | null;
 }
 
-export function MappaIncorporata({ chiave, versione, onCambiato, altezza, className }: Props) {
+export function MappaIncorporata({ chiave, versione, onCambiato, altezza, className, spilloIniziale, partitaId: partitaEsplicita }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
-  const partitaId = attiva?.id ?? null;
+  const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
   const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato });
   if (!mappa && caricamento) return <div className="flex items-center justify-center py-10 text-text-muted" aria-busy="true"><Spinner /></div>;
   if (!mappa) {
@@ -38,11 +43,12 @@ export function MappaIncorporata({ chiave, versione, onCambiato, altezza, classN
     );
   }
   return (
-    <div className={className} style={altezza ? { height: altezza } : undefined}>
+    <div className={className} style={{ height: altezza ?? 560 }}>
       <VisoreMappa
-        key={mappa.chiave}
+        key={`${mappa.chiave}-${spilloIniziale ?? ''}`}
         mappa={mappa}
         partitaId={partitaId}
+        selezioneIniziale={spilloIniziale ?? null}
         incorporato
         onNaviga={(k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`)}
         onRaccolto={raccolto}

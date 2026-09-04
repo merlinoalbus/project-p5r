@@ -395,10 +395,18 @@ export function esportaMappe(radice?: string, opz: { immaginiSpilli?: boolean } 
   // il genitore fuori dal sottoalbero esportato resta indicato: all'importazione viene risolto se esiste
 
   const immagini: EsportazioneMappeDto['immagini'] = {};
+  const immaginiEscluse: NonNullable<EsportazioneMappeDto['immaginiEscluse']> = [];
   for (const m of mappe) {
-    // immagine registrata, oppure quella dell'istanza con la chiave della mappa (piante scaricate)
+    // immagine registrata, oppure quella dell'istanza con la chiave della mappa
     const chiaveImg = m.immagine ?? (leggiImmagine('mappa', m.chiave) ? m.chiave : null);
     if (!chiaveImg) continue;
+    const img = leggiImmagine('mappa', chiaveImg);
+    // le immagini scaricate da terzi (piante delle guide, © dei rispettivi autori) restano nell'istanza: mai nei pacchetti
+    if (img?.origineUrl) {
+      immaginiEscluse.push({ mappa: m.chiave, motivo: `immagine scaricata da ${img.origineUrl}: non ridistribuibile, resta nella tua istanza` });
+      m.immagine = null;
+      continue;
+    }
     m.immagine = chiaveImg;
     try {
       const f = fileImmagine('mappa', chiaveImg);
@@ -407,7 +415,7 @@ export function esportaMappe(radice?: string, opz: { immaginiSpilli?: boolean } 
       // immagine registrata ma file assente: esportata senza immagine
     }
   }
-  return { versione: 1, esportato: nowIso(), mappe, immagini };
+  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(immaginiEscluse.length > 0 ? { immaginiEscluse } : {}) };
 }
 
 export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[] }
@@ -502,7 +510,9 @@ export function creaPacchettoRepository(radice: string, opz: { immaginiSpilli?: 
       if (s.immagini.length === 0) delete s.immagini;
     });
   }
+  const escluse = pacchetto.immaginiEscluse ?? [];
   delete pacchetto.immagini;
+  delete pacchetto.immaginiEscluse;
   delete pacchetto.esportato;
   const leggimi = [
     `Pacchetto della mappa «${radice}» e delle sue mappe figlie (${pacchetto.mappe.length} mappe) — Project P5R, ${adesso.toISOString()}`,
@@ -511,6 +521,7 @@ export function creaPacchettoRepository(radice: string, opz: { immaginiSpilli?: 
     `- data/seed/mappe/${radice}.json: mappe e spilli nel formato del seed (caricati all'avvio insieme a data/seed/mappe-editor.json)`,
     '- public/asset/mappe/*: immagini di base delle mappe (il manifest degli asset le raccoglie da solo)',
     opz.immaginiSpilli ? '- public/asset/spilli/*: schermate degli spilli' : '- schermate degli spilli non incluse (restano nella tua istanza)',
+    ...(escluse.length > 0 ? ['', 'Immagini di base NON incluse perché scaricate da terzi (restano nella tua istanza):', ...escluse.map((e) => `- ${e.mappa}: ${e.motivo}`)] : []),
     '',
     'Nel repository pubblico possono entrare solo immagini tue o generate: mai schermate o mappe ufficiali del gioco.',
     '',

@@ -11,6 +11,7 @@ import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
 import { dimensioniImmagine, importaMappe } from '../services/mappe/mappeService.js';
 import { leggiZip } from '../utils/zip.js';
+import { salvaImmagine } from '../services/immaginiService.js';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../shared/types.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
@@ -236,6 +237,23 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const pacchetto = (await request(app).get('/api/mappe/esporta')).body.data as EsportazioneMappeDto;
     expect(pacchetto.mappe.find((m) => m.chiave === area.chiave)!.immagine).toBe(area.chiave);
     expect(pacchetto.immagini?.[area.chiave]?.mime).toBe('image/png');
+  });
+
+  it('le immagini scaricate da terzi (piante delle guide) non entrano mai nei pacchetti: né nel JSON né nello ZIP, con l’elenco delle esclusioni', async () => {
+    const area = ((await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[]).filter((m) => m.tipo === 'area' && !m.immagineUrl)[1];
+    salvaImmagine('mappa', area.chiave, 'image/png', PNG_2x3, 'https://omoteura.com/pianta.png');
+    expect(((await request(app).get(`/api/mappe/${area.chiave}`)).body.data as MappaDto).immagineUrl).toContain('/file');
+    const json = (await request(app).get(`/api/mappe/esporta?radice=${area.chiave}`)).body.data as EsportazioneMappeDto;
+    expect(json.mappe[0].immagine).toBeNull();
+    expect(json.immagini).toEqual({});
+    expect(json.immaginiEscluse).toEqual([{ mappa: area.chiave, motivo: expect.stringContaining('omoteura.com') }]);
+    const zip = await request(app).get(`/api/mappe/esporta.zip?radice=${area.chiave}`).buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
+    const voci = leggiZip(zip.body as Buffer);
+    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', `data/seed/mappe/${area.chiave}.json`]);
+    expect(voci[0].contenuto.toString('utf-8')).toContain(`- ${area.chiave}: immagine scaricata da https://omoteura.com/pianta.png`);
+    const seedArea = JSON.parse(voci[1].contenuto.toString('utf-8')) as EsportazioneMappeDto;
+    expect(seedArea.mappe[0]).toMatchObject({ immagine: null, asset: null });
+    expect(seedArea.immaginiEscluse).toBeUndefined();
   });
 
   it('schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON e ZIP per il repository) e reimportazione', async () => {

@@ -3,8 +3,8 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getPercorsoGiorno, getPercorsoIndice, impostaAzionePercorso, impostaGiornoCorrente } from '../services/api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -12,68 +12,11 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft, IconChevronRight } from '../components/shared/icons';
 import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
-import { NOME_TIPO_AZIONE, collegamentoAzione } from '../utils/percorso';
-import type { AzionePercorsoDto, EffettiAzioneDto } from '../types';
+import type { AzionePercorsoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
-import { DataP5 } from '../components/shared/DataP5';
-import { MeteoIcona } from '../components/guida/MeteoIcona';
-import { FasciaGiornata } from '../components/guida/FasciaGiornata';
-import { IconaCategoria } from '../components/guida/IconaCategoria';
-import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
-import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
-
-function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data: string; partitaId: number | null; onCambiata: (a: AzionePercorsoDto) => void }) {
-  const [occupato, setOccupato] = useState(false);
-  // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
-  const [chiediNote, setChiediNote] = useState(false);
-  const chiedeNote = a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente';
-  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false) => {
-    if (!partitaId) return;
-    if (fatta && chiedeNote && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
-    setChiediNote(false);
-    setOccupato(true);
-    try {
-      const agg = await impostaAzionePercorso(partitaId, data, a.indice, fatta, noteRisposta);
-      onCambiata(agg);
-      if (fatta && agg.effetti) notifica('success', descriviEffetti(agg.effetti));
-    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
-  };
-  const link = collegamentoAzione(a);
-  return (
-    <li className={`flex items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''}`}>
-      {partitaId && <input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} />}
-      {a.riferimento?.tipo === 'confidente' ? (
-        <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} adatta="copri" />
-      ) : a.riferimento?.tipo === 'dungeon' ? (
-        <EmblemaDungeon chiave={a.riferimento.chiave} nome={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />
-      ) : (
-        <IconaCategoria categoria={a.tipo} dimensione={40} />
-      )}
-      <div className="flex flex-col gap-0.5 text-[13px] min-w-0">
-        <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
-        <span className="flex flex-wrap items-center gap-1.5">
-          <span className="chip text-[11px]">{NOME_TIPO_AZIONE[a.tipo] ?? a.tipo}</span>
-          {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]">{link.etichetta}</Link> : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
-          {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
-          {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
-          {a.fatta && a.effetti && <span className="chip chip--attivo text-[11px]" title="Punti applicati alla spunta: si annullano togliendola">{descriviEffetti(a.effetti)}</span>}
-        </span>
-        {chiediNote && (
-          <span className="flex flex-wrap items-center gap-1.5 text-[12px]" role="group" aria-label="Note ottenute con il Confidente">
-            <span className="text-text-secondary">Quante note hai ottenuto?</span>
-            {([1, 2, 3] as const).map((n) => (
-              <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => void cambia(true, n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'\u266a'.repeat(n)}</button>
-            ))}
-            <button type="button" className="chip touch" disabled={occupato} onClick={() => void cambia(true, undefined, true)}>Nessun punto</button>
-            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => setChiediNote(false)} />
-          </span>
-        )}
-      </div>
-    </li>
-  );
-}
+import { GiornoGuida } from '../components/guida/GiornoGuida';
 
 export function PercorsoPage() {
   const { data: dataParam } = useParams();
@@ -100,8 +43,6 @@ export function PercorsoPage() {
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupatoGiorno(false); }
   };
   const vai = (d: string | null) => { if (d) navigate(`/guida/percorso/${d}`); };
-  const azioniGiorno = (g?.azioni ?? []).filter((a) => a.fascia === 'giorno');
-  const azioniSera = (g?.azioni ?? []).filter((a) => a.fascia === 'sera');
   return (
     <PageState isLoading={(indice.caricamento && !indice.dati) || (giorno.caricamento && !g)} error={indice.errore ?? giorno.errore} onRetry={() => { void indice.ricarica(); void giorno.ricarica(); }}>
       {indice.dati && g && (
@@ -120,40 +61,9 @@ export function PercorsoPage() {
             {partitaId && g.dataCorrente !== g.giorno && <button type="button" className="btn btn-primary btn-sm touch ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()}>Segna come giorno corrente</button>}
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>
-          <section className="card flex flex-col gap-1 text-[13px]">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
-              <span className="chip">{g.fase}</span>
-              {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto />}
-            </div>
-            {g.trama ? <p className="m-0">{g.trama}</p> : <p className="m-0 text-text-muted">Nessun evento di trama annotato.</p>}
-            {g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
-            {g.avvisi.length > 0 && <ul className="m-0 pl-4 text-primary">{g.avvisi.map((v) => <li key={v}>{v}</li>)}</ul>}
-            {!g.coperto && <p className="m-0 text-text-muted">Giorno non coperto dalle fonti: nessuna azione consigliata.</p>}
-            {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
-          </section>
-          {azioniGiorno.length > 0 && (
-            <section className="card flex flex-col gap-1">
-              <FasciaGiornata fascia="giorno" dettaglio={partitaId ? `${azioniGiorno.filter((a) => a.fatta).length} su ${azioniGiorno.length}` : undefined} />
-              <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Azioni di giorno">{azioniGiorno.map((a) => <Azione key={a.indice} a={a} data={g.giorno} partitaId={partitaId} onCambiata={aggiorna} />)}</ul>
-            </section>
-          )}
-          {azioniSera.length > 0 && (
-            <section className="card flex flex-col gap-1">
-              <FasciaGiornata fascia="sera" dettaglio={partitaId ? `${azioniSera.filter((a) => a.fatta).length} su ${azioniSera.length}` : undefined} />
-              <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Azioni di sera">{azioniSera.map((a) => <Azione key={a.indice} a={a} data={g.giorno} partitaId={partitaId} onCambiata={aggiorna} />)}</ul>
-            </section>
-          )}
-          {partitaId && g.azioni.length > 0 && <p className="m-0 text-[12px] text-text-muted">{g.fatte} azioni fatte su {g.azioni.length}.</p>}
+          <GiornoGuida g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={(a) => { if (a.mappa) navigate(`/guida/mappe/${encodeURIComponent(a.mappa.chiave)}${a.mappa.spilloId ? `?spillo=${a.mappa.spilloId}` : ''}`); }} />
         </div>
       )}
     </PageState>
   );
-}
-
-/** Testo breve degli effetti applicati alla spunta (es. «Perizia +2 · Ryuji Sakamoto +15 punti»). */
-function descriviEffetti(e: EffettiAzioneDto): string {
-  const parti = e.doti.map((d) => `${d.nome} +${d.delta}`);
-  if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
-  return parti.join(' \u00b7 ');
 }

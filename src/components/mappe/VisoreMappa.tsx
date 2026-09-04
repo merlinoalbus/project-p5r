@@ -51,6 +51,8 @@ interface Props {
   /** Azioni aggiuntive nella barra superiore (es. «Modifica mappa»). */
   azioni?: ReactNode;
   editor?: StrumentiEditor;
+  /** Spillo da selezionare e centrare all'apertura (es. dall'azione della guida). */
+  selezioneIniziale?: number | null;
   /** Contenuto del pannello laterale al posto di quello predefinito (editor). */
   pannello?: ReactNode;
   /** Elemento davanti al percorso nella barra (es. targhetta «Modifica»). */
@@ -106,7 +108,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
   return a.disponibileDal ? `dal ${a.disponibileDal}` : 'sempre';
 }
 
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, incorporato, azioni, editor, pannello, intestazione, className }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale }: Props) {
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
   const [natCaricata, setNatCaricata] = useState<Dimensioni | null>(null);
@@ -115,7 +117,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [tipiNascosti, setTipiNascosti] = useState<Set<TipoSpillo>>(new Set());
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
   const [ricerca, setRicerca] = useState('');
-  const [selezionatoUso, setSelezionatoUso] = useState<number | null>(null);
+  const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
   const [pannelloAperto, setPannelloAperto] = useState(true);
   const [occupato, setOccupato] = useState(false);
   const assetBase = useAsset(mappa.asset);
@@ -168,6 +170,20 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   }, [applicaZoom]);
 
   const adatta = () => { setZoomEsplicito(null); setPanEsplicito(null); };
+  // Selezione iniziale: centra lo spillo appena l'area è misurata (rinviato di un tick: nessuno stato impostato durante il render)
+  useEffect(() => {
+    if (!selezioneIniziale || dim.w === 0) return;
+    const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
+    if (!s) return;
+    const id = setTimeout(() => {
+      const z = Math.max(stato.current.zoomMin * 2.5, stato.current.zoomMin);
+      setSelezionatoUso(s.id);
+      setZoomEsplicito(z);
+      setPanEsplicito({ x: dim.w / 2 - (s.x / 100) * nat.w * z, y: dim.h / 2 - (s.y / 100) * nat.h * z });
+    }, 0);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selezioneIniziale, dim.w, dim.h, nat.w, nat.h, mappa.chiave]);
   const zoomCentro = (fattore: number) => applicaZoom(zoom * fattore, dim.w / 2, dim.h / 2);
   const centraSu = (s: SpilloDto) => {
     const z = Math.max(zoom, zoomMin * 2.5);

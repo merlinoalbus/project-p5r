@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**656 file richiesti: 521 completati e approvati, 135 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**657 file richiesti: 521 completati e approvati, 136 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -44,7 +44,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | guida | 15 | 15 | 0 |
 | palazzi | 10 | 10 | 0 |
 | personaggi | 5 | 0 | 5 |
-| ui (schede Partita e Fusione, §16) | 17 | 0 | 17 |
+| ui (schede Partita e Fusione, §16) | 18 | 0 | 18 |
 | ui (azioni, §17) | 46 | 0 | 46 |
 | persona-gruppo (§15) | 27 | 0 | 27 |
 | ui (spilli, §18) | 14 | 0 | 14 |
@@ -184,6 +184,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-cicli.png` — 128×128 (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-storico.png` — 128×128 (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-riepilogo.png` — 128×128 (§16)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-oggi.png` — 128×128 (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-calcolatore.png` — 128×128 (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-ricette.png` — 128×128 (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-con.png` — 128×128 (§16)

@@ -146,7 +146,7 @@ export function DungeonDettaglioPage() {
                 {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
               </div>
-              <MappaIncorporata chiave={area.chiave} versione={`${mappaVersione}-${versioneStati}-${scaricata ? download.dati?.byte ?? 0 : 0}`} altezza={520} onCambiato={() => void dati.ricarica()} />
+              <MappaIncorporata chiave={area.chiave} versione={`${mappaVersione}-${versioneStati}-${scaricata ? download.dati?.byte ?? 0 : 0}`} altezza="max(480px, calc(100vh - 240px))" onCambiato={() => void dati.ricarica()} />
               <div className="flex flex-wrap items-center gap-2 text-[12px]">
                 <button type="button" className={`chip touch ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Mostra anche i gestiti ({gestitiArea})</button>
                 <span className="text-text-muted">Spilli e immagine della pianta si modificano dall'editor («Modifica mappa» nel visore).</span>

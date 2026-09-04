@@ -145,7 +145,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 - Stessa superficie del visore in modalità dedicata (barra rossa «Modifica: <mappa>» sempre visibile, uscita con conferma se ci sono
   modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
-  spillo nel punto), **Elimina**; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
+  spillo nel punto); **Elimina** è un pulsante nel pannello dello spillo selezionato (non uno strumento a parte); pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
@@ -154,8 +154,10 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)
 
-- **Guida → Città**: mappa `tokyo` a schermo con i quartieri come spilli `passaggio` (o griglia di piastrelle con miniature reali generate
-  dall'immagine di base: `GET /api/mappe/:chiave/miniatura`); `QuartierePage` = visore della mappa del quartiere con i luoghi.
+- **Guida → Città**: mappa `tokyo` incorporata sopra le piastrelle dei quartieri (quartieri come spilli `passaggio`); le piastrelle mostrano
+  l'immagine di base stessa ridimensionata dal browser (`MiniaturaMappa`: istanza → asset `mappe/<chiave>` → icona), senza un endpoint di
+  miniature generate lato server (scelta 13.4: evita un ridimensionatore; le immagini sono già leggere); `QuartierePage` = visore incorporato
+  della mappa del quartiere con i luoghi.
 - **Guida → Palazzi**: `DungeonDettaglioPage` = elenco delle aree (mappe figlie in ordine) con la mappa dell'area corrente e gli spilli
   `passaggio` fra area e area; la lista dei punti resta come indice testuale accanto alla mappa.
 - **Dedali (Mementos)**: piani come mappe figlie di `mementos`, con le richieste collegate.
@@ -163,6 +165,8 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
   resta come sorgente opzionale dell'immagine.
 
 ## 10. Home della Partita (13.5 = 12.4, punto 11)
+
+Stato: fatto. La scheda «Oggi» è la predefinita della Partita e compare anche nella Home; il visore incorporato parte da Tokyo e «Sulla mappa» lo sposta sulla mappa dell'azione (Palazzo, Mementos, negozio, luogo del Confidente) centrata sullo spillo.
 
 Scheda «Oggi» nella Partita: a sinistra la guida del giorno corrente (azioni con spunta, avvisi, meteo, collegamenti al punto esatto delle
 pagine), a destra (sotto, su schermi stretti) il visore della mappa globale `tokyo` in versione incorporata (stessa componente, altezza
@@ -184,7 +188,7 @@ quartieri; per le aree dei Palazzi l'immagine di base la fornisce l'utente dall'
 
 ## 13. Ordine di lavoro
 
-Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeService`, rotte, schemi, seed `mappe-editor.json`, client API, test `mappe-editor.test.ts`); pacchetto di esportazione in JSON con immagini base64 (§6), non ZIP. **13.2 fatto** (`VisoreMappa`, `IconaSpillo`, `MappaPage`, rotte `/guida/mappe`): il modello di mapgenie.io è stato verificato dal vivo (barra laterale a sinistra con categorie e conteggi, popup ancorato, controlli in basso a destra, trovati tracciati) e il visore lo segue; il §7 resta valido con queste precisazioni. **13.3 fatto** (`EditorMappaPage`, schermate degli spilli con migrazione 028, riferimenti cercati, passaggi automatici, ZIP per luogo, seed `data/seed/mappe/*.json`); mappa globale di Tokyo e mappa verticale dei Mementos = immagini dell'utente nell'istanza con quartieri/Dedali come passaggi; accessi a Palazzi e Mementos = passaggi dentro le mappe dei luoghi (stazione di Shibuya per i Mementos). **13.4 fatto** (`MappaIncorporata` in Città, quartiere e Palazzo; `MappaInterattiva` rimosso; sezione «Mappe» nella Guida). Restano 13.5 (home «Oggi» = 12.4) e 13.6 (asset).
+Stato al 2026-09-04: **13.1 fatto** (migrazione 027, `sincronizzaMappe`, `mappeService`, rotte, schemi, seed `mappe-editor.json`, client API, test `mappe-editor.test.ts`); pacchetto di esportazione in JSON con immagini base64 (§6), non ZIP. **13.2 fatto** (`VisoreMappa`, `IconaSpillo`, `MappaPage`, rotte `/guida/mappe`): il modello di mapgenie.io è stato verificato dal vivo (barra laterale a sinistra con categorie e conteggi, popup ancorato, controlli in basso a destra, trovati tracciati) e il visore lo segue; il §7 resta valido con queste precisazioni. **13.3 fatto** (`EditorMappaPage`, schermate degli spilli con migrazione 028, riferimenti cercati, passaggi automatici, ZIP per luogo, seed `data/seed/mappe/*.json`); mappa globale di Tokyo e mappa verticale dei Mementos = immagini dell'utente nell'istanza con quartieri/Dedali come passaggi; accessi a Palazzi e Mementos = passaggi dentro le mappe dei luoghi (stazione di Shibuya per i Mementos). **13.4 fatto** (`MappaIncorporata` in Città, quartiere e Palazzo; `MappaInterattiva` rimosso; sezione «Mappe» nella Guida). **13.5 fatto** (`OggiPartita` con `GiornoGuida` e `MappaIncorporata`, nella Partita e nella Home; stato delle azioni e mappa collegata dal server). Resta 13.6 (asset: prompt §18/§19/§20 già censiti, riserve SVG in codice).
 
 13.1 modello + API + migrazione + esportazione/importazione → 13.2 visore → 13.3 editor → 13.4 integrazione → 13.5/12.4 home «Oggi» →
 13.6 asset (i prompt §18/§19 sono già censiti; l'app funziona con le riserve SVG e con le immagini caricate dall'utente).
