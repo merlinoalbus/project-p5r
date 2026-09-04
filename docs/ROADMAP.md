@@ -72,7 +72,8 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 | Step | Contenuto | Stato |
 |---|---|---|
 | 7.4 | Piante dei dungeon con spilli preposizionati: seed di soli collegamenti alle immagini pubblicate (mai nel repo), scaricate nell'istanza al primo uso, coordinate dei punti di interesse già fissate | ⬜ (ricerca piante in corso) |
-| 7.5 | Guida giorno per giorno: percorso completo data per data (trama, cosa fare di giorno e di sera, dove, risposte giuste, avvisi sulle scadenze) con data corrente della partita e azioni spuntabili; cruciverba di Leblanc con le risposte | ⬜ (ricerca in corso) |
+| 7.5a | Cruciverba di Leblanc: 38 cruciverba (data, indizio, risposta italiana e inglese) con spunta per partita ed evento; migrazione 016; `GET /api/compendio/cruciverba?partita`, `PUT /api/partite/:id/cruciverba`; pagina «Guida → Cruciverba di Leblanc» | ⏳ in validazione |
+| 7.5b | Guida giorno per giorno: percorso completo data per data (trama, cosa fare di giorno e di sera, dove, risposte giuste, avvisi sulle scadenze) con data corrente della partita e azioni spuntabili | ⬜ (ricerca in corso) |
 
 ## Fase 8 — Città, attività, inventario
 

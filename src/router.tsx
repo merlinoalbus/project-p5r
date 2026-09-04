@@ -22,6 +22,7 @@ import { BattagliaPage } from './pages/BattagliaPage';
 import { CittaPage } from './pages/CittaPage';
 import { QuartierePage } from './pages/QuartierePage';
 import { AttivitaPage } from './pages/AttivitaPage';
+import { CruciverbaPage } from './pages/CruciverbaPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: 'guida/citta', element: <CittaPage /> },
       { path: 'guida/citta/:chiave', element: <QuartierePage /> },
       { path: 'guida/attivita', element: <AttivitaPage /> },
+      { path: 'guida/cruciverba', element: <CruciverbaPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
