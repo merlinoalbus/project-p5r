@@ -777,7 +777,8 @@ export interface AttivitaDto {
   fascia: 'giorno' | 'sera' | 'entrambe' | null;
   costo: number | null;
   sblocco: string | null;
-  doti: Array<{ dote: DoteChiave; note: number | null; condizione: string | null }>;
+  /** `dote` nulla = effetto su una Dote variabile/non confermata, spiegato in `condizione`. */
+  doti: Array<{ dote: DoteChiave | null; note: number | null; condizione: string | null }>;
   altriEffetti: string | null;
   regole: string;
   premi: string | null;

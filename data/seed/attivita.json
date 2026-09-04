@@ -34,7 +34,13 @@
    "fascia": "sera",
    "costo": 800,
    "sblocco": null,
-   "doti": [],
+   "doti": [
+    {
+     "dote": null,
+     "note": null,
+     "condizione": "Ogni partita garantisce un incremento CASUALE di una dote tra Conoscenza, Fascino, Coraggio e Abilita (esclusa la Gentilezza); la fonte non specifica il numero di note per vittoria"
+    }
+   ],
    "altriEffetti": "Aumenta il Rango Tecnico condiviso dalla squadra: piu danni con attacchi tecnici, maggiore probabilita di atterramento (100% a Rango 4) e piu combinazioni elementali.",
    "regole": "Si puo invitare un compagno per guadagnare punti Confidente; i bonus non sono influenzati da Persona dello stesso Arcano ne dai risultati scolastici.",
    "premi": "1 partita: trofeo 'A Hustler's Journey'; 5 sessioni: premio 'Pool Shark Pup' nel Covo dei Ladri.",
@@ -165,7 +171,13 @@
    "fascia": "giorno",
    "costo": null,
    "sblocco": "Legato al Confidente della Torre (Shinya Oda); avviabile dal 4 settembre tramite la richiesta Mementos 'I baro non vincono mai'",
-   "doti": [],
+   "doti": [
+    {
+     "dote": null,
+     "note": null,
+     "condizione": "Non e stato possibile confermare se Gun About assegni punti diretti a una dote sociale al di fuori delle scene del Confidente Shinya; le fonti consultate lo trattano solo come sfondo narrativo del Confidente Torre"
+    }
+   ],
    "altriEffetti": "Il Confidente Torre (Shinya) potenzia l'uso delle armi da fuoco nei combattimenti (limite munizioni, abbattimenti a distanza).",
    "regole": "Shinya e presente all'arcade il lunedi, martedi e giovedi pomeriggio dopo scuola.",
    "premi": null,
