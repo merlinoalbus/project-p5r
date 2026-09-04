@@ -29,9 +29,12 @@ import type {
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
+import { sincronizzaMappe } from '../mappe/sincronizzaMappe.js';
+import { importaMappe } from '../mappe/mappeService.js';
+import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -69,6 +72,7 @@ interface SeedCompleto {
   doti: DoteSeed[];
   descrizioniPersona: DescrizionePersonaSeed[];
   requisitiConfidenti: RequisitiRangoSeed[];
+  mappeEditor: EsportazioneMappeDto;
   hash: string;
 }
 
@@ -88,6 +92,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     persone: JSON.parse(contenuti['persona.json']) as PersonaSeed[],
     descrizioniPersona: JSON.parse(contenuti['descrizioni-persona.json']) as DescrizionePersonaSeed[],
     requisitiConfidenti: JSON.parse(contenuti['confidenti-requisiti.json']) as RequisitiRangoSeed[],
+    mappeEditor: JSON.parse(contenuti['mappe-editor.json']) as EsportazioneMappeDto,
     skill: JSON.parse(contenuti['skill.json']) as SkillSeed[],
     oggetti: JSON.parse(contenuti['oggetti.json']) as OggettoSeed[],
     fusione: JSON.parse(contenuti['fusione.json']) as FusioneSeed,
@@ -572,6 +577,10 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       if (!db.prepare('SELECT 1 FROM confidente WHERE chiave = ?').get(v.confidente)) throw new Error(`seed: requisiti per un Confidente sconosciuto '${v.confidente}'`);
       v.requisiti.forEach((r, i) => { const { tipo, testo, ...dati } = r; insReq.run(v.confidente, v.rango, i, tipo, JSON.stringify(dati), testo); });
     }
+
+    // ---- Mappe dell'editor (Fase 13): albero dalle entità della guida + spilli dai marcatori, poi le mappe pubblicate nel repository ----
+    sincronizzaMappe(db);
+    if (seed.mappeEditor.mappe.length > 0) importaMappe(seed.mappeEditor, { origine: 'seed' });
 
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');
     insMeta.run('hash', seed.hash);

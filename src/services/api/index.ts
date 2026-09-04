@@ -8,5 +8,6 @@ export * from './compendio';
 export * from './traduzioni';
 export * from './partite';
 export * from './immagini';
+export * from './mappe';
 export * from './fusione';
 export * from './font';

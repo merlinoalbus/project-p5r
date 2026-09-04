@@ -1,3 +1,4 @@
+import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -1355,4 +1356,77 @@ export interface ImmagineDto {
   createdAt: string;
   /** Indirizzo da cui l'immagine è stata scaricata (import da URL, piante delle guide); null per i file caricati. */
   origineUrl: string | null;
+}
+
+// ---- Mappe a livelli e spilli (Fase 13) ----
+
+export interface MappaRiassuntoDto {
+  chiave: string;
+  nome: string;
+  tipo: TipoMappa;
+  genitore: string | null;
+  ordine: number;
+  /** Immagine di base caricata nell'istanza (null se assente). */
+  immagineUrl: string | null;
+  /** Asset del repository usato come immagine di base quando manca quella dell'istanza (es. `mappe/citta-shibuya`). */
+  asset: string | null;
+  entita: { tipo: string; chiave: string } | null;
+  origine: 'seed' | 'utente';
+  numeroSpilli: number;
+  numeroFigli: number;
+  updatedAt: string;
+}
+
+export interface DettaglioSpilloDto {
+  tipo: TipoRiferimento;
+  mappa?: { chiave: string; nome: string; tipo: TipoMappa };
+  punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; stato: string | null };
+  luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
+  negozio?: { chiave: string; nome: string; tipo: string; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean }> } | null;
+  confidente?: { chiave: string; nome: string; arcanaNome: string };
+  richiesta?: { chiave: string; nome: string; stato: string | null };
+}
+
+export interface SpilloDto {
+  id: number;
+  mappaChiave: string;
+  tipo: TipoSpillo;
+  tipoNome: string;
+  colore: string;
+  nome: string;
+  descrizione: string;
+  /** Percentuali dell'immagine di base. */
+  x: number;
+  y: number;
+  riferimento: { tipo: TipoRiferimento; chiave: string } | null;
+  collezionabile: boolean;
+  ordine: number;
+  origine: 'seed' | 'utente';
+  /** Raccolto nella partita (o punto già gestito nella Guida). */
+  raccolto: boolean;
+  dettaglio: DettaglioSpilloDto | null;
+  updatedAt: string;
+}
+
+export interface MappaDto extends MappaRiassuntoDto {
+  larghezza: number | null;
+  altezza: number | null;
+  note: string;
+  genitoreNome: string | null;
+  /** Dalla radice a questa mappa. */
+  percorso: Array<{ chiave: string; nome: string }>;
+  figli: MappaRiassuntoDto[];
+  spilli: SpilloDto[];
+}
+
+/** Pacchetto di esportazione/importazione (versione 1); il seed `mappe-editor.json` usa lo stesso formato senza `immagini`. */
+export interface EsportazioneMappeDto {
+  versione: 1;
+  esportato?: string;
+  mappe: Array<{
+    chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
+    entita: { tipo: string; chiave: string } | null; note: string;
+    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number }>;
+  }>;
+  immagini?: Record<string, { mime: string; base64: string }>;
 }
