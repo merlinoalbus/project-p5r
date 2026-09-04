@@ -58,7 +58,7 @@
     "tipo": "dote",
     "dote": "conoscenza",
     "rango": 4,
-    "testo": "Richiede Dote Conoscenza a rango 4;"
+    "testo": "Richiede Dote Conoscenza a rango 4."
    },
    {
     "tipo": "manuale",
@@ -232,7 +232,7 @@
     "tipo": "dote",
     "dote": "fascino",
     "rango": 3,
-    "testo": "Dote Fascino >= 3;"
+    "testo": "Dote Fascino >= 3."
    },
    {
     "tipo": "confidente",
@@ -508,7 +508,7 @@
     "tipo": "dote",
     "dote": "conoscenza",
     "rango": 3,
-    "testo": "Dote sociale Conoscenza a rango 3;"
+    "testo": "Dote sociale Conoscenza a rango 3."
    },
    {
     "tipo": "persona-arcano",
@@ -595,7 +595,7 @@
    {
     "tipo": "data",
     "dal": "09-20",
-    "testo": "Leblanc, non disponibile prima del 20 settembre;"
+    "testo": "Leblanc, non disponibile prima del 20 settembre."
    }
   ]
  },
@@ -778,7 +778,7 @@
    {
     "tipo": "palazzo",
     "dungeon": "kamoshida",
-    "testo": "Richiede il completamento del Palazzo di Kamoshida;"
+    "testo": "Richiede il completamento del Palazzo di Kamoshida."
    },
    {
     "tipo": "meteo",
@@ -794,7 +794,7 @@
    {
     "tipo": "data",
     "dal": "05-06",
-    "testo": "Non disponibile prima del 6 maggio;"
+    "testo": "Non disponibile prima del 6 maggio."
    }
   ]
  },
@@ -815,7 +815,7 @@
   "requisiti": [
    {
     "tipo": "manuale",
-    "testo": "Richiede che Ryuji mandi un messaggio serale in date specifiche (es."
+    "testo": "Richiede che Ryuji mandi un messaggio serale in date specifiche (es. maggio 18/20/25/27, giugno 22/29, luglio 1/6/29, agosto 12/17, settembre 21, ottobre 2/7, novembre 2/4/9/11/16/30, dicembre 2/7/9, gennaio 13)."
    }
   ]
  },
@@ -1067,7 +1067,7 @@
    {
     "tipo": "persona-arcano",
     "arcano": "Sun",
-    "testo": "Consigliato avere equipaggiata una Persona di Arcano Sole (es."
+    "testo": "Consigliato avere equipaggiata una Persona di Arcano Sole (es. Suzaku, fusione di Berith + Hua Po)."
    }
   ]
  },
@@ -1094,7 +1094,7 @@
    {
     "tipo": "persona-arcano",
     "arcano": "Emperor",
-    "testo": "Avere in inventario una Persona con Arcano Imperatore (es."
+    "testo": "Avere in inventario una Persona con Arcano Imperatore (es. Reggente o Eligor)."
    }
   ]
  },

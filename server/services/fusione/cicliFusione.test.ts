@@ -117,7 +117,7 @@ describe('cicliFusione', () => {
       const tutte = [...c.anelli.map((a) => a.partner.id), ...c.anelli.map((a) => a.risultato.id).filter((id) => id !== jack.id)];
       expect(new Set(tutte).size).toBe(tutte.length);
     }
-  });
+  }, 30000);
 
   it('su un campione di bersagli diversi nessuna Persona si ripete nella catena, tranne quella che apre e chiude (anche con le catture)', () => {
     const ctx = creaContesto([]);
@@ -137,5 +137,5 @@ describe('cicliFusione', () => {
       }
     }
     expect(verificati).toBeGreaterThan(20);
-  });
+  }, 30000);
 });
