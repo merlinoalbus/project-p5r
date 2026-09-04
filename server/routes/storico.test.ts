@@ -77,11 +77,11 @@ describe('API storico', () => {
     const dia = skills.find((x) => x.nome === 'Agi')!; // Pixie non conosce Agi: compare fra le «apprese»
     expect(poss.skill.some((x) => x.id === dia.id)).toBe(false);
     const nuoveSkill = [...poss.skill.map((x) => x.id).slice(0, 3), dia.id];
-    await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 9, skillIds: nuoveSkill, statistiche: { forza: 9, magia: 9, resistenza: 9, agilita: 9, fortuna: 9 } });
+    await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 9, skillIds: nuoveSkill, bonus: { forza: 1, magia: 1, resistenza: 1, agilita: 1, fortuna: 1 } });
     await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ note: 'solo note' });
     s = (await request(app).get(`/api/partite/${id}/storico?persona=${pixie}`)).body.data as StoricoDto;
     expect(s.eventi.map((e) => e.tipo)).toEqual(['persona-statistiche', 'persona-skill', 'persona-livello', 'compendio-registrata', 'persona-aggiunta']);
-    expect(s.eventi[0].dettaglio).toContain('FR 9');
+    expect(s.eventi[0].dettaglio).toContain('FR +1');
     expect(s.eventi[1].dettaglio).toContain(dia.nomeIt);
     expect(s.eventi[2]).toMatchObject({ titolo: `${s.eventi[2].personaNomeIt} al livello 9`, dati: { da: 2, a: 9 } });
     await request(app).delete(`/api/partite/${id}/persona/${poss.id}`);

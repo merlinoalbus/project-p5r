@@ -41,7 +41,7 @@ describe('CicliSalvati', () => {
     expect(screen.getByRole('button', { name: 'Esegui anello 1' })).toBeDisabled();
     aggiungiPosseduta.mockResolvedValue({});
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Evoca Pixie/ })); });
-    expect(aggiungiPosseduta).toHaveBeenCalledWith(7, 2, { origine: 'evocazione dal Registro' });
+    expect(aggiungiPosseduta).toHaveBeenCalledWith(7, 2, { origine: 'evocazione dal Registro', daRegistro: true });
     expect(await screen.findByText('Pixie: in scorta')).toBeInTheDocument();
     const esegui = screen.getByRole('button', { name: 'Esegui anello 1' });
     expect(esegui).toBeEnabled();

@@ -66,7 +66,11 @@ export function CompendioPersonale({ partitaId }: Props) {
               <span className="w-9 text-right text-[12px] text-text-muted">Liv. {p.livello}</span>
               <Link to={`/compendio/persona/${p.id}`} className="font-semibold no-underline text-text hover:text-primary flex-1">{p.nomeIt}{p.nomeIt !== p.nome && <span className="text-[12px] font-normal text-text-muted"> {p.nome}</span>}</Link>
               <span className="chip">{p.arcanaNome}</span>
-              {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && <span className="text-[12px] text-text-secondary">reg. liv. {r.livelloRegistrato}</span>}
+              {r?.livelloRegistrato !== null && r?.livelloRegistrato !== undefined && (
+                <span className="text-[12px] text-text-secondary" title={`Istantanea registrata: livello ${r.livelloRegistrato}${r.skill.length ? ` · skill: ${r.skill.map((s) => s.nomeIt).join(', ')}` : ''}${r.tratto ? ` · tratto ${r.tratto.nomeIt}` : ''}${r.carica ? ' · carica' : ''}`}>
+                  reg. liv. {r.livelloRegistrato}{(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const).some((k) => r.bonus[k] !== 0) && ` · bonus ${(['forza', 'magia', 'resistenza', 'agilita', 'fortuna'] as const).filter((k) => r.bonus[k] !== 0).map((k) => `${k.slice(0, 2).toUpperCase()} ${r.bonus[k] > 0 ? '+' : ''}${r.bonus[k]}`).join(' ')}`}{r.skill.length > 0 && ` · ${r.skill.length} skill`}
+                </span>
+              )}
             </li>
           );
         })}

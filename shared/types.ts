@@ -496,6 +496,11 @@ export interface CompendioPartitaDto {
   livello: number;
   registrata: boolean;
   livelloRegistrato: number | null;
+  /** Istantanea presa alla registrazione (Fase 12.2): l'evocazione dal Registro la ripristina. */
+  bonus: StatisticheDto;
+  skill: SkillRiassuntoDto[];
+  tratto: SkillRiassuntoDto | null;
+  carica: boolean;
   updatedAt: string;
 }
 
@@ -509,9 +514,13 @@ export interface PersonaPossedutaDto {
   arcanaNome: string;
   livelloBase: number;
   livello: number;
-  /** Statistiche al livello attuale: registrate dall'utente oppure stimate (+3 punti per livello dalla base). */
+  /** Statistiche effettive al livello attuale: stima del livello (+3 punti per livello dalla base) più il bonus per statistica. */
   statistiche: StatisticheDto;
-  /** true se nessun valore è stato registrato dall'utente: `statistiche` è la stima per il livello. */
+  /** Stima del livello senza bonus. */
+  statisticheStimate: StatisticheDto;
+  /** Bonus per statistica (Potenziamento, Addestramento, Isolamento, Forca): resta quando la Persona sale di livello. */
+  bonus: StatisticheDto;
+  /** true se nessun bonus è registrato: `statistiche` coincide con la stima. */
   statisticheBase: boolean;
   /** Statistiche base della Persona al suo livello base (per il confronto). */
   statisticheBaseLivello: StatisticheDto;

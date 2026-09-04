@@ -30,7 +30,7 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
   const procuraPartner = async () => {
     setOccupato(true);
     try {
-      await aggiungiPosseduta(partitaId, a.partner.id, { origine: av.partnerRegistrato ? 'evocazione dal Registro' : a.partnerModo === 'cattura' ? 'cattura' : 'aggiunta per il ciclo' });
+      await aggiungiPosseduta(partitaId, a.partner.id, { origine: av.partnerRegistrato ? 'evocazione dal Registro' : a.partnerModo === 'cattura' ? 'cattura' : 'aggiunta per il ciclo', daRegistro: av.partnerRegistrato });
       notifica('success', `${a.partner.nomeIt} aggiunta alla scorta.`);
       onCambiato(await ricaricaUno());
     } catch (err) {

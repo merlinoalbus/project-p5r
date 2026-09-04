@@ -59,17 +59,14 @@ export const bodyCompendio = z.object({
   livelloRegistrato: livello.nullable().optional(),
 });
 
-const statistiche = z.object({
-  forza: z.number().int().min(1).max(99),
-  magia: z.number().int().min(1).max(99),
-  resistenza: z.number().int().min(1).max(99),
-  agilita: z.number().int().min(1).max(99),
-  fortuna: z.number().int().min(1).max(99),
+const bonusStatistiche = z.object({
+  forza: z.number().int().min(-99).max(99), magia: z.number().int().min(-99).max(99), resistenza: z.number().int().min(-99).max(99),
+  agilita: z.number().int().min(-99).max(99), fortuna: z.number().int().min(-99).max(99),
 });
 
 const campiPosseduta = {
   livello: livello.optional(),
-  statistiche: statistiche.nullable().optional(),
+  bonus: bonusStatistiche.nullable().optional(),
   trattoSkillId: z.number().int().positive().nullable().optional(),
   inSquadra: z.boolean().optional(),
   carica: z.boolean().optional(),
@@ -77,7 +74,7 @@ const campiPosseduta = {
   skillIds: z.array(z.number().int().positive()).max(8).optional(),
 };
 
-export const bodyAggiungiPosseduta = z.object({ personaId: z.number().int().positive(), ...campiPosseduta, origine: z.string().max(200).optional() });
+export const bodyAggiungiPosseduta = z.object({ personaId: z.number().int().positive(), ...campiPosseduta, origine: z.string().max(200).optional(), daRegistro: z.boolean().optional() });
 
 export const queryStorico = z.object({
   limite: z.coerce.number().int().min(1).max(200).optional(),
@@ -126,7 +123,7 @@ export const bodyFusioneScorta = bodyAnteprimaFusione.extend({
   skillIds: z.array(z.number().int().positive()).max(8).optional(),
   trattoSkillId: z.number().int().positive().nullable().optional(),
   livello: livello.optional(),
-  statistiche: statistiche.nullable().optional(),
+  bonus: bonusStatistiche.nullable().optional(),
   note: z.string().max(2000).optional(),
 });
 export const bodyForca = z.object({

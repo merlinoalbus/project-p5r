@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { aggiornaPosseduta, aggiungiPosseduta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta } from '../../services/api';
+import { aggiornaPosseduta, aggiungiPosseduta, getPersone, getPossedute, getSkills, isApiError, rimuoviPosseduta, getCompendioPartita, registraPosseduta } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState, EmptyState } from '../shared/PageState';
@@ -14,7 +14,7 @@ import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { statistichePerLivello } from '../../../shared/statistiche';
-import type { PersonaPossedutaDto, StatisticheDto } from '../../types';
+import type { CompendioPartitaDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
 import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -28,6 +28,20 @@ export function ScortaPersona({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getPossedute(partitaId), [partitaId]);
   const [aggiunta, setAggiunta] = useState(false);
   const [modifica, setModifica] = useState<PersonaPossedutaDto | null>(null);
+  const compendio = useCarica(() => getCompendioPartita(partitaId), [partitaId]);
+  const istantanee = useMemo(() => new Map((compendio.dati ?? []).map((c) => [c.personaId, c])), [compendio.dati]);
+  const [registrazione, setRegistrazione] = useState<number | null>(null);
+  const registra = async (p: PersonaPossedutaDto) => {
+    setRegistrazione(p.id);
+    try {
+      compendio.imposta(await registraPosseduta(partitaId, p.id));
+      notifica('success', `${p.nomeIt} registrata nel compendio al livello ${p.livello}.`);
+    } catch (err) {
+      notifica('error', err instanceof Error ? err.message : 'Registrazione fallita.');
+    } finally {
+      setRegistrazione(null);
+    }
+  };
 
   const rimuovi = async (p: PersonaPossedutaDto) => {
     if (!dati || !window.confirm(`Rimuovere ${p.nomeIt} dalla scorta? Resta registrata nel compendio.`)) return;
@@ -59,8 +73,12 @@ export function ScortaPersona({ partitaId }: Props) {
                 {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
                 <span className="chip">{p.arcanaNome}</span>
                 {!p.inSquadra && <span className="chip">In deposito</span>}
-                {!p.statisticheBase && <span className="chip chip--attivo">Potenziata</span>}
+                {!p.statisticheBase && <span className="chip chip--attivo" title={descriviBonus(p.bonus)}>Bonus {totaleBonus(p.bonus) > 0 ? '+' : ''}{totaleBonus(p.bonus)}</span>}
+                {(() => { const st = statoIstantanea(p, istantanee.get(p.personaId)); return st === 'aggiornata' ? <span className="chip" title="Il compendio conserva questa versione">Registrata</span> : null; })()}
                 <span className="flex-1" />
+                {statoIstantanea(p, istantanee.get(p.personaId)) !== 'aggiornata' && (
+                  <PulsanteVisivo compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Registra" dettaglio={statoIstantanea(p, istantanee.get(p.personaId)) === 'assente' ? 'nel compendio' : 'aggiorna il compendio'} disabled={registrazione === p.id} onClick={() => void registra(p)} title="Salva nel compendio livello, bonus, skill e tratto di questo esemplare: l'evocazione dal Registro li ripristina" />
+                )}
                 <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => setModifica(p)} />
                 <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" onClick={() => void rimuovi(p)} />
               </div>
@@ -73,8 +91,8 @@ export function ScortaPersona({ partitaId }: Props) {
               </div>
               {p.tratto && <div className="text-[12px] text-text-secondary">Tratto: <strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>}
               <details className="text-[13px]">
-                <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheBase ? '(stimate)' : '(registrate)'}</summary>
-                <div className="pt-2"><StatisticheBarre statistiche={p.statistiche} base={p.statisticheBaseLivello} compatta /></div>
+                <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheBase ? '(stima del livello)' : `(stima più bonus ${descriviBonus(p.bonus)})`}</summary>
+                <div className="pt-2"><StatisticheBarre statistiche={p.statistiche} base={p.statisticheStimate} compatta /></div>
               </details>
             </li>
           ))}
@@ -149,8 +167,9 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const [livello, setLivello] = useState(posseduta.livello);
   const [inSquadra, setInSquadra] = useState(posseduta.inSquadra);
   const [note, setNote] = useState(posseduta.note);
-  const [potenziata, setPotenziata] = useState(!posseduta.statisticheBase);
-  const [statistiche, setStatistiche] = useState<StatisticheDto>(posseduta.statistiche);
+  const [bonus, setBonus] = useState<StatisticheDto>(posseduta.bonus);
+  const stimate = statistichePerLivello(posseduta.statisticheBaseLivello, posseduta.livelloBase, livello);
+  const effettive = Object.fromEntries(ORDINE_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
   const [skillIds, setSkillIds] = useState<number[]>(posseduta.skill.map((s) => s.id));
   const [ricerca, setRicerca] = useState('');
   const [occupato, setOccupato] = useState(false);
@@ -165,7 +184,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
     setOccupato(true);
     try {
       const p = await aggiornaPosseduta(partitaId, posseduta.id, {
-        livello, inSquadra, note, skillIds, statistiche: potenziata ? statistiche : null,
+        livello, inSquadra, note, skillIds, bonus,
       });
       notifica('success', 'Persona aggiornata.');
       onSalvata(p);
@@ -199,25 +218,26 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <label className="flex items-center gap-2 text-[13px] touch">
             <input type="checkbox" checked={inSquadra} onChange={(e) => setInSquadra(e.target.checked)} /> In squadra (non in deposito)
           </label>
-          <label className="flex items-center gap-2 text-[13px] touch">
-            <input type="checkbox" checked={potenziata} onChange={(e) => setPotenziata(e.target.checked)} /> Statistiche potenziate (Potenziamento / Addestramento)
-          </label>
-          {potenziata ? (
+          <div className="flex flex-col gap-1">
+            <span className="form-label m-0">Bonus per statistica (Potenziamento, Addestramento, Isolamento, Forca)</span>
             <div className="grid grid-cols-5 gap-1">
               {ORDINE_STATISTICHE.map((k) => (
                 <label key={k} className="text-[11px] text-text-muted text-center">
-                  {SIGLA_STATISTICA[k]}
-                  <input type="number" min={1} max={99} className="form-input mt-1 px-1 text-center" value={statistiche[k]} onChange={(e) => setStatistiche({ ...statistiche, [k]: Number(e.target.value) })} />
+                  {SIGLA_STATISTICA[k]} <span className="text-text-secondary">({stimate[k]})</span>
+                  <input type="number" min={-99} max={99} className="form-input form-input--compatto mt-1 px-1 text-center w-full" value={bonus[k]} onChange={(e) => setBonus({ ...bonus, [k]: Math.max(-99, Math.min(99, Number(e.target.value) || 0)) })} aria-label={`Bonus ${SIGLA_STATISTICA[k]}`} />
+                  <span className="block text-[12px] font-semibold text-text mt-0.5">= {effettive[k]}</span>
                 </label>
               ))}
             </div>
-          ) : (
-            <StatisticheBarre
-              statistiche={statistichePerLivello(posseduta.statisticheBaseLivello, posseduta.livelloBase, livello)}
-              base={posseduta.statisticheBaseLivello}
-              didascalia={`Stima al livello ${livello} (+3 punti per livello dalla base di livello ${posseduta.livelloBase}); spunta "potenziate" per registrare i valori reali.`}
-            />
-          )}
+            <div className="flex justify-end">
+              <button type="button" className="btn btn-ghost btn-sm" disabled={ORDINE_STATISTICHE.every((k) => bonus[k] === 0)} onClick={() => setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 })}>Azzera i bonus</button>
+            </div>
+          </div>
+          <StatisticheBarre
+            statistiche={effettive}
+            base={stimate}
+            didascalia={`Stima al livello ${livello} (+3 punti per livello dalla base di livello ${posseduta.livelloBase}) più i bonus: i bonus restano quando la Persona sale di livello.`}
+          />
           <label className="form-label">Note
             <textarea className="form-input mt-1 min-h-[80px]" value={note} onChange={(e) => setNote(e.target.value)} />
           </label>
@@ -258,4 +278,22 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
       </div>
     </Modal>
   );
+}
+
+// ---- Aiuti: bonus e istantanea del compendio ----
+
+function totaleBonus(b: StatisticheDto): number {
+  return ORDINE_STATISTICHE.reduce((acc, k) => acc + b[k], 0);
+}
+
+function descriviBonus(b: StatisticheDto): string {
+  return ORDINE_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
+}
+
+/** Confronta l'esemplare con l'istantanea del compendio: assente, da aggiornare o aggiornata. */
+function statoIstantanea(p: PersonaPossedutaDto, c: CompendioPartitaDto | undefined): 'assente' | 'da-aggiornare' | 'aggiornata' {
+  if (!c || !c.registrata || c.livelloRegistrato === null) return 'assente';
+  const stesseSkill = c.skill.length === p.skill.length && c.skill.every((s, i) => s.id === p.skill[i]?.id);
+  const stessoBonus = ORDINE_STATISTICHE.every((k) => c.bonus[k] === p.bonus[k]);
+  return c.livelloRegistrato === p.livello && stesseSkill && stessoBonus && (c.tratto?.id ?? null) === (p.tratto?.id ?? null) && c.carica === p.carica ? 'aggiornata' : 'da-aggiornare';
 }

@@ -245,17 +245,39 @@ describe('API', () => {
     const comp = await request(app).get(`/api/partite/${id}/compendio`);
     expect(comp.body.data).toHaveLength(1);
     expect(comp.body.data[0]).toMatchObject({ nome: 'Jack Frost', registrata: true, livelloRegistrato: 15 });
-    // aggiornamento: livello, statistiche potenziate, skill esplicite
+    // aggiornamento: livello, bonus per statistica (si sommano alla stima del livello), skill esplicite
     const bufu = (await request(app).get('/api/compendio/skill?q=Bufu')).body.data.find((s: { nome: string }) => s.nome === 'Bufu');
-    const upd = await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 20, statistiche: { forza: 10, magia: 30, resistenza: 12, agilita: 14, fortuna: 9 }, skillIds: [bufu.id] });
-    expect(upd.body.data).toMatchObject({ livello: 20, statisticheBase: false, statistiche: { magia: 30 } });
-    expect(upd.body.data.skill).toHaveLength(1);
-    expect((await request(app).get(`/api/partite/${id}/compendio`)).body.data[0].livelloRegistrato).toBe(20);
+    const upd = await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 20, bonus: { forza: 0, magia: 5, resistenza: 0, agilita: 0, fortuna: 0 }, skillIds: [bufu.id] });
+    const aggiornata = upd.body.data as PersonaPossedutaDto;
+    expect(aggiornata).toMatchObject({ livello: 20, statisticheBase: false, bonus: { magia: 5 } });
+    expect(aggiornata.statistiche.magia).toBe(aggiornata.statisticheStimate.magia + 5);
+    expect(aggiornata.skill).toHaveLength(1);
+    // il compendio NON segue i cambiamenti finché non si registra (istantanea alla registrazione)
+    expect((await request(app).get(`/api/partite/${id}/compendio`)).body.data[0]).toMatchObject({ livelloRegistrato: 15, bonus: { magia: 0 } });
+    const reg = await request(app).post(`/api/partite/${id}/persona/${poss.id}/registra`);
+    expect(reg.status).toBe(200);
+    expect(reg.body.data[0]).toMatchObject({ livelloRegistrato: 20, bonus: { magia: 5 }, carica: false });
+    expect(reg.body.data[0].skill.map((x: { id: number }) => x.id)).toEqual([bufu.id]);
+    // il bonus resta quando la Persona sale di livello: le statistiche seguono la stima
+    const liv25 = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 25 })).body.data as PersonaPossedutaDto;
+    expect(liv25.bonus.magia).toBe(5);
+    expect(liv25.statistiche.magia).toBe(liv25.statisticheStimate.magia + 5);
+    expect(liv25.statisticheStimate.magia).toBeGreaterThanOrEqual(aggiornata.statisticheStimate.magia);
     expect((await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ skillIds: [bufu.id, bufu.id] })).status).toBe(400);
     // rimozione dalla scorta: il compendio resta
     expect((await request(app).delete(`/api/partite/${id}/persona/${poss.id}`)).status).toBe(204);
     expect((await request(app).get(`/api/partite/${id}/persona`)).body.data).toHaveLength(0);
     expect((await request(app).get(`/api/partite/${id}/compendio`)).body.data).toHaveLength(1);
+    // evocazione dal Registro: ripristina l'istantanea (livello 20, bonus magia +5, skill Bufu); il compendio resta invariato
+    const evocata = await request(app).post(`/api/partite/${id}/persona`).send({ personaId: jf.id, daRegistro: true, origine: 'evocazione dal Registro' });
+    expect(evocata.status).toBe(201);
+    expect(evocata.body.data).toMatchObject({ livello: 20, bonus: { magia: 5 } });
+    expect((evocata.body.data as PersonaPossedutaDto).skill.map((x) => x.id)).toEqual([bufu.id]);
+    expect((await request(app).get(`/api/partite/${id}/compendio`)).body.data[0]).toMatchObject({ livelloRegistrato: 20 });
+    expect((await request(app).delete(`/api/partite/${id}/persona/${evocata.body.data.id}`)).status).toBe(204);
+    // evocare una Persona non registrata è un errore
+    const pixie = ((await request(app).get('/api/compendio/persona?q=Pixie')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Pixie')!;
+    expect((await request(app).post(`/api/partite/${id}/persona`).send({ personaId: pixie.id, daRegistro: true })).status).toBe(400);
     const dereg = await request(app).put(`/api/partite/${id}/compendio/${jf.id}`).send({ registrata: false });
     expect(dereg.body.data).toHaveLength(0);
 
