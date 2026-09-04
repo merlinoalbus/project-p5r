@@ -73,6 +73,14 @@ export interface FusioneSeed {
 /** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
 export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
 
+/** Percorso giorno per giorno (soluzione allgamestaff): giorni con azioni e riferimenti risolti alle chiavi dell'app. */
+export interface PercorsoSeed {
+  fonti: Array<{ nome: string; url: string; lingua: string; copertura: string }>;
+  giorni: Array<{ data: string; ordine: number; giornoSettimana: string; fase: string; trama: string; vincoli: string[]; meteo: string | null;
+    azioni: Array<{ fascia: 'giorno' | 'sera'; azione: string; tipo: string; riferimento: { tipo: string; chiave: string } | null; riferimentoTesto: string | null; rangoAtteso: number | null; note: string | null }>;
+    avvisi: string[]; fonte: string; coperto: boolean }>;
+}
+
 /** Negozi e articoli (guida allgamestaff + fonti secondarie segnalate da `verificato`). */
 export interface NegoziSeed {
   negozi: Array<{ chiave: string; ordine: number; nome: string; luogo: string; luogoChiave: string | null; tipo: string; gestore: string | null; confidente: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string;

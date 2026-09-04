@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CruciverbaSeed, NegoziSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CruciverbaSeed, NegoziSeed, PercorsoSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -57,6 +57,7 @@ interface SeedCompleto {
   attivita: AttivitaSeed;
   cruciverba: CruciverbaSeed;
   negozi: NegoziSeed;
+  percorso: PercorsoSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -90,6 +91,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     attivita: JSON.parse(contenuti['attivita.json']) as AttivitaSeed,
     cruciverba: JSON.parse(contenuti['cruciverba.json']) as CruciverbaSeed,
     negozi: JSON.parse(contenuti['negozi.json']) as NegoziSeed,
+    percorso: JSON.parse(contenuti['percorso.json']) as PercorsoSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -430,6 +432,21 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     }
     for (const r of db.prepare('SELECT chiave FROM articolo').all() as Array<{ chiave: string }>) if (!chiaviArticoli.has(r.chiave)) db.prepare('DELETE FROM articolo WHERE chiave = ?').run(r.chiave);
     for (const r of db.prepare('SELECT chiave FROM negozio').all() as Array<{ chiave: string }>) if (!chiaviNegozi.has(r.chiave)) db.prepare('DELETE FROM negozio WHERE chiave = ?').run(r.chiave);
+
+    // ---- Percorso giorno per giorno (Fase 7.5b): upsert per data, rimozione orfani; le azioni fatte per partita restano ----
+    const insG = db.prepare(`INSERT INTO giorno_percorso (data, ordine, giorno_settimana, fase, trama, vincoli_json, meteo, azioni_json, avvisi_json, fonte, coperto)
+      VALUES (@data, @ordine, @giorno_settimana, @fase, @trama, @vincoli_json, @meteo, @azioni_json, @avvisi_json, @fonte, @coperto)
+      ON CONFLICT(data) DO UPDATE SET ordine = excluded.ordine, giorno_settimana = excluded.giorno_settimana, fase = excluded.fase, trama = excluded.trama, vincoli_json = excluded.vincoli_json, meteo = excluded.meteo, azioni_json = excluded.azioni_json, avvisi_json = excluded.avvisi_json, fonte = excluded.fonte, coperto = excluded.coperto`);
+    const dateGiorni = new Set<string>();
+    for (const g of seed.percorso.giorni) {
+      dateGiorni.add(g.data);
+      for (const a of g.azioni) {
+        if (a.riferimento?.tipo === 'confidente' && !chiaviConfidenti.has(a.riferimento.chiave)) throw new Error(`Seed percorso: Confidente sconosciuto '${a.riferimento.chiave}' il ${g.data}.`);
+        if (a.riferimento?.tipo === 'dungeon' && !chiaviDungeon.has(a.riferimento.chiave)) throw new Error(`Seed percorso: dungeon sconosciuto '${a.riferimento.chiave}' il ${g.data}.`);
+      }
+      insG.run({ data: g.data, ordine: g.ordine, giorno_settimana: g.giornoSettimana, fase: g.fase, trama: g.trama, vincoli_json: JSON.stringify(g.vincoli), meteo: g.meteo, azioni_json: JSON.stringify(g.azioni), avvisi_json: JSON.stringify(g.avvisi), fonte: g.fonte, coperto: g.coperto ? 1 : 0 });
+    }
+    for (const r of db.prepare('SELECT data FROM giorno_percorso').all() as Array<{ data: string }>) if (!dateGiorni.has(r.data)) db.prepare('DELETE FROM giorno_percorso WHERE data = ?').run(r.data);
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

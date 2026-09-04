@@ -13,6 +13,7 @@ import { dettaglioQuartiere, elencaQuartieri } from '../services/cittaService.js
 import { attivitaTutte } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
+import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -65,6 +66,12 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
+  res.json(indicePercorso((req.query as unknown as { partita?: number }).partita));
+});
+router.get('/percorso/:data', validate({ params: z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) }), query: queryDomande }), (req, res) => {
+  res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
 });
 router.get('/negozi', (_req, res) => {
   res.json(elencaNegozi());

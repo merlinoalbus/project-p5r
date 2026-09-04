@@ -727,6 +727,64 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Guida giorno per giorno (Fase 7.5b) ----
+
+export interface RiferimentoAzioneDto {
+  tipo: 'confidente' | 'dungeon' | 'richiesta' | 'libro' | 'film' | 'attivita' | 'negozio' | 'dote';
+  chiave: string;
+}
+
+export interface AzionePercorsoDto {
+  indice: number;
+  fascia: 'giorno' | 'sera';
+  azione: string;
+  tipo: 'confidente' | 'dote' | 'palazzo' | 'richiesta' | 'acquisto' | 'lavoro' | 'libro' | 'dvd' | 'attivita' | 'esame' | 'trama' | 'velluto' | 'altro';
+  riferimento: RiferimentoAzioneDto | null;
+  riferimentoTesto: string | null;
+  rangoAtteso: number | null;
+  note: string | null;
+  /** Fatta nella partita. */
+  fatta: boolean;
+}
+
+export interface PercorsoGiornoRiassuntoDto {
+  /** 'MM-GG' del calendario di gioco. */
+  giorno: string;
+  giornoSettimana: string;
+  fase: string;
+  meteo: string | null;
+  azioni: number;
+  fatte: number;
+  avvisi: number;
+  coperto: boolean;
+}
+
+export interface PercorsoIndiceDto {
+  giorni: PercorsoGiornoRiassuntoDto[];
+  /** Giorno corrente della partita ('MM-GG'), se indicata e impostato. */
+  dataCorrente: string | null;
+  totaleGiorni: number;
+  giorniCoperti: number;
+}
+
+export interface PercorsoGiornoDto {
+  /** 'MM-GG' del calendario di gioco. */
+  giorno: string;
+  giornoSettimana: string;
+  fase: string;
+  trama: string;
+  vincoli: string[];
+  meteo: string | null;
+  azioni: AzionePercorsoDto[];
+  avvisi: string[];
+  fonte: string;
+  coperto: boolean;
+  precedente: string | null;
+  successivo: string | null;
+  dataCorrente: string | null;
+  fatte: number;
+}
+
 // ---- Negozi e inventario (Fase 8.2) ----
 
 export interface NegozioRiassuntoDto {

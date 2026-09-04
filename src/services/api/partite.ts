@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, CruciverbaDto, FilmDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto,
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto,
 } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
@@ -46,6 +46,11 @@ export const aggiornaDote = (id: number, chiave: string, mod: ModificaDote): Pro
 export const getConfidentiPartita = (id: number): Promise<ConfidentePartitaDto[]> => apiGet(`/partite/${id}/confidenti`);
 export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaConfidente): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${encodeURIComponent(chiave)}`, dati);
+
+/** Azione del percorso fatta (o riaperta) nella partita. */
+export const impostaAzionePercorso = (id: number, data: string, indice: number, fatta: boolean): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { data, indice, fatta });
+/** Giorno corrente della partita (calendario di gioco). */
+export const impostaGiornoCorrente = (id: number, data: string): Promise<{ dataCorrente: string }> => apiPut(`/partite/${id}/giorno`, { data });
 
 /** Articolo acquistato/ottenuto (o riaperto) nella partita. */
 export const impostaAcquisto = (id: number, articolo: string, fatto: boolean): Promise<ArticoloDto> => apiPut(`/partite/${id}/acquisti`, { articolo, fatto });
