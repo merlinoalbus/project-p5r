@@ -44,7 +44,7 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
           <div className="flex flex-wrap gap-1.5 items-center">
             {r.areaChiave && <Link to={`/guida/dungeon/mementos?area=${r.areaChiave}`} className="btn btn-ghost btn-sm no-underline">Apri il Dedalo</Link>}
             {r.confidente && <Link to={`/confidenti/${r.confidente.chiave}`} className="btn btn-ghost btn-sm no-underline">Scheda Confidente</Link>}
-            {r.fonte && <a href={r.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary">fonte</a>}
+            {r.fonte && <a href={r.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
             {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <button type="button" className="btn btn-secondary btn-sm" disabled={occupato} onClick={() => void cambia('accettata')}>Accettata</button>}
             {partitaId && r.stato !== 'completata' && <button type="button" className="btn btn-primary btn-sm" disabled={occupato} onClick={() => void cambia('completata')}>Completata</button>}
             {partitaId && r.stato && <button type="button" className="btn btn-ghost btn-sm" disabled={occupato} onClick={() => void cambia(null)}>Riapri</button>}

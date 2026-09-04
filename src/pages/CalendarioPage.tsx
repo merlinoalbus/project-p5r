@@ -39,7 +39,7 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
             <div key={e.id} className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2 flex-wrap"><span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span><strong>{e.titolo}</strong></div>
               {e.dettaglio && <span className="text-text-secondary">{e.dettaglio}</span>}
-              {e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary">fonte</a>}
+              {e.fonte && <a href={e.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
             </div>
           ))}
           {g.tempoLibero && <span className="text-[12px] text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
@@ -93,7 +93,7 @@ export function CalendarioPage() {
               ) : <p className="m-0 text-[13px] text-text-muted">Nessun evento documentato oggi.</p>}
               {settimanaOggi && (
                 <div className="text-[13px] flex flex-col gap-0.5 pt-1 border-t border-border-light">
-                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="text-[12px] text-primary">guida</a>}</div>
+                  <div className="flex items-center gap-2 flex-wrap"><strong>{settimanaOggi.titolo}</strong><span className="text-text-muted">{settimanaOggi.periodo}</span>{settimanaOggi.url && <a href={settimanaOggi.url} target="_blank" rel="noreferrer" className="credito">guida</a>}</div>
                   <span className="text-text-secondary">{settimanaOggi.riassunto}</span>
                   {settimanaOggi.incertezze && <span className="text-[12px] text-text-muted">Incertezze: {settimanaOggi.incertezze}</span>}
                 </div>

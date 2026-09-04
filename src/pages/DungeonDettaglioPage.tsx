@@ -129,15 +129,15 @@ export function DungeonDettaglioPage() {
                 <span className="text-[12px] text-text-muted flex-1 min-w-[200px]">
                   {fonteUsata ? (
                     <>
-                      Pianta scaricata da <a href={fonteUsata.pagina ?? fonteUsata.url} target="_blank" rel="noreferrer" className="text-primary">{fonteUsata.fonte}</a>{area.pianta && fonteUsata.url === area.pianta.url && area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}{area.pianta && fonteUsata.url !== area.pianta.url ? ' (fonte alternativa: la principale non era raggiungibile)' : ''}, nella tua istanza. Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
+                      Pianta scaricata da <a href={fonteUsata.pagina ?? fonteUsata.url} target="_blank" rel="noreferrer" className="credito">{fonteUsata.fonte}</a>{area.pianta && fonteUsata.url === area.pianta.url && area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}{area.pianta && fonteUsata.url !== area.pianta.url ? ' (fonte alternativa: la principale non era raggiungibile)' : ''}, nella tua istanza. Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
                     </>
                   ) : area.mappa && !area.pianta ? (
                     <>Immagine della pianta importata da te. Gli spilli si spostano in modalità «posiziona».</>
                   ) : area.mappa ? (
-                    <>Immagine della pianta importata da te (la guida <a href={area.pianta!.pagina ?? area.pianta!.url} target="_blank" rel="noreferrer" className="text-primary">{area.pianta!.fonte}</a> ne pubblica una). Gli spilli si spostano in modalità «posiziona».</>
+                    <>Immagine della pianta importata da te (la guida <a href={area.pianta!.pagina ?? area.pianta!.url} target="_blank" rel="noreferrer" className="credito">{area.pianta!.fonte}</a> ne pubblica una). Gli spilli si spostano in modalità «posiziona».</>
                   ) : area.pianta ? (
                     <>
-                      Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="text-primary">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
+                      Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="credito">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
                     </>
                   ) : (
                     <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
@@ -191,7 +191,7 @@ export function DungeonDettaglioPage() {
                       <div className="flex flex-col gap-1.5 pl-5">
                         {p.descrizione && <p className="m-0 text-text-secondary">{p.descrizione}</p>}
                         <Dettagli d={p.dettagli} />
-                        {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary">fonte</a>}
+                        {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
                         <div className="flex flex-wrap gap-1.5">
                           {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
                           {partitaId && p.esauribile && p.stato !== 'esaurito' && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void cambiaStato(p, 'esaurito')}>Esaurito</button>}

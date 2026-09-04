@@ -44,7 +44,7 @@ function Attivita({ a }: { a: AttivitaDto }) {
           {a.altriEffetti && <p className="m-0"><strong>Altri effetti:</strong> {a.altriEffetti}</p>}
           {a.regole && <p className="m-0"><strong>Come funziona:</strong> {a.regole}</p>}
           {a.premi && <p className="m-0"><strong>Premi:</strong> {a.premi}</p>}
-          {a.fonte && <a href={a.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary self-start">fonte</a>}
+          {a.fonte && <a href={a.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
         </div>
       )}
     </li>

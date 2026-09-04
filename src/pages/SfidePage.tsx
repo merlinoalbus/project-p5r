@@ -16,7 +16,7 @@ const SCHEDE = [['battaglie', 'Battaglie Sfida'], ['boss', 'Boss segreti'], ['ma
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="text-[12px] text-primary self-start">fonte</a> : null;
+  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito self-start">fonte</a> : null;
 }
 function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;

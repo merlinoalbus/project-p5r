@@ -22,7 +22,7 @@ const SCHEDE = [
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Fonte({ url }: { url: string | null | undefined }) {
-  return url ? <a href={url} target="_blank" rel="noreferrer" className="text-[12px] text-primary">fonte: allgamestaff</a> : null;
+  return url ? <a href={url} target="_blank" rel="noreferrer" className="credito">fonte: allgamestaff</a> : null;
 }
 
 function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {

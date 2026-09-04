@@ -42,7 +42,7 @@ function Luogo({ l }: { l: LuogoDto }) {
       )}
       {l.negozio && <Link to={`/guida/negozi/${l.negozio}`} className="btn btn-ghost btn-sm self-start no-underline">Articoli in vendita</Link>}
       {l.note && <p className="m-0 text-[12px] text-text-muted">{l.note}</p>}
-      {l.fonte && <a href={l.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary self-start">fonte</a>}
+      {l.fonte && <a href={l.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
     </li>
   );
 }
@@ -65,7 +65,7 @@ export function QuartierePage() {
             <h1 className="m-0 text-2xl font-bold">{q.nome}</h1>
             {q.sblocco && <p className="m-0 mt-1 text-[13px]"><strong>Sblocco:</strong> {q.sblocco}</p>}
             {q.descrizione && <p className="m-0 mt-1 text-[13px] text-text-secondary">{q.descrizione}</p>}
-            {q.fonte && <a href={q.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary">fonte</a>}
+            {q.fonte && <a href={q.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
           </div>
           {tipi.length > 1 && (
             <div className="flex flex-wrap gap-1.5">
