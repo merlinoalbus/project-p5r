@@ -12,6 +12,7 @@ import { Spinner } from '../shared/PageState';
 import { formattaYen } from '../../utils/punti';
 import type { CicloFusioneDto, PersonaRiassuntoDto } from '../../types';
 import { PersonaChip } from './PersonaChip';
+import { OperatoreRicetta } from './RicettaRiga';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 
@@ -43,12 +44,12 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
           <li key={i} className="flex flex-wrap items-center gap-1.5 text-[13px]">
             <span className="w-6 h-6 rounded-full bg-bg-tertiary text-text-muted text-[12px] font-semibold inline-flex items-center justify-center shrink-0" aria-hidden="true">{i + 1}</span>
             <PersonaChip p={a.ingrediente} evidenza={i === 0} />
-            <span className="text-text-muted" aria-hidden="true">+</span>
+            <OperatoreRicetta tipo="piu" />
             <span className="inline-flex flex-col items-start gap-0.5">
               <PersonaChip p={a.partner} title={`${a.partner.arcanaNome} · livello ${a.partner.livello}`} />
               <span className={`chip chip--icona text-[11px] ${a.partnerModo === 'cattura' ? 'text-warning' : ''}`}><IconaAzione chiave={a.partnerModo === 'registro' ? 'evoca' : a.partnerModo === 'cattura' ? 'mappa' : 'raggiunto'} dimensione={12} />{NOME_MODO[a.partnerModo]}{a.partnerModo === 'registro' ? ` · ${formattaYen(a.partnerCosto)}` : ''}</span>
             </span>
-            <span className="text-primary font-black" aria-hidden="true">→</span>
+            <OperatoreRicetta tipo="risultato" />
             <PersonaChip p={a.risultato} evidenza={i === ciclo.anelli.length - 1} />
             <span className="text-[12px] text-text-muted">
               {a.tipo === 'tesoro' ? 'con Demone del Tesoro' : a.tipo === 'stesso-arcano' ? 'stesso arcano' : 'normale'}

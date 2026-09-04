@@ -20,6 +20,7 @@ import { CicliFusione } from '../components/fusione/CicliFusione';
 import { notifica } from '../stores/notificationStore';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PersonaChip } from '../components/fusione/PersonaChip';
+import { OperatoreRicetta } from '../components/fusione/RicettaRiga';
 import { IconaScheda, type ChiaveScheda } from '../components/shared/IconaAzione';
 
 type Vista = 'calcolatore' | 'ricette' | 'con' | 'piani' | 'skill' | 'cicli' | 'forca' | 'coppia' | 'matrice' | 'speciali' | 'tesori';
@@ -183,7 +184,7 @@ export function FusionePage() {
                     {r.ingredienti.map((i, idx) => (
                       <span key={i.id} className="flex items-center gap-1.5">
                         <PersonaChip p={completa(i)} inScorta={inScorta.has(i.id)} />
-                        {idx < r.ingredienti.length - 1 && <span className="text-text-muted" aria-hidden="true">+</span>}
+                        {idx < r.ingredienti.length - 1 && <OperatoreRicetta tipo="piu" />}
                       </span>
                     ))}
                   </div>
