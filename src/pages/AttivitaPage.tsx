@@ -18,7 +18,7 @@ type Scheda = (typeof SCHEDE)[number][0];
 
 function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
   if (doti.length === 0) return null;
-  return <span className="flex flex-wrap gap-1">{doti.map((d, i) => <span key={i} className="chip chip--attivo" title={d.condizione ?? undefined}>{NOME_DOTE[d.dote]}{d.note !== null ? ` ${'♪'.repeat(Math.min(3, d.note))}` : ''}</span>)}</span>;
+  return <span className="flex flex-wrap gap-1">{doti.map((d, i) => <span key={i} className="chip chip--attivo" title={d.condizione ?? undefined}>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}{d.note !== null ? ` ${'♪'.repeat(Math.min(3, d.note))}` : ''}</span>)}</span>;
 }
 
 function Attivita({ a }: { a: AttivitaDto }) {
@@ -40,7 +40,7 @@ function Attivita({ a }: { a: AttivitaDto }) {
       </div>
       {aperta && (
         <div className="flex flex-col gap-1">
-          {a.doti.some((d) => d.condizione) && <ul className="m-0 pl-4">{a.doti.filter((d) => d.condizione).map((d, i) => <li key={i}><strong>{NOME_DOTE[d.dote]}:</strong> {d.condizione}</li>)}</ul>}
+          {a.doti.some((d) => d.condizione) && <ul className="m-0 pl-4">{a.doti.filter((d) => d.condizione).map((d, i) => <li key={i}><strong>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}:</strong> {d.condizione}</li>)}</ul>}
           {a.altriEffetti && <p className="m-0"><strong>Altri effetti:</strong> {a.altriEffetti}</p>}
           {a.regole && <p className="m-0"><strong>Come funziona:</strong> {a.regole}</p>}
           {a.premi && <p className="m-0"><strong>Premi:</strong> {a.premi}</p>}

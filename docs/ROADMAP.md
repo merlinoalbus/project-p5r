@@ -78,7 +78,7 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 
 | Step | Contenuto | Stato |
 |---|---|---|
-| 8.1 | La città (24 quartieri, 84 luoghi con cosa offrono, orari, giorni, sblocco, Confidenti, piatti; luoghi da fonte secondaria segnalati) e Attività e Doti sociali (22 attività, 4 lavori, 46 libri, 21 film/DVD con note delle Doti; libri letti e film visti per partita con evento); migrazione 015; `GET /api/compendio/citta`, `/citta/:chiave`, `/attivita?partita`, `PUT /api/partite/:id/letture`; pagine «Guida → La città» e «Guida → Attività e Doti sociali» | ⏳ in validazione |
+| 8.1 | La città (24 quartieri, 84 luoghi con cosa offrono, orari, giorni, sblocco, Confidenti, piatti; luoghi da fonte secondaria segnalati) e Attività e Doti sociali (26 attività, 4 lavori, 46 libri, 21 film/DVD con note delle Doti; libri letti e film visti per partita con evento); migrazione 015; `GET /api/compendio/citta`, `/citta/:chiave`, `/attivita?partita`, `PUT /api/partite/:id/letture`; pagine «Guida → La città» e «Guida → Attività e Doti sociali» | ⏳ in validazione |
 | 8.2 | Inventario: negozi con articoli (armi, protezioni, accessori, abiti, oggetti, regali) con prezzi, sblocchi e condizioni | ⬜ (ricerca in corso) |
 | 8.3 | Mappe della città in modalità guida: piante dei quartieri con spilli sui luoghi (stesso meccanismo della 7.4) | ⬜ |
 
