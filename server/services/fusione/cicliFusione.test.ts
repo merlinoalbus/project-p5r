@@ -118,4 +118,24 @@ describe('cicliFusione', () => {
       expect(new Set(tutte).size).toBe(tutte.length);
     }
   });
+
+  it('su un campione di bersagli diversi nessuna Persona si ripete nella catena, tranne quella che apre e chiude (anche con le catture)', () => {
+    const ctx = creaContesto([]);
+    // bersagli sui quali la vecchia regola lasciava passare un risultato uguale a un partner precedente, più un campione regolare
+    const nomi = ['Cait Sith', 'Ara Mitama', 'Choronzon', 'Decarabia', 'Incubus', 'Mothman', "Jack-o'-Lantern", 'Pixie', 'Berith', 'Anzu', 'Silky', 'Kelpie'];
+    const disp: Disponibilita = { scorta: new Map(), registro: new Set() };
+    let verificati = 0;
+    for (const nome of nomi) {
+      const target = personaFusione(idDi(nome))!;
+      for (const c of cicliFusione(target, ctx, disp, { lunghezzaMax: 5, alternative: 8, catture: true, livelloMax: null })) {
+        const tutte = [...c.anelli.map((a) => a.partner.id), ...c.anelli.map((a) => a.ingrediente.id).filter((id) => id !== target.id), ...c.anelli.map((a) => a.risultato.id).filter((id) => id !== target.id)];
+        // ingrediente dell'anello i = risultato dell'anello i−1: si conta una volta sola
+        const uniche = new Set([...c.anelli.map((a) => a.partner.id), ...c.anelli.map((a) => a.risultato.id).filter((id) => id !== target.id)]);
+        expect(uniche.size).toBe(c.anelli.length + c.anelli.length - 1);
+        expect(tutte.includes(target.id)).toBe(false);
+        verificati++;
+      }
+    }
+    expect(verificati).toBeGreaterThan(20);
+  });
 });
