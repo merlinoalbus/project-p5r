@@ -7,11 +7,12 @@
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { EseguiFusioneModal } from './EseguiFusioneModal';
 import type { AnteprimaFusioneDto } from '../../types';
 
 const { getAnteprimaFusione, eseguiFusioneScorta } = vi.hoisted(() => ({ getAnteprimaFusione: vi.fn(), eseguiFusioneScorta: vi.fn() }));
-vi.mock('../../services/api', () => ({ getAnteprimaFusione, eseguiFusioneScorta }));
+vi.mock('../../services/api', () => ({ getAnteprimaFusione, eseguiFusioneScorta, getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x') }));
 vi.mock('../../stores/notificationStore', () => ({ notifica: vi.fn() }));
 vi.mock('../shared/Modal', () => ({ Modal: ({ children, titolo }: { children: ReactNode; titolo: string }) => <div><h2>{titolo}</h2>{children}</div> }));
 
@@ -30,7 +31,7 @@ describe('EseguiFusioneModal', () => {
     getAnteprimaFusione.mockResolvedValue(anteprima);
     eseguiFusioneScorta.mockResolvedValue({ risultato: { nomeIt: 'Jack Frost', livello: 14 }, rimosse: [{ nomeIt: 'Arsène' }, { nomeIt: 'Pixie' }], anteprima });
     const onEseguita = vi.fn();
-    render(<EseguiFusioneModal partitaId={7} possedutaIds={[1, 2]} onChiudi={() => undefined} onEseguita={onEseguita} />);
+    render(<MemoryRouter><EseguiFusioneModal partitaId={7} possedutaIds={[1, 2]} onChiudi={() => undefined} onEseguita={onEseguita} /></MemoryRouter>);
     expect(await screen.findByLabelText('Livello di partenza')).toHaveValue(14);
     expect(getAnteprimaFusione).toHaveBeenCalledWith(7, { possedutaIds: [1, 2], risultatoId: undefined });
     expect(screen.getByText(/bonus Confidente \+3/)).toBeInTheDocument();
