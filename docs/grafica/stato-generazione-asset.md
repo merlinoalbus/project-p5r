@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**461 file richiesti: 197 completati e approvati, 264 ancora da consegnare.**
+**461 file richiesti: 205 completati e approvati, 256 ancora da consegnare.**
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -38,7 +38,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | doti | 12 | 12 | 0 |
 | ui | 47 | 47 | 0 |
 | illustrazioni | 15 | 15 | 0 |
-| confidenti | 23 | 8 | 15 |
+| confidenti | 23 | 16 | 7 |
 | persona | 232 | 0 | 232 |
 | meteo | 17 | 0 | 17 |
 
@@ -260,21 +260,21 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 ### confidenti
 
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/igor.png` — 768×1024
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/morgana.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/morgana.png` — 768×1024
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ryuji.png` — 768×1024
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ann.png` — 768×1024
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/yusuke.png` — 768×1024
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/makoto.png` — 768×1024
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/futaba.png` — 768×1024
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/haru.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/akechi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/kasumi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/sojiro.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/takemi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/kawakami.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/yoshida.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/mishima.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/ohya.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/akechi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/kasumi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/sojiro.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/takemi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/kawakami.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/yoshida.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/mishima.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ohya.png` — 768×1024
 - [ ] **DA CONSEGNARE** — `public/asset/confidenti/hifumi.png` — 768×1024
 - [ ] **DA CONSEGNARE** — `public/asset/confidenti/chihaya.png` — 768×1024
 - [ ] **DA CONSEGNARE** — `public/asset/confidenti/iwai.png` — 768×1024
@@ -885,13 +885,28 @@ Primi otto ritratti §9 generati con Imagegen e adattati proporzionalmente a 768
 | Asset | Sorgente Imagegen |
 |---|---|
 | `public/asset/confidenti/igor.png` | `exec-80853693-28f3-449c-860d-6bb463bcdfd0.png` |
-| `public/asset/confidenti/morgana.png` | `exec-69aca76c-87bd-4c92-9a20-963b6238c977.png` |
+| `public/asset/confidenti/morgana.png` | `exec-1693f61b-1d49-4aca-868c-2650b71bb30b.png` — fondo convertito in alfa reale |
 | `public/asset/confidenti/ryuji.png` | `exec-adff4db2-005c-4c03-8d26-3d55e982404b.png` |
 | `public/asset/confidenti/ann.png` | `exec-cb22c942-6d24-41f2-a054-683708de2f75.png` |
 | `public/asset/confidenti/yusuke.png` | `exec-3de7658c-25f7-47ce-9371-d21b8e1af436.png` |
 | `public/asset/confidenti/makoto.png` | `exec-d0bfa718-89dd-4479-bfe4-11c7dd3d5b65.png` |
 | `public/asset/confidenti/futaba.png` | `exec-5ce61061-0534-4afa-a282-b2fe2b204a98.png` |
 | `public/asset/confidenti/haru.png` | `exec-b610619b-79fb-4bb4-8123-24ea266310fc.png` |
+
+### Confidenti — lotto 2
+
+Otto ritratti §9 generati con Imagegen e adattati proporzionalmente a 768×1024 con sfondo alfa reale; approvati da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/akechi.png` | `exec-a80ac9c4-6718-40b8-86fd-dc785495b1b9.png` |
+| `public/asset/confidenti/kasumi.png` | `exec-eb1be64f-a63d-49b7-b420-37e075fa2c11.png` |
+| `public/asset/confidenti/sojiro.png` | `exec-510463ad-10cb-49b2-955d-f0700da11819.png` |
+| `public/asset/confidenti/takemi.png` | `exec-cf092535-e439-4ae7-a60b-5b65ee6f80e4.png` |
+| `public/asset/confidenti/kawakami.png` | `exec-5d2fa746-de09-4234-a225-09e91bb7c02d.png` |
+| `public/asset/confidenti/yoshida.png` | `exec-25436948-9335-4232-bb3d-e48cc23d9ed2.png` |
+| `public/asset/confidenti/mishima.png` | `exec-87e2eb9c-2c27-4af7-a246-78231f048ba4.png` |
+| `public/asset/confidenti/ohya.png` | `exec-5af4d48d-1731-484f-995f-efd97ad6d371.png` |
 
 ## Impronte dei file completati
 
@@ -1089,10 +1104,18 @@ Rilevano eventuali sostituzioni accidentali dei file approvati.
 | `public/asset/illustrazioni/caricamento-7.png` | RGBA | 50566ee112da8c233200cd4b82c4c94b64962a54f8bb8907abb3ff9df1196ca8 |
 | `public/asset/illustrazioni/caricamento-8.png` | RGBA | d93b270ba8d1f3e1a689d198aa298b77a1e0ca6b93cddb46d79409501127161b |
 | `public/asset/confidenti/igor.png` | RGBA | 05e8d8c4a24fab808f86de0d8a41bc1a57afce2bfa4c54ce07f2541646db379d |
-| `public/asset/confidenti/morgana.png` | RGBA | 828ee84cc9543c7b32378ae3f8b86991322b874c996d7e234f9e4450b473982b |
+| `public/asset/confidenti/morgana.png` | RGBA | 6fa790c3c4dd82feb9d7cef72138047b3387d85a2c5303a127c78b2ee1918069 |
 | `public/asset/confidenti/ryuji.png` | RGBA | 063cf6b9cd019688141b9f1df4c53237bebaf845d9a0794d1f6e06d89a692f4b |
 | `public/asset/confidenti/ann.png` | RGBA | 26b4a7fd38a01699d932c3c419784f564444986fcba4804deaff4e369bd4d6c5 |
 | `public/asset/confidenti/yusuke.png` | RGBA | 33ececb619bf492f9ec0ae2f451f6915334ab80bd1c37d93df1eacadd43a85b9 |
 | `public/asset/confidenti/makoto.png` | RGBA | 48a6feb961d4a7ab2f05912a659e7cc276d905f8961c085b80cb28177203323b |
 | `public/asset/confidenti/futaba.png` | RGBA | 4d89245c2883ab99c7efdcc14e433e298ef72c02cc01ecdbb81285a7c0d62806 |
 | `public/asset/confidenti/haru.png` | RGBA | c62b3789f7d353aa8a970663a2015f969d225af6d07d3f69f7e9ec979ec7ccec |
+| `public/asset/confidenti/akechi.png` | RGBA | abcf6b7da170c4edd612c4a708d5e4812adae2cb10d2a18064a88cfb839a446f |
+| `public/asset/confidenti/kasumi.png` | RGBA | d763f7d29064b4c62b3796ebb3caee5aa0e4b1bafe80f037407cffb44f30f5c0 |
+| `public/asset/confidenti/sojiro.png` | RGBA | ab735e8001ba90fa72def90bbd731999958b59128f74f19307e748758c92b8e7 |
+| `public/asset/confidenti/takemi.png` | RGBA | eece60151a2913383c8e471c70f43adf20d8f2d75182970f8f82602658a67628 |
+| `public/asset/confidenti/kawakami.png` | RGBA | fe9f313b13568a1e2499eebb906ada3a0726270ae7965426862f88880eb49608 |
+| `public/asset/confidenti/yoshida.png` | RGBA | d93e671201f10f90b5a036258b540a0b9377f489516899b27145cf2338d904c7 |
+| `public/asset/confidenti/mishima.png` | RGBA | 10131ceebffba6355fc065a5266dc1bd627a21128be265b0be45f06f798970ea |
+| `public/asset/confidenti/ohya.png` | RGBA | f458f37a6f33bac823373662823860845e82a299013718e84d8656631fb2ccbe |
