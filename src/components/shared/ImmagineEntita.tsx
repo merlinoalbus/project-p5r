@@ -11,7 +11,8 @@
 // ============================================================
 
 import { useEffect, useRef, useState } from 'react';
-import { caricaImmagine, eliminaImmagine, getImmagini, importaImmagineDaUrl, urlImmagine, type AmbitoImmagine } from '../../services/api';
+import { caricaImmagine, eliminaImmagine, importaImmagineDaUrl, urlImmagine, type AmbitoImmagine } from '../../services/api';
+import { chiaviPresenti, versioniImmagini as versioni } from './immaginiCache';
 import { notifica } from '../../stores/notificationStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
 import { altezzaPerForma, chiaviAssetPredefinito, type FormaImmagine, type FormaRiquadro } from '../../utils/assetPredefiniti';
@@ -29,26 +30,6 @@ interface Props {
   /** Adattamento dell'immagine al riquadro: senza ritagli (predefinito) oppure a riempire. */
   adatta?: 'contieni' | 'copri';
   className?: string;
-}
-
-/** Cache locale di esistenza per ambito (una sola richiesta di elenco per ambito, invalidata a ogni scrittura). */
-const elenchi = new Map<string, Promise<Set<string>>>();
-/** Versione per (ambito/chiave): cambia a ogni sostituzione così l'URL del file è sempre nuovo, anche fra montaggi. */
-const versioni = new Map<string, number>();
-
-function chiaviPresenti(ambito: AmbitoImmagine): Promise<Set<string>> {
-  let p = elenchi.get(ambito);
-  if (!p) {
-    p = getImmagini(ambito).then((lista) => new Set(lista.map((i) => i.chiave))).catch(() => new Set<string>());
-    elenchi.set(ambito, p);
-  }
-  return p;
-}
-
-/** Aggiorna la cache di esistenza quando un'immagine viene creata fuori dal componente (es. pianta scaricata dalla guida). */
-export function segnaImmaginePresente(ambito: AmbitoImmagine, chiave: string): void {
-  void chiaviPresenti(ambito).then((set) => set.add(chiave));
-  versioni.set(`${ambito}/${chiave}`, (versioni.get(`${ambito}/${chiave}`) ?? 0) + 1);
 }
 
 /** Riquadro immagine con ingrandimento e gestione del caricamento (file o URL). */
