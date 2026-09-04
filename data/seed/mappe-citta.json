@@ -14,7 +14,71 @@
     "Clinica Medica Takemi (icona croce medica, plausibile)",
     "Bagno pubblico (icona vasca da bagno, plausibile)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "yongen-jaya/bagno-pubblico",
+     "x": 90.4,
+     "y": 52.8,
+     "confidenza": "alta",
+     "nota": "icona vapore/fumo tipica dei bagni pubblici giapponesi (onsen)"
+    },
+    {
+     "luogo": "yongen-jaya/batting-cage-yongen",
+     "x": 50.0,
+     "y": 52.4,
+     "confidenza": "media",
+     "nota": "icona interpretata come guantone e mazza da baseball (batting cage); forma non del tutto nitida alla risoluzione della mappa"
+    },
+    {
+     "luogo": "yongen-jaya/cinema-yongen",
+     "x": 21.5,
+     "y": 64.1,
+     "confidenza": "alta",
+     "nota": "icona proiettore cinematografico (bobine); il dato di origine segnala possibile sovrapposizione con l'omonimo cinema di Central Street/Shibuya, dove compare la stessa icona"
+    },
+    {
+     "luogo": "yongen-jaya/clinica-takemi",
+     "x": 45.9,
+     "y": 87.9,
+     "confidenza": "alta",
+     "nota": "icona cuore con croce medica"
+    },
+    {
+     "luogo": "yongen-jaya/distributore-tabaccaio",
+     "x": 54.9,
+     "y": 59.0,
+     "confidenza": "media",
+     "nota": "icona distributore automatico (griglia); sulla mappa compare un secondo distributore identico più a est (non marcato separatamente, stesso tipo di luogo)"
+    },
+    {
+     "luogo": "yongen-jaya/lavanderia-yongen",
+     "x": 78.2,
+     "y": 63.1,
+     "confidenza": "alta",
+     "nota": "icona lavatrice con oblò"
+    },
+    {
+     "luogo": "yongen-jaya/leblanc",
+     "x": 62.5,
+     "y": 49.7,
+     "confidenza": "alta",
+     "nota": "icona tazza di caffè fumante"
+    },
+    {
+     "luogo": "yongen-jaya/negozio-usato-yumenoshima",
+     "x": 52.6,
+     "y": 75.9,
+     "confidenza": "media",
+     "nota": "icona triangolo di riciclo; interpretata come negozio dell'usato, nessuna etichetta testuale di conferma"
+    },
+    {
+     "luogo": "yongen-jaya/super-muramasa",
+     "x": 43.3,
+     "y": 42.8,
+     "confidenza": "media",
+     "nota": "icona carrello della spesa; interpretata come negozio di generi vari/snack, nessuna etichetta testuale di conferma"
+    }
+   ]
   },
   {
    "quartiereChiave": "shibuya",
@@ -34,7 +98,85 @@
     "Videonoleggio Scarlet (icona disco/DVD)",
     "Farmacia Aohige (icona capsula)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "shibuya/aohige",
+     "x": 77.1,
+     "y": 34.4,
+     "confidenza": "alta",
+     "nota": "icona capsula, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/big-bang-burger",
+     "x": 81.2,
+     "y": 46.2,
+     "confidenza": "alta",
+     "nota": "icona hamburger, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/diner",
+     "x": 26.9,
+     "y": 75.9,
+     "confidenza": "media",
+     "nota": "icona forchetta e coltello; interpretata come il Diner (unico ristorante non ancora abbinato su questa via), nessuna etichetta testuale"
+    },
+    {
+     "luogo": "shibuya/ore-no-beko",
+     "x": 67.8,
+     "y": 71.2,
+     "confidenza": "alta",
+     "nota": "icona ciotola, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/protein-lovers",
+     "x": 84.7,
+     "y": 53.8,
+     "confidenza": "alta",
+     "nota": "icona manubrio, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/rocinante",
+     "x": 22.8,
+     "y": 31.5,
+     "confidenza": "media",
+     "nota": "icona cesto/paniere; interpretata come negozio di generi vari (Discount Rocinante) secondo la legenda 'cesto = alimentari', nessuna etichetta testuale"
+    },
+    {
+     "luogo": "shibuya/sala-giochi-shibuya",
+     "x": 33.9,
+     "y": 52.1,
+     "confidenza": "bassa",
+     "nota": "icona a cupola con antenna e gambette (stile macchina acchiappapremi), identica a un'icona di Akihabara abbinata con maggiore sicurezza alla sala giochi; qui l'abbinamento resta incerto"
+    },
+    {
+     "luogo": "shibuya/scarlet",
+     "x": 77.1,
+     "y": 88.2,
+     "confidenza": "alta",
+     "nota": "icona disco/DVD, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/taiheido",
+     "x": 37.4,
+     "y": 88.2,
+     "confidenza": "alta",
+     "nota": "icona libro, corrisponde alla legenda 'libro = libreria'"
+    },
+    {
+     "luogo": "shibuya/triple-seven",
+     "x": 34.5,
+     "y": 45.3,
+     "confidenza": "alta",
+     "nota": "icona '24' del minimarket, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/untouchable",
+     "x": 11.1,
+     "y": 60.0,
+     "confidenza": "alta",
+     "nota": "icona pistola, corrisponde a luoghiVisibili"
+    }
+   ]
   },
   {
    "quartiereChiave": "shinjuku",
@@ -49,7 +191,43 @@
     "Bar Crossroads (icona cocktail, plausibile)",
     "Bancarella della chiromante Chihaya (icona esoterica, plausibile)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "shinjuku/cinema-cult9",
+     "x": 12.8,
+     "y": 83.6,
+     "confidenza": "alta",
+     "nota": "icona proiettore cinematografico (bobine)"
+    },
+    {
+     "luogo": "shinjuku/crossroads",
+     "x": 81.4,
+     "y": 33.1,
+     "confidenza": "alta",
+     "nota": "icona bicchiere da cocktail, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shinjuku/fioraio-sukebe",
+     "x": 68.6,
+     "y": 42.5,
+     "confidenza": "alta",
+     "nota": "icona fiore, corrisponde alla legenda 'fiore = fioraio' e a luoghiVisibili"
+    },
+    {
+     "luogo": "shinjuku/hinokuniya",
+     "x": 34.9,
+     "y": 42.9,
+     "confidenza": "alta",
+     "nota": "icona libro, unica libreria di Shinjuku"
+    },
+    {
+     "luogo": "shinjuku/mran-mran",
+     "x": 67.9,
+     "y": 49.3,
+     "confidenza": "bassa",
+     "nota": "icona di forma incerta (secchio/brocca), interpretata come negozio di articoli vari; il dato di origine ipotizzava qui un'icona esoterica per la bancarella di Chihaya, ma la forma osservata non è chia"
+    }
+   ]
   },
   {
    "quartiereChiave": "kichijoji",
@@ -75,7 +253,50 @@
    "luoghiVisibili": [
     "Distributori automatici speciali (icone vending machine, plausibile)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "akihabara/akiba-electronics",
+     "x": 20.8,
+     "y": 77.4,
+     "confidenza": "media",
+     "nota": "icona spina elettrica con cavo, interpretata come negozio di componenti elettronici, nessuna etichetta testuale"
+    },
+    {
+     "luogo": "akihabara/akindo",
+     "x": 64.0,
+     "y": 16.8,
+     "confidenza": "media",
+     "nota": "icona televisore/monitor, interpretata come megastore di elettronica, nessuna etichetta testuale"
+    },
+    {
+     "luogo": "akihabara/distributori-akihabara",
+     "x": 29.0,
+     "y": 11.8,
+     "confidenza": "alta",
+     "nota": "icona distributore automatico (griglia); sulla mappa compaiono complessivamente 4 icone identiche (coerente con i '6 distributori' della scheda), marcata solo la prima come rappresentativa"
+    },
+    {
+     "luogo": "akihabara/maid-cafe-akihabara",
+     "x": 14.0,
+     "y": 66.8,
+     "confidenza": "bassa",
+     "nota": "icona fiocco/nastro, interpretata come possibile maid cafe (divisa con fiocchi); presenza del locale non confermata nemmeno nella scheda dati di origine"
+    },
+    {
+     "luogo": "akihabara/sala-giochi-akihabara",
+     "x": 18.8,
+     "y": 36.4,
+     "confidenza": "alta",
+     "nota": "icona a cupola con antenna e gambette, interpretata come macchina acchiappapremi/gru; coerente con la descrizione 'Arcade con minigioco della gru'"
+    },
+    {
+     "luogo": "akihabara/tokobushiya",
+     "x": 24.2,
+     "y": 55.8,
+     "confidenza": "media",
+     "nota": "icona di un robot/action figure, interpretata come negozio otaku (merchandise), nessuna etichetta testuale"
+    }
+   ]
   },
   {
    "quartiereChiave": "shujin-academy",
@@ -90,7 +311,15 @@
     "Aula del protagonista, Classe 2-D (etichetta testuale \"2-D\" visibile sulla mappa del 2° piano)",
     "Distributori automatici scolastici (icone vending machine)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "shujin-academy/distributori-shujin",
+     "x": 50.9,
+     "y": 55.5,
+     "confidenza": "alta",
+     "nota": "icona distributore automatico (griglia); sulla mappa del 1° piano compaiono 3 icone identiche (coerenti con '2 nell'edificio principale + 1 nel cortile' della scheda), marcata solo quella centrale com"
+    }
+   ]
   },
   {
    "quartiereChiave": "kanda-jinbocho",
@@ -102,7 +331,15 @@
    "altezza": 418,
    "note": "ATTENZIONE: non è una mappa cartografica ma uno screenshot in-game della via delle librerie di Jinbocho (insegne di negozi di libri usati visibili, in giapponese, non corrispondenti letteralmente a \"Libreria Nagiuri\" dell'app che è presumibilmente una libreria diversa sulla stessa via). Nessuna mappa annotata stile guida trovata per quest'area. È disponibile anche uno screenshot separato dell'interno della Chiesa di Kanda (altro luogo di questo quartiere composito nell'app): https://static.wikia.nocookie.net/megamitensei/images/1/13/Kanda.png/revision/latest?cb=20170728203355 (512x512, verificato 200/image, pagina https://megamitensei.fandom.com/wiki/Kanda ). Il quartiere dell'app unisce due location distinte del gioco (Kanda e Jinbocho), ciascuna con una propria immagine ma senza un'unica mappa combinata.",
    "luoghiVisibili": [],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "kanda-jinbocho/nagiuri",
+     "x": 45.0,
+     "y": 60.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della via delle librerie usate di Jinbocho; insegne leggibili diverse da 'Libreria Nagiuri': non è confermato che il negozio inquadrato sia specificamente Nagiuri, ma l'immagine"
+    }
+   ]
   },
   {
    "quartiereChiave": "ikebukuro",
@@ -126,7 +363,15 @@
    "altezza": 512,
    "note": "Screenshot in-game (non mappa cartografica) di Harajuku: vicolo \"Takenoko Street\" con insegne di negozi di moda/dolciumi (CANDY, Crown Sugar), coerente con la descrizione dell'app (quartiere della moda giovanile). Alt text originale \"Harajuku in Persona 5.\" Ritaglio quadrato 512x512 (probabile crop da screenshot 16:9 più ampio).",
    "luoghiVisibili": [],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "harajuku/harajuku-hangout",
+     "x": 48.0,
+     "y": 55.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) di Takenoko Street, insegne CANDY e Crown Sugar leggibili; spillo centrale sulla via"
+    }
+   ]
   },
   {
    "quartiereChiave": "ueno",
@@ -140,7 +385,15 @@
    "luoghiVisibili": [
     "Museo di Ueno (l'intera immagine raffigura l'interno del museo)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "ueno/museo-ueno",
+     "x": 50.0,
+     "y": 55.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della sala principale del museo con quadri esposti; spillo centrale"
+    }
+   ]
   },
   {
    "quartiereChiave": "inokashira-park",
@@ -154,7 +407,15 @@
    "luoghiVisibili": [
     "Parco Inokashira, area hangout (l'intera immagine raffigura il parco)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "inokashira-park/inokashira-hangout",
+     "x": 45.0,
+     "y": 60.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) del sentiero alberato del parco; spillo centrale sul vialetto"
+    }
+   ]
   },
   {
    "quartiereChiave": "odaiba",
@@ -168,7 +429,15 @@
    "luoghiVisibili": [
     "Odaiba Seaside Park (l'intera immagine raffigura il parco)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "odaiba/odaiba-seaside-park",
+     "x": 60.0,
+     "y": 68.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della panchina con vista sul Rainbow Bridge in notturna; spillo sulla panchina/punto panoramico"
+    }
+   ]
   },
   {
    "quartiereChiave": "shinagawa",
@@ -182,7 +451,15 @@
    "luoghiVisibili": [
     "Acquario di Shinagawa (l'intera immagine raffigura l'acquario, con dialogo di Kasumi Yoshizawa)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "shinagawa/shinagawa-acquario",
+     "x": 55.0,
+     "y": 45.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della vasca principale dell'acquario, scena di dialogo con Kasumi Yoshizawa; spillo sulla vasca"
+    }
+   ]
   },
   {
    "quartiereChiave": "nakano",
@@ -208,7 +485,15 @@
    "luoghiVisibili": [
     "Ristorante di ramen di Ogikubo (l'intera immagine raffigura il locale)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "ogikubo/ogikubo-ramen",
+     "x": 45.0,
+     "y": 55.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'insegna rossa leggibile 'Chuka Soba' del ristorante; spillo sull'ingresso"
+    }
+   ]
   },
   {
    "quartiereChiave": "yokohama-chinatown",
@@ -222,7 +507,15 @@
    "luoghiVisibili": [
     "Chinatown, area hangout (l'intera immagine raffigura la via)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "yokohama-chinatown/chinatown-hangout",
+     "x": 50.0,
+     "y": 48.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della via di Chinatown con lanterne rosse e insegne in caratteri cinesi; spillo centrale sulla via"
+    }
+   ]
   },
   {
    "quartiereChiave": "maihama",
@@ -236,7 +529,15 @@
    "luoghiVisibili": [
     "Tokyo Destinyland (l'intera immagine raffigura l'ingresso del parco)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "maihama/destinyland",
+     "x": 42.0,
+     "y": 45.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) del castello d'ingresso in stile fiabesco di Tokyo Destinyland; spillo sul castello"
+    }
+   ]
   },
   {
    "quartiereChiave": "roppongi",
@@ -250,7 +551,15 @@
    "luoghiVisibili": [
     "Sede Okumura Foods (insegna \"Okumura Foods\" leggibile sull'edificio, corrispondenza certa)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "roppongi/okumura-foods-hq",
+     "x": 38.0,
+     "y": 52.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) del grattacielo con insegna 'Okumura Foods' chiaramente leggibile sulla facciata; identificazione testuale certa, ma posizione nello screenshot resta approssimativa"
+    }
+   ]
   },
   {
    "quartiereChiave": "tsukishima",
@@ -264,7 +573,15 @@
    "luoghiVisibili": [
     "Ristorante di monjayaki (l'intera immagine raffigura l'interno del locale)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "tsukishima/tsukishima-monjayaki",
+     "x": 48.0,
+     "y": 58.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'interno del locale di monjayaki, tavoli con piastra alla griglia; spillo sui tavoli"
+    }
+   ]
   },
   {
    "quartiereChiave": "meiji-shrine",
@@ -278,7 +595,15 @@
    "luoghiVisibili": [
     "Santuario Meiji, area hangout (l'intera immagine raffigura il santuario)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "meiji-shrine/meiji-shrine-hangout",
+     "x": 42.0,
+     "y": 58.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'edificio principale del Santuario Meiji; spillo sull'edificio"
+    }
+   ]
   },
   {
    "quartiereChiave": "ichigaya",
@@ -292,7 +617,15 @@
    "luoghiVisibili": [
     "Laghetto di Ichigaya (l'intera immagine raffigura l'area di pesca)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "ichigaya/laghetto-ichigaya",
+     "x": 48.0,
+     "y": 62.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'area di pesca con moli galleggianti e ceste; spillo centrale"
+    }
+   ]
   },
   {
    "quartiereChiave": "suidobashi",
@@ -306,7 +639,15 @@
    "luoghiVisibili": [
     "Dome Town (l'intera immagine raffigura l'area attrazioni)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "suidobashi/dome-town",
+     "x": 55.0,
+     "y": 40.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) delle attrazioni (montagne russe e ruota panoramica) di Dome Town; spillo sulle attrazioni"
+    }
+   ]
   },
   {
    "quartiereChiave": "asakusa",
@@ -320,7 +661,15 @@
    "luoghiVisibili": [
     "Asakusa, area hangout (l'intera immagine raffigura la via storica)"
    ],
-   "marcatori": []
+   "marcatori": [
+    {
+     "luogo": "asakusa/asakusa-hangout",
+     "x": 48.0,
+     "y": 48.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della via storica con cancello rosso, lanterne e insegna 'Asakusa Tori no Ichi'; spillo centrale sulla via"
+    }
+   ]
   },
   {
    "quartiereChiave": "mementos",
