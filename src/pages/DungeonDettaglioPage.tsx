@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getDungeon, impostaMarcatore, impostaStatoPunto, urlImmagine } from '../services/api';
+import { getDungeon, impostaMarcatore, impostaStatoPunto, scaricaPianta, urlImmagine } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -46,6 +46,10 @@ export function DungeonDettaglioPage() {
   const [selezionato, setSelezionato] = useState<string | null>(null);
   const [posizionamento, setPosizionamento] = useState(false);
   const [mappaVersione, setMappaVersione] = useState(0);
+  // Pianta pubblicata dalla guida ma non ancora nell'istanza: viene scaricata appena l'area è aperta (una richiesta per area)
+  const download = useCarica(() => (area && !area.mappa && area.pianta ? scaricaPianta(area.chiave) : Promise.resolve(null)), [area?.chiave, area?.mappa, area?.pianta?.url]);
+  const scaricata = !!area && !!download.dati && download.dati.area === area.chiave;
+  const mappaPronta = !!area && (area.mappa || mappaVersione > 0 || scaricata);
 
   const puntiVisibili = useMemo(() => (area?.punti ?? []).filter((p) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato)), [area, filtro, mostraGestiti]);
   const gestitiArea = (area?.punti ?? []).filter((p) => p.stato).length;
@@ -116,14 +120,23 @@ export function DungeonDettaglioPage() {
               <h2 className="m-0 text-[15px] font-semibold">{area.nome}</h2>
               {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
               <div className="flex flex-wrap items-center gap-2">
-                <ImmagineEntita key={`${area.chiave}-${mappaVersione}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />
-                <span className="text-[12px] text-text-muted flex-1 min-w-[200px]">Importa la pianta dell'area (file o URL) per usare la mappa interattiva: gli spilli dei punti si fissano toccando la mappa in modalità «posiziona». Le immagini restano nella tua istanza.</span>
+                <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />
+                <span className="text-[12px] text-text-muted flex-1 min-w-[200px]">
+                  {area.pianta ? (
+                    <>
+                      Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="text-primary">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
+                    </>
+                  ) : (
+                    <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
+                  )}
+                </span>
+                {download.errore && area.pianta && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void download.ricarica()}>Riprova</button>}
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => setMappaVersione((v) => v + 1)}>Ricarica mappa</button>
               </div>
-              {area.mappa || mappaVersione > 0 ? (
+              {mappaPronta ? (
                 <MappaInterattiva
-                  key={`${area.chiave}-${mappaVersione}`}
-                  src={`${urlImmagine('mappa', area.chiave)}?v=${mappaVersione}`}
+                  key={`${area.chiave}-${mappaVersione}-${scaricata ? download.dati?.byte ?? 0 : 0}`}
+                  src={`${urlImmagine('mappa', area.chiave)}?v=${mappaVersione}-${scaricata ? download.dati?.byte ?? 0 : 0}`}
                   punti={area.punti.filter((p) => filtro.size === 0 || filtro.has(p.tipo))}
                   selezionato={selezionato}
                   onSeleziona={setSelezionato}
@@ -132,10 +145,10 @@ export function DungeonDettaglioPage() {
                   mostraGestiti={mostraGestiti}
                 />
               ) : (
-                <p className="m-0 text-[13px] text-text-muted">Nessuna mappa importata per quest'area: l'elenco dei punti resta comunque disponibile.</p>
+                <p className="m-0 text-[13px] text-text-muted">{download.caricamento ? 'Scaricamento della pianta in corso…' : 'Nessuna mappa per quest’area: l’elenco dei punti resta comunque disponibile.'}</p>
               )}
               <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                <button type="button" className={`chip touch ${posizionamento ? 'chip--attivo' : ''}`} onClick={() => setPosizionamento((v) => !v)} aria-pressed={posizionamento} disabled={!(area.mappa || mappaVersione > 0)}>Modalità posiziona spilli</button>
+                <button type="button" className={`chip touch ${posizionamento ? 'chip--attivo' : ''}`} onClick={() => setPosizionamento((v) => !v)} aria-pressed={posizionamento} disabled={!mappaPronta}>Modalità posiziona spilli</button>
                 <button type="button" className={`chip touch ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Mostra anche i gestiti ({gestitiArea})</button>
                 {selezionato && <span className="text-text-muted">Selezionato: {area.punti.find((p) => p.chiave === selezionato)?.nome}</span>}
               </div>
@@ -171,7 +184,7 @@ export function DungeonDettaglioPage() {
                           {partitaId && p.esauribile && p.stato !== 'esaurito' && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void cambiaStato(p, 'esaurito')}>Esaurito</button>}
                           {partitaId && p.stato && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void cambiaStato(p, null)}>Riapri</button>}
                           {p.marcatore && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void rimuoviSpillo(p)}>Togli spillo</button>}
-                          {!p.marcatore && (area.mappa || mappaVersione > 0) && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPosizionamento(true)}>Posiziona sulla mappa</button>}
+                          {!p.marcatore && mappaPronta && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPosizionamento(true)}>Posiziona sulla mappa</button>}
                         </div>
                         {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti ottenuti.</span>}
                       </div>

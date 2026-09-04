@@ -1127,7 +1127,12 @@ export interface AreaDungeonDto {
   nome: string;
   descrizione: string;
   /** L'utente ha importato la pianta dell'area (immagine ambito «mappa»). */
+  /** Immagine della pianta presente nell'istanza (ambito «mappa»). */
   mappa: boolean;
+  /** Collegamento alla pianta pubblicata (null se nessuna guida la offre). */
+  pianta: PiantaAreaDto | null;
+  /** Motivo dell'assenza della pianta, se noto (es. piani generati proceduralmente). */
+  piantaAssente: string | null;
   punti: PuntoInteresseDto[];
 }
 
@@ -1146,6 +1151,20 @@ export interface DungeonRiassuntoDto {
   esauribili: number;
   /** Punti con uno stato nella partita (null senza partita). */
   gestiti: number | null;
+}
+
+/** Pianta dell'area pubblicata da una guida: solo collegamento e credito; l'immagine si scarica nell'istanza al primo uso. */
+export interface PiantaAreaDto {
+  url: string;
+  pagina: string | null;
+  fonte: string;
+  licenza: string;
+  larghezza: number | null;
+  altezza: number | null;
+  /** «area» se la pianta è dell'area, «dungeon» se copre più aree. */
+  copertura: string;
+  note: string;
+  alternative: Array<{ url: string; pagina: string | null; fonte: string }>;
 }
 
 export interface DungeonDettaglioDto extends Omit<DungeonRiassuntoDto, 'aree'> {

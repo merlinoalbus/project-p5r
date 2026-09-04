@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, NegoziSeed, PercorsoSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeSeed, NegoziSeed, PercorsoSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -60,6 +60,7 @@ interface SeedCompleto {
   percorso: PercorsoSeed;
   completamento: CompletamentoSeed;
   sfide: SfideSeed;
+  mappe: MappeSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -96,6 +97,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     percorso: JSON.parse(contenuti['percorso.json']) as PercorsoSeed,
     completamento: JSON.parse(contenuti['completamento.json']) as CompletamentoSeed,
     sfide: JSON.parse(contenuti['sfide.json']) as SfideSeed,
+    mappe: JSON.parse(contenuti['mappe.json']) as MappeSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -465,6 +467,28 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
 
     // ---- Sfide (Fase 9.2): Battaglie Sfida, boss segreti, Magnate e tratti in dati_guida ----
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('sfide', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.sfide));
+
+    // ---- Piante delle aree (Fase 7.4): collegamenti con upsert e rimozione orfani; spilli dal seed solo dove l'utente non ne ha fissato uno ----
+    const insP = db.prepare(`INSERT INTO pianta_area (area_chiave, url, pagina, fonte, licenza, larghezza, altezza, copertura, copre_aree_json, note, alternative_json)
+      VALUES (@area_chiave, @url, @pagina, @fonte, @licenza, @larghezza, @altezza, @copertura, @copre_aree_json, @note, @alternative_json)
+      ON CONFLICT(area_chiave) DO UPDATE SET url = excluded.url, pagina = excluded.pagina, fonte = excluded.fonte, licenza = excluded.licenza, larghezza = excluded.larghezza, altezza = excluded.altezza, copertura = excluded.copertura, copre_aree_json = excluded.copre_aree_json, note = excluded.note, alternative_json = excluded.alternative_json`);
+    const insM = db.prepare(`INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'seed')
+      ON CONFLICT(punto_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at WHERE marcatore_mappa.origine = 'seed'`);
+    const areeConPianta = new Set<string>();
+    for (const m of seed.mappe.aree) {
+      if (!chiaviAree.has(m.areaChiave)) throw new Error(`Seed mappe: area sconosciuta '${m.areaChiave}'.`);
+      if (m.url) {
+        areeConPianta.add(m.areaChiave);
+        insP.run({ area_chiave: m.areaChiave, url: m.url, pagina: m.pagina, fonte: m.fonte ?? '', licenza: m.licenza ?? '', larghezza: m.larghezza, altezza: m.altezza, copertura: m.copertura ?? 'area', copre_aree_json: m.copreAree ? JSON.stringify(m.copreAree) : null, note: m.note, alternative_json: JSON.stringify(m.alternative ?? []) });
+      }
+      for (const s of m.marcatori ?? []) {
+        if (!chiaviPunti.has(s.punto)) throw new Error(`Seed mappe: punto sconosciuto '${s.punto}' per gli spilli dell'area '${m.areaChiave}'.`);
+        insM.run(s.punto, s.x, s.y, adesso);
+      }
+    }
+    for (const r of db.prepare('SELECT area_chiave FROM pianta_area').all() as Array<{ area_chiave: string }>) if (!areeConPianta.has(r.area_chiave)) db.prepare('DELETE FROM pianta_area WHERE area_chiave = ?').run(r.area_chiave);
+    const motiviAssenza = Object.fromEntries(seed.mappe.aree.filter((m) => !m.url && m.note).map((m) => [m.areaChiave, m.note]));
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('mappe-assenti', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(motiviAssenza));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

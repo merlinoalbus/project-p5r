@@ -6,7 +6,8 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
-import type { AreaDungeonDto, DungeonDettaglioDto, DungeonRiassuntoDto, PuntoInteresseDto, StatoPunto } from '../../shared/types.js';
+import type { AreaDungeonDto, DungeonDettaglioDto, DungeonRiassuntoDto, PiantaAreaDto, PuntoInteresseDto, StatoPunto } from '../../shared/types.js';
+import { importaImmagineDaUrl } from './immaginiService.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
@@ -20,6 +21,27 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
 
 function marcatori(): Map<string, { x: number; y: number }> {
   return new Map((prepared('SELECT punto_chiave, x, y FROM marcatore_mappa').all() as Array<{ punto_chiave: string; x: number; y: number }>).map((r) => [r.punto_chiave, { x: r.x, y: r.y }]));
+}
+
+interface RigaPianta { area_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; copertura: string; copre_aree_json: string | null; note: string; alternative_json: string }
+
+function pianteAree(): Map<string, RigaPianta> {
+  return new Map((prepared('SELECT * FROM pianta_area').all() as RigaPianta[]).map((r) => [r.area_chiave, r]));
+}
+
+function piantaDto(r: RigaPianta | undefined): PiantaAreaDto | null {
+  if (!r) return null;
+  const alternative = (JSON.parse(r.alternative_json) as Array<{ url: string; pagina: string | null; fonte: string }>).map((a) => ({ url: a.url, pagina: a.pagina ?? null, fonte: a.fonte }));
+  return { url: r.url, pagina: r.pagina, fonte: r.fonte, licenza: r.licenza, larghezza: r.larghezza, altezza: r.altezza, copertura: r.copertura, note: r.note, alternative };
+}
+
+/** Motivi noti dell'assenza di una pianta (dal seed `mappe.json`, campo note delle aree senza url). */
+function motiviAssenza(): Map<string, string> {
+  const m = new Map<string, string>();
+  for (const r of prepared("SELECT chiave, json FROM dati_guida WHERE chiave = 'mappe-assenti'").all() as Array<{ chiave: string; json: string }>) {
+    for (const [k, v] of Object.entries(JSON.parse(r.json) as Record<string, string>)) m.set(k, v);
+  }
+  return m;
 }
 
 function mappePresenti(): Set<string> {
@@ -48,8 +70,10 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const stati = statiPartita(partitaId);
   const marc = marcatori();
   const mappe = mappePresenti();
+  const piante = pianteAree();
+  const assenti = motiviAssenza();
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
-    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave),
+    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave), pianta: piantaDto(piante.get(a.chiave)), piantaAssente: piante.has(a.chiave) ? null : (assenti.get(a.chiave) ?? null),
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine').all(a.chiave) as RigaPunto[]).map((p): PuntoInteresseDto => ({
       chiave: p.chiave, ordine: p.ordine, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dettagli: JSON.parse(p.dettagli_json) as Record<string, unknown>, fonte: p.fonte,
       stato: stati.get(p.chiave) ?? null, marcatore: marc.get(p.chiave) ?? null,
@@ -86,6 +110,23 @@ export function impostaMarcatore(puntoChiave: string, posizione: { x: number; y:
   }
   const x = Math.max(0, Math.min(100, posizione.x));
   const y = Math.max(0, Math.min(100, posizione.y));
-  prepared('INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at) VALUES (?, ?, ?, ?) ON CONFLICT(punto_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at').run(puntoChiave, x, y, nowIso());
+  prepared("INSERT INTO marcatore_mappa (punto_chiave, x, y, updated_at, origine) VALUES (?, ?, ?, ?, 'utente') ON CONFLICT(punto_chiave) DO UPDATE SET x = excluded.x, y = excluded.y, updated_at = excluded.updated_at, origine = 'utente'").run(puntoChiave, x, y, nowIso());
   return { x, y };
+}
+
+/** Scarica nell'istanza la pianta dell'area dall'URL del seed (poi dalle alternative, se il primo fallisce). */
+export async function scaricaPianta(areaChiave: string): Promise<{ area: string; mime: string; byte: number; fonte: string; url: string }> {
+  const r = prepared('SELECT * FROM pianta_area WHERE area_chiave = ?').get(areaChiave) as RigaPianta | undefined;
+  if (!r) throw httpErrors.notFound('pianta-non-disponibile', `Nessuna pianta collegata per l'area '${areaChiave}'.`);
+  const candidati = [{ url: r.url, fonte: r.fonte }, ...(JSON.parse(r.alternative_json) as Array<{ url: string; fonte: string }>).map((a) => ({ url: a.url, fonte: a.fonte }))];
+  let ultimo: unknown = null;
+  for (const c of candidati) {
+    try {
+      const img = await importaImmagineDaUrl('mappa', areaChiave, c.url);
+      return { area: areaChiave, mime: img.mime, byte: img.byte, fonte: c.fonte, url: c.url };
+    } catch (err) {
+      ultimo = err;
+    }
+  }
+  throw httpErrors.badRequest('download-fallito', `Impossibile scaricare la pianta di '${areaChiave}' da nessuna delle fonti collegate${ultimo instanceof Error ? `: ${ultimo.message}` : ''}.`);
 }
