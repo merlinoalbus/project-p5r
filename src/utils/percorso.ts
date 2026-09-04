@@ -58,7 +58,7 @@ export function collegamentoAzione(a: AzionePercorsoDto): CollegamentoAzione | n
 
 /** Testo breve degli effetti applicati alla spunta (es. «Perizia +2 · Ryuji Sakamoto +15 punti»). */
 export function descriviEffetti(e: EffettiAzioneDto): string {
-  const parti = e.doti.map((d) => `${d.nome} +${d.delta}`);
+  const parti = e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
   return parti.join(' · ');
 }
