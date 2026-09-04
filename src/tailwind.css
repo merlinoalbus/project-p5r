@@ -403,12 +403,14 @@
   /* Punteggi delle Doti: tante colonne quante ne stanno, etichette troncate invece che traboccanti */
   /* Sei tessere (cinque Doti + scorta): due per riga sul telefono, tre sulle larghezze intermedie, a riempimento da tablet in su.
      Le colonne fisse evitano la riga spaiata (4 + 2) che lasciava un buco sulla destra. */
-  .kpi-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; min-width: 0; }
+  .kpi-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
   @media (min-width: 420px) { .kpi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (min-width: 768px) { .kpi-griglia { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); } }
   /* Desktop: la carta e larga e le sei tessere su una riga si stiravano fino a 200 px l'una; tre per riga, compatte */
   @media (min-width: 1360px) { .kpi-griglia { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); max-width: 420px; } }
-  .kpi-tile--compatto { padding: 5px 8px; min-width: 0; border-radius: var(--radius-md); }
+  /* Specificita maggiore di `.kpi-tile` (definita piu avanti con min-width e padding da cruscotto): nella griglia le tessere
+     devono stare nella loro colonna, altrimenti si sovrappongono */
+  .kpi-griglia > .kpi-tile, .kpi-tile--compatto { padding: 7px 10px; min-width: 0; width: auto; border-radius: var(--radius-md); }
   .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
   .kpi-tile--compatto .kpi-value { font-size: 20px; line-height: 1.05; }
