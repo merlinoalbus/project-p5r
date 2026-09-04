@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**660 file richiesti: 621 completati e approvati, 39 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**665 file richiesti: 640 completati e approvati, 25 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -49,7 +49,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | ui (schede Partita e Fusione, §16) | 17 | 17 | 0 |
 | ui (azioni, §17) | 46 | 46 | 0 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
-| ui (spilli, §18) | 14 | 0 | 14 |
+| ui (spilli, §18) | 19 | 19 | 0 |
 | mappe (§19) | 25 | 0 | 25 |
 
 ## Elenco degli asset da consegnare
@@ -84,20 +84,25 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/ella.png` — 768×768 (§15)
 
 ### ui — spilli (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-negozio.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-forziere.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-boss.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-miniboss.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sicura.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-scorciatoia.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-confidente.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-attivita.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-ristorante.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-distributore.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-treno.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-nota.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-negozio.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-forziere.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-boss.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-miniboss.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-sicura.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-scorciatoia.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-confidente.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-attivita.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-ristorante.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-distributore.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-treno.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-nota.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-nemico.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-oggetto-chiave.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-punto-sensibile.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro-palazzo.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
 
 ### mappe (§19)
 - [ ] **DA CONSEGNARE** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
