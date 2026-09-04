@@ -403,6 +403,9 @@ base (`impostaImmagineMappa`, corpo grezzo `image/*`, dimensioni da `dimensioniI
 `/esporta`, `/importa`, `/entita/:tipo/:chiave`, `/:chiave`, `/:chiave/immagine`, `/:chiave/spilli`, `/spilli/:id`) e
 `PUT /api/partite/:id/spilli/:spilloId`; schemi zod in `server/schemas/mappe.ts`; client `src/services/api/mappe.ts`. Le vecchie rotte
 dei marcatori e delle piante restano per le pagine attuali finché 13.4 non le sostituisce.
+`importaMappe` senza «sovrascrivi» rimpiazza solo gli spilli della stessa origine del pacchetto: il seed aggiorna i propri spilli e conserva
+quelli aggiunti dall'utente su una mappa del seed; `spillo.tipo` è validato dall'applicazione (zod + registro) e non da un CHECK, perché il
+registro dei tipi può crescere senza migrazioni.
 
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,

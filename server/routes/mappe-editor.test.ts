@@ -9,7 +9,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from '../services/seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import { dimensioniImmagine } from '../services/mappe/mappeService.js';
+import { dimensioniImmagine, importaMappe } from '../services/mappe/mappeService.js';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../shared/types.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
@@ -102,6 +102,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'forziere', nome: 'Fuori', x: 150, y: 10 })).status).toBe(400);
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'drago', nome: 'Tipo ignoto', x: 1, y: 1 })).status).toBe(400);
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Verso il nulla', x: 1, y: 1, riferimento: { tipo: 'mappa', chiave: 'non-esiste' } })).status).toBe(404);
+    expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'negozio', nome: 'Negozio fantasma', x: 1, y: 1, riferimento: { tipo: 'negozio', chiave: 'non-esiste' } })).status).toBe(404);
     const passaggio = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Torna a Shibuya', x: 50, y: 95, riferimento: { tipo: 'mappa', chiave: 'citta-shibuya' } })).body.data as SpilloDto;
     expect(passaggio.dettaglio).toMatchObject({ tipo: 'mappa', mappa: { chiave: 'citta-shibuya' } });
     expect(passaggio.collezionabile).toBe(false);
@@ -167,12 +168,38 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: nuova })).body.data).toMatchObject({ mappe: 2, immagini: 1, saltate: [] });
     expect(((await request(app).get('/api/mappe/figlia-nuova')).body.data as MappaDto).percorso.map((p) => p.chiave)).toEqual(['madre-nuova', 'figlia-nuova']);
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { versione: 2, mappe: [] } })).status).toBe(400);
+    // chiave o tipo non validi → la mappa finisce in «saltate» senza far fallire il resto
+    const mista: EsportazioneMappeDto = { versione: 1, mappe: [
+      { chiave: 'Chiave Errata', nome: 'x', tipo: 'generica', genitore: null, ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '', spilli: [] },
+      { chiave: 'tipo-errato', nome: 'x', tipo: 'castello' as unknown as 'generica', genitore: null, ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '', spilli: [] },
+      { chiave: 'valida-mista', nome: 'Valida', tipo: 'generica', genitore: null, ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '', spilli: [{ tipo: 'nota', nome: 'Ok', descrizione: '', x: 1, y: 1, riferimento: null, collezionabile: false, ordine: 0 }] },
+    ] };
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: mista })).body.data).toMatchObject({ mappe: 1, spilli: 1, saltate: ['Chiave Errata', 'tipo-errato'] });
+    expect((await request(app).delete('/api/mappe/valida-mista')).status).toBe(204);
 
     // eliminazione: i figli restano orfani (genitore null), gli spilli spariscono
     expect((await request(app).delete('/api/mappe/madre-nuova')).status).toBe(204);
     expect(((await request(app).get('/api/mappe/figlia-nuova')).body.data as MappaDto).genitore).toBeNull();
     expect((await request(app).delete('/api/mappe/prova-negozio')).status).toBe(204);
     expect((await request(app).get('/api/mappe/prova-negozio')).status).toBe(404);
+  });
+
+  it('il seed non cancella gli spilli aggiunti dall’utente su una mappa del seed (reseed con mappe-editor popolato)', async () => {
+    const mio = (await request(app).post('/api/mappe/citta-shibuya/spilli').send({ tipo: 'nota', nome: 'Il mio appunto', x: 33, y: 44 })).body.data as SpilloDto;
+    expect(mio.origine).toBe('utente');
+    const prima = ((await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto).spilli;
+    // pacchetto «seed» per la stessa mappa (origine seed): sostituisce i soli spilli di origine seed
+    const seed: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: 'citta-shibuya', nome: 'Shibuya', tipo: 'quartiere', genitore: 'tokyo', ordine: 1, immagine: null, asset: 'mappe/citta-shibuya', larghezza: null, altezza: null, entita: { tipo: 'quartiere', chiave: 'shibuya' }, note: '', spilli: [{ tipo: 'nota', nome: 'Nota del seed', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0 }] }] };
+    expect(importaMappe(seed, { origine: 'seed' })).toMatchObject({ mappe: 1, spilli: 1, saltate: [] });
+    const dopo = ((await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto).spilli;
+    expect(dopo.some((s) => s.id === mio.id && s.nome === 'Il mio appunto')).toBe(true);
+    expect(dopo.some((s) => s.nome === 'Nota del seed' && s.origine === 'seed')).toBe(true);
+    expect(dopo.filter((s) => s.origine === 'seed' && s.nome !== 'Nota del seed')).toHaveLength(0);
+    expect(dopo.length).toBe(prima.filter((s) => s.origine === 'utente').length + 1);
+    // un pacchetto dell'utente senza «sovrascrivi» salta la mappa esistente; con «sovrascrivi» la sostituisce per intero
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: seed })).body.data).toMatchObject({ mappe: 0, saltate: ['citta-shibuya'] });
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: seed, sovrascrivi: true })).body.data).toMatchObject({ mappe: 1, spilli: 1 });
+    expect(((await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto).spilli.map((s) => s.nome)).toEqual(['Nota del seed']);
   });
 
   it('dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP', () => {

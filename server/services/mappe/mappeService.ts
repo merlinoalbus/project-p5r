@@ -296,7 +296,8 @@ export function esportaMappe(): EsportazioneMappeDto {
 
 export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[] }
 
-/** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti, altrimenti salta le mappe già presenti. */
+/** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
+ * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
 export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi?: boolean; origine?: 'seed' | 'utente' } = {}): EsitoImportazione {
   if (!pacchetto || pacchetto.versione !== 1 || !Array.isArray(pacchetto.mappe)) throw httpErrors.badRequest('pacchetto-non-valido', 'Pacchetto delle mappe non riconosciuto (versione 1 attesa).');
   const origine = opz.origine ?? 'utente';
@@ -314,7 +315,10 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
           larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at`)
         .run(m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null, origine, m.note ?? '', adesso);
-      prepared('DELETE FROM spillo WHERE mappa_chiave = ?').run(m.chiave);
+      // Con «sovrascrivi» la mappa viene sostituita per intero; altrimenti (seed sopra seed) si rimpiazzano solo gli spilli della stessa
+      // origine, così gli spilli aggiunti dall'utente su una mappa del seed sopravvivono al reseed.
+      if (opz.sovrascrivi) prepared('DELETE FROM spillo WHERE mappa_chiave = ?').run(m.chiave);
+      else prepared('DELETE FROM spillo WHERE mappa_chiave = ? AND origine = ?').run(m.chiave, origine);
       for (const s of m.spilli ?? []) {
         if (!(TIPI_SPILLO as readonly string[]).includes(s.tipo)) continue;
         prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
