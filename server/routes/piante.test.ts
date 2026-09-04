@@ -49,7 +49,10 @@ describe('Piante delle aree', () => {
     // gli spilli dal seed (se presenti) sono marcati come tali
     const origini = getDb().prepare('SELECT origine, COUNT(*) AS n FROM marcatore_mappa GROUP BY origine').all() as Array<{ origine: string; n: number }>;
     expect(origini.every((o) => o.origine === 'seed')).toBe(true);
-    expect(origini.reduce((s, o) => s + o.n, 0)).toBe(conSpillo.length);
+    // 7.4b: 187 spilli in tutto, di cui 21 nel Palazzo di Kamoshida
+    expect(origini.reduce((s, o) => s + o.n, 0)).toBe(187);
+    expect((getDb().prepare("SELECT COUNT(*) AS n FROM marcatore_mappa WHERE punto_chiave LIKE 'kamoshida-%'").get() as { n: number }).n).toBe(conSpillo.length);
+    expect(conSpillo).toHaveLength(21);
     const punto = k.aree[0].punti[0];
     await request(app).put('/api/mappe/marcatori').send({ punto: punto.chiave, x: 33, y: 44 });
     caricaSeed(getDb(), DIR_SEED, true);
