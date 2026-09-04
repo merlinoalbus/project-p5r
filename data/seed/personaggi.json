@@ -984,7 +984,12 @@
    "campiDaFontiSecondarie": [
     "ruolo"
    ],
-   "fontiSecondarie": []
+   "fontiSecondarie": [
+    {
+     "campo": "ruolo",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/"
+    }
+   ]
   }
  ],
  "gruppi": [

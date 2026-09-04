@@ -1114,17 +1114,6 @@
  },
  {
   "confidente": "ohya",
-  "rango": 1,
-  "requisiti": [
-   {
-    "tipo": "data",
-    "dal": "07-05",
-    "testo": "Disponibile dal 5 luglio: prima sera utile per raggiungere il Bar Crossroads a Shinjuku e incontrare Ohya."
-   }
-  ]
- },
- {
-  "confidente": "ohya",
   "rango": 4,
   "requisiti": [
    {
