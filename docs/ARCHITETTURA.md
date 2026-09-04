@@ -189,6 +189,11 @@ lo restituisce collegando ogni maschera dell'indice delle Ombre alla Persona del
 italiano). L'indice unisce le tabelle dei Palazzi, le tabelle di negoziazione già nei punti dei dungeon e le Ombre dei Dedali
 (deduplicate per dungeon + maschera).
 
+### Città e attività (Fase 8.1)
+Migrazione 015: `quartiere`, `luogo` (chiave `<quartiere>/<luogo>`, Confidenti e attività in JSON, piatti in JSON, flag `verificato`),
+`attivita` (compresi i lavori, Doti in JSON), `libro`, `film`, `lettura_partita` (libri letti / film visti). Seed `citta.json` e
+`attivita.json` generati dalla ricerca (allgamestaff + fonti secondarie segnalate). `cittaService` e `attivitaService`; evento «lettura».
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

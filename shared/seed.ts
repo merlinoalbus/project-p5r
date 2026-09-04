@@ -73,6 +73,19 @@ export interface FusioneSeed {
 /** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
 export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
 
+/** Città: quartieri e luoghi (guida allgamestaff + fonti secondarie segnalate da `verificato`). */
+export interface CittaSeed {
+  quartieri: Array<{ chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string;
+    luoghi: Array<{ chiave: string; ordine: number; tipo: string; nome: string; cosaOffre: string; quando: string | null; giorni: string | null; sblocco: string | null; confidenti: string[]; attivita: string[]; negozio: string | null; piatti: Array<{ nome: string; prezzo: number | null; effetto: string }> | null; note: string | null; fonte: string; verificato: boolean }> }>;
+}
+
+/** Attività del tempo libero (compresi i lavori), libri e film. */
+export interface AttivitaSeed {
+  attivita: Array<{ chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogoChiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; doti: Array<{ dote: string; note: number | null; condizione: string | null }>; altriEffetti: string | null; regole: string; premi: string | null; paga: string | null; fonte: string; verificato: boolean }>;
+  libri: Array<{ chiave: string; ordine: number; nome: string; nomeIt: string | null; dove: string; prezzo: number | null; disponibileDal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: boolean }>;
+  film: Array<{ chiave: string; ordine: number; nome: string; nomeIt: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; prezzo: number | null; dettagli: string | null; fonte: string; verificato: boolean }>;
+}
+
 /** Richieste dei Mementos e Jose (guida allgamestaff). */
 export interface MementosSeed {
   richieste: Array<{ chiave: string; nome: string; committente: string; disponibileDal: string; scadenza: string; area: string; areaChiave: string | null; piano: string; bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean }; ricompense: string[]; confidente: { chiave: string; rango?: number | null } | null; note: string; fonte: string }>;

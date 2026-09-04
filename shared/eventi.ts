@@ -31,6 +31,7 @@ export const TIPI_EVENTO = [
   'domanda-risposta',
   'punto-dungeon',
   'richiesta-completata',
+  'lettura',
 ] as const;
 
 export type TipoEvento = (typeof TIPI_EVENTO)[number];
@@ -61,6 +62,7 @@ export const ETICHETTE_EVENTO: Readonly<Record<TipoEvento, { nome: string; grupp
   'domanda-risposta': { nome: 'Domanda in classe risposta', gruppo: 'doti' },
   'punto-dungeon': { nome: 'Punto di interesse gestito', gruppo: 'dungeon' },
   'richiesta-completata': { nome: 'Richiesta dei Mementos completata', gruppo: 'dungeon' },
+  lettura: { nome: 'Libro letto o film visto', gruppo: 'doti' },
 };
 
 export const GRUPPI_EVENTO: ReadonlyArray<{ chiave: (typeof ETICHETTE_EVENTO)[TipoEvento]['gruppo']; nome: string }> = [

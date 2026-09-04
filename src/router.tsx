@@ -19,6 +19,9 @@ import { DungeonPage } from './pages/DungeonPage';
 import { DungeonDettaglioPage } from './pages/DungeonDettaglioPage';
 import { RichiestePage } from './pages/RichiestePage';
 import { BattagliaPage } from './pages/BattagliaPage';
+import { CittaPage } from './pages/CittaPage';
+import { QuartierePage } from './pages/QuartierePage';
+import { AttivitaPage } from './pages/AttivitaPage';
 import { PartitaPage } from './pages/PartitaPage';
 import { ImpostazioniPage } from './pages/ImpostazioniPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -46,6 +49,9 @@ export const router = createBrowserRouter([
       { path: 'guida/dungeon/:chiave', element: <DungeonDettaglioPage /> },
       { path: 'guida/richieste', element: <RichiestePage /> },
       { path: 'guida/battaglia', element: <BattagliaPage /> },
+      { path: 'guida/citta', element: <CittaPage /> },
+      { path: 'guida/citta/:chiave', element: <QuartierePage /> },
+      { path: 'guida/attivita', element: <AttivitaPage /> },
       { path: 'impostazioni', element: <ImpostazioniPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
