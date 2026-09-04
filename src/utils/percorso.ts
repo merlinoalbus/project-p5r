@@ -2,7 +2,7 @@
 // percorso — etichette dei tipi di azione e collegamenti alle schede dell'app (Fase 7.5b)
 // ============================================================
 
-import type { AzionePercorsoDto } from '../types';
+import type { AzionePercorsoDto, EffettiAzioneDto } from '../types';
 
 export const NOME_TIPO_AZIONE: Record<string, string> = {
   confidente: 'Confidente',
@@ -54,4 +54,11 @@ export function collegamentoAzione(a: AzionePercorsoDto): CollegamentoAzione | n
     case 'richiesta': return { href: '/guida/richieste', etichetta: testo ?? 'Richieste dei Mementos' };
     default: return null;
   }
+}
+
+/** Testo breve degli effetti applicati alla spunta (es. «Perizia +2 · Ryuji Sakamoto +15 punti»). */
+export function descriviEffetti(e: EffettiAzioneDto): string {
+  const parti = e.doti.map((d) => `${d.nome} +${d.delta}`);
+  if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
+  return parti.join(' · ');
 }
