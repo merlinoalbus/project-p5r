@@ -29,7 +29,7 @@ describe('API personaggi', () => {
     const d = res.body.data as PersonaggiDto;
     // 27 con Lavenza (Stanza di Velluto, aggiunta il 2026-09-04 su richiesta dell'utente)
     expect(d.personaggi).toHaveLength(27);
-    expect(d.gruppi.find((g) => g.nome === 'Stanza di Velluto')!.membri.map((m) => (typeof m === 'string' ? m : m.chiave))).toContain('lavenza');
+    expect(d.gruppi.find((g) => g.nome === 'Stanza di Velluto')!.membri).toContain('lavenza');
     expect(d.personaggi.filter((p) => p.giocabile)).toHaveLength(10);
     expect(d.personaggi.filter((p) => p.nomeCodice)).toHaveLength(10);
     expect(d.personaggi[0]).toMatchObject({ chiave: 'joker', nomeCodice: 'Joker', arcano: 'Matto', giocabile: true });
