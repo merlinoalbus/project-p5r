@@ -85,7 +85,7 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 | 8.3 | Mappe della città: seed `mappe-citta.json` con i collegamenti alle mappe pubblicate (22 quartieri su 24 dalla wiki Megami Tensei: 7 mappe annotate stile guida per Yongen-Jaya, Shibuya, Shinjuku, Akihabara, Shujin; schermate di gioco per gli altri; Ikebukuro e Nakano senza immagine); migrazione 022 (`pianta_quartiere`, `marcatore_luogo` con origine); download automatico nell'istanza (`POST /api/mappe/piante-citta/:quartiere/scarica`), spilli dei luoghi (`PUT /api/mappe/marcatori-luoghi`), `MappaInterattiva` riusata con colori per tipo di luogo nella scheda del quartiere | ✅ 2026-09-04 (spilli preposizionati con 8.3b) |
 | 8.3b | Spilli preposizionati sulle mappe dei quartieri: 47 luoghi su 20 quartieri (Shibuya 11, Yongen-Jaya 9, Akihabara 6, Shinjuku 5, uno per gli altri) posizionati sulle mappe scaricate leggendo icone e insegne (confidenza alta 20, media 9, bassa 18 annotata nel seed) e caricati in `marcatore_luogo` con origine seed; l'utente può spostarli o rimuoverli (origine utente, mai sovrascritta dal reseed); senza spilli restano Ikebukuro e Nakano (nessuna mappa), Kichijoji e Mementos (immagini senza insegne leggibili) | ✅ 2026-09-04(approvato dal validatore) |
 
-⬜ 8 (voce precedente) Inventario (negozi, oggetti, armi, accessori, abiti) · Attività (mini-giochi, lavori, libri, DVD) · **Mappe della città in modalità guida** (richiesta utente 2026-09-03: luoghi con cosa offrono; per negozi e punti sensibili elenco di oggetti, armi, accessori, abiti e opzioni disponibili, con date/condizioni)
+✅ 8 (voce precedente, assorbita da 8.1–8.3b) Inventario (negozi, oggetti, armi, accessori, abiti) · Attività (mini-giochi, lavori, libri, DVD) · **Mappe della città in modalità guida** (richiesta utente 2026-09-03: luoghi con cosa offrono; per negozi e punti sensibili elenco di oggetti, armi, accessori, abiti e opzioni disponibili, con date/condizioni)
 ## Fase 9 — Completamento, sfide, boss
 
 | Step | Contenuto | Stato |
@@ -93,7 +93,7 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 | 9.1 | Completamento: seed `completamento.json` (53 trofei con nome italiano e inglese, tipo, come e quando; 6 finali con condizioni e date; Covo dei Ladri con 52 sfide e 36 voci di catalogo; 12 DLC; 11 voci sugli effetti del meteo; Nuova Partita+; differenze Royal/vanilla; fasce orarie e regole del tempo); migrazione 019 (`trofeo`, `trofeo_partita`), consultazione in `dati_guida`; `GET /api/compendio/completamento?partita`, `PUT /api/partite/:id/trofei` (evento «trofeo»); pagina «Guida → Trofei, finali e Covo dei Ladri» a schede | ✅ 2026-09-04 |
 | 9.2 | Sfide e boss: seed `sfide.json` in `dati_guida` (7 Battaglie Sfida con regole, nemici, punteggi, ricompense e strategia; boss segreti Jose, Gemelle Custodi e Lavenza con mosse, resistenze e strategia; Magnate; 90 tratti delle Persona con effetto in italiano, nome inglese dal compendio e compagno per i 18 tratti «Alleati»; statistiche e note dei boss); le 11 domande del game show in TV entrano in `domande.json` (tipo «altro», con spunta per partita); `GET /api/compendio/sfide`; pagina «Guida → Battaglie Sfida, boss segreti e tratti» a schede con ricerca dei tratti | ✅ 2026-09-04 |
 
-⬜ 9 (voce precedente) Trofei, finali, Covo dei Ladri
+✅ 9 (voce precedente, assorbita da 9.1–9.2) Trofei, finali, Covo dei Ladri
 
 ## Fase 10 — Rifiniture e buchi residui del censimento
 
