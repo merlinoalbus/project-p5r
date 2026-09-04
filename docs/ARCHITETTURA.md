@@ -495,7 +495,7 @@ che supera la precedente esclusione.
 - **Formati** — `Topbar` e `PartitaSelettore` stanno in 375 px (logo e selettore restringibili); `.titolo-tasselli` scala sulla larghezza (`clamp(20px, 5.4vw, 42px)`); `FilaScorrevole` (`src/components/shared/FilaScorrevole.tsx`, CSS `.fila-scorrevole`) rende le file di schede/filtri una riga sola scorrevole sotto i 768 px, con la scheda attiva portata in vista; `.home-griglia` con aree per telefono/tablet/desktop; `.kpi-griglia` 2/3/auto colonne; `.sr-only { top:0; left:0 }` fuori dai layer perché un riquadro assoluto da 1 px in fondo a un elenco che scorre allungava il documento (seconda barra verticale); `.btn-nota` compatto col mouse e 44 px sui dispositivi a tocco.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 94 file / 287 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 95 file / 290 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
