@@ -2,15 +2,15 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**461 file richiesti: 117 completati e approvati, 344 ancora da consegnare.**
+**484 file richiesti: 235 completati e approvati, 249 ancora da consegnare.**
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
-Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso ancora mancante, incluse le varianti senza testo; 2 carte e 24 icone degli Arcani ancora da generare.
+Arcani completati: tutte le 48 carte, incluse le varianti senza testo, e tutte le 24 icone sono approvate da galaxy_task_validator.
 
 ## Generazioni non consegnate
 
-- `arcani/hanged.png`: due richieste Imagegen respinte nella fase di output dal filtro automatico (violence/self-harm), nonostante la formulazione allegorica non violenta della carta. Nessun file prodotto. Request ID: `8ab764b4-ac13-404e-a2c5-6642a4fe3d2d`, `df3ac7e4-9da3-416c-a47c-acb428a9beab`, `6f59def4-ad84-4c75-afc7-d002c9528262` (ultimo tentativo con l’icona astratta già approvata come riferimento). Non ripetere gli stessi prompt. La coppia Appeso resta DA CONSEGNARE; la variante senza testo non è stata tentata. L'obiettivo complessivo resta attivo e gli altri asset procedono.
+Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con alfa reale, ridotta proporzionalmente e approvata da galaxy_task_validator.
 
 ## Regole operative
 
@@ -24,6 +24,9 @@ Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso anc
 - Sfondi completi: quattro file (§2) approvati da galaxy_task_validator; pattern verificato anche in ripetizione 2×2.
 - Identità completa: quattro loghi (§1.1), tre icone (§1.2) e quattro splash (§1.3) approvati da galaxy_task_validator.
 - Scale-up in Python autorizzato dall’utente, purché il rapporto di forma sia già corretto: fattore identico sui due assi, nessun ritaglio o deformazione.
+- Ordine richiesto dall’utente: completare la categoria `persona` per ultima, dopo illustrazioni, confidenti e meteo.
+- Per ciascuno dei 23 Confidenti conservare la versione originale già generata e aggiungere una seconda variante `-fedele`, nello stesso stile ma basata sulle fattezze originali mostrate nella guida Steam indicata dall’utente.
+- Per ciascun asset `persona`, recuperare prima un riferimento visivo originale e tradurne i tratti riconoscibili in un prompt testuale preciso per la reinterpretazione richiesta dal §10. Usare lo stesso metodo approvato per i Confidenti fedeli: Imagegen senza riferimento allegato, stile uniforme, alfa nativo prodotto in generazione e nessuno scontorno successivo.
 
 ## Riepilogo
 
@@ -31,13 +34,13 @@ Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso anc
 |---|---:|---:|---:|
 | identita | 11 | 11 | 0 |
 | sfondi | 4 | 4 | 0 |
-| arcani | 72 | 62 | 10 |
+| arcani | 72 | 72 | 0 |
 | elementi | 16 | 16 | 0 |
 | affinita | 12 | 12 | 0 |
-| doti | 12 | 0 | 12 |
-| ui | 47 | 12 | 35 |
-| illustrazioni | 15 | 0 | 15 |
-| confidenti | 23 | 0 | 23 |
+| doti | 12 | 12 | 0 |
+| ui | 47 | 47 | 0 |
+| illustrazioni | 15 | 15 | 0 |
+| confidenti | 46 | 46 | 0 |
 | persona | 232 | 0 | 232 |
 | meteo | 17 | 0 | 17 |
 
@@ -90,8 +93,8 @@ Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso anc
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/fortune-senza-testo.png` — 768×1344
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/strength.png` — 768×1344
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/strength-senza-testo.png` — 768×1344
-- [ ] **DA CONSEGNARE** — `public/asset/arcani/hanged.png` — 768×1344
-- [ ] **DA CONSEGNARE** — `public/asset/arcani/hanged-senza-testo.png` — 768×1344
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/hanged.png` — 768×1344
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/hanged-senza-testo.png` — 768×1344
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/death.png` — 768×1344
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/death-senza-testo.png` — 768×1344
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/temperance.png` — 768×1344
@@ -130,14 +133,14 @@ Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso anc
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/death.png` — 256×256
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/temperance.png` — 256×256
 - [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/devil.png` — 256×256
-- [ ] **GENERATO — in verifica finale** — `public/asset/arcani/icona/tower.png` — 256×256
-- [ ] **GENERATO — in verifica finale** — `public/asset/arcani/icona/star.png` — 256×256
-- [ ] **GENERATO — in verifica finale** — `public/asset/arcani/icona/moon.png` — 256×256
-- [ ] **GENERATO — in verifica finale** — `public/asset/arcani/icona/sun.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/arcani/icona/judgement.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/arcani/icona/world.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/arcani/icona/faith.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/arcani/icona/councillor.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/tower.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/star.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/moon.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/sun.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/judgement.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/world.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/faith.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/arcani/icona/councillor.png` — 256×256
 
 ### elementi
 
@@ -175,18 +178,18 @@ Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso anc
 
 ### doti
 
-- [ ] **DA CONSEGNARE** — `public/asset/doti/conoscenza.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/conoscenza-senza-testo.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/fascino.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/fascino-senza-testo.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/coraggio.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/coraggio-senza-testo.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/gentilezza.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/gentilezza-senza-testo.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/perizia.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/perizia-senza-testo.png` — 512×256
-- [ ] **DA CONSEGNARE** — `public/asset/doti/stella-vuota.png` — 1024×1024
-- [ ] **DA CONSEGNARE** — `public/asset/doti/stella-vuota-senza-testo.png` — 1024×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/conoscenza.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/conoscenza-senza-testo.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/fascino.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/fascino-senza-testo.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/coraggio.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/coraggio-senza-testo.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/gentilezza.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/gentilezza-senza-testo.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/perizia.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/perizia-senza-testo.png` — 512×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/stella-vuota.png` — 1024×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/doti/stella-vuota-senza-testo.png` — 1024×1024
 
 ### ui
 
@@ -202,85 +205,111 @@ Carte degli Arcani: 46 carte approvate, dal Matto al Consigliere, con Appeso anc
 - [x] **COMPLETATO — approvato** — `public/asset/ui/nav-partita-attiva.png` — 256×256
 - [x] **COMPLETATO — approvato** — `public/asset/ui/nav-impostazioni.png` — 256×256
 - [x] **COMPLETATO — approvato** — `public/asset/ui/nav-impostazioni-attiva.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-1.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-2.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-3.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-4.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-5.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-6.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-7.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-8.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-9.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-max.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/rango-senza-testo.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-allarme.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-dlc.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-tesoro.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-speciale.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-nuova-partita.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-senza-testo.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/badge-allarme-senza-testo.png` — 512×192
-- [ ] **DA CONSEGNARE** — `public/asset/ui/pulsante-primario.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/ui/pulsante-secondario.png` — 600×160
-- [ ] **DA CONSEGNARE** — `public/asset/ui/cornice-scheda.png` — 1600×1000
-- [ ] **DA CONSEGNARE** — `public/asset/ui/stat-forza.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/stat-magia.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/stat-resistenza.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/stat-agilita.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/stat-fortuna.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-crystal-skull.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-koh-i-noor.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-queens-necklace.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-regent.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-stone-of-scone.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-orlov.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-emperors-amulet.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-hope-diamond.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/ui/tesoro-orichalcum.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-1.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-2.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-3.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-4.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-5.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-6.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-7.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-8.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-9.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-max.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/rango-senza-testo.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-allarme.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-dlc.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-tesoro.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-speciale.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-nuova-partita.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-senza-testo.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/badge-allarme-senza-testo.png` — 512×192
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/pulsante-primario.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/pulsante-secondario.png` — 600×160
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/cornice-scheda.png` — 1600×1000
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/stat-forza.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/stat-magia.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/stat-resistenza.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/stat-agilita.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/stat-fortuna.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-crystal-skull.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-koh-i-noor.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-queens-necklace.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-regent.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-stone-of-scone.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-orlov.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-emperors-amulet.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-hope-diamond.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/ui/tesoro-orichalcum.png` — 256×256
 
 ### illustrazioni
 
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-persona.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-persona-senza-testo.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-partita.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-partita-senza-testo.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/errore.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/errore-senza-testo.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-1.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-2.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-3.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-4.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-5.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-6.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-7.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-8.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-persona.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-persona-senza-testo.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-partita.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-partita-senza-testo.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/errore.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/errore-senza-testo.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-1.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-2.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-3.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-4.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-5.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-6.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-7.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-8.png` — 256×256
 
 ### confidenti
 
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/igor.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/morgana.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/ryuji.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/ann.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/yusuke.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/makoto.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/futaba.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/haru.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/akechi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/kasumi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/sojiro.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/takemi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/kawakami.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/yoshida.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/mishima.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/ohya.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/hifumi.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/chihaya.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/iwai.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/shinya.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/gemelle.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/sae.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/maruki.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/igor.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/morgana.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ryuji.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ann.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/yusuke.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/makoto.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/futaba.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/haru.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/akechi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/kasumi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/sojiro.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/takemi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/kawakami.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/yoshida.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/mishima.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ohya.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/hifumi.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/chihaya.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/iwai.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/shinya.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/gemelle.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/sae.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/maruki.png` — 768×1024
+
+#### Varianti fedeli ai riferimenti originali
+
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/igor-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/morgana-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/ryuji-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/ann-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/yusuke-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/makoto-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/futaba-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/haru-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/akechi-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/kasumi-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/sojiro-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/takemi-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/kawakami-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/yoshida-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/mishima-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/ohya-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/hifumi-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/chihaya-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/iwai-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/shinya-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/gemelle-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/sae-fedele.png` — 768×1024
+- [x] **COMPLETATO — approvato dall’utente** — `public/asset/confidenti/maruki-fedele.png` — 768×1024
 
 ### persona
 
@@ -695,9 +724,12 @@ Matto: entrambe le versioni generate con Imagegen, native948×1659 (4:7 esatto),
 | `arcani/councillor.png` | `exec-de982130-04ad-4cb3-8eb1-73f8ef5af731.png` |
 | `arcani/councillor-senza-testo.png` | `exec-c15ca141-c236-4b99-9019-3384581fbca5.png` |
 
+| `arcani/hanged.png` | `C:/Users/rober/Downloads/Immagine Codex 3 set 2026, 22_48_29.png` |
+| `arcani/hanged-senza-testo.png` | `C:/Users/rober/Downloads/appeso_senza_testo.png` |
+
 ## Sorgenti delle icone degli Arcani
 
-Prime sedici icone generate con Imagegen, ridotte proporzionalmente a 256×256 e approvate da galaxy_task_validator.
+Tutte le ventiquattro icone generate con Imagegen, ridotte proporzionalmente a 256×256 e approvate da galaxy_task_validator.
 
 | File salvato | Sorgente |
 |---|---|
@@ -725,6 +757,230 @@ Prime sedici icone generate con Imagegen, ridotte proporzionalmente a 256×256 e
 | `arcani/icona/star.png` | `exec-09acf7e0-dc9b-4ae1-a9b1-d4450e71fb3b.png` |
 | `arcani/icona/moon.png` | `exec-a7856ad5-a106-4c68-90d3-e73587bb9904.png` |
 | `arcani/icona/sun.png` | `exec-9022e2a9-5b97-4912-a04e-ce6620e4201e.png` |
+
+| `arcani/icona/judgement.png` | `exec-52438b97-888f-41ba-9010-5c381fd77e9a.png` |
+| `arcani/icona/world.png` | `exec-deb4bb65-3a82-4349-a9d9-dee651ef2b2d.png` |
+| `arcani/icona/faith.png` | `exec-19995e12-8b18-43ed-ab9e-dfdf828ea45f.png` |
+| `arcani/icona/councillor.png` | `exec-303b6a2e-0620-45aa-834e-a96265d0b3a2.png` |
+
+## Sorgenti delle Doti sociali
+
+Serie completa §6 generata con Imagegen, adattata proporzionalmente alle dimensioni richieste con alfa reale e approvata da galaxy_task_validator. Categoria Doti completa: 12/12.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/doti/conoscenza.png` | `exec-99c519da-06cb-427b-9443-2e5b88be3222.png` |
+| `public/asset/doti/conoscenza-senza-testo.png` | `exec-1cbe8281-34da-4a57-8038-268dfc92aa5f.png` |
+| `public/asset/doti/fascino.png` | `exec-cfda775c-c1b3-491d-946e-60008de9b930.png` |
+| `public/asset/doti/fascino-senza-testo.png` | `exec-71a3f598-ff05-468e-83fa-6cf30dab141e.png` |
+| `public/asset/doti/coraggio.png` | `exec-982d7182-71cd-42fc-8832-488d12c3ca6d.png` |
+| `public/asset/doti/coraggio-senza-testo.png` | `exec-9c21c81e-7e52-4faf-8167-92e37a0dd384.png` |
+| `public/asset/doti/gentilezza.png` | `exec-971e6952-80e3-4058-ac55-2ea884da7cd1.png` |
+| `public/asset/doti/gentilezza-senza-testo.png` | `exec-a5102ac8-6f09-4982-b957-550c638fd24f.png` |
+| `public/asset/doti/perizia.png` | `exec-447d3eea-bc5f-4f5e-a736-1e7cdd6cc9fb.png` |
+| `public/asset/doti/perizia-senza-testo.png` | `exec-06a76dbf-0d78-498b-a494-4d58a791bb16.png` |
+| `public/asset/doti/stella-vuota.png` | `exec-bcdf653c-dc96-441d-94f4-3fc283dcaa99.png` |
+| `public/asset/doti/stella-vuota-senza-testo.png` | `exec-ff107a48-6c78-4d6d-acc6-ed29fa1197c6.png` |
+
+## Sorgenti UI
+
+### Badge di rango
+
+Serie completa §7.2 (ranghi 1–9, MAX e tassello vuoto) generata con Imagegen, ridotta proporzionalmente a 256×256 e approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/ui/rango-1.png` | `exec-a255a85c-db7c-4cee-95a6-f482d254e14a.png` |
+| `public/asset/ui/rango-2.png` | `exec-bad5b3ff-2a22-41af-bb67-59b8c244d35d.png` |
+| `public/asset/ui/rango-3.png` | `exec-873edbe3-3a6a-4ff0-b3bb-250b0ee64299.png` |
+| `public/asset/ui/rango-4.png` | `exec-41370785-18b9-4406-9f57-c26af9102d41.png` |
+
+| `public/asset/ui/rango-5.png` | `exec-e127f403-3ea7-4c57-b8f1-94376797e8ac.png` |
+| `public/asset/ui/rango-6.png` | `exec-a51e37c8-47ad-4e29-bb92-780ae79be015.png` |
+| `public/asset/ui/rango-7.png` | `exec-67d71e71-86d5-4304-9a29-179392e9f3f0.png` |
+| `public/asset/ui/rango-8.png` | `exec-3bd0b689-7a70-4bc3-b54c-efec1d53e7d4.png` |
+
+| `public/asset/ui/rango-9.png` | `exec-defdb204-081f-4b1a-b6f8-9d361b41b85a.png` |
+| `public/asset/ui/rango-max.png` | `exec-8df48fa0-3a82-4410-bbfd-1531b931825f.png` |
+| `public/asset/ui/rango-senza-testo.png` | `exec-ec02c6e5-157b-4162-b100-0cef110e8029.png` |
+
+### Badge di stato
+
+Serie completa §7.3 generata con Imagegen, adattata proporzionalmente nel canvas 512×192 con sfondo alfa reale e approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/ui/badge-allarme.png` | `exec-82e63e2b-02d3-43f4-9421-a83211f22df0.png` |
+| `public/asset/ui/badge-dlc.png` | `exec-a67d6eaf-1a8a-4ff3-a2ce-43120b8e9d2f.png` |
+| `public/asset/ui/badge-tesoro.png` | `exec-f09c9c36-9641-434d-896f-591d634a9513.png` |
+| `public/asset/ui/badge-speciale.png` | `exec-d1e5e484-4149-466a-bcce-541a2f3d92a1.png` |
+| `public/asset/ui/badge-nuova-partita.png` | `exec-f17a4437-5594-4e40-8961-6a9997c3af64.png` |
+| `public/asset/ui/badge-senza-testo.png` | `exec-ea6fa122-fb6b-43f2-ada6-2dc1264f9e8c.png` |
+| `public/asset/ui/badge-allarme-senza-testo.png` | `exec-3c30775c-16b0-4db8-bf0d-d2fcc77960a7.png` |
+
+### Pulsanti azione
+
+Lotto §7.4 generato con Imagegen, adattato proporzionalmente a 600×160 con sfondo alfa reale e approvato da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/ui/pulsante-primario.png` | `exec-78737aa2-c111-4951-9aca-6b00ca89579c.png` |
+| `public/asset/ui/pulsante-secondario.png` | `exec-e297fedf-d8ac-4c72-a6fc-48c6c3e900a5.png` |
+
+### Cornice scheda Persona
+
+Asset §7.5 generato con Imagegen, adattato proporzionalmente a 1600×1000 con foro centrale e sfondo alfa reali e approvato da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/ui/cornice-scheda.png` | `exec-1faa52cb-9ca2-4ee9-a0b8-70032fa599b9.png` |
+
+### Icone delle statistiche
+
+Lotto §7.6 generato con Imagegen, ridotto proporzionalmente a 256×256 con sfondo alfa reale e approvato da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/ui/stat-forza.png` | `exec-c4ef5cc3-4aa8-4f81-ae4b-bfcc2c94b4ac.png` |
+| `public/asset/ui/stat-magia.png` | `exec-5defd285-bd60-40db-a687-c626876d2348.png` |
+| `public/asset/ui/stat-resistenza.png` | `exec-c7bf5a50-9147-4581-91fb-b9c583e5e0ef.png` |
+| `public/asset/ui/stat-agilita.png` | `exec-a9e5549d-8388-4476-a920-0d92d2020b58.png` |
+| `public/asset/ui/stat-fortuna.png` | `exec-3decb667-c8c3-4e4c-836e-79e09592c78d.png` |
+
+### Badge Demone del Tesoro
+
+Lotto §7.7 generato con Imagegen, ridotto proporzionalmente a 256×256 con sfondo alfa reale e approvato da galaxy_task_validator. Categoria UI completa: 47/47.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/ui/tesoro-crystal-skull.png` | `exec-0c8d7786-de6e-4bba-9bed-4ae2cf7f1492.png` |
+| `public/asset/ui/tesoro-koh-i-noor.png` | `exec-8764867c-8776-4345-bbd8-c74a96a6efaa.png` |
+| `public/asset/ui/tesoro-queens-necklace.png` | `exec-7e8f7cf1-e846-4e78-9bb1-62e2dc659953.png` |
+| `public/asset/ui/tesoro-regent.png` | `exec-53a91393-ee86-4c09-b233-e770aa1616bf.png` |
+| `public/asset/ui/tesoro-stone-of-scone.png` | `exec-7663ce61-b89d-4f22-8ef4-8c4256186368.png` |
+| `public/asset/ui/tesoro-orlov.png` | `exec-84c88573-d78b-4d66-8147-860b8fa90d59.png` |
+| `public/asset/ui/tesoro-emperors-amulet.png` | `exec-7ee73527-304e-425b-a9ed-106726fa068d.png` |
+| `public/asset/ui/tesoro-hope-diamond.png` | `exec-88cef5c4-83c9-4b14-bb72-87cd0cb3d5f4.png` |
+| `public/asset/ui/tesoro-orichalcum.png` | `exec-205487b0-d284-453c-a28b-70dc8f1efdef.png` |
+
+### Illustrazioni vuoto Persona
+
+Coppia §8 generata con Imagegen, ridotta proporzionalmente e centrata su canvas 1200×800, con sfondo alfa reale; approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/vuoto-persona.png` | `exec-12b40677-f3d5-45bf-9d2b-8bdaf0477bc4.png` |
+| `public/asset/illustrazioni/vuoto-persona-senza-testo.png` | `exec-2b43f2c8-68d2-4344-b681-07ce3ef545c4.png` |
+
+### Illustrazioni vuoto Partita
+
+Coppia §8 generata con Imagegen, ridotta proporzionalmente e centrata su canvas 1200×800, con sfondo alfa reale; approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/vuoto-partita.png` | `exec-a5386fc6-0b6f-48df-a6b1-cbdd63bc9416.png` |
+| `public/asset/illustrazioni/vuoto-partita-senza-testo.png` | `exec-a47905b0-b41a-400d-8e00-d72421572835.png` |
+
+### Illustrazioni errore
+
+Coppia §8 generata con Imagegen, ridotta proporzionalmente e centrata su canvas 1200×800, con sfondo alfa reale; approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/errore.png` | `exec-65f896d3-0435-4f59-85ad-1e74ec2857ab.png` |
+| `public/asset/illustrazioni/errore-senza-testo.png` | `exec-42a38406-bd2d-48bc-a726-f832611b5d70.png` |
+
+### Illustrazioni caricamento
+
+Lotto §8 generato con Imagegen: illustrazione principale da sorgente 3:2 e otto fotogrammi da sprite sheet 3×3, ridotti proporzionalmente con sfondo alfa reale; approvato da galaxy_task_validator. Categoria illustrazioni completa: 15/15.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/caricamento.png` | `exec-ea4cebf4-98a6-444e-9a86-244323842211.png` |
+| `public/asset/illustrazioni/caricamento-1.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 1 |
+| `public/asset/illustrazioni/caricamento-2.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 2 |
+| `public/asset/illustrazioni/caricamento-3.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 3 |
+| `public/asset/illustrazioni/caricamento-4.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 4 |
+| `public/asset/illustrazioni/caricamento-5.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 5 |
+| `public/asset/illustrazioni/caricamento-6.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 6 |
+| `public/asset/illustrazioni/caricamento-7.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 7 |
+| `public/asset/illustrazioni/caricamento-8.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 8 |
+
+### Confidenti — lotto 1
+
+Primi otto ritratti §9 generati con Imagegen e adattati proporzionalmente a 768×1024 con sfondo alfa reale; approvati da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/igor.png` | `exec-80853693-28f3-449c-860d-6bb463bcdfd0.png` |
+| `public/asset/confidenti/morgana.png` | `exec-1693f61b-1d49-4aca-868c-2650b71bb30b.png` — fondo convertito in alfa reale |
+| `public/asset/confidenti/ryuji.png` | `exec-adff4db2-005c-4c03-8d26-3d55e982404b.png` |
+| `public/asset/confidenti/ann.png` | `exec-cb22c942-6d24-41f2-a054-683708de2f75.png` |
+| `public/asset/confidenti/yusuke.png` | `exec-3de7658c-25f7-47ce-9371-d21b8e1af436.png` |
+| `public/asset/confidenti/makoto.png` | `exec-d0bfa718-89dd-4479-bfe4-11c7dd3d5b65.png` |
+| `public/asset/confidenti/futaba.png` | `exec-5ce61061-0534-4afa-a282-b2fe2b204a98.png` |
+| `public/asset/confidenti/haru.png` | `exec-b610619b-79fb-4bb4-8123-24ea266310fc.png` |
+
+### Confidenti — lotto 2
+
+Otto ritratti §9 generati con Imagegen e adattati proporzionalmente a 768×1024 con sfondo alfa reale; approvati da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/akechi.png` | `exec-a80ac9c4-6718-40b8-86fd-dc785495b1b9.png` |
+| `public/asset/confidenti/kasumi.png` | `exec-eb1be64f-a63d-49b7-b420-37e075fa2c11.png` |
+| `public/asset/confidenti/sojiro.png` | `exec-510463ad-10cb-49b2-955d-f0700da11819.png` |
+| `public/asset/confidenti/takemi.png` | `exec-cf092535-e439-4ae7-a60b-5b65ee6f80e4.png` |
+| `public/asset/confidenti/kawakami.png` | `exec-5d2fa746-de09-4234-a225-09e91bb7c02d.png` |
+| `public/asset/confidenti/yoshida.png` | `exec-25436948-9335-4232-bb3d-e48cc23d9ed2.png` |
+| `public/asset/confidenti/mishima.png` | `exec-87e2eb9c-2c27-4af7-a246-78231f048ba4.png` |
+| `public/asset/confidenti/ohya.png` | `exec-5af4d48d-1731-484f-995f-efd97ad6d371.png` |
+
+### Confidenti — lotto 3
+
+Sette ritratti §9 generati con Imagegen e adattati proporzionalmente a 768×1024 con sfondo alfa reale; approvati da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/hifumi.png` | `exec-3d2bbcae-7543-4592-8538-f90c10abdced.png` |
+| `public/asset/confidenti/chihaya.png` | `exec-008d943c-e94f-4b87-a740-cc4d8388985e.png` |
+| `public/asset/confidenti/iwai.png` | `exec-93852958-8968-4fde-94b2-7f4abb3387b3.png` |
+| `public/asset/confidenti/shinya.png` | `exec-e4396b97-2c5f-4902-94a9-7e0554e782e7.png` |
+| `public/asset/confidenti/gemelle.png` | `exec-e7d3034c-55ba-414e-bb3c-4f2fd6dbadda.png` |
+| `public/asset/confidenti/sae.png` | `exec-fbfc10b9-1a8d-46eb-893a-357b0947b059.png` |
+| `public/asset/confidenti/maruki.png` | `exec-e53af0ed-3dcd-4574-9115-900254a21a66.png` |
+
+### Confidenti — varianti fedeli ai riferimenti originali
+
+Le 23 varianti sono state generate da Imagegen con prompt testuali ricavati dai riferimenti originali indicati dall’utente, mantenendo il linguaggio grafico dei primi ritratti. I riferimenti non sono stati allegati alla generazione, per evitare fondali incorporati. Tutte le sorgenti sono PNG RGBA con alfa nativo; la sola trasformazione applicata è la riduzione uniforme da 1086×1448 a 768×1024. Nessuno scontorno è stato eseguito. L’intera serie è approvata direttamente dall’utente.
+
+Riferimenti: https://steamcommunity.com/sharedfiles/filedetails/?id=2880260759 e https://steamcommunity.com/sharedfiles/filedetails/?id=3707344584
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/igor-fedele.png` | `exec-27a1daba-c273-4ad6-b71a-2d0a5f2f777a.png` |
+| `public/asset/confidenti/morgana-fedele.png` | `exec-d63af62c-3cea-45f4-be7f-c0ef17bcd124.png` |
+| `public/asset/confidenti/ryuji-fedele.png` | `exec-04c1f869-9a8a-45d6-aa2a-34fbc15972ba.png` |
+| `public/asset/confidenti/ann-fedele.png` | `exec-8c2aff5b-e60b-41ef-a01d-0172092a99c6.png` |
+| `public/asset/confidenti/yusuke-fedele.png` | `exec-21236ee4-7709-4fdd-ae05-0901b96b2d06.png` |
+| `public/asset/confidenti/makoto-fedele.png` | `exec-b318b87f-6047-4b66-bf86-6d9bdd8a4e32.png` |
+| `public/asset/confidenti/futaba-fedele.png` | `exec-9b18ea5d-b184-4f11-a767-5d55033c27dc.png` |
+| `public/asset/confidenti/haru-fedele.png` | `exec-809b6c96-947a-4014-9ef7-54d6851eec1b.png` |
+| `public/asset/confidenti/akechi-fedele.png` | `exec-3681445f-7746-47f5-8324-b91a132c0f9f.png` |
+| `public/asset/confidenti/kasumi-fedele.png` | `exec-31582521-468c-487b-a4c1-64b13450f8d8.png` |
+| `public/asset/confidenti/sojiro-fedele.png` | `exec-e38395f9-a202-4f0b-b6f7-a1a40a19c400.png` |
+| `public/asset/confidenti/takemi-fedele.png` | `exec-0559d0ac-9442-4911-a804-ec82decfc0ad.png` |
+| `public/asset/confidenti/kawakami-fedele.png` | `exec-da052745-2e14-495e-8d2a-75dd8d775ec4.png` |
+| `public/asset/confidenti/yoshida-fedele.png` | `exec-7c6b9f19-8f84-4886-8396-0d0e10837153.png` |
+| `public/asset/confidenti/mishima-fedele.png` | `exec-7f5ffc37-9e28-47ff-abd5-d42e45f065b0.png` |
+| `public/asset/confidenti/ohya-fedele.png` | `exec-ae194786-3cfc-4456-97eb-cc0e02f1a57c.png` |
+| `public/asset/confidenti/hifumi-fedele.png` | `exec-5474d538-f952-4af5-bc27-a5aa5b75d30b.png` |
+| `public/asset/confidenti/chihaya-fedele.png` | `exec-f623398a-7bce-4d0b-8414-cd3e795b5d9a.png` |
+| `public/asset/confidenti/iwai-fedele.png` | `exec-5a228a0d-d42e-42c6-bdf4-3a9291de826b.png` |
+| `public/asset/confidenti/shinya-fedele.png` | `exec-47eab5ca-9963-4be2-9ce9-7e34051e1ca8.png` |
+| `public/asset/confidenti/gemelle-fedele.png` | `exec-fa5c359e-8536-4387-8250-96048aa5d1ad.png` |
+| `public/asset/confidenti/sae-fedele.png` | `exec-d999b525-69b0-4017-a9e7-742a6e9c0acb.png` |
+| `public/asset/confidenti/maruki-fedele.png` | `exec-bcf9d92b-885b-4d97-8b3a-ad79af1fd1d4.png` |
 
 ## Impronte dei file completati
 
@@ -849,3 +1105,121 @@ Rilevano eventuali sostituzioni accidentali dei file approvati.
 | `public/asset/arcani/icona/death.png` | RGBA | 4b153f73424ddcafa7279cb332553226f7fc3ec1975c282b287b0bd6f38e682d |
 | `public/asset/arcani/icona/temperance.png` | RGBA | f103af044044ccefd94fedcb0145da0b2cd1d37c27aa8b744ba7250390e09774 |
 | `public/asset/arcani/icona/devil.png` | RGBA | 3d640a60a9aafd6dca6c9e4938764179e0cce4d8c76cd160921b27356e6875a8 |
+| `public/asset/arcani/icona/tower.png` | RGBA | 2f8470814910e0c268e5ecdd2db06b4d709542552499f7a671f4a48ad407afc4 |
+| `public/asset/arcani/icona/star.png` | RGBA | 9e03edaa5741f0580499ffa2561d9c689997e509bb6d9fec85e881e3c51bf189 |
+| `public/asset/arcani/icona/moon.png` | RGBA | 4d967d5f3e102e1afadcc46ef49650ab68124d54f1209b0563fee7de066da752 |
+| `public/asset/arcani/icona/sun.png` | RGBA | 86894454133c8f55a1b2493a3860617119f488848c279c80d2b87b0859d2f270 |
+| `public/asset/arcani/icona/judgement.png` | RGBA | 7ab57037951dca01ff58dfd01487e793723ad5f8f8deefb8a3456495d25f08fc |
+| `public/asset/arcani/icona/world.png` | RGBA | c88f8e42e429928bece1425bc5c3b9e060b2d2af44418bf3cab9dda85e2ffeae |
+| `public/asset/arcani/icona/faith.png` | RGBA | 17cdf037cfb9f0ec2812dc51249a2a9b9b8d51061a3b8638b47f9792e23b67a9 |
+| `public/asset/arcani/icona/councillor.png` | RGBA | 14211df6657db81137a6085edec86931168d5b84c7f27ad4d507c20e585fe90d |
+| `public/asset/doti/conoscenza.png` | RGBA | de1fb36ac2d0015f8ba7cb8ac280ff420d6b1c228bbf5b62544fb7f4bc2d3722 |
+| `public/asset/doti/conoscenza-senza-testo.png` | RGBA | fc3efad7333382783ab004c8ddac6642c80097132c33f2f87b2be4193f2451f6 |
+| `public/asset/doti/fascino.png` | RGBA | c9930742b6ece36dc6396c0913515bf152f1b075310b26062a49aaa1d9142ede |
+| `public/asset/doti/fascino-senza-testo.png` | RGBA | f380fae42b2a109d7d7109610b2425fd9ea185a5b1b7ec335fb41423f843a790 |
+| `public/asset/doti/coraggio.png` | RGBA | 78f59244a8e6daff67dd060fe7b470db103a0aef5653b90727323af6b4b27b02 |
+| `public/asset/doti/coraggio-senza-testo.png` | RGBA | 50cdb184bc5d95494dea143fd5e362b19d5159edfe65546e6ebe707d15fa6e1f |
+| `public/asset/arcani/hanged.png` | RGBA | e73815f35ea10646ac28e0949264368a57ce2fda70de125fbc2c57dcd4063b20 |
+| `public/asset/arcani/hanged-senza-testo.png` | RGBA | cb8625dcec88a9b35169cee0245acb79bd683159ffa8723e18e9a4ebe770a120 |
+| `public/asset/ui/rango-1.png` | RGBA | 2a5c7f655ee0ef06099bb883880175921f23e49eaeb7a94f12c9283389587880 |
+| `public/asset/ui/rango-2.png` | RGBA | 82dc00ef4df7f6608259710a5d849e93c40e70833da89c48550ddd03ba46d45b |
+| `public/asset/ui/rango-3.png` | RGBA | 96b2c0e677a641c3df8b6e4561f95a7bd5a235e78435c804379dde48afe7ad3a |
+| `public/asset/ui/rango-4.png` | RGBA | 9e699fc9d0fae791db49884cf161b1956d2c91c1b44141ad3353d8ac49bd6f1e |
+| `public/asset/ui/rango-5.png` | RGBA | 42af4497f7a71dbc7eb3a75cc2dd6f4f79fb735125294fb1f68ec4f7c0b38ee0 |
+| `public/asset/ui/rango-6.png` | RGBA | ea9c98680c33935edecde0fadce4959cb45248658556331ed0b5ecc71f59b013 |
+| `public/asset/ui/rango-7.png` | RGBA | 419d99b95ef8f68f57c302dc86c2be2726ce0ee1176284e3ce352d455398224c |
+| `public/asset/ui/rango-8.png` | RGBA | b1adf4b218ed2d3757afc6dab81781d67fc370864309f54f1e7decd5d270a648 |
+| `public/asset/ui/rango-9.png` | RGBA | f43985bdc0ab49c9c967447e8107b0d725441167e19adbecbc3db6f947bb2734 |
+| `public/asset/ui/rango-max.png` | RGBA | 8d11e514995eefb9a379ce9bf869041c8ad43623995e5f1791f962dfb280c4f6 |
+| `public/asset/ui/rango-senza-testo.png` | RGBA | 056e7f952a7ca20841fa1ff59ed6ba7a74c001d838e2a080658568cadb156a9d |
+| `public/asset/ui/badge-allarme.png` | RGBA | 2d4b016481041c64ab3042157379ae5918d282475d73a8501996476a17ce0c30 |
+| `public/asset/ui/badge-dlc.png` | RGBA | e987bc274a0d33b48a1ac31c591bf5d514f6e849c4b8394a9cfb0862ccb76a54 |
+| `public/asset/ui/badge-tesoro.png` | RGBA | f16920cabd8ffbcbcfdabb51d9ef508bc7bf1cb8ac81b1743ad0060030a8fc56 |
+| `public/asset/ui/badge-speciale.png` | RGBA | be4797a0396baf775d1ccdbfa85c94e5fc36a869077bb0fa588e322f4864cddd |
+| `public/asset/ui/badge-nuova-partita.png` | RGBA | 36ef23b39af7a1b329dea0a3396ab54d5c7a9f7dde1904aa41c87a424a621211 |
+| `public/asset/ui/badge-senza-testo.png` | RGBA | ea6592631f87098fac4d8f541867d37530251a1fb2ba4fd44929f6c91df78665 |
+| `public/asset/ui/badge-allarme-senza-testo.png` | RGBA | fc007bde606d20750e178d120819ed2ce64fad2ee0bcc28f046483e18ab38452 |
+| `public/asset/ui/pulsante-primario.png` | RGBA | 1540afa2a2ca918e9ffe59173c070d7729622b36feaddb7a43d421db6820fafe |
+| `public/asset/ui/pulsante-secondario.png` | RGBA | 74c98e530ff154125ef472b9f3416f2f62e594a5d291a4a03e204161bb3bf2b4 |
+| `public/asset/ui/cornice-scheda.png` | RGBA | a8fcdc926942b84fb24e8b6ecf87e97a04ab5cf11dd274ffa8b8dd3930626d65 |
+| `public/asset/ui/stat-forza.png` | RGBA | 1bee5ba36608051f54921f6ee558cb1e3947e303240556e1904ed4bf352230d1 |
+| `public/asset/ui/stat-magia.png` | RGBA | c8761f7a8c54e2d41d73de26925952e641e471ec34152eca8607b1a7bc212f2e |
+| `public/asset/ui/stat-resistenza.png` | RGBA | 9dc96698f551c2b35cc298476a17fb950548f2eb58670641d8b63dccb88b0b93 |
+| `public/asset/ui/stat-agilita.png` | RGBA | c0a6d1ab313d3d60b8df1690b05ffe4692e8915baf0df1cb448c621f097a8b00 |
+| `public/asset/ui/stat-fortuna.png` | RGBA | daf519e30c89e20f94b01d2b1aae90544fe81e23d4f2cc9641a0b928f1bf82b4 |
+| `public/asset/ui/tesoro-crystal-skull.png` | RGBA | 6b90d53a24b81a73366e3cccc0ca1f1902ecb526b88310b738c142155a1e5686 |
+| `public/asset/ui/tesoro-koh-i-noor.png` | RGBA | 0e516937a57d8f63cff5029772cc31d192e273e539c67f079640baf2f8f15f5f |
+| `public/asset/ui/tesoro-queens-necklace.png` | RGBA | 56ec140102f10ff247a45c714669626431bae6d3634a411bd2093e3ebde35b5b |
+| `public/asset/ui/tesoro-regent.png` | RGBA | eb3616394140d36446e725bd23d000223dc75dc9efc3ffc43ca4cdd529e21599 |
+| `public/asset/ui/tesoro-stone-of-scone.png` | RGBA | 5122c8370e23c3bf43872b284b59d6c86912ecfda94853bf57de75ac74ac3b31 |
+| `public/asset/ui/tesoro-orlov.png` | RGBA | a29b2d01dd93201c3a13cebcd4d3e228dfcdec9d61e26850ccea8e1c38df3b4b |
+| `public/asset/ui/tesoro-emperors-amulet.png` | RGBA | db7e73ed5143077b297274a3dc2d4200bdab6616427a705fa825f425e5ba2fb4 |
+| `public/asset/ui/tesoro-hope-diamond.png` | RGBA | e1a0e62de2944791e79e00d47fb97c88d63cbc556fba8ce56ced1738e2edcfab |
+| `public/asset/ui/tesoro-orichalcum.png` | RGBA | 5ff4528b0177c4ea26d4c4ebe0d6b4064f5d1a7fe30ab2703437ff179f66eeab |
+| `public/asset/doti/gentilezza.png` | RGBA | 8e3f861e50e4b6c119ff36c346d9aced66a441d79b474d27d4f9d071ed8df0bb |
+| `public/asset/doti/gentilezza-senza-testo.png` | RGBA | c6560653a850193a849cb49bc3be911fb03ad012366ddd014a55b5716ed8d9a8 |
+| `public/asset/doti/perizia.png` | RGBA | a3320c696bd5503d49e047b5c7f158ebe0c6cef5e4716bf21818c1395672f5a1 |
+| `public/asset/doti/perizia-senza-testo.png` | RGBA | 96d6742bcd2d836c12f29676bdcefd9641642413d1d6a4dc7dcd3aeb22f58abd |
+| `public/asset/doti/stella-vuota.png` | RGBA | 262e04ed68c6454aa5e77acf7cea19fed51ca02dc38603157cbdfd7d5bcedd02 |
+| `public/asset/doti/stella-vuota-senza-testo.png` | RGBA | 0373f44ffb735ed30b0cb5c5715c9cbcbbec2b4aedeb7f577a04df5e9813d33f |
+| `public/asset/illustrazioni/vuoto-persona.png` | RGBA | 52de5069ad4230c9690561e03dbf3fb47a95442e60601e2bfb8ed8f49fe8ea83 |
+| `public/asset/illustrazioni/vuoto-persona-senza-testo.png` | RGBA | 638dc466e5d1980326e37b92d870c32923245eef2f19b003f856f3cebdd4340e |
+| `public/asset/illustrazioni/vuoto-partita.png` | RGBA | 295f6e611c4e9ade5f7b07a3220de5d099b33ada1af5f1f20186c0fa8520b04c |
+| `public/asset/illustrazioni/vuoto-partita-senza-testo.png` | RGBA | 26bfb31135c1e285c89c23ef83ba9e265677a4afc5b12d603ccbe1ed4d12a317 |
+| `public/asset/illustrazioni/errore.png` | RGBA | 60a0ba328fb7061cd10efe8b27660c938582ab448da9a5931120c28d453b2def |
+| `public/asset/illustrazioni/errore-senza-testo.png` | RGBA | 31263c17bc9df77b6062a78aedb4c8a39bdf7895cd060d8f4f1fe51e7be3af30 |
+| `public/asset/illustrazioni/caricamento.png` | RGBA | 446196ee86eb17b89479b2aa645e4526f61f08ad4bf90f5626a41a56584c2982 |
+| `public/asset/illustrazioni/caricamento-1.png` | RGBA | 0f5b254338726132c8d2251b3ad92072141758a7eb383cfac6a2dc9dc6e48b88 |
+| `public/asset/illustrazioni/caricamento-2.png` | RGBA | 415e4fb5e7f87319f6b0e84542750a372d06d3f349eaf8cdf0172e8377591a49 |
+| `public/asset/illustrazioni/caricamento-3.png` | RGBA | b5598bea9584ed69040b38930968c84714e89d9ca040958348adbb0a0068bff3 |
+| `public/asset/illustrazioni/caricamento-4.png` | RGBA | 1fee950e16094f3eab190b3977a6b71b59b70270a974bd619d9bde714d5afbdc |
+| `public/asset/illustrazioni/caricamento-5.png` | RGBA | ab43a5345b3636ae19d62637ac1715ca6a9a32f527b8998ca8a78ee6b00e609a |
+| `public/asset/illustrazioni/caricamento-6.png` | RGBA | 932e128facd2897217adb882373f0157fb01a57dc3201e5efc9f94d9165868a0 |
+| `public/asset/illustrazioni/caricamento-7.png` | RGBA | 50566ee112da8c233200cd4b82c4c94b64962a54f8bb8907abb3ff9df1196ca8 |
+| `public/asset/illustrazioni/caricamento-8.png` | RGBA | d93b270ba8d1f3e1a689d198aa298b77a1e0ca6b93cddb46d79409501127161b |
+| `public/asset/confidenti/igor.png` | RGBA | 05e8d8c4a24fab808f86de0d8a41bc1a57afce2bfa4c54ce07f2541646db379d |
+| `public/asset/confidenti/morgana.png` | RGBA | 6fa790c3c4dd82feb9d7cef72138047b3387d85a2c5303a127c78b2ee1918069 |
+| `public/asset/confidenti/ryuji.png` | RGBA | 063cf6b9cd019688141b9f1df4c53237bebaf845d9a0794d1f6e06d89a692f4b |
+| `public/asset/confidenti/ann.png` | RGBA | 26b4a7fd38a01699d932c3c419784f564444986fcba4804deaff4e369bd4d6c5 |
+| `public/asset/confidenti/yusuke.png` | RGBA | 33ececb619bf492f9ec0ae2f451f6915334ab80bd1c37d93df1eacadd43a85b9 |
+| `public/asset/confidenti/makoto.png` | RGBA | 48a6feb961d4a7ab2f05912a659e7cc276d905f8961c085b80cb28177203323b |
+| `public/asset/confidenti/futaba.png` | RGBA | 4d89245c2883ab99c7efdcc14e433e298ef72c02cc01ecdbb81285a7c0d62806 |
+| `public/asset/confidenti/haru.png` | RGBA | c62b3789f7d353aa8a970663a2015f969d225af6d07d3f69f7e9ec979ec7ccec |
+| `public/asset/confidenti/akechi.png` | RGBA | abcf6b7da170c4edd612c4a708d5e4812adae2cb10d2a18064a88cfb839a446f |
+| `public/asset/confidenti/kasumi.png` | RGBA | d763f7d29064b4c62b3796ebb3caee5aa0e4b1bafe80f037407cffb44f30f5c0 |
+| `public/asset/confidenti/sojiro.png` | RGBA | ab735e8001ba90fa72def90bbd731999958b59128f74f19307e748758c92b8e7 |
+| `public/asset/confidenti/takemi.png` | RGBA | eece60151a2913383c8e471c70f43adf20d8f2d75182970f8f82602658a67628 |
+| `public/asset/confidenti/kawakami.png` | RGBA | fe9f313b13568a1e2499eebb906ada3a0726270ae7965426862f88880eb49608 |
+| `public/asset/confidenti/yoshida.png` | RGBA | d93e671201f10f90b5a036258b540a0b9377f489516899b27145cf2338d904c7 |
+| `public/asset/confidenti/mishima.png` | RGBA | 10131ceebffba6355fc065a5266dc1bd627a21128be265b0be45f06f798970ea |
+| `public/asset/confidenti/ohya.png` | RGBA | f458f37a6f33bac823373662823860845e82a299013718e84d8656631fb2ccbe |
+| `public/asset/confidenti/hifumi.png` | RGBA | f602f397d1295973e0ac839101b6fa87624b321e100f70d50b55987bc9e26794 |
+| `public/asset/confidenti/chihaya.png` | RGBA | 69b2e161f7ffa740aa2eb4f4afdf00ade01bc2d2aa8298d9f6316914a217ce0e |
+| `public/asset/confidenti/iwai.png` | RGBA | bb0a960a3201d44d28e68b72cedc22907543d73f55ed8773201bf99d62fb09bf |
+| `public/asset/confidenti/shinya.png` | RGBA | e924eefd446fb19990a05f9e1801d4bcb2fad2a0378e4b91743e5f26304caee7 |
+| `public/asset/confidenti/gemelle.png` | RGBA | 2ed91c653e29eb27922db4294f54ccdfdd0ccd0c2f89bc3f0048dbd869f44a49 |
+| `public/asset/confidenti/sae.png` | RGBA | 625a005e436ac93d7e4bf24a8bb2a3e53b9cbcc2721f23c490b27c17274f1ff0 |
+| `public/asset/confidenti/maruki.png` | RGBA | 36e4d5353a46d3778db2fc7d5d6905af1d490501a2e9b29a6bee62d8ec3e35d0 |
+| `public/asset/confidenti/akechi-fedele.png` | RGBA | 09d93cc95322b2aac4b7ec8f805757509849b10f822e902850a9612da55a03bd |
+| `public/asset/confidenti/ann-fedele.png` | RGBA | 2a522b39c18c07844376dd7fbc6a17ec70cfe1e9dafaa7bff7d5bf3f8427bc20 |
+| `public/asset/confidenti/chihaya-fedele.png` | RGBA | 5bd3b26cca9c7885b2eb2ae8c0e3d01e5965cdd7319a074ddf552da11e60ad58 |
+| `public/asset/confidenti/futaba-fedele.png` | RGBA | 1a85f051347781063fee15dfaa2335c83cae7e2d6a0368399bccfa927f280ffb |
+| `public/asset/confidenti/gemelle-fedele.png` | RGBA | 090acb92c59664a52aae48b414dd1716ad9059e9e7c8a2a49fb79d1067448fe3 |
+| `public/asset/confidenti/haru-fedele.png` | RGBA | c80c9d361f832b911d95d9161d9a3b55cbcf70c57fd14bba94ddd023e47df4b8 |
+| `public/asset/confidenti/hifumi-fedele.png` | RGBA | a8739ad8613e09182c6ce7732ac8b78da79bddaddf7dc8c4ff694305f6171281 |
+| `public/asset/confidenti/igor-fedele.png` | RGBA | a4b64dfcff31feaecee69e88191438c19719129682c9bc41bb3101ac5cf1a849 |
+| `public/asset/confidenti/iwai-fedele.png` | RGBA | ce41fa68b61e2ba3a9fd9c1e5cd7ff8f703b6e9bcc3f6ba9223f30247a616787 |
+| `public/asset/confidenti/kasumi-fedele.png` | RGBA | 0b5215abc4747600e0dafdc2edc34b44c07136fc66765dc9f408ee7c8fbab2cc |
+| `public/asset/confidenti/kawakami-fedele.png` | RGBA | 51fdd4f877567b47f24acff3c48ad9229e065d1b9b89935b2f4baedf9bf7537f |
+| `public/asset/confidenti/makoto-fedele.png` | RGBA | b9c9cc79bdba1b6a805d52e6f91e5872b8d97e3e0cf33f1b2e86f9bf5b77d6d8 |
+| `public/asset/confidenti/maruki-fedele.png` | RGBA | 5dba451f94fa521cb160696e3ccc25184f9aed63d2c95156325301018474c1b4 |
+| `public/asset/confidenti/mishima-fedele.png` | RGBA | 51823288d173584795d8c7826a1dd4d79e0ed28838d0955ef33161cf65428914 |
+| `public/asset/confidenti/morgana-fedele.png` | RGBA | 5e7d8f2dacb2e30f6b040cf307521d5f41df008d66267a036808c1f707a7a7a7 |
+| `public/asset/confidenti/ohya-fedele.png` | RGBA | 07733679d4f5eeb4fbd594db175094ed9ff8b2b5b293c3d72b0b7f8a5761e56d |
+| `public/asset/confidenti/ryuji-fedele.png` | RGBA | 2a5e3435d437e032886403346bbcd6f53b84435c3bf1857241cfb842863e0214 |
+| `public/asset/confidenti/sae-fedele.png` | RGBA | 16ba8a6cc7bc95ea42403ce05d06f2fbdaf5fdfd8f8b795786802009d6a4ad9b |
+| `public/asset/confidenti/shinya-fedele.png` | RGBA | 361a6f5837a425581dff7783ed2e8b2f09a4a96cb87694cf0d66546b40fa62ec |
+| `public/asset/confidenti/sojiro-fedele.png` | RGBA | e852dd4d8c20d7aab50c5e1f9e2532e9ec926a744b345176f1cbea8ea62a2347 |
+| `public/asset/confidenti/takemi-fedele.png` | RGBA | 1d58dd66e7ed021b340c153035e572900774fa06d0a6671c206d1b4e625fee29 |
+| `public/asset/confidenti/yoshida-fedele.png` | RGBA | 5140bc5b3b253eeaf2ed031b78f95574f72a36c5b7ae36b4a66751c0b4893c2f |
+| `public/asset/confidenti/yusuke-fedele.png` | RGBA | b1e7eac60d000055ecef9f6431e7714b8eb05bfbe2368fc087af969edf41755c |
