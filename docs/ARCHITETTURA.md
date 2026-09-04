@@ -292,7 +292,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   (URL con la data di modifica come anti-cache); `components/impostazioni/CaratteriEditor.tsx` carica/sostituisce/rimuove un file per
   ruolo con anteprima immediata. I file vivono solo nell'istanza (`data/font/` è in .gitignore e .dockerignore).
 - **Sfondi a tema**: `components/layout/sfondi.ts` abbina prefisso di percorso → asset (Stanza di Velluto per Compendio/Skill/Fusione,
-  con variante Allarme; Mementos per la Guida; splash dell'identità per Home e Partita); `MainLayout` rende un livello `.sfondo-sezione`
+  con variante Allarme, e per Impostazioni; Mementos per la Guida; splash dell'identità per Home, Partita e schede dei Confidenti); `MainLayout` rende un livello `.sfondo-sezione`
   (assoluto, sotto il contenuto, velo scuro) sopra il pattern ripetibile; le card sono leggermente traslucide.
 - **Intestazione comune** `components/shared/IntestazionePagina.tsx`: titolo h1 a tasselli (una parola per cartiglio, colori alternati,
   inclinazione, nome accessibile intero), sottotitolo, azioni, illustrazione da asset, collegamento «indietro»; usata da tutte le pagine
@@ -303,7 +303,10 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   ritardi negativi), errore con `illustrazioni/errore-senza-testo`, stati vuoti con illustrazione dedicata → neutra → icona
   (`useAssetMulti` in `assetStore`); l'ErrorBoundary mostra la stessa illustrazione.
 - **Pulsanti e chip** a taglio diagonale disegnati in CSS: il riquadro resta rettangolare (outline di focus visibile), bordo e
-  riempimento sono due pseudo-elementi ritagliati con `clip-path`; i pulsanti usano il carattere «menu» in maiuscolo.
+  riempimento sono due pseudo-elementi ritagliati con `clip-path`; il testo resta nel carattere di lettura.
+- **Regola di leggibilità** (richiesta dell'utente dopo la prima verifica): i font P5 compaiono solo dove sono grandi, cioè titoli a
+  tasselli e nomi in evidenza (display, ≥ 17 px: anche il menu laterale), parole brevi dei tasselli rossi (menu), titoli degli stati
+  vuoti e dei messaggi (decor, ≥ 26 px); pulsanti, chip, barra in basso e testi usano sempre il sans.
 
 ## 8. Build, test, deploy
 - Test (Vitest, 20 file / 79 casi): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),

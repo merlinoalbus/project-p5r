@@ -10,7 +10,7 @@ export interface SfondoSezione {
   allarme?: string;
 }
 
-/** Abbinamenti sezione → asset. Compendio, Skill e Fusione vivono nella Stanza di Velluto; Guida e Partita nei Mementos. */
+/** Abbinamenti sezione → asset: Stanza di Velluto per Compendio, Skill, Fusione e Impostazioni; Mementos per la Guida; splash dell'identità per Home, Partita e Confidenti. Ogni sezione ha il suo sfondo (decisione dell'utente). */
 export const SFONDI_SEZIONE: ReadonlyArray<SfondoSezione> = [
   { prefisso: '/fusione', sfondo: 'sfondi/stanza-velluto', allarme: 'sfondi/stanza-velluto-allarme' },
   { prefisso: '/compendio', sfondo: 'sfondi/stanza-velluto' },
@@ -19,6 +19,7 @@ export const SFONDI_SEZIONE: ReadonlyArray<SfondoSezione> = [
   { prefisso: '/partita', sfondo: 'identita/splash-verticale-senza-testo' },
   { prefisso: '/confidenti', sfondo: 'identita/splash-verticale-senza-testo' },
   { prefisso: '/home', sfondo: 'identita/splash-orizzontale-senza-testo' },
+  { prefisso: '/impostazioni', sfondo: 'sfondi/stanza-velluto' },
 ];
 
 /** Chiave dell'asset di sfondo per il percorso, oppure null se la sezione non ne ha uno. */

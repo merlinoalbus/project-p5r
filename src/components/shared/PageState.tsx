@@ -53,7 +53,7 @@ export function PageState({ isLoading, error, onRetry, children }: PageStateProp
     return (
       <div className="flex flex-col items-center justify-center min-h-[40vh] gap-3 text-center" role="alert">
         <AssetImg nome="illustrazioni/errore-senza-testo" alt="" decorativa className="max-h-[150px] w-auto object-contain" fallback={<IconAlert size={32} className="text-error" />} />
-        <h3 className="m-0 font-display uppercase tracking-wide text-[22px] text-error">Qualcosa è andato storto</h3>
+        <h3 className="m-0 font-decor uppercase tracking-wide text-[26px] leading-none text-error">Qualcosa è andato storto</h3>
         <p className="m-0 text-text-secondary max-w-[420px]">{error}</p>
         {onRetry && (
           <button type="button" className="btn btn-secondary" onClick={onRetry}>
@@ -89,7 +89,7 @@ export function EmptyState({ icon, title, hint, action, illustrazione }: EmptySt
         className="max-h-[200px] w-auto object-contain"
         fallback={icon ? <div className="text-text-muted text-[40px] leading-none">{icon}</div> : null}
       />
-      <h3 className="m-0 font-display uppercase tracking-wide text-[24px] text-text">{title}</h3>
+      <h3 className="m-0 font-decor uppercase tracking-wide text-[26px] leading-none text-text">{title}</h3>
       {hint && <p className="m-0 text-[14px] text-text-muted max-w-[420px]">{hint}</p>}
       {action && <div className="mt-2 flex gap-2">{action}</div>}
     </div>

@@ -34,6 +34,7 @@ describe('DotiSociali', () => {
     render(<DotiSociali partitaId={1} />);
 
     expect(await screen.findByText('Rango 1 · Indifferente')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Stella delle Doti sociali: Fascino: 12%/ })).toBeInTheDocument();
     expect(screen.getByText(/Mancano/)).toHaveTextContent('Mancano 6 punti al rango 2 · Interessante (6)');
     // anteprime senza modificatori: 2 / 3 / 5
     expect(screen.getByLabelText('Fascino: aggiungi 1 nota (2 punti)')).toBeInTheDocument();

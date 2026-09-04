@@ -79,10 +79,10 @@ export function ObiettiviPartita({ partitaId }: Props) {
         <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Obiettivi">
           {visibili.map((o) => (
             <li key={o.id} className={`card flex gap-3 ${o.stato !== 'aperto' ? 'opacity-80' : ''}`}>
-              <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={64} forma="quadrata" />
+              <ImmagineEntita ambito="persona" chiave={o.nome} etichetta={o.nomeIt} dimensione={96} forma="quadrata" adatta="copri" />
               <div className="flex-1 min-w-0 flex flex-col gap-1 text-[13px]">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Link to={`/compendio/persona/${o.personaId}`} className="font-semibold text-[15px] text-text no-underline hover:text-primary">{o.nomeIt}</Link>
+                  <Link to={`/compendio/persona/${o.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary">{o.nomeIt}</Link>
                   <span className="text-text-muted">{o.arcanaNome} · livello base {o.livelloBase}</span>
                   <span className={`chip ${o.priorita === 2 ? 'chip--attivo' : ''}`}>Priorità {PRIORITA.find((p) => p.v === o.priorita)?.l.toLowerCase()}</span>
                   {o.stato === 'raggiunto' && <span className="chip">Raggiunto{o.raggiuntoAt ? ` il ${new Date(o.raggiuntoAt).toLocaleDateString('it-IT')}` : ''}</span>}

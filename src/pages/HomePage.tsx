@@ -9,6 +9,8 @@ import { getDoti, getPossedute } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { StellaCinque } from '../components/shared/StellaCinque';
+import { avanzamentoDote } from '../utils/doti';
 
 /** Pagina iniziale con lo stato della partita attiva e gli accessi rapidi. */
 export function HomePage() {
@@ -28,7 +30,13 @@ export function HomePage() {
             <span className="chip">Liv. {attiva.livelloProtagonista}</span>
             {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-4 flex-wrap items-center">
+            {doti.dati && doti.dati.length > 0 && (
+              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0" aria-label="Apri le Doti sociali">
+                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}-senza-testo`, testo: `Rango ${d.rango}` }))} dimensione={220} etichettaAria="Stella delle Doti sociali" />
+              </Link>
+            )}
+            <div className="flex gap-2 flex-wrap">
             {doti.dati?.map((d) => (
               <Link key={d.chiave} to="/partita?scheda=doti" className="kpi-tile no-underline text-text min-w-[110px]">
                 <span className="kpi-label">{d.nome}</span>
@@ -39,6 +47,7 @@ export function HomePage() {
               <span className="kpi-label">Scorta</span>
               <span className="kpi-value">{scorta.dati?.length ?? '…'}</span>
             </Link>
+            </div>
           </div>
         </div>
       ) : (

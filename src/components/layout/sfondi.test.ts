@@ -11,6 +11,7 @@ describe('sfondoPerPercorso', () => {
     expect(sfondoPerPercorso('/guida/dungeon/kamoshida')).toBe('sfondi/mementos');
     expect(sfondoPerPercorso('/partita')).toBe('identita/splash-verticale-senza-testo');
     expect(sfondoPerPercorso('/home')).toBe('identita/splash-orizzontale-senza-testo');
+    expect(sfondoPerPercorso('/impostazioni')).toBe('sfondi/stanza-velluto');
   });
 
   it('con l\'Allarme attivo la Fusione passa alla variante dedicata; le altre sezioni non cambiano', () => {
