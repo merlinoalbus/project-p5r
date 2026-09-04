@@ -228,21 +228,6 @@
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
   },
   {
-   "data": "05-19",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle due potrebbe essere classificata come lesione? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Produrre rumori molesti"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
    "data": "05-21",
    "tipo": "classe",
    "chi": "Prof. Usami",
@@ -296,21 +281,6 @@
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
   },
   {
-   "data": "05-26",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Qual è la risposta esatta? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "La \"regina\" delle prove"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
    "data": "05-31",
    "tipo": "classe",
    "chi": "Prof. Inui",
@@ -324,21 +294,6 @@
    "ricompensa": "Conoscenza +1 nota",
    "note": "",
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
-  },
-  {
-   "data": "06-02",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "I tutori non sono pagati"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
   },
   {
    "data": "06-04",
@@ -444,21 +399,6 @@
    "ricompensa": "Conoscenza +1 nota",
    "note": "",
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
-  },
-  {
-   "data": "06-23",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle due rappresenta una frode? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Ordinare cibo senza soldi"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
   },
   {
    "data": "06-27",
@@ -639,21 +579,6 @@
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte; rpgsite.net/feature/9602"
   },
   {
-   "data": "08-04",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle due può essere considerata un furto? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Rubare un'auto e restituirla"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
    "data": "09-03",
    "tipo": "classe",
    "chi": "Prof. Inui",
@@ -729,21 +654,6 @@
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
   },
   {
-   "data": "09-22",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Qual è la pena prevista per chi costringe qualcuno ai lavori forzati?",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Dieci anni di carcere"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
    "data": "09-24",
    "tipo": "classe",
    "chi": "Prof. Usami",
@@ -795,21 +705,6 @@
    "ricompensa": "Conoscenza +1 nota",
    "note": "",
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
-  },
-  {
-   "data": "09-29",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle precedenti è diffamazione? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Pubblicare una fedina penale"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
   },
   {
    "data": "10-03",
@@ -1008,21 +903,6 @@
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
   },
   {
-   "data": "11-10",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Chi detiene il potere in questo paese?",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Noi, gli spettatori"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
    "data": "11-12",
    "tipo": "classe",
    "chi": "Prof. Hiruta",
@@ -1081,51 +961,6 @@
    "ricompensa": "Conoscenza +1 nota",
    "note": "",
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
-  },
-  {
-   "data": "11-24",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "La Dieta decide in base a un voto maggioritario, ma chi ha l'ultima parola se il voto è al 50%?",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Lo Speaker della Camera"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
-   "data": "12-08",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Tentato omicidio"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
-  },
-  {
-   "data": "12-15",
-   "tipo": "altro",
-   "chi": "Game show in TV",
-   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
-   "risposte": [
-    {
-     "ordine": 1,
-     "testo": "Non dà vantaggi ai ricercati"
-    }
-   ],
-   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
-   "note": "",
-   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
   },
   {
    "data": "12-20",
@@ -1293,6 +1128,171 @@
    "ricompensa": "Conoscenza +1 nota",
    "note": "Esclusiva Royal (terzo semestre, gennaio).",
    "fonte": "allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte"
+  },
+  {
+   "data": "05-19",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle due potrebbe essere classificata come lesione? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Produrre rumori molesti"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "05-26",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Qual è la risposta esatta? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "La \"regina\" delle prove"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "06-02",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "I tutori non sono pagati"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "06-23",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle due rappresenta una frode? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Ordinare cibo senza soldi"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "08-04",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle due può essere considerata un furto? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Rubare un'auto e restituirla"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "09-22",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Qual è la pena prevista per chi costringe qualcuno ai lavori forzati?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Dieci anni di carcere"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "09-29",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti è diffamazione? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Pubblicare una fedina penale"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "11-10",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Chi detiene il potere in questo paese?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Noi, gli spettatori"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "11-24",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "La Dieta decide in base a un voto maggioritario, ma chi ha l'ultima parola se il voto è al 50%?",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Lo Speaker della Camera"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "12-08",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Tentato omicidio"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  },
+  {
+   "data": "12-15",
+   "tipo": "altro",
+   "chi": "Game show in TV",
+   "domanda": "Quale delle precedenti affermazioni è vera? A voi la sentenza!",
+   "risposte": [
+    {
+     "ordine": 1,
+     "testo": "Non dà vantaggi ai ricercati"
+    }
+   ],
+   "ricompensa": "Aumento della Dote Conoscenza (senza consumo di tempo/fascia oraria)",
+   "note": "",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
   }
  ],
  "esami": [

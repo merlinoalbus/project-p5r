@@ -37,7 +37,8 @@ export function domande(partitaId?: number): DomandeDto {
     dataGioco = p.data_gioco;
     fatte = new Set((prepared('SELECT domanda_id FROM domanda_partita WHERE partita_id = ?').all(partitaId) as Array<{ domanda_id: number }>).map((r) => r.domanda_id));
   }
-  const righe = prepared('SELECT * FROM domanda ORDER BY ordine').all() as RigaDomanda[];
+  // ordine di calendario scolastico (aprile → marzo) e, a pari data, ordine del seed: le voci aggiunte in coda al seed (quiz TV) restano al loro giorno
+  const righe = (prepared('SELECT * FROM domanda ORDER BY ordine').all() as RigaDomanda[]).sort((x, y) => indiceGiornoScolastico(x.data) - indiceGiornoScolastico(y.data) || x.ordine - y.ordine);
   const tutte = righe.map((r) => domandaDto(r, fatte));
   const oggi = dataGioco ? indiceGiornoScolastico(dataGioco) : null;
   const prossime = oggi === null ? [] : tutte.filter((d) => !d.fatta && indiceGiornoScolastico(d.data) >= oggi).slice(0, 5);
