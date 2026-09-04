@@ -176,8 +176,9 @@ function applicaEffetti(partitaId: number, a: AzioneSeed, opz: OpzioniSpunta): E
   const doti: EffettiAzioneDto['doti'] = [];
   const cinema = (a.tipo === 'dvd' || a.riferimento?.tipo === 'film') && haAnimaDaCineasta(partitaId);
   for (const d of dotiDalleNote(a.note)) {
-    // le note della guida diventano punti (2/3/5), con lo scalino in più di «Anima da cineasta» su film e DVD
-    const note = Math.min(3, Math.max(1, d.delta)) as 1 | 2 | 3;
+    // Le note della guida diventano punti (2/3/5), con lo scalino in più di «Anima da cineasta» su film e DVD.
+    // I DVD danno sempre due note (3 punti; 5 col libro): la guida li segna «+3» contando il libro, che però valutiamo a parte.
+    const note = (a.tipo === 'dvd' ? 2 : Math.min(3, Math.max(1, d.delta))) as 1 | 2 | 3;
     const punti = puntiDaNote(note, false, false, cinema);
     const agg = aggiornaDote(partitaId, d.chiave, { delta: punti });
     doti.push({ chiave: d.chiave, nome: agg.nome, delta: punti, note, cinema });

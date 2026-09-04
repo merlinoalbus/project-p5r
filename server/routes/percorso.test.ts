@@ -133,29 +133,42 @@ describe('API percorso giorno per giorno', () => {
 
   it('«Anima da cineasta» alza di uno scalino i punti di film e DVD alla spunta, solo se il libro risulta letto', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Cineasta' })).body.data as { id: number }).id;
-    // cerco un giorno con un DVD che dà una Dote
+    // cerco il primo DVD della guida che dà una Dote
     let trovato: { giorno: string; indice: number; note: number; dote: string } | null = null;
     const indice = (await request(app).get('/api/compendio/percorso')).body.data as { giorni: Array<{ giorno: string }> };
     for (const g of indice.giorni) {
       const giorno = (await request(app).get(`/api/compendio/percorso/${g.giorno}?partita=${id}`)).body.data as PercorsoGiornoDto;
-      const dvd = giorno.azioni.find((x) => (x.tipo === 'dvd' || x.riferimento?.tipo === 'film') && /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.test(x.note ?? ''));
+      const dvd = giorno.azioni.find((x) => x.tipo === 'dvd' && /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.test(x.note ?? ''));
       if (dvd) { const m = /(Conoscenza|Coraggio|Fascino|Gentilezza|Perizia) \+(\d)/.exec(dvd.note ?? '')!; trovato = { giorno: g.giorno, indice: dvd.indice, note: Number(m[2]), dote: m[1].toLowerCase() }; break; }
     }
     expect(trovato).not.toBeNull();
-    const { giorno, indice: idx, note, dote } = trovato!;
-    const scalini = [2, 3, 5, 7];
-    // senza il libro: punti normali
+    const { giorno, indice: idx, dote } = trovato!;
+    // un DVD dà sempre due note (3 punti), anche se la guida lo segna «+3» contando il libro
     const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
-    expect(senza.effetti?.doti[0]).toMatchObject({ chiave: dote, delta: scalini[note - 1], note, cinema: false });
+    expect(senza.effetti?.doti[0]).toMatchObject({ chiave: dote, delta: 3, note: 2, cinema: false });
     await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: false });
-    // col libro letto: uno scalino in più (2→3, 3→5, 5→7)
+    // col libro letto: uno scalino in più (3 → 5)
     expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', fatto: true })).status).toBe(200);
     const con = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: true })).body.data as AzionePercorsoDto;
-    expect(con.effetti?.doti[0]).toMatchObject({ chiave: dote, delta: scalini[Math.min(3, note)], note, cinema: true });
+    expect(con.effetti?.doti[0]).toMatchObject({ chiave: dote, delta: 5, note: 2, cinema: true });
     const doti = (await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>;
-    expect(doti.find((d) => d.chiave === dote)!.punti).toBe(scalini[Math.min(3, note)]);
+    expect(doti.find((d) => d.chiave === dote)!.punti).toBe(5);
     // togliendo la spunta si annullano esattamente i punti applicati
     await request(app).put(`/api/partite/${id}/percorso`).send({ data: giorno, indice: idx, fatta: false });
     expect(((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === dote)!.punti).toBe(0);
+  });
+
+  it('un film al cinema della guida riceve lo scalino di «Anima da cineasta»: 5 punti senza il libro, 7 col libro', async () => {
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Cinema' })).body.data as { id: number }).id;
+    const g = (await request(app).get(`/api/compendio/percorso/05-01?partita=${id}`)).body.data as PercorsoGiornoDto;
+    const film = g.azioni.find((x) => x.riferimento?.tipo === 'film' && /Gentilezza \+3/.test(x.note ?? ''))!;
+    expect(film).toBeDefined();
+    expect(film.riferimento).toEqual({ tipo: 'film', chiave: 'cinema-the-cake-knight-rises' });
+    const senza = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true })).body.data as AzionePercorsoDto;
+    expect(senza.effetti?.doti[0]).toMatchObject({ chiave: 'gentilezza', delta: 5, note: 3, cinema: false });
+    await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: false });
+    await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', fatto: true });
+    const con = (await request(app).put(`/api/partite/${id}/percorso`).send({ data: '05-01', indice: film.indice, fatta: true })).body.data as AzionePercorsoDto;
+    expect(con.effetti?.doti[0]).toMatchObject({ chiave: 'gentilezza', delta: 7, note: 3, cinema: true });
   });
 });
