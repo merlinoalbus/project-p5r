@@ -151,10 +151,11 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-negozio.png` | Articoli in vendita | insegna con borsa della spesa |
 | `azione-filtri.png` | Apre e chiude il pannello dei filtri del Compendio (acceso quando è aperto, con il conteggio dei filtri attivi accanto) | imbuto stilizzato con tre linee che vi scendono dentro |
 
-## 18. Spilli delle mappe (14) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13)
+## 18. Spilli delle mappe (19) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13)
 Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo
 (passaggio blu, negozio verde, forziere oro, tesoro viola, boss rosso, miniboss arancio, sicura azzurro, scorciatoia grigio, Confidente rosa,
-attività giallo, ristorante marrone, distributore ciano, treno verde scuro, nota bianco). Senza testo. L'app usa un SVG in codice se manca il file.
+attività giallo, ristorante marrone, distributore ciano, treno verde scuro, nota bianco, nemico bordeaux, oggetto chiave blu,
+punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia magenta). Senza testo. L'app usa un SVG in codice se manca il file.
 | File | Tipo di spillo | Soggetto |
 |---|---|---|
 | `spillo-passaggio.png` | ingresso/passaggio verso un'altra mappa | porta ad arco con freccia |
@@ -171,6 +172,11 @@ attività giallo, ristorante marrone, distributore ciano, treno verde scuro, not
 | `spillo-distributore.png` | distributore automatico | distributore con lattina |
 | `spillo-treno.png` | stazione della metropolitana | vagone stilizzato |
 | `spillo-nota.png` | nota generica | foglietto con puntina |
+| `spillo-nemico.png` | nemico | maschera d'Ombra minacciosa, distinta dai teschi di boss e miniboss |
+| `spillo-oggetto-chiave.png` | oggetto chiave | chiave antica |
+| `spillo-punto-sensibile.png` | punto sensibile | mirino sopra un nucleo vulnerabile crepato |
+| `spillo-tesoro-palazzo.png` | tesoro principale del Palazzo | corona-reliquia radiante su piedistallo, distinta dalla gemma di tesoro |
+| `spillo-seme-bramosia.png` | Seme della Bramosia | pietra-teschio crepata con viticci e richiami alle tre varianti rossa, verde e blu |
 
 ## 19. Mappe di base della città (25) — `mappe/<chiave>.png` (2048×1536, opache) — richieste il 2026-09-04 (Fase 13)
 Piante ILLUSTRATE originali in stile guida strategica (vista dall'alto leggermente prospettica, sagome nere degli edifici, strade chiare,
