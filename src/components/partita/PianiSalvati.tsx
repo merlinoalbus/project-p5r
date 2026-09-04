@@ -15,6 +15,8 @@ import type { PianoSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { PersonaChip } from '../fusione/PersonaChip';
+import { OperatoreRicetta } from '../fusione/RicettaRiga';
 
 interface Props {
   partitaId: number;
@@ -59,9 +61,10 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
           <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Passi eseguibili">
             {av.passi.map((p, i) => (
               <li key={i} className="text-[13px] flex flex-wrap items-center gap-1.5">
-                {p.ingredienti.map((ing, j) => <span key={j} className="chip chip--attivo">{ing.nomeIt}</span>)}
-                <span aria-hidden="true">→</span>
-                <Link to={p.ingredienti.length === 2 ? `/fusione?vista=calcolatore&a=${p.ingredienti[0].id}&b=${p.ingredienti[1].id}` : `/fusione?vista=ricette&ricette=${p.risultato.id}`} className="chip no-underline font-semibold">{p.risultato.nomeIt}</Link>
+                {p.ingredienti.map((ing, j) => <PersonaChip key={j} p={ing} inScorta={possedutaDi.has(ing.id)} />)}
+                <OperatoreRicetta tipo="risultato" />
+                <PersonaChip p={p.risultato} evidenza />
+                <CollegamentoVisivo to={p.ingredienti.length === 2 ? `/fusione?vista=calcolatore&a=${p.ingredienti[0].id}&b=${p.ingredienti[1].id}` : `/fusione?vista=ricette&ricette=${p.risultato.id}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricetta" dimensione={20} />} titolo="Ricetta" />
                 <span className="text-[12px] text-text-muted">fusione {p.tipo === 'speciale' ? 'speciale' : p.tipo === 'stesso-arcano' ? 'stesso arcano' : p.tipo === 'tesoro' ? 'con Demone del Tesoro' : 'normale'}{p.skillPortate.length ? ` · eredita ${p.skillPortate.map((s) => s.nomeIt).join(', ')}` : ''}</span>
                 {p.ingredienti.every((ing) => possedutaDi.has(ing.id)) && <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Esegui" onClick={() => setPassoInEsecuzione(i)} />}
               </li>

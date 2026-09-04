@@ -60,12 +60,12 @@ export function DotiSociali({ partitaId }: Props) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="grid gap-4 items-start lg:grid-cols-[minmax(280px,380px)_1fr]">
-        <section className="card flex flex-col items-center gap-3 lg:sticky lg:top-0 px-10 pt-6 overflow-visible" aria-label="Stella delle Doti">
+      <div className="grid gap-3 items-start md:grid-cols-[minmax(250px,320px)_1fr] md:h-full md:min-h-0 md:items-stretch">
+        <section className="card flex flex-col items-center gap-2 px-6 pt-4 pb-3 overflow-visible md:min-h-0 md:overflow-y-auto" aria-label="Stella delle Doti">
           <StellaCinque
             assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
-            dimensione={280}
-            badgeAltezza={42}
+            dimensione={220}
+            badgeAltezza={34}
             etichettaAria="Stella delle Doti sociali"
             onScegli={vaiAllaDote}
             selezionato={selezionata}
@@ -79,9 +79,9 @@ export function DotiSociali({ partitaId }: Props) {
           </div>
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
         </section>
-        <ul className="m-0 p-0 list-none flex flex-col gap-3">
+        <ul className="m-0 p-0 list-none flex flex-col gap-2 md:min-h-0 md:overflow-y-auto md:pr-1">
           {dati?.map((d) => (
-            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-2 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''}`}>
+            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-1.5 py-2.5 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''}`}>
               <CartaDote dote={d} />
               <div className="flex flex-wrap gap-2">
                 {([1, 2, 3] as const).map((n) => (

@@ -38,6 +38,7 @@ export const bodyDote = z
 
 export const bodyConfidente = z
   .object({
+    forza: z.boolean().optional(),
     sbloccato: z.boolean().optional(),
     rango: z.number().int().min(0).max(10).optional(),
     punti: z.number().min(0).max(9999).optional(),

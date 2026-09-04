@@ -32,6 +32,22 @@ describe('API semafori dei Confidenti', () => {
     const arcano = yusuke.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'persona-arcano');
     expect(arcano).toBeDefined();
     expect(arcano!.stato).toBe('rosso');
+    // bloccato: il rango 1 non è raggiungibile (né lo sblocco) finché i requisiti non sono verdi; il server rifiuta con 409
+    expect(yusuke.bloccato).toMatchObject({ rango: 1 });
+    expect(yusuke.bloccato!.motivi.length).toBeGreaterThan(0);
+    const rifiuto = await request(app).put(`/api/partite/${id}/confidenti/yusuke`).send({ rango: 1 });
+    expect(rifiuto.status).toBe(409);
+    expect(rifiuto.body.error.code).toBe('confidente-bloccato');
+    expect((await request(app).put(`/api/partite/${id}/confidenti/yusuke`).send({ sbloccato: true })).status).toBe(409);
+    // via d'uscita esplicita: `forza` passa e resta nello storico
+    const forzato = await request(app).put(`/api/partite/${id}/confidenti/yusuke`).send({ forza: true, rango: 1 });
+    expect(forzato.status).toBe(200);
+    expect((forzato.body.data as ConfidentePartitaDto).rango).toBe(1);
+    const eventi = (await request(app).get(`/api/partite/${id}/storico`)).body.data as { eventi: Array<{ titolo: string }> };
+    expect(eventi.eventi.some((e) => e.titolo.includes('nonostante i requisiti'))).toBe(true);
+    // un Confidente senza requisiti per il rango successivo non è bloccato e sale liberamente
+    const libero = conf.find((c) => c.bloccato === null && c.rango < 10)!;
+    expect((await request(app).put(`/api/partite/${id}/confidenti/${libero.chiave}`).send({ rango: libero.rango + 1 })).status).toBe(200);
     // una Persona dell'Imperatore in scorta → verde
     const eligor = ((await request(app).get('/api/compendio/persona?q=Eligor')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Eligor')!;
     await request(app).post(`/api/partite/${id}/persona`).send({ personaId: eligor.id });
@@ -55,11 +71,12 @@ describe('API semafori dei Confidenti', () => {
     // requisito inesistente → 404; corpo non valido → 400
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji/requisiti`).send({ rango: 9, indice: 40, confermato: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji/requisiti`).send({ rango: 2, confermato: true })).status).toBe(400);
-    // data: senza giorno corrente è grigio; con il giorno corrente diventa verde o rosso
+    // data: la nuova partita parte dal primo giorno del gioco (04-09), quindi il requisito è già verde o rosso; cambiando il giorno resta valutato
+    expect(((await request(app).get(`/api/partite/${id}`)).body.data as { dataGioco: string | null }).dataGioco).toBe('04-09');
     const conData = conf.find((c) => c.semafori.some((s) => s.requisiti.some((r) => r.tipo === 'data')));
     if (conData) {
       const rd = conData.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data')!;
-      expect(rd.stato).toBe('grigio');
+      expect(['verde', 'rosso']).toContain(rd.stato);
       await request(app).put(`/api/partite/${id}/giorno`).send({ data: '12-24' });
       const aggData = ((await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[]).find((c) => c.chiave === conData.chiave)!;
       expect(['verde', 'rosso']).toContain(aggData.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data')!.stato);

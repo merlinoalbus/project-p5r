@@ -31,6 +31,17 @@ interface Props {
 }
 
 /** Griglia «poster» dei Confidenti: rango con +/−, note della risposta con moltiplicatori, anello verso il rango successivo, sblocco, note, immagini. */
+/** Gruppi dell'elenco: in cima chi si puo far crescere adesso (rango > 0, gia sbloccato, o rango 0 con i requisiti del rango 1 soddisfatti). */
+const GRUPPI = [
+  { chiave: 'attivi', titolo: 'Attivi e sbloccabili', descrizione: 'in corso o pronti da avviare in gioco' },
+  { chiave: 'bloccati', titolo: 'Non ancora disponibili', descrizione: 'requisiti del primo rango non soddisfatti' },
+] as const;
+
+/** Un Confidente resta fra i bloccati solo finche non e mai stato avviato e i requisiti del rango 1 non sono soddisfatti. */
+function gruppoDi(c: ConfidentePartitaDto): 'attivi' | 'bloccati' {
+  return c.rango > 0 || c.sbloccato || !c.bloccato ? 'attivi' : 'bloccati';
+}
+
 export function ConfidentiPartita({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
@@ -103,14 +114,23 @@ export function ConfidentiPartita({ partitaId }: Props) {
         Le note mostrate in gioco valgono 5, 10 o 15 punti; il bonus della Persona dello stesso arcano (×1,5) viene proposto in base alla scorta della partita e si può forzare su ogni Confidente.
         Gli esami valgono solo per Ryuji, Ann, Makoto, Haru, Sojiro, Kawakami e Kasumi.
       </p>
+      {GRUPPI.map(({ chiave: gruppo, titolo, descrizione }) => {
+        const elenco = (dati ?? []).filter((c) => gruppoDi(c) === gruppo);
+        if (elenco.length === 0) return null;
+        return (
+        <section key={gruppo} className="flex flex-col gap-2 mb-4" aria-label={titolo}>
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <h3 className="m-0 font-display text-[19px] uppercase">{titolo}</h3>
+            <span className="text-[12px] text-text-muted">{elenco.length} · {descrizione}</span>
+          </div>
       <ul className="m-0 p-0 list-none grid gap-3 grid-cols-1 md:grid-cols-2 2xl:grid-cols-3">
-        {dati?.map((c) => {
+        {elenco.map((c) => {
           const bonus = bonusArcanoDi(c);
           const occ = occupato === c.chiave;
           const aPunti = c.rango < 10 && c.puntiNecessari !== null && c.puntiNecessari > 0;
           const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === 10 ? 1 : 0;
           return (
-            <li key={c.chiave} className={`card poster relative overflow-hidden flex gap-3 ${c.sbloccato ? '' : 'opacity-75'}`}>
+            <li key={c.chiave} className={`card poster relative overflow-hidden flex gap-3 ${c.sbloccato ? '' : 'opacity-75'} ${c.bloccato ? 'poster--bloccato' : ''}`} aria-label={c.bloccato ? `${c.nome}: bloccato per il rango ${c.bloccato.rango}` : undefined}>
               <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa className="poster__filigrana" fallback={null} />
               <div className="relative shrink-0 self-start">
                 <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={128} forma="carta" adatta="copri" modificabile />
@@ -139,8 +159,17 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango {c.rango === 10 ? 'MAX' : c.rango}</span>
                   <button type="button" className="btn btn-secondary btn-sm w-12" disabled={occ || c.rango === 0} onClick={() => void salva(c.chiave, { rango: c.rango - 1 })} aria-label={`Rango di ${c.nome} meno uno`}>−</button>
-                  <button type="button" className="btn btn-primary btn-sm w-12" disabled={occ || c.rango === 10} onClick={() => void salva(c.chiave, { rango: c.rango + 1 })} aria-label={`Rango di ${c.nome} più uno`}>+</button>
+                  <button type="button" className="btn btn-primary btn-sm w-12" disabled={occ || c.rango === 10 || !!c.bloccato} title={c.bloccato ? `Bloccato: ${c.bloccato.motivi.join(' · ')}` : undefined} onClick={() => void salva(c.chiave, { rango: c.rango + 1 })} aria-label={`Rango di ${c.nome} più uno${c.bloccato ? ' (bloccato dai requisiti)' : ''}`}>+</button>
                 </div>
+                {c.bloccato && (
+                  <div className="blocco-confidente" role="status">
+                    <span className="chip chip--icona chip--bloccata text-[11px]"><IconaAzione chiave="bloccato" dimensione={14} />Bloccato · rango {c.bloccato.rango}</span>
+                    <ul className="m-0 pl-4 text-[12px] text-text-secondary">{c.bloccato.motivi.map((m) => <li key={m}>{m}</li>)}</ul>
+                    <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="attiva" dimensione={20} />} titolo="Segna comunque" dettaglio={`rango ${c.bloccato.rango}`} disabled={occ}
+                      onClick={() => void salva(c.chiave, { rango: c.bloccato!.rango, forza: true })}
+                      aria-label={`${c.nome}: segna comunque il rango ${c.bloccato.rango} nonostante i requisiti`} />
+                  </div>
+                )}
 
                 {c.rango === 0 && (
                   <p className="m-0 text-[13px] text-text-muted">Confidente non ancora sbloccato: porta il rango a 1 quando lo incontri in gioco; le note e i punti mancanti compaiono dal primo rango che li richiede.</p>
@@ -192,7 +221,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                 )}
 
                 <div className="flex items-center gap-2 flex-wrap mt-auto">
-                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : 'Bloccato'} dettaglio={c.rango > 0 ? 'dal rango 1' : undefined} disabled={occ || c.rango > 0} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : 'bloccato'}`} />
+                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : 'Bloccato'} dettaglio={c.rango > 0 ? 'dal rango 1' : c.bloccato ? 'requisiti mancanti' : undefined} disabled={occ || c.rango > 0 || (!c.sbloccato && !!c.bloccato)} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : 'bloccato'}`} />
                   <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={() => { setModifica(c); setNote(c.note); }} />
                 </div>
                 {c.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap line-clamp-2">{c.note}</p>}
@@ -201,6 +230,9 @@ export function ConfidentiPartita({ partitaId }: Props) {
           );
         })}
       </ul>
+        </section>
+        );
+      })}
       <Modal
         titolo={modifica ? `Note — ${modifica.nome}` : 'Note'}
         aperta={modifica !== null}

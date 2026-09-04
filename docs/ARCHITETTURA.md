@@ -403,10 +403,71 @@ base (`impostaImmagineMappa`, corpo grezzo `image/*`, dimensioni da `dimensioniI
 `/esporta`, `/importa`, `/entita/:tipo/:chiave`, `/:chiave`, `/:chiave/immagine`, `/:chiave/spilli`, `/spilli/:id`) e
 `PUT /api/partite/:id/spilli/:spilloId`; schemi zod in `server/schemas/mappe.ts`; client `src/services/api/mappe.ts`. Le vecchie rotte
 dei marcatori e delle piante restano per le pagine attuali finché 13.4 non le sostituisce.
+`importaMappe` senza «sovrascrivi» rimpiazza solo gli spilli della stessa origine del pacchetto: il seed aggiorna i propri spilli e conserva
+quelli aggiunti dall'utente su una mappa del seed; `spillo.tipo` è validato dall'applicazione (zod + registro) e non da un CHECK, perché il
+registro dei tipi può crescere senza migrazioni.
+
+### Visore delle mappe (Fase 13.2)
+Modello di mapgenie.io osservato dal vivo: barra laterale a sinistra con categorie e conteggi, «Mostra tutti/Nascondi tutti», ricerca,
+segnalini a dimensione costante con icona per categoria, popup ancorato al segnalino, controlli dello zoom in basso a destra, tracciamento
+dei trovati. `src/components/mappe/VisoreMappa.tsx`: zoom espresso rispetto al minimo «adatta» (stato `null` = adatta, così nessun effetto
+imposta lo stato: `zoom = zoomEsplicito ?? zoomMin`), rotellina non passiva registrata a mano (React registra `wheel` come passivo),
+pinch con due puntatori, trascinamento, doppio click per adattare; il livello è scalato (`translate(pan) scale(zoom)`) e gli elementi
+ancorati (spilli, gruppi, popup) usano `scale(1/zoom) translate(…)` con origine 0 0 per restare a dimensione costante con la punta
+sulle coordinate; raggruppamento «+n» per celle di 30 px sotto 1,6× il minimo. `IconaSpillo` (asset `ui/spillo-<tipo>` → riserva
+SVG); `SchedaSpillo` con le azioni per tipo di riferimento; strumenti dell'editor (13.3) passati via `editor` (seleziona/sposta,
+aggiungi). Pagina `MappaPage` (`/guida/mappe`, `/guida/mappe/:chiave`) con lo stato «raccolto» della partita attiva; i raccolti
+sostituiscono lo spillo nel DTO locale senza ricaricare la mappa.
+Azioni per partita dal visore: «Raccolto/Riapri» (collezionabili), «Ottenuto/Esaurito/Riapri» per gli spilli collegati a un punto della
+Guida (`impostaStatoPunto`, stessi stati della scheda del Palazzo) e acquisto degli articoli del negozio collegato (`impostaAcquisto`);
+`DettaglioSpilloDto.immagine` porta l'immagine dell'entità collegata quando esiste (mappa, Confidente).
+
+### Editor delle mappe (Fase 13.3)
+`src/pages/EditorMappaPage.tsx` riusa `VisoreMappa` con `editor` (strumento seleziona/sposta o aggiungi, spillo selezionato, click sulla
+mappa, fine trascinamento) e con `pannello`/`intestazione` propri. Ogni modifica è salvata subito via API e la mappa viene ricaricata
+senza smontare il visore (`isLoading` solo senza dati: zoom e posizione restano). Riferimenti cercati con `GET /api/mappe/riferimenti`
+(`cercaRiferimenti`: LIKE su nome/chiave per tipo). Schermate degli spilli: migrazione 028 `spillo_immagine` (immagine dell'istanza
+nell'ambito «spillo» oppure `asset` del repository, didascalia, ordine), rotte `POST /api/mappe/spilli/:id/immagini` (corpo `image/*`),
+`PUT/DELETE /api/mappe/spilli/immagini/:id`; `SpilloDto.immagini` e `GalleriaSpillo` nel visore. `sincronizzaMappe` crea anche i passaggi
+verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da trascinare nell'editor: la mappa globale di Tokyo
+e la mappa verticale dei Mementos sono immagini dell'utente nell'istanza (mai nel repository) con i quartieri e i Dedali come passaggi;
+gli accessi ai Palazzi e ai Mementos sono passaggi dentro le mappe dei luoghi (es. la stazione di Shibuya). Esportazione: `esportaMappe(radice)`
+limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «store» in `server/utils/zip.ts`) con `data/seed/mappe/<chiave>.json`
+(immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>`) e i file in `public/asset/`;
+`caricaSeed` importa `mappe-editor.json` e poi ogni `data/seed/mappe/*.json` (nell'hash del seed).
+
+### Integrazione delle mappe nelle pagine (Fase 13.4)
+`src/hooks/useMappaPartita.ts` (mappa con la partita attiva, azioni raccolto/punto/acquisto con aggiornamento locale, `versione` per ricaricare,
+`onCambiato` per avvisare la pagina ospite) è condiviso da `MappaPage` e da `src/components/mappe/MappaIncorporata.tsx` (visore `incorporato`
+ad altezza fissa con «Schermo intero» e «Modifica mappa»). «La città» mostra la mappa `tokyo` sopra le piastrelle (`MiniaturaMappa`: immagine
+dell'istanza → asset `mappe/<chiave>` → icona); la scheda del quartiere mostra `citta-<q>`; la scheda del Palazzo mostra la mappa dell'area
+corrente e tiene allineati elenco dei punti e visore (l'elenco ricarica il visore con `versione`, il visore ricarica la scheda con `onCambiato`).
+Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor; le rotte server dei
+marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) restano perché alimentano la sincronizzazione iniziale degli spilli e i test.
+
+### Scheda «Oggi» e stato delle azioni della guida (Fase 12.4 / 13.5)
+`GiornoGuida` (`src/components/guida/GiornoGuida.tsx`) rende la scheda del giorno e le azioni (spunta con note del Confidente, collegamenti,
+«Sulla mappa» quando l'azione ha una mappa collegata) ed è usato dalla pagina della guida e da `OggiPartita`
+(`src/components/partita/OggiPartita.tsx`: scheda «Oggi» predefinita della Partita e sezione «Oggi» della Home) con `MappaIncorporata`
+accanto (Tokyo, poi la mappa dell'azione scelta con lo spillo centrato: `VisoreMappa.selezioneIniziale`, `MappaPage` con `?spillo=`).
+`percorsoService.giornoPercorso` calcola per ogni azione `stato` (con partita: `statoAzione` valuta i semafori del rango atteso del
+Confidente — rossi → bloccata con motivo, tutti verdi → consigliata, grigi → neutra «da confermare») e `mappa` (`mappaAzione`: Palazzo →
+`dungeon-<k>`, richiesta → `dungeon-mementos`, negozio/Confidente → spillo del luogo in città). `creaPartita` imposta il giorno corrente al
+primo giorno del percorso (04-09). Home, scheda «Oggi» e «Doti sociali» della Partita stanno in una schermata senza scorrimento su
+desktop e tablet (`.home`/`.scheda-riempi`: altezza della finestra meno la cornice; scorrono solo la guida del giorno e l'elenco delle Doti;
+la mappa incorporata riempie la colonna); lo schermo intero della mappa si apre in pagina («Torna alla pagina» o Esc) senza cambiare
+rotta. Cache delle immagini: gli URL dei file caricati sono versionati (`urlImmagineVersionata`: data di creazione dall'elenco + contatore
+locale) e il server risponde con `Cache-Control: private, max-age=31536000, immutable` quando c'è `?v=`, altrimenti rivalidazione; gli
+asset del repository hanno un'ora di cache piena in nginx (`stale-while-revalidate` di un giorno). Esportazione delle mappe: il pacchetto è completo (immagini di base e schermate degli spilli sempre incluse, puntate come asset);
+la provenienza delle immagini scaricate dalle guide è solo annotata (`provenienze`, LEGGIMI) — decisione dell'utente del 2026-09-04 sera,
+che supera la precedente esclusione.
 
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
   confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
+  Blocco (specifica 12.3): `ConfidentePartitaDto.bloccato` = requisiti non verdi del rango successivo; `aggiornaConfidente` rifiuta con 409
+  `confidente-bloccato` ogni aumento di rango (e lo sblocco) verso un rango i cui semafori non sono tutti verdi o confermati; la carta è spenta
+  (`poster--bloccato`) con i motivi e «+»/sblocco disattivati. Elenco dei requisiti manuali e condizionali: `docs/riferimenti/semafori-confidenti.md`.
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, boss segnati, richieste completate, ranghi, giorno e meteo
   correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
   `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.
@@ -420,10 +481,10 @@ dei marcatori e delle piante restano per le pagine attuali finché 13.4 non le s
 - `pianiDto` restituisce `motivo` (`non-fondibile` | `skill-non-ereditabili`) calcolato con `ricettePer`, `tipoEredita` ed `elementoEreditabile`
   prima di cercare i piani; il frontend lo mostra in un riquadro dedicato.
 - `FusionePage`: schede principali con `IconaScheda fusione-*`; le viste di calcolo (Due arcani, Matrice, Demoni del Tesoro) solo con `?strumenti=1`.
-- Tasselli Persona (`PersonaChip`, `.persona-chip*`): taglio diagonale, cornice rossa con la figura intera (`AnteprimaPersona contieni`), nome nel carattere P5 (17/19 px), tessera «Lv N», icona dell'arcano (`arcani/icona/<slug>`), rombo dorato per le rare, spunta verde d'angolo per la scorta (classe `persona-chip--scorta` conservata per i test). Operatori `OperatoreRicetta` («+» rosso, freccia bianca) condivisi da `RicettaRiga`, `CicliFusione` e ricette speciali; righe `.ricetta-riga` con tipo a etichetta, costo P5 e barra rossa quando tutti gli ingredienti sono in scorta.
+- Tasselli Persona (`PersonaChip`, `.persona-chip*`): taglio diagonale, cornice rossa con la figura intera (`AnteprimaPersona contieni`), nome nel carattere P5 (17/19 px), tessera «Lv N», icona dell'arcano (`arcani/icona/<slug>`), rombo dorato per le rare, spunta verde d'angolo per la scorta (classe `persona-chip--scorta` conservata per i test). Operatori `OperatoreRicetta` («+» rosso, freccia bianca) condivisi da `RicettaRiga`, `CicliFusione` e ricette speciali; righe `.ricetta-riga` con tipo a etichetta, costo P5 e barra rossa quando tutti gli ingredienti sono in scorta; anche «Fusioni speciali» della scheda Persona, «Cicli salvati», «Piani salvati» e la finestra «Esegui la fusione dalla scorta» usano gli stessi tasselli (14.11).
 
 ## 8. Build, test, deploy
-- Test (Vitest, 86 file / 252 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 91 file / 274 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla

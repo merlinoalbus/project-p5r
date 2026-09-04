@@ -12,6 +12,8 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { dataBreve, sintesi } from '../utils/testoBreve';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 export function DungeonPage() {
   useDocumentTitle('Palazzi e Dedali');
@@ -50,6 +52,7 @@ export function DungeonPage() {
                       <span className="text-[12px] text-text-muted">{d.aree} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
                     </div>
                   </Link>
+                  <CollegamentoVisivo to={`/guida/mappe/dungeon-${encodeURIComponent(d.chiave)}`} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Mappa" dettaglio={`${d.aree} aree collegate`} />
                 </li>
               );
             })}
