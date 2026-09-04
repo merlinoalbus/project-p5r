@@ -17,6 +17,7 @@ interface RigaPersona {
   id: number; nome: string; arcana: string; livello: number; eredita: string | null; speciale: number; rara: number; dlc: number;
   richiede_confidente_max: number; nota: string | null; oggetto: string; oggetto_allarme: string; oggetto_e_carta: number; tratto: string;
   forza: number; magia: number; resistenza: number; agilita: number; fortuna: number; aree_mementos_json: string; piani_mementos: string | null;
+  descrizione: string; fonte_descrizione: string;
 }
 
 interface RigaSkill {
@@ -210,6 +211,7 @@ export function dettaglioPersona(id: number): PersonaDettaglioDto {
     skill, areeMementos: aree, pianiMementos: r.piani_mementos,
     ricettaSpeciale: ricetta, ingredienteDi, dlcSet, carteDaEsecuzione: carte,
     negoziazione: titolo ? { titolo, titoloNome: t('negoziazione', titolo) } : null,
+    descrizione: r.descrizione, fonteDescrizione: r.fonte_descrizione,
   };
 }
 

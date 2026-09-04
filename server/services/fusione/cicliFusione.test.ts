@@ -58,6 +58,10 @@ describe('cicliFusione', () => {
     const jack = personaFusione(idDi('Jack Frost'))!;
     expect(cicliFusione(jack, ctx, { scorta: new Map(), registro: new Set() }, { lunghezzaMax: 3, alternative: 3, catture: false, livelloMax: null })).toEqual([]);
     const conCatture = cicliFusione(jack, ctx, { scorta: new Map(), registro: new Set() }, { lunghezzaMax: 3, alternative: 3, catture: true, livelloMax: 20 });
+    for (const c of cicliFusione(jack, ctx, { scorta: new Map(), registro: new Set() }, { lunghezzaMax: 5, alternative: 6, catture: true, livelloMax: 20 })) {
+      const consumate = new Set([jack.id, ...c.anelli.flatMap((a) => [a.ingrediente.id, a.risultato.id])]);
+      for (const a of c.anelli) expect(consumate.has(a.partner.id)).toBe(false);
+    }
     expect(conCatture.length).toBeGreaterThan(0);
     for (const c of conCatture) {
       expect(c.costo).toBe(0);
@@ -86,6 +90,9 @@ describe('cicliFusione', () => {
       expect(c.lunghezza).toBeLessThanOrEqual(4);
       const partner = c.anelli.map((a) => a.partner.id);
       expect(new Set(partner).size).toBe(partner.length);
+      // nessun partner è il bersaglio o una Persona consumata dalla catena (ingredienti e risultati)
+      const consumate = new Set([jack.id, ...c.anelli.flatMap((a) => [a.ingrediente.id, a.risultato.id])]);
+      for (const id of partner) expect(consumate.has(id)).toBe(false);
     }
     // minimo maggiore del massimo: il minimo viene ridotto al massimo (nessun errore, catene di 2)
     const corti = cicliFusione(jack, ctx, disp, { lunghezzaMax: 2, lunghezzaMin: 5, alternative: 3, catture: false, livelloMax: null });

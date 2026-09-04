@@ -42,8 +42,8 @@ export function HomePage() {
           </div>
           <div className="flex flex-col items-center gap-3">
             {doti.dati && doti.dati.length > 0 && (
-              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-8 py-3" aria-label="Apri le Doti sociali">
-                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={300} badgeAltezza={40} etichettaAria="Stella delle Doti sociali" />
+              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-12 pt-6 pb-4" aria-label="Apri le Doti sociali">
+                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={280} badgeAltezza={40} etichettaAria="Stella delle Doti sociali" />
               </Link>
             )}
             <div className="flex gap-2 flex-wrap justify-center">

@@ -39,7 +39,7 @@ export interface OpzioniCicli {
   lunghezzaMax: number;
   /** Numero minimo di anelli (2–lunghezzaMax, default 2). */
   lunghezzaMin?: number;
-  /** Ogni partner compare una sola volta lungo la catena (default true): a ogni giro servono Persona diverse. */
+  /** Ogni partner compare una sola volta e non è mai il bersaglio né una Persona consumata dalla catena (default true). */
   partnerDistinti?: boolean;
   alternative: number;
   /** Ammette partner da catturare (costo 0, ma non ripetibile a piacere). */
@@ -101,7 +101,9 @@ export function cicliFusione(target: PersonaFusione, ctx: Contesto, disp: Dispon
       const res = ric.risultato;
       if (res.id !== target.id && visitati.has(res.id)) continue;
       if (res.id !== target.id && res.rara) continue;
-      if (partnerDistinti && anelli.some((a) => a.partner.id === partner.id)) continue;
+      // Partner distinti: mai il bersaglio, mai una Persona già consumata dalla catena (ingredienti e risultati intermedi),
+      // mai un partner già usato: ogni anello richiede un esemplare procurato a parte.
+      if (partnerDistinti && (partner.id === target.id || partner.id === corrente.id || visitati.has(partner.id) || anelli.some((a) => a.partner.id === partner.id || a.ingrediente.id === partner.id || a.risultato.id === partner.id))) continue;
       if (opz.livelloMax !== null && res.livello > opz.livelloMax) continue;
       const m = modoPartner(partner, disp, opz);
       if (!m) continue;

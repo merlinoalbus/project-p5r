@@ -23,13 +23,15 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type {
+  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed,
+} from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json', 'descrizioni-persona.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -65,6 +67,7 @@ interface SeedCompleto {
   personaggi: PersonaggiSeed;
   oggettiGuida: OggettiGuidaSeed;
   doti: DoteSeed[];
+  descrizioniPersona: DescrizionePersonaSeed[];
   hash: string;
 }
 
@@ -82,6 +85,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
   return {
     versione,
     persone: JSON.parse(contenuti['persona.json']) as PersonaSeed[],
+    descrizioniPersona: JSON.parse(contenuti['descrizioni-persona.json']) as DescrizionePersonaSeed[],
     skill: JSON.parse(contenuti['skill.json']) as SkillSeed[],
     oggetti: JSON.parse(contenuti['oggetti.json']) as OggettoSeed[],
     fusione: JSON.parse(contenuti['fusione.json']) as FusioneSeed,
@@ -176,6 +180,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       if (id === undefined) throw new Error(`seed: Persona sconosciuta '${nome}'`);
       return id;
     };
+    // ---- Descrizioni (testo originale sull'origine della figura, Fase 12.9) ----
+    const updDescrizione = db.prepare('UPDATE persona SET descrizione = ?, fonte_descrizione = ? WHERE id = ?');
+    for (const d of seed.descrizioniPersona) updDescrizione.run(d.descrizione, d.fonte, idDi(d.nome));
     const idSkillDi = (nome: string): number => {
       const id = idSkill.get(nome);
       if (id === undefined) throw new Error(`seed: skill sconosciuta '${nome}'`);

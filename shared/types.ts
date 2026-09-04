@@ -96,6 +96,9 @@ export interface RicettaSpecialeDto {
 
 /** Scheda completa di una Persona. */
 export interface PersonaDettaglioDto extends PersonaRiassuntoDto {
+  /** Testo originale sull'origine della figura (mai il testo del gioco), con fonte sintetica. */
+  descrizione: string;
+  fonteDescrizione: string;
   nota: string | null;
   notaNome: string | null;
   oggetto: string;

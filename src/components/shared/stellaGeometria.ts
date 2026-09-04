@@ -4,7 +4,6 @@
 
 export const CENTRO = 50;
 export const RAGGIO = 34;
-export const RAGGIO_ETICHETTE = 47;
 
 /** Coordinate (in percentuale del riquadro) del punto a distanza `raggio` sull'asse `indice` di `n`; il primo asse punta in alto. */
 export function puntoStella(indice: number, n: number, raggio: number): [number, number] {

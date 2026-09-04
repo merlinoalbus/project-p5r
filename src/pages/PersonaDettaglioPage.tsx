@@ -143,6 +143,13 @@ export function PersonaDettaglioPage() {
               <CorniceArte>
                 <ImmagineEntita ambito="persona" chiave={p.nome} etichetta={p.nomeIt} dimensione={280} forma="orizzontale" modificabile />
               </CorniceArte>
+              {p.descrizione && (
+                <section className="card mt-3 py-2.5 px-3 flex flex-col gap-1" aria-label="Chi è">
+                  <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Chi è</span>
+                  <p className="m-0 text-[13px] leading-relaxed text-text-secondary h-[118px] overflow-y-auto pr-1">{p.descrizione}</p>
+                  {p.fonteDescrizione && <span className="text-[11px] text-text-muted">Origine: {p.fonteDescrizione}</span>}
+                </section>
+              )}
             </div>
             <div className="flex-1 min-w-0 flex flex-col gap-3">
               <div className="flex items-start gap-3">

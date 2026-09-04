@@ -34,6 +34,13 @@ export interface PersonaSeed {
   pianiMementos: string | null;
 }
 
+/** Descrizione originale di una Persona (origine della figura) con fonte sintetica. */
+export interface DescrizionePersonaSeed {
+  nome: string;
+  descrizione: string;
+  fonte: string;
+}
+
 /** Skill del compendio Royal. */
 export interface SkillSeed {
   nome: string;
