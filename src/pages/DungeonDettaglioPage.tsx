@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { getDungeon, impostaMarcatore, impostaStatoPunto, scaricaPianta, urlImmagine } from '../services/api';
+import { getDungeon, impostaStatoPunto, scaricaPianta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -13,7 +13,7 @@ import { PageState } from '../components/shared/PageState';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { segnaImmaginePresente } from '../components/shared/immaginiCache';
 import { IconChevronLeft } from '../components/shared/icons';
-import { MappaInterattiva } from '../components/guida/MappaInterattiva';
+import { MappaIncorporata } from '../components/mappe/MappaIncorporata';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
@@ -51,12 +51,12 @@ export function DungeonDettaglioPage() {
   const [filtro, setFiltro] = useState<Set<PuntoInteresseDto['tipo']>>(new Set());
   const [mostraGestiti, setMostraGestiti] = useState(false);
   const [selezionato, setSelezionato] = useState<string | null>(null);
-  const [posizionamento, setPosizionamento] = useState(false);
   const [mappaVersione, setMappaVersione] = useState(0);
+  // ogni cambio di stato dall'elenco ricarica il visore (e viceversa il visore ricarica l'elenco)
+  const [versioneStati, setVersioneStati] = useState(0);
   // Pianta pubblicata dalla guida ma non ancora nell'istanza: viene scaricata appena l'area è aperta (una richiesta per area)
   const download = useCarica(() => (area && !area.mappa && area.pianta ? scaricaPianta(area.chiave).then((r) => { segnaImmaginePresente('mappa', r.area); return r; }) : Promise.resolve(null)), [area?.chiave, area?.mappa, area?.pianta?.url]);
   const scaricata = !!area && !!download.dati && download.dati.area === area.chiave;
-  const mappaPronta = !!area && (area.mappa || mappaVersione > 0 || scaricata);
   // Credito della fonte davvero usata: quella registrata nell'immagine, oppure quella appena scaricata (principale o alternativa)
   const fonteUsata = area?.piantaScaricata ?? (scaricata && download.dati && area?.pianta
     ? { url: download.dati.url, fonte: download.dati.fonte, pagina: download.dati.url === area.pianta.url ? area.pianta.pagina : (area.pianta.alternative.find((x) => x.url === download.dati?.url)?.pagina ?? null) }
@@ -73,30 +73,11 @@ export function DungeonDettaglioPage() {
     if (!partitaId) return;
     try {
       aggiornaPunto(await impostaStatoPunto(partitaId, p.chiave, stato));
+      setVersioneStati((v) => v + 1);
     } catch (err) {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     }
   };
-  const posiziona = async (puntoChiave: string, x: number, y: number) => {
-    const p = area?.punti.find((q) => q.chiave === puntoChiave);
-    if (!p) return;
-    try {
-      const m = await impostaMarcatore(puntoChiave, { x, y });
-      aggiornaPunto({ ...p, marcatore: m });
-      notifica('success', `Spillo di «${p.nome}» posizionato.`);
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Posizionamento fallito.');
-    }
-  };
-  const rimuoviSpillo = async (p: PuntoInteresseDto) => {
-    try {
-      await impostaMarcatore(p.chiave, null);
-      aggiornaPunto({ ...p, marcatore: null });
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Rimozione fallita.');
-    }
-  };
-
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && area && (
@@ -165,24 +146,10 @@ export function DungeonDettaglioPage() {
                 {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
                 <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
               </div>
-              {mappaPronta ? (
-                <MappaInterattiva
-                  key={`${area.chiave}-${mappaVersione}-${scaricata ? download.dati?.byte ?? 0 : 0}`}
-                  src={`${urlImmagine('mappa', area.chiave)}?v=${mappaVersione}-${scaricata ? download.dati?.byte ?? 0 : 0}`}
-                  punti={area.punti.filter((p) => filtro.size === 0 || filtro.has(p.tipo))}
-                  selezionato={selezionato}
-                  onSeleziona={setSelezionato}
-                  posizionamento={posizionamento}
-                  onPosiziona={(k, x, y) => void posiziona(k, x, y)}
-                  mostraGestiti={mostraGestiti}
-                />
-              ) : (
-                <p className="m-0 text-[13px] text-text-muted">{download.caricamento ? 'Scaricamento della pianta in corso…' : 'Nessuna mappa per quest’area: l’elenco dei punti resta comunque disponibile.'}</p>
-              )}
+              <MappaIncorporata chiave={area.chiave} versione={`${mappaVersione}-${versioneStati}-${scaricata ? download.dati?.byte ?? 0 : 0}`} altezza={520} onCambiato={() => void dati.ricarica()} />
               <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                <button type="button" className={`chip touch ${posizionamento ? 'chip--attivo' : ''}`} onClick={() => setPosizionamento((v) => !v)} aria-pressed={posizionamento} disabled={!mappaPronta}>Modalità posiziona spilli</button>
                 <button type="button" className={`chip touch ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Mostra anche i gestiti ({gestitiArea})</button>
-                {selezionato && <span className="text-text-muted">Selezionato: {area.punti.find((p) => p.chiave === selezionato)?.nome}</span>}
+                <span className="text-text-muted">Spilli e immagine della pianta si modificano dall'editor («Modifica mappa» nel visore).</span>
               </div>
             </section>
 
@@ -203,7 +170,7 @@ export function DungeonDettaglioPage() {
                       <span className="mt-1 inline-block w-3 h-3 rounded-full shrink-0" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
                       <span className="flex-1 min-w-0">
                         <span className="font-semibold">{p.nome}</span>
-                        <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.marcatore ? ' · 📍' : ''}{p.stato ? ` · ${p.stato}` : ''}</span>
+                        <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}</span>
                       </span>
                     </button>
                     {p.chiave === selezionato && (
@@ -215,8 +182,6 @@ export function DungeonDettaglioPage() {
                           {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
                           {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
                           {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
-                          {p.marcatore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Togli spillo" onClick={() => void rimuoviSpillo(p)} />}
-                          {!p.marcatore && mappaPronta && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Posiziona sulla mappa" onClick={() => setPosizionamento(true)} />}
                         </div>
                         {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti ottenuti.</span>}
                       </div>

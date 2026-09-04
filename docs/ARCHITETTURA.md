@@ -436,6 +436,15 @@ limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «sto
 (immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>` solo se richieste) e i file in `public/asset/`;
 `caricaSeed` importa `mappe-editor.json` e poi ogni `data/seed/mappe/*.json` (nell'hash del seed).
 
+### Integrazione delle mappe nelle pagine (Fase 13.4)
+`src/hooks/useMappaPartita.ts` (mappa con la partita attiva, azioni raccolto/punto/acquisto con aggiornamento locale, `versione` per ricaricare,
+`onCambiato` per avvisare la pagina ospite) è condiviso da `MappaPage` e da `src/components/mappe/MappaIncorporata.tsx` (visore `incorporato`
+ad altezza fissa con «Schermo intero» e «Modifica mappa»). «La città» mostra la mappa `tokyo` sopra le piastrelle (`MiniaturaMappa`: immagine
+dell'istanza → asset `mappe/<chiave>` → icona); la scheda del quartiere mostra `citta-<q>`; la scheda del Palazzo mostra la mappa dell'area
+corrente e tiene allineati elenco dei punti e visore (l'elenco ricarica il visore con `versione`, il visore ricarica la scheda con `onCambiato`).
+Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor; le rotte server dei
+marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) restano perché alimentano la sincronizzazione iniziale degli spilli e i test.
+
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
   confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
