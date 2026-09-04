@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**660 file richiesti: 621 completati e approvati, 39 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**667 file richiesti: 665 completati e approvati, 2 ancora da consegnare.** La Fase 11.6 (§13), gli spilli (§18) e le mappe (§19) sono completi e validati.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -49,8 +49,8 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | ui (azioni, §17) | 46 | 46 | 0 |
 | ui (schede Partita e Fusione, §16) | 18 | 17 | 1 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
-| ui (spilli, §18) | 14 | 0 | 14 |
-| mappe (§19) | 25 | 0 | 25 |
+| ui (spilli, §18) | 19 | 19 | 0 |
+| mappe (§19) | 25 | 25 | 0 |
 | guida (sezione Mappe, §20) | 1 | 0 | 1 |
 
 ## Elenco degli asset da consegnare
@@ -85,47 +85,55 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/ella.png` — 768×768 (§15)
 
 ### ui — spilli (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-negozio.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-forziere.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-boss.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-miniboss.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sicura.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-scorciatoia.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-confidente.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-attivita.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-ristorante.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-distributore.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-treno.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-nota.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-negozio.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-forziere.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-boss.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-miniboss.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-sicura.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-scorciatoia.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-confidente.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-attivita.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-ristorante.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-distributore.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-treno.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-nota.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-nemico.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-oggetto-chiave.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-punto-sensibile.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro-palazzo.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
 
 ### mappe (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-yongen-jaya.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shibuya.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shinjuku.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-kichijoji.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-akihabara.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shujin-academy.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-kanda-jinbocho.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ikebukuro.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-harajuku.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ueno.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-inokashira-park.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-odaiba.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-shinagawa.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-nakano.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ogikubo.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-yokohama-chinatown.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-maihama.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-roppongi.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-tsukishima.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-meiji-shrine.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-ichigaya.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-suidobashi.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-asakusa.png` — 2048×1536 (§19)
-- [ ] **DA CONSEGNARE** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-yongen-jaya.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shibuya.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shinjuku.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-kichijoji.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-akihabara.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shujin-academy.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-kanda-jinbocho.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ikebukuro.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-harajuku.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ueno.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-inokashira-park.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-odaiba.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-shinagawa.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-nakano.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ogikubo.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-yokohama-chinatown.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-maihama.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-roppongi.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-tsukishima.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-meiji-shrine.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-ichigaya.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-suidobashi.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-asakusa.png` — 2048×1536 (§19)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
+
+### guida — sezione Mappe (§20)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/mappe.png` — 256×256 (§20)
 
 ### ui — azioni (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-regalo.png` — 128×128 (§17)
@@ -185,6 +193,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-cicli.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-storico.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-riepilogo.png` — 128×128 (§16)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-oggi.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-calcolatore.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-ricette.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-con.png` — 128×128 (§16)
