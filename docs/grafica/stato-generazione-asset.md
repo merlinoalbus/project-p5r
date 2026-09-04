@@ -2,10 +2,9 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**521 file richiesti: 235 completati e approvati, 286 ancora da consegnare** (37 aggiunti il 2026-09-04 con la Fase 11.6: §13 di `prompt-immagini.md`).
-**484 file richiesti: 461 completati e approvati, 23 ancora da consegnare.**
+**521 file richiesti: 521 completati e approvati, 0 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
-Persona completate e approvate: **209**. Persona generate e in validazione: **0**. Persona ancora da generare: **23**.
+Persona completate e approvate: **232**. Persona generate e in validazione: **0**. Persona da rigenerare: **0**.
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -41,11 +40,13 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | elementi | 16 | 16 | 0 |
 | affinita | 12 | 12 | 0 |
 | doti | 12 | 12 | 0 |
-| ui | 51 | 47 | 4 |
-| illustrazioni | 23 | 15 | 8 |
+| ui | 51 | 51 | 0 |
+| illustrazioni | 23 | 23 | 0 |
 | confidenti | 46 | 46 | 0 |
-| persona | 232 | 177 | 55 |
+| persona | 232 | 232 | 0 |
 | meteo | 17 | 17 | 0 |
+| guida | 15 | 15 | 0 |
+| palazzi | 10 | 10 | 0 |
 
 ## Elenco completo
 
@@ -212,7 +213,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orichalcum.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/king-frost.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/asterius-picaro.png` — 768×768
-- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/chernobog.png` — 768×768
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/chernobog.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/seiryu.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/forneus.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kali.png` — 768×768
@@ -247,29 +248,29 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/gabriel.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/scathach.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/raphael.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/izanagi-no-okami.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/sraosha.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/vohu-manah.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/zaou-gongen.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/alilat.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/izanagi-no-okami.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/sraosha.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/vohu-manah.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/zaou-gongen.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/alilat.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/messiah.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/uriel.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/attis.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/baal.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/belial.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/shiva.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/alice.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/cybele.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/surt.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/vishnu.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/ardha.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/hastur.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/odin.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/siegfried.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/ishtar.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/mother-harlot.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/fafnir.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/futsunushi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/belial.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/shiva.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/alice.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/cybele.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/surt.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/vishnu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ardha.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hastur.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/odin.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/siegfried.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ishtar.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mother-harlot.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/fafnir.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/futsunushi.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/beelzebub.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/michael.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/yoshitsune.png` — 768×768
@@ -279,7 +280,58 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ongyo-ki.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mada.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/messiah-picaro.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/satan.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/lucifer.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/maria.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/satanael.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/satan.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lucifer.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/maria.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/satanael.png` — 768×768
+
+Alias localizzato aggiuntivo richiesto dall'utente: `public/asset/persona/wakinyan.png`, identico a `thunderbird.png`; non altera il totale di 232 Persona canoniche del seed.
+
+### ui — Fase 13
+
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/ui/nav-guida.png` — 256×256 (§13.1)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/ui/nav-guida-attiva.png` — 256×256 (§13.1)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/ui/giorno.png` — 256×256 (§13.4)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/ui/sera.png` — 256×256 (§13.4)
+
+### illustrazioni — Fase 13
+
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-obiettivi.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-obiettivi-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-piani.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-piani-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-cicli.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-cicli-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-storico.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-storico-senza-testo.png` — 1200×800 (§13.5)
+
+### guida — Fase 13
+
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/percorso.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/domande.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/cruciverba.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/calendario.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/dungeon.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/richieste.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/battaglia.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/citta.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/negozi.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/attivita.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/completamento.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/sfide.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/personaggi.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/oggetti.png` — 256×256 (§13.2)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/guida/confidenti.png` — 256×256 (§13.2)
+
+### palazzi — Fase 13
+
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/kamoshida.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/madarame.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/kaneshiro.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/futaba.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/okumura.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/niijima.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/shido.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/iweleth.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/maruki.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/mementos.png` — 512×512 (§13.3)
