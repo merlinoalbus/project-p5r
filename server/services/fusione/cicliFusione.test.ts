@@ -101,4 +101,20 @@ describe('cicliFusione', () => {
     const liberi = cicliFusione(jack, ctx, disp, { lunghezzaMax: 4, lunghezzaMin: 3, partnerDistinti: false, alternative: 6, catture: false, livelloMax: null });
     expect(liberi.length).toBeGreaterThanOrEqual(lunghi.length);
   });
+
+  it('ammette catene lunghe (fino a 15 anelli) restando nel budget di ricerca', () => {
+    const ctx = creaContesto([]);
+    const jack = personaFusione(idDi('Jack Frost'))!;
+    const disp: Disponibilita = { scorta: new Map(), registro: new Set(ctx.ammesse.filter((p) => p.livello <= 40).map((p) => p.id)) };
+    const inizio = Date.now();
+    const lunghi = cicliFusione(jack, ctx, disp, { lunghezzaMax: 15, lunghezzaMin: 8, alternative: 2, catture: false, livelloMax: null });
+    // il budget di ricerca limita il lavoro: anche con la suite in parallelo la ricerca resta entro un minuto
+    expect(Date.now() - inizio).toBeLessThan(60000);
+    for (const c of lunghi) {
+      expect(c.lunghezza).toBeGreaterThanOrEqual(8);
+      expect(c.lunghezza).toBeLessThanOrEqual(15);
+      const tutte = [...c.anelli.map((a) => a.partner.id), ...c.anelli.map((a) => a.risultato.id).filter((id) => id !== jack.id)];
+      expect(new Set(tutte).size).toBe(tutte.length);
+    }
+  });
 });

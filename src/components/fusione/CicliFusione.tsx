@@ -56,6 +56,9 @@ export function SchedaCiclo({ ciclo, indice, onSalva, salvato }: { ciclo: CicloF
   );
 }
 
+/** Anelli ammessi (2–15): oltre i 5 la ricerca esamina più candidati e può richiedere qualche secondo. */
+const LUNGHEZZE = Array.from({ length: 14 }, (_, i) => i + 2);
+
 export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta, inizialeId, onSalvato }: Props) {
   const [scelta, setScelta] = useState<PersonaRiassuntoDto | null>(() => persone.find((p) => p.id === inizialeId) ?? null);
   const [lunghezza, setLunghezza] = useState(3);
@@ -95,11 +98,11 @@ export function CicliFusione({ persone, partitaId, livelloProtagonista, inScorta
             <span className="flex items-center gap-1.5" role="group" aria-label="Numero di anelli">
               Anelli da
               <select className="form-input form-input--compatto" value={Math.min(lunghezzaMin, lunghezza)} onChange={(e) => setLunghezzaMin(Number(e.target.value))} aria-label="Numero minimo di anelli">
-                {[2, 3, 4, 5].filter((n) => n <= lunghezza).map((n) => <option key={n} value={n}>{n}</option>)}
+                {LUNGHEZZE.filter((n) => n <= lunghezza).map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
               a
               <select className="form-input form-input--compatto" value={lunghezza} onChange={(e) => { const v = Number(e.target.value); setLunghezza(v); if (lunghezzaMin > v) setLunghezzaMin(v); }} aria-label="Numero massimo di anelli">
-                {[2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+                {LUNGHEZZE.map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </span>
             <button type="button" className={`chip touch ${partnerDistinti ? 'chip--attivo' : ''}`} onClick={() => setPartnerDistinti((v) => !v)} aria-pressed={partnerDistinti} title="Ogni partner compare una sola volta nella catena: a ogni giro servono Persona diverse fra loro">Partner distinti</button>

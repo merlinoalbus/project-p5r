@@ -273,6 +273,10 @@
   .form-input:focus { border-color: var(--color-primary); }
   .form-input--compatto { width: auto; min-height: 34px; padding: 4px 8px; font-size: 13px; }
 
+  /* ---- Griglia delle affinità: 5 per riga (2 righe), 10 per riga solo se il contenitore è largo; nomi mai spezzati ---- */
+  .griglia-affinita { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); container-type: inline-size; }
+  @container (min-width: 760px) { .griglia-affinita { grid-template-columns: repeat(10, minmax(0, 1fr)); } }
+
   /* ---- Pannello dei filtri: gruppi etichettati, ordinati in griglia ---- */
   .pannello-filtri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, max-content)); gap: 10px 22px; align-items: end; padding: 10px 14px; }
   .pannello-filtri__gruppo { display: flex; flex-direction: column; gap: 4px; }

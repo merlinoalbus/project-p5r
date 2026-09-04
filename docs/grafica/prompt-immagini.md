@@ -515,6 +515,93 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-riprova.png` | Riprova dopo un errore | freccia circolare con punto esclamativo |
 | `azione-registra.png` | Registra nel compendio | libro chiuso con segnalibro e spunta |
 
+## 15. Persona dei personaggi giocabili (27) — `persona-gruppo/<slug>.png` (768×768, trasparente) — richieste il 2026-09-04
+Stile identico alle Persona del compendio (§10): figura intera o mezzo busto su fondo trasparente, palette del gioco, nessun testo. Arsène e
+Satanael usano già gli asset del compendio (`persona/arsene.png`, `persona/satanael.png`) e non vanno rifatti. L'app li mostra nella scheda
+del personaggio (Guida → Personaggi): striscia con la Persona iniziale e le evoluzioni, click per vederne una in grande.
+| File | Persona | Personaggio e fase |
+|---|---|---|
+| `captain-kidd.png` | Captain Kidd | Ryuji Sakamoto — iniziale |
+| `seiten-taisei.png` | Seiten Taisei | Ryuji Sakamoto — seconda forma (risveglio) |
+| `william.png` | William | Ryuji Sakamoto — terza forma (Royal) |
+| `carmen.png` | Carmen | Ann Takamaki — iniziale |
+| `ecate.png` | Ecate | Ann Takamaki — seconda forma (risveglio) |
+| `celestine.png` | Célestine | Ann Takamaki — terza forma (Royal) |
+| `zorro.png` | Zorro | Morgana — iniziale |
+| `mercurio.png` | Mercurio | Morgana — seconda forma (risveglio) |
+| `diego.png` | Diego | Morgana — terza forma (Royal) |
+| `goemon.png` | Goemon | Yusuke Kitagawa — iniziale |
+| `kamu-susano-o.png` | Kamu Susano-o | Yusuke Kitagawa — seconda forma (risveglio) |
+| `gorokichi.png` | Gorokichi | Yusuke Kitagawa — terza forma (Royal) |
+| `ioanna.png` | Ioanna | Makoto Niijima — iniziale |
+| `anat.png` | Anat | Makoto Niijima — seconda forma (risveglio) |
+| `agnes.png` | Agnes | Makoto Niijima — terza forma (Royal) |
+| `necronomicon.png` | Necronomicon | Futaba Sakura — iniziale |
+| `prometeo.png` | Prometeo | Futaba Sakura — seconda forma (risveglio) |
+| `al-azif.png` | Al Azif | Futaba Sakura — terza forma (Royal) |
+| `milady.png` | Milady | Haru Okumura — iniziale |
+| `astarte.png` | Astarte | Haru Okumura — seconda forma (risveglio) |
+| `lucy.png` | Lucy | Haru Okumura — terza forma (Royal) |
+| `robin-hood.png` | Robin Hood | Goro Akechi — iniziale |
+| `loki.png` | Loki | Goro Akechi — seconda forma (risveglio) |
+| `ervardo.png` | Ervardo | Goro Akechi — terza forma (Royal) |
+| `cenerentola.png` | Cenerentola | Kasumi Yoshizawa — iniziale |
+| `vanadis.png` | Vanadis | Kasumi Yoshizawa — seconda forma (risveglio) |
+| `ella.png` | Ella | Kasumi Yoshizawa — terza forma (Royal) |
+
+## 18. Spilli delle mappe (14) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13)
+Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo
+(passaggio blu, negozio verde, forziere oro, tesoro viola, boss rosso, miniboss arancio, sicura azzurro, scorciatoia grigio, Confidente rosa,
+attività giallo, ristorante marrone, distributore ciano, treno verde scuro, nota bianco). Senza testo. L'app usa un SVG in codice se manca il file.
+| File | Tipo di spillo | Soggetto |
+|---|---|---|
+| `spillo-passaggio.png` | ingresso/passaggio verso un'altra mappa | porta ad arco con freccia |
+| `spillo-negozio.png` | negozio | insegna con borsa della spesa |
+| `spillo-forziere.png` | forziere | scrigno chiuso |
+| `spillo-tesoro.png` | tesoro collezionabile | gemma sfaccettata |
+| `spillo-boss.png` | boss | teschio con corona |
+| `spillo-miniboss.png` | miniboss | teschio semplice |
+| `spillo-sicura.png` | stanza sicura | scudo con spunta |
+| `spillo-scorciatoia.png` | scorciatoia | frecce che si incrociano |
+| `spillo-confidente.png` | Confidente | due volti di profilo |
+| `spillo-attivita.png` | attività | stella a cinque punte |
+| `spillo-ristorante.png` | ristorante o caffè | tazza fumante |
+| `spillo-distributore.png` | distributore automatico | distributore con lattina |
+| `spillo-treno.png` | stazione della metropolitana | vagone stilizzato |
+| `spillo-nota.png` | nota generica | foglietto con puntina |
+
+## 19. Mappe di base della città (25) — `mappe/<chiave>.png` (2048×1536, opache) — richieste il 2026-09-04 (Fase 13)
+Piante ILLUSTRATE originali in stile guida strategica (vista dall'alto leggermente prospettica, sagome nere degli edifici, strade chiare,
+accenti rossi), NON ricalcate da mappe ufficiali né da screenshot: sono le immagini di base su cui l'editor delle mappe posiziona gli spilli,
+e vengono pubblicate nel repository. Nessun testo dentro l'immagine (nomi e spilli li mette l'app).
+| File | Mappa | Soggetto |
+|---|---|---|
+| `tokyo.png` | Vista d'insieme di Tokyo | mappa stilizzata con i quartieri del gioco come isole collegate dalle linee della metropolitana, senza testo |
+| `citta-yongen-jaya.png` | Yongen-Jaya | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-shibuya.png` | Shibuya | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-shinjuku.png` | Shinjuku | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-kichijoji.png` | Kichijoji | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-akihabara.png` | Akihabara | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-shujin-academy.png` | Shujin Academy (scuola) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-kanda-jinbocho.png` | Kanda / Jinbocho | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-ikebukuro.png` | Ikebukuro | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-harajuku.png` | Harajuku | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-ueno.png` | Ueno | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-inokashira-park.png` | Parco Inokashira | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-odaiba.png` | Odaiba / Seaside Park | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-shinagawa.png` | Shinagawa | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-nakano.png` | Nakano | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-ogikubo.png` | Ogikubo | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-yokohama-chinatown.png` | Chinatown (Yokohama) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-maihama.png` | Maihama | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-roppongi.png` | Roppongi | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-tsukishima.png` | Tsukishima | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-meiji-shrine.png` | Santuario Meiji | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-ichigaya.png` | Ichigaya | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-suidobashi.png` | Suidobashi (Dome Town) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-asakusa.png` | Asakusa | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+| `citta-mementos.png` | Mementos (ingresso) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.
 2. Icone elementi (4), affinità (5), navigazione (7.1) → usate in ogni scheda.

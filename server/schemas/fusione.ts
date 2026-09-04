@@ -34,8 +34,8 @@ const booleano = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'tru
 export const queryCicli = z.object({
   partita: z.coerce.number().int().positive().optional(),
   dlc: z.string().optional(),
-  lunghezza: z.coerce.number().int().min(2).max(5).optional(),
-  lunghezzaMin: z.coerce.number().int().min(2).max(5).optional(),
+  lunghezza: z.coerce.number().int().min(2).max(15).optional(),
+  lunghezzaMin: z.coerce.number().int().min(2).max(15).optional(),
   partnerDistinti: z.enum(['true', 'false']).optional(),
   alternative: z.coerce.number().int().min(1).max(12).optional(),
   catture: z.enum(['true', 'false']).optional(),
