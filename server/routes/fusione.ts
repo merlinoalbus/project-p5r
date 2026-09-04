@@ -46,10 +46,11 @@ router.get('/cerca-skill', validate({ query: queryCercaSkill }), (req, res) => {
 });
 
 router.get('/cicli/:personaId', validate({ params: paramsPersonaId, query: queryCicli }), (req, res) => {
-  const q = req.query as unknown as { partita?: number; dlc?: string; lunghezza?: number; alternative?: number; catture?: string; limitaLivello?: string; livelloMax?: number };
+  const q = req.query as unknown as { partita?: number; dlc?: string; lunghezza?: number; lunghezzaMin?: number; partnerDistinti?: string; alternative?: number; catture?: string; limitaLivello?: string; livelloMax?: number };
   res.json(cicliDto(Number(req.params.personaId), {
     partitaId: q.partita, dlc: q.dlc ? q.dlc.split(',').map(Number).filter((n) => Number.isInteger(n)) : undefined,
-    lunghezza: q.lunghezza, alternative: q.alternative, catture: q.catture === 'true', limitaLivello: q.limitaLivello === 'true', livelloMax: q.livelloMax,
+    lunghezza: q.lunghezza, lunghezzaMin: q.lunghezzaMin, partnerDistinti: q.partnerDistinti === undefined ? undefined : q.partnerDistinti === 'true',
+    alternative: q.alternative, catture: q.catture === 'true', limitaLivello: q.limitaLivello === 'true', livelloMax: q.livelloMax,
   }));
 });
 

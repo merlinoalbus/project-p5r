@@ -35,6 +35,8 @@ export const queryCicli = z.object({
   partita: z.coerce.number().int().positive().optional(),
   dlc: z.string().optional(),
   lunghezza: z.coerce.number().int().min(2).max(5).optional(),
+  lunghezzaMin: z.coerce.number().int().min(2).max(5).optional(),
+  partnerDistinti: z.enum(['true', 'false']).optional(),
   alternative: z.coerce.number().int().min(1).max(12).optional(),
   catture: z.enum(['true', 'false']).optional(),
   limitaLivello: z.enum(['true', 'false']).optional(),

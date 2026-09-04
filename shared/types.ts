@@ -596,7 +596,7 @@ export interface CicloFusioneDto {
 export interface CicliFusioneDto {
   persona: PersonaFusioneDto;
   cicli: CicloFusioneDto[];
-  opzioni: { lunghezzaMax: number; alternative: number; catture: boolean; livelloMax: number | null };
+  opzioni: { lunghezzaMax: number; lunghezzaMin: number; partnerDistinti: boolean; alternative: number; catture: boolean; livelloMax: number | null };
   sconto: number;
   disponibilita: { scorta: number; registro: number };
   /** La Persona di partenza è nella scorta della partita. */

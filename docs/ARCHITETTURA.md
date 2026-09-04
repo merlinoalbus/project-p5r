@@ -373,6 +373,11 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   modifiche automaticamente. `POST /api/partite/:id/persona` con `daRegistro: true` (evocazione) ripristina l'istantanea (400 se non
   registrata) senza toccarla. La registrazione manuale dal compendio personale crea un'istantanea di solo livello.
 
+### Cicli di fusione: anelli minimi/massimi e partner distinti (Fase 12.5)
+- `cicliFusione` accetta `lunghezzaMin` (2–`lunghezzaMax`) e `partnerDistinti` (default true: un partner non può ripetersi lungo la catena,
+  così ogni giro usa Persona diverse); `GET /api/fusione/cicli/:id?lunghezzaMin&partnerDistinti` e selettori «Anelli da … a …» + chip
+  «Partner distinti» nella vista Cicli.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 82 file / 237 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
