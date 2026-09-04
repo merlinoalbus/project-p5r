@@ -1,0 +1,348 @@
+{
+  "_meta": {
+    "titolo": "Regole numeriche dei bonus di fusione — Persona 5 Royal",
+    "scopo": "Dati strutturati per l'ottimizzatore dei bonus di fusione (Fase 4, app project-p5r-main)",
+    "dataRicerca": "2026-09-03",
+    "legendaAffidabilita": {
+      "alta": "confermata da 2+ fonti indipendenti (idealmente EN + JP) o da codice/dati primari",
+      "media": "una fonte primaria solida, o due fonti che si citano a vicenda",
+      "bassa": "una sola fonte debole, o dato dedotto/non isolato"
+    },
+    "nota": "Vedi regole-bonus-fusione.md per il testo esplicativo completo e le divergenze fra fonti."
+  },
+
+  "1_bonusExpConfidenteFusione": {
+    "regolaGenerale": "Fondere/potenziare una Persona la cui Arcana corrisponde all'Arcana di un Confidente dà EXP bonus scalato dal rango del Confidente. Non esclusivo del Confidente Forza (confermato per qualunque Confidente allineato all'Arcana del risultato).",
+    "tabellaA_fusioneGenerica": {
+      "descrizione": "Moltiplicatore EXP per rango, fonte fandom.com/wiki/Experience via wikiwiki.jp (identica per P5 e P5R)",
+      "affidabilita": "media",
+      "moltiplicatorePerRango": { "0": 1.0, "1": 1.15, "2": 1.3, "3": 1.5, "4": 1.7, "5": 2.0, "6": 2.15, "7": 2.3, "8": 2.5, "9": 2.7, "10": 3.0 }
+    },
+    "tabellaB_forzaSacrificio": {
+      "descrizione": "Moltiplicatore EXP per la Forca (sacrificio), per rango del Confidente ricevente, condizionato al rango del 'Folle/Igor' (non max / max). Trovata indipendentemente da due ricerche.",
+      "affidabilita": "alta",
+      "moltiplicatorePerRango_igorNonMax": { "1": 1.25, "5": 2.25, "10": 3.5 },
+      "moltiplicatorePerRango_igorMax": { "1": 1.5, "5": 2.75, "10": 4.0 },
+      "notaInterpolazione": "Solo i ranghi 1, 5, 10 sono documentati dalla fonte; i valori intermedi non sono confermati (interpolazione non verificata).",
+      "bonusCumulativi": {
+        "stessaArcanaSacrificio": { "moltiplicatore": 1.5, "affidabilita": "alta" },
+        "tesoroArcanaDiversa": { "moltiplicatore": 3, "affidabilita": "alta" },
+        "tesoroStessaArcana": { "moltiplicatore": 5, "affidabilita": "alta" }
+      },
+      "duranteFusionAlarm": {
+        "descrizione": "I moltiplicatori sopra sono SOSTITUITI (non cumulati) da questa scala fissa durante l'Allarme",
+        "affidabilita": "alta",
+        "normaleArcanaDiversa": 2,
+        "normaleStessaArcana": 3,
+        "tesoroArcanaDiversa": 5,
+        "tesoroStessaArcana": 7
+      }
+    },
+    "divergenzaApertaTabelleAeB": "Non è chiaro se Tabella A e Tabella B descrivano meccaniche distinte (fusione a 2 ingredienti vs Forca) o la stessa meccanica vista da fonti diverse. Riportate entrambe senza fonderle.",
+    "puntiStatisticaPerLivello": {
+      "puntiPerLivello": 3,
+      "distribuzione": "casuale tra le 5 statistiche (FR/MA/RS/AG/FO)",
+      "affidabilita": "media-alta",
+      "formulaCumulativaTotalePunti": "livello * 3 + 7",
+      "capPerStatistica": 99,
+      "capSenzaEquipSpeciale": 90,
+      "puntiTotaliMassimiALivello99": 304,
+      "affidabilitaCapSenzaEquipE304": "media (solo fonte pixelflood.it)",
+      "eccezioniPersonaBaseAlta": ["Agathion", "Shiki-ouji", "Koumokuten", "Black Rider", "Dominion"]
+    },
+    "fonti": [
+      "https://megamitensei.fandom.com/wiki/Experience",
+      "https://megamitensei.fandom.com/wiki/Confidant",
+      "https://wikiwiki.jp/persona5r/ (pagina Potenziamento/ペルソナ強化)",
+      "GameFAQs (formula L*3+7, non URL specifico raccolto)"
+    ]
+  },
+
+  "2_allarmeFusioni": {
+    "attivazione": {
+      "sbloccoEvento": "Dopo aver assicurato la rotta al Tesoro nel Palazzo di Kaneshiro e tentato di uscire (prima data: 21 giugno)",
+      "triggerTipo": "probabilistico, cresce con vittorie in battaglia nel Metaverso (incl. Instakill Confidente Carro rango 7)",
+      "triggerAggiuntivo": "Lettura 'Proibita - Fortuna Celeste' del Confidente Fortuna (Chihaya) rango 8, a pagamento: attiva l'allarme nel mondo reale e ne aumenta la probabilità nel Metaverso",
+      "percentualeEsatta": null,
+      "affidabilita": "alta (meccanismo), nessun numero esatto disponibile"
+    },
+    "durata": {
+      "unitaMisura": "nessuna, dura finché non avviene un incidente o si esce dopo almeno un'operazione",
+      "reset": ["parlare ai gemelli custodi", "uscire dalla Stanza dopo almeno un'operazione", "verificarsi di un incidente (espulsione forzata)"]
+    },
+    "fusioneNormaleGhigliottina": {
+      "effetti": [
+        "statistiche extra oltre al normale +3/livello",
+        "Demoni del Tesoro trattati come 5 livelli piu alti del reale",
+        "skill del risultato possono mutare in versioni potenziate/diverse",
+        "Persona fusa diventa 'carica' (nome oro) per il resto dell'allarme"
+      ],
+      "riusoPersonaCarica": {
+        "unaCarica": "incidente quasi garantito, altrimenti bonus statistico",
+        "dueCariche": "incidente sempre garantito",
+        "setSkillIncidente": { "unaCaricaNumSet": 11, "dueCaricheNumSet": 14 }
+      },
+      "affidabilita": "alta"
+    },
+    "forcaGallows": {
+      "skillEreditate": { "normale": 1, "duranteAllarme": "1-3 (randomizzato in anticipo)", "affidabilita": "alta" },
+      "limiteGiornalieroSaltato": true,
+      "incidente": {
+        "expOttenuta": 0,
+        "bonusStatisticoGarantito": {
+          "sacrificioNormale": 5,
+          "unaPersonaCarica": 10,
+          "entrambeCariche": 15
+        },
+        "affidabilitaBonus5e10": "alta (fandom + wikiwiki.jp concordi)",
+        "affidabilitaBonus15": "media (solo wikiwiki.jp, non confermato da fandom EN)"
+      }
+    },
+    "sediaElettrica": {
+      "senzaIncidente": "oggetto un tier sopra il normale, garantito (non casuale) — corrisponde al campo oggettoAllarme del dataset dell'app",
+      "conIncidente": {
+        "tabellaPerLivelloSacrificio": [
+          { "livelloMax": 35, "ricompense": ["Megido (skill card)", "Divine Grace (skill card)", "Alluring Belt", "Mighty Ring", "Lucky Belt", "incenso base ST/MA/EN/AG/LU"] },
+          { "livelloMin": 36, "livelloMax": 55, "ricompense": ["Heat Up (skill card)", "Ailment Boost (skill card)", "Hell Ring", "Almighty Ring", "Miracle Belt", "incenso Ambergris ST/MA/EN/AG/LU"] },
+          { "livelloMin": 56, "ricompense": ["Life Aid (skill card)", "Fortify Spirit (skill card)", "Amrita Shower (skill card)", "Angelic Grace (skill card)", "Deadly Fury Belt", "incenso Nirvana ST/MA/EN/AG/LU"] }
+        ],
+        "conPersonaCarica": "sempre una skill card dal pool Boost/Amp/Resist/Null/Repel/Drain/Dodge/Evade"
+      },
+      "affidabilita": "alta"
+    },
+    "isolamento": {
+      "bonusIncensoDuranteAllarme": "raddoppiato (x2), deve essere acceso durante l'allarme",
+      "affidabilita": "alta"
+    },
+    "rischioIncidente": {
+      "probabilitaInizialePerMetodo": 0,
+      "regolaCrescita": "cresce fortemente con ogni uso dello stesso metodo; due usi consecutivi dello stesso metodo = incidente quasi garantito",
+      "regolaAlternanza": "alternare metodi diversi riduce il rischio",
+      "regolaRegistro": "ogni evocazione dal Registro durante l'allarme aumenta il rischio per tutte le operazioni contemporaneamente",
+      "sogliaSecondaEvocazione": { "descrizione": "una seconda evocazione dal Registro nello stesso allarme garantirebbe il fallimento del tentativo successivo", "affidabilita": "media (fonte singola, thegamer.com)" }
+    },
+    "fonti": [
+      "https://megamitensei.fandom.com/wiki/Fusion_alarm",
+      "https://wikiwiki.jp/persona5r/ (pagina 合体警報)",
+      "https://www.thegamer.com/persona-5-royal-velvet-room-fusion-alarms-guide/",
+      "https://gamerant.com/persona-5-royal-fusion-alarms-guide/",
+      "https://www.neoseeker.com/persona-5-royal/Guide_to_Fusion_Alarms"
+    ]
+  },
+
+  "3_forcaPotenziamento": {
+    "formulaConcettuale": "EXP = EXP_base(livello_iniziale_sacrificio) * moltiplicatore_rango_confidente(x Igor) * bonus_arcana * bonus_tesoro",
+    "expBaseDipendeDa": "livello iniziale (creazione/registrazione) del sacrificio, non dal livello attuale",
+    "penalita50Percento": {
+      "condizione": "livello attuale del sacrificio > livello attuale del ricevente",
+      "effetto": "EXP dimezzata",
+      "esempi": [
+        { "descrizione": "Pixie Lv2 + Arsene Lv1 iniziale/attuale", "exp": 28 },
+        { "descrizione": "Pixie Lv2 + Arsene portato a Lv3 attuale (penalita attiva)", "exp": 14 },
+        { "descrizione": "Pixie Lv2 + Mandrake Lv3/Lv3", "exp": 130 },
+        { "descrizione": "Pixie portato a Lv4 (pari al sacrificio, penalita rimossa) + Mandrake Lv3", "exp": 260 }
+      ],
+      "affidabilita": "alta"
+    },
+    "difficoltaMerciless": { "moltiplicatore": 0.333, "affidabilita": "media (solo fandom, non riscontrato su wiki JP)" },
+    "skillTrasferite": {
+      "p5vanilla": 1,
+      "p5royalNormale": 1,
+      "p5royalDuranteAllarme": "1-3 (randomizzato in anticipo)"
+    },
+    "limiti": {
+      "usiGiornalieriPerPersona": 1,
+      "workaround": "ri-registrare/eliminare/ri-evocare a pagamento per ripetere nello stesso giorno",
+      "limiteSaltatoDuranteAllarme": true,
+      "costoYenDirettoOperazione": null,
+      "vincoloLivelloProtagonista": { "confermatoSpecificoPerForca": false, "note": "vincolo generico di fusione, applicabilita a Forca non confermata specificamente" }
+    },
+    "fonti": [
+      "https://wikiwiki.jp/persona5r/ (pagina 絞首刑/ペルソナ強化)",
+      "https://megamitensei.fandom.com/wiki/Sacrificial_fusion",
+      "GameFAQs (thread community)"
+    ]
+  },
+
+  "4_isolamentoAddestramento": {
+    "sblocco": { "confidente": "Forza", "rango": 3 },
+    "durataGiorni": {
+      "versioneFandomEN": { "nonSbloccato": 5, "rangoMassimo": 2, "note": "solo due punti dati, nessuna tabella intermedia" },
+      "versioneWikiwikiJP": { "nonSbloccato": 5, "rango1_3": 4, "rango4_6": 3, "rango7_9": 2, "rangoMax": 1 },
+      "divergenza": true
+    },
+    "avvisoPerdita": {
+      "versioneFandomEN": "circa 10 giorni (generico)",
+      "versioneWikiwikiJP": { "giornoAvviso": 9, "giornoPerditaSeNonRitirata": 10 },
+      "divergenza": true
+    },
+    "skillPerLivelloPersona": {
+      "affidabilita": "alta",
+      "tabella": [
+        { "livelloMin": 1, "livelloMax": 25, "skill": "Schiva X (Dodge)" },
+        { "livelloMin": 26, "livelloMax": 33, "skill": "Super Schiva X (Evade)" },
+        { "livelloMin": 34, "livelloMax": 52, "skill": "Resistenza X (Resist)" },
+        { "livelloMin": 53, "livelloMax": 62, "skill": "Nullifica X (Null)" },
+        { "livelloMin": 63, "livelloMax": 74, "skill": "Riflette X (Repel)" },
+        { "livelloMin": 75, "livelloMax": null, "skill": "Assorbe X (Drain)" }
+      ],
+      "note": "copertura reale della debolezza solo da Lv34+; nessuna skill copre debolezze Gun; determinato al momento del deposito, non modificabile ricaricando"
+    },
+    "regolaResistenzeDaGiorni": {
+      "ipotesiOriginale": "piu giorni in isolamento = resistenza piu alta",
+      "confermata": false,
+      "spiegazione": "il tier di resistenza dipende dal livello della Persona al deposito, non dai giorni di permanenza; la durata (rango Confidente) influenza solo il tempo necessario, non il risultato"
+    },
+    "incenso": {
+      "tabella": [
+        { "nome": "Incenso base (uno per statistica FR/MA/RS/AG/FO)", "prezzoYen": 4000, "effetto": "+1 alla statistica indicata" },
+        { "nome": "Musk (5 combinazioni: FR+MA, FR+AG, MA+RS, MA+FO, RS+AG)", "prezzoYen": 8000, "effetto": "+1 a due statistiche" },
+        { "nome": "Rasta Sandalwood (dal 1 ottobre)", "prezzoYen": 14000, "effetto": "+1 a FR, MA, AG" },
+        { "nome": "Ambergris (scambio 80 fiori Mementos)", "prezzoYen": null, "effetto": "+2 alla statistica" },
+        { "nome": "Nirvana (scambio 80 fiori Mementos, dal 30 ottobre)", "prezzoYen": null, "effetto": "+3 alla statistica" }
+      ],
+      "giorniPerEffetto": 2,
+      "puntoVenditaPrincipale": ["Home Shopping Program", "Jose's Shop", "Mantra Ganda Incense Shop (Kichijoji)"],
+      "bonusGiornalieroSenzaIncenso": { "punti": 1, "casuale": true, "affidabilita": "media (fonte singola JP)" },
+      "duranteFusionAlarm": {
+        "moltiplicatore": 2,
+        "esempioNumerico": "2 giorni Rasta Sandalwood + Nirvana (base +3) durante Allarme = +8 in 2 giorni (scala linearmente: +16 in 4gg, +24 in 6gg)",
+        "affidabilita": "media (fonte singola con calcolo interno coerente)"
+      },
+      "affidabilita": "alta (tabella incenso/prezzi)"
+    },
+    "fonti": [
+      "https://megamitensei.fandom.com/wiki/Lockdown",
+      "https://megamitensei.fandom.com/wiki/Incense",
+      "https://wikiwiki.jp/persona5r/ (pagina 独房送り/ペルソナ特訓)"
+    ]
+  },
+
+  "5_prezzoEvocazioneRegistro": {
+    "formulaInUsoNellApp": "27*L^2 + 126*L + 2147",
+    "fonteFormula": "chinhodado/persona5_calculator, FusionCalculator.ts, funzione getApproxCost — identica in index.html (P5) e indexRoyal.html (P5R)",
+    "avvertenzaAutore": "L'autore dichiara esplicitamente: 'the cost is estimated and is not accurate' — stima per ordinamento relativo, non prezzo esatto di gioco",
+    "affidabilitaFormula": "media",
+    "scontoPerCompletamentoCompendio": {
+      "affidabilita": "alta",
+      "tabella": [
+        { "percentualeRegistrata": 25, "scontoPercentuale": 10 },
+        { "percentualeRegistrata": 50, "scontoPercentuale": 15 },
+        { "percentualeRegistrata": 75, "scontoPercentuale": 25 },
+        { "percentualeRegistrata": 100, "scontoPercentuale": 50 }
+      ]
+    },
+    "scontoDaConfidente": { "trovato": false, "note": "nessuna fonte lega uno sconto al rango di un Confidente (Matto o Forza)" },
+    "personaDlc": { "primoRichiamoGratuito": true, "contaAiFiniPercentualeCompletamento": false },
+    "fonti": [
+      "https://github.com/chinhodado/persona5_calculator",
+      "wikiwiki.jp/persona5r/ (pagina sconti compendio)",
+      "GameFAQs thread 'Compendium discounts'"
+    ]
+  },
+
+  "6_bonusConfidenteForza": {
+    "confidente": "Caroline & Justine (poi Lavenza) — Twin Wardens",
+    "affidabilita": "alta",
+    "tabellaP5Royal": [
+      { "rango": 1, "sblocco": "Group Guillotine", "effetto": "fusione di gruppo, 3 Persona" },
+      { "rango": 2, "sblocco": null },
+      { "rango": 3, "sblocco": "Lockdown", "effetto": "isolamento/addestramento resistenza elementale" },
+      { "rango": 4, "sblocco": null },
+      { "rango": 5, "sblocco": "Special Treatment", "effetto": "a pagamento, fusione di Persona sopra il livello del protagonista" },
+      { "rango": 6, "sblocco": null },
+      { "rango": 7, "sblocco": null },
+      { "rango": 8, "sblocco": "Guillotine Booster", "effetto": "aumenta le combinazioni possibili in Group Guillotine" },
+      { "rango": 9, "sblocco": null },
+      { "rango": 10, "sblocco": "VIP Treatment", "effetto": "riduce il costo Yen di Special Treatment (percentuale non nota)" }
+    ],
+    "differenzeDaP5Vanilla": {
+      "rango3": "Lockdown (uguale)",
+      "rango5": "Guillotine Booster in vanilla (in Royal e' rango 8)",
+      "rango8": "Isolation in vanilla (skill resistenza piu forti da Lockdown — non presente come voce separata in Royal)",
+      "rangoMax": "Special Treatment in vanilla (in Royal e' rango 5; VIP Treatment e' nuovo per Royal)"
+    },
+    "completamento": { "fusioneSbloccata": "Zaou-Gongen", "regaloSpeciale": "Cell Key (19 marzo, riporta gli sblocchi in New Game Plus)" },
+    "fonti": [
+      "https://megamitensei.fandom.com/wiki/Confidant/Caroline_%26_Justine",
+      "https://www.dualshockers.com/persona-5-royal-strength-confidant-guide/"
+    ]
+  },
+
+  "7_altriConfidentiStanzaVelluto": {
+    "regolaGenerale": { "descrizione": "EXP bonus di fusione (sez. 1) si applica per qualunque Confidente allineato all'Arcana del risultato, non solo Forza", "affidabilita": "alta" },
+    "velocitaLockdown": { "descrizione": "dipende dal rango del Confidente dell'Arcana della Persona in isolamento, non necessariamente Forza", "affidabilita": "media" },
+    "confidenteFortuna": {
+      "nome": "Chihaya Mifune",
+      "rango": 8,
+      "effetto": "Lettura 'Proibita - Fortuna Celeste' (a pagamento) attiva il Fusion Alarm nel mondo reale e ne aumenta la probabilita nel Metaverso",
+      "affidabilita": "alta"
+    },
+    "confidenteCarro": {
+      "nome": "Ryuji Sakamoto",
+      "rango": 7,
+      "effetto": "Instakill contribuisce ad aumentare la probabilita cumulata di Fusion Alarm (come le vittorie normali)",
+      "affidabilita": "alta"
+    },
+    "confidenteFolle_incertezza": {
+      "descrizione": "una fonte non incrociata elenca 'Bonus EXP for fusion' e 'Increases Persona stock capacity' tra i benefici del Folle; termine ambiguo (il Folle e' il protagonista stesso, non un Confidente classico con schermata propria)",
+      "affidabilita": "bassa",
+      "raccomandazione": "non modellare nell'app finché non confermato da fonte primaria"
+    },
+    "altriConfidenti": { "trovati": false, "nota": "assenza di prova, non prova di assenza: non tutte le ~22 pagine dei Confidenti sono state verificate singolarmente" },
+    "fonti": [
+      "https://megamitensei.fandom.com/wiki/Confidant",
+      "wikiwiki.jp/persona5r/ (pagina fusion alarm)"
+    ]
+  },
+
+  "8_cicliDemoniDelTesoro": {
+    "meccanismo": "fondere Demone del Tesoro + Persona normale produce una Persona della stessa Arcana della Persona partner, spostata di +-1 o +-2 posizioni nella lista per livello di quell'Arcana; offset dipende dalla combinazione specifica tesoro x arcana (tabella modificatori)",
+    "affidabilita": "alta (meccanismo generale)",
+    "livelloUsatoPerCalcolo": { "valore": "livello attuale della Persona partner (non confermato da seconda fonte, da trattare con cautela)", "affidabilita": "media" },
+    "giaImplementatoNellApp": {
+      "descrizione": "shared/types.ts (tesori.nomi/modificatori), server/services/fusione/motoreFusione.ts (mappa arcana->modificatori per tesoro)",
+      "raccomandazione": "non sostituire i dati esistenti; usare i dati wiki solo come verifica incrociata non validata riga per riga"
+    },
+    "listaDemoniDelTesoroP5R": [
+      { "nome": "Regent", "livello": 10, "arcana": "Imperatore", "location": ["Palazzo di Madarame", "Mementos - Qimranut", "Mementos - Aiyatsbus", "Mementos - Chemdah", "Mementos - Da'at (Royal)"] },
+      { "nome": "Queen's Necklace", "livello": 15, "arcana": "Imperatrice", "location": ["Palazzo di Kaneshiro", "Mementos - Kaitul"] },
+      { "nome": "Stone of Scone", "livello": 20, "arcana": "Fortuna", "location": ["Palazzo di Futaba", "Mementos - Akzeriyyuth"] },
+      { "nome": "Koh-i-Noor", "livello": 25, "arcana": "Sacerdotessa", "location": ["Palazzo di Okumura", "Mementos - Adyeshach"] },
+      { "nome": "Orlov", "livello": 30, "arcana": "Forza", "location": ["Palazzo di Niijima", "Mementos - Sheriruth"] },
+      { "nome": "Emperor's Amulet", "livello": 35, "arcana": "Appeso", "location": ["Palazzo di Shido", "Mementos - Sheriruth (dopo Shido)"] },
+      { "nome": "Hope Diamond", "livello": 40, "arcana": "Morte", "location": ["Palazzo di Shido (Royal, molto raro)", "Depths of Mementos/Da'at (Royal)"] },
+      { "nome": "Crystal Skull", "livello": 50, "arcana": "Matto", "location": ["Palazzo di Shido (Royal, raro)", "Qliphoth World/Da'at (Royal)"] },
+      { "nome": "Orichalcum", "livello": 60, "arcana": "Fede", "location": ["Palazzo di Maruki"], "note": "unico nuovo Demone del Tesoro introdotto in Royal" }
+    ],
+    "arcanaSenzaTesoro": "Councillor (unico arcano P5R senza Demone del Tesoro)",
+    "disponibilita": {
+      "ottenibileViaFusione": false,
+      "metodoOttenimento": "negoziazione/cattura in Palazzi e Mementos",
+      "registrabileNelCompendio": true,
+      "prezzoEvocazioneDedicato": "non confermato, presumibilmente formula standard sez. 5"
+    },
+    "usoPratico": "bypassa la catena di fusione incrementale nello stesso Arcano; risparmio non quantificato in Yen/EXP dalle fonti, solo vantaggio di 'scorciatoia'",
+    "fonti": [
+      "https://megamitensei.fandom.com/wiki/Treasure_Demon"
+    ]
+  },
+
+  "9_manipolazioneStatistiche": {
+    "integraDocumento": "docs/riferimenti/manipolazione-statistiche.md (guida pixelflood.it)",
+    "confermeIncrociate": [
+      { "dato": "cap 99 per statistica", "pixelflood": true, "confermaEsterna": "GameFAQs esplicito per P5R", "affidabilita": "alta" },
+      { "dato": "cap 90 senza equip speciale", "pixelflood": true, "confermaEsterna": null, "affidabilita": "media" },
+      { "dato": "304 punti totali massimi a Lv99", "pixelflood": true, "confermaEsterna": null, "affidabilita": "media" },
+      { "dato": "reroll uscendo/rientrando dalla schermata risultati", "pixelflood": true, "confermaEsterna": "TheGamer.com indipendente", "affidabilita": "alta" },
+      { "dato": "+3 punti per livello, distribuzione casuale", "pixelflood": "implicito", "confermaEsterna": "wikiwiki.jp (2 ricerche indipendenti) + formula cumulativa GameFAQs L*3+7", "affidabilita": "media-alta" },
+      { "dato": "manipolabile una sola volta per Persona fusa", "pixelflood": true, "confermaEsterna": null, "affidabilita": "media" }
+    ],
+    "notaGranularitaDiversa": "il valore '10 punti' per un'esecuzione Forca dorata durante l'Allarme (sez. 3/2) e' il bonus-incidente della Forca, non il tasso per singolo livello; non contraddice il +3/livello",
+    "fonti": [
+      "docs/riferimenti/manipolazione-statistiche.md (interno al progetto)",
+      "https://www.thegamer.com/",
+      "wikiwiki.jp/persona5r/"
+    ]
+  }
+}

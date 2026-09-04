@@ -22,6 +22,7 @@ export default defineConfig({
       'scripts/**/*.test.ts',
       'src/**/*.test.ts',
       'src/**/*.test.tsx',
+      'vite/**/*.test.ts',
     ],
     exclude: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
     setupFiles: ['./test/setup.ts'],

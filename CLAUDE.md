@@ -41,6 +41,13 @@ italiana tramite la tabella `traduzione`.
 4. Aggiornare `docs/ROADMAP.md` (stato) e, se cambia qualcosa di strutturale, `docs/ARCHITETTURA.md` / `docs/DECISIONI.md`.
 5. Niente mockup, placeholder o regressioni senza autorizzazione esplicita dell'utente.
 
+## Lavoro in parallelo con altre sessioni/IA
+Nel repository possono lavorare più agenti (es. Codex sul branch `codex/asset-grafici-alfa` per gli asset grafici).
+Regole: (1) verificare SEMPRE `git branch --show-current` prima di committare; (2) non fare checkout di branch altrui
+nella working copy condivisa; (3) per lavorare su `main` usare il worktree dedicato `C:\Repository\project-p5r-main`
+(`git worktree list`), che ha i propri `node_modules` e `.env`; (4) gli asset generati vanno in `public/asset/…` e
+si integrano su `main` tramite merge del branch di produzione asset.
+
 ## Avvio rapido
 ```bash
 npm install && cp .env.example .env

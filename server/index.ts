@@ -6,7 +6,8 @@
 //   1. initDb()        — apertura DB, FATALE su errore
 //   2. runBootBackup() — snapshot rotante pre-migrazioni, warn-only
 //   3. runMigrations() — schema versionato, FATALE su errore
-//   4. createApp() + listen(porta)
+//   4. caricaSeed()    — compendio Royal da data/seed (idempotente), FATALE su errore
+//   5. createApp() + listen(porta)
 //
 // Arresto: su SIGINT/SIGTERM (Ctrl-C, docker stop) si chiude il server
 // HTTP, si esegue `PRAGMA optimize` e si chiude la connessione SQLite.
@@ -20,6 +21,7 @@ import { closeDb, initDb } from './db/dbService.js';
 import { runBootBackup } from './db/backupService.js';
 import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
+import { caricaSeed } from './services/seed/caricaSeed.js';
 
 try {
   initDb();
@@ -34,6 +36,14 @@ try {
   runMigrations(initDb());
 } catch (err) {
   console.error('[project-p5r] FATALE: migrazione schema fallita:', err);
+  process.exit(1);
+}
+
+try {
+  const esito = caricaSeed(initDb());
+  logger.info(esito, esito.caricato ? 'seed del compendio caricato' : 'seed del compendio già aggiornato');
+} catch (err) {
+  console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
   process.exit(1);
 }
 

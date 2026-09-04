@@ -5,6 +5,7 @@
 import { NavLink } from 'react-router-dom';
 import { useConfigStore } from '../../stores/configStore';
 import { VOCI_NAV } from './navigazione';
+import { IconaNav } from './IconaNav';
 
 /** Navigazione laterale a larghezza fissa fra le aree principali dell'app. */
 export function Sidebar() {
@@ -18,15 +19,19 @@ export function Sidebar() {
             key={item.to}
             to={item.to}
             className={({ isActive }) =>
-              `touch flex items-center gap-3 px-3 py-2 rounded-md text-[14px] no-underline transition-colors ${
+              `touch voce-menu flex items-center gap-3 px-3 py-2 rounded-md text-[18px] no-underline transition-colors ${
                 isActive
                   ? 'bg-primary-bg text-primary font-semibold'
                   : 'text-text-secondary hover:bg-bg-tertiary hover:text-text'
               }`
             }
           >
-            {item.icon}
-            {item.label}
+            {({ isActive }) => (
+              <>
+                <IconaNav voce={item} attiva={isActive} />
+                {item.label}
+              </>
+            )}
           </NavLink>
         ))}
       </div>

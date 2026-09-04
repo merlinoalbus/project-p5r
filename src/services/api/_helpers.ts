@@ -85,9 +85,9 @@ export const apiDelete = <T>(path: string, opts?: HttpFetchOptions): Promise<T> 
   requestJson<T>('DELETE', path, undefined, opts);
 
 /** Costruisce una query string da un oggetto, saltando i valori vuoti. */
-export function queryString(params: Record<string, string | number | boolean | undefined | null>): string {
+export function queryString(params: object): string {
   const sp = new URLSearchParams();
-  for (const [k, v] of Object.entries(params)) {
+  for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
     if (v === undefined || v === null || v === '') continue;
     sp.set(k, String(v));
   }

@@ -1,6 +1,6 @@
 {
   "versione": 1,
-  "generatoIl": "2026-09-03T11:41:02.412Z",
+  "generatoIl": "2026-09-03T17:30:31.723Z",
   "fonti": {
     "primaria": {
       "id": "chinhodado",
@@ -19,9 +19,14 @@
     "oggetti": 223,
     "ricetteSpeciali": 24,
     "tesori": 9,
+    "confidenti": 23,
+    "doti": 5,
     "effettiTradotti": 512,
     "descrizioniOggettiTradotte": 223,
     "negoziazioniTradotte": 120,
-    "fontiCartaTradotte": 49
+    "fontiCartaTradotte": 49,
+    "skillLocalizzate": 371,
+    "personeLocalizzate": 58,
+    "termini": 56
   }
 }
