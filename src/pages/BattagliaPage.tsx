@@ -32,13 +32,13 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
   return <p className="m-0"><strong>{titolo}:</strong> {children}</p>;
 }
 
-/** Elemento base di una debolezza/resistenza («Tuono (dimezza)» → «Tuono»). */
 /** Debolezza o resistenza della guida: chip dell'elemento con icona se riconosciuto, altrimenti chip testuale (il testo resta quello della guida). */
 function ChipElementoGuida({ testo }: { testo: string }) {
   const chiave = chiaveElementoDaTesto(testo);
   return chiave ? <ElementoChip elemento={chiave} nome={testo} piccolo /> : <span className="chip">{testo}</span>;
 }
 
+/** Elemento base di una debolezza/resistenza («Tuono (dimezza)» → «Tuono»). */
 function elementoBase(v: string): string {
   return v.replace(/\s*\(.*\)\s*$/, '').trim();
 }

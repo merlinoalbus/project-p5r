@@ -16,6 +16,8 @@ describe('dataBreve', () => {
     const breve = dataBreve('Nella tabella di marcia ottimizzata della guida il furto avviene il 15 dicembre');
     expect(breve.endsWith('…')).toBe(true);
     expect(breve).toBe('Nella tabella di marcia…');
+    // senza spazi utili entro i primi 32 caratteri si taglia al limite
+    expect(dataBreve('Un ' + 'x'.repeat(40))).toBe(`Un ${'x'.repeat(30)}…`);
   });
 });
 
