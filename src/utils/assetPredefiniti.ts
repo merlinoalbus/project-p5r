@@ -19,7 +19,8 @@ export function altezzaPerForma(forma: FormaRiquadro | undefined, larghezza: num
 /**
  * Chiavi del manifest candidate per l'asset predefinito di un'entità, in ordine di preferenza
  * (la seconda è la riserva). Convenzione di docs/grafica/prompt-immagini.md:
- * `persona/<slug>`, `arcani/<chiave>` (carta) e `arcani/icona/<chiave>` (icona), `confidenti/<chiave>`.
+ * `persona/<slug>`, `arcani/<chiave>` (carta) e `arcani/icona/<chiave>` (icona), `confidenti/<chiave>-fedele` (ritratto fedele
+ * al gioco, mostrato di default) con `confidenti/<chiave>` (versione stilizzata, riserva e alternativa al passaggio del mouse).
  */
 export function chiaviAssetPredefinito(ambito: AmbitoImmagine, chiave: string, forma: FormaImmagine, dimensione: number): [string | null, string | null] {
   const s = slug(chiave);
@@ -27,7 +28,7 @@ export function chiaviAssetPredefinito(ambito: AmbitoImmagine, chiave: string, f
     case 'persona': return [`persona/${s}`, null];
     // Carta intera per la forma "carta" o i riquadri grandi; icona piccola altrimenti (con l'altra come riserva).
     case 'arcana': return forma === 'carta' || dimensione >= 96 ? [`arcani/${s}`, `arcani/icona/${s}`] : [`arcani/icona/${s}`, `arcani/${s}`];
-    case 'confidente': return [`confidenti/${s}`, null];
+    case 'confidente': return [`confidenti/${s}-fedele`, `confidenti/${s}`];
     default: return [null, null];
   }
 }

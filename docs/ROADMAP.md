@@ -93,6 +93,14 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 
 ⬜ 9 (voce precedente) Trofei, finali, Covo dei Ladri
 
+## Fase 10 — Rifiniture e buchi residui del censimento
+
+| Step | Contenuto | Stato |
+|---|---|---|
+| 10.1 | Ritratti dei Confidenti in due versioni: `confidenti/<chiave>-fedele` (ritratto fedele, mostrato di default) e `confidenti/<chiave>` (stilizzata, mostrata al passaggio del mouse e con il pulsante nella finestra per il tocco); gli asset arrivano con la consegna grafica, l'app resta perfettamente funzionante senza | ⏳ in validazione |
+| 10.2 | Oggetti non equipaggiamento: consumabili, oggetti chiave e materiali, fabbricazione degli attrezzi, personalizzazione delle armi, abiti e lavanderia, scambi e venditori nascosti | ⬜ (ricerca in corso) |
+| 10.3 | Personaggi senza spoiler: presentazioni del cast (Ladri Fantasma, Confidenti, Stanza di Velluto, terzo semestre) collegate alle schede dei Confidenti | ⬜ (ricerca in corso) |
+
 ## Requisiti trasversali (sempre validi)
 - Tutto in italiano; nomi Persona originali; skill con chiave canonica + resa IT modificabile.
 - Tablet-first ma **anche mobile** (375px) e desktop.
