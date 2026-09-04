@@ -190,6 +190,8 @@
   .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
   .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 6px; }
   /* Pulsanti d'incremento compatti (note delle Doti): piccoli col mouse, sempre 44px sui dispositivi a tocco */
+  /* Le tendine prendono la larghezza dell'opzione piu lunga e non si restringono: entro il contenitore, sempre (telefono) */
+  select.form-input { max-width: 100%; min-width: 0; }
   .btn-nota { font-size: 12px; padding: 3px 8px; min-height: 30px; --btn-taglio: 5px; gap: 5px; }
   @media (pointer: coarse) { .btn-nota { min-height: 44px; padding: 6px 12px; font-size: 13px; } }
 

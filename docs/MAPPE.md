@@ -87,6 +87,11 @@ Regole:
 | negozio | spillo-negozio | verde | no | negozio |
 | forziere | spillo-forziere | oro | sì | punto |
 | tesoro | spillo-tesoro | viola | sì | punto |
+| tesoro-palazzo | spillo-tesoro-palazzo | fucsia | sì | punto (Tesoro del Palazzo) |
+| seme-bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
+| oggetto-chiave | spillo-oggetto-chiave | ambra | sì | punto |
+| nemico | spillo-nemico | grigio-azzurro | no (sì se il punto è esauribile) | punto (Ombra della Sciagura) |
+| punto-sensibile | spillo-punto-sensibile | verde acqua | no | punto (enigma) |
 | boss / miniboss | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
 | sicura | spillo-sicura | azzurro | no | punto |
 | scorciatoia | spillo-scorciatoia | grigio | no | punto |
@@ -97,8 +102,9 @@ Regole:
 | treno | spillo-treno | verde scuro | no | mappa (quartiere) |
 | nota | spillo-nota | bianco | no | — |
 
-I 12 tipi dei punti di dungeon esistenti (`utils/dungeon.ts`) si mappano su questi (persona → nota con riferimento al punto, puzzle → nota,
-volontà → tesoro, ombra-sciagura → miniboss, forziere-chiuso → forziere, oggetto → tesoro).
+I 12 tipi dei punti di dungeon esistenti (`utils/dungeon.ts`) si mappano su questi (persona → nota con riferimento al punto, puzzle → punto-sensibile,
+volontà → seme-bramosia, tesoro → tesoro-palazzo, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave). Quando la corrispondenza cambia,
+`sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita.
 
 ## 5. API (`/api/mappe`, sostituisce le rotte attuali mantenendo `scarica` come sorgente opzionale dell'immagine)
 
