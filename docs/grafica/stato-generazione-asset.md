@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**660 file richiesti: 558 completati e approvati, 102 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**660 file richiesti: 575 completati e approvati, 85 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -46,7 +46,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | guida | 15 | 15 | 0 |
 | palazzi | 10 | 10 | 0 |
 | personaggi | 10 | 10 | 0 |
-| ui (schede Partita e Fusione, §16) | 17 | 0 | 17 |
+| ui (schede Partita e Fusione, §16) | 17 | 17 | 0 |
 | ui (azioni, §17) | 46 | 0 | 46 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
 | ui (spilli, §18) | 14 | 0 | 14 |
@@ -175,23 +175,23 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [ ] **DA CONSEGNARE** — `public/asset/ui/azione-filtri.png` — 128×128 (§17)
 
 ### ui — schede della Partita (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-doti.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-confidenti.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-scorta.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-compendio.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-obiettivi.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-piani.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-cicli.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-storico.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-riepilogo.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-calcolatore.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-ricette.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-con.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-piani.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-skill.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-cicli.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-forca.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-fusione-speciali.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-doti.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-confidenti.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-scorta.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-compendio.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-obiettivi.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-piani.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-cicli.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-storico.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-riepilogo.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-calcolatore.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-ricette.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-con.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-piani.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-skill.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-cicli.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-forca.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-speciali.png` — 128×128 (§16)
 
 ### personaggi
 - [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/joker.png` — 768×1024 (§14)
