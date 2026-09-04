@@ -12,7 +12,7 @@ import { getSuggerimenti } from '../services/api';
 import { usePartitaStore } from './partitaStore';
 import type { SuggerimentiOggiDto } from '../types';
 
-export type CategoriaSuggerita = 'confidenti' | 'dungeon' | 'libri' | 'film' | 'attivita' | 'richieste' | 'negozi' | 'luoghi' | 'quartieri' | 'doti' | 'mappe' | 'spilli';
+export type CategoriaSuggerita = 'confidenti' | 'personaggi' | 'dungeon' | 'aree' | 'libri' | 'film' | 'articoli' | 'attivita' | 'richieste' | 'negozi' | 'luoghi' | 'quartieri' | 'doti' | 'mappe' | 'spilli';
 
 interface Stato {
   partitaId: number | null;

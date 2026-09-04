@@ -17,13 +17,18 @@ import { NOME_TIPO_LUOGO } from '../utils/citta';
 import type { LuogoDto } from '../types';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 function Luogo({ l }: { l: LuogoDto }) {
+  const sugg = useSuggerimenti();
   return (
-    <li className="card flex flex-col gap-1 text-[13px]">
+    <li className={`card flex flex-col gap-1 text-[13px] ${classiSuggerito(sugg.evidenziato('luoghi', l.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
         <strong className="text-[15px]">{l.nome}</strong>
         <span className="chip">{NOME_TIPO_LUOGO[l.tipo] ?? l.tipo}</span>
+        {sugg.evidenziato('luoghi', l.chiave) && <TargaSuggerito motivo={sugg.motivo('luoghi', l.chiave)} compatta />}
         {l.quando && <span className="chip">{l.quando === 'entrambe' ? 'giorno e sera' : l.quando}</span>}
         {!l.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
       </div>

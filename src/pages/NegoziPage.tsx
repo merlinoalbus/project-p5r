@@ -15,8 +15,12 @@ import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import type { NegozioRiassuntoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 export function NegoziPage() {
+  const sugg = useSuggerimenti();
   useDocumentTitle('Negozi e inventario');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
@@ -70,8 +74,8 @@ export function NegoziPage() {
                 <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`Negozi: ${g.nome}`}>
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>
-                      <Link to={`/guida/negozi/${n.chiave}`} className="card card--cliccabile no-underline text-text flex flex-col gap-1 h-full">
-                        <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase text-[18px] leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span></span>
+                      <Link to={`/guida/negozi/${n.chiave}`} className={`card card--cliccabile no-underline text-text flex flex-col gap-1 h-full ${classiSuggerito(sugg.evidenziato('negozi', n.chiave))}`}>
+                        <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase text-[18px] leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
                         <span className="text-[12px] text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
                         {n.luogo && <span className="text-[12px] text-text-muted">{n.luogo}</span>}
                       </Link>

@@ -374,6 +374,9 @@
   .visore-mappa__controllo:hover:not(:disabled) { border-color: var(--color-primary); }
   .visore-mappa__controllo:disabled { opacity: .4; cursor: default; }
   .visore-mappa__zoom { font-size: 11px; color: var(--color-text-muted); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); padding: 2px 6px; border: 1px solid var(--color-border); }
+  /* Spillo coinvolto nei suggerimenti del giorno: alone dorato pulsante sopra al colore del tipo */
+  .spillo-mappa--suggerito .spillo-mappa__goccia { box-shadow: 0 0 0 3px var(--color-oro), 0 0 16px rgba(245,197,66,.6); }
+  .spillo-mappa--suggerito { z-index: 14; }
   .spillo-popup { position: absolute; z-index: 20; width: 260px; max-width: 70vw; display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; background: rgba(11,11,14,.96); border: 1px solid var(--color-primary); color: var(--color-text); transform-origin: 0 0; box-shadow: 0 6px 18px rgba(0,0,0,.6); cursor: default; }
   .spillo-popup::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: rgba(11,11,14,.96); border-right: 1px solid var(--color-primary); border-bottom: 1px solid var(--color-primary); transform: translateX(-50%) rotate(45deg); }
   .spillo-popup__testo { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
@@ -396,7 +399,11 @@
 
   /* Tessera compatta dei KPI (Home in una schermata) */
   /* Punteggi delle Doti: tante colonne quante ne stanno, etichette troncate invece che traboccanti */
-  .kpi-griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 6px; min-width: 0; }
+  /* Sei tessere (cinque Doti + scorta): due per riga sul telefono, tre sulle larghezze intermedie, a riempimento da tablet in su.
+     Le colonne fisse evitano la riga spaiata (4 + 2) che lasciava un buco sulla destra. */
+  .kpi-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; min-width: 0; }
+  @media (min-width: 420px) { .kpi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (min-width: 768px) { .kpi-griglia { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); } }
   .kpi-tile--compatto { padding: 5px 8px; min-width: 0; border-radius: var(--radius-md); }
   .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
@@ -563,6 +570,64 @@
     color: var(--color-primary);
   }
 
+  /* ---- Griglia della Home: tre disposizioni diverse, una per formato ----
+     Telefono: tutto incolonnato. Tablet: carta e accessi a tutta larghezza, poi guida e mappa affiancate.
+     Desktop (da 1024): due colonne piene, guida a sinistra e mappa a destra, senza scorrimento di pagina. */
+  .home-griglia { display: grid; gap: 12px; grid-template-areas: "carta" "accessi" "oggi" "mappa"; }
+  .home-carta { grid-area: carta; min-width: 0; }
+  .home-accessi { grid-area: accessi; min-width: 0; }
+  .home-oggi { grid-area: oggi; min-width: 0; }
+  .home-mappa { grid-area: mappa; min-width: 0; }
+  @media (min-width: 768px) {
+    .home-griglia {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas: "carta carta" "accessi accessi" "oggi mappa";
+      grid-template-rows: auto auto minmax(0, 1fr);
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .home-oggi, .home-mappa { min-height: 0; }
+    .home-oggi > *, .home-mappa > * { height: 100%; min-height: 0; }
+  }
+  @media (min-width: 1024px) {
+    .home-griglia {
+      grid-template-columns: minmax(0, 1fr) 320px;
+      grid-template-areas: "carta accessi" "oggi mappa";
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 1280px) {
+    .home-griglia { grid-template-columns: minmax(0, 1fr) 360px; }
+  }
+
+  /* ---- Fila di schede/filtri: una riga sola che scorre sul telefono, a capo dal tablet in su ----
+     Dieci schede su 375 px andrebbero a capo quattro volte: qui scorrono in orizzontale, con la sfumatura ai bordi
+     che segnala il resto della fila e lo scatto sull'elemento. Da 768 px il comportamento torna quello di prima. */
+  .fila-scorrevole {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 10px, #000 calc(100% - 22px), transparent 100%);
+  }
+  .fila-scorrevole::-webkit-scrollbar { display: none; }
+  .fila-scorrevole > * { flex: 0 0 auto; scroll-snap-align: start; }
+  @media (min-width: 768px) {
+    .fila-scorrevole {
+      flex-wrap: wrap;
+      overflow: visible;
+      padding-bottom: 0;
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+
   /* ---- Intestazione «hero» e titoli a tasselli (stile Persona 5) ---- */
   .intestazione { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 6px 0 4px; }
   .titolo-tasselli {
@@ -570,16 +635,18 @@
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    font-size: clamp(26px, 3.4vw, 42px);
+    /* Sul telefono comanda la larghezza (5.4vw), non un minimo fisso: cosi un titolo di tre parole resta su una riga sola. */
+    font-size: clamp(20px, 5.4vw, 42px);
     line-height: 1;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 6px 8px;
   }
-  .intestazione--compatta .titolo-tasselli { font-size: clamp(22px, 2.4vw, 30px); }
+  .intestazione--compatta .titolo-tasselli { font-size: clamp(18px, 4.6vw, 30px); }
   .tassello {
     display: inline-block;
+    white-space: nowrap;
     padding: 5px 10px 3px;
     background: var(--color-text);
     color: var(--color-bg);
@@ -596,7 +663,7 @@
   /* titolo in carattere display senza tasselli (schede di dettaglio con immagine accanto) */
   .titolo-display { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; font-size: clamp(24px, 2.6vw, 34px); line-height: 1; }
   .intestazione__illustrazione { max-height: 120px; width: auto; max-width: 40vw; object-fit: contain; filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6)); }
-  @media (max-width: 640px) { .intestazione__illustrazione { max-height: 72px; } }
+  @media (max-width: 640px) { .intestazione__illustrazione { max-height: 64px; max-width: 26vw; } }
 
   /* ---- Sfondo a tema della sezione (asset «sfondi/*»): livello sotto il contenuto con velo scuro per la leggibilità ---- */
   .sfondo-sezione {

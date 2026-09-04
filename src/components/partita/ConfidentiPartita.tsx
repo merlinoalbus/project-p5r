@@ -25,6 +25,9 @@ import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { SemaforiRango } from './SemaforiRango';
 import { IconMaschera } from '../shared/iconeGuida';
 import { IconaAzione } from '../shared/IconaAzione';
+import { useSuggerimenti } from '../../stores/suggerimentiStore';
+import { classiSuggerito } from '../../utils/suggerimenti';
+import { TargaSuggerito } from '../shared/Suggerito';
 
 interface Props {
   partitaId: number;
@@ -45,6 +48,7 @@ function gruppoDi(c: ConfidentePartitaDto): 'attivi' | 'bloccati' {
 export function ConfidentiPartita({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getConfidentiPartita(partitaId), [partitaId]);
   const [occupato, setOccupato] = useState<string | null>(null);
+  const sugg = useSuggerimenti();
   const [modifica, setModifica] = useState<ConfidentePartitaDto | null>(null);
   const [note, setNote] = useState('');
   // Moltiplicatori globali (valgono per tutte le card finché l'utente non li cambia).
@@ -139,7 +143,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
           const aPunti = c.rango < 10 && c.puntiNecessari !== null && c.puntiNecessari > 0;
           const quota = aPunti ? Math.min(1, c.punti / (c.puntiNecessari ?? 1)) : c.rango === 10 ? 1 : 0;
           return (
-            <li key={c.chiave} className={`card poster relative overflow-hidden flex gap-3 ${c.sbloccato ? '' : 'opacity-75'} ${c.bloccato ? 'poster--bloccato' : ''}`} aria-label={c.bloccato ? `${c.nome}: bloccato per il rango ${c.bloccato.rango}` : undefined}>
+            <li key={c.chiave} className={`card poster relative overflow-hidden flex gap-3 ${c.sbloccato ? '' : 'opacity-75'} ${c.bloccato ? 'poster--bloccato' : ''} ${classiSuggerito(sugg.evidenziato('confidenti', c.chiave))}`} aria-label={c.bloccato ? `${c.nome}: bloccato per il rango ${c.bloccato.rango}` : undefined}>
               <AssetImg nome={`arcani/${slug(c.arcana)}-senza-testo`} alt="" decorativa className="poster__filigrana" fallback={null} />
               <div className="relative shrink-0 self-start">
                 <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={128} forma="carta" adatta="copri" modificabile />
@@ -160,6 +164,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                     <h3 className="m-0 font-display uppercase text-[22px] leading-none tracking-wide truncate" title={c.nome}>{c.nome}</h3>
                     <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
                       <span className="chip">{c.arcanaNome}</span>
+                      {sugg.evidenziato('confidenti', c.chiave) && <TargaSuggerito motivo={sugg.motivo('confidenti', c.chiave)} compatta />}
                       {c.regaliFatti.length > 0 && <span className="text-[12px] text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
                     </div>
                   </div>

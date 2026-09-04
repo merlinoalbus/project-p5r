@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { IconaScheda } from '../components/shared/IconaAzione';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -65,11 +66,11 @@ export function PartitaPage() {
               <ScuolaOggi key={`${attiva.id}-${attiva.dataGioco ?? ''}`} partita={attiva} />
             </div>
           </IntestazionePagina>
-          <div className="flex gap-1.5 flex-wrap">
+          <FilaScorrevole role="tablist" aria-label="Schede della partita">
             {SCHEDE.map((s) => (
               <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
             ))}
-          </div>
+          </FilaScorrevole>
           {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}

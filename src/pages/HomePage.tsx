@@ -28,7 +28,7 @@ import type { PartitaDto } from '../types';
 /** Scorciatoie alle sezioni dell'app: colonna stretta a destra su desktop e tablet, griglia su mobile. */
 function AccessiRapidi() {
   return (
-    <nav className="accessi-rapidi grid grid-cols-2 sm:grid-cols-3 md:grid-cols-1 gap-1.5 content-start shrink-0" aria-label="Accessi rapidi">
+    <nav className="accessi-rapidi grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-1.5 content-start" aria-label="Accessi rapidi">
       <Link to="/compendio" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconBook size={22} className="text-primary" /><span><strong>Compendio</strong><br /><span className="text-[12px] text-text-secondary">232 Persona</span></span></Link>
       <Link to="/skill" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconBolt size={22} className="text-primary" /><span><strong>Skill</strong><br /><span className="text-[12px] text-text-secondary">525 skill in italiano</span></span></Link>
       <Link to="/fusione" className="card card--cliccabile no-underline text-text flex items-center gap-3 py-2"><IconFusion size={22} className="text-primary" /><span><strong>Fusione</strong><br /><span className="text-[12px] text-text-secondary">Regole degli Arcani</span></span></Link>
@@ -56,9 +56,8 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
     : <div className="flex items-center justify-center py-6" aria-busy="true"><Spinner /></div>;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] gap-3 md:flex-1 md:min-h-0">
-      <div className="flex flex-col gap-3 md:min-h-0">
-        <div className="card flex flex-col gap-2 py-3 shrink-0">
+    <div className="home-griglia">
+      <div className="home-carta card flex flex-col gap-2 py-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[12px] uppercase tracking-wide text-text-muted">Partita attiva</span>
             <span className="font-semibold text-[16px]">{partita.nome}</span>
@@ -67,8 +66,13 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5">
             {doti.dati && doti.dati.length > 0 && (
-              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-7 pt-3 pb-1" aria-label="Apri le Doti sociali" style={{ width: 'clamp(150px, 20vh, 240px)' }}>
-                <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={200} badgeAltezza={30} etichettaAria="Stella delle Doti sociali" />
+              // Larghezza legata alla finestra: su telefono la stella occupa quasi tutta la colonna, da md in su torna
+              // legata all'altezza (la Home deve restare in una schermata). Il rientro percentuale lascia spazio alle
+              // targhette dei vertici, che sporgono oltre il riquadro della stella.
+              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 py-1 w-[min(58vw,250px)] sm:w-[min(32vw,200px)] md:w-[clamp(150px,20vh,240px)]" aria-label="Apri le Doti sociali">
+                <div className="w-full flex justify-center px-[11%]">
+                  <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={420} badgeAltezza={62} etichettaAria="Stella delle Doti sociali" />
+                </div>
               </Link>
             )}
             <div className="flex flex-col gap-2 min-w-0 flex-1">
@@ -98,17 +102,15 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
               )}
             </div>
           </div>
-        </div>
-        <section className="flex flex-col gap-1.5 md:flex-1 md:min-h-0" aria-label="Oggi nella partita">
-          <h2 className="m-0 font-display text-[19px] uppercase shrink-0">Oggi</h2>
-          <div className="md:flex-1 md:min-h-0 riempi-figli">{guidaPronta ? <OggiGuida oggi={oggi} riempi /> : statoOggi}</div>
-        </section>
       </div>
 
-      <div className="flex flex-col gap-3 md:min-h-0">
-        <AccessiRapidi />
-        {guidaPronta && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiMappa oggi={oggi} riempi /></div>}
-      </div>
+      <section className="home-oggi flex flex-col gap-1.5" aria-label="Oggi nella partita">
+        <h2 className="m-0 font-display text-[19px] uppercase shrink-0">Oggi</h2>
+        <div className="flex-1 min-h-0 riempi-figli">{guidaPronta ? <OggiGuida oggi={oggi} riempi /> : statoOggi}</div>
+      </section>
+
+      <div className="home-accessi"><AccessiRapidi /></div>
+      {guidaPronta && <div className="home-mappa riempi-figli"><OggiMappa oggi={oggi} riempi /></div>}
     </div>
   );
 }

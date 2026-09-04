@@ -21,6 +21,7 @@ import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
+import { useSuggerimenti } from '../../stores/suggerimentiStore';
 
 export type StatoPuntoMappa = 'ottenuto' | 'esaurito' | null;
 
@@ -111,6 +112,7 @@ function disponibilita(a: { disponibileDal: string | null }): string {
 }
 
 export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale }: Props) {
+  const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
   const [natCaricata, setNatCaricata] = useState<Dimensioni | null>(null);
@@ -452,7 +454,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <button
                   key={s.id}
                   type="button"
-                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''}`}
+                  className={`spillo-mappa ${attivo ? 'spillo-mappa--selezionato' : ''} ${s.raccolto ? 'spillo-mappa--raccolto' : ''} ${ricercaNorm ? 'spillo-mappa--trovato' : ''} ${sugg.evidenziato('spilli', s.id) ? 'spillo-mappa--suggerito' : ''}`}
                   style={{ left: `${pos.x}%`, top: `${pos.y}%`, '--colore-spillo': s.colore, transform: `scale(${1 / zoom}) translate(-50%, -100%)` } as CSSProperties}
                   aria-label={`${s.tipoNome}: ${s.nome}${s.raccolto ? ' (raccolto)' : ''}`}
                   aria-pressed={attivo}
