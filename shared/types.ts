@@ -727,6 +727,110 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Città, attività, libri e film (Fase 8.1) ----
+
+export type DoteChiave = 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia';
+
+export interface QuartiereRiassuntoDto {
+  chiave: string;
+  nome: string;
+  sblocco: string | null;
+  descrizione: string;
+  luoghi: number;
+  verificati: number;
+}
+
+export interface LuogoDto {
+  chiave: string;
+  ordine: number;
+  tipo: 'negozio' | 'ristorante' | 'attivita' | 'confidente' | 'servizio' | 'distributore' | 'punto-interesse' | 'scuola' | 'trasporto' | 'altro';
+  nome: string;
+  cosaOffre: string;
+  quando: 'giorno' | 'sera' | 'entrambe' | null;
+  giorni: string | null;
+  sblocco: string | null;
+  confidenti: Array<{ chiave: string; nome: string }>;
+  attivita: string[];
+  negozio: string | null;
+  piatti: Array<{ nome: string; prezzo: number | null; effetto: string }> | null;
+  note: string | null;
+  fonte: string;
+  /** false = dato da fonte secondaria, non confermato sulla guida italiana. */
+  verificato: boolean;
+}
+
+export interface QuartiereDettaglioDto {
+  chiave: string;
+  nome: string;
+  sblocco: string | null;
+  descrizione: string;
+  fonte: string;
+  luoghi: LuogoDto[];
+}
+
+export interface AttivitaDto {
+  chiave: string;
+  nome: string;
+  tipo: 'mini-gioco' | 'lavoro' | 'studio' | 'lettura' | 'film' | 'dvd' | 'videogioco' | 'allenamento' | 'cibo' | 'sfida' | 'altro';
+  luogo: string;
+  luogoChiave: string | null;
+  fascia: 'giorno' | 'sera' | 'entrambe' | null;
+  costo: number | null;
+  sblocco: string | null;
+  doti: Array<{ dote: DoteChiave; note: number | null; condizione: string | null }>;
+  altriEffetti: string | null;
+  regole: string;
+  premi: string | null;
+  paga: string | null;
+  fonte: string;
+  verificato: boolean;
+}
+
+export interface LibroDto {
+  chiave: string;
+  nome: string;
+  nomeIt: string | null;
+  dove: string;
+  prezzo: number | null;
+  disponibileDal: string | null;
+  dote: DoteChiave | null;
+  note: number | null;
+  sblocca: string | null;
+  sessioni: number | null;
+  dettagli: string | null;
+  fonte: string;
+  verificato: boolean;
+  /** Letto nella partita. */
+  fatto: boolean;
+}
+
+export interface FilmDto {
+  chiave: string;
+  nome: string;
+  nomeIt: string | null;
+  dove: 'cinema' | 'dvd';
+  periodo: string;
+  dote: DoteChiave | null;
+  note: number | null;
+  prezzo: number | null;
+  dettagli: string | null;
+  fonte: string;
+  verificato: boolean;
+  /** Visto nella partita. */
+  fatto: boolean;
+}
+
+export type TipoLettura = 'libro' | 'film';
+
+export interface AttivitaTutteDto {
+  attivita: AttivitaDto[];
+  lavori: AttivitaDto[];
+  libri: LibroDto[];
+  film: FilmDto[];
+  libriLetti: number;
+  filmVisti: number;
+}
+
 // ---- Aiuto in battaglia (Fase 7.3) ----
 
 export interface OmbraDto {

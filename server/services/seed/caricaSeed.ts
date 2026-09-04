@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { BattagliaSeed, CalendarioSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -53,6 +53,8 @@ interface SeedCompleto {
   dungeon: DungeonSeed[];
   mementos: MementosSeed;
   battaglia: BattagliaSeed;
+  citta: CittaSeed;
+  attivita: AttivitaSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -82,6 +84,8 @@ function leggiSeed(seedDir: string): SeedCompleto {
     dungeon: JSON.parse(contenuti['dungeon.json']) as DungeonSeed[],
     mementos: JSON.parse(contenuti['mementos.json']) as MementosSeed,
     battaglia: JSON.parse(contenuti['battaglia.json']) as BattagliaSeed,
+    citta: JSON.parse(contenuti['citta.json']) as CittaSeed,
+    attivita: JSON.parse(contenuti['attivita.json']) as AttivitaSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -351,6 +355,48 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     // ---- Aiuto in battaglia (Fase 7.3): sezioni della guida e indice delle Ombre (le chiavi dei dungeon devono esistere) ----
     for (const o of seed.battaglia.ombre) if (!chiaviDungeon.has(o.dungeonChiave)) throw new Error(`Seed battaglia: dungeon sconosciuto '${o.dungeonChiave}' per l'Ombra '${o.ombra ?? o.persona ?? ''}'.`);
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('battaglia', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.battaglia));
+
+    // ---- Città e attività (Fase 8.1): upsert per chiave stabile, rimozione degli orfani; le letture per partita restano ----
+    const insQ = db.prepare(`INSERT INTO quartiere (chiave, ordine, nome, sblocco, descrizione, fonte) VALUES (@chiave, @ordine, @nome, @sblocco, @descrizione, @fonte)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, sblocco = excluded.sblocco, descrizione = excluded.descrizione, fonte = excluded.fonte`);
+    const insL = db.prepare(`INSERT INTO luogo (chiave, quartiere_chiave, ordine, tipo, nome, cosa_offre, quando, giorni, sblocco, confidenti_json, attivita_json, negozio, piatti_json, note, fonte, verificato)
+      VALUES (@chiave, @quartiere_chiave, @ordine, @tipo, @nome, @cosa_offre, @quando, @giorni, @sblocco, @confidenti_json, @attivita_json, @negozio, @piatti_json, @note, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET quartiere_chiave = excluded.quartiere_chiave, ordine = excluded.ordine, tipo = excluded.tipo, nome = excluded.nome, cosa_offre = excluded.cosa_offre, quando = excluded.quando, giorni = excluded.giorni,
+        sblocco = excluded.sblocco, confidenti_json = excluded.confidenti_json, attivita_json = excluded.attivita_json, negozio = excluded.negozio, piatti_json = excluded.piatti_json, note = excluded.note, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const chiaviQuartieri = new Set<string>(); const chiaviLuoghi = new Set<string>();
+    for (const q of seed.citta.quartieri) {
+      chiaviQuartieri.add(q.chiave);
+      insQ.run({ chiave: q.chiave, ordine: q.ordine, nome: q.nome, sblocco: q.sblocco, descrizione: q.descrizione, fonte: q.fonte });
+      for (const l of q.luoghi) {
+        chiaviLuoghi.add(l.chiave);
+        const conf = l.confidenti.filter((c) => chiaviConfidenti.has(c));
+        insL.run({ chiave: l.chiave, quartiere_chiave: q.chiave, ordine: l.ordine, tipo: l.tipo, nome: l.nome, cosa_offre: l.cosaOffre, quando: l.quando, giorni: l.giorni, sblocco: l.sblocco, confidenti_json: JSON.stringify(conf), attivita_json: JSON.stringify(l.attivita), negozio: l.negozio, piatti_json: l.piatti ? JSON.stringify(l.piatti) : null, note: l.note, fonte: l.fonte, verificato: l.verificato ? 1 : 0 });
+      }
+    }
+    for (const r of db.prepare('SELECT chiave FROM luogo').all() as Array<{ chiave: string }>) if (!chiaviLuoghi.has(r.chiave)) db.prepare('DELETE FROM luogo WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare('SELECT chiave FROM quartiere').all() as Array<{ chiave: string }>) if (!chiaviQuartieri.has(r.chiave)) db.prepare('DELETE FROM quartiere WHERE chiave = ?').run(r.chiave);
+    const insA = db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
+      VALUES (@chiave, @ordine, @nome, @tipo, @luogo, @luogo_chiave, @fascia, @costo, @sblocco, @doti_json, @altri_effetti, @regole, @premi, @paga, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, tipo = excluded.tipo, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, fascia = excluded.fascia, costo = excluded.costo, sblocco = excluded.sblocco,
+        doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const chiaviAttivita = new Set<string>();
+    for (const a of seed.attivita.attivita) {
+      chiaviAttivita.add(a.chiave);
+      insA.run({ chiave: a.chiave, ordine: a.ordine, nome: a.nome, tipo: a.tipo, luogo: a.luogo, luogo_chiave: a.luogoChiave && chiaviQuartieri.has(a.luogoChiave) ? a.luogoChiave : null, fascia: a.fascia, costo: a.costo, sblocco: a.sblocco, doti_json: JSON.stringify(a.doti), altri_effetti: a.altriEffetti, regole: a.regole, premi: a.premi, paga: a.paga, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
+    }
+    for (const r of db.prepare('SELECT chiave FROM attivita').all() as Array<{ chiave: string }>) if (!chiaviAttivita.has(r.chiave)) db.prepare('DELETE FROM attivita WHERE chiave = ?').run(r.chiave);
+    const insLib = db.prepare(`INSERT INTO libro (chiave, ordine, nome, nome_it, dove, prezzo, disponibile_dal, dote, note, sblocca, sessioni, dettagli, fonte, verificato)
+      VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @prezzo, @disponibile_dal, @dote, @note, @sblocca, @sessioni, @dettagli, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, prezzo = excluded.prezzo, disponibile_dal = excluded.disponibile_dal, dote = excluded.dote, note = excluded.note, sblocca = excluded.sblocca, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const chiaviLibri = new Set<string>();
+    for (const l of seed.attivita.libri) { chiaviLibri.add(l.chiave); insLib.run({ chiave: l.chiave, ordine: l.ordine, nome: l.nome, nome_it: l.nomeIt, dove: l.dove, prezzo: l.prezzo, disponibile_dal: l.disponibileDal, dote: l.dote, note: l.note, sblocca: l.sblocca, sessioni: l.sessioni, dettagli: l.dettagli, fonte: l.fonte, verificato: l.verificato ? 1 : 0 }); }
+    for (const r of db.prepare('SELECT chiave FROM libro').all() as Array<{ chiave: string }>) if (!chiaviLibri.has(r.chiave)) db.prepare('DELETE FROM libro WHERE chiave = ?').run(r.chiave);
+    const insFilm = db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, dettagli, fonte, verificato)
+      VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @dettagli, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const chiaviFilm = new Set<string>();
+    for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, prezzo: f.prezzo, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
+    for (const r of db.prepare('SELECT chiave FROM film').all() as Array<{ chiave: string }>) if (!chiaviFilm.has(r.chiave)) db.prepare('DELETE FROM film WHERE chiave = ?').run(r.chiave);
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

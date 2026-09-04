@@ -1,0 +1,1935 @@
+{
+ "quartieri": [
+  {
+   "chiave": "yongen-jaya",
+   "ordine": 0,
+   "nome": "Yongen-Jaya",
+   "sblocco": null,
+   "descrizione": "Quartiere residenziale dove si trova il Café Leblanc, casa del protagonista durante l'anno scolastico. Disponibile fin dall'inizio del gioco.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/muovere-i-primi-passi/",
+   "luoghi": [
+    {
+     "chiave": "yongen-jaya/leblanc",
+     "ordine": 0,
+     "tipo": "servizio",
+     "nome": "Café Leblanc",
+     "cosaOffre": "Caffetteria e curry gestita da Sojiro Sakura; soffitta al piano superiore è la stanza del protagonista (studio, fabbricazione strumenti, videogiochi, DVD, dormire, acquisti online da Tanaka). Dopo la pulizia della soffitta si sbloccano libri in vendita (\"Il pensiero sociale\", \"Esplorando Yoncha 4\").",
+     "quando": "entrambe",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "sojiro"
+     ],
+     "attivita": [
+      "studio",
+      "fabbricazione strumenti",
+      "riposo",
+      "acquisti online Tanaka",
+      "lettura libri"
+     ],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Caffè (varie miscele)",
+       "prezzo": null,
+       "effetto": "Bonus temporanei in battaglia in base ad abbinamento con il curry; ricette specifiche non reperite in dettaglio nelle fonti consultate."
+      },
+      {
+       "nome": "Curry (varie ricette)",
+       "prezzo": null,
+       "effetto": "Bonus temporanei in battaglia; ricette e valori esatti non reperiti in dettaglio nelle fonti consultate."
+      }
+     ],
+     "note": "Dati sulle singole ricette di caffè/curry non reperiti in modo esaustivo: necessario approfondimento con pagina dedicata (non trovata nell'indice fonte).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/muovere-i-primi-passi/",
+     "verificato": true
+    },
+    {
+     "chiave": "yongen-jaya/clinica-takemi",
+     "ordine": 1,
+     "tipo": "confidente",
+     "nome": "Clinica Medica Takemi",
+     "cosaOffre": "Medicine e oggetti medici per HP/cura alterazioni/rianimazione; sconto 50% con Confidente al massimo. Confidente di Tae Takemi (Morte).",
+     "quando": "giorno",
+     "giorni": "lunedì, martedì, mercoledì, giovedì, venerdì, sabato, domenica",
+     "sblocco": "18 aprile (visita alla clinica e dialoghi su farmaci speciali/test clinico)",
+     "confidenti": [
+      "takemi"
+     ],
+     "attivita": [
+      "acquisto medicinali"
+     ],
+     "negozio": "clinica-takemi",
+     "piatti": null,
+     "note": "Generalmente disponibile anche con pioggia, salvo eventi specifici di rango non meteo-compatibili.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-tae-takemi-morte/",
+     "verificato": true
+    },
+    {
+     "chiave": "yongen-jaya/bagno-pubblico",
+     "ordine": 2,
+     "tipo": "servizio",
+     "nome": "Bagno pubblico (Terme Yongen-Jaya)",
+     "cosaOffre": "Aumenta la dote Fascino, in particolare nei giorni di pioggia. Distributori automatici con Arginade e Acqua della rinascita a prezzo ridotto (100¥).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "aumento Fascino"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
+     "verificato": true
+    },
+    {
+     "chiave": "yongen-jaya/negozio-usato-yumenoshima",
+     "ordine": 3,
+     "tipo": "negozio",
+     "nome": "Negozio di articoli usati Yumenoshima",
+     "cosaOffre": "Materiali e articoli usati; secondo fonte secondaria (samurai-gamers) tratta anche materiali per strumenti ed elettronica di seconda mano (TV, lettore DVD, laptop, videogiochi retrò).",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "vendita/acquisto oggetti usati"
+     ],
+     "negozio": "yumenoshima",
+     "piatti": null,
+     "note": "Dettaglio elettronica di seconda mano proviene da fonte secondaria non verificata sulla guida italiana.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "yongen-jaya/super-muramasa",
+     "ordine": 4,
+     "tipo": "negozio",
+     "nome": "Super Muramasa",
+     "cosaOffre": "Snack e specialità stagionali.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "super-muramasa",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "yongen-jaya/venditore-patate-dolci",
+     "ordine": 5,
+     "tipo": "negozio",
+     "nome": "Venditore di patate dolci",
+     "cosaOffre": "Patate dolci (snack).",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": "dal 9 ottobre",
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "venditore-patate-dolci",
+     "piatti": [
+      {
+       "nome": "Patata dolce",
+       "prezzo": null,
+       "effetto": ""
+      }
+     ],
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "yongen-jaya/distributore-tabaccaio",
+     "ordine": 6,
+     "tipo": "distributore",
+     "nome": "Distributore automatico (Tabaccaio)",
+     "cosaOffre": "Bevande: Nastea, 1UP, Starvicks (130¥ ciascuna).",
+     "quando": "entrambe",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Rifornito settimanalmente ogni lunedì. Esaurito durante allerta ondata di calore.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
+     "verificato": true
+    },
+    {
+     "chiave": "yongen-jaya/batting-cage-yongen",
+     "ordine": 7,
+     "tipo": "attivita",
+     "nome": "Batting Cage",
+     "cosaOffre": "Minigioco di battuta per aumentare la dote Perizia.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "aumento Perizia"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Dettagli tratti da fonte secondaria; non individuata pagina dedicata sulla guida italiana.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "yongen-jaya/cinema-yongen",
+     "ordine": 8,
+     "tipo": "attivita",
+     "nome": "Cinema di Yongen-Jaya",
+     "cosaOffre": "Visione film con incremento doti sociali.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "aumento doti sociali"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Presenza segnalata da fonte secondaria (samurai-gamers); non confermata esplicitamente sulla guida italiana consultata: possibile omonimia/confusione con il cinema di Central Street (Shibuya). Da verificare.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "yongen-jaya/lavanderia-yongen",
+     "ordine": 9,
+     "tipo": "servizio",
+     "nome": "Lavanderia",
+     "cosaOffre": "Pulizia/valutazione di armature sporche recuperate nei Palazzi/Memento.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "pulizia armature"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "yongen-jaya/sakura-residence",
+     "ordine": 10,
+     "tipo": "punto-interesse",
+     "nome": "Sakura Residence",
+     "cosaOffre": "Abitazione di Sojiro Sakura e Futaba Sakura; teatro di eventi del Confidente di Futaba (Eremita).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "futaba",
+      "sojiro"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Dettagli su orari/condizioni non reperiti in modo puntuale nella fonte primaria.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-futaba-eremita/",
+     "verificato": false
+    },
+    {
+     "chiave": "yongen-jaya/stazione-yongen-jaya",
+     "ordine": 11,
+     "tipo": "trasporto",
+     "nome": "Stazione di Yongen-Jaya",
+     "cosaOffre": "Punto di accesso alla metropolitana per spostarsi verso Shibuya e altri quartieri.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "viaggio rapido"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/muovere-i-primi-passi/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "shibuya",
+   "ordine": 1,
+   "nome": "Shibuya",
+   "sblocco": null,
+   "descrizione": "Quartiere centrale, hub principale di negozi, ristoranti e attività; comprende Central Street, Piazza della Stazione, Centro commerciale sotterraneo e Sottopasso. Disponibile fin dall'inizio.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+   "luoghi": [
+    {
+     "chiave": "shibuya/untouchable",
+     "ordine": 0,
+     "tipo": "negozio",
+     "nome": "Untouchable",
+     "cosaOffre": "Negozio softair: armi da mischia, armi a distanza, protezioni, accessori; personalizzazione armi (richiede Coraggio Rango 4); vendita tesori.",
+     "quando": "sera",
+     "giorni": "giovedì, sabato, domenica (per il Confidente Iwai)",
+     "sblocco": "Confidente Iwai: 15 agosto consigliato (Coraggio Rango 4 + Persona Arcano Appeso); negozio disponibile prima come semplice esercizio dal Palazzo di Kamoshida in poi",
+     "confidenti": [
+      "iwai"
+     ],
+     "attivita": [
+      "acquisto armi",
+      "personalizzazione armi",
+      "vendita tesori"
+     ],
+     "negozio": "untouchable",
+     "piatti": null,
+     "note": "Eventi di Rango 4 e 9 di Iwai si svolgono all'aperto e non disponibili con pioggia.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-iwai-appeso/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/rafflesia",
+     "ordine": 1,
+     "tipo": "negozio",
+     "nome": "Fiorista Rafflesia",
+     "cosaOffre": "Balsamo vegetale e materiali botanici; lavoro part-time come commesso/a (preparazione bouquet).",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": "lavoro part-time: Fascino Rango 2 (Interessante)",
+     "confidenti": [],
+     "attivita": [
+      "lavoro part-time"
+     ],
+     "negozio": "rafflesia",
+     "piatti": null,
+     "note": "Guadagno lavoro: 3.200¥ standard, fino a 7.800¥ con bouquet perfetto; +2 Gentilezza a turno. Possono comparire Yusuke e Haru come clienti.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/lavori-part-time/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/taiheido",
+     "ordine": 2,
+     "tipo": "negozio",
+     "nome": "Libreria Taiheido",
+     "cosaOffre": "Libri vari (narrativa, saggistica, guide su attività e sblocco luoghi). Elenco parziale: La pulizia del cuore, Storia di Buchiko, Arte della persuasione, Minaccia Medjed, Vague, Eredità dell'Impiccato, Luoghi della movida, Incontri spettrali, Un acquario al giorno, Vedetta lacustre, Santuari di Tokyo, Cieli notturni, Esplorando Nakano, Esperto a biliardo.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "lettura",
+      "acquisto libri"
+     ],
+     "negozio": "taiheido",
+     "piatti": null,
+     "note": "Diversi libri sbloccano luoghi di hangout (es. Vague=Harajuku, Un acquario al giorno=Shinagawa, Vedetta lacustre=Ichigaya, Santuari di Tokyo=Meiji Shrine, Esplorando Nakano=Nakano); corrispondenze dedotte per coincidenza di titolo, non confermate esplicitamente riga per riga dalla guida.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/scarlet",
+     "ordine": 3,
+     "tipo": "negozio",
+     "nome": "Videonoleggio Scarlet",
+     "cosaOffre": "Noleggio DVD in abbonamento annuale (4.800¥, un DVD alla volta). 12 titoli: Bubbly Hills 90210, Wraith, Guy McVer, The X Folders, Betty la grezza, I.C.U., Prison Escape, The Running Dead, Casalinghe disparate, Doctor Mouse, 31, Tee. Ogni DVD dà +2 punti a una dote sociale (Fascino/Gentilezza/Perizia/Coraggio); +3 con libro \"Anima da cineasta\".",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "disponibile una volta raggiunta Shibuya nella storia",
+     "confidenti": [
+      "mishima"
+     ],
+     "attivita": [
+      "visione DVD"
+     ],
+     "negozio": "scarlet",
+     "piatti": null,
+     "note": "Punto d'incontro anche per il Confidente Mishima (Luna) secondo fonte secondaria.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/diner",
+     "ordine": 4,
+     "tipo": "ristorante",
+     "nome": "Diner",
+     "cosaOffre": "Bevande di recupero doti sociali/statistiche; punto di incontro ricorrente per Mishima.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "mishima"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Menu dettagliato non reperito nelle fonti consultate.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "shibuya/triple-seven",
+     "ordine": 5,
+     "tipo": "negozio",
+     "nome": "Triple Seven",
+     "cosaOffre": "Minimarket/convenience store: snack e cibi pronti; lavoro part-time con quiz mensile sui codici a barre (7°, 17°, 27° del mese).",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": "nessun requisito",
+     "confidenti": [],
+     "attivita": [
+      "lavoro part-time"
+     ],
+     "negozio": "triple-seven",
+     "piatti": null,
+     "note": "Guadagno lavoro: 3.500¥ standard, fino a 7.400¥ con quiz perfetto; +2 Fascino a turno.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/lavori-part-time/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/ore-no-beko",
+     "ordine": 6,
+     "tipo": "ristorante",
+     "nome": "Ore no Beko (Gyudon)",
+     "cosaOffre": "Ciotole di manzo (gyudon); lavoro part-time la sera con memorizzazione ordini; punto di partenza per il Confidente Yoshida (Sole).",
+     "quando": "sera",
+     "giorni": null,
+     "sblocco": "nessun requisito per il lavoro",
+     "confidenti": [
+      "yoshida"
+     ],
+     "attivita": [
+      "lavoro part-time"
+     ],
+     "negozio": "ore-no-beko",
+     "piatti": null,
+     "note": "Guadagno lavoro: 3.600¥ standard, fino a 8.800¥ con ordini perfetti; +2 Perizia a turno. Possono comparire Ryuji e Yoshida come clienti.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/lavori-part-time/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/protein-lovers",
+     "ordine": 7,
+     "tipo": "servizio",
+     "nome": "Palestra Protein Lovers",
+     "cosaOffre": "Allenamento a pagamento (2.000¥/visita) che aumenta HP e SP massimi progressivamente (da +3HP/+2SP fino a +9HP/+7SP).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Ryuji Confidente Rango 5 oppure Ann Confidente Rango 8",
+     "confidenti": [
+      "ryuji",
+      "ann"
+     ],
+     "attivita": [
+      "allenamento"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "I bonus si mantengono in Nuova Partita+.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/allenamento-casa-e-palestra/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/big-bang-burger",
+     "ordine": 8,
+     "tipo": "ristorante",
+     "nome": "Big Bang Burger",
+     "cosaOffre": "Fast food con sfida hamburger gigante (Big Bang Challenge).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "sfida culinaria"
+     ],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Big Bang Burger (sfida)",
+       "prezzo": null,
+       "effetto": "Dettagli su premio/effetto non reperiti nelle fonti consultate."
+      }
+     ],
+     "note": "Dati incompleti: non è stata reperita una pagina dedicata sulla guida italiana.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "shibuya/sala-giochi-shibuya",
+     "ordine": 9,
+     "tipo": "attivita",
+     "nome": "Sala giochi (Central Street)",
+     "cosaOffre": "Distributore automatico con bevande curative (Dr. Salt NEO 210¥, Creatura-cura sonno 200¥, Arginade, Acqua della rinascita); luogo dell'indagine sul cheater Nejima collegata al Confidente Shinya.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "shinya"
+     ],
+     "attivita": [
+      "videogiochi arcade"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/aohige",
+     "ordine": 10,
+     "tipo": "negozio",
+     "nome": "Farmacia Aohige",
+     "cosaOffre": "Medicinali e cure.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "aohige",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/rocinante",
+     "ordine": 11,
+     "tipo": "negozio",
+     "nome": "Discount Rocinante",
+     "cosaOffre": "Articoli vari e snack.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "rocinante",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/body-chop",
+     "ordine": 12,
+     "tipo": "negozio",
+     "nome": "Body Chop",
+     "cosaOffre": "Articoli per la bellezza e profumi.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "body-chop",
+     "piatti": null,
+     "note": "Situato nel Centro commerciale sotterraneo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/37-gradi",
+     "ordine": 13,
+     "tipo": "negozio",
+     "nome": "37 Gradi Celsius",
+     "cosaOffre": "Anelli e accessori per attributi/statistiche.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "37-gradi",
+     "piatti": null,
+     "note": "Situato nel Centro commerciale sotterraneo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/tsurukame",
+     "ordine": 14,
+     "tipo": "negozio",
+     "nome": "Tsurukame Diamond",
+     "cosaOffre": "Gioielli e braccialetti.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "tsurukame",
+     "piatti": null,
+     "note": "Situato nel Centro commerciale sotterraneo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/high-sense",
+     "ordine": 15,
+     "tipo": "negozio",
+     "nome": "High Sense",
+     "cosaOffre": "Articoli decorativi.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "high-sense",
+     "piatti": null,
+     "note": "Situato nel Centro commerciale sotterraneo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/prossimo-asso",
+     "ordine": 16,
+     "tipo": "negozio",
+     "nome": "Prossimo Asso",
+     "cosaOffre": "Attrezzature sportive e da pesca; vendita del libro \"Esperto a biliardo\".",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "prossimo-asso",
+     "piatti": null,
+     "note": "Situato nel Centro commerciale sotterraneo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/kiyasuku",
+     "ordine": 17,
+     "tipo": "negozio",
+     "nome": "Chiosco della stazione KiyasuKu",
+     "cosaOffre": "Articoli e snack da stazione.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "kiyasuku",
+     "piatti": null,
+     "note": "Situato nel Sottopasso.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/yon-germain",
+     "ordine": 18,
+     "tipo": "negozio",
+     "nome": "Panetteria Yon-Germain",
+     "cosaOffre": "Pane e panini.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "yon-germain",
+     "piatti": null,
+     "note": "Situata nel Sottopasso.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/stazione-piazza-shibuya",
+     "ordine": 19,
+     "tipo": "punto-interesse",
+     "nome": "Piazza della Stazione (Station Square)",
+     "cosaOffre": "Punto di incontro con Yoshida, oratore di strada.",
+     "quando": "sera",
+     "giorni": "domenica (regolare) e festività",
+     "sblocco": "Confidente Yoshida: 9 maggio (dopo aver lavorato all'Ore no Beko)",
+     "confidenti": [
+      "yoshida"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Non disponibile con pioggia. Scadenza: Yoshida non più disponibile dopo il 17 novembre se non completato (limite consigliato 13 novembre).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-yoshida-sole/",
+     "verificato": true
+    },
+    {
+     "chiave": "shibuya/underground-mall-lovers",
+     "ordine": 20,
+     "tipo": "confidente",
+     "nome": "Passaggio del Centro commerciale sotterraneo (Ann)",
+     "cosaOffre": "Punto d'incontro per il Confidente Ann Takamaki (Amanti).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "ann"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Dettagli su giorni/orari specifici non reperiti nelle fonti consultate in questa sessione.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "shibuya/stazione-shibuya",
+     "ordine": 21,
+     "tipo": "trasporto",
+     "nome": "Stazione di Shibuya",
+     "cosaOffre": "Hub metropolitano principale, accesso a tutti i quartieri di Tokyo e punto di ingresso ai Memento (tramite MetaNav).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "viaggio rapido",
+      "accesso ai Memento"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/muovere-i-primi-passi/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "shinjuku",
+   "ordine": 2,
+   "nome": "Shinjuku",
+   "sblocco": "18 giugno (evento di trama)",
+   "descrizione": "Quartiere a luci rosse, sbloccato in giugno durante la trama principale.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "shinjuku/crossroads",
+     "ordine": 0,
+     "tipo": "confidente",
+     "nome": "Bar Crossroads",
+     "cosaOffre": "Bar dove lavora Ichiko Ohya; lavoro part-time serale e punto d'incontro per il Confidente Ohya (Diavolo).",
+     "quando": "sera",
+     "giorni": "tutti i giorni (lunedì-domenica)",
+     "sblocco": "Confidente: 5 luglio; lavoro part-time: Confidente Ohya avviato + Gentilezza Rango 3 + Perizia Rango 3",
+     "confidenti": [
+      "ohya"
+     ],
+     "attivita": [
+      "lavoro part-time"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Punto di interesse più a nord-est di Shinjuku. Eventi ai ranghi 4 e 10 non disponibili con pioggia. Guadagno lavoro: 7.200¥ standard, 12.000¥ la domenica.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-ohya-diavolo/",
+     "verificato": true
+    },
+    {
+     "chiave": "shinjuku/chihaya-stand",
+     "ordine": 1,
+     "tipo": "confidente",
+     "nome": "Bancarella della chiromante Chihaya",
+     "cosaOffre": "Punto d'incontro con Chihaya Mifune per letture di tarocchi; Confidente Fortuna.",
+     "quando": "sera",
+     "giorni": "martedì, giovedì, sabato, domenica",
+     "sblocco": "Incontro: 23 giugno; svolta: 30 giugno (richiesta Memento \"Un fidanzato violento\"); primo rango: 30 luglio",
+     "confidenti": [
+      "chihaya"
+     ],
+     "attivita": [
+      "lettura tarocchi"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "In fondo alla prima strada a destra, di fronte al negozio di Articoli vari. Mai disponibile con pioggia.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-chihaya-fortuna/",
+     "verificato": true
+    },
+    {
+     "chiave": "shinjuku/hinokuniya",
+     "ordine": 2,
+     "tipo": "negozio",
+     "nome": "Libreria Hinokuniya",
+     "cosaOffre": "Libri specializzati: Enciclopedia floreale, La scienza del baseball, Anima da cineasta, L'ABC dell'artigianato, Maestro a freccette, Lo zen della pesca, Segreti di gioco.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": "alcuni titoli richiedono attività specifiche sbloccate",
+     "confidenti": [],
+     "attivita": [
+      "lettura",
+      "acquisto libri"
+     ],
+     "negozio": "hinokuniya",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
+     "verificato": true
+    },
+    {
+     "chiave": "shinjuku/fioraio-sukebe",
+     "ordine": 3,
+     "tipo": "negozio",
+     "nome": "Fioraio Sukebe",
+     "cosaOffre": "Piante e fertilizzanti.",
+     "quando": "sera",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "fioraio-sukebe",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shinjuku/mran-mran",
+     "ordine": 4,
+     "tipo": "negozio",
+     "nome": "Negozio di articoli vari Mran Mran",
+     "cosaOffre": "Decorazioni e articoli vari.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "mran-mran",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "shinjuku/cinema-cult9",
+     "ordine": 5,
+     "tipo": "attivita",
+     "nome": "Cinema \"Cult 9\"",
+     "cosaOffre": "Proiezioni cinematografiche che aumentano le doti sociali.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "aumento doti sociali"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Presenza segnalata da fonte secondaria (samurai-gamers); non individuata pagina dedicata sulla guida italiana.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "kichijoji",
+   "ordine": 3,
+   "nome": "Kichijoji",
+   "sblocco": "esclusivo Persona 5 Royal, disponibile dopo l'introduzione narrativa nella prima parte del gioco",
+   "descrizione": "Quartiere esclusivo di Royal, pieno di locali e negozi specializzati. Base d'incontro per Kasumi/Sumire Yoshizawa e Goro Akechi.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/jazz-club/",
+   "luoghi": [
+    {
+     "chiave": "kichijoji/jazz-jin",
+     "ordine": 0,
+     "tipo": "attivita",
+     "nome": "Jazz Club (Jazz Jin)",
+     "cosaOffre": "Locale jazz dove invitare un membro del party a bere cocktail: aumenta punti Affetto, modifica statistiche di combattimento, insegna nuove abilità (soprattutto la domenica).",
+     "quando": "sera",
+     "giorni": null,
+     "sblocco": "Confidente Akechi Rango 4 (dal 26 giugno)",
+     "confidenti": [
+      "akechi"
+     ],
+     "attivita": [
+      "bere cocktail",
+      "apprendimento abilità"
+     ],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Forzow Mule",
+       "prezzo": null,
+       "effetto": "Livello +1, HP +20 (lunedì)"
+      },
+      {
+       "nome": "Spritz +",
+       "prezzo": null,
+       "effetto": "Forza, Resistenza, Fortuna +4 (martedì)"
+      },
+      {
+       "nome": "Anima Colada",
+       "prezzo": null,
+       "effetto": "Livello +1, SP +10 (mercoledì)"
+      },
+      {
+       "nome": "Magibolle",
+       "prezzo": null,
+       "effetto": "Magia, Agilità, Fortuna +4 (giovedì)"
+      },
+      {
+       "nome": "Onni-bolle",
+       "prezzo": null,
+       "effetto": "Potenzia tutti i parametri (venerdì)"
+      },
+      {
+       "nome": "Drink del sabato",
+       "prezzo": null,
+       "effetto": "Rotazione casuale dei drink feriali (sabato)"
+      },
+      {
+       "nome": "Drink speciale della domenica",
+       "prezzo": null,
+       "effetto": "Insegna abilità avanzate come \"Carica\" e \"Concentrazione\" (domenica)"
+      }
+     ],
+     "note": "Costo d'ingresso 3.000¥.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/jazz-club/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/penguin-sniper",
+     "ordine": 1,
+     "tipo": "attivita",
+     "nome": "Penguin Sniper (Freccette e Biliardo)",
+     "cosaOffre": "Biliardo e freccette (\"Penguin Sniper\"); punto d'incontro abituale per Akechi.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "akechi"
+     ],
+     "attivita": [
+      "biliardo",
+      "freccette"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Akechi è generalmente trovato fuori da questo edificio.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-goro-akechi-giustizia/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/vestiti-usati-kichijoji",
+     "ordine": 2,
+     "tipo": "negozio",
+     "nome": "Negozio di abiti usati",
+     "cosaOffre": "Incensi e spray; sistema a punti; scambio di armature \"sporche\"/logore per oggetti speciali.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "vestiti-usati-kichijoji",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/stoneon",
+     "ordine": 3,
+     "tipo": "negozio",
+     "nome": "Cristalloterapia Stoneon",
+     "cosaOffre": "Collane e pietre; materiali per accessori che potenziano attributi.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "stoneon",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/mitsubachi",
+     "ordine": 4,
+     "tipo": "negozio",
+     "nome": "Cartoleria Mitsubachi",
+     "cosaOffre": "Articoli per la scrittura; utile per l'acquisto di regali per i Confidenti.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "acquisto regali"
+     ],
+     "negozio": "mitsubachi",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/hagoromo",
+     "ordine": 5,
+     "tipo": "ristorante",
+     "nome": "Friggitoria/Macelleria Hagoromo",
+     "cosaOffre": "Katsu (cotoletta fritta) disponibile la domenica sera; effetto di recupero HP.",
+     "quando": "sera",
+     "giorni": "domenica",
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Katsu",
+       "prezzo": null,
+       "effetto": "Recupero HP"
+      }
+     ],
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/houraku",
+     "ordine": 6,
+     "tipo": "ristorante",
+     "nome": "Street food cinese Houraku",
+     "cosaOffre": "Nikuman (panini al vapore) e specialità cinesi; effetto di recupero HP.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Nikuman",
+       "prezzo": null,
+       "effetto": "Recupero HP"
+      }
+     ],
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/mealport",
+     "ordine": 7,
+     "tipo": "negozio",
+     "nome": "Verdura d'importazione MealPort",
+     "cosaOffre": "Alimenti importati; effetto di recupero HP.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "mealport",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/mantra-ganda",
+     "ordine": 8,
+     "tipo": "negozio",
+     "nome": "Mantra Ganda",
+     "cosaOffre": "Incensi con effetti di potenziamento delle Persone.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Rango 3 delle Gemelle custodi (Forza)",
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "mantra-ganda",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "kichijoji/vecchio-tempio-kichijoji",
+     "ordine": 9,
+     "tipo": "punto-interesse",
+     "nome": "Vecchio tempio",
+     "cosaOffre": "Aumento del limite massimo di SP.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "aumento SP massimi"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Dettagli precisi (costo, frequenza) non reperiti nella fonte primaria consultata in questa sessione.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "kichijoji/kichijoji-galleria-kasumi",
+     "ordine": 10,
+     "tipo": "confidente",
+     "nome": "Galleria (zona d'incontro Kasumi/Sumire)",
+     "cosaOffre": "Zona di Kichijoji dove si trova abitualmente Kasumi Yoshizawa (poi Sumire), Confidente Fede.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "avvio automatico 30 maggio; sviluppo bloccato a rango 5 fino al 12 gennaio (Palazzo di Maruki)",
+     "confidenti": [
+      "kasumi"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Non sono indicati orari fissi: dipende da messaggi/inviti legati alla trama.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-kasumi-fede/",
+     "verificato": true
+    }
+   ]
+  },
+  {
+   "chiave": "akihabara",
+   "ordine": 4,
+   "nome": "Akihabara",
+   "sblocco": "31 agosto (evento di trama)",
+   "descrizione": "Electric Town: quartiere di elettronica, videogiochi e cultura otaku.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "akihabara/akindo",
+     "ordine": 0,
+     "tipo": "negozio",
+     "nome": "Megastore di elettronica Akindo",
+     "cosaOffre": "Elettronica e gadget.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "akindo",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "akihabara/tokobushiya",
+     "ordine": 1,
+     "tipo": "negozio",
+     "nome": "Negozio Otaku Tokobushiya",
+     "cosaOffre": "Merchandise e articoli otaku.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "tokobushiya",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "akihabara/akiba-electronics",
+     "ordine": 2,
+     "tipo": "negozio",
+     "nome": "Negozio di elettronica Akiba",
+     "cosaOffre": "Materiali e componenti elettronici.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "akiba-electronics",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "akihabara/super-baron",
+     "ordine": 3,
+     "tipo": "negozio",
+     "nome": "Negozio di retrogaming Super Baron",
+     "cosaOffre": "Videogiochi retrò; scambio premi.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "super-baron",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+     "verificato": true
+    },
+    {
+     "chiave": "akihabara/sala-giochi-akihabara",
+     "ordine": 4,
+     "tipo": "confidente",
+     "nome": "Sala giochi di Akihabara",
+     "cosaOffre": "Arcade con minigioco della gru; punto d'incontro per il Confidente Shinya Oda (Torre), soprannominato \"Il Re\" dei videogiochi.",
+     "quando": "giorno",
+     "giorni": "lunedì, martedì, giovedì, sabato",
+     "sblocco": "richiesta Memento \"I vincitori non imbrogliano\" completata, poi confronto con l'Ombra di Shinya dal 4 settembre; Confidente attivo dal 5 settembre",
+     "confidenti": [
+      "shinya"
+     ],
+     "attivita": [
+      "minigioco della gru"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Generalmente disponibile con pioggia, tranne eventi dei Ranghi 7, 8 e 9 (all'aperto).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-shinya-torre/",
+     "verificato": true
+    },
+    {
+     "chiave": "akihabara/distributori-akihabara",
+     "ordine": 5,
+     "tipo": "distributore",
+     "nome": "Distributori automatici speciali",
+     "cosaOffre": "6 distributori con bevande esclusive, incluse bevande con effetti di potenziamento/penalità in battaglia (es. Curry alla fragola, Locusta alla maionese, Miso di stella marina, Bevanda energetica, Strano boccone, Salsa rancida).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Rifornimento settimanale (lunedì); nuove bevande dal 1° settembre e dal 10 ottobre; esauriti durante ondate di calore.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
+     "verificato": true
+    },
+    {
+     "chiave": "akihabara/maid-cafe-akihabara",
+     "ordine": 6,
+     "tipo": "ristorante",
+     "nome": "Maid Café",
+     "cosaOffre": "Segnalato da fonte secondaria come locale presente ad Akihabara, ma la sua reale presenza/funzione in Persona 5 Royal non è stata confermata sulla guida italiana.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Da verificare: possibile elemento scenico non interattivo oppure erroneamente riportato dalla fonte secondaria.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "shujin-academy",
+   "ordine": 5,
+   "nome": "Shujin Academy (scuola)",
+   "sblocco": null,
+   "descrizione": "Liceo Shujin, frequentato dal protagonista, situato ad Aoyama-Itchome. Disponibile fin dall'inizio.",
+   "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+   "luoghi": [
+    {
+     "chiave": "shujin-academy/biblioteca-shujin",
+     "ordine": 0,
+     "tipo": "servizio",
+     "nome": "Biblioteca scolastica",
+     "cosaOffre": "Prestito gratuito di libri: Il magnifico ladro, La leggenda dei pirati, Zorro il fuorilegge, La ballerina seducente, La papessa illusoria, L'urlo di Cthulhu, Lettura rapida, Vestito di ceneri, Donna nel buio, L'eroe con l'arco.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "prestito libri",
+      "studio"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
+     "verificato": true
+    },
+    {
+     "chiave": "shujin-academy/cancello-shujin",
+     "ordine": 1,
+     "tipo": "confidente",
+     "nome": "Cancello della scuola",
+     "cosaOffre": "Ingresso della scuola; punto d'incontro abituale per Makoto Niijima (Papessa).",
+     "quando": "giorno",
+     "giorni": "martedì, giovedì, sabato, domenica",
+     "sblocco": "Confidente attivo dal 26 luglio (richiede Conoscenza Rango 3)",
+     "confidenti": [
+      "makoto"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Eventi dei Ranghi 2 e 9 all'aperto, non disponibili con pioggia.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-makoto-papessa/",
+     "verificato": true
+    },
+    {
+     "chiave": "shujin-academy/corridoio-2-piano-shujin",
+     "ordine": 2,
+     "tipo": "confidente",
+     "nome": "Corridoio del 2° piano",
+     "cosaOffre": "Passaggio centrale a sud dell'aula del protagonista; punto d'incontro per Sadayo Kawakami (Temperanza).",
+     "quando": "sera",
+     "giorni": "venerdì, sabato",
+     "sblocco": "4 giugno (dopo evento narrativo del 3 giugno); Coraggio Rango 3 per la prima chiamata",
+     "confidenti": [
+      "kawakami"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Disponibilità aumentata in caso di pioggia.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-kawakami-temperanza/",
+     "verificato": true
+    },
+    {
+     "chiave": "shujin-academy/infermeria-shujin",
+     "ordine": 3,
+     "tipo": "confidente",
+     "nome": "Infermeria",
+     "cosaOffre": "Ambulatorio scolastico; sede del Confidente esclusivo di Royal, Takuto Maruki (Consigliere).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [
+      "maruki"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Dettagli precisi su giorni/orari non reperiti nella fonte primaria in questa sessione.",
+     "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
+     "verificato": false
+    },
+    {
+     "chiave": "shujin-academy/distributori-shujin",
+     "ordine": 4,
+     "tipo": "distributore",
+     "nome": "Distributori automatici scolastici",
+     "cosaOffre": "2 distributori nell'edificio principale (Second Maid, Manta, Earl Green a 130¥), 1 nel cortile (Dr. Salt NEO 210¥, Arginade, Acqua della rinascita 300¥), 2 al cancello della scuola.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Rifornimento settimanale, esauriti durante ondate di calore.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/distributori-automatici/",
+     "verificato": true
+    },
+    {
+     "chiave": "shujin-academy/aula-shujin",
+     "ordine": 5,
+     "tipo": "scuola",
+     "nome": "Aula del protagonista",
+     "cosaOffre": "Interrogazioni (domande di Conoscenza) ed esami (bonus Fascino).",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "interrogazioni",
+      "esami"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/interrogazioni-esami-risposte/",
+     "verificato": true
+    }
+   ]
+  },
+  {
+   "chiave": "kanda-jinbocho",
+   "ordine": 6,
+   "nome": "Kanda / Jinbocho",
+   "sblocco": "Kanda: Confidente Emperor (Yusuke) Rango 5; Jinbocho: Confidente Star (Hifumi) Rango 4",
+   "descrizione": "Kanda è nota per la chiesa cattolica; Jinbocho è il quartiere delle librerie antiquarie e specializzate.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "kanda-jinbocho/chiesa-kanda",
+     "ordine": 0,
+     "tipo": "confidente",
+     "nome": "Chiesa di Kanda",
+     "cosaOffre": "Articoli religiosi in vendita la domenica; panchina davanti alla chiesa dove si trova Hifumi Togo (poi anche nella chiesa stessa).",
+     "quando": "sera",
+     "giorni": "lunedì, mercoledì, sabato, domenica",
+     "sblocco": "dal 28 giugno; Fascino Rango 3 per il primo incontro (consigliato 2 luglio)",
+     "confidenti": [
+      "hifumi"
+     ],
+     "attivita": [
+      "acquisto articoli religiosi (domenica)"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Generalmente disponibile con pioggia, tranne eventi dei Ranghi 4 e 6.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-di-hifumi-stella/",
+     "verificato": true
+    },
+    {
+     "chiave": "kanda-jinbocho/nagiuri",
+     "ordine": 1,
+     "tipo": "negozio",
+     "nome": "Libreria Nagiuri",
+     "cosaOffre": "Libri speciali con requisiti di lettura: Pagine ammuffite, Spadaccino provetto, Chiamami Capo, Casanova spregiudicato, Rivelazioni eroiche, Come fare karakuri, Comprendere il cuore.",
+     "quando": "giorno",
+     "giorni": null,
+     "sblocco": null,
+     "confidenti": [],
+     "attivita": [
+      "lettura",
+      "acquisto libri"
+     ],
+     "negozio": "nagiuri",
+     "piatti": null,
+     "note": "A Jinbocho, sbloccata al Rango 4 di Hifumi.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
+     "verificato": true
+    }
+   ]
+  },
+  {
+   "chiave": "ikebukuro",
+   "ordine": 7,
+   "nome": "Ikebukuro",
+   "sblocco": "1 settembre (lettura libro, forse \"Cieli notturni\") oppure invito di Makoto (Niijima) del 30 luglio dopo il suo Palazzo",
+   "descrizione": "Quartiere con planetario, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "ikebukuro/planetario-ikebukuro",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Planetario di Ikebukuro",
+     "cosaOffre": "Luogo di hangout/data spot per aumentare l'affetto dei Confidenti (visione del cielo stellato).",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "lettura di un libro dedicato (titolo italiano non confermato con certezza; possibile \"Cieli notturni\", 1.800¥, Libreria Taiheido) oppure invito di Makoto il 30/07",
+     "confidenti": [
+      "makoto"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Corrispondenza titolo libro dedotta per coincidenza, non confermata esplicitamente dalla guida italiana: da verificare.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "harajuku",
+   "ordine": 8,
+   "nome": "Harajuku",
+   "sblocco": "lettura del libro \"Vague\" (Libreria Taiheido, Shibuya, 700¥) oppure invito di Mishima del 3 agosto",
+   "descrizione": "Quartiere della moda giovanile, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "harajuku/harajuku-hangout",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Harajuku (zona crepes/moda)",
+     "cosaOffre": "Luogo di hangout/data spot.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "libro \"Vague\" o invito di Mishima (3 agosto)",
+     "confidenti": [
+      "mishima"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Corrispondenza col titolo \"Vague\" presente nell'elenco libri Taiheido: coincidenza plausibile ma non confermata esplicitamente riga per riga.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "ueno",
+   "ordine": 9,
+   "nome": "Ueno",
+   "sblocco": "Confidente Emperor (Yusuke) Rango 3",
+   "descrizione": "Quartiere del museo, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "ueno/museo-ueno",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Museo di Ueno",
+     "cosaOffre": "Luogo di hangout/data spot a tema artistico, legato a Yusuke.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Confidente Yusuke (Imperatore) Rango 3",
+     "confidenti": [
+      "yusuke"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "inokashira-park",
+   "ordine": 10,
+   "nome": "Parco Inokashira",
+   "sblocco": "Confidente Lovers (Ann) Rango 3",
+   "descrizione": "Parco pubblico, luogo di hangout; anche punto d'incontro occasionale per Mishima.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "inokashira-park/inokashira-hangout",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Parco Inokashira (area hangout)",
+     "cosaOffre": "Luogo di hangout/data spot.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Confidente Ann (Amanti) Rango 3",
+     "confidenti": [
+      "ann",
+      "mishima"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "odaiba",
+   "ordine": 11,
+   "nome": "Odaiba / Seaside Park",
+   "sblocco": "1 giugno oppure Confidente Lovers (Ann) Rango 10",
+   "descrizione": "Parco costiero sul mare, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "odaiba/odaiba-seaside-park",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Odaiba Seaside Park",
+     "cosaOffre": "Parco costiero, luogo di hangout/data spot.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "1 giugno / Confidente Ann Rango 10",
+     "confidenti": [
+      "ann"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "shinagawa",
+   "ordine": 12,
+   "nome": "Shinagawa",
+   "sblocco": "lettura del libro \"Un acquario al giorno\" (Libreria Taiheido, 2.000¥) o invito di Akechi del 28-29 luglio (esclusivo Royal)",
+   "descrizione": "Hotel con acquario interno; quartiere esclusivo di Persona 5 Royal.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "shinagawa/shinagawa-acquario",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Acquario di Shinagawa",
+     "cosaOffre": "Acquario all'interno di un hotel, luogo di hangout/data spot.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "libro \"Un acquario al giorno\" o invito Akechi (Giustizia) del 28-29 luglio",
+     "confidenti": [
+      "akechi"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Corrispondenza col titolo del libro Taiheido plausibile ma non confermata esplicitamente riga per riga.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "nakano",
+   "ordine": 13,
+   "nome": "Nakano",
+   "sblocco": "lettura del libro \"Esplorando Nakano\" (Libreria Taiheido, 2.000¥) o invito di Futaba (Eremita) del 9 ottobre (esclusivo Royal)",
+   "descrizione": "Centro commerciale (Nakano Broadway), luogo di hangout esclusivo Royal.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "nakano/nakano-broadway",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Nakano Broadway (centro commerciale)",
+     "cosaOffre": "Centro commerciale con negozi di collezionismo, luogo di hangout/data spot.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "libro \"Esplorando Nakano\" o invito Futaba (Eremita) 9 ottobre",
+     "confidenti": [
+      "futaba"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "ogikubo",
+   "ordine": 14,
+   "nome": "Ogikubo",
+   "sblocco": "Confidente Chariot (Ryuji) Rango 4",
+   "descrizione": "Quartiere noto per un ristorante di ramen, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "ogikubo/ogikubo-ramen",
+     "ordine": 0,
+     "tipo": "ristorante",
+     "nome": "Ristorante di ramen di Ogikubo",
+     "cosaOffre": "Ramen, luogo di hangout con Ryuji.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Confidente Ryuji (Carro) Rango 4",
+     "confidenti": [
+      "ryuji"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Ramen",
+       "prezzo": null,
+       "effetto": "Dettagli su varianti/effetti non reperiti nelle fonti consultate."
+      }
+     ],
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "yokohama-chinatown",
+   "ordine": 15,
+   "nome": "Chinatown (Yokohama)",
+   "sblocco": "lettura del libro \"Chinese Sweets\" (titolo italiano non reperito)",
+   "descrizione": "Quartiere cinese di Yokohama, luogo di hangout a tema culinario.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "yokohama-chinatown/chinatown-hangout",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Chinatown (area hangout)",
+     "cosaOffre": "Luogo di hangout/data spot a tema culinario cinese.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "lettura di un libro dedicato (titolo italiano non reperito nelle fonti consultate)",
+     "confidenti": [],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Titolo italiano del libro di sblocco non reperito: segnalato come dato mancante.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "maihama",
+   "ordine": 16,
+   "nome": "Maihama",
+   "sblocco": "11 ottobre (evento di trama con le Gemelle custodi) o lettura libro \"Theme Park Escort\" (titolo italiano non reperito)",
+   "descrizione": "Sede del parco a tema Destinyland.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "maihama/destinyland",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Tokyo Destinyland",
+     "cosaOffre": "Parco divertimenti, sede di un'uscita serale con Caroline e Justine (Gemelle custodi, Forza).",
+     "quando": "sera",
+     "giorni": null,
+     "sblocco": "11 ottobre (evento di trama) o libro dedicato",
+     "confidenti": [],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Titolo italiano del libro di sblocco non reperito.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "roppongi",
+   "ordine": 17,
+   "nome": "Roppongi",
+   "sblocco": "sbloccato durante l'infiltrazione al Palazzo di Okumura (circa 19 settembre)",
+   "descrizione": "Sede del quartier generale di Okumura Foods.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "roppongi/okumura-foods-hq",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Sede Okumura Foods",
+     "cosaOffre": "Grattacielo sede dell'azienda di Kunikazu Okumura, rilevante per la trama del Palazzo di Okumura.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "durante l'infiltrazione al Palazzo di Okumura",
+     "confidenti": [
+      "haru"
+     ],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "tsukishima",
+   "ordine": 18,
+   "nome": "Tsukishima",
+   "sblocco": "Confidente Chariot (Ryuji) Rango 7",
+   "descrizione": "Quartiere noto per il monjayaki, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "tsukishima/tsukishima-monjayaki",
+     "ordine": 0,
+     "tipo": "ristorante",
+     "nome": "Ristorante di monjayaki",
+     "cosaOffre": "Monjayaki (piatto alla piastra tipico di Tsukishima); confidenti invitabili: Ryuji, Yusuke, Haru, Takemi.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Confidente Ryuji (Carro) Rango 7",
+     "confidenti": [
+      "ryuji",
+      "yusuke",
+      "haru",
+      "takemi"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": [
+      {
+       "nome": "Monjayaki",
+       "prezzo": null,
+       "effetto": "Dettagli su effetti non reperiti nelle fonti consultate."
+      }
+     ],
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "meiji-shrine",
+   "ordine": 19,
+   "nome": "Santuario Meiji",
+   "sblocco": "lettura del libro \"Santuari di Tokyo\" (Libreria Taiheido, 1.800¥) o invito di Ann del 5 agosto",
+   "descrizione": "Santuario shintoista, luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "meiji-shrine/meiji-shrine-hangout",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Santuario Meiji (area hangout)",
+     "cosaOffre": "Luogo di hangout/data spot in un santuario shintoista.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "libro \"Santuari di Tokyo\" o invito Ann (Amanti) 5 agosto",
+     "confidenti": [
+      "ann"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Corrispondenza col titolo Taiheido plausibile ma non confermata esplicitamente riga per riga.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "ichigaya",
+   "ordine": 20,
+   "nome": "Ichigaya",
+   "sblocco": "lettura del libro \"Vedetta lacustre\" (Libreria Taiheido, 1.800¥) o invito di Ryuji (data riportata come 6 luglio dalla guida italiana, 3 luglio da fonte secondaria: verificare)",
+   "descrizione": "Sede del Laghetto di Ichigaya, minigioco di pesca.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/pesca-laghetto-ichigaya/",
+   "luoghi": [
+    {
+     "chiave": "ichigaya/laghetto-ichigaya",
+     "ordine": 0,
+     "tipo": "attivita",
+     "nome": "Laghetto di Ichigaya",
+     "cosaOffre": "Minigioco di pesca: scelta esca, lancio, recupero del pesce. Pesci: con Boilie piccola (Pesce rosso, Carpa selvaggia, Ciprinide di Tokyo), Boilie media (Trota dai sette colori, Carpa bianca, Trota del Tesoro), Boilie grande (Ciprinide delizioso, Carpa inarrivabile), Boilie sospetto (Guardiano e Boss di Ichigaya).",
+     "quando": "entrambe",
+     "giorni": null,
+     "sblocco": "6 luglio (invito di Ryuji) o lettura libro \"Vedetta lacustre\"",
+     "confidenti": [
+      "ryuji"
+     ],
+     "attivita": [
+      "pesca"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Costo: 3.000¥ di giorno, 1.000¥ di sera. Premi: nuove esche, canne migliori, accessori, trofeo \"Il patito della pesca\" alla prima cattura. Data di sblocco: 6 luglio secondo la guida italiana (fonte secondaria riporta 3 luglio: discrepanza da verificare).",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/pesca-laghetto-ichigaya/",
+     "verificato": true
+    }
+   ]
+  },
+  {
+   "chiave": "suidobashi",
+   "ordine": 21,
+   "nome": "Suidobashi (Dome Town)",
+   "sblocco": "10 giugno (evento di trama)",
+   "descrizione": "Area di divertimenti presso il Tokyo Dome.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "suidobashi/dome-town",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Dome Town",
+     "cosaOffre": "Area di attrazioni presso il Tokyo Dome; sede di eventi di trama.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "10 giugno",
+     "confidenti": [],
+     "attivita": [],
+     "negozio": null,
+     "piatti": null,
+     "note": "Dettagli approfonditi non reperiti nelle fonti consultate in questa sessione.",
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "asakusa",
+   "ordine": 22,
+   "nome": "Asakusa",
+   "sblocco": "Confidente Lovers (Ann) Rango 7",
+   "descrizione": "Quartiere storico (area Asakusa-Oshiage secondo fonte secondaria), luogo di hangout.",
+   "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+   "luoghi": [
+    {
+     "chiave": "asakusa/asakusa-hangout",
+     "ordine": 0,
+     "tipo": "punto-interesse",
+     "nome": "Asakusa (area hangout)",
+     "cosaOffre": "Luogo di hangout/data spot in area storica.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "Confidente Ann (Amanti) Rango 7",
+     "confidenti": [
+      "ann"
+     ],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    }
+   ]
+  },
+  {
+   "chiave": "mementos",
+   "ordine": 23,
+   "nome": "Mementos (ingresso)",
+   "sblocco": null,
+   "descrizione": "Dungeon procedurale accessibile dalla metropolitana di Shibuya tramite l'app MetaNav; contiene richieste secondarie e il negozio ambulante di Jose.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/",
+   "luoghi": [
+    {
+     "chiave": "mementos/ingresso-mementos",
+     "ordine": 0,
+     "tipo": "trasporto",
+     "nome": "Ingresso ai Memento",
+     "cosaOffre": "Accesso al dungeon procedurale dei Memento tramite la metropolitana di Shibuya; qui si ricevono e completano le richieste dei cittadini.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "dopo il primo Palazzo (Kamoshida)",
+     "confidenti": [],
+     "attivita": [
+      "richieste secondarie"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/",
+     "verificato": false
+    },
+    {
+     "chiave": "mementos/negozio-jose",
+     "ordine": 1,
+     "tipo": "negozio",
+     "nome": "Negozio di Jose",
+     "cosaOffre": "Vende oggetti in cambio di Fiori (valuta dei Memento, limite 999 per esplorazione); modifica la cognizione dei Memento.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "appare casualmente nei Memento",
+     "confidenti": [],
+     "attivita": [],
+     "negozio": "jose",
+     "piatti": null,
+     "note": null,
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+     "verificato": true
+    }
+   ]
+  }
+ ]
+}

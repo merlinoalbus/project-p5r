@@ -9,6 +9,8 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
+import { dettaglioQuartiere, elencaQuartieri } from '../services/cittaService.js';
+import { attivitaTutte } from '../services/attivitaService.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -60,6 +62,15 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/citta', (_req, res) => {
+  res.json(elencaQuartieri());
+});
+router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }) }), (req, res) => {
+  res.json(dettaglioQuartiere(String(req.params.chiave)));
+});
+router.get('/attivita', validate({ query: queryDomande }), (req, res) => {
+  res.json(attivitaTutte((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/battaglia', (_req, res) => {
   res.json(battaglia());

@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, BattagliaDto, DungeonDettaglioDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiGet, queryString } from './_helpers';
 
@@ -29,6 +29,12 @@ export const getPersona = (id: number): Promise<PersonaDettaglioDto> => apiGet(`
 export const getSkills = (f: { q?: string; elemento?: string } = {}): Promise<SkillRiassuntoDto[]> => apiGet(`/compendio/skill${queryString(f)}`);
 export const getSkill = (id: number): Promise<SkillDettaglioDto> => apiGet(`/compendio/skill/${id}`);
 export const getOggetti = (f: { q?: string; categoria?: string } = {}): Promise<OggettoDto[]> => apiGet(`/compendio/oggetti${queryString(f)}`);
+/** Quartieri della città con conteggi. */
+export const getQuartieri = (): Promise<QuartiereRiassuntoDto[]> => apiGet('/compendio/citta');
+/** Scheda di un quartiere con i luoghi. */
+export const getQuartiere = (chiave: string): Promise<QuartiereDettaglioDto> => apiGet(`/compendio/citta/${encodeURIComponent(chiave)}`);
+/** Attività, lavori, libri e film (con letture della partita se indicata). */
+export const getAttivita = (partita?: number): Promise<AttivitaTutteDto> => apiGet(`/compendio/attivita${queryString({ partita })}`);
 /** Aiuto in battaglia: sezioni della guida e indice delle Ombre. */
 export const getBattaglia = (): Promise<BattagliaDto> => apiGet('/compendio/battaglia');
 /** Richieste dei Mementos e dati di Jose (stato per partita se indicata). */

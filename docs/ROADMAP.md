@@ -69,7 +69,20 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 | 7.3 | Aiuto in battaglia: seed `battaglia.json` (allgamestaff) in `dati_guida` con sistema di battaglia, Rapina/Assalto/Parla, negoziazione (4 personalità con risposte efficaci e da evitare), danno tecnico (11 stati), Staffetta (ranghi e moltiplicatori), 8 Speciali, Ombre sciagura, Mietitore, 9 Demoni del Tesoro; indice unico delle Ombre di Palazzi e Dedali (217 voci: nome in battaglia, maschera collegata alla scheda Persona, debolezze, resistenze, personalità, area) con ricerca rapida e filtri per dungeon, debolezza e personalità; `GET /api/compendio/battaglia`; pagina «Guida → Aiuto in battaglia» a schede | ✅ 2026-09-04 |
 
 ✅ 7 (voce precedente, completata con 7.1–7.3) Dungeon (Palazzi, Dedali, Richieste) · Aiuto in battaglia (debolezze, danno tecnico, negoziazione) · **Mappe dei dungeon** (richiesta utente 2026-09-03: piante di ogni area con punti di interesse, risorse, forzieri, Volontà, sicure, Persona/Ombre, marcatori sovrapposti a immagini importate dall'utente, mai nel repo; **interattive**: ogni elemento è tracciato per partita, si può segnare come già ottenuto/esaurito e nascondere, con una vista completa che mostra anche gli elementi esauriti)
-⬜ 8 Inventario (negozi, oggetti, armi, accessori, abiti) · Attività (mini-giochi, lavori, libri, DVD) · **Mappe della città in modalità guida** (richiesta utente 2026-09-03: luoghi con cosa offrono; per negozi e punti sensibili elenco di oggetti, armi, accessori, abiti e opzioni disponibili, con date/condizioni)
+| Step | Contenuto | Stato |
+|---|---|---|
+| 7.4 | Piante dei dungeon con spilli preposizionati: seed di soli collegamenti alle immagini pubblicate (mai nel repo), scaricate nell'istanza al primo uso, coordinate dei punti di interesse già fissate | ⬜ (ricerca piante in corso) |
+| 7.5 | Guida giorno per giorno: percorso completo data per data (trama, cosa fare di giorno e di sera, dove, risposte giuste, avvisi sulle scadenze) con data corrente della partita e azioni spuntabili; cruciverba di Leblanc con le risposte | ⬜ (ricerca in corso) |
+
+## Fase 8 — Città, attività, inventario
+
+| Step | Contenuto | Stato |
+|---|---|---|
+| 8.1 | La città (24 quartieri, 84 luoghi con cosa offrono, orari, giorni, sblocco, Confidenti, piatti; luoghi da fonte secondaria segnalati) e Attività e Doti sociali (22 attività, 4 lavori, 46 libri, 21 film/DVD con note delle Doti; libri letti e film visti per partita con evento); migrazione 015; `GET /api/compendio/citta`, `/citta/:chiave`, `/attivita?partita`, `PUT /api/partite/:id/letture`; pagine «Guida → La città» e «Guida → Attività e Doti sociali» | ⏳ in validazione |
+| 8.2 | Inventario: negozi con articoli (armi, protezioni, accessori, abiti, oggetti, regali) con prezzi, sblocchi e condizioni | ⬜ (ricerca in corso) |
+| 8.3 | Mappe della città in modalità guida: piante dei quartieri con spilli sui luoghi (stesso meccanismo della 7.4) | ⬜ |
+
+⬜ 8 (voce precedente) Inventario (negozi, oggetti, armi, accessori, abiti) · Attività (mini-giochi, lavori, libri, DVD) · **Mappe della città in modalità guida** (richiesta utente 2026-09-03: luoghi con cosa offrono; per negozi e punti sensibili elenco di oggetti, armi, accessori, abiti e opzioni disponibili, con date/condizioni)
 ⬜ 9 Trofei, finali, Covo dei Ladri
 
 ## Requisiti trasversali (sempre validi)
