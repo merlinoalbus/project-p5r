@@ -26,7 +26,7 @@ vi.mock('../../services/api', () => ({
 function confidente(sovrascrivi: Partial<ConfidentePartitaDto>): ConfidentePartitaDto {
   return {
     chiave: 'ryuji', nome: 'Ryuji Sakamoto', arcana: 'Chariot', arcanaNome: 'Carro', ordine: 7,
-    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], personaArcanoInScorta: false, note: '', updatedAt: null,
+    sbloccato: true, rango: 2, punti: 0, puntiNecessari: 20, mancanti: 20, regaliFatti: [], personaArcanoInScorta: false, note: '', semafori: [], updatedAt: null,
     ...sovrascrivi,
   };
 }

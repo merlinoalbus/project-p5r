@@ -1,0 +1,1128 @@
+[
+ {
+  "confidente": "akechi",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "06-10",
+    "testo": "10 giugno"
+   }
+  ]
+ },
+ {
+  "confidente": "akechi",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "conoscenza",
+    "rango": 3,
+    "testo": "Richiede Dote Conoscenza a rango 3 e Dote Fascino a rango 3."
+   },
+   {
+    "tipo": "dote",
+    "dote": "fascino",
+    "rango": 3,
+    "testo": "Richiede Dote Conoscenza a rango 3 e Dote Fascino a rango 3."
+   }
+  ]
+ },
+ {
+  "confidente": "akechi",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "akechi",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "09-03",
+    "testo": "disponibile solo dopo il 3 settembre."
+   }
+  ]
+ },
+ {
+  "confidente": "akechi",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "conoscenza",
+    "rango": 4,
+    "testo": "Richiede Dote Conoscenza a rango 4;"
+   },
+   {
+    "tipo": "manuale",
+    "testo": "non disponibile prima di questa data."
+   }
+  ]
+ },
+ {
+  "confidente": "akechi",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Combattimento uno-contro-uno obbligatorio con Akechi (vittoria necessaria per proseguire)."
+   }
+  ]
+ },
+ {
+  "confidente": "ann",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-15",
+    "testo": "Rango 1: 15 aprile (dopo il Palazzo di Kamoshida)"
+   }
+  ]
+ },
+ {
+  "confidente": "ann",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "gentilezza",
+    "rango": 2,
+    "testo": "Richiede Dote Gentilezza (Kindness) almeno 2."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Un fidanzato violento",
+    "testo": "Completare la richiesta Memento 'Un fidanzato violento'"
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Smascheriamo i ciarlatani",
+    "testo": "2 ottobre, dopo aver completato la richiesta 'Smascheriamo i ciarlatani'."
+   }
+  ]
+ },
+ {
+  "confidente": "futaba",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "08-31",
+    "testo": "31 agosto"
+   }
+  ]
+ },
+ {
+  "confidente": "futaba",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "gentilezza",
+    "rango": 4,
+    "testo": "Richiede Dote sociale Gentilezza a rango 4."
+   }
+  ]
+ },
+ {
+  "confidente": "futaba",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "È una figlia o un buono pasto?",
+    "testo": "Prerequisito: aver completato la richiesta Memento 'È una figlia o un buono pasto?'."
+   }
+  ]
+ },
+ {
+  "confidente": "gemelle",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "05-19",
+    "testo": "Rango 1 disponibile da subito dopo l'accesso alla Stanza di Velluto (fine Palazzo Madarame); date consigliate dalla guida per procedere in modo efficiente: 19 maggio (R1), 8 giugno (R2-R4), 26 giugno "
+   },
+   {
+    "tipo": "manuale",
+    "testo": "Requisito reale: possedere/fondere una Persona che eredita l'abilità specifica indicata per ogni rango (vedi campo abilita/descrizione)."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "10-31",
+    "testo": "31 ottobre"
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Empress",
+    "testo": "Avere Persona con Arcano Imperatrice"
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Richiede Perizia sufficiente secondo la fonte (livello esatto non specificato)."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "perizia",
+    "rango": 5,
+    "testo": "Richiede Dote sociale Perizia al massimo livello (Migliore) — essenziale per procedere."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 9.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "11-25",
+    "testo": "Non disponibile prima del 25 novembre."
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "06-28",
+    "testo": "Dal 28 giugno (data di gioco)"
+   },
+   {
+    "tipo": "dote",
+    "dote": "fascino",
+    "rango": 3,
+    "testo": "Dote Fascino >= 3;"
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento non disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento non disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "conoscenza",
+    "rango": 5,
+    "testo": "Richiede la Lettura delle affinita da Chihaya e Dote Conoscenza >= 5."
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 7.5,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "conoscenza",
+    "rango": 5,
+    "testo": "Richiede Dote Conoscenza rango 5 (Erudito)."
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "La mamma manager",
+    "testo": "Richiede il completamento della richiesta Memento 'La mamma manager'."
+   }
+  ]
+ },
+ {
+  "confidente": "hifumi",
+  "rango": 10.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Richiede la Lettura delle affinita da Chihaya."
+   }
+  ]
+ },
+ {
+  "confidente": "igor",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-12",
+    "testo": "Rango 1: 12 aprile (dopo l'incursione nel Palazzo di Kamoshida)"
+   }
+  ]
+ },
+ {
+  "confidente": "iwai",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "08-15",
+    "testo": "15 agosto"
+   },
+   {
+    "tipo": "dote",
+    "dote": "coraggio",
+    "rango": 4,
+    "testo": "Dote sociale Coraggio rango 4"
+   }
+  ]
+ },
+ {
+  "confidente": "iwai",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento non disponibile se piove."
+   }
+  ]
+ },
+ {
+  "confidente": "iwai",
+  "rango": 7.5,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "coraggio",
+    "rango": 5,
+    "testo": "Richiede Coraggio rango 5."
+   }
+  ]
+ },
+ {
+  "confidente": "iwai",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Affari loschi nell",
+    "testo": "Richiede il completamento della richiesta Memento 'Affari loschi nell'ombra'."
+   }
+  ]
+ },
+ {
+  "confidente": "kasumi",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "05-30",
+    "testo": "30 maggio"
+   },
+   {
+    "tipo": "manuale",
+    "testo": "Evento scolastico obbligatorio (giornata di pulizia al parco)."
+   },
+   {
+    "tipo": "data",
+    "dal": "01-12",
+    "testo": "Il Confidente si blocca a Rango 5 fino al 22 dicembre e riprende dal 12 gennaio, condizionato dall'aver completato il Rango 10 del Confidente del Consigliere Maruki (Sacerdote) durante la Terza Semest"
+   }
+  ]
+ },
+ {
+  "confidente": "kasumi",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Faith",
+    "testo": "Richiede di possedere una Persona di Arcana Fede equipaggiata."
+   }
+  ]
+ },
+ {
+  "confidente": "kasumi",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Faith",
+    "testo": "Richiede Persona di Arcana Fede."
+   }
+  ]
+ },
+ {
+  "confidente": "kasumi",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Faith",
+    "testo": "Richiede Persona di Arcana Fede equipaggiata."
+   }
+  ]
+ },
+ {
+  "confidente": "kasumi",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "palazzo",
+    "dungeon": "maruki",
+    "testo": "18 gennaio (mercoledì), galleria a Kichijoji — sblocco richiede aver completato il Rango 10 del Confidente di Maruki (Sacerdote) e l'evento del 12 gennaio nel Palazzo di Maruki (in cui Sumire si unisc"
+   }
+  ]
+ },
+ {
+  "confidente": "kasumi",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Faith",
+    "testo": "Richiede Persona di Arcana Fede equipaggiata."
+   }
+  ]
+ },
+ {
+  "confidente": "kawakami",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "06-03",
+    "testo": "3-4 giugno"
+   },
+   {
+    "tipo": "dote",
+    "dote": "coraggio",
+    "rango": 3,
+    "testo": "Dote sociale Coraggio rango 3"
+   }
+  ]
+ },
+ {
+  "confidente": "kawakami",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Costo 5.000 ¥."
+   }
+  ]
+ },
+ {
+  "confidente": "kawakami",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Costo 5.000 ¥."
+   }
+  ]
+ },
+ {
+  "confidente": "kawakami",
+  "rango": 9.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Le fatiche di una maid in cattedra",
+    "testo": "Richiede il completamento della richiesta Memento 'Le fatiche di una maid in cattedra'."
+   }
+  ]
+ },
+ {
+  "confidente": "makoto",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "07-26",
+    "testo": "26 luglio"
+   },
+   {
+    "tipo": "dote",
+    "dote": "conoscenza",
+    "rango": 3,
+    "testo": "Dote sociale Conoscenza a rango 3;"
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Priestess",
+    "testo": "Persona con Arcano Papessa equipaggiata"
+   }
+  ]
+ },
+ {
+  "confidente": "makoto",
+  "rango": 5.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "fascino",
+    "rango": 5,
+    "testo": "Il rango successivo richiede Dote sociale Fascino a livello 5."
+   }
+  ]
+ },
+ {
+  "confidente": "makoto",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "fascino",
+    "rango": 5,
+    "testo": "Richiede Dote sociale Fascino a rango 5 (Irresistibile)."
+   }
+  ]
+ },
+ {
+  "confidente": "maruki",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "05-13",
+    "testo": "Inizio automatico: 13 maggio (Venerdì). Rango 9 deve essere raggiunto entro il 17 novembre. Rango 10 automatico il 18 novembre."
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Councillor",
+    "testo": "alcuni ranghi richiedono di avere equipaggiata/in squadra una Persona dell'Arcana Consigliere (rango 3 e 5)."
+   },
+   {
+    "tipo": "manuale",
+    "testo": "Contenuto ESCLUSIVO Royal: raggiungere il Rango 9 entro il 17/11 è condizione necessaria per accedere al Terzo Semestre e al finale completo del gioco."
+   }
+  ]
+ },
+ {
+  "confidente": "maruki",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non disponibile nei giorni di pioggia."
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Councillor",
+    "testo": "Richiede di avere in squadra una Persona dell'Arcana Consigliere."
+   }
+  ]
+ },
+ {
+  "confidente": "maruki",
+  "rango": 5.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Councillor",
+    "testo": "Richiede Persona Consigliere equipaggiata."
+   }
+  ]
+ },
+ {
+  "confidente": "maruki",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "09-20",
+    "testo": "Leblanc, non disponibile prima del 20 settembre;"
+   }
+  ]
+ },
+ {
+  "confidente": "maruki",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Attenzione alla deadline: bisogna raggiungere il Rango 9 entro il 17 novembre."
+   }
+  ]
+ },
+ {
+  "confidente": "mishima",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "05-06",
+    "testo": "Dal 6 maggio (data di gioco)"
+   }
+  ]
+ },
+ {
+  "confidente": "mishima",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Luogo: Shinjuku (attivita all'aperto, non disponibile con pioggia)."
+   }
+  ]
+ },
+ {
+  "confidente": "mishima",
+  "rango": 6.5,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Moon",
+    "testo": "IMPORTANTE: non equipaggiare una Persona di Arcano Luna per questo evento."
+   }
+  ]
+ },
+ {
+  "confidente": "mishima",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Moon",
+    "testo": "IMPORTANTE: non equipaggiare una Persona di Arcano Luna."
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Luogo: Parco di Akihabara Electric Town (attivita all'aperto, non disponibile con pioggia)."
+   }
+  ]
+ },
+ {
+  "confidente": "mishima",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Moon",
+    "testo": "Da questo rango in poi: equipaggiare una Persona di Arcano Luna per il bonus punti."
+   }
+  ]
+ },
+ {
+  "confidente": "mishima",
+  "rango": 10.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Luogo: parco (attivita all'aperto, non disponibile con pioggia)."
+   }
+  ]
+ },
+ {
+  "confidente": "morgana",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-15",
+    "testo": "Rango 1: 15 aprile (dopo la liberazione di Morgana nel Palazzo di Kamoshida)"
+   }
+  ]
+ },
+ {
+  "confidente": "ohya",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "07-05",
+    "testo": "5 luglio"
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Devil",
+    "testo": "Avere equipaggiata una Persona dell'Arcano Diavolo"
+   }
+  ]
+ },
+ {
+  "confidente": "ohya",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento non disponibile con pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "ohya",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Richiede di aver ottenuto la lettura delle affinità per Ohya."
+   }
+  ]
+ },
+ {
+  "confidente": "ohya",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Lottare per la libertà di stampa",
+    "testo": "Richiede il completamento della richiesta Memento 'Lottare per la libertà di stampa'."
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-12",
+    "testo": "Rango 1: 12 aprile (dopo il combattimento nel Palazzo di Kamoshida)"
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Gli eventi all'aperto (ranghi 2, 3, 6, 8) non sono disponibili nei giorni di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "non disponibile se piove."
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Chariot",
+    "testo": "Richiede di avere in inventario (non necessariamente equipaggiata) una Persona dell'Arcano Carro per il bonus massimo."
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "palazzo",
+    "dungeon": "kamoshida",
+    "testo": "Richiede il completamento del Palazzo di Kamoshida;"
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "evento all'aperto, non disponibile con pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 5.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "05-06",
+    "testo": "Non disponibile prima del 6 maggio;"
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "non disponibile con pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Richiede che Ryuji mandi un messaggio serale in date specifiche (es."
+   }
+  ]
+ },
+ {
+  "confidente": "ryuji",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento nel cortile di Shujin Academy, all'aperto, non disponibile con pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "sae",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "07-09",
+    "testo": "Inizio: 9 luglio (Rango 1); tappe automatiche 24 luglio, 22 agosto, 13 settembre, 12 ottobre, 28 ottobre; finale 20 novembre (Rango 10)"
+   }
+  ]
+ },
+ {
+  "confidente": "shinya",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "09-05",
+    "testo": "Dal 5 settembre (data di gioco)"
+   },
+   {
+    "tipo": "richiesta",
+    "richiesta": "I vincenti non imbrogliano",
+    "testo": "Completare la richiesta Memento 'I vincenti non imbrogliano'"
+   }
+  ]
+ },
+ {
+  "confidente": "shinya",
+  "rango": 9.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Una madre aggressiva",
+    "testo": "Richiede il completamento della richiesta Memento 'Una madre aggressiva'."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-23",
+    "testo": "23 aprile"
+   },
+   {
+    "tipo": "palazzo",
+    "dungeon": "kamoshida",
+    "testo": "Completare il Palazzo di Kamoshida"
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede di possedere una Persona di Arcana Ierofante."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 3.0,
+  "requisiti": [
+   {
+    "tipo": "manuale",
+    "testo": "Richiede di aver preparato caffè almeno una volta (usando il sifone al Leblanc, che dà anche +1 Gentilezza, +1 Fascino e +1 punto legame)."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede Persona di Arcana Ierofante."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 5.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "08-22",
+    "testo": "Richiede che il Palazzo di Futaba sia scaduto/completato (dopo il 22 agosto) e Persona di Arcana Ierofante."
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede che il Palazzo di Futaba sia scaduto/completato (dopo il 22 agosto) e Persona di Arcana Ierofante."
+   },
+   {
+    "tipo": "palazzo",
+    "dungeon": "futaba",
+    "testo": "Richiede che il Palazzo di Futaba sia scaduto/completato (dopo il 22 agosto) e Persona di Arcana Ierofante."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede Persona di Arcana Ierofante."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "gentilezza",
+    "rango": 5,
+    "testo": "Richiede Dote Gentilezza a Rango 5 (Angelico), Persona di Arcana Ierofante, e un'uscita con Sojiro fuori dal Leblanc."
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede Dote Gentilezza a Rango 5 (Angelico), Persona di Arcana Ierofante, e un'uscita con Sojiro fuori dal Leblanc."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "palazzo",
+    "dungeon": "okumura",
+    "testo": "Richiede di essere usciti dal Palazzo di Okumura, l'abilità 'Massaggio speciale' di Kawakami e una Lettura delle affinità da Chihaya (Fortuna Rango 5, 5.000¥)."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 9.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede di aver completato la richiesta Memento 'Lo zio ingordo' e Persona di Arcana Ierofante."
+   },
+   {
+    "tipo": "richiesta",
+    "richiesta": "Lo zio ingordo",
+    "testo": "Richiede di aver completato la richiesta Memento 'Lo zio ingordo' e Persona di Arcana Ierofante."
+   }
+  ]
+ },
+ {
+  "confidente": "sojiro",
+  "rango": 10.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Hierophant",
+    "testo": "Richiede Persona di Arcana Ierofante e un'uscita con Sojiro in chiesa."
+   }
+  ]
+ },
+ {
+  "confidente": "takemi",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-18",
+    "testo": "18 aprile"
+   }
+  ]
+ },
+ {
+  "confidente": "takemi",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "coraggio",
+    "rango": 2,
+    "testo": "Richiede Coraggio rango 2 (Audace)."
+   }
+  ]
+ },
+ {
+  "confidente": "takemi",
+  "rango": 7.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "fascino",
+    "rango": 4,
+    "testo": "Per progredire oltre serve Fascino rango 4 (Carismatico)."
+   }
+  ]
+ },
+ {
+  "confidente": "takemi",
+  "rango": 7.5,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "fascino",
+    "rango": 4,
+    "testo": "Richiede Fascino rango 4."
+   }
+  ]
+ },
+ {
+  "confidente": "takemi",
+  "rango": 8.0,
+  "requisiti": [
+   {
+    "tipo": "richiesta",
+    "richiesta": "Medicina amara",
+    "testo": "Richiede il completamento della richiesta Memento 'Medicina amara'."
+   }
+  ]
+ },
+ {
+  "confidente": "yoshida",
+  "rango": 2.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Sun",
+    "testo": "Consigliato avere equipaggiata una Persona di Arcano Sole (es."
+   }
+  ]
+ },
+ {
+  "confidente": "yoshida",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Sun",
+    "testo": "Richiede una Persona di Arcano Sole equipaggiata."
+   }
+  ]
+ },
+ {
+  "confidente": "yusuke",
+  "rango": 1.0,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "06-18",
+    "testo": "18 giugno"
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Emperor",
+    "testo": "Avere in inventario una Persona con Arcano Imperatore (es."
+   }
+  ]
+ },
+ {
+  "confidente": "yusuke",
+  "rango": 4.0,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento all'aperto: NON disponibile se piove."
+   },
+   {
+    "tipo": "persona-arcano",
+    "arcano": "Emperor",
+    "testo": "Richiede Persona con Arcano Imperatore equipaggiata."
+   }
+  ]
+ },
+ {
+  "confidente": "yusuke",
+  "rango": 6.0,
+  "requisiti": [
+   {
+    "tipo": "dote",
+    "dote": "perizia",
+    "rango": 4,
+    "testo": "Richiede Dote sociale Perizia a rango 4 (Asso) per poter proseguire nella scena (scelta 'Dovremmo ripararla')."
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Evento all'aperto: NON disponibile se piove."
+   }
+  ]
+ }
+]

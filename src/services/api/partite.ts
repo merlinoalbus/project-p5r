@@ -53,6 +53,9 @@ export const aggiornaConfidente = (id: number, chiave: string, dati: ModificaCon
 /** Trofeo ottenuto (o tolto) nella partita. */
 export const impostaTrofeo = (id: number, trofeo: string, ottenuto: boolean): Promise<TrofeoDto> => apiPut(`/partite/${id}/trofei`, { trofeo, ottenuto });
 /** Azione del percorso fatta (o riaperta) nella partita. */
+/** Conferma (o revoca) a mano un requisito non verificabile di un rango del Confidente. */
+export const confermaRequisitoConfidente = (id: number, chiave: string, rango: number, indice: number, confermato: boolean): Promise<ConfidentePartitaDto> =>
+  apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
 export const impostaAzionePercorso = (id: number, data: string, indice: number, fatta: boolean, noteRisposta?: 1 | 2 | 3): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { data, indice, fatta, ...(noteRisposta ? { noteRisposta } : {}) });
 /** Giorno corrente della partita (calendario di gioco). */
 export const impostaGiornoCorrente = (id: number, data: string): Promise<{ dataCorrente: string }> => apiPut(`/partite/${id}/giorno`, { data });

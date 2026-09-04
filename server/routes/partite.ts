@@ -8,7 +8,7 @@ import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
 import {
   bodyAggiornaPartita, bodyAggiornaPosseduta, bodyAggiungiPosseduta, bodyCompendio, bodyConfidente, bodyCreaPartita, bodyDote,
-  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi } from '../schemas/partite.js';
+  bodyAggiornaCiclo, bodyAggiornaObiettivo, bodyDomandaFatta, bodyAcquisto, bodyAzionePercorso, bodyTrofeo, bodyCruciverba, bodyGiornoCorrente, bodyLettura, bodyStatoPunto, bodyStatoRichiesta, bodyRegalo, paramsPartitaDomanda, bodyAggiornaPianoSalvato, bodyAnteprimaFusione, bodySalvaCiclo, paramsPartitaCiclo, bodyCreaObiettivo, bodyForca, bodyFusioneScorta, bodyIsolamento, bodySalvaPiano, paramsPartita, paramsPartitaPiano, queryPianiSalvati, paramsPartitaChiave, paramsPartitaEvento, paramsPartitaObiettivo, paramsPartitaPersona, paramsPartitaPosseduta, queryObiettivi, queryStorico, bodyEliminaEventi, bodyRequisito } from '../schemas/partite.js';
 import { aggiornaObiettivo, creaObiettivo, eliminaObiettivo, obiettivi } from '../services/obiettiviService.js';
 import { aggiornaPianoSalvato, eliminaPianoSalvato, pianiSalvati, salvaPiano } from '../services/pianiSalvatiService.js';
 import { anteprimaFusione, eseguiForca, eseguiFusione, eseguiIsolamento, skillResistenzaIsolamento } from '../services/operazioniVellutoService.js';
@@ -19,6 +19,7 @@ import { impostaStatoRichiesta } from '../services/richiesteService.js';
 import { impostaLettura } from '../services/attivitaService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
+import { confermaRequisito } from '../services/semaforiService.js';
 import { impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
@@ -71,6 +72,14 @@ router.put('/:id/confidenti/:chiave', validate({ params: paramsPartitaChiave, bo
   res.json(aggiornaConfidente(Number(req.params.id), String(req.params.chiave), req.body));
 });
 
+/** Conferma manuale di un requisito non verificabile dall'app (semafori, Fase 12.3); restituisce il Confidente aggiornato. */
+router.put('/:id/confidenti/:chiave/requisiti', validate({ params: paramsPartitaChiave, body: bodyRequisito }), (req, res) => {
+  const b = req.body as { rango: number; indice: number; confermato: boolean };
+  confermaRequisito(Number(req.params.id), String(req.params.chiave), b.rango, b.indice, b.confermato);
+  const c = confidenti(Number(req.params.id)).find((x) => x.chiave === String(req.params.chiave));
+  if (!c) throw httpErrors.notFound('confidente-non-trovato', `Il Confidente '${String(req.params.chiave)}' non esiste.`);
+  res.json(c);
+});
 router.put('/:id/confidenti/:chiave/regali', validate({ params: paramsPartitaChiave, body: bodyRegalo }), (req, res) => {
   const b = req.body as { regalo: string; fatto: boolean };
   res.json(impostaRegaloFatto(Number(req.params.id), String(req.params.chiave), b.regalo, b.fatto));

@@ -452,6 +452,26 @@ export interface ModificaDote {
   fortuna?: boolean;
 }
 
+/** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
+export interface SemaforoRequisitoDto {
+  indice: number;
+  tipo: 'dote' | 'persona-arcano' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
+  testo: string;
+  stato: 'verde' | 'rosso' | 'grigio';
+  /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */
+  dettaglio: string;
+  /** Richiede la conferma manuale dell'utente. */
+  manuale: boolean;
+  confermato: boolean;
+}
+
+export interface SemaforiRangoDto {
+  rango: number;
+  requisiti: SemaforoRequisitoDto[];
+  /** Tutti i requisiti verdi (o confermati). */
+  pronto: boolean;
+}
+
 export interface ConfidentePartitaDto extends ConfidenteDto {
   sbloccato: boolean;
   rango: number;
@@ -465,6 +485,8 @@ export interface ConfidentePartitaDto extends ConfidenteDto {
   /** Regali già consegnati in questa partita (nomi). */
   regaliFatti: string[];
   note: string;
+  /** Semafori dei ranghi superiori a quello attuale (Fase 12.3), in ordine di rango. */
+  semafori: SemaforiRangoDto[];
   updatedAt: string | null;
 }
 
