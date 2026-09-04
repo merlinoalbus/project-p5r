@@ -23,13 +23,13 @@ import { createHash } from 'node:crypto';
 import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
-import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, NegoziSeed, PercorsoSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, NegoziSeed, PercorsoSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'doti.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'doti.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -59,6 +59,7 @@ interface SeedCompleto {
   negozi: NegoziSeed;
   percorso: PercorsoSeed;
   completamento: CompletamentoSeed;
+  sfide: SfideSeed;
   doti: DoteSeed[];
   hash: string;
 }
@@ -94,6 +95,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     negozi: JSON.parse(contenuti['negozi.json']) as NegoziSeed,
     percorso: JSON.parse(contenuti['percorso.json']) as PercorsoSeed,
     completamento: JSON.parse(contenuti['completamento.json']) as CompletamentoSeed,
+    sfide: JSON.parse(contenuti['sfide.json']) as SfideSeed,
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -460,6 +462,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     const { trofei: _trofei, ...consultazione } = seed.completamento;
     void _trofei;
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('completamento', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(consultazione));
+
+    // ---- Sfide (Fase 9.2): Battaglie Sfida, boss segreti, Magnate e tratti in dati_guida ----
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('sfide', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.sfide));
 
     // ---- Traduzioni (mai sovrascrivere fonte='utente') ----
     const insTr = db.prepare(`INSERT INTO traduzione (ambito, chiave, testo, extra_json, fonte, updated_at) VALUES (?, ?, ?, ?, 'seed', ?)

@@ -1,0 +1,1099 @@
+{
+ "battaglieSfida": {
+  "introduzione": "Le Battaglie Sfida sono un contenuto secondario di Persona 5 Royal pensato per mettere alla prova la conoscenza del sistema di combattimento, delle debolezze elementali e della gestione del punteggio. Caroline e Justine trasformano la Stanza di Velluto in una sorta di arena d'addestramento avanzata, proponendo scontri con regole modificate rispetto al gameplay tradizionale. In totale sono 13 battaglie: 5 prove standard incluse nel gioco base (Trial, Chain, Technical, Survival, Trickster) e 8 prove aggiuntive distribuite in 2 pacchetti DLC a pagamento (\"Challenge Battle: Remarkable Guest\" Full Moon e Foggy Day), che comprendono anche gli scontri contro i protagonisti di Persona 3 e Persona 4.",
+  "sblocco": "Si accede parlando con le Gemelle Custodi (Caroline e Justine) nella Stanza di Velluto; le battaglie sono affrontabili praticamente in qualsiasi momento della partita, senza una data di sblocco narrativa specifica indicata dalla guida per le singole sfide. I livelli più alti delle sfide (es. Trial Lv 20/30/50/80, o i livelli \"???\" di Full Moon/Foggy Day) presuppongono però una squadra adeguatamente avanzata in termini di livello ed equipaggiamento, come indicato dai party consigliati di ciascuna sfida. Le sfide Full Moon e Foggy Day richiedono inoltre l'acquisto dei rispettivi contenuti scaricabili (DLC \"Challenge Battle: Remarkable Guest\").",
+  "regoleGenerali": "Regole comuni a tutte le Battaglie Sfida, valide salvo diversa indicazione: se il combattimento si protrae troppo a lungo le Ombre lanciano Megidolaon (danno onnipotente a tutto il gruppo); è sempre possibile fuggire con successo; HP e SP si ripristinano automaticamente al termine della battaglia, ma gli oggetti consumati durante lo scontro non vengono restituiti. Sono disattivate le seguenti funzioni: Rapina, Assalti, Negoziazioni, Speciali, Riverbero, Derubare, Supporto morale e vitale. Il punteggio si basa principalmente sui danni inflitti dal gruppo (limite massimo di 999.999 punti per singola registrazione di danno); gli attacchi multipli e ad area generano punti separatamente per ogni colpo e per ogni nemico colpito. Non generano punti: i danni da bruciatura, i danni riflessi, i danni inflitti da personaggi sotto Soggiogamento e le eliminazioni ottenute per Disperazione. Le abilità a morte istantanea assegnano punti pari agli HP massimi dell'Ombra colpita. Le ricompense (tre per sfida, ottenibili una sola volta ciascuna in base a soglie di punteggio crescenti) sono sempre: un tesoro rivendibile, una carta abilità e un accessorio speciale; le Battaglie Sfida non assegnano mai PE o denaro direttamente, ma gli oggetti droppati da nemici confusi restano comunque nell'inventario.",
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglie-sfida/",
+  "elenco": [
+   {
+    "chiave": "trial",
+    "nome": "Trial",
+    "nomeIt": null,
+    "regole": "Sfida strutturata in 5 livelli indipendenti e crescenti (Lv 10, 20, 30, 50, 80), ciascuno con 2-3 round di nemici. Ogni livello ha tre condizioni bonus proprie: un bonus punti per il completamento entro un numero limite di azioni, un moltiplicatore di punteggio per gli attacchi di un elemento specifico, e un moltiplicatore di punteggio abbattimento se il colpo finale è inflitto da un personaggio designato.",
+    "nemici": [
+     "Lv 10 - Round 1: Piromane delle cripte, Folle cavallo di palude, Vecchietto della foglia, Pupazzo di neve beffardo",
+     "Lv 10 - Round 2: Guerriero notturno, Ninfa dell'acqua, Cadavere d'uccello, Fantasma di cane",
+     "Lv 20 - Round 1: Demone della battaglia, Portatore di disgrazie, Amante geloso",
+     "Lv 20 - Round 2: Ladro delle tavole, Guardiano bicefalo, Demone tornado",
+     "Lv 20 - Round 3: Uomo serpente, Vendicatore sconfitto, Demone dell'acqua furioso",
+     "Lv 30 - Round 1: Fango pulsante, Subdolo pentacolo, Babbuino cantilenante",
+     "Lv 30 - Round 2: Bestia inespressiva, Palindromo di turpitudine, Sole oscuro",
+     "Lv 30 - Round 3: Sacrificio lamentoso, Leopardo crudele, Portatrice di rovina, Divinità risvegliata",
+     "Lv 50 - Round 1: Diamante Hope, Pachiderma benevolo, Elefante ribelle",
+     "Lv 50 - Round 2: Signore delle nevi, Pupazzo di neve malvagio, Pupazzo di neve beffardo",
+     "Lv 50 - Round 3: Svettante re dei desideri, Strega del sabba, Serpenti ubriachi",
+     "Lv 80 - Round 1: Signore delle mosche",
+     "Lv 80 - Round 2: Tiranno che raduna eroi, Signore del tuono, Guerriera dell'oltretomba",
+     "Lv 80 - Round 3: Ombra di Dio"
+    ],
+    "punteggi": "Lv 10: entro 20 azioni +10.000 pt, attacchi Vento x3, abbattimento con Ann x7. Lv 20: entro 28 azioni +15.000 pt, attacchi Nucleare x4, abbattimento con Yusuke x7. Lv 30: entro 24 azioni +20.000 pt, attacchi Psicocinesi x3, abbattimento con Morgana x8. Lv 50: entro 16 azioni +25.000 pt, attacchi Fuoco x2, abbattimento con Ryuji x6. Lv 80: entro 28 azioni +15.000 pt, attacchi Elettrici x2, abbattimento con Makoto x6.",
+    "ricompense": [
+     "Lv 10 - 10.000 pt: Blocco di rame (tesoro, 13.000 ¥)",
+     "Lv 10 - 15.000 pt: Giacca da duca (protezione, Difesa +75, Elusione +6)",
+     "Lv 10 - 25.000 pt: Anello del tizzone (accessorio, attiva Agi)",
+     "Lv 20 - 15.000 pt: Blocco d'argento (tesoro, 30.000 ¥)",
+     "Lv 20 - 28.000 pt: Schiva ghiaccio (carta abilità)",
+     "Lv 20 - 35.000 pt: Cint. ondata di caldo (accessorio, danno fisico pesante a tutti)",
+     "Lv 30 - 20.000 pt: Blocco d'oro (tesoro, 42.000 ¥)",
+     "Lv 30 - 35.000 pt: Mazionga (carta abilità)",
+     "Lv 30 - 43.000 pt: Cav. Rasetsu a spir. (accessorio, attiva Matarukaja)",
+     "Lv 50 - 25.000 pt: Blocco di platino (tesoro, 100.000 ¥)",
+     "Lv 50 - 38.000 pt: Riscaldamento (carta abilità)",
+     "Lv 50 - 46.000 pt: Cintura miracolosa (accessorio, danno fisico medio, alta chance critico)",
+     "Lv 80 - 15.000 pt: Blocco di diamante (tesoro, 185.000 ¥)",
+     "Lv 80 - 30.000 pt: Supporto medico (carta abilità)",
+     "Lv 80 - 40.000 pt: Anello supremo (accessorio, attiva Megidolaon)"
+    ],
+    "strategia": "Le strategie enfatizzano lo sfruttamento delle debolezze elementali dei nemici, l'uso della Staffetta per concatenare attacchi senza sprecare azioni, e l'assicurarsi che il personaggio designato dal bonus infligga i colpi finali per massimizzare il moltiplicatore di punteggio abbattimento. Party consigliati: Lv 10 Joker/Skull/Mona/Panther (~Lv 10); Lv 20 Joker/Skull/Makoto/Yusuke (~Lv 40); Lv 30 Joker/Fox/Makoto/Morgana (~Lv 40); Lv 50 Joker/Ryuji/Ann/Haru (~Lv 60); Lv 80 Joker/Makoto/Haru/Akechi (~Lv 90).",
+    "livelloConsigliato": "Variabile per livello: ~Lv 10 (sfida Lv10), ~Lv 40 (sfide Lv20 e Lv30), ~Lv 60 (sfida Lv50), ~Lv 90 (sfida Lv80)",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-trial/",
+    "verificato": true
+   },
+   {
+    "chiave": "chain",
+    "nome": "Chain",
+    "nomeIt": null,
+    "regole": "Guida incentrata sulla sfida di livello 20. Consigliata dopo aver completato il Palazzo di Futaba, con una squadra intorno al Lv 40. Bonus: sconfiggere i nemici entro 28 azioni (+50.000 pt); attacchi fisici (punteggio abbattimento x2); sconfiggere nemici con Yusuke (punteggio abbattimento x7); attaccare subito dopo una Staffetta (punteggio x2).",
+    "nemici": [
+     "Round 1: Stella senza desideri (debolezza Nucleare; immune ad Armi da fuoco e Psicocinesi)",
+     "Round 1: Subdolo pentacolo (debolezza Attacchi fisici; resiste a Nucleare e Maledizione; riflette Fuoco)",
+     "Round 1: Divinità risvegliata (debolezza Psicocinesi/Nucleare; riflette Attacchi fisici e Armi da fuoco; resiste a Sacro e Maledizione)",
+     "Round 1: Strega del sabba (debolezza Tuono/Sacro; riflette Attacchi fisici e Armi da fuoco; immune a Fuoco e Maledizione)",
+     "Round 2: Sole oscuro (debolezza Psicocinesi; resiste ad Attacchi fisici e Armi da fuoco; riflette Nucleare; assorbe Fuoco)",
+     "Round 2: Giudice finale (riflette Tuono; resiste a Sacro; assorbe Vento)",
+     "Round 2: Fantasma fuso (Ombra sciagura, debole a tutte le forme di danno; esplode infliggendo danni collaterali)",
+     "Round 3: Reggente (debolezza Nucleare; resiste ad Attacchi fisici e Armi da fuoco)",
+     "Round 3: Collana della Regina (debolezza Psicocinesi; resiste ad Attacchi fisici e Armi da fuoco)",
+     "Round 3: Pietra di Scone (debolezza Fuoco; resiste ad Attacchi fisici e Armi da fuoco)",
+     "Round 3: Koh-i-Noor (debolezza Armi da fuoco; resiste ad Attacchi fisici)",
+     "Round 3: Orlov (debolezza Maledizione; resiste ad Attacchi fisici e Armi da fuoco)"
+    ],
+    "punteggi": "Bonus: entro 28 azioni +50.000 pt; attacchi fisici abbattimento x2; abbattimento con Yusuke x7; attacco dopo Staffetta x2.",
+    "ricompense": [
+     "150.000 pt: Catena d'oro (tesoro, rivendibile per 60.000 ¥)",
+     "230.000 pt: Diarama (carta abilità, insegna l'abilità di guarigione)",
+     "300.000 pt: Portaf. guarigione (accessorio, attiva Diarahan)"
+    ],
+    "strategia": "Round 1: evitare attacchi fisici diretti al Subdolo pentacolo durante la Staffetta iniziale, affidando gli ultimi colpi a Yusuke; sequenza consigliata Rakunda su Subdolo pentacolo, Zionga (Skull) sulla Strega del sabba, Freila (Makoto) sulla Stella senza desideri, Psio (Joker) sulla Divinità risvegliata. Round 2 (cruciale per il punteggio): costruire la Staffetta per far infliggere a Yusuke un \"Fendente verticale\" massimizzato sul Fantasma fuso, che esplodendo genera danni ad area e decine di migliaia di punti. Round 3 (meno critico): sfruttare liberamente le debolezze per costruire la Staffetta e chiudere senza preoccuparsi del bonus dei 28 turni. Party: Joker (Coltello del supporto/Eliminatore Ct/Sacra sindone reale/Adesivo SP 3, Persona con Rakunda e Psio), Skull (Ramo del sonno/Fuoco infernale/Sacra sindone reale/Cav. Rasetsu a spir.), Makoto (Tirapugni/Ling Xing/Veste arcana/Cintura di Idaten), Yusuke (Yuibitachi/Fucile ribello/Sacra sindone reale/Anello atomico, necessario per usare Frei).",
+    "livelloConsigliato": "~Lv 40, dopo il Palazzo di Futaba",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-chain/",
+    "verificato": true
+   },
+   {
+    "chiave": "technical",
+    "nome": "Technical",
+    "nomeIt": null,
+    "regole": "Guida incentrata sulla sfida di livello 30, pensata per il massimo punteggio rispettando le condizioni tecniche. Bonus: sconfiggere i nemici entro 28 azioni (+25.000 pt); attacco tecnico (punteggio attacco tecnico x2); abbattimento con attacco tecnico (punteggio abbattimento tecnico x5). Tabella delle combinazioni per colpo tecnico: Soggiogamento/Confusione/Disperazione/Paura/Amnesia/Furia → Psicocinesi; Scottatura → Nucleare o Vento; Congelamento/Scossa → Attacchi fisici, armi da fuoco o Nucleare; Vertigini/Sonno → qualsiasi elemento.",
+    "nemici": [
+     "Round 1: Divinità risvegliata (debolezza Psicocinesi/Nucleare; riflette Attacchi fisici e Armi da fuoco; resiste a Sacro e Maledizione)",
+     "Round 1: Samurai assassino (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 1: Portatrice di rovina (debolezza Vento/Sacro; resiste a Ghiaccio; immune a Maledizione)",
+     "Round 2: Signore dei cenotafi (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 2: Giudice delle anime (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 2: Ghast (debolezza Fuoco/Sacro; resiste a Elettricità; immune a Maledizione)",
+     "Round 3: Sovrano degli apostati (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 3: Furia nera (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 3: Giudice finale (riflette Attacchi fisici e Armi da fuoco)"
+    ],
+    "punteggi": "Entro 28 azioni +25.000 pt; punteggio attacco tecnico x2; punteggio abbattimento tecnico x5.",
+    "ricompense": [
+     "25.000 pt: Mano d'oro (tesoro, rivendibile per 84.000 ¥)",
+     "35.000 pt: Recupero 1 (carta abilità, insegna l'abilità passiva Recupero 1)",
+     "45.000 pt: Masc. prosc. spirit. (accessorio, attiva Risucchio spirituale: assorbe SP da un nemico)"
+    ],
+    "strategia": "Round 1: Joker Marin Karin su Portatrice di rovina, Skull Tarukaja su Joker, Panther Ninnananna su tutti, Queen Freila sulla Divinità risvegliata (atterrata), Joker in Staffetta Psio/Mapsi su Portatrice di rovina (soggiogata) per colpo tecnico, ripetere sul Samurai assassino, poi annientare la Divinità risvegliata con Psio. Round 2: Joker Marin Karin su Giudice delle anime, Skull Tarukaja, Panther Agilao su Ghast poi Ninnananna su tutti, Queen Bomba accecante su Ghast per colpo tecnico, Joker doppio Psio su Giudice delle anime soggiogato, Skull Tarukaja, Panther Dormina/Ninnananna sul Signore dei cenotafi, Queen Freila per colpo tecnico, Joker Marin Karin poi Psio in Staffetta. Round 3: Joker Marin Karin su Sovrano degli apostati, Skull Mazionga, Panther Maragion, Queen Mafreila per colpi tecnici multipli (sfruttando eventuali More), annientare tutti entro 28 azioni totali. Party (Lv 40): Joker (Coltello del supporto/Eliminatore Ct/Sacra sindone reale/Adesivo SP3, Persona con Rakunda, Psio e Marin Karin), Skull (Ramo del sonno/Fuoco infernale/Sacra sindone reale/Batterie portatili), Makoto (Tirapugni/Ling Xing/Veste arcana/Cintura di Idaten), Ann (Spadafrusta/Tarantula/Veste vecchia/Pacchetto di petrolio).",
+    "livelloConsigliato": "~Lv 40",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-technical/",
+    "verificato": true
+   },
+   {
+    "chiave": "survival",
+    "nome": "Survival",
+    "nomeIt": null,
+    "regole": "La guida non specifica esplicitamente un requisito di sblocco narrativo, ma consiglia di completare le Profondità dei Memento prima di affrontarla con una squadra intorno al Lv 90. Bonus: completamento entro 30 turni (+40.000 pt); attacchi di elemento Sacro (punteggio x2); attacchi tecnici (punteggio x3); colpo finale con Ann (punteggio x6). Stessa tabella di combinazioni tecniche di Technical (stato alterato → elemento efficace per colpo tecnico).",
+    "nemici": [
+     "Round 1: Necromante vagabondo (debolezza Sacro)",
+     "Round 1: Ragazzina misteriosa (debolezza Sacro)",
+     "Round 1: Araldo della depravazione (immune ad Attacchi fisici e Maledizione)",
+     "Round 2: Dea sanguinaria (debolezza Elettricità)",
+     "Round 2: Signore del tuono (immune ad Armi da fuoco ed Elettricità)",
+     "Round 2: Signore della prigione (riflette Sacro e Maledizione)",
+     "Round 3: Guerriero rancoroso (riflette Elettricità e Sacro)",
+     "Round 3: Re saggio arrabbiato (immune ad Armi da fuoco; riflette Fuoco)",
+     "Round 3: Guerriero irato (debolezza Elettricità; riflette Fuoco, Sacro e Maledizione)"
+    ],
+    "punteggi": "Entro 30 turni +40.000 pt; attacchi Sacro x2; attacchi tecnici x3; colpo finale con Ann x6.",
+    "ricompense": [
+     "40.000 pt: Cuore d'oro (tesoro, rivendibile per 200.000 ¥)",
+     "70.000 pt: Cav. spirale di Idaten (accessorio, attiva Masukukaja)",
+     "90.000 pt: Cav. potenziamento (accessorio, attiva Potenziamento)"
+    ],
+    "strategia": "Schema comune a tutti i round: (1) setup iniziale con Joker che apre con Lavaggio del cervello per soggiogare i nemici, Ryuji che applica Matarukaja, Ann che si mette in guardia; (2) fase offensiva sfruttando le debolezze elementali dei nemici; (3) attacchi tecnici combinando elementi e stati alterati (es. Psiodyne su nemici soggiogati con Haru); (4) colpo finale assicurato ad Ann con attacchi Sacro o elementali; (5) gestione della Staffetta per massimizzare i moltiplicatori. La chiave è combinare Sacro, danni tecnici e una buona gestione della Staffetta per completare entro 30 turni. Party (Lv 90): Joker (Pugnale punitivo/Jig 227 CL/Guardia divina/Maschera occulta; abilità Lavaggio del cervello da Forneus, Kougaon/Makougaon da Dominazione, Mabufudyne da Yamata-no-Orochi), Skull/Ryuji (Martello finale/Inversione CL/Guardia divina/Anello benedizione; ruolo potenziamento e attacchi Sacro), Panther/Ann (Raffio/Balalaika CL/Vestito unio/An. benedetto a spir.; colpi finali Sacro/Fuoco), Noir/Haru (Crociato/Milkor CL/Gilet della vita/Anello dell'avarizia; attacchi tecnici Psiodyne/Mapsiodyne).",
+    "livelloConsigliato": "~Lv 90, dopo le Profondità dei Memento",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-survival/",
+    "verificato": true
+   },
+   {
+    "chiave": "trickster",
+    "nome": "Trickster",
+    "nomeIt": null,
+    "regole": "La guida non specifica esplicitamente un requisito di sblocco narrativo, ma suggerisce di affrontarla dopo le Profondità dei Memento con una squadra di livello ~90. Bonus: sconfiggere i nemici entro 20 azioni (+100.000 pt); attaccare con il Protagonista (punteggio x4); attacco tecnico (punteggio x7); attacco dopo Staffetta (danno x2).",
+    "nemici": [
+     "Round 1: Araldo di Morte (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 1: Purificatore del Paradiso (riflette Attacchi fisici e Armi da fuoco)",
+     "Round 2: Primo sacerdote (debolezza Vento)",
+     "Round 2: La prima strega (debolezza Fuoco)",
+     "Round 2: Regina degli scandali (debolezza Psicocinesi)",
+     "Round 2: Re infedele dei sogni (debolezza Nucleare)",
+     "Round 2: Vendicatore nero (Ombra sciagura; debolezza Fuoco e Sacro)",
+     "Round 3: Bellezza distruttiva (debolezza Maledizione)",
+     "Round 3: Divinità risvegliata (debolezza Ghiaccio e Nucleare)",
+     "Round 3: Ragazza seducente (debolezza Armi da fuoco, Ghiaccio e Maledizione)",
+     "Round 3: Generale lanciere (debolezza Elettricità)"
+    ],
+    "punteggi": "Entro 20 azioni +100.000 pt; attacchi del Protagonista x4; attacco tecnico x7; attacco dopo Staffetta x2 (danno).",
+    "ricompense": [
+     "100.000 pt: Stella d'oro (tesoro, rivendibile per 200.000 ¥)",
+     "300.000 pt: Discepolo sagace (carta abilità, insegna abilità passiva)",
+     "450.000 pt: Cav. debilitazione (accessorio, attiva debilitazione sui nemici)"
+    ],
+    "strategia": "Round 1 (Araldo di Morte + Purificatore del Paradiso): Joker apre con Lavaggio cervello, Ann applica Potenziamento a Joker, Makoto attacca con abilità sacra/nucleare, Haru colpisce il soggiogato con Psiodyne (danno tecnico), Joker chiude in Staffetta con Mapsiodyne per l'eliminazione tecnica. Round 2 (5 nemici): Joker Lavaggio cervello, Ann Agidyne sulla prima strega (debolezza fuoco), Makoto Fungo atomico sul Re infedele, Haru Psiodyne sul soggiogato (evitando il Vendicatore nero), Joker chiude con Mapsiodyne. Round 3 (4 nemici): Joker Lavaggio cervello, Ann spara sulla Ragazza seducente sperando nel critico, Makoto Fungo atomico sulla Divinità risvegliata, Haru Psiodyne sul soggiogato, Joker Mapsiodyne, eventualmente Ann Agidyne sulla Bellezza distruttiva per ripulire il campo. Il successo dipende dall'infliggere stati alterati per attivare danni tecnici, sfruttare le debolezze per ottenere Extra Turn, concatenare più Staffette possibile e far attaccare il Protagonista nelle fasi finali. Party (Lv ~90): Joker (Pugnale punitivo/Jig 227 CL/Guardia divina/Maschera occulta; Persona con Lavaggio cervello da Forneus o Mapsiodyne da Nebiros), Panther/Ann (Raffio/Balalaika CL/Vestito unio/Cav. potenziamento; Agidyne), Queen/Makoto (Campione/Senza limiti CL/Vestito unio/Anello benedizione; Fungo atomico, Kouga), Noir/Haru (Crociato/Milkor CL/Gilet della vita/Corona del tumulto; Psiodyne, Lavaggio cervello).",
+    "livelloConsigliato": "~Lv 90, dopo le Profondità dei Memento",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-trickster/",
+    "verificato": true
+   },
+   {
+    "chiave": "full-moon",
+    "nome": "Full Moon",
+    "nomeIt": null,
+    "regole": "Contenuto DLC (\"Challenge Battle: Remarkable Guest - Full Moon\"). Il nemico è un unico avversario (\"Membro S.E.E.S.\", verosimilmente il protagonista maschile di Persona 3 secondo fonti secondarie in lingua inglese - non verificato dalla guida italiana) che cambia Persona durante lo scontro secondo uno schema ciclico fisso, modificando attacchi e debolezze. La sfida presenta due livelli distinti: Livello 50 e Livello \"???\" (più difficile). Bonus comuni a entrambi i livelli: sconfiggere entro 20 azioni (Lv50 +25.000 pt / Lv??? +150.000 pt); attacchi Sacri (punteggio x5); colpire con Morgana (punteggio x4); sconfiggere con Joker (punteggio abbattimento x10). Difficoltà di gioco richiesta: Spietata (da reimpostare al termine se diversa in origine).",
+    "nemici": [
+     "Lv 50 - Membro S.E.E.S.: rotazione Orfeo (Maragidyne, Potenziamento in One More; debolezza Elettricità/Maledizione; resiste Sacro) → Attis (Magarudyne, Maziodyne; debolezza Maledizione; resiste Fuoco; riflette Vento) → Siegfried (Lama Vorpal, Concentrazione; debolezza Nucleare; resiste Ghiaccio; immune Attacchi fisici) → Thanatos (Maeigaon, Porte dell'Ade, Mudoon in One More; debolezza Sacro; resiste Attacchi fisici; riflette Maledizione), ciclo ripetuto",
+     "Lv ??? - Membro S.E.E.S.: rotazione Orfeo (Inferno di fuoco, Esplosione nucleare, Potenziamento in One More; debolezza Elettricità/Maledizione; resiste Sacro; immune Fuoco) → Attis (Vuoto cosmico, Concentrazione; debolezza Maledizione; immune Fuoco; riflette Vento) → Thanatos (Maeigaon, Porte dell'Ade, Mudoon in One More; debolezza Sacro; resiste Attacchi fisici; immune Fuoco; riflette Maledizione) → Siegfried (Lama Vorpal, Carica; debolezza Nucleare; resiste Ghiaccio; immune Attacchi fisici e Fuoco) → Messia (Megidolaon, Fuoco di soppressione, Tarukaja in One More; debolezza Maledizione; resiste Ghiaccio/Elettricità/Vento/Psicocinesi/Nucleare; immune Fuoco; riflette Sacro), ciclo ripetuto"
+    ],
+    "punteggi": "Lv 50: entro 20 azioni +25.000 pt; Sacro x5; Morgana x4; abbattimento Joker x10. Lv ???: entro 20 azioni +150.000 pt; stessi moltiplicatori.",
+    "ricompense": [
+     "Lv 50 - 25.000 pt: Luna d'argento (tesoro, rivendibile per 200.000 ¥)",
+     "Lv 50 - 50.000 pt: Stoicismo (carta abilità)",
+     "Lv 50 - 60.000 pt: Collare di Ardhanari (accessorio, attiva Inferno di fuoco)",
+     "Lv ??? - 150.000 pt: Luna d'oro (tesoro, rivendibile per 1.000.000 ¥)",
+     "Lv ??? - 250.000 pt: Assorbe fuoco (carta abilità)",
+     "Lv ??? - 360.000 pt: Misanga magico (accessorio, attiva Signore della magia: dimezza il costo SP delle abilità)"
+    ],
+    "strategia": "Fase 1 (setup): Joker spara per infliggere Folgorazione senza ancora sfruttare il danno tecnico; Morgana usa Debilitazione o Ofuda debilitante; Yusuke attiva Carica; Makoto attiva Concentrazione; Joker attiva Carica. Fase 2 (offensiva): Morgana usa Raffica (Lv50) o Mano di Dio (Lv???) per il danno tecnico sulla Folgorazione, poi Staffetta a Joker che passa a una Persona specializzata in fisico/nucleare e usa Raffica; Yusuke colpisce con Fendenti letali o Lama turbinante; Makoto con Freidyne o Fungo atomico. Fase 3 (Stoicismo): il nemico si ferma a 1 HP e risponde con Maragidyne (Lv50) o Inferno di fuoco (Lv???); se Yusuke è caduto, Morgana usa Debilitazione, altrimenti si tenta Fiala del sonno S o delle vertigini S (il Soggiogamento non funziona su questo nemico). Fase 4 (conclusione): una volta addormentato, Joker sfodera la pistola per l'abbattimento acrobatico (x1,25), usa Concentrazione e chiude con Kougaon per il colpo finale. Ricordarsi di ripristinare la difficoltà originale a fine sfida se non era già Spietata. Party (Lv 90 per Lv50 / Lv 99 per Lv???, difficoltà Spietata): Joker (Pugnale punitivo/Eliminatore E/Guardia divina/Braccialetto bianco), Morgana (Lama verticale/Falco CL/Collare del pleroma/Cintura triplo colpo o Cintura mano di Dio), Fox/Yusuke (Spada del demone rosso/Star-H CL/Guardia divina/Maschera vertigini), Queen/Makoto (Campione/Senza limiti CL/Vestito unio/Cavaliere potenziamento). Eliminatore E: pistola \"Eliminatore\" del Negozio softair Untouchable di Shibuya, personalizzata con \"Mimetica elettrica [E]\" (richiede Rango tecnico 4). Cintura triplo colpo/mano di Dio: ottenibile trasmutando Seth (Lv50) o giustiziando Zaou-Gongen (Lv???) sulla Sedia elettrica senza allarme fusione. Braccialetto bianco acquistabile alla gioielleria Tsurukame Diamond (centro commerciale sotterraneo di Shibuya).",
+    "livelloConsigliato": "Lv 90 (sfida Lv50) / Lv 99 (sfida Lv???), difficoltà Spietata",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-full-moon/",
+    "verificato": true
+   },
+   {
+    "chiave": "foggy-day",
+    "nome": "Foggy Day",
+    "nomeIt": null,
+    "regole": "Contenuto DLC (\"Challenge Battle: Remarkable Guest - Foggy Day\"). Il nemico è Yu Narukami, identificato in guida come \"Membro team investigativo\" (protagonista di Persona 4), che cambia Persona durante lo scontro secondo uno schema ciclico fisso, modificando attacchi e debolezze. Due livelli distinti: Livello 50 e Livello \"???\" (più difficile). Bonus comuni: sconfiggere entro X azioni (Lv50: entro 20 azioni +300.000 pt; Lv???: entro 24 azioni +999.999 pt); attacchi fisici (punteggio x5); danni tecnici (punteggio attacco tecnico x7); colpire con Haru (punteggio x4); sconfiggere con Joker (punteggio abbattimento x10). Difficoltà di gioco richiesta: Spietata (da reimpostare al termine se diversa in origine).",
+    "nemici": [
+     "Lv 50 - Membro team investigativo (Yu Narukami): rotazione Izanagi (Taglio a croce*, Maziodyne; debolezza Vento; resiste Attacchi fisici/Elettricità; immune Maledizione) → Kohryu (Shock cerebrale, Lavaggio del cervello, Sukukaja**; resiste Attacchi fisici; riflette Elettricità; immune Psicocinesi/Sacro) → Kaguya (Frecce splendenti; debolezza Fuoco; resiste Attacchi fisici/Vento; immune Sacro/Maledizione) → Sraosha (Mabufudyne, Carica, Makarakarn**; debolezza Maledizione; resiste Attacchi fisici; riflette Elettricità/Sacro) → Yoshitsune (Hassou Tobi, Potenziamento**; resiste Fuoco; immune Attacchi fisici; riflette Elettricità/Sacro). *il primo Taglio a croce colpisce sempre il Protagonista se non deviato; **abilità solo in One More",
+     "Lv ??? - Membro team investigativo (Yu Narukami): stessa rotazione con Izanagi (Taglio a croce*, Dio del tuono), Kohryu, Kaguya, Sraosha (Glaciazione al posto di Mabufudyne), Yoshitsune, più Izanagi-no-Okami (Verità letali) in chiusura di ciclo"
+    ],
+    "punteggi": "Lv 50: entro 20 azioni +300.000 pt; attacchi fisici x5; danni tecnici x7; colpire con Haru x4; abbattimento Joker x10. Lv ???: entro 24 azioni +999.999 pt; stessi moltiplicatori.",
+    "ricompense": [
+     "Lv 50 - 300.000 pt: Nebbia d'argento (tesoro, rivendibile per 200.000 ¥)",
+     "Lv 50 - 800.000 pt: Danza di Ali (carta abilità)",
+     "Lv 50 - 1.200.000 pt: Portafort. del tuono (accessorio, attiva Dio del tuono)",
+     "Lv ??? - 1.000.000 pt: Nebbia d'oro (tesoro, rivendibile per 1.000.000 ¥)",
+     "Lv ??? - 1.700.000 pt: Assorbe elettricità (carta abilità)",
+     "Lv ??? - 2.500.000 pt: Fascia dell'audacia (accessorio, attiva Signore delle armi: dimezza il costo in HP delle abilità)"
+    ],
+    "strategia": "Lv 50 - Fase iniziale: Joker spara per infliggere Folgorazione senza sfruttare subito il tecnico. Preparazione: Ryuji e Yusuke attivano Carica, Haru usa Debilitazione/Ofuda debilitante, Joker attiva Carica. Offensiva: Ryuji usa Mano di Dio per il danno tecnico sulla Folgorazione, Staffetta a Yusuke (nemico con molti HP) o Haru (nemico con poca vita) che scatena Raffica. Il nemico attiva Stoicismo (1 HP) rispondendo con Taglio a croce. Controllo: Joker usa Debilitazione, poi si somministra Fiala del sonno S finché il nemico non si addormenta, evitando altri attacchi. Finale: Joker sfodera la pistola per l'abbattimento acrobatico (x1,25) e chiude con Lama turbinante sfruttando Carica. Lv ??? - Preparazione: Ryuji usa Spirito combattivo (buff di squadra), Yusuke usa Debilitazione/Ofuda debilitante. Offensiva: Haru usa due volte Mano di Dio (One More) per il tecnico, Joker infligge Fendenti letali; il nemico attiva Stoicismo e subisce un altro fendente. Controllo: Fiala del sonno S se necessario. Finale: abbattimento acrobatico (x1,25) e colpo finale con Lama turbinante o Fendenti letali sfruttando Carica. Party Lv50 (Lv 90): Joker (Pugnale punitivo/Eliminatore E/Guardia divina/Dispositivo Demonica; Persona con Carica, Concentrazione, Debilitazione, Lama turbinante), Ryuji (Martello finale/Inversione CL/Guardia divina/Cav. potenziamento), Fox/Yusuke (Spada del demone rosso/Star-H CL/Guardia divina/Maschera assonnata), Haru (Crociato/Milkor CL/Gilet della vita/Cintura triplo colpo). Party Lv??? (Lv 99): stesso equipaggiamento con Maschera vertigini per Yusuke e Cintura mano di Dio per Haru; Persona di Joker con Fendenti letali e Lama turbinante entrambe al Lv 99. Eliminatore E: personalizzazione richiede Rango tecnico 4. Ricordarsi di ripristinare la difficoltà originale a fine sfida se non era già Spietata.",
+    "livelloConsigliato": "Lv 90 (sfida Lv50) / Lv 99 (sfida Lv???), difficoltà Spietata",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/battaglia-sfida-foggy-day/",
+    "verificato": true
+   }
+  ]
+ },
+ "bossSegreti": [
+  {
+   "chiave": "jose",
+   "nome": "Jose",
+   "dove": "Memento (esclusivamente); una volta soddisfatto il requisito, appare nella Sala di controllo cognitivo",
+   "quando": "In qualsiasi momento della partita in cui si esplorano i Memento, una volta raggiunta la soglia di timbri richiesta",
+   "requisiti": [
+    "Raccogliere circa 123 timbri nei Memento, inclusi quelli del percorso finale (Dedalo di Da'at)"
+   ],
+   "livelloConsigliato": null,
+   "mosse": [
+    "Deriva - fisico pesante a tutto il party, colpo di apertura devastante",
+    "Palla di fuoco - arma da fuoco pesante, alta probabilità di In fiamme",
+    "Palla di neve - ghiaccio pesante, alta probabilità di Congelamento",
+    "Palla del voltaggio - elettrico pesante, alta probabilità di Folgorazione",
+    "Palla della burrasca - vento pesante a tutti",
+    "Palla psicocinetica - psichico pesante a tutti",
+    "Palla nucleare - nucleare pesante a tutti",
+    "Palla sacra - sacro pesante a tutti",
+    "Palla maledetta - maledetto pesante a tutti",
+    "Palla della confusione - alta probabilità di Confusione",
+    "Palla del battesimo - rimuove i potenziamenti degli alleati",
+    "Palla dell'esorcismo - rimuove gli indebolimenti su se stesso",
+    "Lancio - mossa di supporto che prepara l'attacco successivo senza consumare il turno",
+    "Fuochi d'artificio speciali - danno divino colossale (~1000 danni a tutto il party), eseguito nel turno dopo Lancio"
+   ],
+   "resistenze": [
+    "Attacchi fisici"
+   ],
+   "debolezze": [
+    "Nessuna debolezza elementale nota"
+   ],
+   "strategia": [
+    "Jose apre sempre con \"Deriva\", un attacco fisico devastante: conviene iniziare con una Persona che annulla i danni fisici (es. Abaddon) per evitare danni catastrofici nei primi turni",
+    "Poiché resiste agli attacchi fisici e alle armi da fuoco, evitare strategie basate su danno fisico e puntare su magie elementali, a cui Jose non oppone resistenze particolari",
+    "Quando gli HP scendono sotto circa 1/3, Jose usa \"Lancio\" come mossa preparatoria: nel turno successivo tutto il party deve mettersi in \"Guardia\", perché la mossa seguente (\"Fuochi d'artificio speciali\") infligge circa 1000 danni a tutti e ignorarla porta quasi sempre alla sconfitta",
+    "Usare Personae con buone resistenze elementali e agli stati alterati; assicurarsi che il Protagonista sia immune alla Confusione per evitare la perdita di controllo nei momenti critici",
+    "Una Persona con \"Muro della vita\" (es. Lucifero su Joker o Lucy su Haru) fa sì che Jose, non avendo resistenze elementali, finisca per infliggersi danni da solo quando attacca con le sue Palle elementali",
+    "Perdere contro Jose comporta un Game Over a tutti gli effetti nonostante il tono amichevole dello scontro"
+   ],
+   "ricompense": [
+    "Trofeo \"Senpai della vita\" nel Covo dei Ladri",
+    "Vaschetta a stella (oggetto chiave che raddoppia i fiori raccolti nei Memento)",
+    "~20.000 PE",
+    "~90.000 ¥"
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-jose/",
+   "verificato": true
+  },
+  {
+   "chiave": "gemelle-custodi",
+   "nome": "Gemelle Custodi (Caroline e Justine)",
+   "dove": "Memento, parlando con Caroline",
+   "quando": "Solo in Nuova Partita +, in una finestra temporale compresa tra il 9 maggio e il 22 dicembre; lo scontro è affrontabile una sola volta per partita",
+   "requisiti": [
+    "Nuova Partita + avviata",
+    "Finestra temporale: 9 maggio - 22 dicembre"
+   ],
+   "livelloConsigliato": "Party al livello 99",
+   "mosse": [
+    "[Caroline] Colpo miracoloso - fisico medio, 1 nemico, alta probabilità di critico",
+    "[Caroline] Esplosione Vajra - fisico medio, tutti",
+    "[Caroline] Attacco mortale - fisico medio, tutti, colpisce da 1 a 2 volte",
+    "[Caroline] Mano di Dio - fisico colossale, 1 nemico",
+    "[Caroline] Agidyne / Maragidyne - fuoco pesante (singolo/tutti), può infliggere In fiamme (raro)",
+    "[Caroline] Inferno / Inferno di fuoco - fuoco grave (singolo/tutti), può infliggere In fiamme (raro)",
+    "[Caroline] Ziodyne / Maziodyne - elettrico pesante (singolo/tutti), può infliggere Folgorazione (raro)",
+    "[Caroline] Tuono prorompente / Dio del tuono - elettrico grave (singolo/tutti), può infliggere Folgorazione (raro)",
+    "[Caroline] Psiodyne / Mapsiodyne - psichico pesante (singolo/tutti), danno tecnico su Soggiogamento",
+    "[Caroline] Spinta psichica / Attacco psichico - psichico grave (singolo/tutti), danno tecnico su Soggiogamento",
+    "[Caroline] Kougaon / Makougaon - sacro pesante (singolo/tutti)",
+    "[Caroline] Giudizio divino - sacro, 1 nemico, dimezza i PV rimanenti",
+    "[Caroline] Dekaja - rimuove i potenziamenti nemici; Dekunda - rimuove gli indebolimenti alleati",
+    "[Caroline] Recarm - rianima un alleato al 50% PV; Diarahan - cura completa a un alleato",
+    "[Justine] Raffica - arma da fuoco leggero, tutti, colpisce 3 volte",
+    "[Justine] Centro perfetto - arma da fuoco grave, 1 nemico, alta probabilità critico",
+    "[Justine] Fuoco di soppressione - arma da fuoco grave, tutti",
+    "[Justine] Bufudyne / Mabufudyne - ghiaccio grave (singolo/tutti), può infliggere Congelamento (raro)",
+    "[Justine] Polvere di diamanti / Glaciazione - ghiaccio grave (singolo/tutti), può infliggere Congelamento (raro)",
+    "[Justine] Garudyne / Magarudyne - vento grave (singolo/tutti), danno tecnico se In fiamme",
+    "[Justine] Panta Rhei / Vuoto cosmico - vento grave (singolo/tutti), danno tecnico se In fiamme",
+    "[Justine] Freidyne / Mafreidyne - nucleare grave/pesante (singolo/tutti), danno tecnico con In fiamme/Congelamento/Folgorazione",
+    "[Justine] Fungo atomico / Esplosione nucleare - nucleare grave (singolo/tutti), danno tecnico con In fiamme/Congelamento/Folgorazione",
+    "[Justine] Eigaon / Maeigaon - maledetto pesante (singolo/tutti)",
+    "[Justine] Decreto demoniaco - maledetto, 1 nemico, dimezza i PV rimanenti",
+    "[Justine] Dekaja / Dekunda, Recarm / Diarahan (stessi effetti di Caroline)"
+   ],
+   "resistenze": [
+    "Nessuna (per entrambe)"
+   ],
+   "debolezze": [
+    "Nessuna (per entrambe)"
+   ],
+   "strategia": [
+    "Lo scontro è diviso in 6 fasi da massimo 6 turni ciascuna: Fase 1 (100%-75% HP, danno pesante Fisico+Armi da fuoco), Fase 2 (75%-50%, danno pesante Fuoco/Ghiaccio/Elettricità/Vento), Fase 3 (torna al 100%-75% dopo Diarahan, danno pesante Psicocinesi/Nucleare/Sacro/Maledizione), Fase 4 (75%-50% dopo Diarahan, danno pesante tutti gli elementi), Fase 5 (50%-25%, danno grave tutti gli elementi), Fase 6 (25%-0%, danno grave, ordine casuale)",
+    "Se non si infligge abbastanza danno entro il limite di 6 turni per fase, le Gemelle usano un'abilità che atterra tutto il gruppo seguita da un Assalto inevitabile che causa sconfitta automatica indipendentemente dal livello del party",
+    "Quando una Gemella scende al 50% HP o meno, entrambe lanciano automaticamente Diarahan (cura totale) alla prima occasione utile",
+    "Le due Gemelle devono essere sconfitte simultaneamente o una subito dopo l'altra: se ne resta in vita una sola, questa userà Recarm per rianimare la compagna con 4.000 HP",
+    "A differenza di altri boss, le Gemelle non puniscono l'uso di Personae che annullano, riflettono o assorbono gli attacchi; riflettere Sacro e Maledetto è particolarmente utile",
+    "Se individuano una debolezza nel party, le Gemelle interrompono la sequenza per usare Dekaja/Dekunda, passarsi il turno con la Staffetta per colpire altri membri, o sfruttare colpi tecnici su eventuali stati alterati inflitti",
+    "Party consigliato: Yoshitsune con Carica e Hassou Tobi per il danno migliore; avere almeno una Persona con Auto-Maraku, Auto-Mataru e Auto-Masuku per impostare subito il ritmo",
+    "Equipaggiamento consigliato: Joker (Pugnale parata pro/Nataraja/Giubbotto demoniaco/Teschio di Cristallo, utile per Grazia angelica che aumenta l'elusione dagli attacchi magici non divini), Skull (Bastone super megido/Kiraihou II/Giubbotto demoniaco/Adesivo SP 3), Morgana (Sciabola oscura/Utopia CtM/Armatura Nekomata/Adesivo SP 3), Ann (Ramo duro/Phantom Killer II/Camicia akashic/Adesivo SP 3)",
+    "Difficoltà Spietata: i danni aumentati sulle debolezze accelerano il passaggio tra le fasi facilitando il rispetto del limite di 6 turni",
+    "Trucco alternativo: impostare la difficoltà su Rilassata (irreversibile una volta scelta) con party al Lv 99 per infliggere più danno, subirne meno e mancare meno colpi",
+    "La sconfitta non causa Game Over: le Gemelle valutano la prestazione e ricompensano comunque il giocatore con un oggetto, riportandolo nei Memento"
+   ],
+   "ricompense": [
+    "Doppio segnalibro (oggetto chiave, un segnalibro a due strati usato da Justine)",
+    "Anello della velocità (accessorio, +50% PE)",
+    "Balsamo vitale x20 (consumabile, rianima un alleato ripristinando tutti gli HP)",
+    "Catena di perline x5 (consumabile, ripristina completamente gli HP degli alleati)",
+    "Pane per l'anima x10 (consumabile, ripristina completamente gli SP di un alleato)",
+    "La coppa della vittoria (accessorio, \"Urla di trionfo\": ripristina completamente HP/SP dopo battaglia)",
+    "Premio \"Riabilitazione futura\" nel Covo dei Ladri"
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-le-gemelle-custodi/",
+   "verificato": true
+  },
+  {
+   "chiave": "lavenza",
+   "nome": "Lavenza",
+   "dove": "Memento, lungo un percorso che si crea verso il Tesoro del Palazzo di Maruki",
+   "quando": "Solo in Nuova Partita +, durante il terzo semestre, sostituisce le Gemelle Custodi come prova finale; la sconfitta non causa Game Over e permette tentativi illimitati",
+   "requisiti": [
+    "Nuova Partita + avviata, terzo semestre",
+    "Rango Staffetta al massimo",
+    "Rango Tecnico al massimo",
+    "Personae di terzo livello (eccetto Akechi)",
+    "Migliori armi e armature disponibili"
+   ],
+   "livelloConsigliato": "Party al livello 99",
+   "mosse": [
+    "Magie elementari pesanti: Maragidyne (Fuoco), Mabufudyne (Ghiaccio), Magarudyne (Vento), Maziodyne (Elettrico)",
+    "Magie gravi a singolo bersaglio: Inferno, Polvere di diamanti, Panta Rhei, Tuono prorompente, Spinta psichica, Fungo atomico",
+    "Magie gravi multi-bersaglio: Inferno di fuoco, Glaciazione, Vuoto cosmico, Dio del tuono, Attacco psichico, Esplosione nucleare",
+    "Magie Sacre/Maledette: Makougaon, Mahamaon (50% possibilità di KO istantaneo), Maeigaon, Mamudoon (50% possibilità di KO istantaneo)",
+    "Attacchi fisici: Agneyastra (da 1 a 3 colpi), Lama danzante, Centro perfetto, Gigantomachia, Mano di Dio, Fuoco di soppressione",
+    "Potenziamento / Debilitazione: aumenta/riduce Attacco, Difesa, Precisione ed Elusione per 3 turni",
+    "Dekaja / Dekunda: rimuove potenziamenti/depotenziamenti",
+    "Alterazioni: Tentarafoo (Confusione 40%), Furia cieca (Furia 50%), Flash notturno (Vertigini 50%)",
+    "Tetrakarn (riflette il prossimo attacco fisico/arma da fuoco), Dissolvi-Makara (rimuove scudi magici)",
+    "Carica (potenzia il prossimo attacco fisico/arma da fuoco x2,5); Concentrazione (potenzia il prossimo attacco magico x2,5)",
+    "Ogni sei turni passa alla Persona Lucifero, lanciando Concentrazione seguita da una versione potenziata di Megidolaon"
+   ],
+   "resistenze": [
+    "Fase 1 (100%-70%, tramite Berith/Kelpie/Inugami/Nue): resiste ad Attacchi fisici, Armi da fuoco e a tutti gli elementi; assorbe Divino al 50%",
+    "Fase 2 (70%-50%, Oni e Anubis): Oni resiste a tutto tranne Divino; Anubis blocca Sacro e Maledizione e resiste agli altri elementi",
+    "Fase 3 (50%-30%, Ose e Mitra): resistono a tutti gli elementi ma non a Fisico e Armi da fuoco",
+    "Fase 4 (30%-0%): Atavaka resiste a Fisico/Maledizione, blocca Armi da fuoco, riflette Fuoco; Thor resiste a Fisico/Armi da fuoco/Sacro/Maledizione, riflette Elettricità; Lucifero resiste a Fuoco/Ghiaccio/Elettricità/Vento, blocca Fisico/Armi da fuoco, assorbe Maledizione"
+   ],
+   "debolezze": [
+    "Variabili per fase (vedi campo resistenze per il dettaglio elemento per elemento e persona per persona)",
+    "Fase 2 (70%-50%): estremamente vulnerabile agli stati alterati, eccetto Disperazione",
+    "Fase 3 (50%-30%): vulnerabile a colpi critici"
+   ],
+   "strategia": [
+    "Lo scontro presenta tre prove nascoste, ciascuna da soddisfare entro 9 turni; fallirne anche una attiva un Assalto letale che ignora qualsiasi effetto protettivo (Stoicismo, Egida suprema, ecc.)",
+    "Lavenza apre sempre con Dekaja e Potenziamento, agisce due volte per turno e resiste a Sacro e Maledizione nelle fasi iniziali",
+    "Prima Prova (100%-70%): infliggere almeno 5.000 danni in 9 turni; Lavenza usa magie elementali e diventa vulnerabile all'elemento opposto nel turno seguente, subendo danno raddoppiato; applica spesso alterazioni di stato da sfruttare con colpi tecnici",
+    "Seconda Prova (70%-50%): infliggere almeno 5.000 danni in 9 turni più almeno un colpo tecnico per turno; Lavenza resiste quasi a tutto tranne Divino ma è molto vulnerabile agli stati alterati; usa Hamaon e Mudoon",
+    "Terza Prova (50%-30%): infliggere almeno 5.000 danni in 9 turni più almeno un colpo critico per turno; Lavenza resiste a quasi tutti gli elementi tranne Fisico, Armi da fuoco e Divino; usa Tetrakarn per bloccare gli attacchi fisici. Per favorire i critici, usare volutamente una Persona debole a Psicocinesi per indurre Lavenza a sfruttare quella debolezza invece di attivare Tetrakarn",
+    "Fase Finale (30%-0%): le prove terminano, scontro più diretto ma pericoloso; Lavenza usa Personae come Atavaka e Thor cambiando resistenze frequentemente; ogni sei turni passa a Lucifero lanciando Concentrazione seguita da Megidolaon potenziato — tenere il conto dei turni per anticiparlo e preparare Stoicismo/Resurrezione e cure rapide",
+    "Ogni fase ha un limite invisibile ai danni infliggibili: superata una soglia gli attacchi vengono drasticamente ridotti fino al turno di Lavenza",
+    "Lavenza può essere atterrata da colpi critici, permettendo una Rapina; conviene sfruttare la Staffetta per trasferire il turno al Protagonista e infliggere più danno rispetto a un Assalto diretto",
+    "È tecnicamente possibile affrontarla in solitaria (un solo membro attivo) ma richiede gestione precisa e fortuna, poiché le condizioni delle prove vanno soddisfatte in un solo turno; per i colpi tecnici in solitaria usare armi da fuoco che infliggono Folgorazione o Congelamento per concatenare più colpi tecnici nello stesso turno",
+    "Party consigliato: Joker (Persona Attis, Maria, Shiva, Satanael; accessorio Teschio di cristallo), Haru/Lucy (Psiodyne, Debilitazione, Muro della vita, Pioggia di Amrita; Anello della superbia), Makoto/Agnes (Freidyne, Makajam, Mediarahan, Pioggia di energia; Anello della superbia), Sumire/Vanadis (Lama danzante, Kougaon, Passo del coraggio, Danza di Ali; Anello della vanità)",
+    "Abilità passive di Lavenza da tenere presenti: Abilità magica (+25% magie), Potenzia divino (+50% abilità divine), Amplifica/Potenzia arma (+50%/+25% danni armi da fuoco), Amplifica arma (+50% tutte le affinità), Guarigione istantanea (cura in 1 turno), Discepolo sagace (+50% critico), Potenzia alterazioni (+25% chance alterazioni)"
+   ],
+   "ricompense": [
+    "Segnalibro intricato (ricompensa simbolica)",
+    "Premio \"Vera riabilitazione\" nel Covo dei Ladri",
+    "20.000 PE",
+    "60.000 ¥"
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-lavenza/",
+   "verificato": true
+  }
+ ],
+ "magnate": {
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/magnate/",
+  "verificato": true,
+  "dove": "Covo dei Ladri (Thieves Den), nell'Area Giochi, tra le sezioni dedicate ai premi \"Battaglia\" e \"Fantasma\", vicino a Jose e all'ingresso del covo",
+  "quando": "La guida italiana non indica una data/condizione narrativa di sblocco specifica per Magnate in sé; è un'attività dell'Area Giochi del Covo dei Ladri. Secondo fonti secondarie in lingua inglese (Twinfinite, GameSpot, TheGamer - non verificate sulla guida italiana), il Covo dei Ladri stesso si sblocca solo dopo aver completato il gioco almeno una volta.",
+  "sfidanti": "Joker affronta tre membri dei Ladri Fantasma scelti casualmente ad ogni partita; è possibile selezionare \"Cambia sfidanti\" prima di iniziare, oppure uscire e rientrare per ottenere una nuova combinazione, utile per completare sfide legate a personaggi specifici",
+  "difficolta": [
+   "Giochiamo tranquilli (facile, ideale per imparare le regole)",
+   "Giochiamo seriamente (intermedia, avversari più forti)",
+   "Giochiamo all'ultimo sangue (difficile, avversari aggressivi)"
+  ],
+  "regole": {
+   "struttura": "Ogni partita si gioca in un set di tre manche; al termine si stilano classifiche basate sui punti ottenuti in ogni round. Per massimizzare le ricompense occorre mantenere buoni piazzamenti durante l'intero set.",
+   "valoreCarte": "Il 3 è la carta normale più debole, il 2 la più forte tra le carte normali; per giocare occorre superare la carta sul tavolo rispettando il numero di carte usate (singola contro singola, coppia contro coppia, tris contro tris, ecc.)",
+   "inizioManche": "La prima manche inizia con chi possiede il 3 di quadri; nelle manche successive inizia il Mendicante del round precedente",
+   "ruoliEScambi": "Dopo ogni round i giocatori ricevono un ruolo in classifica: Magnate, Ricco, Povero, Mendicante. Il Magnate e il Mendicante si scambiano due carte, il Ricco e il Povero se ne scambiano una; Povero e Mendicante devono cedere le loro carte migliori, mentre Magnate e Ricco scelgono cosa dare",
+   "passare": "Se non si possiedono combinazioni valide si può passare; quando tutti e quattro i giocatori passano consecutivamente il turno termina e il tavolo si azzera; inizia il turno successivo chi ha giocato l'ultima carta valida",
+   "bancarotta": "Se si termina una manche come Magnate ma non si mantiene quella posizione nella manche successiva, si perde immediatamente lo status privilegiato e si viene retrocessi a Mendicante, saltando il turno successivo",
+   "rivoluzione": "Giocare quattro carte dello stesso valore attiva una Rivoluzione, che inverte l'ordine di forza (il 3 diventa la carta più forte, il 2 la più debole); un'ulteriore combinazione di quattro carte uguali attiva una Contro-rivoluzione che ripristina i valori normali",
+   "regolaOtto": "Giocare un 8 termina immediatamente il turno indipendentemente dalle carte in gioco, azzerando il tavolo; chi ha giocato l'8 inizia il turno successivo",
+   "joker": "Il Joker è la carta più forte del gioco, supera anche il 2 e può sostituire qualsiasi valore o completare combinazioni; il 3 di picche (\"Le 3 Picche\") annulla il Joker se giocato come carta singola, terminando il turno e permettendo al difensore di controllare la manche successiva"
+  },
+  "ricompensePosizione": {
+   "descrizione": "Medaglie P assegnate in base al piazzamento finale e alla difficoltà scelta",
+   "tabella": [
+    {
+     "posizione": "1°",
+     "semplice": 5,
+     "normale": 10,
+     "difficile": 15
+    },
+    {
+     "posizione": "2°",
+     "semplice": 4,
+     "normale": 8,
+     "difficile": 13
+    },
+    {
+     "posizione": "3°",
+     "semplice": 3,
+     "normale": 5,
+     "difficile": 10
+    },
+    {
+     "posizione": "4°",
+     "semplice": 1,
+     "normale": 3,
+     "difficile": 5
+    }
+   ]
+  },
+  "sfide": [
+   {
+    "nome": "Campione semplice",
+    "condizione": "Diventare Magnate in una partita informale",
+    "ricompensa": "1 Medaglia P"
+   },
+   {
+    "nome": "Maestro semplice",
+    "condizione": "Diventare Magnate 5 volte in partite informali",
+    "ricompensa": "3 Medaglie P"
+   },
+   {
+    "nome": "Campione normale",
+    "condizione": "Diventare Magnate in una partita formale",
+    "ricompensa": "1 Medaglia P"
+   },
+   {
+    "nome": "Maestro normale",
+    "condizione": "Diventare Magnate 5 volte in partite formali",
+    "ricompensa": "5 Medaglie P"
+   },
+   {
+    "nome": "Campione difficile",
+    "condizione": "Diventare Magnate in una partita spietata",
+    "ricompensa": "1 Medaglia P"
+   },
+   {
+    "nome": "Maestro difficile",
+    "condizione": "Diventare Magnate 5 volte in partite spietate",
+    "ricompensa": "10 Medaglie P"
+   },
+   {
+    "nome": "Rivoluzionario chic",
+    "condizione": "Diventare Magnate in un turno in cui hai iniziato una Rivoluzione",
+    "ricompensa": "3 Medaglie P"
+   },
+   {
+    "nome": "Magnate super",
+    "condizione": "Diventare Magnate in ogni turno di una partita spietata",
+    "ricompensa": "5 Medaglie P"
+   },
+   {
+    "nome": "Alla frutta",
+    "condizione": "Concludere un round con un Tre",
+    "ricompensa": "3 Medaglie P"
+   },
+   {
+    "nome": "Che fine matta",
+    "condizione": "Concludere un round con il Joker",
+    "ricompensa": "3 Medaglie P"
+   },
+   {
+    "nome": "Un bel pasticcio",
+    "condizione": "Concludere un round con una Rivoluzione",
+    "ricompensa": "7 Medaglie P"
+   },
+   {
+    "nome": "Dalle stalle alle stelle",
+    "condizione": "Passare da Mendicante a Magnate in un turno",
+    "ricompensa": "7 Medaglie P"
+   },
+   {
+    "nome": "Valanga!",
+    "condizione": "Concludere un turno in una partita spietata mentre altri giocatori hanno 10+ carte in mano",
+    "ricompensa": "10 Medaglie P"
+   },
+   {
+    "nome": "Antisommossa",
+    "condizione": "Eseguire una Contro-rivoluzione",
+    "ricompensa": "5 Medaglie P"
+   },
+   {
+    "nome": "Anima ribelle",
+    "condizione": "Rispondere al Joker con il 3 di picche",
+    "ricompensa": "3 Medaglie P"
+   },
+   {
+    "nome": "Tre-mendo",
+    "condizione": "Eseguire \"Tre Carte\" tre volte in una singola partita",
+    "ricompensa": "10 Medaglie P"
+   },
+   {
+    "nome": "Magnate Fantasma",
+    "condizione": "Diventare Magnate giocando con ogni membro dei Ladri Fantasma in partita spietata",
+    "ricompensa": "7 Medaglie P"
+   },
+   {
+    "nome": "Turno infinito",
+    "condizione": "Forzare tutti gli avversari a passare tre volte in una partita formale o spietata",
+    "ricompensa": "10 Medaglie P"
+   },
+   {
+    "nome": "Equilibrio karmico",
+    "condizione": "Mandare in Bancarotta un altro giocatore e diventare Magnate",
+    "ricompensa": "3 Medaglie P"
+   },
+   {
+    "nome": "Magnate alla riscossa",
+    "condizione": "Passare da Mendicante al primo posto nella classifica finale",
+    "ricompensa": "7 Medaglie P"
+   }
+  ],
+  "ricompensaFinale": "Completando tutte le sfide si ottiene l'obiettivo \"Maestro Magnate\", che assegna 20 Medaglie P e rappresenta il 100% di completamento del minigioco",
+  "effettiRelazioni": "A differenza di altre attività del Covo dei Ladri, Magnate NON influenza direttamente le relazioni con i compagni né le loro abilità: è un minigioco esclusivamente incentrato sull'accumulo di Medaglie P, spendibili per decorazioni, musica e altri contenuti del Covo dei Ladri. I risultati sono consultabili nella sezione \"Archivi\" del Covo.",
+  "note": "Le Medaglie P non sbloccano filmati o contenuti narrativi: servono solo per l'Area Decorazioni/Archivi del Covo dei Ladri."
+ },
+ "tratti": {
+  "introduzione": "I Tratti sono abilità passive speciali che non occupano alcuno slot abilità: ogni Persona può possederne uno e il suo effetto si attiva automaticamente in combattimento. Sono una feature esclusiva di Persona 5 Royal (assente nell'edizione base). Durante la fusione nella Stanza di Velluto, i Tratti possono essere ereditati dalle nuove Personae create: se due Personae usate in fusione condividono lo stesso Tratto, questo si trasmette alla Persona risultante. Punto importante: i Tratti che riducono il consumo di risorse non abbassano permanentemente i costi, la riduzione si applica solo nel momento del lancio della tecnica, quindi serve comunque avere SP sufficienti al lordo dello sconto per poter selezionare l'abilità.",
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/tratti/",
+  "verificato": true,
+  "elenco": [
+   {
+    "nome": "Stirpe ardente",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità di Fuoco",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe gelida",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità di Ghiaccio",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe elettrica",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità Elettriche",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe del vento",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità di Vento",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe psichica",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità Psicocinetiche",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe atomica",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità Nucleari",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe sacra",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità Sacre",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe maledetta",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità Maledette",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe del messia",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità curative",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Stirpe dell'aiuto",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP delle abilità di supporto",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Fervore dell'ebbro",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità di Fuoco",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Cocito",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità di Ghiaccio",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Dardi convenienti",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità Elettriche",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Ali di Vahana",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità di Vento",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Bened. di Chi You",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità Psicocinetiche",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Inferno atomico",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità Nucleari",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Dono del martire",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità Sacre",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Lamento materno",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità Maledette",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Grazia della madre",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità curative",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Ave Maria",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità di supporto",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Muori!",
+    "nomeEn": null,
+    "effetto": "Costo in SP ridotto a 0 per le abilità di uccisione istantanea",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Saggezza seducente",
+    "nomeEn": null,
+    "effetto": "Riduce del 75% il costo in SP delle abilità magiche",
+    "categoria": "Riduzione SP"
+   },
+   {
+    "nome": "Conduttore termico",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di infliggere In fiamme dopo una Staffetta",
+    "categoria": "Potenziamento alterazioni"
+   },
+   {
+    "nome": "Crudele",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di infliggere Congelamento con un One More",
+    "categoria": "Potenziamento alterazioni"
+   },
+   {
+    "nome": "Elettric. statica",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di infliggere Folgorazione sui nemici atterrati",
+    "categoria": "Potenziamento alterazioni"
+   },
+   {
+    "nome": "Tanfo",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di infliggere alterazioni dopo una Staffetta",
+    "categoria": "Potenziamento alterazioni"
+   },
+   {
+    "nome": "Nido spettrale",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di infliggere alterazioni sui nemici atterrati",
+    "categoria": "Potenziamento alterazioni"
+   },
+   {
+    "nome": "Fetore",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di infliggere alterazioni negative",
+    "categoria": "Potenziamento alterazioni"
+   },
+   {
+    "nome": "Peso notevole",
+    "nomeEn": null,
+    "effetto": "Potenzia le abilità fisiche del 20%",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Furia immortale",
+    "nomeEn": null,
+    "effetto": "Potenzia le abilità fisiche del 30%",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Concentr. intensa",
+    "nomeEn": null,
+    "effetto": "Potenzia del 20% le abilità magiche che colpiscono un singolo nemico",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Sguardo possente",
+    "nomeEn": null,
+    "effetto": "Potenzia del 20% le abilità magiche che colpiscono tutti i nemici",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Combinaz. provetta",
+    "nomeEn": null,
+    "effetto": "Aumenta il danno inflitto dopo una Staffetta",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Stirpe legata",
+    "nomeEn": null,
+    "effetto": "Aumenta di molto il danno inflitto dopo una Staffetta",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Cercatore alteraz.",
+    "nomeEn": null,
+    "effetto": "Aumenta l'attacco del 25% per ogni alterazione presente sul nemico",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Malattia letale",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di uccisione istantanea (cumulabile)",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Auspicio",
+    "nomeEn": null,
+    "effetto": "Aumenta di molto le probabilità di uccisione istantanea (cumulabile)",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Tecnica provetta",
+    "nomeEn": null,
+    "effetto": "Aumenta il danno tecnico del 25%",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Legge universale",
+    "nomeEn": null,
+    "effetto": "Aumenta il danno tecnico del 50%",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Implacabile",
+    "nomeEn": null,
+    "effetto": "Aumenta del 50% il danno degli attacchi che sfruttano le debolezze nemiche",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Corpo vendicativo",
+    "nomeEn": null,
+    "effetto": "Raddoppia il danno di Risposta",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Volere della spada",
+    "nomeEn": null,
+    "effetto": "Triplica gli effetti di Carica e Concentrazione",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Fascino pagano",
+    "nomeEn": null,
+    "effetto": "Potenzia le abilità magiche del 50% (non cumulabile oltre il limite di 2 attacchi)",
+    "categoria": "Attacco"
+   },
+   {
+    "nome": "Bocca drenante",
+    "nomeEn": null,
+    "effetto": "Raddoppia gli effetti delle abilità attive e passive di tipo Assorbimento",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Bocca dell'ingordo",
+    "nomeEn": null,
+    "effetto": "Aumenta del 50% gli effetti di recupero HP su se stessi",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Morso demoniaco",
+    "nomeEn": null,
+    "effetto": "Raddoppia gli effetti di recupero HP su se stessi",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Bocca del gusto",
+    "nomeEn": null,
+    "effetto": "Aumenta del 50% gli effetti di recupero SP su se stessi",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Naranari",
+    "nomeEn": null,
+    "effetto": "Raddoppia gli effetti di recupero SP su se stessi",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Ipnosi interna",
+    "nomeEn": null,
+    "effetto": "Aumenta di 1 turno la durata delle abilità di supporto su se stessi (estende gli auto-potenziamenti a tutta la squadra)",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Pensiero positivo",
+    "nomeEn": null,
+    "effetto": "Aumenta di 2 turni la durata delle abilità di supporto su se stessi (estende gli auto-potenziamenti a tutta la squadra)",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Ipnosi potente",
+    "nomeEn": null,
+    "effetto": "Aumenta di 1 turno la durata delle abilità di supporto sugli alleati (estende gli auto-potenziamenti a tutta la squadra)",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Ricchezza del loto",
+    "nomeEn": null,
+    "effetto": "Aumenta di 2 turni la durata delle abilità di supporto sugli alleati (estende gli auto-potenziamenti a tutta la squadra)",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Anticorpo raro",
+    "nomeEn": null,
+    "effetto": "Diminuisce le probabilità di essere colpiti da alterazioni negative",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Immunità",
+    "nomeEn": null,
+    "effetto": "Previene le alterazioni negative",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Occhi insanguinati",
+    "nomeEn": null,
+    "effetto": "Alta probabilità di schivare gli attacchi dei nemici con alterazioni negative (conferisce anche Tarukaja automatico a inizio battaglia)",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Controllo crisi",
+    "nomeEn": null,
+    "effetto": "Diminuisce il danno degli attacchi che sfruttano le debolezze",
+    "categoria": "Difesa"
+   },
+   {
+    "nome": "Bimbo depresso",
+    "nomeEn": null,
+    "effetto": "Allarme pioggia, neve e polline sempre attivo",
+    "categoria": "Altro"
+   },
+   {
+    "nome": "Ancora a strappo",
+    "nomeEn": null,
+    "effetto": "Dopo una Staffetta, permette l'uso delle abilità disponibili se circondati",
+    "categoria": "Altro"
+   },
+   {
+    "nome": "Vigore vegetale",
+    "nomeEn": null,
+    "effetto": "Permette l'uso delle abilità disponibili solo se circondati",
+    "categoria": "Altro"
+   },
+   {
+    "nome": "Recipiente ideale",
+    "nomeEn": null,
+    "effetto": "Acquisisce Tratti bonus durante la fusione con un Demone del Tesoro",
+    "categoria": "Altro"
+   },
+   {
+    "nome": "Cerchio di tristezza",
+    "nomeEn": null,
+    "effetto": "Quando Abbattuto, rianima con 1 HP fino a 4 volte per battaglia",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Cuore di ferro",
+    "nomeEn": null,
+    "effetto": "Dimezza il costo in SP dopo una Staffetta (attiva Tetrakarn e Makarakarn automaticamente a inizio battaglia)",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Spirito consacrato",
+    "nomeEn": null,
+    "effetto": "Raddoppia gli effetti di recupero HP/SP su se stessi",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Creatore divino",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di innescare i Tratti delle Persona degli alleati",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Giullare vuoto",
+    "nomeEn": null,
+    "effetto": "Aumenta l'attacco del 40% per ogni alterazione presente sul nemico",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Bellezza sacra",
+    "nomeEn": null,
+    "effetto": "Triplica il danno di Risposta",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Brigata",
+    "nomeEn": null,
+    "effetto": "Gli oggetti consumabili non vengono consumati se usati dopo una Staffetta",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Toro scatenato",
+    "nomeEn": null,
+    "effetto": "Aumenta il danno degli attacchi quando i propri HP sono bassi",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Forza sostenitrice",
+    "nomeEn": null,
+    "effetto": "Aumenta l'attacco del 50% durante un One More",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Grazia dell'oliva",
+    "nomeEn": null,
+    "effetto": "Costi in HP/SP ridotti a 0 durante un One More",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Creatore di paesi",
+    "nomeEn": null,
+    "effetto": "Aumenta Attacco/Difesa in base al livello di completamento del Registro del Prigioniero",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Presenza confusa",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità di innescare gli attacchi concatenati degli alleati",
+    "categoria": "DLC"
+   },
+   {
+    "nome": "Presenza fiera",
+    "nomeEn": null,
+    "effetto": "Aumenta l'effetto delle abilità curative degli alleati",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Temper. furente",
+    "nomeEn": null,
+    "effetto": "Può aumentare gli attacchi fisici degli alleati del 40%",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Anima della magia",
+    "nomeEn": null,
+    "effetto": "Può diminuire occasionalmente il costo in SP degli attacchi magici di un alleato",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Occhi da canaglia",
+    "nomeEn": null,
+    "effetto": "Può aumentare leggermente la probabilità degli alleati di evitare attacchi fisici",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Patto della natura",
+    "nomeEn": null,
+    "effetto": "+25% probabilità per gli alleati di infliggere In fiamme / Congelamento / Folgorazione",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Schema esplosivo",
+    "nomeEn": null,
+    "effetto": "Gli Assalti possono sconfiggere tutti i nemici e ripristinare il 25% degli HP degli alleati",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Temperam. glaciale",
+    "nomeEn": null,
+    "effetto": "Diminuisce del 25% le probabilità degli alleati di subire alterazioni negative",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Spirito tattico",
+    "nomeEn": null,
+    "effetto": "Può dimezzare il costo in SP delle abilità di supporto degli alleati",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Velo di mezzanotte",
+    "nomeEn": null,
+    "effetto": "Aumenta le probabilità che un alleato non venga atterrato da un attacco",
+    "categoria": "Alleati (standard)"
+   },
+   {
+    "nome": "Presenza maestosa",
+    "nomeEn": null,
+    "effetto": "Aumenta l'effetto delle abilità curative degli alleati; può anche ridurne il costo in SP",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Temper. eccentrico",
+    "nomeEn": null,
+    "effetto": "Può aumentare gli attacchi fisici degli alleati dell'80%",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Apogeo della magia",
+    "nomeEn": null,
+    "effetto": "Può dimezzare occasionalmente il costo in SP degli attacchi magici di un alleato",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Occhi senza pari",
+    "nomeEn": null,
+    "effetto": "L'alleato ha più probabilità di schivare un attacco fisico",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Bacio di Gaia",
+    "nomeEn": null,
+    "effetto": "+50% probabilità per gli alleati di infliggere In fiamme / Congelamento / Folgorazione",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Schema infinito",
+    "nomeEn": null,
+    "effetto": "Gli Assalti possono sconfiggere tutti i nemici e ripristinare completamente gli HP degli alleati",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Cliente stiloso",
+    "nomeEn": null,
+    "effetto": "Diminuisce del 50% le probabilità degli alleati di subire alterazioni negative",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Spirito ingegnoso",
+    "nomeEn": null,
+    "effetto": "Può dimezzare il costo in SP delle abilità di supporto/divine degli alleati",
+    "categoria": "Alleati (terza evoluzione)"
+   },
+   {
+    "nome": "Velo dell'alba",
+    "nomeEn": null,
+    "effetto": "Aumenta di molto le probabilità che un alleato non venga atterrato da un attacco",
+    "categoria": "Alleati (terza evoluzione)"
+   }
+  ]
+ },
+ "quizTv": {
+  "introduzione": "A partire dal 19 maggio (giovedì), ogni settimana - precisamente il giovedì, salvo eventi di trama - viene trasmesso un programma televisivo speciale visibile dalla TV del Café Leblanc. Durante la visione viene posta una domanda a tempo a cui rispondere rapidamente; rispondendo correttamente si ottiene un aumento della Dote sociale Conoscenza senza consumare la fascia oraria. Le occasioni sono limitate: nel corso della partita si hanno solo 11 possibilità di partecipare al quiz (corrispondenti alle 11 domande elencate). Non ci sono differenze tra le domande/risposte dell'edizione standard e quelle di Royal.",
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+ }
+}

@@ -33,8 +33,8 @@ describe('API domande', () => {
 
   it('elenco completo ordinato per data, esami con premi; senza partita nessuna spunta né prossime', async () => {
     const d = (await request(app).get('/api/compendio/domande')).body.data as DomandeDto;
-    expect(d.totale).toBe(67);
-    expect(d.domande).toHaveLength(67);
+    expect(d.totale).toBe(78);
+    expect(d.domande).toHaveLength(78);
     expect(d.esami).toHaveLength(4);
     expect(d.esami[0]).toMatchObject({ nome: 'Esame di metà semestre 1', date: ['05-11', '05-12', '05-13'], dataRisultati: '05-20' });
     expect(d.esami[0].domande.length).toBe(8);
