@@ -10,6 +10,7 @@ import { notifica } from '../../stores/notificationStore';
 import { GRUPPI_EVENTO, tipiDelGruppo } from '../../../shared/eventi';
 import { EmptyState, Spinner } from '../shared/PageState';
 import type { EventoPartitaDto } from '../../types';
+import { ImmagineEntita } from '../shared/ImmagineEntita';
 
 interface Props {
   partitaId: number;
@@ -95,6 +96,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
           {eventi.map((e) => (
             <li key={e.id} className="py-2 flex items-start gap-3 text-[13px]">
               <time dateTime={e.createdAt} className="shrink-0 w-[92px] text-[12px] text-text-muted tabular-nums pt-0.5">{formattaIstante(e.createdAt)}</time>
+              {e.personaNome && <ImmagineEntita ambito="persona" chiave={e.personaNome} etichetta={e.personaNomeIt ?? e.personaNome} dimensione={40} adatta="copri" />}
               <div className="flex-1 min-w-0">
                 <div className="font-semibold">{e.titolo}</div>
                 {e.dettaglio && <div className="text-text-secondary">{e.dettaglio}</div>}

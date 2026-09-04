@@ -139,9 +139,10 @@
   /* ---- Bersaglio touch minimo (tablet) ---- */
   .touch { min-height: 44px; min-width: 44px; }
 
-  /* ---- Pulsanti: parallelogramma a taglio diagonale disegnato in CSS (nitido a ogni dimensione), carattere «menu».
-     Il riquadro del pulsante resta rettangolare (outline di focus visibile); bordo e riempimento sono due livelli
-     sotto il testo ritagliati con clip-path. ---- */
+  /* ---- Pulsanti: parallelogramma a taglio diagonale disegnato in CSS (nitido a ogni dimensione).
+     Il testo resta nel carattere di lettura (leggibilità prima di tutto: i font P5 valgono solo per titoli e parole
+     grandi). Il riquadro è rettangolare (outline di focus visibile); bordo e riempimento sono due livelli sotto il
+     testo ritagliati con clip-path. ---- */
   .btn {
     --btn-sfondo: transparent;
     --btn-bordo: transparent;
@@ -153,12 +154,10 @@
     border: 0;
     border-radius: 0;
     background: transparent;
-    font-family: var(--font-menu);
-    font-size: 17px;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    line-height: 1;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -187,7 +186,7 @@
   .btn-ghost:hover:not(:disabled) { color: var(--color-text); --btn-sfondo: rgba(255, 255, 255, 0.05); }
   .btn-danger { color: var(--color-error); --btn-bordo: rgba(239, 68, 68, 0.45); }
   .btn-danger:hover:not(:disabled) { --btn-sfondo: rgba(239, 68, 68, 0.12); }
-  .btn-sm { font-size: 15px; padding: 6px 14px; min-height: 44px; --btn-taglio: 6px; }
+  .btn-sm { font-size: 13px; padding: 6px 12px; min-height: 44px; --btn-taglio: 6px; }
 
   /* ---- Modali ---- */
   .modal-overlay {
@@ -386,6 +385,7 @@
     transform: rotate(-1.4deg);
   }
   .titolo-tasselli .tassello:nth-child(even) {
+    font-family: var(--font-menu);
     background: var(--color-primary);
     color: #fff;
     transform: rotate(1.1deg);
@@ -417,8 +417,22 @@
   /* ---- Caricamento a fotogrammi (illustrazioni/caricamento-1…8) ---- */
   .fotogramma { opacity: 0; animation: fotogramma 0.8s steps(1, end) infinite; }
 
+  /* ---- Scheda «poster» (Confidenti): filigrana dell'arcano e badge del rango sovrapposto al ritratto ---- */
+  .poster__filigrana {
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    height: 82%;
+    width: auto;
+    opacity: 0.13;
+    pointer-events: none;
+    transform: rotate(6deg);
+    user-select: none;
+  }
+  .poster__rango { position: absolute; right: -14px; bottom: -8px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.7)); }
+
   /* ---- Etichette di navigazione in carattere «menu» ---- */
-  .voce-menu { font-family: var(--font-menu); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 400; }
+  .voce-menu { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400; }
 
   /* ---- KPI ---- */
   .kpi-tile {

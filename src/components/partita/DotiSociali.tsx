@@ -1,10 +1,12 @@
 // ============================================================
-// DotiSociali — le 5 doti con note (+1/+2/+3), modificatori, rango e punti mancanti
+// DotiSociali — stella delle cinque Doti + schede compatte con note (+1/+2/+3), modificatori, rango e punti mancanti
 // ============================================================
 //
 // Nel gioco ogni azione mostra 1–3 note: 1 nota = 2 punti, 2 note = 3, 3 note = 5
 // (7 con libri a resa maggiorata); la lettura della fortuna di Chihaya moltiplica
 // ×1,5 (per difetto). La conversione la fa il backend (`note`, `libro`, `fortuna`).
+// La stella (Fase 11.2) mostra l'avanzamento continuo di ogni dote: ranghi completati
+// più la quota verso il prossimo; toccare un vertice porta alla scheda della dote.
 // ============================================================
 
 import { useState } from 'react';
@@ -13,6 +15,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { AssetImg } from '../shared/AssetImg';
+import { StellaCinque } from '../shared/StellaCinque';
+import { avanzamentoDote, quotaVersoProssimoRango } from '../../utils/doti';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 
 interface Props {
@@ -24,12 +28,13 @@ function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean): numb
   return fortuna ? Math.floor(base * 1.5) : base;
 }
 
-/** Elenco delle Doti sociali con incremento a note, rango attuale e distanza dal rango successivo. */
+/** Stella delle Doti con schede compatte: incremento a note, rango attuale e distanza dal rango successivo. */
 export function DotiSociali({ partitaId }: Props) {
   const { dati, caricamento, errore, ricarica, imposta } = useCarica(() => getDoti(partitaId), [partitaId]);
   const [occupata, setOccupata] = useState<string | null>(null);
   const [fortuna, setFortuna] = useState(false);
   const [libro, setLibro] = useState(false);
+  const [selezionata, setSelezionata] = useState<string | null>(null);
 
   const modifica = async (chiave: string, mod: ModificaDote) => {
     if (!dati) return;
@@ -46,56 +51,71 @@ export function DotiSociali({ partitaId }: Props) {
     }
   };
 
+  const vaiAllaDote = (chiave: string) => {
+    setSelezionata(chiave);
+    document.getElementById(`dote-${chiave}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+  };
+
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="flex flex-wrap items-center gap-2 mb-3 text-[13px]">
-        <span className="text-text-muted">Modificatori:</span>
-        <button type="button" className={`chip touch ${fortuna ? 'chip--attivo' : ''}`} onClick={() => setFortuna((v) => !v)} aria-pressed={fortuna} title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)">×1,5 Fortuna</button>
-        <button type="button" className={`chip touch ${libro ? 'chip--attivo' : ''}`} onClick={() => setLibro((v) => !v)} aria-pressed={libro} title="Libri a resa maggiorata: 3 note valgono 7 punti">Libro (3 note = 7)</button>
+      <div className="grid gap-4 items-start lg:grid-cols-[minmax(280px,380px)_1fr]">
+        <section className="card flex flex-col items-center gap-3 lg:sticky lg:top-0" aria-label="Stella delle Doti">
+          <StellaCinque
+            assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}-senza-testo`, testo: `Rango ${d.rango}` }))}
+            dimensione={300}
+            etichettaAria="Stella delle Doti sociali"
+            onScegli={vaiAllaDote}
+            selezionato={selezionata}
+          />
+          <div className="flex flex-wrap items-center justify-center gap-2 text-[13px]">
+            <span className="text-text-muted">Modificatori:</span>
+            <button type="button" className={`chip touch ${fortuna ? 'chip--attivo' : ''}`} onClick={() => setFortuna((v) => !v)} aria-pressed={fortuna} title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)">×1,5 Fortuna</button>
+            <button type="button" className={`chip touch ${libro ? 'chip--attivo' : ''}`} onClick={() => setLibro((v) => !v)} aria-pressed={libro} title="Libri a resa maggiorata: 3 note valgono 7 punti">Libro (3 note = 7)</button>
+          </div>
+          <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote. I modificatori valgono per tutte le note che registri.</p>
+        </section>
+        <ul className="m-0 p-0 list-none flex flex-col gap-3">
+          {dati?.map((d) => (
+            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-2 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''}`}>
+              <CartaDote dote={d} />
+              <div className="flex flex-wrap gap-2">
+                {([1, 2, 3] as const).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className="btn btn-primary btn-sm flex-1 min-w-[84px]"
+                    disabled={occupata === d.chiave}
+                    onClick={() => void modifica(d.chiave, { note: n, libro, fortuna })}
+                    aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna)} punti)`}
+                  >
+                    <span aria-hidden="true">{'♪'.repeat(n)}</span>
+                    <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortuna)}</span>
+                  </button>
+                ))}
+                <button type="button" className="btn btn-secondary btn-sm min-w-[56px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
+                <button type="button" className="btn btn-secondary btn-sm min-w-[56px]" disabled={occupata === d.chiave} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul className="m-0 p-0 list-none grid gap-3 grid-cols-1 xl:grid-cols-2">
-        {dati?.map((d) => (
-          <li key={d.chiave} className="card flex flex-col gap-2">
-            <CartaDote dote={d} />
-            <div className="flex flex-wrap gap-2">
-              {([1, 2, 3] as const).map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  className="btn btn-primary flex-1 min-w-[88px]"
-                  disabled={occupata === d.chiave || d.rango === 5 && d.mancanti === null && false}
-                  onClick={() => void modifica(d.chiave, { note: n, libro, fortuna })}
-                  aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna)} punti)`}
-                >
-                  <span aria-hidden="true">{'♪'.repeat(n)}</span>
-                  <span className="text-[12px] opacity-90">+{puntiAnteprima(n, libro, fortuna)}</span>
-                </button>
-              ))}
-              <button type="button" className="btn btn-secondary min-w-[56px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
-              <button type="button" className="btn btn-secondary min-w-[56px]" disabled={occupata === d.chiave} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
-            </div>
-          </li>
-        ))}
-      </ul>
     </PageState>
   );
 }
 
-/** Intestazione della dote: nome, rango con titolo, punti, barra verso il rango successivo. */
+/** Intestazione compatta della dote: targhetta, rango con titolo, punti, barra verso il rango successivo. */
 function CartaDote({ dote: d }: { dote: DoteSocialePartitaDto }) {
-  const inizio = d.ranghi.find((r) => r.rango === d.rango)?.soglia ?? 0;
-  const fine = d.sogliaProssima ?? inizio;
-  const quota = fine > inizio ? Math.min(100, Math.round(((d.punti - inizio) / (fine - inizio)) * 100)) : 100;
+  const quota = Math.round(quotaVersoProssimoRango(d) * 100);
   const prossimo = d.ranghi.find((r) => r.rango === d.rango + 1);
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-baseline gap-2 flex-wrap">
-        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 w-auto object-contain" fallback={<span className="text-[12px] uppercase tracking-wide text-text-muted">{d.nome}</span>} />
+      <div className="flex items-center gap-2 flex-wrap">
+        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-9 w-auto object-contain" fallback={<span className="font-display uppercase text-[20px] leading-none">{d.nome}</span>} />
         <span className="chip chip--attivo">Rango {d.rango} · {d.nomeRango}</span>
-        <span className="ml-auto text-2xl font-black tabular-nums">{d.punti}<span className="text-[12px] font-normal text-text-muted"> punti</span></span>
+        <span className="ml-auto font-display text-[30px] leading-none tabular-nums">{d.punti}<span className="text-[12px] font-sans text-text-muted"> punti</span></span>
       </div>
-      <div className="h-2.5 rounded-full bg-bg-tertiary overflow-hidden" role="progressbar" aria-valuemin={inizio} aria-valuemax={fine} aria-valuenow={d.punti} aria-label={`Progresso verso il rango ${d.rango + 1}`}>
-        <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${quota}%` }} />
+      <div className="h-2 bg-bg-tertiary overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={d.sogliaProssima === null ? 100 : quota} aria-label={`Progresso verso il rango ${d.rango + 1}`}>
+        <div className="h-full bg-primary transition-[width]" style={{ width: `${d.sogliaProssima === null ? 100 : quota}%` }} />
       </div>
       <div className="text-[13px] text-text-secondary">
         {d.mancanti !== null && prossimo

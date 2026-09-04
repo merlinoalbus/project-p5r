@@ -12,6 +12,7 @@ import { AlberoPiano } from '../fusione/AlberoPiano';
 import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
 import { formattaYen } from '../../utils/punti';
 import type { PianoSalvatoDto } from '../../types';
+import { ImmagineEntita } from '../shared/ImmagineEntita';
 
 interface Props {
   partitaId: number;
@@ -26,8 +27,9 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
   const av = piano.avanzamento;
   return (
     <article className={`card flex flex-col gap-2 ${av.completato ? 'border-primary' : ''}`}>
-      <div className="flex items-center gap-2 flex-wrap">
-        <Link to={`/compendio/persona/${piano.personaId}`} className="font-semibold text-[15px] text-text no-underline hover:text-primary">{piano.nomeIt}</Link>
+      <div className="flex items-center gap-3 flex-wrap">
+        <ImmagineEntita ambito="persona" chiave={piano.nome} etichetta={piano.nomeIt} dimensione={72} adatta="copri" />
+        <Link to={`/compendio/persona/${piano.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary">{piano.nomeIt}</Link>
         <span className="text-[12px] text-text-muted">{piano.arcanaNome} · livello {piano.livello}</span>
         {modificaTitolo ? (
           <form className="flex items-center gap-1" onSubmit={(e) => { e.preventDefault(); onCambiaTitolo(titolo); setModificaTitolo(false); }}>

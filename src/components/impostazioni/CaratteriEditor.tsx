@@ -23,9 +23,9 @@ interface Ruolo {
 }
 
 const RUOLI: Ruolo[] = [
-  { ruolo: 'display', nome: 'Titoli e numeri', descrizione: 'Intestazioni delle pagine, livelli, ranghi e punti in evidenza.', predefinito: 'Anton', anteprima: 'PALAZZO DI KAMOSHIDA · LIVELLO 42', classe: 'font-display text-[30px] leading-none' },
-  { ruolo: 'menu', nome: 'Menu, pulsanti ed etichette', descrizione: 'Navigazione, pulsanti, schede e chip in maiuscolo.', predefinito: 'Bebas Neue', anteprima: 'HOME · COMPENDIO · FUSIONE · GUIDA', classe: 'font-menu text-[24px] leading-none tracking-wide' },
-  { ruolo: 'decor', nome: 'Tasselli decorativi', descrizione: 'Cartigli in stile ritaglio di giornale negli stati vuoti e nei badge.', predefinito: 'Special Elite', anteprima: 'Cambio di cuore', classe: 'font-decor text-[22px] leading-none' },
+  { ruolo: 'display', nome: 'Titoli, numeri e menu laterale', descrizione: 'Intestazioni delle pagine, nomi in evidenza, livelli e ranghi, voci del menu laterale (mai sotto i 17 px).', predefinito: 'Anton', anteprima: 'PALAZZO DI KAMOSHIDA · LIVELLO 42', classe: 'font-display text-[30px] leading-none' },
+  { ruolo: 'menu', nome: 'Parole brevi in evidenza', descrizione: 'I tasselli rossi dei titoli (parole corte e grandi): adatto anche a caratteri a ritagli poco leggibili nei testi.', predefinito: 'Bebas Neue', anteprima: 'DI · E · PER · CON', classe: 'font-menu text-[32px] leading-none tracking-wide' },
+  { ruolo: 'decor', nome: 'Titoli degli stati vuoti e dei messaggi', descrizione: 'Cartigli in stile ritaglio di giornale: «Nessun piano salvato», «Qualcosa è andato storto».', predefinito: 'Special Elite', anteprima: 'NESSUNA PERSONA', classe: 'font-decor text-[26px] leading-none' },
 ];
 
 const formatoByte = (b: number): string => (b >= 1024 * 1024 ? `${(b / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(b / 1024))} KB`);
@@ -90,6 +90,7 @@ export function CaratteriEditor() {
       <p className="m-0 text-[13px] text-text-secondary">
         Carica i tuoi font in stile Persona 5 (TTF, OTF, WOFF o WOFF2, fino a 4 MB): restano solo in questa istanza, non vengono mai pubblicati e li usi sotto la tua responsabilità secondo la loro licenza.
         Senza caricamenti l'app usa i font liberi inclusi (Anton, Bebas Neue, Special Elite, Inter). Le lettere che un font non contiene, per esempio le accentate, vengono prese dal font predefinito.
+        Pulsanti, chip e testi restano sempre nel carattere di lettura: i font caricati compaiono solo dove sono grandi abbastanza da restare leggibili.
       </p>
       <ul className="m-0 p-0 list-none flex flex-col gap-3">
         {RUOLI.map((def) => <RigaRuolo key={def.ruolo} def={def} stato={elenco?.find((f) => f.ruolo === def.ruolo)} />)}

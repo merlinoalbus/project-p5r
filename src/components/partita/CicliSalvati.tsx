@@ -11,6 +11,7 @@ import { EmptyState, Spinner } from '../shared/PageState';
 import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
 import { formattaYen } from '../../utils/punti';
 import type { CicloSalvatoDto } from '../../types';
+import { ImmagineEntita } from '../shared/ImmagineEntita';
 
 interface Props {
   partitaId: number;
@@ -53,8 +54,9 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
 
   return (
     <article className="card flex flex-col gap-2">
-      <div className="flex items-center gap-2 flex-wrap">
-        <Link to={`/compendio/persona/${ciclo.personaId}`} className="font-semibold text-[15px] text-text no-underline hover:text-primary">{ciclo.nomeIt}</Link>
+      <div className="flex items-center gap-3 flex-wrap">
+        <ImmagineEntita ambito="persona" chiave={ciclo.nome} etichetta={ciclo.nomeIt} dimensione={72} adatta="copri" />
+        <Link to={`/compendio/persona/${ciclo.personaId}`} className="font-display uppercase text-[20px] leading-none text-text no-underline hover:text-primary">{ciclo.nomeIt}</Link>
         <span className="text-[12px] text-text-muted">{ciclo.arcanaNome}</span>
         <span className="chip">{ciclo.titolo}</span>
         <span className="chip chip--attivo" title="Iterazioni complete registrate">{ciclo.iterazioni} {ciclo.iterazioni === 1 ? 'giro' : 'giri'}</span>
