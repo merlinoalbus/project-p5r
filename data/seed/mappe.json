@@ -12,7 +12,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"古城・城門前\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "kamoshida-01-cancello-del-castello-ingresso/0",
+     "x": 60.0,
+     "y": 57.0,
+     "confidenza": "alta",
+     "etichetta": "スタート地点",
+     "nota": "Testo «スタート地点» (punto di partenza) con freccia che punta al corridoio verticale in basso; corrisponde al Cancello del Castello, unico punto app dell'area (sicura/partenza)."
+    }
+   ]
   },
   {
    "dungeonChiave": "kamoshida",
@@ -36,7 +46,8 @@
      "altezza": 533,
      "note": "Pianta della Sala Centrale (visita del 12 aprile), con i 2 punti d'interesse numerati (Capitano della Guardia e forziere)."
     }
-   ]
+   ],
+   "marcatori": []
   },
   {
    "dungeonChiave": "kamoshida",
@@ -59,6 +70,16 @@
      "larghezza": 800,
      "altezza": 533,
      "note": "Pianta dell'Edificio Ovest 1P (versione della visita del 20 aprile). Esiste anche una versione precedente (15 aprile) con meno punti annotati: https://samurai-gamers.com/wp-content/uploads/2020/01/sg-p5r-4-15-west-building-first-floor.jpg"
+    }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-03-edificio-ovest-1p/0",
+     "x": 41.0,
+     "y": 63.0,
+     "confidenza": "alta",
+     "etichetta": "【1】 / S",
+     "nota": "Icona blu 'S' (セーフルーム) con etichetta 【1】 accanto che rimanda ad essa; corrisponde alla Safe Room dell'Edificio Ovest 1P, unico punto app dell'area."
     }
    ]
   },
@@ -84,6 +105,16 @@
      "altezza": 533,
      "note": "Pianta unica del sito che copre in un solo schema Edificio Ovest 2P, Sala Centrale (2° piano/seconda visita), Edificio Est 2P, la sala da pranzo con le leve e la biblioteca (9 punti numerati). Il sito guida non separa graficamente queste sotto-aree."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-04-sala-da-pranzo-e-cucine/5",
+     "x": 22.0,
+     "y": 65.0,
+     "confidenza": "media",
+     "etichetta": "✕",
+     "nota": "Simbolo rosso 'X' (porta chiusa/vicolo cieco) nello stesso punto in cui il testo di legenda (voce ⑧) descrive la porta chiusa a chiave aggirata arrampicandosi sugli scaffali e passando dal condotto d'"
+    }
    ]
   },
   {
@@ -107,6 +138,16 @@
      "larghezza": 800,
      "altezza": 534,
      "note": "Pianta dell'Edificio Est 3P che include anche la stanza nascosta con la Medaglia di Kamoshida (citata nel testo come 'hidden room on the southeast corner')."
+    }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-05-edificio-est-3p/0",
+     "x": 41.0,
+     "y": 87.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' (セーフルーム) riconosciuta autonomamente come Safe Room. Nessuna voce di legenda ha puntoChiave in quest'area (tutte le voci sono su libri/enigmi di un'altra sezione), ma è l'unico punto app "
     }
    ]
   },
@@ -135,6 +176,24 @@
      "altezza": 533,
      "note": "Stessa pianta combinata di kamoshida-04: l'enigma delle leve per ottenere la mappa del castello ('pull the correct order of switches to get the map') è annotato nello stesso schema."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-06-corridoio-delle-sbarre-enigma-delle-leve/0",
+     "x": 32.0,
+     "y": 49.0,
+     "confidenza": "bassa",
+     "etichetta": "(sala con motivo circolare)",
+     "nota": "Nessuna icona esplicita per l'enigma delle leve/urna; posizione dedotta dalla sala con motivo puntinato circolare, subito dopo le scale di accesso al 2P, coerente con la descrizione testuale ('poco do"
+    },
+    {
+     "punto": "kamoshida-06-corridoio-delle-sbarre-enigma-delle-leve/1",
+     "x": 59.0,
+     "y": 86.0,
+     "confidenza": "alta",
+     "etichetta": "防具：夜警の胸当て",
+     "nota": "Icona di forziere chiuso (lucchetto rosa/magenta) con etichetta «防具：夜警の胸当て» (Armatura da guardia notturna), posta esattamente di fronte alla Safe Room — corrispondenza diretta col forziere chiuso 'Arm"
+    }
    ]
   },
   {
@@ -159,7 +218,8 @@
      "altezza": 533,
      "note": "Stessa pianta combinata di kamoshida-04 (la Sala Centrale 2P è il nodo centrale dello schema)."
     }
-   ]
+   ],
+   "marcatori": []
   },
   {
    "dungeonChiave": "kamoshida",
@@ -186,6 +246,16 @@
      "altezza": 533,
      "note": "Stessa pianta combinata di kamoshida-04; la biblioteca nascosta ('hidden library') è nel tratto orientale dello schema."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-08-sala-da-pranzo-estesa-e-biblioteca/6",
+     "x": 81.0,
+     "y": 43.0,
+     "confidenza": "bassa",
+     "etichetta": "(sala a scaffali)",
+     "nota": "Nessuna etichetta esplicita; posizione dedotta dalla stanza con motivo a barre verticali (scaffalatura) sulla mappa condivisa del 2P, coerente con la descrizione testuale dell'Enigma della Biblioteca "
+    }
    ]
   },
   {
@@ -209,6 +279,24 @@
      "larghezza": 800,
      "altezza": 534,
      "note": "Stessa pianta di kamoshida-05: la Stanza Nascosta con la Medaglia di Kamoshida si trova nell'angolo sud-est di questo schema."
+    }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-09-stanza-nascosta/0",
+     "x": 52.0,
+     "y": 13.0,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Etichetta 【1】 con linea che punta all'imbocco del corridoio destro, in cima alla stanza; corrisponde all'evento di arrivo nella Stanza Nascosta (Medaglia di Kamoshida)."
+    },
+    {
+     "punto": "kamoshida-09-stanza-nascosta/1",
+     "x": 41.0,
+     "y": 60.0,
+     "confidenza": "bassa",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 con linea che punta al punto di fusione dei due corridoi; corrisponde all'evento generico abbinato per posizione all'Ombra sciagura incontrata nel corridoio di ritorno."
     }
    ]
   },
@@ -234,6 +322,16 @@
      "altezza": 533,
      "note": "Pianta dedicata dell'East Building Annex (dépendance)."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-10-edificio-est-dependance/0",
+     "x": 12.0,
+     "y": 71.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' (セーフルーム), confermata anche dal testo di legenda (voce 'percorso', sicura); unico punto app dell'area."
+    }
    ]
   },
   {
@@ -258,6 +356,16 @@
      "altezza": 533,
      "note": "Pianta dedicata della Cappella (East Building Chapel)."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-11-cappella/0",
+     "x": 31.0,
+     "y": 26.0,
+     "confidenza": "media",
+     "etichetta": "△ (icona di pericolo)",
+     "nota": "Doppia icona triangolare azzurra ('pericolo/nemico forte') lungo il corridoio subito dopo l'ingresso, in corrispondenza della voce di legenda ④ (boss fight contro l'Ufficiale della punizione celeste ="
+    }
    ]
   },
   {
@@ -275,7 +383,25 @@
     "kamoshida-08-sala-da-pranzo-estesa-e-biblioteca"
    ],
    "note": "Mappa dell'intero piano (\"古城２階マップ\") in stile screenshot con etichette colorate per oggetti/forzieri in giapponese; quest'area non ha una pianta dedicata sul percorso critico delle guide consultate (omoteura.com/game-kouryaku.info), quindi si usa la mappa dell'intero piano come riferimento più preciso disponibile. La stessa immagine è condivisa con le altre aree dell'app elencate in \"copreAree\" (stesso piano).",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "kamoshida-12-travi-del-soffitto-della-cattedrale/2",
+     "x": 78.0,
+     "y": 71.0,
+     "confidenza": "alta",
+     "etichetta": "アイテム：ソウルドロップ",
+     "nota": "Sulla mappa condivisa del 2P, icona di forziere con etichetta «アイテム：ソウルドロップ» (Goccia dell'anima); corrisponde al forziere della Goccia dell'anima dell'app."
+    },
+    {
+     "punto": "kamoshida-12-travi-del-soffitto-della-cattedrale/3",
+     "x": 67.5,
+     "y": 39.4,
+     "confidenza": "alta",
+     "etichetta": "防具：（重騎士の）すすけた防具",
+     "nota": "Sulla mappa condivisa del 2P, icona di forziere con etichetta «...すすけた防具» (armatura pesante sporca); corrisponde esattamente a 'Arm. pesante sporca' dell'app."
+    }
+   ]
   },
   {
    "dungeonChiave": "kamoshida",
@@ -298,6 +424,32 @@
      "larghezza": 800,
      "altezza": 533,
      "note": "Pianta dedicata dell'Old Castle Roof (Tetto del vecchio castello)."
+    }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-13-tetto/0",
+     "x": 13.0,
+     "y": 16.0,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Etichetta 【1】 nella mappa 1 (zona d'ingresso sul tetto), unico riferimento numerico per l'evento delle tre guardie; nessuna icona dedicata oltre al numero."
+    },
+    {
+     "punto": "kamoshida-13-tetto/1",
+     "x": 7.0,
+     "y": 66.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-12",
+     "nota": "Quadrato rosso con etichetta «宝2-12» nella mappa 3; corrisponde al forziere dei 3 Magatama maledetto dell'app."
+    },
+    {
+     "punto": "kamoshida-13-tetto/2",
+     "x": 8.0,
+     "y": 94.0,
+     "confidenza": "alta",
+     "etichetta": "イシ2-13",
+     "nota": "Quadrato rosso con etichetta «イシ2-13» nella mappa 4; il testo di legenda lo identifica come «色欲の緑のイシ» (Seme verde della lussuria), riconosciuto autonomamente come punto di tipo volontà (Seme lussuria "
     }
    ]
   },
@@ -323,6 +475,16 @@
      "altezza": 533,
      "note": "Pianta della sezione 'Castle Tower Secret Passage', che include il grande dipinto di Kamoshida (scorciatoia) e l'ascensore/montacarichi."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-14-interno-della-torre-sala-del-dipinto-e-degli-ascensori/1",
+     "x": 46.0,
+     "y": 13.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' (セーフルーム) chiaramente visibile in cima alla sala circolare; riconosciuta autonomamente come Safe Room. Gli altri punti (leve/ascensori, 2 forzieri, miniboss, seme) non sono stati posizion"
+    }
    ]
   },
   {
@@ -347,7 +509,8 @@
      "altezza": 533,
      "note": "Pianta del Castle Tower Low Level (parte bassa della torre centrale). Esiste anche una pianta separata per il Middle Level: https://samurai-gamers.com/wp-content/uploads/2020/01/sg-p5r-kamoshida-palace-4-22-castle-tower-middle-level.jpg (non collegata singolarmente perché l'area 'Torre Centrale' in dungeon.json non distingue i piani)."
     }
-   ]
+   ],
+   "marcatori": []
   },
   {
    "dungeonChiave": "kamoshida",
@@ -370,6 +533,16 @@
      "larghezza": 800,
      "altezza": 533,
      "note": "Pianta del Castle Tower Upper Level: statua di Kamoshida, enigma delle due chiavi (occhio destro/sinistro) e ponte finale sono nello stesso schema."
+    }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-16-sala-della-statua-di-kamoshida-labirinto-delle-chiavi/4",
+     "x": 70.0,
+     "y": 68.0,
+     "confidenza": "media",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 collegata da una linea al corridoio circolare inferiore; corrisponde all'esame della Statua di Kamoshida (enigma occhi/falci)."
     }
    ]
   },
@@ -395,6 +568,24 @@
      "altezza": 533,
      "note": "Stessa pianta di kamoshida-16: il ponte finale è la parte conclusiva dello schema del Castle Tower Upper Level."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-17-ponte-e-corridoi-finali-verso-la-sala-del-trono/0",
+     "x": 42.0,
+     "y": 50.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-20",
+     "nota": "Quadrato rosso con etichetta «宝2-20»; il testo di legenda lo identifica come «息吹のリング» (Anello del respiro), forziere dell'app."
+    },
+    {
+     "punto": "kamoshida-17-ponte-e-corridoi-finali-verso-la-sala-del-trono/3",
+     "x": 77.0,
+     "y": 70.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-22",
+     "nota": "Quadrato rosso con etichetta «宝2-22»; il testo di legenda lo identifica come «洗礼水» (Acqua battesimale, 'ex irraggiungibile'), forziere dell'app."
+    }
    ]
   },
   {
@@ -419,6 +610,16 @@
      "altezza": 533,
      "note": "Pianta dedicata della Throne Room, con il percorso fino alla Stanza del Tesoro."
     }
+   ],
+   "marcatori": [
+    {
+     "punto": "kamoshida-18-sala-del-trono-e-stanza-del-tesoro/1",
+     "x": 23.0,
+     "y": 86.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 nella sezione inferiore (古城・宝物庫); il testo di legenda conferma il combattimento contro «カモシダ・アスモデウス・スグル» = Suguru Asmodeus Kamoshida, il boss finale del Palazzo."
+    }
    ]
   },
   {
@@ -433,7 +634,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"美術館前\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "madarame",
@@ -447,7 +649,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"美術館・1F (特別展示室)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-02-stanza-della-mostra-sp/5",
+     "x": 47.0,
+     "y": 83.0,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Grande etichetta rossa 【1】 al centro della sala circolare con la scultura gigante; il testo di legenda conferma lo scontro con Ippon-Datara + 4 Koppa Tengu (schermaglia del 20 maggio)."
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -461,7 +673,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"美術館・1F (第1展示室)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-03-stanza-della-mostra-1/0",
+     "x": 67.0,
+     "y": 29.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' (セーフルーム); corrisponde alla Prima Safe Room dell'app, riconosciuta autonomamente."
+    },
+    {
+     "punto": "madarame-03-stanza-della-mostra-1/3",
+     "x": 78.0,
+     "y": 32.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-2",
+     "nota": "Quadrato rosso con etichetta «宝2-2». Il testo di legenda scaricato non nomina esplicitamente questo forziere, ma la pagina sorgente omoteura (HTML grezzo consultato per disambiguare) riporta per l'imm"
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -475,7 +705,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"美術館・2F (第2展示室)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "madarame",
@@ -489,7 +720,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"中央庭園\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-05-giardino-centrale/0",
+     "x": 49.0,
+     "y": 94.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' (セーフルーム) in fondo al corridoio verticale; corrisponde alla Safe Room del Giardino centrale, riconosciuta autonomamente."
+    },
+    {
+     "punto": "madarame-05-giardino-centrale/2",
+     "x": 52.0,
+     "y": 32.0,
+     "confidenza": "bassa",
+     "etichetta": "【1】",
+     "nota": "Etichetta 【1】 sulla sala esagonale centrale; il testo di legenda ('evento generico') è stato abbinato dai curatori alla rimozione della Barriera bloccante, senza citazione testuale diretta (confidenza"
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -503,7 +752,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宝物殿・ラウンジ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-06-sala-del-tesoro-atrio/7",
+     "x": 28.0,
+     "y": 89.0,
+     "confidenza": "media",
+     "etichetta": "鍵宝3-4",
+     "nota": "Quadrato rosso con prefisso «鍵» (chiuso a chiave) accanto al forziere 3-5; riconosciuto autonomamente come forziere chiuso (unico dell'area). Il testo di legenda cita per lo stesso gruppo «宝玉輪» (nome "
+    },
+    {
+     "punto": "madarame-06-sala-del-tesoro-atrio/8",
+     "x": 33.0,
+     "y": 89.0,
+     "confidenza": "alta",
+     "etichetta": "宝3-5",
+     "nota": "Quadrato rosso con etichetta «宝3-5» in basso; corrisponde esattamente a «目眩の小ビン×3» (3 Fiale delle vertigini S) citato nella voce di legenda con puntoChiave."
+    },
+    {
+     "punto": "madarame-06-sala-del-tesoro-atrio/9",
+     "x": 35.0,
+     "y": 54.0,
+     "confidenza": "alta",
+     "etichetta": "【11】",
+     "nota": "Etichetta 【11】 sulla sala rettangolare centrale; il testo di legenda conferma «巨大な絵画を調べる» (si esamina il dipinto gigante), corrispondente all'enigma con puntoChiave."
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -517,7 +792,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宝物殿・ギャラリー\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-07-sala-del-tesoro-stanza-intermedia-con-safe-room-e-sala-del-t/4",
+     "x": 60.0,
+     "y": 35.0,
+     "confidenza": "alta",
+     "etichetta": "宝3-6",
+     "nota": "Quadrato rosso con etichetta «宝3-6» esplicitamente citato nel testo di legenda («ヒランヤ...マップ1・宝3-6»); corrisponde al forziere dell'Hiranya."
+    },
+    {
+     "punto": "madarame-07-sala-del-tesoro-stanza-intermedia-con-safe-room-e-sala-del-t/5",
+     "x": 75.0,
+     "y": 21.0,
+     "confidenza": "media",
+     "etichetta": "宝3-7",
+     "nota": "Quadrato rosso con etichetta «宝3-7» esplicitamente citato nel testo di legenda («宝玉...マップ1・宝3-7»); corrisponde al forziere della Perlina."
+    },
+    {
+     "punto": "madarame-07-sala-del-tesoro-stanza-intermedia-con-safe-room-e-sala-del-t/6",
+     "x": 47.0,
+     "y": 95.0,
+     "confidenza": "alta",
+     "etichetta": "イシ3-8",
+     "nota": "Quadrato rosso con etichetta «イシ3-8» in fondo alla mappa 2; corrisponde esattamente al Seme vanità verde (voce di legenda 【6】/▶, «虚飾の緑のイシ»)."
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -531,7 +832,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-08-labirinto-contorto-area-di-distorsione/0",
+     "x": 69.0,
+     "y": 40.0,
+     "confidenza": "alta",
+     "etichetta": "宝3-9",
+     "nota": "Quadrato rosso con etichetta «宝3-9», esplicitamente citato nella voce di legenda 【1】 («黒い石...宝3-9»); corrisponde al forziere della Roccia nera."
+    },
+    {
+     "punto": "madarame-08-labirinto-contorto-area-di-distorsione/3",
+     "x": 21.0,
+     "y": 7.0,
+     "confidenza": "media",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 in alto; il testo di legenda conferma «壁…？を調べる» (si esamina un punto sospetto della parete), corrispondente all'enigma con puntoChiave."
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -545,7 +864,57 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宝物殿・メインホール\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/0",
+     "x": 76.0,
+     "y": 15.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' nella mappa 2 (parte alta, zona d'arrivo); corrisponde alla prima Safe Room — Sala principale, in linea con la voce di legenda 【1】 ('si arriva alla Sala principale, evento')."
+    },
+    {
+     "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/1",
+     "x": 18.0,
+     "y": 68.0,
+     "confidenza": "alta",
+     "etichetta": "【3】",
+     "nota": "Etichetta 【3】 nella mappa 3; il testo di legenda conferma l'esame del terminale nella sala di sorveglianza (voce 【3】〜【4】)."
+    },
+    {
+     "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/2",
+     "x": 18.0,
+     "y": 68.0,
+     "confidenza": "alta",
+     "etichetta": "【3】 (stesso punto)",
+     "nota": "Stessa posizione del terminale di sorveglianza: selezionando tutte le opzioni scatta lo scontro con i 3 Makami nello stesso ambiente (voce di legenda 'idem, Makami')."
+    },
+    {
+     "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/3",
+     "x": 17.0,
+     "y": 80.0,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Etichetta 【1】 nella mappa 3; il testo di legenda conferma il forziere chiuso col Vestito zen (voce 'oggetto chiuso')."
+    },
+    {
+     "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/4",
+     "x": 54.0,
+     "y": 72.0,
+     "confidenza": "bassa",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 nella mappa 3; il testo di legenda abbina qui la seconda Safe Room ('Sala principale superiore') tramite la voce 【5】 ('si preme un interruttore'), ma senza icona 'S' visibile in questo p"
+    },
+    {
+     "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/5",
+     "x": 63.0,
+     "y": 89.0,
+     "confidenza": "alta",
+     "etichetta": "【4】",
+     "nota": "Etichetta 【4】 nella mappa 3; il testo di legenda conferma lo scontro col miniboss Arahabaki (voce 【7】)."
+    }
+   ]
   },
   {
    "dungeonChiave": "madarame",
@@ -559,7 +928,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta pubblicata: è l'area della sola battaglia finale in fuga (cutscene + boss fight a corridoio/cortile obbligato), senza forzieri né esplorazione libera; assente sia su omoteura.com (si ferma a \"Sala del Tesoro - Sala Principale\") sia su game-kouryaku.info (si ferma a map25 \"Sala del Tesoro - Main Hall\") sia su game8.jp.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "kaneshiro",
@@ -573,7 +943,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"金城銀行・入口\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "kaneshiro-01-sala-d-ingresso/7",
+     "x": 78.0,
+     "y": 30.0,
+     "confidenza": "media",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 con linea che punta a est; il testo di legenda conferma «東にある金の豚を調べる» (si esamina il maiale dorato a est), corrispondente al Salvadanaio a porcellino."
+    }
+   ]
   },
   {
    "dungeonChiave": "kaneshiro",
@@ -587,7 +967,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"銀行・行員用通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "kaneshiro-02-corridoio-dei-banchieri/3",
+     "x": 67.0,
+     "y": 20.0,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Etichetta 【1】 sopra la sala con motivo a sbarre (sala di sorveglianza); il testo di legenda conferma lo scontro col Demone Acque Furibondo (Sui-Ki)."
+    }
+   ]
   },
   {
    "dungeonChiave": "kaneshiro",
@@ -601,7 +991,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ロンダリング・オフィス\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "kaneshiro-03-ufficio-riciclaggio/0",
+     "x": 52.0,
+     "y": 62.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona blu 'S' (セーフルーム); corrisponde alla Sala Sicura — Ufficio, riconosciuta autonomamente (unico punto di tipo sicura dell'area)."
+    },
+    {
+     "punto": "kaneshiro-03-ufficio-riciclaggio/2",
+     "x": 37.0,
+     "y": 76.0,
+     "confidenza": "alta",
+     "etichetta": "鍵宝12",
+     "nota": "Quadrato rosso con prefisso «鍵» (chiuso a chiave) ed etichetta «鍵宝12». L'HTML grezzo omoteura consultato per disambiguare conferma: «鍵宝12から「ナックルダスター」を入手したら真に装備させること» = Tirapugni (arma per Makoto/'真'),"
+    },
+    {
+     "punto": "kaneshiro-03-ufficio-riciclaggio/3",
+     "x": 28.0,
+     "y": 88.0,
+     "confidenza": "bassa",
+     "etichetta": "宝11",
+     "nota": "Quadrato rosso con etichetta «宝11». L'HTML grezzo omoteura lo identifica come «地返しの玉» (Sfera del ritorno); il nome non coincide esattamente con 'Perlina rigenerante' dell'app, ma è l'unico forziere (n"
+    }
+   ]
   },
   {
    "dungeonChiave": "kaneshiro",
@@ -615,7 +1031,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"地下大金庫・第2フロア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "kaneshiro-04-caveau-sotterraneo/1",
+     "x": 56.0,
+     "y": 68.0,
+     "confidenza": "alta",
+     "etichetta": "【9】",
+     "nota": "Etichetta 【9】 nella mappa 2. Il testo di legenda per questo punto (pannelli PIN) era stato collegato con un codice (0931) proveniente da un'altra immagine; l'HTML grezzo omoteura relativo a QUESTA imm"
+    },
+    {
+     "punto": "kaneshiro-04-caveau-sotterraneo/5",
+     "x": 49.0,
+     "y": 39.0,
+     "confidenza": "media",
+     "etichetta": "【3】",
+     "nota": "Etichetta 【3】 (la prima di tre «電源ボックスを調べる» consecutive, 【3】-【4】-【5】, tutte nello stesso punto app). Corrisponde al Terminale di controllo — Caveau 1P, verificato tramite l'HTML grezzo omoteura di que"
+    }
+   ]
   },
   {
    "dungeonChiave": "kaneshiro",
@@ -629,7 +1063,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"地下大金庫・第1フロア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "futaba",
@@ -643,7 +1078,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・入口\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "futaba",
@@ -657,7 +1093,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・大回廊\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/0",
+     "x": 44.0,
+     "y": 87.0,
+     "confidenza": "bassa",
+     "etichetta": "【1】",
+     "nota": "Marcatore numerico 【1】 visibile in fondo al corridoio verticale, subito sopra l'etichetta スタート地点 (punto di partenza). La legenda lo abbina a 'Tesoro avvistato' con confidenza semantica bassa (testo ge"
+    },
+    {
+     "punto": "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/1",
+     "x": 44.0,
+     "y": 32.0,
+     "confidenza": "bassa",
+     "etichetta": "【3】",
+     "nota": "Marcatore numerico 【3】 in cima al corridoio verticale, ultimo evento prima del ritorno forzato al mondo reale. Abbinato a 'Ombra di Futaba (blocco narrativo)' con confidenza semantica bassa da legenda"
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -671,7 +1125,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"砂漠の街\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-03-citta-nel-deserto/3",
+     "x": 65.0,
+     "y": 20.0,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Marcatore 【1】 in cima alla struttura a scalinata sulla destra della pianta (unico marcatore presente nell'immagine, che copre solo la seconda parte dell'area). Abbinato dalla legenda a 'si parla con l"
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -685,7 +1149,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・地下空洞\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/5",
+     "x": 67.0,
+     "y": 79.0,
+     "confidenza": "bassa",
+     "etichetta": "宝1-1",
+     "nota": "Il punto app è un GRUPPO di forzieri (Ofuda invincibile, Perlina, Fiale disperazione S x3, Pane sacramentale x3) descritto dal testo con riferimento a '宝1-4'. La pianta (in stile multi-riquadro Mappa1"
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -699,7 +1173,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・石棺の間\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-05-camera-dei-sarcofagi/0",
+     "x": 10.0,
+     "y": 58.0,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Marcatore 【1】 con quadrato arancione (icona oggetto) nella stanza inferiore di Map2; corrisponde a 'si esamina la statua di pietra misteriosa al livello inferiore, si ottiene una Gemma dell'abisso' (p"
+    },
+    {
+     "punto": "futaba-05-camera-dei-sarcofagi/1",
+     "x": 74.0,
+     "y": 81.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 in Map3, con freccia rossa verticale che punta a un quadrato arancione (statua di Anubi); corrisponde alla seconda Gemma dell'abisso."
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -713,7 +1205,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・地下通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-06-corridoio-principale-sezione-centrale/1",
+     "x": 7.0,
+     "y": 81.0,
+     "confidenza": "media",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 in Map2, in cima a una piccola stanza laterale; corrisponde a 'si esamina l'interruttore di pietra al livello superiore' -> puzzle piedistalli/pannello riflettente."
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -727,7 +1229,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・拒絶の間\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-07-camera-del-rigetto-chamber-of-rejection/4",
+     "x": 81.0,
+     "y": 69.0,
+     "confidenza": "media",
+     "etichetta": "イシ1-8",
+     "nota": "Icona 'イシ1-8' (rettangolo con quadrato rosso) riconosciuta per analogia lessicale con i semi di Volontà (イシ) confermati in altre aree del Palazzo. IMPORTANTE: l'immagine mostra marcatori 【6】【7】【8】【9】 "
+    },
+    {
+     "punto": "futaba-07-camera-del-rigetto-chamber-of-rejection/5",
+     "x": 33.0,
+     "y": 70.0,
+     "confidenza": "media",
+     "etichetta": "宝1-5",
+     "nota": "Icona forziere '宝1-5' (non chiusa a chiave), unico forziere semplice dell'area non altrimenti assegnato; riconosciuto per tipo (forziere) senza abbinamento diretto in legenda, a causa del disallineame"
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -741,7 +1261,41 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・自責の間\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-08-camera-del-rimorso-chamber-of-guilt/0",
+     "x": 84.0,
+     "y": 76.0,
+     "confidenza": "alta",
+     "etichetta": "【10】",
+     "nota": "Marcatore 【10】; corrisponde a 'si esamina la tavoletta di pietra al livello superiore' -> Tavoletta geroglifica allineamento rosso/blu."
+    },
+    {
+     "punto": "futaba-08-camera-del-rimorso-chamber-of-guilt/1",
+     "x": 63.0,
+     "y": 51.0,
+     "confidenza": "alta",
+     "etichetta": "【12】",
+     "nota": "Marcatore 【12】, posizionato nella stanza con una griglia di 12 piccoli rettangoli ben visibile (i sarcofagi stessi); corrisponde al Puzzle delle 12 bare/sarcofagi. Anche 【13】 (switch, stessa area) pun"
+    },
+    {
+     "punto": "futaba-08-camera-del-rimorso-chamber-of-guilt/2",
+     "x": 75.0,
+     "y": 70.0,
+     "confidenza": "alta",
+     "etichetta": "【9】",
+     "nota": "Marcatore 【9】; corrisponde a 'evento nel corridoio percorso da un grande masso rotolante' -> Trappola del macigno gigante."
+    },
+    {
+     "punto": "futaba-08-camera-del-rimorso-chamber-of-guilt/5",
+     "x": 62.0,
+     "y": 22.0,
+     "confidenza": "media",
+     "etichetta": "宝1-11",
+     "nota": "Icona forziere '宝1-11' riconosciuta per tipo (forziere), non citata dalla legenda per quest'area -> Forziere Homunculus."
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -755,7 +1309,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・庇護の間\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-09-camera-del-santuario-chamber-of-sanctuary/0",
+     "x": 69.0,
+     "y": 42.0,
+     "confidenza": "media",
+     "etichetta": "鍵宝1-15",
+     "nota": "Icona forziere con prefisso 鍵 (chiuso a chiave) in Map2, riconosciuta per tipo; nessuna voce di legenda per quest'area la cita (tutte le voci hanno puntoChiave null) -> Forziere intrappolato - Veste n"
+    },
+    {
+     "punto": "futaba-09-camera-del-santuario-chamber-of-sanctuary/2",
+     "x": 23.0,
+     "y": 77.0,
+     "confidenza": "media",
+     "etichetta": "イシ1-16",
+     "nota": "Icona 'イシ1-16' in Map3, riconosciuta per pattern lessicale (semi di Volontà); nessuna voce di legenda la cita -> Seme di Volontà dell'Ira (blu)."
+    }
+   ]
   },
   {
    "dungeonChiave": "futaba",
@@ -769,7 +1341,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ピラミッド・虚の間\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "futaba-10-santuario-interno-camera-del-vuoto-area-finale-dato-parzialm/0",
+     "x": 19.0,
+     "y": 34.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 con quadrato arancione sopra; corrisponde allo scontro con il mostro che domina il Palazzo (la Sfinge) e, subito dopo, con Wakaba Isshiki (entrambe le fasi del boss, stessa posizione)."
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -783,7 +1365,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・通用口\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "okumura",
@@ -797,7 +1380,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・施設内通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-02-corridoi-del-complesso/1",
+     "x": 43.0,
+     "y": 12.0,
+     "confidenza": "media",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 nella stanza superiore, vicino a un'icona ottagonale (porta di autenticazione biometrica); corrisponde all'evento che riporta forzatamente al mondo reale -> battaglia di risveglio di Har"
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -811,7 +1404,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・兵舎エリア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "okumura",
@@ -825,7 +1419,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・屋外エリア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-04-dintorni-del-complesso/0",
+     "x": 87.0,
+     "y": 85.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita e inequivocabile vicino allo スタート地点, non citata dalla legenda per quest'area -> Terza Safe Room."
+    },
+    {
+     "punto": "okumura-04-dintorni-del-complesso/2",
+     "x": 44.0,
+     "y": 33.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-5",
+     "nota": "Icona forziere '宝2-5' con etichetta esplicita; corrisponde a 'マジック軟膏×2' -> Forziere Unguento magico x2."
+    },
+    {
+     "punto": "okumura-04-dintorni-del-complesso/3",
+     "x": 47.0,
+     "y": 66.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-4",
+     "nota": "Icona forziere '宝2-4' con etichetta esplicita; corrisponde a '黒い石' -> Forziere Roccia nera."
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -839,7 +1459,49 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"中央工場・搬出ライン\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-05-linea-esportazioni/0",
+     "x": 31.0,
+     "y": 61.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita alla base di Map1 -> Quarta Safe Room."
+    },
+    {
+     "punto": "okumura-05-linea-esportazioni/1",
+     "x": 13.0,
+     "y": 85.0,
+     "confidenza": "bassa",
+     "etichetta": "宝2-6",
+     "nota": "Unico forziere semplice non-mimic rimasto senza assegnazione più specifica in Map2; posizione (raggiungibile lateralmente) non pienamente coerente con la descrizione app ('seconda serie di tubi verso "
+    },
+    {
+     "punto": "okumura-05-linea-esportazioni/2",
+     "x": 27.0,
+     "y": 98.0,
+     "confidenza": "alta",
+     "etichetta": "イシ2-7",
+     "nota": "Icona 'イシ2-7' in Map2, pattern lessicale dei semi di Volontà -> Seme avarizia verde."
+    },
+    {
+     "punto": "okumura-05-linea-esportazioni/3",
+     "x": 70.0,
+     "y": 31.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 in un corridoio verticale con barre colorate (presse/bracci meccanici); corrisponde a 'si esamina una console e si sceglie pausa pranzo' -> Console dei bracci meccanici."
+    },
+    {
+     "punto": "okumura-05-linea-esportazioni/4",
+     "x": 73.0,
+     "y": 17.0,
+     "confidenza": "alta",
+     "etichetta": "鍵宝2-8",
+     "nota": "Icona forziere chiuso a chiave '鍵宝2-8' in Map1, riconosciuta per tipo -> Forziere chiuso a chiave - Ascia Big Bang."
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -853,7 +1515,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"中央工場・製造ライン\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-06-linea-di-produzione/0",
+     "x": 17.0,
+     "y": 69.0,
+     "confidenza": "alta",
+     "etichetta": "【5】",
+     "nota": "Marcatore 【5】 accanto a プレス機B (Pressa B); corrisponde a 'si esamina la console e si sceglie pausa pranzo' -> Console 'Pranzo' e presse idrauliche."
+    },
+    {
+     "punto": "okumura-06-linea-di-produzione/1",
+     "x": 7.0,
+     "y": 83.0,
+     "confidenza": "media",
+     "etichetta": "宝2-9",
+     "nota": "Icona forziere reale (rossa) '宝2-9', unica candidata plausibile nell'area; la legenda cita esplicitamente スナフソウル 宝2-9 (stesso nome giapponese di 'Polvere d'anima') ma con posizione numerica segnalata "
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -867,7 +1547,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"中央工場・廃棄ライン\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-07-linea-di-smaltimento/4",
+     "x": 49.0,
+     "y": 43.0,
+     "confidenza": "media",
+     "etichetta": "【8】",
+     "nota": "Marcatore 【8】 (in rosso, ad indicare uno scontro) nell'unica stanza della pianta; corrisponde a 'avanzando, scontro con 5x Servobot TYPE-Capufficio' -> Ondata di Servobot MDL-CH."
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -881,7 +1571,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・中央工場\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-08-fabbrica-centrale/0",
+     "x": 45.0,
+     "y": 88.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita nella stanza inferiore -> Sesta Safe Room."
+    },
+    {
+     "punto": "okumura-08-fabbrica-centrale/2",
+     "x": 15.0,
+     "y": 70.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-12",
+     "nota": "Icona forziere '宝2-12' con etichetta esplicita, corrisponde esattamente a 'フィジカル軟膏×2' citato dalla legenda -> Forziere Unguento fisico x2."
+    },
+    {
+     "punto": "okumura-08-fabbrica-centrale/3",
+     "x": 77.0,
+     "y": 36.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 nella stanza superiore; corrisponde a 'si esamina una console' -> Camera Stagna e Console di sblocco porte."
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -895,7 +1611,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・搬送ラインエリア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-09-interscambio/1",
+     "x": 56.0,
+     "y": 50.0,
+     "confidenza": "alta",
+     "etichetta": "【3】",
+     "nota": "Marcatore 【3】 su una leva (etichetta Ω); corrisponde a 'si esamina una leva, si sblocca la Camera Stagna Omega blu' -> Enigma delle Camere Stagne Alfa/Omega. Anche 【4】 punta allo stesso punto app (ste"
+    },
+    {
+     "punto": "okumura-09-interscambio/2",
+     "x": 81.0,
+     "y": 19.0,
+     "confidenza": "alta",
+     "etichetta": "【5】",
+     "nota": "Marcatore 【5】 (in rosso) in cima a un corridoio verticale; corrisponde a 'si avanza e si sceglie Andiamo, scontro con il Salvatore eretico' -> miniboss Primo Sacerdote (Melchizedek)."
+    }
+   ]
   },
   {
    "dungeonChiave": "okumura",
@@ -909,7 +1643,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"宇宙基地・兵器製造エリア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "okumura-10-produzione-armamenti/0",
+     "x": 89.0,
+     "y": 74.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita, posizione preferita rispetto al marcatore 【1】 della legenda (che ha confidenza bassa ed è posizionato più in basso, su un evento generico d'arrivo) -> Ottava Safe Room (final"
+    },
+    {
+     "punto": "okumura-10-produzione-armamenti/1",
+     "x": 57.0,
+     "y": 85.0,
+     "confidenza": "alta",
+     "etichetta": "鍵宝2-15",
+     "nota": "Icona forziere chiuso a chiave '鍵宝2-15' con etichetta esplicita, corrisponde esattamente a 'si ottiene la Tuta spaziale protettiva' citato dalla legenda -> Forziere chiuso a chiave - Tuta spaziale."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -923,7 +1675,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"カジノ・入口\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "niijima",
@@ -937,7 +1690,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"カジノ・メインフロア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-02-piano-terra/0",
+     "x": 41.0,
+     "y": 94.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita alla base di Map2 (stanza circolare a petali); non citata dalla legenda (unica voce riguarda solo l'ascensore d'uscita) -> Sala sicura piano terra."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -951,7 +1714,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"カジノ・従業員通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-03-area-riservata-allo-staff-parte-i/0",
+     "x": 26.0,
+     "y": 7.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita in alto a sinistra; posizione preferita rispetto al marcatore 【1】 della legenda (confidenza media, posizione diversa in basso a destra) -> Sala sicura Staff I."
+    },
+    {
+     "punto": "niijima-03-area-riservata-allo-staff-parte-i/1",
+     "x": 7.0,
+     "y": 39.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 (in rosso); corrisponde a 'si sceglie di sfondare combattendo, scontro con 2x Regina che ride nella notte eterna' -> miniboss Regina di Mezzanotte x2."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -965,7 +1746,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"カジノ・従業員通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-04-area-riservata-allo-staff-parte-ii/3",
+     "x": 35.0,
+     "y": 89.0,
+     "confidenza": "media",
+     "etichetta": "【3】",
+     "nota": "Marcatore 【3】 adiacente a un piccolo cancello/gate disegnato sulla pianta; corrisponde a 'si esamina il lettore di tessere' -> Gate con lettore di Tessera socio. Anche 【4】 (più a nord) punta allo stes"
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -979,7 +1770,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"カジノ・従業員通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-05-area-riservata-allo-staff-parte-iii/0",
+     "x": 26.0,
+     "y": 27.0,
+     "confidenza": "media",
+     "etichetta": "【7】",
+     "nota": "Marcatore 【7】, vicino a una struttura a griglia/condotto presso lo スタート地点; corrisponde a 'si esamina il lettore di tessere' -> Terminale di controllo VERDE (corrispondenza già segnalata come non verif"
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -993,7 +1794,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"メンバーズフロア・ロビー\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-06-lobby-piano-riservato-ai-soci/0",
+     "x": 10.0,
+     "y": 51.0,
+     "confidenza": "alta",
+     "etichetta": "S",
+     "nota": "Icona S/セーフルーム esplicita a ovest; posizione preferita rispetto al marcatore 【1】 della legenda (confidenza media) -> Sala sicura Lobby soci."
+    },
+    {
+     "punto": "niijima-06-lobby-piano-riservato-ai-soci/1",
+     "x": 39.0,
+     "y": 89.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Marcatore 【2】 in basso; corrisponde a 'si parla con l'addetto al banco, si ottengono 1000 monete e la mappa' -> Cassiere Ombra."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1007,7 +1826,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ダイスゲーム・ルーム\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-07-area-dadi-parte-i/0",
+     "x": 23.0,
+     "y": 55.0,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Marcatore 【1】 vicino allo スタート地点; corrisponde a 'arrivando nella sala scatta un evento' -> Minigioco dei dadi."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1021,7 +1850,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ダイスゲーム・ルーム\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-08-area-dadi-parte-ii/0",
+     "x": 62.0,
+     "y": 35.0,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Marcatore 【1】 (in rosso); corrisponde a 'si sceglie di colpire tutto insieme, scontro col Necromante vagabondo' -> miniboss Generale necromante (Nebiros)."
+    },
+    {
+     "punto": "niijima-08-area-dadi-parte-ii/2",
+     "x": 42.0,
+     "y": 35.0,
+     "confidenza": "alta",
+     "etichetta": "【3】",
+     "nota": "Marcatore 【3】; corrisponde a 'si gioca ai dadi nella stanza manomessa' -> Terminali di controllo dadi."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1035,7 +1882,41 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"スロットルーム\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-09-stanza-slot-machine-1/0",
+     "x": 86.0,
+     "y": 19.0,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Marcatore 【1】 (in rosso) presso lo スタート地点; corrisponde a 'entrando nella sala slot, scontro con l'Avvoltoio arrogante' -> miniboss Jatayu."
+    },
+    {
+     "punto": "niijima-09-stanza-slot-machine-1/1",
+     "x": 84.0,
+     "y": 53.0,
+     "confidenza": "alta",
+     "etichetta": "宝2-8",
+     "nota": "Icona forziere '宝2-8' (Map2). Il testo di legenda cita sia 宝2-8 (Hiranya) sia 宝2-9 (Incenso della fortuna, Map1, x=38 y=23) per lo stesso punto app (gruppo forziere zona elevata est); scelto 宝2-8 come"
+    },
+    {
+     "punto": "niijima-09-stanza-slot-machine-1/5",
+     "x": 19.0,
+     "y": 84.0,
+     "confidenza": "media",
+     "etichetta": "【5】",
+     "nota": "Marcatore 【5】 in Map3; corrisponde a 'si esamina il terminale di controllo' -> Terminale di controllo ROSSO."
+    },
+    {
+     "punto": "niijima-09-stanza-slot-machine-1/6",
+     "x": 8.0,
+     "y": 61.0,
+     "confidenza": "alta",
+     "etichetta": "イシ2-10",
+     "nota": "Icona 'イシ2-10' in Map2, con etichetta esplicita corrispondente esattamente al testo di legenda -> Seme Invidia Verde."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1049,7 +1930,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"スロットルーム\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-10-stanza-slot-machine-2/2",
+     "x": 17.0,
+     "y": 78.0,
+     "confidenza": "alta",
+     "etichetta": "【9】",
+     "nota": "Marcatore 【9】 presso lo スタート地点 in Map2; corrisponde a 'si esamina la slot machine gigante e si sceglie Lascia fare a me' -> Slot machine gigante."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1063,7 +1954,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ハイレートフロア・ロビー\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-11-lobby-piano-puntate-alte/0",
+     "x": 73.0,
+     "y": 89.0,
+     "confidenza": "alta",
+     "etichetta": "鍵宝3-1",
+     "nota": "Icona forziere chiuso a chiave '鍵宝3-1' con etichetta esplicita, corrisponde esattamente a 'si ottiene il Pugnale reale' citato dalla legenda -> Forziere chiuso Piano Puntate. Unico punto app di quest'"
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1077,7 +1978,41 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"バトルアリーナ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-12-arena-combattimenti/0",
+     "x": 86.0,
+     "y": 50.0,
+     "confidenza": "alta",
+     "etichetta": "【4】",
+     "nota": "Centro del cerchio (il ring dell'arena), a cui punta il marcatore 【4】; corrisponde all'ingresso nel ring -> Round 1, due Ganesha. Un solo marcatore visivo copre 4 punti app in sequenza narrativa (roun"
+    },
+    {
+     "punto": "niijima-12-arena-combattimenti/1",
+     "x": 86.0,
+     "y": 50.0,
+     "confidenza": "alta",
+     "etichetta": "【4】",
+     "nota": "Stessa posizione del ring (vedi punto 0) -> Round 2, tre streghe del sabba (Rangda), scontro immediatamente successivo nello stesso ring."
+    },
+    {
+     "punto": "niijima-12-arena-combattimenti/2",
+     "x": 86.0,
+     "y": 50.0,
+     "confidenza": "alta",
+     "etichetta": "【4】",
+     "nota": "Stessa posizione del ring (vedi punto 0) -> Round 3, Signore del tuono (Thor), scontro immediatamente successivo nello stesso ring."
+    },
+    {
+     "punto": "niijima-12-arena-combattimenti/4",
+     "x": 86.0,
+     "y": 50.0,
+     "confidenza": "alta",
+     "etichetta": "【4】",
+     "nota": "Stessa posizione del ring (vedi punto 0) -> ricompensa di 100.000 monete al completamento dei tre round."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1091,7 +2026,49 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"ハウス・オブ・ダークネス\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-13-oscura-dimora/0",
+     "x": 9.0,
+     "y": 81.0,
+     "confidenza": "alta",
+     "etichetta": "【6】",
+     "nota": "Marcatore 【6】 (in rosso, Map2); corrisponde a 'avanzando, scontro con il Perfido re dei serpenti' -> miniboss Re dei serpenti (Raja Naga)."
+    },
+    {
+     "punto": "niijima-13-oscura-dimora/1",
+     "x": 64.0,
+     "y": 32.0,
+     "confidenza": "alta",
+     "etichetta": "宝3-3",
+     "nota": "Icona forziere '宝3-3' con etichetta esplicita; corrisponde a 'ウィジャ盤' citato dalla legenda -> Forziere Tavola Ouija."
+    },
+    {
+     "punto": "niijima-13-oscura-dimora/2",
+     "x": 36.0,
+     "y": 14.0,
+     "confidenza": "alta",
+     "etichetta": "宝3-5",
+     "nota": "Icona forziere '宝3-5' con etichetta esplicita; corrisponde a '黒い小刀' citato dalla legenda -> Forziere Kogatana nera."
+    },
+    {
+     "punto": "niijima-13-oscura-dimora/3",
+     "x": 10.0,
+     "y": 77.0,
+     "confidenza": "media",
+     "etichetta": "鍵宝3-7",
+     "nota": "Icona forziere chiuso '鍵宝3-7' con etichetta esplicita (Map2); corrisponde a 'ソウルフード' citato dalla legenda -> Forziere chiuso Pane per l'anima."
+    },
+    {
+     "punto": "niijima-13-oscura-dimora/4",
+     "x": 17.0,
+     "y": 30.0,
+     "confidenza": "alta",
+     "etichetta": "鍵宝3-6",
+     "nota": "Icona forziere chiuso '鍵宝3-6' con etichetta esplicita; corrisponde a '勝負師のワイシャツ' citato dalla legenda -> Forziere chiuso Camicia d'azzardo."
+    }
+   ]
   },
   {
    "dungeonChiave": "niijima",
@@ -1105,7 +2082,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"カジノ・支配人エリア\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "niijima-14-direzione-sala-del-boss/0",
+     "x": 51.0,
+     "y": 24.0,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Marcatore 【1】; corrisponde a 'avanzando nell'area della Direzione scatta un evento' -> Ombra di Sae Niijima, Fase 1 (confidenza media già in legenda)."
+    },
+    {
+     "punto": "niijima-14-direzione-sala-del-boss/1",
+     "x": 51.0,
+     "y": 24.0,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Stessa posizione della Fase 1 (nessun marcatore distinto per la Fase 2 nella pianta, che non descrive le fasi in dettaglio); assegnata per continuità diretta dello stesso scontro nella stessa stanza. "
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1119,7 +2114,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・フロントデッキ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-01-passaggio-centrale-sala-d-ingresso/0",
+     "x": 90.4,
+     "y": 56.9,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Unica voce di legenda della pianta (minima, solo transizione): esaminando la porta principale si viene condotti alla sala successiva dove si attiva la Stanza di Velluto, coerente col punto sicura 'Saf"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1133,7 +2138,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・中央ホール\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-02-sala-centrale/3",
+     "x": 30.2,
+     "y": 78.0,
+     "confidenza": "media",
+     "etichetta": "宝魔 (icona forziere arancione)",
+     "nota": "Nessuna voce di legenda testuale ha puntoChiave per quest'area. Riconosciuto un riquadro arancione (icona tipica di forziere/scrigno nelle chart map di omoteura) con etichetta JP '宝魔' collegata da una"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1147,7 +2162,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・レストラン\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-03-ristorante/0",
+     "x": 83.6,
+     "y": 62.8,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Pianta minima a striscia orizzontale. 【1】 in basso a destra, unico evento dell'area, abbinato con cautela (confidenza originale media) al miniboss Politico Ooe."
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1161,7 +2186,49 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・右舷中層客室通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-04-corridoio-mezzavia-tribordo/0",
+     "x": 41.2,
+     "y": 76.1,
+     "confidenza": "media",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "La voce di legenda 【1】 (puntoChiave assegnato a questo punto, confidenza originale bassa) è posizionata vicino all'ingresso della sala grigia delle statue, NON sopra l'icona 'S' chiaramente visibile p"
+    },
+    {
+     "punto": "shido-04-corridoio-mezzavia-tribordo/1",
+     "x": 48.9,
+     "y": 13.6,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Stanzino in alto a sinistra raggiungibile da un corridoio dedicato; contiene un'icona quadrata arancione (l'interruttore) accanto all'etichetta 【2】 ('si esamina l'interruttore'), corrispondenza testua"
+    },
+    {
+     "punto": "shido-04-corridoio-mezzavia-tribordo/5",
+     "x": 16.5,
+     "y": 61.1,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Sul percorso sono presenti 3 icone quadrate arancioni non etichettate, in numero uguale ai 3 forzieri dell'area (punti 5,6,7); questa è la più vicina al punto di partenza. A"
+    },
+    {
+     "punto": "shido-04-corridoio-mezzavia-tribordo/6",
+     "x": 92.2,
+     "y": 39.6,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona quadrata arancione sul corridoio che porta alla stanza sul lato destro della pianta, coerente con la descrizione 'lungo il percorso verso l'ascensore per Ponte Piscina"
+    },
+    {
+     "punto": "shido-04-corridoio-mezzavia-tribordo/7",
+     "x": 65.7,
+     "y": 95.6,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona quadrata arancione sul corridoio inferiore, raggiungibile solo passando per la sala centrale delle statue (coerente con 'stanza dopo aver disattivato le statue'). Asse"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1175,7 +2242,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・プールデッキ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-05-ponte-piscina/0",
+     "x": 25.0,
+     "y": 40.0,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Nessuna voce di legenda testuale disponibile per quest'area (anomalia di parsing segnalata in legende.json). Icona 'S' blu chiaramente visibile e inequivocabile in una stanzetta in basso nella sala su"
+    },
+    {
+     "punto": "shido-05-ponte-piscina/2",
+     "x": 32.8,
+     "y": 25.6,
+     "confidenza": "media",
+     "etichetta": "鍵宝2-4 (icona rossa)",
+     "nota": "Nessuna voce di legenda testuale. Individuato via analisi pixel un riquadro rosso puro (255,0,0), distinto dai riquadri arancioni, con etichetta JP '鍵宝2-4' (鍵=chiave/lucchetto + 宝=tesoro = forziere ch"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1189,7 +2274,49 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・右舷上層客室通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-06-corridoio-superiore-tribordo/0",
+     "x": 40.8,
+     "y": 46.9,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Nessuna voce di legenda associata (Safe Room senza riscontro puntuale). Icona 'S' blu inequivocabile, individuata isolando il blob di pixel blu puro (0,0,255) corrispondente al carattere."
+    },
+    {
+     "punto": "shido-06-corridoio-superiore-tribordo/1",
+     "x": 61.0,
+     "y": 69.0,
+     "confidenza": "alta",
+     "etichetta": "【6】",
+     "nota": "Punto puzzle 'Doppio pulsante per statue' abbinato da 2 gruppi di voci di legenda ('【3】-【5】' sblocco di 3 porte, confidenza media, e '【6】' esamina interruttore, confidenza alta). Essendo un solo spill"
+    },
+    {
+     "punto": "shido-06-corridoio-superiore-tribordo/2",
+     "x": 63.5,
+     "y": 24.1,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona arancione nella stanza in alto a destra, raggiungibile dal corridoio principale passando vicino alla porta sigillata 【3】; coerente con la descrizione 'stanza raggiunta"
+    },
+    {
+     "punto": "shido-06-corridoio-superiore-tribordo/3",
+     "x": 30.4,
+     "y": 92.2,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona arancione vicino alle sale grigie (statue) in basso; assegnata per esclusione a 'Rasetsu Ofuda' (vicino a un incontro con la Furia nera), confidenza bassa."
+    },
+    {
+     "punto": "shido-06-corridoio-superiore-tribordo/7",
+     "x": 17.0,
+     "y": 44.3,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona arancione vicino alla zona di partenza sul lato ovest della mappa, coerente con 'in fondo a un corridoio ovest' (Idaten Ofuda). Assegnazione per posizione, confidenza "
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1203,7 +2330,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・バックデッキ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-07-ponte-di-poppa/0",
+     "x": 31.9,
+     "y": 89.6,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "La voce 【1】 (confidenza originale bassa, 'arrivando scatta un evento') è posizionata in alto nella sala superiore; preferita l'icona 'S' blu inequivocabile in basso, molto più precisa per la Safe Room"
+    },
+    {
+     "punto": "shido-07-ponte-di-poppa/2",
+     "x": 43.5,
+     "y": 71.9,
+     "confidenza": "alta",
+     "etichetta": "宝2-8 (icona rossa)",
+     "nota": "Corrispondenza diretta: la voce di legenda cita testualmente 'チューインソウル（消費物）宝2-8' (Anima da masticare, forziere 2-8); icona quadrata rossa individuata via analisi pixel esattamente accanto all'etichett"
+    },
+    {
+     "punto": "shido-07-ponte-di-poppa/4",
+     "x": 46.8,
+     "y": 61.0,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Etichetta 【2】 sulla porta verso la Sala Intrattenimento (adiacente a '次のチャート', next chart); corrisponde a 'esaminando la porta, scontro con 2x Guru caprino della setta malvagia' = miniboss Capro nero "
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1217,7 +2370,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・娯楽ホール\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-08-sala-intrattenimento/3",
+     "x": 26.4,
+     "y": 28.8,
+     "confidenza": "media",
+     "etichetta": "鍵宝2-9 (icona rossa)",
+     "nota": "Nessuna voce di legenda (anomalia di parsing). Pianta a 4 mappe verticali impilate (マップ1-4); マップ1 mostra un'icona a spirale (scala a chiocciola) subito dopo la partenza; l'icona rossa 'lucchetto' etic"
+    },
+    {
+     "punto": "shido-08-sala-intrattenimento/4",
+     "x": 34.0,
+     "y": 65.0,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Icona 'S' blu inequivocabile in マップ3, individuata isolando il pixel blu puro del glifo."
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1231,7 +2402,41 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・左舷下層客室通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-09-corridoio-inferiore-babordo/0",
+     "x": 16.0,
+     "y": 80.4,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "'Si preme l'interruttore' (confidenza originale alta). Etichetta accanto a un'area delimitata in rosso con testo 'sconfiggi i nemici presenti qui'."
+    },
+    {
+     "punto": "shido-09-corridoio-inferiore-babordo/1",
+     "x": 77.8,
+     "y": 32.6,
+     "confidenza": "alta",
+     "etichetta": "宝2-10 (icona rossa)",
+     "nota": "Corrispondenza diretta: legenda cita '金剛の札（消費物）宝2-10' (Kongou Ofuda, forziere 2-10); icona quadrata rossa individuata via analisi pixel accanto all'etichetta '宝2-10'."
+    },
+    {
+     "punto": "shido-09-corridoio-inferiore-babordo/2",
+     "x": 84.4,
+     "y": 12.6,
+     "confidenza": "bassa",
+     "etichetta": "icone arancioni (2, non etichettate)",
+     "nota": "Nessun riscontro testuale. Stanzino in alto a destra raggiunto tramite una linea di collegamento (condotto) dal corridoio principale, contenente 2 icone arancioni identiche non etichettate: coerente c"
+    },
+    {
+     "punto": "shido-09-corridoio-inferiore-babordo/4",
+     "x": 42.4,
+     "y": 80.4,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona arancione adiacente alla zona delimitata in rosso 'sconfiggi i nemici qui' (presumibile zona Furia nera), coerente con 'Muschio FR-RS, forziere vicino alla Furia nera'"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1245,7 +2450,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・サイドデッキ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-10-ponte-laterale-parte-i/0",
+     "x": 49.3,
+     "y": 31.6,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Nessuna voce di legenda associata alla Safe Room. Icona 'S' blu ben visibile al centro della striscia di percorso, individuata via analisi pixel."
+    },
+    {
+     "punto": "shido-10-ponte-laterale-parte-i/1",
+     "x": 38.1,
+     "y": 27.7,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "'Avanzando sul Ponte Laterale, scontro con 3x Guru caprino' = Capro nero x3 (Baphomet); corrispondenza esatta (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1259,7 +2482,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・左舷中層客室通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-11-corridoio-mezzavia-babordo/0",
+     "x": 55.7,
+     "y": 76.5,
+     "confidenza": "media",
+     "etichetta": "宝2-13 (icona rossa)",
+     "nota": "La voce '(oggetto)' cita '宝玉輪（consumabile）宝2-13' (Anello di giada) ma il pipeline non l'ha abbinata a nessun punto (puntoChiave nullo, confidenza bassa). È l'unico forziere del testo rimasto senza cor"
+    },
+    {
+     "punto": "shido-11-corridoio-mezzavia-babordo/2",
+     "x": 86.9,
+     "y": 39.4,
+     "confidenza": "alta",
+     "etichetta": "宝2-14 (icona rossa)",
+     "nota": "Voce '▶' (uscita) riporta esplicitamente 'si ottiene il Pane per l'anima dal forziere 2-14'; icona rossa '宝2-14' individuata via analisi pixel nella sala grigia (statue) a est, coerente con 'forziere "
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1273,7 +2514,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・中央ホール\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-12-sala-centrale-seconda-visita-e-ristorante/0",
+     "x": 22.7,
+     "y": 20.8,
+     "confidenza": "media",
+     "etichetta": "【1】",
+     "nota": "Unico punto app dell'area (dialogo col cameriere), abbinato per esclusione all'evento generico d'arrivo (confidenza originale media). Presente anche un'icona 'S' (Safe Room) vicino allo start, ma non "
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1287,7 +2538,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・サイドデッキ\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-13-ponte-laterale-parte-ii/5",
+     "x": 91.9,
+     "y": 19.5,
+     "confidenza": "bassa",
+     "etichetta": "【6】",
+     "nota": "'Si esamina il condotto e si sceglie Proviamoci' abbinato a 'Sala ospiti VIP' (confidenza originale bassa). Immagine è la 3a di una serie (マップ1-4, ordine di percorso 4->3->2->1); le prime 1-2 immagini"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1301,7 +2562,49 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・機関室\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-14-sala-macchine/0",
+     "x": 59.8,
+     "y": 27.5,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "'Scontro con 4x Guru caprino della setta malvagia' = Capro nero x4 (confidenza originale alta)."
+    },
+    {
+     "punto": "shido-14-sala-macchine/3",
+     "x": 33.9,
+     "y": 89.2,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "'Scontro con lo Shadow unico l'Incaricato delle pulizie' = Ombra dello Spazzino, boss (confidenza originale alta)."
+    },
+    {
+     "punto": "shido-14-sala-macchine/4",
+     "x": 40.9,
+     "y": 46.6,
+     "confidenza": "alta",
+     "etichetta": "【3】",
+     "nota": "'Scontro col Generale della lancia magica e col Mastino dell'Ade' (confidenza originale alta)."
+    },
+    {
+     "punto": "shido-14-sala-macchine/5",
+     "x": 40.9,
+     "y": 46.6,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【3】",
+     "nota": "'Subito dopo, scontro con Goro Akechi' (Round 1) -- nessun marcatore numerato proprio sulla pianta: è parte dello stesso scontro a raffica al centro della Sala Macchine iniziato a 【3】, stessa posizion"
+    },
+    {
+     "punto": "shido-14-sala-macchine/6",
+     "x": 40.9,
+     "y": 46.6,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【3】",
+     "nota": "'Infine, scontro con Akechi Goro nella sua vera forma' (Round 2) -- stessa posizione di 【3】/Round 1, nessun marcatore numerato proprio (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1315,7 +2618,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・中央通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-15-passaggio-centrale-uscita/0",
+     "x": 60.0,
+     "y": 57.5,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Unico punto app dell'area; 'si esamina la porta dell'Aula Magna' corrisponde esattamente a 'Porte dell'Aula Magna' (confidenza originale alta). Icona 'S' presente ma non genera spillo: nessun punto si"
+    }
+   ]
   },
   {
    "dungeonChiave": "shido",
@@ -1329,7 +2642,49 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"客船・本会議場\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "shido-16-aula-magna-tesoro-e-boss-finali/0",
+     "x": 62.9,
+     "y": 49.8,
+     "confidenza": "alta",
+     "etichetta": "【1】a",
+     "nota": "Scontro composito unico al centro dell'Aula Magna: 'Bestia Regale del Sacrificio Umano' (prima forma). Tutte le 5 fasi del boss finale condividono la stessa posizione (【1】), essendo un unico scontro a"
+    },
+    {
+     "punto": "shido-16-aula-magna-tesoro-e-boss-finali/1",
+     "x": 62.9,
+     "y": 49.8,
+     "confidenza": "alta",
+     "etichetta": "【1】b",
+     "nota": "'Ali Regali del Sacrificio Umano' (seconda forma, stesso scontro composito, stessa posizione)."
+    },
+    {
+     "punto": "shido-16-aula-magna-tesoro-e-boss-finali/2",
+     "x": 62.9,
+     "y": 49.8,
+     "confidenza": "alta",
+     "etichetta": "【1】c",
+     "nota": "'Tomba Regale del Sacrificio Umano' (terza forma, stesso scontro composito, stessa posizione)."
+    },
+    {
+     "punto": "shido-16-aula-magna-tesoro-e-boss-finali/3",
+     "x": 62.9,
+     "y": 49.8,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【1】",
+     "nota": "'Subito dopo, scontro con Masayoshi Samael Shido' (prima forma), stessa posizione della sequenza."
+    },
+    {
+     "punto": "shido-16-aula-magna-tesoro-e-boss-finali/4",
+     "x": 62.9,
+     "y": 49.8,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【1】",
+     "nota": "'Infine, scontro col vero Masayoshi Samael Shido' (seconda forma, boss finale del gioco), stessa posizione della sequenza."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1343,7 +2698,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・入口\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "iweleth",
@@ -1357,7 +2713,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・獄中通路 (1)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-02-corridoio-della-prigione-parte-i/0",
+     "x": 83.4,
+     "y": 93.2,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Unica icona colorata della pianta, nella sala di partenza; assegnata per esclusione alla Sciabola oscura (raggiunta con rampino da un punto di aggancio), unico forziere dell"
+    },
+    {
+     "punto": "iweleth-02-corridoio-della-prigione-parte-i/3",
+     "x": 27.5,
+     "y": 28.7,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "'Scontro con 2x Salvatore eretico' = Primo sacerdote x2 (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1371,7 +2745,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・内壁 (1)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "iweleth",
@@ -1385,7 +2760,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・獄中通路 (3)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-04-corridoio-della-prigione-parte-ii/1",
+     "x": 52.9,
+     "y": 6.1,
+     "confidenza": "alta",
+     "etichetta": "宝2 (icona rossa)",
+     "nota": "Voce '▶' riporta esplicitamente 'si ottiene la Sacra Sindone dal forziere 2'; unica icona rossa piena della pianta, individuata via analisi pixel vicino all'inizio del percorso."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1399,7 +2784,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・内壁 (2)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "iweleth",
@@ -1413,7 +2799,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・獄中通路 (5)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-06-corridoio-della-prigione-parte-iii/8",
+     "x": 19.3,
+     "y": 37.6,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "'Scontro con 3x Inquisitore senza clemenza' = Inquisitore crudele x3 (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1427,7 +2823,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・神殿内部\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-07-santuario/0",
+     "x": 31.4,
+     "y": 20.8,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "Unico punto app, sequenza scriptata a 3 scontri (Tesoro dei Memento?, Santo Graal, Caroline+Justine) tutti allo stesso puntoChiave (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1441,7 +2847,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"渋谷・駅前広場\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "iweleth",
@@ -1455,7 +2862,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"聖杯に至る道 (1)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "iweleth",
@@ -1469,7 +2877,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"聖杯に至る道 (2)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-10-cammino-per-il-santo-graal-parte-ii/0",
+     "x": 42.2,
+     "y": 24.3,
+     "confidenza": "media",
+     "etichetta": "【2】",
+     "nota": "'Scontro col Purgatore dell'immacolato' abbinato a 'Purificatore del Paradiso' (nome concettualmente vicino ma non identico, confidenza originale media)."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1483,7 +2901,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"聖杯に至る道 (3)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-11-cammino-per-il-santo-graal-parte-iii/0",
+     "x": 77.8,
+     "y": 30.5,
+     "confidenza": "media",
+     "etichetta": "宝4 (icona rossa)",
+     "nota": "Nessun riscontro nel testo di legenda catturato (che cita solo 宝5/宝6, in realtà appartenenti a iweleth-12 per errore di estrazione). Icona rossa '宝4' individuata via analisi pixel, non menzionata nell"
+    },
+    {
+     "punto": "iweleth-11-cammino-per-il-santo-graal-parte-iii/1",
+     "x": 34.8,
+     "y": 26.6,
+     "confidenza": "bassa",
+     "etichetta": "【1】/▶",
+     "nota": "'Scontro con la Guida della fine' abbinato con cautela al Messaggero del Tormento (confidenza originale bassa; la nota segnala possibile alternativa col miniboss di iweleth-12)."
+    }
+   ]
   },
   {
    "dungeonChiave": "iweleth",
@@ -1497,7 +2933,41 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"聖杯に至る道 (4)\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "iweleth-12-cammino-per-il-santo-graal-parte-iv/0",
+     "x": 22.4,
+     "y": 18.5,
+     "confidenza": "alta",
+     "etichetta": "宝5 (icona rossa)",
+     "nota": "Testo di legenda (catturato per errore sotto iweleth-11) cita 'dal forziere 5 si ottiene Soma'. Icona rossa '宝5' individuata via analisi pixel sul ramo sinistro della pianta, coerente con 'forziere su"
+    },
+    {
+     "punto": "iweleth-12-cammino-per-il-santo-graal-parte-iv/1",
+     "x": 74.4,
+     "y": 38.5,
+     "confidenza": "alta",
+     "etichetta": "宝6 (icona rossa)",
+     "nota": "Testo di legenda cita 'dal forziere 6 la Sciarpa della pieta (per Morgana)'. Icona rossa '宝6' individuata via analisi pixel sul ramo destro della pianta, coerente con 'forziere sulla destra'."
+    },
+    {
+     "punto": "iweleth-12-cammino-per-il-santo-graal-parte-iv/4",
+     "x": 81.4,
+     "y": 9.9,
+     "confidenza": "alta",
+     "etichetta": "【1】",
+     "nota": "'Scontro con il Santo Graal' (confidenza originale alta)."
+    },
+    {
+     "punto": "iweleth-12-cammino-per-il-santo-graal-parte-iv/5",
+     "x": 81.4,
+     "y": 9.9,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【1】",
+     "nota": "'Subito dopo, scontro con Yaldabaoth, Dio del Controllo' -- boss finale del gioco, stessa posizione del Santo Graal (scontro consecutivo nella stessa area, confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1511,7 +2981,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・入口\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "maruki",
@@ -1525,7 +2996,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・エントランスホール\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-02-sala-d-ingresso/0",
+     "x": 80.8,
+     "y": 65.9,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Nessuna voce di legenda (anomalia di parsing, testo duplicato da maruki-03). Icona 'S' blu inequivocabile in マップ4, individuata via analisi pixel."
+    },
+    {
+     "punto": "maruki-02-sala-d-ingresso/1",
+     "x": 38.5,
+     "y": 49.4,
+     "confidenza": "media",
+     "etichetta": "宝1-2 (icona rossa)",
+     "nota": "Nessuna voce di legenda. Unica icona rossa della pianta, etichettata '宝1-2', in cima a マップ4 (subito dopo la salita iniziale): coerente con 'Forziere iniziale, a sinistra salendo le scale', primo forzi"
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1539,7 +3028,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・テストトラック\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-03-percorso-di-prova/1",
+     "x": 55.2,
+     "y": 45.0,
+     "confidenza": "alta",
+     "etichetta": "【3】",
+     "nota": "'Scontro con 2x Araldo della depravazione' (confidenza originale alta)."
+    },
+    {
+     "punto": "maruki-03-percorso-di-prova/2",
+     "x": 66.4,
+     "y": 76.5,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "'Scontro con l'Abisso contorto' (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1553,7 +3060,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・連絡通路\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-04-corridoio/1",
+     "x": 34.4,
+     "y": 58.1,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Unica icona colorata della pianta, nella sala raggiunta con il trasferimento forzato dopo 【1】, sul lato ovest: coerente con 'Forziere nella sala retrostante, nella sala a ov"
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1567,7 +3084,8 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・講堂\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "maruki",
@@ -1581,7 +3099,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・倉庫\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-06-ripostiglio/1",
+     "x": 49.6,
+     "y": 64.8,
+     "confidenza": "media",
+     "etichetta": "宝3-3 (icona rossa)",
+     "nota": "Voce '(oggetto)' cita '目眩の小ビン（消費物）宝3-3' (Fialetta di stordimento, confidenza originale media); icona rossa '宝3-3' individuata via analisi pixel e confermata con zoom ravvicinato."
+    },
+    {
+     "punto": "maruki-06-ripostiglio/2",
+     "x": 28.5,
+     "y": 27.7,
+     "confidenza": "media",
+     "etichetta": "宝3-4 (icona rossa)",
+     "nota": "Voce '▶' cita 'si ottiene un Ofuda di forte indebolimento dal forziere 2-4' (confidenza originale alta); l'icona rossa individuata via analisi pixel riporta però l'etichetta '宝3-4' (verificato con zoo"
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1595,7 +3131,57 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"？？？・モニタールーム\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-07-sala-di-controllo/0",
+     "x": 18.7,
+     "y": 61.1,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Nessuna voce di legenda per la Safe Room. Icona 'S' blu chiara vicino allo start, individuata via zoom e verifica pixel."
+    },
+    {
+     "punto": "maruki-07-sala-di-controllo/3",
+     "x": 80.4,
+     "y": 17.8,
+     "confidenza": "alta",
+     "etichetta": "【9】",
+     "nota": "Punto puzzle 'Porta parlante' abbinato da 2 gruppi di voci ('【2】-【3】' esamina il diario x2, media, e '【9】' esamina la porta e risponde 'Il suo amore', alta). Usata la posizione di 【9】, più specifica e"
+    },
+    {
+     "punto": "maruki-07-sala-di-controllo/4",
+     "x": 30.7,
+     "y": 90.2,
+     "confidenza": "media",
+     "etichetta": "宝4-1 (icona rossa)",
+     "nota": "La voce '(oggetti)' cita '宝玉輪（消費物）宝4-1' (Anello di giada) senza puntoChiave assegnato (la legenda lega esplicitamente la voce solo a 'Infini-sciabola', 4-2). Icona '宝4-1' individuata e confermata via "
+    },
+    {
+     "punto": "maruki-07-sala-di-controllo/5",
+     "x": 19.4,
+     "y": 75.0,
+     "confidenza": "alta",
+     "etichetta": "鍵宝4-2 (icona rossa)",
+     "nota": "Voce '(oggetti)' cita 'アンフィニサーベル（明智用近接武器）鍵宝4-2' (Infini-sciabola per Akechi); icona confermata via zoom in マップ2."
+    },
+    {
+     "punto": "maruki-07-sala-di-controllo/6",
+     "x": 7.7,
+     "y": 79.3,
+     "confidenza": "alta",
+     "etichetta": "イシ4-3 (icona rossa)",
+     "nota": "Voce '(idem, Seme rosso)' cita '悲嘆の赤いイシ（貴重品）イシ4-3'; icona confermata via zoom in マップ2."
+    },
+    {
+     "punto": "maruki-07-sala-di-controllo/7",
+     "x": 81.0,
+     "y": 41.5,
+     "confidenza": "alta",
+     "etichetta": "鍵宝4-4 (icona rossa)",
+     "nota": "Voce '(oggetto chiuso)' cita 'ソウルフード×2（消費物）鍵宝4-4'; icona rossa individuata via analisi pixel nella sala esagonale a destra in マップ1."
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1609,7 +3195,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"研究所・研究室棟\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-08-ala-ricerca/0",
+     "x": 56.5,
+     "y": 11.3,
+     "confidenza": "alta",
+     "etichetta": "icona 'S' (セーフルーム)",
+     "nota": "Voce 【1】 (confidenza originale bassa, evento generico d'arrivo) posizionata lontano, alla partenza; preferita l'icona 'S' blu inequivocabile, coerente con 'angolo nord della prima grande stanza'."
+    },
+    {
+     "punto": "maruki-08-ala-ricerca/1",
+     "x": 62.3,
+     "y": 37.4,
+     "confidenza": "alta",
+     "etichetta": "宝4-5 (icona rossa)",
+     "nota": "Voce '▶' cita 'si ottiene Kongou Ofuda dal forziere 4-5' (confidenza originale alta)."
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1623,7 +3227,17 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"研究所・心理検査室\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-09-sala-visite/4",
+     "x": 64.8,
+     "y": 43.7,
+     "confidenza": "media",
+     "etichetta": "宝4-10 (icona rossa)",
+     "nota": "Nessuna voce di legenda con puntoChiave (testo catturato appartiene alla Sala di supporto successiva). Unica icona rossa della pianta, etichettata '宝4-10', non menzionata nel testo estratto ma chiaram"
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1637,7 +3251,25 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"研究所・治療室\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-10-sala-di-supporto/2",
+     "x": 27.1,
+     "y": 61.7,
+     "confidenza": "alta",
+     "etichetta": "【13】",
+     "nota": "'Scontro col Gigante fiammeggiante' = Surt (confidenza originale alta)."
+    },
+    {
+     "punto": "maruki-10-sala-di-supporto/3",
+     "x": 18.6,
+     "y": 24.2,
+     "confidenza": "alta",
+     "etichetta": "【14】",
+     "nota": "Punto puzzle 'Porta parlante' abbinato da 2 voci ('【12】' esamina la vecchia TV, media, e '【14】' esamina la porta e risponde 'Voglio diventare quella persona', alta). Usata la posizione di 【14】, più sp"
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1651,7 +3283,33 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"経過モニター・薄明回廊\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-11-corridoio-del-crepuscolo/0",
+     "x": 90.1,
+     "y": 60.3,
+     "confidenza": "alta",
+     "etichetta": "【2】",
+     "nota": "Punto puzzle RGB abbinato da 3 voci (【1】 evento generico bassa, 【2】 'si esamina il dispositivo RGB, si accendono tutti i colori' alta, 【4】 'si spegne il rosso' alta). Usata la posizione di 【2】, prima "
+    },
+    {
+     "punto": "maruki-11-corridoio-del-crepuscolo/2",
+     "x": 47.1,
+     "y": 33.3,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale diretto (l'unico forziere con etichetta esplicita sulla pianta, 宝4-14 'Ofuda di potenziamento istantaneo', non corrisponde per nome a nessuno dei 3 forzieri di quest'area e n"
+    },
+    {
+     "punto": "maruki-11-corridoio-del-crepuscolo/4",
+     "x": 47.5,
+     "y": 68.6,
+     "confidenza": "bassa",
+     "etichetta": "icona arancione (forziere, non etichettata)",
+     "nota": "Nessun riscontro testuale. Icona arancione nella stanza più a sud del bivio: coerente con 'Balsamo vitale, nella zona più a sud dell'area'."
+    }
+   ]
   },
   {
    "dungeonChiave": "maruki",
@@ -1665,7 +3323,41 @@
    "copertura": "area",
    "copreAree": null,
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"成果モデル・エデン\".",
-   "alternative": []
+   "alternative": [],
+   "marcatori": [
+    {
+     "punto": "maruki-12-eden-modello-psi-cognitivo-eden/0",
+     "x": 60.0,
+     "y": 94.1,
+     "confidenza": "alta",
+     "etichetta": "【3】",
+     "nota": "'Sulla cima di Eden, scontro con Maruki, Azathoth e i Tentacoli' (prima fase, confidenza originale alta). Boss finale del gioco a più fasi consecutive nello stesso punto (cima della spirale)."
+    },
+    {
+     "punto": "maruki-12-eden-modello-psi-cognitivo-eden/1",
+     "x": 60.0,
+     "y": 94.1,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【3】",
+     "nota": "'Subito dopo, nuovo scontro con Maruki' (fase degli Editti, confidenza originale alta), stessa posizione della sequenza."
+    },
+    {
+     "punto": "maruki-12-eden-modello-psi-cognitivo-eden/2",
+     "x": 60.0,
+     "y": 94.1,
+     "confidenza": "media",
+     "etichetta": "(continua) dopo 【3】",
+     "nota": "Fase Adam Kadmon a danno ridotto: la nota di legende.json chiarisce che il testo giapponese non la distingue esplicitamente dalla forma finale (trattate come scontro continuo): nessun marcatore propri"
+    },
+    {
+     "punto": "maruki-12-eden-modello-psi-cognitivo-eden/3",
+     "x": 60.0,
+     "y": 94.1,
+     "confidenza": "alta",
+     "etichetta": "(continua) dopo 【3】",
+     "nota": "'Infine scontro con Adam Kadmon' + 'scontro finale solo protagonista' (le due voci relative a questo punto, confidenza originale alta e media), stessa posizione della sequenza -- battaglia di sopravvi"
+    }
+   ]
   },
   {
    "dungeonChiave": "mementos",
@@ -1679,7 +3371,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1693,7 +3386,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1707,7 +3401,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1721,7 +3416,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1735,7 +3431,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1749,7 +3446,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1763,7 +3461,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: i piani regolari di Mementos sono generati proceduralmente ad ogni visita (layout non fisso come nei Palazzi), quindi le guide giapponesi consultate (omoteura.com, game8.jp, game-kouryaku.info, kamigame.jp) forniscono solo indicazioni testuali passo-passo e non piante disegnate. Confermato su 4 fonti indipendenti.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1777,7 +3476,8 @@
    "copertura": "dungeon",
    "copreAree": [],
    "note": "Pianta schematica in stile \"chart\" (percorso a tappe numerate, forzieri e oggetti evidenziati); legenda interamente in giapponese. Sezione originale: \"怠惰の監獄・入口\". Stesso spazio del dungeon \"iweleth\" (12 aree dettagliate in questo JSON); qui riportata la mappa d'ingresso come riferimento aggregato.",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   },
   {
    "dungeonChiave": "mementos",
@@ -1791,7 +3491,8 @@
    "copertura": null,
    "copreAree": null,
    "note": "Nessuna pianta fissa pubblicata: Da'at corrisponde ai piani più profondi di Mementos (oltre il piano 15, sbloccati progressivamente coi timbri di Jose) generati proceduralmente ad ogni visita, non un dungeon a layout fisso. Verificato su omoteura.com (nessuna chart dedicata), game8.jp/p5r/487733 (hub Mementos senza mappe), game-kouryaku.info (pagine mementos testuali senza immagini).",
-   "alternative": []
+   "alternative": [],
+   "marcatori": []
   }
  ]
 }
