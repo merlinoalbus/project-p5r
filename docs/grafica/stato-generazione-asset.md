@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**665 file richiesti: 665 completati e approvati, 0 ancora da consegnare.** La Fase 11.6 (§13), gli spilli (§18) e le mappe (§19) sono completi e validati.
+**667 file richiesti: 665 completati e approvati, 2 ancora da consegnare.** La Fase 11.6 (§13), gli spilli (§18) e le mappe (§19) sono completi e validati.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -132,6 +132,9 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-asakusa.png` — 2048×1536 (§19)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
 
+### guida — sezione Mappe (§20)
+- [ ] **DA CONSEGNARE** — `public/asset/guida/mappe.png` — 256×256 (§20)
+
 ### ui — azioni (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-regalo.png` — 128×128 (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-uscita.png` — 128×128 (§17)
@@ -190,6 +193,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-cicli.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-storico.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-riepilogo.png` — 128×128 (§16)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-oggi.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-calcolatore.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-ricette.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-con.png` — 128×128 (§16)
