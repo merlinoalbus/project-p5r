@@ -151,7 +151,7 @@
     {
      "dote": "perizia",
      "note": null,
-     "condizione": "Completare il minigioco aumenta l'Perizia (Proficiency); numero di note non specificato dalla fonte secondaria"
+     "condizione": "Completare il minigioco aumenta la Perizia (Proficiency); numero di note non specificato dalla fonte secondaria"
     }
    ],
    "altriEffetti": "Tre livelli di difficolta per velocita della palla: Beginner 70km/h (500 yen), Intermediate 90km/h (1.000 yen), Advanced 130km/h (3.000 yen). Il libro 'La scienza del baseball' (Hinokuniya, 2.800 yen, dopo prima visita alle gabbie) sblocca il Terzo Occhio per rallentare il tempo.",
