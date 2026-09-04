@@ -2,9 +2,9 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**521 file richiesti: 501 completati e approvati, 20 ancora da consegnare** (18 della Fase 11.6 e 2 Persona da rigenerare dopo il controllo visivo dell'utente).
+**521 file richiesti: 521 completati e approvati, 0 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
-Persona completate e approvate: **230**. Persona generate e in validazione: **0**. Persona da rigenerare: **2**.
+Persona completate e approvate: **232**. Persona generate e in validazione: **0**. Persona da rigenerare: **0**.
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -41,12 +41,12 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | affinita | 12 | 12 | 0 |
 | doti | 12 | 12 | 0 |
 | ui | 51 | 51 | 0 |
-| illustrazioni | 23 | 15 | 8 |
+| illustrazioni | 23 | 23 | 0 |
 | confidenti | 46 | 46 | 0 |
-| persona | 232 | 230 | 2 |
+| persona | 232 | 232 | 0 |
 | meteo | 17 | 17 | 0 |
 | guida | 15 | 15 | 0 |
-| palazzi | 10 | 0 | 10 |
+| palazzi | 10 | 10 | 0 |
 
 ## Elenco completo
 
@@ -213,7 +213,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orichalcum.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/king-frost.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/asterius-picaro.png` — 768×768
-- [ ] **DA RIGENERARE — feedback visivo dell'utente** — `public/asset/persona/chernobog.png` — 768×768
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/chernobog.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/seiryu.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/forneus.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kali.png` — 768×768
@@ -230,7 +230,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/vasuki.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lakshmi.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/thanatos-picaro.png` — 768×768
-- [ ] **DA RIGENERARE — feedback visivo dell'utente** — `public/asset/persona/byakhee.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/byakhee.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/loa.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/dionysus.png` — 768×768
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mot.png` — 768×768
@@ -296,14 +296,14 @@ Alias localizzato aggiuntivo richiesto dall'utente: `public/asset/persona/wakiny
 
 ### illustrazioni — Fase 13
 
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-obiettivi.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-obiettivi-senza-testo.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-piani.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-piani-senza-testo.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-cicli.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-cicli-senza-testo.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-storico.png` — 1200×800 (§13.5)
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-storico-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-obiettivi.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-obiettivi-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-piani.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-piani-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-cicli.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-cicli-senza-testo.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-storico.png` — 1200×800 (§13.5)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/illustrazioni/vuoto-storico-senza-testo.png` — 1200×800 (§13.5)
 
 ### guida — Fase 13
 
@@ -325,13 +325,13 @@ Alias localizzato aggiuntivo richiesto dall'utente: `public/asset/persona/wakiny
 
 ### palazzi — Fase 13
 
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/kamoshida.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/madarame.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/kaneshiro.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/futaba.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/okumura.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/niijima.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/shido.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/iweleth.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/maruki.png` — 512×512 (§13.3)
-- [ ] **DA CONSEGNARE** — `public/asset/palazzi/mementos.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/kamoshida.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/madarame.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/kaneshiro.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/futaba.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/okumura.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/niijima.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/shido.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/iweleth.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/maruki.png` — 512×512 (§13.3)
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/mementos.png` — 512×512 (§13.3)
