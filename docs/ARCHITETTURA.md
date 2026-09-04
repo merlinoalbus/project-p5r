@@ -211,6 +211,11 @@ differenze e tempo sono JSON in `dati_guida` («completamento»). `completamento
 ### Sfide (Fase 9.2)
 `sfide.json` è consultazione pura in `dati_guida` («sfide»); le domande del game show in TV riusano il modello `domanda` (tipo «altro», chi «Game show in TV») e quindi la spunta per partita.
 
+### Piante delle aree (Fase 7.4)
+Migrazione 020: `pianta_area` (URL, pagina, fonte, licenza, alternative in JSON) e colonna `origine` su `marcatore_mappa`. Le immagini non
+entrano mai nel repository: `scaricaPianta` le importa nell'istanza (ambito «mappa») al primo accesso all'area, provando le fonti
+alternative; gli spilli del seed hanno `origine = 'seed'` e il reseed non tocca quelli fissati dall'utente.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

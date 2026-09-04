@@ -16,6 +16,9 @@ export const impostaMarcatore = (punto: string, posizione: { x: number; y: numbe
 export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 
 /** URL del file di un'immagine. */
+/** Scarica nell'istanza la pianta dell'area dalla guida collegata (immagine mai nel repository). */
+export const scaricaPianta = (area: string): Promise<{ area: string; mime: string; byte: number; fonte: string; url: string }> => apiPost(`/mappe/piante/${encodeURIComponent(area)}/scarica`, {}, { timeoutMs: 60_000, maxRetries: 0 });
+
 export function urlImmagine(ambito: AmbitoImmagine, chiave: string): string {
   return `${API_BASE_URL}/immagini/${encodeURIComponent(ambito)}/${encodeURIComponent(chiave)}/file`;
 }
