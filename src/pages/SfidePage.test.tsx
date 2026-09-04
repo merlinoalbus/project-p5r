@@ -15,10 +15,10 @@ vi.mock('../services/api', () => ({ getSfide }));
 
 const dati: SfideDto = {
   battaglieSfida: { introduzione: 'Sfide del Covo.', sblocco: 'Dopo il finale.', regoleGenerali: 'Punteggio.', fonte: 'https://www.allgamestaff.it/b', elenco: [{ chiave: 'trial', nome: 'Trial', nomeIt: null, regole: 'Cinque livelli.', nemici: ['Piromane delle cripte'], punteggi: null, ricompense: ['Medaglie'], strategia: 'Colpire le debolezze.', livelloConsigliato: null, fonte: 'https://www.allgamestaff.it/t', verificato: true }] },
-  bossSegreti: [{ chiave: 'jose', nome: 'Jose', dove: 'Mementos', quando: 'Con 123 timbri', requisiti: ['123 timbri'], livelloConsigliato: null, mosse: ['Deriva'], resistenze: [], debolezze: [], strategia: ['Cura sempre'], ricompense: ['Trofeo'], fonte: 'https://www.allgamestaff.it/j', verificato: true }],
+  bossSegreti: [{ chiave: 'jose', nome: 'Jose', dove: 'Mementos', quando: 'Con 123 timbri', requisiti: ['123 timbri'], livelloConsigliato: null, mosse: ['Deriva'], resistenze: [], debolezze: [], strategia: ['Cura sempre'], ricompense: ['Trofeo'], statistiche: { hp: 9999, sp: 999 }, nota: null, fonte: 'https://www.allgamestaff.it/j', verificato: true }],
   magnate: { fonte: 'https://www.allgamestaff.it/m', verificato: true, dove: 'Covo dei Ladri', regole: 'Gioco di carte a eliminazione.' },
-  tratti: { introduzione: 'Ogni Persona ha un tratto.', fonte: 'https://www.allgamestaff.it/tr', verificato: true, elenco: [{ nome: 'Stirpe ardente', nomeEn: null, effetto: 'Dimezza il costo in SP delle abilità di Fuoco', categoria: 'Riduzione SP' }, { nome: 'Cuore di ghiaccio', nomeEn: null, effetto: 'Dimezza il costo in SP delle abilità di Ghiaccio', categoria: 'Riduzione SP' }] },
-  quizTv: { introduzione: 'Ogni giovedì.', fonte: 'https://www.allgamestaff.it/q' },
+  tratti: { introduzione: 'Ogni Persona ha un tratto.', fonte: 'https://www.allgamestaff.it/tr', verificato: true, elenco: [{ nome: 'Stirpe ardente', nomeEn: 'Heated Bloodline', effetto: 'Dimezza il costo in SP delle abilità di Fuoco', categoria: 'Riduzione SP', personaggio: null }, { nome: 'Cuore di ghiaccio', nomeEn: null, effetto: 'Dimezza il costo in SP delle abilità di Ghiaccio', categoria: 'Riduzione SP', personaggio: 'Zorro / Mercurio' }] },
+  quizTv: { introduzione: 'Ogni giovedì.', numeroDomandeTotali: 11, fonte: 'https://www.allgamestaff.it/q', verificato: true },
 };
 
 describe('SfidePage', () => {
@@ -30,6 +30,7 @@ describe('SfidePage', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Boss segreti' }));
     expect(screen.getByRole('heading', { name: 'Jose' })).toBeInTheDocument();
     expect(screen.getByText('Cura sempre')).toBeInTheDocument();
+    expect(screen.getByText(/HP 9999/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Magnate' }));
     expect(screen.getByText('Gioco di carte a eliminazione.')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Tratti' }));

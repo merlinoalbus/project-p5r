@@ -256,6 +256,14 @@
     "~20.000 PE",
     "~90.000 ¥"
    ],
+   "statistiche": {
+    "hp": 9999,
+    "sp": 999,
+    "pe": "~20.000",
+    "denaro": "~90.000 ¥",
+    "bottino": "Nessuno"
+   },
+   "nota": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-jose/",
    "verificato": true
   },
@@ -325,6 +333,8 @@
     "La coppa della vittoria (accessorio, \"Urla di trionfo\": ripristina completamente HP/SP dopo battaglia)",
     "Premio \"Riabilitazione futura\" nel Covo dei Ladri"
    ],
+   "statistiche": null,
+   "nota": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-le-gemelle-custodi/",
    "verificato": true
   },
@@ -384,6 +394,14 @@
     "20.000 PE",
     "60.000 ¥"
    ],
+   "statistiche": {
+    "hp": 25000,
+    "sp": 65535,
+    "pe": 20000,
+    "denaro": "60.000 ¥",
+    "bottino": "Nessuno"
+   },
+   "nota": "Boss non esplicitamente richiesto ma incluso come estensione naturale della voce \"Gemelle Custodi\": Lavenza sostituisce Caroline e Justine come prova finale nel terzo semestre di Nuova Partita+ ed è direttamente collegata/linkata dalla pagina delle Gemelle Custodi nella guida italiana.",
    "fonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-lavenza/",
    "verificato": true
   }
@@ -552,548 +570,640 @@
   "elenco": [
    {
     "nome": "Stirpe ardente",
-    "nomeEn": null,
+    "nomeEn": "Heated Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità di Fuoco",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe gelida",
-    "nomeEn": null,
+    "nomeEn": "Frigid Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità di Ghiaccio",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe elettrica",
-    "nomeEn": null,
+    "nomeEn": "Electric Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità Elettriche",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe del vento",
-    "nomeEn": null,
+    "nomeEn": "Wind Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità di Vento",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe psichica",
-    "nomeEn": null,
+    "nomeEn": "Psychic Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità Psicocinetiche",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe atomica",
-    "nomeEn": null,
+    "nomeEn": "Atomic Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità Nucleari",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe sacra",
-    "nomeEn": null,
+    "nomeEn": "Blessed Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità Sacre",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe maledetta",
-    "nomeEn": null,
+    "nomeEn": "Cursed Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità Maledette",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe del messia",
-    "nomeEn": null,
+    "nomeEn": "Savior Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità curative",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Stirpe dell'aiuto",
-    "nomeEn": null,
+    "nomeEn": "Relief Bloodline",
     "effetto": "Dimezza il costo in SP delle abilità di supporto",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Fervore dell'ebbro",
-    "nomeEn": null,
+    "nomeEn": "Drunken Passion",
     "effetto": "Riduce del 75% il costo in SP delle abilità di Fuoco",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Cocito",
-    "nomeEn": null,
+    "nomeEn": "Cocytus",
     "effetto": "Riduce del 75% il costo in SP delle abilità di Ghiaccio",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Dardi convenienti",
-    "nomeEn": null,
+    "nomeEn": "Bargain Bolts",
     "effetto": "Riduce del 75% il costo in SP delle abilità Elettriche",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Ali di Vahana",
-    "nomeEn": null,
+    "nomeEn": "Vahana's Wings",
     "effetto": "Riduce del 75% il costo in SP delle abilità di Vento",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Bened. di Chi You",
-    "nomeEn": null,
+    "nomeEn": "Chi You's Blessing",
     "effetto": "Riduce del 75% il costo in SP delle abilità Psicocinetiche",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Inferno atomico",
-    "nomeEn": null,
+    "nomeEn": "Atomic Hellscape",
     "effetto": "Riduce del 75% il costo in SP delle abilità Nucleari",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Dono del martire",
-    "nomeEn": null,
+    "nomeEn": "Martyr's Gift",
     "effetto": "Riduce del 75% il costo in SP delle abilità Sacre",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Lamento materno",
-    "nomeEn": null,
+    "nomeEn": "Mother's Lament",
     "effetto": "Riduce del 75% il costo in SP delle abilità Maledette",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Grazia della madre",
-    "nomeEn": null,
+    "nomeEn": "Grace of Mother",
     "effetto": "Riduce del 75% il costo in SP delle abilità curative",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Ave Maria",
-    "nomeEn": null,
+    "nomeEn": "Ave Maria",
     "effetto": "Riduce del 75% il costo in SP delle abilità di supporto",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Muori!",
-    "nomeEn": null,
+    "nomeEn": "Just Die",
     "effetto": "Costo in SP ridotto a 0 per le abilità di uccisione istantanea",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Saggezza seducente",
-    "nomeEn": null,
+    "nomeEn": "Allure of Wisdom",
     "effetto": "Riduce del 75% il costo in SP delle abilità magiche",
-    "categoria": "Riduzione SP"
+    "categoria": "Riduzione SP",
+    "personaggio": null
    },
    {
     "nome": "Conduttore termico",
-    "nomeEn": null,
+    "nomeEn": "Thermal Conduct",
     "effetto": "Aumenta le probabilità di infliggere In fiamme dopo una Staffetta",
-    "categoria": "Potenziamento alterazioni"
+    "categoria": "Potenziamento alterazioni",
+    "personaggio": null
    },
    {
     "nome": "Crudele",
-    "nomeEn": null,
+    "nomeEn": "Cold-Blooded",
     "effetto": "Aumenta le probabilità di infliggere Congelamento con un One More",
-    "categoria": "Potenziamento alterazioni"
+    "categoria": "Potenziamento alterazioni",
+    "personaggio": null
    },
    {
     "nome": "Elettric. statica",
-    "nomeEn": null,
+    "nomeEn": "Static Electricity",
     "effetto": "Aumenta le probabilità di infliggere Folgorazione sui nemici atterrati",
-    "categoria": "Potenziamento alterazioni"
+    "categoria": "Potenziamento alterazioni",
+    "personaggio": null
    },
    {
     "nome": "Tanfo",
-    "nomeEn": null,
+    "nomeEn": "Foul Odor",
     "effetto": "Aumenta le probabilità di infliggere alterazioni dopo una Staffetta",
-    "categoria": "Potenziamento alterazioni"
+    "categoria": "Potenziamento alterazioni",
+    "personaggio": null
    },
    {
     "nome": "Nido spettrale",
-    "nomeEn": null,
+    "nomeEn": "Ghost Nest",
     "effetto": "Aumenta le probabilità di infliggere alterazioni sui nemici atterrati",
-    "categoria": "Potenziamento alterazioni"
+    "categoria": "Potenziamento alterazioni",
+    "personaggio": null
    },
    {
     "nome": "Fetore",
-    "nomeEn": null,
+    "nomeEn": "Foul Stench",
     "effetto": "Aumenta le probabilità di infliggere alterazioni negative",
-    "categoria": "Potenziamento alterazioni"
+    "categoria": "Potenziamento alterazioni",
+    "personaggio": null
    },
    {
     "nome": "Peso notevole",
-    "nomeEn": null,
+    "nomeEn": "Striking Weight",
     "effetto": "Potenzia le abilità fisiche del 20%",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Furia immortale",
-    "nomeEn": null,
+    "nomeEn": "Undying Fury",
     "effetto": "Potenzia le abilità fisiche del 30%",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Concentr. intensa",
-    "nomeEn": null,
+    "nomeEn": "Intense Focus",
     "effetto": "Potenzia del 20% le abilità magiche che colpiscono un singolo nemico",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Sguardo possente",
-    "nomeEn": null,
+    "nomeEn": "Mighty Gaze",
     "effetto": "Potenzia del 20% le abilità magiche che colpiscono tutti i nemici",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Combinaz. provetta",
-    "nomeEn": null,
+    "nomeEn": "Skillful Combo",
     "effetto": "Aumenta il danno inflitto dopo una Staffetta",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Stirpe legata",
-    "nomeEn": null,
+    "nomeEn": "Linked Bloodline",
     "effetto": "Aumenta di molto il danno inflitto dopo una Staffetta",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Cercatore alteraz.",
-    "nomeEn": null,
+    "nomeEn": "Ailment Hunter",
     "effetto": "Aumenta l'attacco del 25% per ogni alterazione presente sul nemico",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Malattia letale",
-    "nomeEn": null,
+    "nomeEn": "Deathly Illness",
     "effetto": "Aumenta le probabilità di uccisione istantanea (cumulabile)",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Auspicio",
-    "nomeEn": null,
+    "nomeEn": "Omen",
     "effetto": "Aumenta di molto le probabilità di uccisione istantanea (cumulabile)",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Tecnica provetta",
-    "nomeEn": null,
+    "nomeEn": "Skillful Technique",
     "effetto": "Aumenta il danno tecnico del 25%",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Legge universale",
-    "nomeEn": null,
+    "nomeEn": "Universal Law",
     "effetto": "Aumenta il danno tecnico del 50%",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Implacabile",
-    "nomeEn": null,
+    "nomeEn": "Relentless",
     "effetto": "Aumenta del 50% il danno degli attacchi che sfruttano le debolezze nemiche",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Corpo vendicativo",
-    "nomeEn": null,
+    "nomeEn": "Retaliating Body",
     "effetto": "Raddoppia il danno di Risposta",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Volere della spada",
-    "nomeEn": null,
+    "nomeEn": "Will of the Sword",
     "effetto": "Triplica gli effetti di Carica e Concentrazione",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Fascino pagano",
-    "nomeEn": null,
+    "nomeEn": "Pagan Allure",
     "effetto": "Potenzia le abilità magiche del 50% (non cumulabile oltre il limite di 2 attacchi)",
-    "categoria": "Attacco"
+    "categoria": "Attacco",
+    "personaggio": null
    },
    {
     "nome": "Bocca drenante",
-    "nomeEn": null,
+    "nomeEn": "Draining Mouth",
     "effetto": "Raddoppia gli effetti delle abilità attive e passive di tipo Assorbimento",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Bocca dell'ingordo",
-    "nomeEn": null,
+    "nomeEn": "Gluttonmouth",
     "effetto": "Aumenta del 50% gli effetti di recupero HP su se stessi",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Morso demoniaco",
-    "nomeEn": null,
+    "nomeEn": "Demon's Bite",
     "effetto": "Raddoppia gli effetti di recupero HP su se stessi",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Bocca del gusto",
-    "nomeEn": null,
+    "nomeEn": "Mouth of Savoring",
     "effetto": "Aumenta del 50% gli effetti di recupero SP su se stessi",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Naranari",
-    "nomeEn": null,
+    "nomeEn": "Naranari",
     "effetto": "Raddoppia gli effetti di recupero SP su se stessi",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Ipnosi interna",
-    "nomeEn": null,
+    "nomeEn": "Internal Hypnosis",
     "effetto": "Aumenta di 1 turno la durata delle abilità di supporto su se stessi (estende gli auto-potenziamenti a tutta la squadra)",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Pensiero positivo",
-    "nomeEn": null,
+    "nomeEn": "Positive Thoughts",
     "effetto": "Aumenta di 2 turni la durata delle abilità di supporto su se stessi (estende gli auto-potenziamenti a tutta la squadra)",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Ipnosi potente",
-    "nomeEn": null,
+    "nomeEn": "Potent Hypnosis",
     "effetto": "Aumenta di 1 turno la durata delle abilità di supporto sugli alleati (estende gli auto-potenziamenti a tutta la squadra)",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Ricchezza del loto",
-    "nomeEn": null,
+    "nomeEn": "Wealth of Lotus",
     "effetto": "Aumenta di 2 turni la durata delle abilità di supporto sugli alleati (estende gli auto-potenziamenti a tutta la squadra)",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Anticorpo raro",
-    "nomeEn": null,
+    "nomeEn": "Rare Antibody",
     "effetto": "Diminuisce le probabilità di essere colpiti da alterazioni negative",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Immunità",
-    "nomeEn": null,
+    "nomeEn": "Immunity",
     "effetto": "Previene le alterazioni negative",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Occhi insanguinati",
-    "nomeEn": null,
+    "nomeEn": "Bloodstained Eyes",
     "effetto": "Alta probabilità di schivare gli attacchi dei nemici con alterazioni negative (conferisce anche Tarukaja automatico a inizio battaglia)",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Controllo crisi",
-    "nomeEn": null,
+    "nomeEn": "Crisis Control",
     "effetto": "Diminuisce il danno degli attacchi che sfruttano le debolezze",
-    "categoria": "Difesa"
+    "categoria": "Difesa",
+    "personaggio": null
    },
    {
     "nome": "Bimbo depresso",
-    "nomeEn": null,
+    "nomeEn": "Gloomy Child",
     "effetto": "Allarme pioggia, neve e polline sempre attivo",
-    "categoria": "Altro"
+    "categoria": "Altro",
+    "personaggio": null
    },
    {
     "nome": "Ancora a strappo",
-    "nomeEn": null,
+    "nomeEn": "Pinch Anchor",
     "effetto": "Dopo una Staffetta, permette l'uso delle abilità disponibili se circondati",
-    "categoria": "Altro"
+    "categoria": "Altro",
+    "personaggio": null
    },
    {
     "nome": "Vigore vegetale",
-    "nomeEn": null,
+    "nomeEn": "Vitality of the Tree",
     "effetto": "Permette l'uso delle abilità disponibili solo se circondati",
-    "categoria": "Altro"
+    "categoria": "Altro",
+    "personaggio": null
    },
    {
     "nome": "Recipiente ideale",
-    "nomeEn": null,
+    "nomeEn": "Ultimate Vessel",
     "effetto": "Acquisisce Tratti bonus durante la fusione con un Demone del Tesoro",
-    "categoria": "Altro"
+    "categoria": "Altro",
+    "personaggio": null
    },
    {
     "nome": "Cerchio di tristezza",
-    "nomeEn": null,
+    "nomeEn": "Circle of Sadness",
     "effetto": "Quando Abbattuto, rianima con 1 HP fino a 4 volte per battaglia",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Cuore di ferro",
-    "nomeEn": null,
+    "nomeEn": "Iron Heart",
     "effetto": "Dimezza il costo in SP dopo una Staffetta (attiva Tetrakarn e Makarakarn automaticamente a inizio battaglia)",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Spirito consacrato",
-    "nomeEn": null,
+    "nomeEn": "Hallowed Spirit",
     "effetto": "Raddoppia gli effetti di recupero HP/SP su se stessi",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Creatore divino",
-    "nomeEn": null,
+    "nomeEn": "God Maker",
     "effetto": "Aumenta le probabilità di innescare i Tratti delle Persona degli alleati",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Giullare vuoto",
-    "nomeEn": null,
+    "nomeEn": "Hollow Jester",
     "effetto": "Aumenta l'attacco del 40% per ogni alterazione presente sul nemico",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Bellezza sacra",
-    "nomeEn": null,
+    "nomeEn": "Inviolable Beauty",
     "effetto": "Triplica il danno di Risposta",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Brigata",
-    "nomeEn": null,
+    "nomeEn": "Tag Team",
     "effetto": "Gli oggetti consumabili non vengono consumati se usati dopo una Staffetta",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Toro scatenato",
-    "nomeEn": null,
+    "nomeEn": "Frenzied Bull",
     "effetto": "Aumenta il danno degli attacchi quando i propri HP sono bassi",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Forza sostenitrice",
-    "nomeEn": null,
+    "nomeEn": "Bolstering Force",
     "effetto": "Aumenta l'attacco del 50% durante un One More",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Grazia dell'oliva",
-    "nomeEn": null,
+    "nomeEn": "Grace of the Olive",
     "effetto": "Costi in HP/SP ridotti a 0 durante un One More",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Creatore di paesi",
-    "nomeEn": null,
+    "nomeEn": "Country Maker",
     "effetto": "Aumenta Attacco/Difesa in base al livello di completamento del Registro del Prigioniero",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Presenza confusa",
-    "nomeEn": null,
+    "nomeEn": "Hazy Presence",
     "effetto": "Aumenta le probabilità di innescare gli attacchi concatenati degli alleati",
-    "categoria": "DLC"
+    "categoria": "DLC",
+    "personaggio": null
    },
    {
     "nome": "Presenza fiera",
-    "nomeEn": null,
+    "nomeEn": "Proud Presence",
     "effetto": "Aumenta l'effetto delle abilità curative degli alleati",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Zorro / Mercurio"
    },
    {
     "nome": "Temper. furente",
-    "nomeEn": null,
+    "nomeEn": "Raging Temper",
     "effetto": "Può aumentare gli attacchi fisici degli alleati del 40%",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Captain Kidd / Seiten Taisei"
    },
    {
     "nome": "Anima della magia",
-    "nomeEn": null,
+    "nomeEn": "Mastery of Magic",
     "effetto": "Può diminuire occasionalmente il costo in SP degli attacchi magici di un alleato",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Carmen / Ecate"
    },
    {
     "nome": "Occhi da canaglia",
-    "nomeEn": null,
+    "nomeEn": "Scoundrel Eyes",
     "effetto": "Può aumentare leggermente la probabilità degli alleati di evitare attacchi fisici",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Goemon / Kamu Susano-o"
    },
    {
     "nome": "Patto della natura",
-    "nomeEn": null,
+    "nomeEn": "Gaia Pact",
     "effetto": "+25% probabilità per gli alleati di infliggere In fiamme / Congelamento / Folgorazione",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Ioanna / Anat"
    },
    {
     "nome": "Schema esplosivo",
-    "nomeEn": null,
+    "nomeEn": "Explosive Scheme",
     "effetto": "Gli Assalti possono sconfiggere tutti i nemici e ripristinare il 25% degli HP degli alleati",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Necronomicon / Prometeo"
    },
    {
     "nome": "Temperam. glaciale",
-    "nomeEn": null,
+    "nomeEn": "Icy Glare",
     "effetto": "Diminuisce del 25% le probabilità degli alleati di subire alterazioni negative",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Milady / Astarte"
    },
    {
     "nome": "Spirito tattico",
-    "nomeEn": null,
+    "nomeEn": "Tactical Spirit",
     "effetto": "Può dimezzare il costo in SP delle abilità di supporto degli alleati",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Robin Hood / Loki"
    },
    {
     "nome": "Velo di mezzanotte",
-    "nomeEn": null,
+    "nomeEn": "Veil of Midnight",
     "effetto": "Aumenta le probabilità che un alleato non venga atterrato da un attacco",
-    "categoria": "Alleati (standard)"
+    "categoria": "Alleati (standard)",
+    "personaggio": "Cenerentola / Vanadis"
    },
    {
     "nome": "Presenza maestosa",
-    "nomeEn": null,
+    "nomeEn": "Majestic Presence",
     "effetto": "Aumenta l'effetto delle abilità curative degli alleati; può anche ridurne il costo in SP",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Diego"
    },
    {
     "nome": "Temper. eccentrico",
-    "nomeEn": null,
+    "nomeEn": "Eccentric Temper",
     "effetto": "Può aumentare gli attacchi fisici degli alleati dell'80%",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "William"
    },
    {
     "nome": "Apogeo della magia",
-    "nomeEn": null,
+    "nomeEn": "Pinnacle of Magic",
     "effetto": "Può dimezzare occasionalmente il costo in SP degli attacchi magici di un alleato",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Célestine"
    },
    {
     "nome": "Occhi senza pari",
-    "nomeEn": null,
+    "nomeEn": "Unparalleled Eyes",
     "effetto": "L'alleato ha più probabilità di schivare un attacco fisico",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Gorokichi"
    },
    {
     "nome": "Bacio di Gaia",
-    "nomeEn": null,
+    "nomeEn": "Gaia Blessing",
     "effetto": "+50% probabilità per gli alleati di infliggere In fiamme / Congelamento / Folgorazione",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Agnes"
    },
    {
     "nome": "Schema infinito",
-    "nomeEn": null,
+    "nomeEn": "Infinite Scheme",
     "effetto": "Gli Assalti possono sconfiggere tutti i nemici e ripristinare completamente gli HP degli alleati",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Al Azif"
    },
    {
     "nome": "Cliente stiloso",
-    "nomeEn": null,
+    "nomeEn": "Cool Customer",
     "effetto": "Diminuisce del 50% le probabilità degli alleati di subire alterazioni negative",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Lucy"
    },
    {
     "nome": "Spirito ingegnoso",
-    "nomeEn": null,
+    "nomeEn": "Ingenious Spirit",
     "effetto": "Può dimezzare il costo in SP delle abilità di supporto/divine degli alleati",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Ervardo"
    },
    {
     "nome": "Velo dell'alba",
-    "nomeEn": null,
+    "nomeEn": "Veil of Sunrise",
     "effetto": "Aumenta di molto le probabilità che un alleato non venga atterrato da un attacco",
-    "categoria": "Alleati (terza evoluzione)"
+    "categoria": "Alleati (terza evoluzione)",
+    "personaggio": "Ella"
    }
   ]
  },
  "quizTv": {
   "introduzione": "A partire dal 19 maggio (giovedì), ogni settimana - precisamente il giovedì, salvo eventi di trama - viene trasmesso un programma televisivo speciale visibile dalla TV del Café Leblanc. Durante la visione viene posta una domanda a tempo a cui rispondere rapidamente; rispondendo correttamente si ottiene un aumento della Dote sociale Conoscenza senza consumare la fascia oraria. Le occasioni sono limitate: nel corso della partita si hanno solo 11 possibilità di partecipare al quiz (corrispondenti alle 11 domande elencate). Non ci sono differenze tra le domande/risposte dell'edizione standard e quelle di Royal.",
-  "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/"
+  "numeroDomandeTotali": 11,
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/domande-game-show-in-tv/",
+  "verificato": true
  }
 }
