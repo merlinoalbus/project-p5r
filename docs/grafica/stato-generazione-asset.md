@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**660 file richiesti: 531 completati e approvati, 129 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**660 file richiesti: 558 completati e approvati, 102 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -48,40 +48,40 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | personaggi | 10 | 10 | 0 |
 | ui (schede Partita e Fusione, §16) | 17 | 0 | 17 |
 | ui (azioni, §17) | 46 | 0 | 46 |
-| persona-gruppo (§15) | 27 | 0 | 27 |
+| persona-gruppo (§15) | 27 | 27 | 0 |
 | ui (spilli, §18) | 14 | 0 | 14 |
 | mappe (§19) | 25 | 0 | 25 |
 
 ## Elenco degli asset da consegnare
 
 ### persona-gruppo (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/captain-kidd.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/seiten-taisei.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/william.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/carmen.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ecate.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/celestine.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/zorro.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/mercurio.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/diego.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/goemon.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/kamu-susano-o.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/gorokichi.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ioanna.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/anat.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/agnes.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/necronomicon.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/prometeo.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/al-azif.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/milady.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/astarte.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/lucy.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/robin-hood.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/loki.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ervardo.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/cenerentola.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/vanadis.png` — 768×768 (§15)
-- [ ] **DA CONSEGNARE** — `public/asset/persona-gruppo/ella.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/captain-kidd.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/seiten-taisei.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/william.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/carmen.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/ecate.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/celestine.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/zorro.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/mercurio.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/diego.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/goemon.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/kamu-susano-o.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/gorokichi.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/ioanna.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/anat.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/agnes.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/necronomicon.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/prometeo.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/al-azif.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/milady.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/astarte.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/lucy.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/robin-hood.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/loki.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/ervardo.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/cenerentola.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/vanadis.png` — 768×768 (§15)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/persona-gruppo/ella.png` — 768×768 (§15)
 
 ### ui — spilli (§18)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-passaggio.png` — 128×128 (§18)
