@@ -956,6 +956,35 @@
    "verificato": true,
    "campiDaFontiSecondarie": [],
    "fontiSecondarie": []
+  },
+  {
+   "chiave": "lavenza",
+   "ordine": 26,
+   "nome": "Lavenza",
+   "nomeCodice": null,
+   "confidente": null,
+   "arcano": "Forza",
+   "ruolo": "Assistente della Stanza di Velluto, legata alle gemelle custodi Caroline e Justine; compare nella parte finale della storia e, nel Terzo Semestre di Nuova Partita+, propone la prova più dura del gioco.",
+   "presentazione": null,
+   "persona": [],
+   "armi": {
+    "mischia": null,
+    "distanza": null
+   },
+   "battaglia": null,
+   "scuola": null,
+   "eta": null,
+   "doppiatori": {
+    "jp": null,
+    "en": null
+   },
+   "giocabile": false,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": false,
+   "campiDaFontiSecondarie": [
+    "ruolo"
+   ],
+   "fontiSecondarie": []
   }
  ],
  "gruppi": [
@@ -979,7 +1008,8 @@
    "membri": [
     "igor",
     "caroline",
-    "justine"
+    "justine",
+    "lavenza"
    ]
   },
   {

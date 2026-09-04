@@ -385,17 +385,6 @@
  },
  {
   "confidente": "yusuke",
-  "rango": 1,
-  "requisiti": [
-   {
-    "tipo": "data",
-    "dal": "06-18",
-    "testo": "Disponibile dal 18 giugno: il legame si apre con il messaggio di Yusuke dopo la scuola"
-   }
-  ]
- },
- {
-  "confidente": "yusuke",
   "rango": 4,
   "requisiti": [
    {
@@ -437,11 +426,6 @@
   "confidente": "makoto",
   "rango": 1,
   "requisiti": [
-   {
-    "tipo": "data",
-    "dal": "07-26",
-    "testo": "Disponibile dal 26 luglio (sblocco del Confidente)"
-   },
    {
     "tipo": "dote",
     "dote": "conoscenza",
@@ -536,6 +520,33 @@
     "tipo": "data",
     "dal": "10-31",
     "testo": "Disponibile dal 31 ottobre (sblocco del confidente)"
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 2,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 3,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
    }
   ]
  },
@@ -548,6 +559,55 @@
     "dote": "perizia",
     "rango": 5,
     "testo": "Perizia al rango massimo (Migliore)"
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 5,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 6,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 7,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 8,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
    }
   ]
  },
@@ -559,6 +619,22 @@
     "tipo": "data",
     "dal": "11-25",
     "testo": "Non avviabile prima del 25 novembre"
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "haru",
+  "rango": 10,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
    }
   ]
  },
@@ -728,11 +804,6 @@
   "rango": 1,
   "requisiti": [
    {
-    "tipo": "data",
-    "dal": "04-23",
-    "testo": "Disponibile dal 23 aprile (sblocco automatico al Leblanc)"
-   },
-   {
     "tipo": "palazzo",
     "dungeon": "kamoshida",
     "testo": "Aver completato il Palazzo di Kamoshida"
@@ -788,18 +859,84 @@
   "rango": 1,
   "requisiti": [
    {
-    "tipo": "data",
-    "dal": "06-23",
-    "testo": "Chihaya si incontra a Shinjuku a partire dal 23 giugno (primo incontro/sblocco del Confidente)"
-   },
-   {
     "tipo": "richiesta",
     "richiesta": "Un fidanzato violento",
     "testo": "Completare la richiesta dei Mementos \"Un fidanzato violento\" prima di poter far salire il Rango Confidente"
    },
    {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   },
+   {
     "tipo": "manuale",
     "testo": "Bisogna comprare da Chihaya la Pietra Sacra per 100.000 yen: senza l'acquisto il Confidente non si sviluppa."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 2,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 3,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 4,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 5,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 6,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 7,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
    }
   ]
  },
@@ -811,6 +948,33 @@
     "tipo": "richiesta",
     "richiesta": "Smascheriamo i ciarlatani",
     "testo": "Completare la richiesta dei Mementos \"Smascheriamo i ciarlatani\" (sbloccata durante l'evento intermedio di Rango 7.5) prima di avviare il Rango 8"
+   },
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 9,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
+   }
+  ]
+ },
+ {
+  "confidente": "chihaya",
+  "rango": 10,
+  "requisiti": [
+   {
+    "tipo": "meteo",
+    "condizione": "non-piove",
+    "testo": "Non è mai disponibile in caso di pioggia."
    }
   ]
  },
@@ -862,17 +1026,6 @@
     "tipo": "meteo",
     "condizione": "non-piove",
     "testo": "Non deve piovere: l'evento del rango 9 si svolge all'aperto"
-   }
-  ]
- },
- {
-  "confidente": "takemi",
-  "rango": 1,
-  "requisiti": [
-   {
-    "tipo": "data",
-    "dal": "04-18",
-    "testo": "Disponibile dal 18 aprile: primo incontro alla Clinica medica Takemi di Yongen-Jaya, che sblocca la Confidente"
    }
   ]
  },

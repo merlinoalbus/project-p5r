@@ -1,6 +1,6 @@
 # Semafori dei Confidenti — cosa l'app verifica da sola e cosa resta da confermare a mano
 
-Fonte: `data/seed/confidenti-requisiti.json` (131 ranghi, 160 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nel seed resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
+Fonte: `data/seed/confidenti-requisiti.json` (144 ranghi, 175 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nel seed resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
 
 Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli della guida (data consigliata, Persona dello stesso arcano per il bonus punti, regali, risposte) e le descrizioni di eventi automatici di trama non sono semafori.
 
@@ -8,8 +8,8 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 | Tipo | Quanti | Valutazione |
 |---|---|---|
-| `data` | 57 | automatica: giorno corrente della partita (aprile prima di marzo); grigio se il giorno non è impostato |
-| `meteo` | 43 | automatica dal calendario del giorno corrente (pioggia sì/no); grigio se il meteo del giorno non è noto |
+| `meteo` | 63 | automatica dal calendario del giorno corrente (pioggia sì/no); grigio se il meteo del giorno non è noto |
+| `data` | 52 | automatica: giorno corrente della partita (aprile prima di marzo); grigio se il giorno non è impostato |
 | `dote` | 17 | automatica: rango della Dote nella partita |
 | `palazzo` | 15 | automatica quando il boss del Palazzo è segnato «ottenuto» nella Guida; altrimenti grigio da confermare |
 | `richiesta` | 11 | automatica quando la richiesta dei Mementos è completata nella partita; altrimenti grigio da confermare |
@@ -106,7 +106,6 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 ### Makoto Niijima (Priestess)
 
-- Rango 1 · `data` — `07-26`: Disponibile dal 26 luglio (sblocco del Confidente)
 - Rango 1 · `dote` — `conoscenza`: Conoscenza al rango 3 (Studioso)
 - Rango 2 · `meteo` — `non-piove`: Non deve piovere: l'evento del rango 2 si svolge all'aperto
 - Rango 6 · `dote` — `fascino`: Fascino al rango massimo 5 (Irresistibile): senza di esso il Confidente resta bloccato al rango 5
@@ -115,12 +114,21 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 ### Haru Okumura (Empress)
 
 - Rango 1 · `data` — `10-31`: Disponibile dal 31 ottobre (sblocco del confidente)
+- Rango 1 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 2 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 3 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 - Rango 4 · `dote` — `perizia`: Perizia al rango massimo (Migliore)
+- Rango 4 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 5 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 6 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 7 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 8 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 - Rango 9 · `data` — `11-25`: Non avviabile prima del 25 novembre
+- Rango 9 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 10 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 
 ### Yusuke Kitagawa (Emperor)
 
-- Rango 1 · `data` — `06-18`: Disponibile dal 18 giugno: il legame si apre con il messaggio di Yusuke dopo la scuola
 - Rango 4 · `meteo` — `non-piove`: Non deve piovere: l'evento del Rango 4 si svolge all'aperto (parco)
 - Rango 6 · `dote` — `perizia`: Perizia al Rango 4 (Asso)
 - Rango 6 · `meteo` — `non-piove`: Non deve piovere: l'evento del Rango 6 si svolge all'aperto (vecchia casa di Madarame)
@@ -128,7 +136,6 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 ### Sojiro Sakura (Hierophant)
 
-- Rango 1 · `data` — `04-23`: Disponibile dal 23 aprile (sblocco automatico al Leblanc)
 - Rango 1 · `palazzo` — `kamoshida`: Aver completato il Palazzo di Kamoshida
 - Rango 3 · `manuale`: Aver preparato il caffè al Leblanc almeno una volta
 - Rango 5 · `data` — `08-22`: Non disponibile prima del 22 agosto (scadenza del Palazzo di Futaba)
@@ -178,10 +185,19 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 ### Chihaya Mifune (Fortune)
 
-- Rango 1 · `data` — `06-23`: Chihaya si incontra a Shinjuku a partire dal 23 giugno (primo incontro/sblocco del Confidente)
 - Rango 1 · `richiesta` — `Un fidanzato violento`: Completare la richiesta dei Mementos "Un fidanzato violento" prima di poter far salire il Rango Confidente
+- Rango 1 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 - Rango 1 · `manuale`: Bisogna comprare da Chihaya la Pietra Sacra per 100.000 yen: senza l'acquisto il Confidente non si sviluppa.
+- Rango 2 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 3 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 4 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 5 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 6 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 7 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 - Rango 8 · `richiesta` — `Smascheriamo i ciarlatani`: Completare la richiesta dei Mementos "Smascheriamo i ciarlatani" (sbloccata durante l'evento intermedio di Rango 7.5) prima di avviare il Rango 8
+- Rango 8 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 9 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
+- Rango 10 · `meteo` — `non-piove`: Non è mai disponibile in caso di pioggia.
 
 ### Gemelle Custodi (Caroline e Justine) (Strength)
 
@@ -207,7 +223,6 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 
 ### Tae Takemi (Death)
 
-- Rango 1 · `data` — `04-18`: Disponibile dal 18 aprile: primo incontro alla Clinica medica Takemi di Yongen-Jaya, che sblocca la Confidente
 - Rango 2 · `dote` — `coraggio`: Coraggio al rango 2 (Audace)
 - Rango 6 · `meteo` — `non-piove`: L'evento di rango 6 non e disponibile quando piove
 - Rango 8 · `dote` — `fascino`: Fascino al rango 4 (Carismatico)

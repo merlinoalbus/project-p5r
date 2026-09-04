@@ -407,7 +407,7 @@
   @media (min-width: 420px) { .kpi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (min-width: 768px) { .kpi-griglia { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); } }
   /* Desktop: la carta e larga e le sei tessere su una riga si stiravano fino a 200 px l'una; tre per riga, compatte */
-  @media (min-width: 1024px) { .kpi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 420px; } }
+  @media (min-width: 1360px) { .kpi-griglia { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); max-width: 420px; } }
   .kpi-tile--compatto { padding: 5px 8px; min-width: 0; border-radius: var(--radius-md); }
   .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
@@ -575,18 +575,18 @@
   }
 
   /* ---- Griglia della Home: tre disposizioni diverse, una per formato ----
-     Telefono: tutto incolonnato. Tablet: carta e accessi a tutta larghezza, poi guida e mappa affiancate.
-     Desktop (da 1024): due colonne piene, guida a sinistra e mappa a destra, senza scorrimento di pagina. */
-  .home-griglia { display: grid; gap: 12px; grid-template-areas: "carta" "accessi" "oggi" "mappa"; }
+     Telefono: tutto incolonnato. Tablet: carta a tutta larghezza, poi guida e mappa affiancate.
+     Desktop (da 1360): carta e guida del giorno nella colonna sinistra (5/12), mappa a tutta altezza a destra (7/12).
+     Gli accessi rapidi non compaiono: la barra laterale e la barra in basso li offrono gia. */
+  .home-griglia { display: grid; gap: 12px; grid-template-areas: "carta" "oggi" "mappa"; }
   .home-carta { grid-area: carta; min-width: 0; }
-  .home-accessi { grid-area: accessi; min-width: 0; }
   .home-oggi { grid-area: oggi; min-width: 0; }
   .home-mappa { grid-area: mappa; min-width: 0; }
   @media (min-width: 768px) {
     .home-griglia {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      grid-template-areas: "carta carta" "accessi accessi" "oggi mappa";
-      grid-template-rows: auto auto minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      grid-template-areas: "carta carta" "oggi mappa";
+      grid-template-rows: auto minmax(0, 1fr);
       flex: 1 1 auto;
       min-height: 0;
     }
@@ -595,16 +595,27 @@
     .home-oggi > .riempi-figli { flex: 1 1 auto; min-height: 0; }
     .home-mappa > * { height: 100%; min-height: 0; }
   }
-  @media (min-width: 1024px) {
+  @media (min-width: 1360px) {
     .home-griglia {
-      grid-template-columns: minmax(0, 1fr) 320px;
-      grid-template-areas: "carta accessi" "oggi mappa";
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas: "carta mappa" "oggi mappa";
       grid-template-rows: auto minmax(0, 1fr);
     }
   }
-  @media (min-width: 1280px) {
-    .home-griglia { grid-template-columns: minmax(0, 1fr) 360px; }
+
+  /* ---- Carta della partita in Home: stella e tessere ----
+     La riga stella + tessere e in colonna sul telefono e in riga da 640 px. La larghezza della stella segue la finestra:
+     larghezza sul telefono, altezza da tablet in su (la Home deve restare in una schermata). */
+  .home-carta { container-type: inline-size; }
+  .home-carta__riga { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .home-carta__stella { width: min(58vw, 250px); }
+  @media (min-width: 640px) {
+    .home-carta__riga { flex-direction: row; gap: 20px; }
+    .home-carta__stella { width: min(32vw, 200px); }
   }
+  @media (min-width: 768px) { .home-carta__stella { width: clamp(150px, 20vh, 240px); } }
+  /* Desktop largo: la stella cresce con l'altezza ma non oltre il 55% della carta, cosi le tessere restano accanto */
+  @media (min-width: 1360px) { .home-carta__stella { width: max(230px, min(40vh, 50cqw, 420px)); } }
 
   /* ---- Fila di schede/filtri: una riga sola che scorre sul telefono, a capo dal tablet in su ----
      Dieci schede su 375 px andrebbero a capo quattro volte: qui scorrono in orizzontale, con la sfumatura ai bordi

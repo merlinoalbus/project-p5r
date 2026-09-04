@@ -23,11 +23,13 @@ describe('API personaggi', () => {
   });
   afterAll(() => closeDb());
 
-  it('26 personaggi (10 giocabili con nome in codice), 4 gruppi, Confidenti collegati a chiavi esistenti, fonti allgamestaff', async () => {
+  it('27 personaggi (10 giocabili con nome in codice), 4 gruppi, Confidenti collegati a chiavi esistenti, fonti allgamestaff', async () => {
     const res = await request(app).get('/api/compendio/personaggi');
     expect(res.status).toBe(200);
     const d = res.body.data as PersonaggiDto;
-    expect(d.personaggi).toHaveLength(26);
+    // 27 con Lavenza (Stanza di Velluto, aggiunta il 2026-09-04 su richiesta dell'utente)
+    expect(d.personaggi).toHaveLength(27);
+    expect(d.gruppi.find((g) => g.nome === 'Stanza di Velluto')!.membri.map((m) => (typeof m === 'string' ? m : m.chiave))).toContain('lavenza');
     expect(d.personaggi.filter((p) => p.giocabile)).toHaveLength(10);
     expect(d.personaggi.filter((p) => p.nomeCodice)).toHaveLength(10);
     expect(d.personaggi[0]).toMatchObject({ chiave: 'joker', nomeCodice: 'Joker', arcano: 'Matto', giocabile: true });
@@ -37,7 +39,7 @@ describe('API personaggi', () => {
     const chiavi = new Set(confidenti.map((c) => c.chiave));
     expect(d.personaggi.filter((p) => p.confidente).every((p) => chiavi.has(p.confidente!))).toBe(true);
     expect(d.personaggi.filter((p) => p.confidente)).toHaveLength(22);
-    expect(d.gruppi.map((g) => [g.nome, g.membri.length])).toEqual([['Ladri Fantasma', 10], ['Stanza di Velluto', 3], ['Confidenti', 22], ['Terzo Semestre (Royal)', 3]]);
+    expect(d.gruppi.map((g) => [g.nome, g.membri.length])).toEqual([['Ladri Fantasma', 10], ['Stanza di Velluto', 4], ['Confidenti', 22], ['Terzo Semestre (Royal)', 3]]);
     expect(d.gruppi.every((g) => g.membri.every((m) => d.personaggi.some((p) => p.chiave === m)))).toBe(true);
   });
 });
