@@ -958,6 +958,8 @@ export interface LuogoDto {
   fonte: string;
   /** false = dato da fonte secondaria, non confermato sulla guida italiana. */
   verificato: boolean;
+  /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
+  marcatore: { x: number; y: number } | null;
 }
 
 export interface QuartiereDettaglioDto {
@@ -967,6 +969,11 @@ export interface QuartiereDettaglioDto {
   descrizione: string;
   fonte: string;
   luoghi: LuogoDto[];
+  /** Immagine della mappa presente nell'istanza (ambito «mappa», chiave `citta-<quartiere>`). */
+  mappa: boolean;
+  /** Collegamento alla mappa pubblicata (null se nessuna fonte la offre). */
+  pianta: PiantaAreaDto | null;
+  piantaAssente: string | null;
 }
 
 export interface AttivitaDto {

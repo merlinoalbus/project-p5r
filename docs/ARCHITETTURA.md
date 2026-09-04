@@ -216,6 +216,10 @@ Migrazione 020: `pianta_area` (URL, pagina, fonte, licenza, alternative in JSON)
 entrano mai nel repository: `scaricaPianta` le importa nell'istanza (ambito «mappa») al primo accesso all'area, provando le fonti
 alternative; gli spilli del seed hanno `origine = 'seed'` e il reseed non tocca quelli fissati dall'utente.
 
+### Mappe della città (Fase 8.3)
+Migrazione 022: `pianta_quartiere` e `marcatore_luogo` (origine seed/utente). L'immagine del quartiere vive in `immagine` (ambito «mappa»,
+chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta etichette e colori per tipo e viene riusata per i luoghi.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

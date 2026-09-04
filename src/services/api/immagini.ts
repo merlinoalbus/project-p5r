@@ -16,6 +16,11 @@ export const impostaMarcatore = (punto: string, posizione: { x: number; y: numbe
 export const getImmagini = (ambito?: AmbitoImmagine): Promise<ImmagineDto[]> => apiGet(`/immagini${queryString({ ambito })}`);
 
 /** URL del file di un'immagine. */
+/** Scarica nell'istanza la mappa del quartiere dalla fonte collegata (immagine mai nel repository). */
+export const scaricaPiantaQuartiere = (quartiere: string): Promise<{ quartiere: string; mime: string; byte: number; fonte: string; url: string }> => apiPost(`/mappe/piante-citta/${encodeURIComponent(quartiere)}/scarica`, {}, { timeoutMs: 60_000, maxRetries: 0 });
+/** Fissa (o rimuove con null) lo spillo di un luogo sulla mappa del quartiere. */
+export const impostaMarcatoreLuogo = (luogo: string, pos: { x: number; y: number } | null): Promise<{ x: number; y: number } | null> => apiPut<{ luogo: string; marcatore: { x: number; y: number } | null }>('/mappe/marcatori-luoghi', { luogo, x: pos?.x ?? null, y: pos?.y ?? null }).then((r) => r.marcatore);
+
 /** Scarica nell'istanza la pianta dell'area dalla guida collegata (immagine mai nel repository). */
 export const scaricaPianta = (area: string): Promise<{ area: string; mime: string; byte: number; fonte: string; url: string }> => apiPost(`/mappe/piante/${encodeURIComponent(area)}/scarica`, {}, { timeoutMs: 60_000, maxRetries: 0 });
 
