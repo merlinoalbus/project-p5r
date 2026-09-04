@@ -1,0 +1,687 @@
+{
+ "quartieri": [
+  {
+   "quartiereChiave": "yongen-jaya",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e4/P5_Map_YongenJaya.png/revision/latest?cb=20201213191404",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5_Map_YongenJaya.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Mappa in stile guida strategica ufficiale (illustrazione sagome nere/icone gialle), © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 344,
+   "altezza": 290,
+   "note": "Mappa annotata (stile guida ufficiale, sagome nere e icone gialle) delle vie di Yongen-Jaya, alt text originale \"The map of Yongen-Jaya\". Icone di negozi/servizi senza etichette testuali con i nomi: la tazza di caffè e la croce medica sono plausibilmente riferite a Café Leblanc e Clinica Takemi, ma l'assenza di testo non permette una conferma certa al 100%. Verificata con HEAD/GET (200, image/webp negoziato dal server Thumbor di Fandom; file originale caricato come PNG).",
+   "luoghiVisibili": [
+    "Café Leblanc (icona tazza di caffè, plausibile)",
+    "Clinica Medica Takemi (icona croce medica, plausibile)",
+    "Bagno pubblico (icona vasca da bagno, plausibile)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "yongen-jaya/bagno-pubblico",
+     "x": 90.4,
+     "y": 52.8,
+     "confidenza": "alta",
+     "nota": "icona vapore/fumo tipica dei bagni pubblici giapponesi (onsen)"
+    },
+    {
+     "luogo": "yongen-jaya/batting-cage-yongen",
+     "x": 50.0,
+     "y": 52.4,
+     "confidenza": "media",
+     "nota": "icona interpretata come guantone e mazza da baseball (batting cage); forma non del tutto nitida alla risoluzione della mappa"
+    },
+    {
+     "luogo": "yongen-jaya/cinema-yongen",
+     "x": 21.5,
+     "y": 64.1,
+     "confidenza": "alta",
+     "nota": "icona proiettore cinematografico (bobine); il dato di origine segnala possibile sovrapposizione con l'omonimo cinema di Central Street/Shibuya, dove compare la stessa icona"
+    },
+    {
+     "luogo": "yongen-jaya/clinica-takemi",
+     "x": 45.9,
+     "y": 87.9,
+     "confidenza": "alta",
+     "nota": "icona cuore con croce medica"
+    },
+    {
+     "luogo": "yongen-jaya/distributore-tabaccaio",
+     "x": 54.9,
+     "y": 59.0,
+     "confidenza": "media",
+     "nota": "icona distributore automatico (griglia); sulla mappa compare un secondo distributore identico più a est (non marcato separatamente, stesso tipo di luogo)"
+    },
+    {
+     "luogo": "yongen-jaya/lavanderia-yongen",
+     "x": 78.2,
+     "y": 63.1,
+     "confidenza": "alta",
+     "nota": "icona lavatrice con oblò"
+    },
+    {
+     "luogo": "yongen-jaya/leblanc",
+     "x": 62.5,
+     "y": 49.7,
+     "confidenza": "alta",
+     "nota": "icona tazza di caffè fumante"
+    },
+    {
+     "luogo": "yongen-jaya/negozio-usato-yumenoshima",
+     "x": 52.6,
+     "y": 75.9,
+     "confidenza": "media",
+     "nota": "icona triangolo di riciclo; interpretata come negozio dell'usato, nessuna etichetta testuale di conferma"
+    },
+    {
+     "luogo": "yongen-jaya/super-muramasa",
+     "x": 43.3,
+     "y": 42.8,
+     "confidenza": "media",
+     "nota": "icona carrello della spesa; interpretata come negozio di generi vari/snack, nessuna etichetta testuale di conferma"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "shibuya",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e5/P5_Map_Shibuya1.png/revision/latest?cb=20201213194607",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5_Map_Shibuya1.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Mappa in stile guida strategica ufficiale (illustrazione sagome nere/icone gialle), © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 214,
+   "altezza": 425,
+   "note": "Mappa annotata (stile guida ufficiale) di Shibuya Central Street, la via principale dei negozi. Il quartiere Shibuya nel gioco è diviso in 5 mappe distinte sulla stessa wiki, tutte verificate 200/image: Central Street (questa, usata come principale), Shibuya Station https://static.wikia.nocookie.net/megamitensei/images/9/98/P5_Map_Shibuya2.png/revision/latest?cb=20201213194934 (314x269), Underground Mall https://static.wikia.nocookie.net/megamitensei/images/f/fa/P5_Map_Shibuya3.png/revision/latest?cb=20201213195609 (264x227, corrisponde ai negozi del Centro commerciale sotterraneo dell'app), Underground Walkway https://static.wikia.nocookie.net/megamitensei/images/c/c6/P5_Map_Shibuya4.png/revision/latest?cb=20201213195623 (449x309, corrisponde al Sottopasso dell'app) e Ginza Line Gate https://static.wikia.nocookie.net/megamitensei/images/4/45/P5_Map_Shibuya5.png/revision/latest?cb=20201213195631 (221x135, area stazione/metro).",
+   "luoghiVisibili": [
+    "Big Bang Burger (icona hamburger)",
+    "Untouchable (icona pistola)",
+    "Ore no Beko (icona ciotola)",
+    "Triple Seven (icona negozio 24h)",
+    "Palestra Protein Lovers (icona manubrio)",
+    "Videonoleggio Scarlet (icona disco/DVD)",
+    "Farmacia Aohige (icona capsula)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "shibuya/aohige",
+     "x": 77.1,
+     "y": 34.4,
+     "confidenza": "alta",
+     "nota": "icona capsula, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/big-bang-burger",
+     "x": 81.2,
+     "y": 46.2,
+     "confidenza": "alta",
+     "nota": "icona hamburger, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/diner",
+     "x": 26.9,
+     "y": 75.9,
+     "confidenza": "media",
+     "nota": "icona forchetta e coltello; interpretata come il Diner (unico ristorante non ancora abbinato su questa via), nessuna etichetta testuale"
+    },
+    {
+     "luogo": "shibuya/ore-no-beko",
+     "x": 67.8,
+     "y": 71.2,
+     "confidenza": "alta",
+     "nota": "icona ciotola, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/protein-lovers",
+     "x": 84.7,
+     "y": 53.8,
+     "confidenza": "alta",
+     "nota": "icona manubrio, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/rocinante",
+     "x": 22.8,
+     "y": 31.5,
+     "confidenza": "media",
+     "nota": "icona cesto/paniere; interpretata come negozio di generi vari (Discount Rocinante) secondo la legenda 'cesto = alimentari', nessuna etichetta testuale"
+    },
+    {
+     "luogo": "shibuya/sala-giochi-shibuya",
+     "x": 33.9,
+     "y": 52.1,
+     "confidenza": "bassa",
+     "nota": "icona a cupola con antenna e gambette (stile macchina acchiappapremi), identica a un'icona di Akihabara abbinata con maggiore sicurezza alla sala giochi; qui l'abbinamento resta incerto"
+    },
+    {
+     "luogo": "shibuya/scarlet",
+     "x": 77.1,
+     "y": 88.2,
+     "confidenza": "alta",
+     "nota": "icona disco/DVD, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/taiheido",
+     "x": 37.4,
+     "y": 88.2,
+     "confidenza": "alta",
+     "nota": "icona libro, corrisponde alla legenda 'libro = libreria'"
+    },
+    {
+     "luogo": "shibuya/triple-seven",
+     "x": 34.5,
+     "y": 45.3,
+     "confidenza": "alta",
+     "nota": "icona '24' del minimarket, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shibuya/untouchable",
+     "x": 11.1,
+     "y": 60.0,
+     "confidenza": "alta",
+     "nota": "icona pistola, corrisponde a luoghiVisibili"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "shinjuku",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/e/e4/P5_Map_Shinjuku.png/revision/latest?cb=20201213193001",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5_Map_Shinjuku.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Mappa in stile guida strategica ufficiale (illustrazione sagome nere/icone gialle), © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 215,
+   "altezza": 347,
+   "note": "Mappa annotata (stile guida ufficiale) di Shinjuku. Icone senza etichette testuali: bicchiere da cocktail plausibilmente riferito al Bar Crossroads; icona esagonale con simbolo esoterico in fondo plausibilmente riferita alla bancarella della chiromante Chihaya (coerente con la nota dell'app \"in fondo alla prima strada a destra\").",
+   "luoghiVisibili": [
+    "Bar Crossroads (icona cocktail, plausibile)",
+    "Bancarella della chiromante Chihaya (icona esoterica, plausibile)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "shinjuku/cinema-cult9",
+     "x": 12.8,
+     "y": 83.6,
+     "confidenza": "alta",
+     "nota": "icona proiettore cinematografico (bobine)"
+    },
+    {
+     "luogo": "shinjuku/crossroads",
+     "x": 81.4,
+     "y": 33.1,
+     "confidenza": "alta",
+     "nota": "icona bicchiere da cocktail, corrisponde a luoghiVisibili"
+    },
+    {
+     "luogo": "shinjuku/fioraio-sukebe",
+     "x": 68.6,
+     "y": 42.5,
+     "confidenza": "alta",
+     "nota": "icona fiore, corrisponde alla legenda 'fiore = fioraio' e a luoghiVisibili"
+    },
+    {
+     "luogo": "shinjuku/hinokuniya",
+     "x": 34.9,
+     "y": 42.9,
+     "confidenza": "alta",
+     "nota": "icona libro, unica libreria di Shinjuku"
+    },
+    {
+     "luogo": "shinjuku/mran-mran",
+     "x": 67.9,
+     "y": 49.3,
+     "confidenza": "bassa",
+     "nota": "icona di forma incerta (secchio/brocca), interpretata come negozio di articoli vari; il dato di origine ipotizzava qui un'icona esoterica per la bancarella di Chihaya, ma la forma osservata non è chia"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "kichijoji",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/b/bd/P5R_Kichijoji.jpg/revision/latest?cb=20200209215604",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5R_Kichijoji.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 1920,
+   "altezza": 1080,
+   "note": "ATTENZIONE: non è una mappa cartografica/top-down ma uno screenshot in-game panoramico della via commerciale principale (Sanporoad, cartello visibile \"SANPOROAD\"), con l'etichetta di zona in basso a destra (kanji, \"quartiere dello shopping di Kichijoji\") e mini-mappa HUD visibile nell'angolo. Nessuna mappa annotata stile guida (serie \"P5_Map_*\") è stata trovata per Kichijoji su questo wiki né su megatenwiki.com (bloccato da Cloudflare, non esplorabile per istruzione), game8.co (pagine non indicizzate/404) o scribblinggeek.com (bloccato, HTTP 403). Negozi/insegne specifiche dell'app non leggibili in questo scatto.",
+   "luoghiVisibili": [],
+   "marcatori": []
+  },
+  {
+   "quartiereChiave": "akihabara",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/c/c8/P5_Map_Akihabara.png/revision/latest?cb=20201213193011",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5_Map_Akihabara.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Mappa in stile guida strategica ufficiale (illustrazione sagome nere/icone gialle), © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 207,
+   "altezza": 328,
+   "note": "Mappa annotata (stile guida ufficiale) di Akihabara (Electric Town). Icone di elettronica/negozi senza etichette testuali; presenti icone di distributori automatici, un monitor/TV (plausibile negozio di elettronica), una chiave inglese (plausibile Akiba Electronics) e una figura simile a un robot/action figure (plausibile negozio otaku Tokobushiya o retrogaming Super Baron), non confermabili con certezza.",
+   "luoghiVisibili": [
+    "Distributori automatici speciali (icone vending machine, plausibile)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "akihabara/akiba-electronics",
+     "x": 20.8,
+     "y": 77.4,
+     "confidenza": "media",
+     "nota": "icona spina elettrica con cavo, interpretata come negozio di componenti elettronici, nessuna etichetta testuale"
+    },
+    {
+     "luogo": "akihabara/akindo",
+     "x": 64.0,
+     "y": 16.8,
+     "confidenza": "media",
+     "nota": "icona televisore/monitor, interpretata come megastore di elettronica, nessuna etichetta testuale"
+    },
+    {
+     "luogo": "akihabara/distributori-akihabara",
+     "x": 29.0,
+     "y": 11.8,
+     "confidenza": "alta",
+     "nota": "icona distributore automatico (griglia); sulla mappa compaiono complessivamente 4 icone identiche (coerente con i '6 distributori' della scheda), marcata solo la prima come rappresentativa"
+    },
+    {
+     "luogo": "akihabara/maid-cafe-akihabara",
+     "x": 14.0,
+     "y": 66.8,
+     "confidenza": "bassa",
+     "nota": "icona fiocco/nastro, interpretata come possibile maid cafe (divisa con fiocchi); presenza del locale non confermata nemmeno nella scheda dati di origine"
+    },
+    {
+     "luogo": "akihabara/sala-giochi-akihabara",
+     "x": 18.8,
+     "y": 36.4,
+     "confidenza": "alta",
+     "nota": "icona a cupola con antenna e gambette, interpretata come macchina acchiappapremi/gru; coerente con la descrizione 'Arcade con minigioco della gru'"
+    },
+    {
+     "luogo": "akihabara/tokobushiya",
+     "x": 24.2,
+     "y": 55.8,
+     "confidenza": "media",
+     "nota": "icona di un robot/action figure, interpretata come negozio otaku (merchandise), nessuna etichetta testuale"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "shujin-academy",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/a/a1/P5_Map_Shujin1.png/revision/latest?cb=20201213184417",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5_Map_Shujin1.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Mappa in stile guida strategica ufficiale (illustrazione sagome nere/icone gialle), © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 302,
+   "altezza": 320,
+   "note": "Mappa annotata (stile guida ufficiale) del 1° piano di Shujin Academy (bagni WC, distributori, scalinata centrale). La scuola è coperta da 4 mappe distinte sulla wiki, tutte verificate 200/image: 1° piano (questa), 2° piano https://static.wikia.nocookie.net/megamitensei/images/9/96/P5_Map_Shujin2.png/revision/latest?cb=20201213184859 (302x320, mostra l'etichetta \"2-D\" che è la classe del protagonista: corridoio del 2° piano e aula), 3° piano https://static.wikia.nocookie.net/megamitensei/images/3/38/P5_Map_Shujin3.png/revision/latest?cb=20201213184928 (302x320, con icona verde plausibile infermeria) e tetto/rooftop https://static.wikia.nocookie.net/megamitensei/images/1/13/P5_Map_Shujin4.png/revision/latest?cb=20201213184938 (302x320). Esiste anche una mappa esterna separata dell'area Aoyama-Itchome (dove la scuola è situata, con cancello e stazione) sulla pagina https://megamitensei.fandom.com/wiki/Aoyama-Itchome : https://static.wikia.nocookie.net/megamitensei/images/a/a7/P5_Map_AoyamaItchome.png/revision/latest?cb=20201213183334 (259x94, verificata 200/image, icone minime).",
+   "luoghiVisibili": [
+    "Aula del protagonista, Classe 2-D (etichetta testuale \"2-D\" visibile sulla mappa del 2° piano)",
+    "Distributori automatici scolastici (icone vending machine)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "shujin-academy/distributori-shujin",
+     "x": 50.9,
+     "y": 55.5,
+     "confidenza": "alta",
+     "nota": "icona distributore automatico (griglia); sulla mappa del 1° piano compaiono 3 icone identiche (coerenti con '2 nell'edificio principale + 1 nel cortile' della scheda), marcata solo quella centrale com"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "kanda-jinbocho",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/6/61/P5-Jinbocho.jpg/revision/latest?cb=20171108201512",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5-Jinbocho.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 745,
+   "altezza": 418,
+   "note": "ATTENZIONE: non è una mappa cartografica ma uno screenshot in-game della via delle librerie di Jinbocho (insegne di negozi di libri usati visibili, in giapponese, non corrispondenti letteralmente a \"Libreria Nagiuri\" dell'app che è presumibilmente una libreria diversa sulla stessa via). Nessuna mappa annotata stile guida trovata per quest'area. È disponibile anche uno screenshot separato dell'interno della Chiesa di Kanda (altro luogo di questo quartiere composito nell'app): https://static.wikia.nocookie.net/megamitensei/images/1/13/Kanda.png/revision/latest?cb=20170728203355 (512x512, verificato 200/image, pagina https://megamitensei.fandom.com/wiki/Kanda ). Il quartiere dell'app unisce due location distinte del gioco (Kanda e Jinbocho), ciascuna con una propria immagine ma senza un'unica mappa combinata.",
+   "luoghiVisibili": [],
+   "marcatori": [
+    {
+     "luogo": "kanda-jinbocho/nagiuri",
+     "x": 45.0,
+     "y": 60.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della via delle librerie usate di Jinbocho; insegne leggibili diverse da 'Libreria Nagiuri': non è confermato che il negozio inquadrato sia specificamente Nagiuri, ma l'immagine"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "ikebukuro",
+   "url": null,
+   "pagina": null,
+   "fonte": null,
+   "licenza": null,
+   "larghezza": null,
+   "altezza": null,
+   "note": "Nessuna immagine trovata. Ikebukuro è un punto di hangout singolo (planetario) senza mappa multi-negozio nel gioco. Sulla Megami Tensei Wiki (Fandom) la pagina Ikebukuro contiene solo immagini di altri capitoli della serie (Shin Megami Tensei IMAGINE/IV): il file \"Ike.jpg\" inizialmente sembrava promettente ma la didascalia nel wikitext lo identifica come \"Concept artwork of Ikebukuro in Shin Megami Tensei IMAGINE\", quindi scartato per non pertinenza a Persona 5. Nessun file con prefisso P5/P5R per Ikebukuro risulta caricato su questo wiki (verificato via API allimages e ricerca full-text nel namespace File). megatenwiki.com (che ha una categoria dedicata \"Persona 5 Royal Screenshots\" secondo i risultati di ricerca) è bloccato da Cloudflare (403) e non è stato esplorato per istruzione. game8.co e scribblinggeek.com non hanno restituito pagine accessibili. allgamestaff.it (settimana 27, ottobre) menziona lo sblocco del Planetario ma le immagini della galleria in quella pagina non lo raffigurano.",
+   "luoghiVisibili": [],
+   "marcatori": []
+  },
+  {
+   "quartiereChiave": "harajuku",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/6/6d/Harajuku.png/revision/latest?cb=20170807165906",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Harajuku.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) di Harajuku: vicolo \"Takenoko Street\" con insegne di negozi di moda/dolciumi (CANDY, Crown Sugar), coerente con la descrizione dell'app (quartiere della moda giovanile). Alt text originale \"Harajuku in Persona 5.\" Ritaglio quadrato 512x512 (probabile crop da screenshot 16:9 più ampio).",
+   "luoghiVisibili": [],
+   "marcatori": [
+    {
+     "luogo": "harajuku/harajuku-hangout",
+     "x": 48.0,
+     "y": 55.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) di Takenoko Street, insegne CANDY e Crown Sugar leggibili; spillo centrale sulla via"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "ueno",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/8/83/Ueno.png/revision/latest?cb=20170807170320",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Ueno.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) dell'interno del Museo di Ueno, sala con quadri esposti. Alt text originale \"Ueno in Persona 5.\" Corrisponde esattamente all'unico luogo dell'app per questo quartiere.",
+   "luoghiVisibili": [
+    "Museo di Ueno (l'intera immagine raffigura l'interno del museo)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "ueno/museo-ueno",
+     "x": 50.0,
+     "y": 55.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della sala principale del museo con quadri esposti; spillo centrale"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "inokashira-park",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/e/ed/Inokashira.png/revision/latest?cb=20170803114903",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Inokashira.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) del sentiero alberato del Parco Inokashira. Alt text originale \"Inokashira Park in Persona 5\". Corrisponde all'unico luogo dell'app per questo quartiere.",
+   "luoghiVisibili": [
+    "Parco Inokashira, area hangout (l'intera immagine raffigura il parco)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "inokashira-park/inokashira-hangout",
+     "x": 45.0,
+     "y": 60.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) del sentiero alberato del parco; spillo centrale sul vialetto"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "odaiba",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/3/35/P5-SeasideParkOdaiba.jpg/revision/latest?cb=20171108204217",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5-SeasideParkOdaiba.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 746,
+   "altezza": 421,
+   "note": "Screenshot in-game (non mappa cartografica) del Seaside Park di Odaiba in notturna, con vista sul Rainbow Bridge e panchina in primo piano. Alt text originale \"Seaside Park in Persona 5\".",
+   "luoghiVisibili": [
+    "Odaiba Seaside Park (l'intera immagine raffigura il parco)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "odaiba/odaiba-seaside-park",
+     "x": 60.0,
+     "y": 68.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della panchina con vista sul Rainbow Bridge in notturna; spillo sulla panchina/punto panoramico"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "shinagawa",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/b/b5/P5R_Aquarium.jpg/revision/latest?cb=20200607155844",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5R_Aquarium.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 1920,
+   "altezza": 1080,
+   "note": "Screenshot in-game a piena risoluzione (non mappa cartografica) dell'Acquario di Shinagawa con vasca panoramica; alt text originale \"The protagonist bringing Yoshizawa to Shinagawa in Persona 5 Royal\" (mostra un dialogo con Kasumi Yoshizawa). Esplicitamente etichettato come Persona 5 Royal.",
+   "luoghiVisibili": [
+    "Acquario di Shinagawa (l'intera immagine raffigura l'acquario, con dialogo di Kasumi Yoshizawa)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "shinagawa/shinagawa-acquario",
+     "x": 55.0,
+     "y": 45.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della vasca principale dell'acquario, scena di dialogo con Kasumi Yoshizawa; spillo sulla vasca"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "nakano",
+   "url": null,
+   "pagina": null,
+   "fonte": null,
+   "licenza": null,
+   "larghezza": null,
+   "altezza": null,
+   "note": "Nessuna immagine trovata. Nakano è un punto di hangout singolo (Nakano Broadway) senza mappa multi-negozio nel gioco. Sulla Megami Tensei Wiki (Fandom) la pagina \"Nakano\" è condivisa tra più giochi della serie (Megami Tensei II, Shin Megami Tensei IMAGINE, Persona 5 Royal); il testo descrive Nakano Broadway per P5R ma la sezione Gallery contiene solo immagini di Shin Megami Tensei IMAGINE (Nakano_Obelisk.jpg, Nakano_Versus.jpg), non pertinenti. Nessun file con prefisso P5/P5R per Nakano risulta caricato (verificato via API allimages). Le categorie \"Persona 5 Royal Location Images\" e \"Persona 5 Royal Screenshots\" su questo wiki non includono Nakano. megatenwiki.com è bloccato da Cloudflare (403) e non esplorato per istruzione.",
+   "luoghiVisibili": [],
+   "marcatori": []
+  },
+  {
+   "quartiereChiave": "ogikubo",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8a/Ogikubo.png/revision/latest?cb=20170807165217",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Ogikubo.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) dell'esterno del ristorante di ramen/soba di Ogikubo (insegna \"Chuka Soba\" e scooter parcheggiato). Alt text originale \"Ogikubo in Persona 5.\" Corrisponde all'unico luogo dell'app per questo quartiere.",
+   "luoghiVisibili": [
+    "Ristorante di ramen di Ogikubo (l'intera immagine raffigura il locale)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "ogikubo/ogikubo-ramen",
+     "x": 45.0,
+     "y": 55.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'insegna rossa leggibile 'Chuka Soba' del ristorante; spillo sull'ingresso"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "yokohama-chinatown",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/e/eb/Chinatown.png/revision/latest?cb=20170818182043",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Chinatown.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) della via di Chinatown a Yokohama, con lanterne rosse e insegne di ristoranti in caratteri cinesi. Alt text originale \"Chinatown in Persona 5.\"",
+   "luoghiVisibili": [
+    "Chinatown, area hangout (l'intera immagine raffigura la via)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "yokohama-chinatown/chinatown-hangout",
+     "x": 50.0,
+     "y": 48.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della via di Chinatown con lanterne rosse e insegne in caratteri cinesi; spillo centrale sulla via"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "maihama",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/3/3c/P5-TokyoDestinyland.jpg/revision/latest?cb=20171108195333",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5-TokyoDestinyland.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 486,
+   "altezza": 273,
+   "note": "Screenshot in-game (non mappa cartografica) dell'ingresso del parco a tema Tokyo Destinyland (castello in stile fiabesco, parodia di Disneyland). Alt text originale \"Tokyo Destinyland In Persona 5\".",
+   "luoghiVisibili": [
+    "Tokyo Destinyland (l'intera immagine raffigura l'ingresso del parco)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "maihama/destinyland",
+     "x": 42.0,
+     "y": 45.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) del castello d'ingresso in stile fiabesco di Tokyo Destinyland; spillo sul castello"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "roppongi",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/7/7c/Roppongi.png/revision/latest?cb=20170807170136",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Roppongi.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) del grattacielo sede di Okumura Foods, con insegna aziendale in giapponese \"Okumura Foods\" chiaramente leggibile sulla facciata. Alt text originale \"Roppongi in Persona 5.\" Corrispondenza testuale diretta con il luogo dell'app.",
+   "luoghiVisibili": [
+    "Sede Okumura Foods (insegna \"Okumura Foods\" leggibile sull'edificio, corrispondenza certa)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "roppongi/okumura-foods-hq",
+     "x": 38.0,
+     "y": 52.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) del grattacielo con insegna 'Okumura Foods' chiaramente leggibile sulla facciata; identificazione testuale certa, ma posizione nello screenshot resta approssimativa"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "tsukishima",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/3/35/P5-Tsukishima.jpg/revision/latest?cb=20171108203930",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5-Tsukishima.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 485,
+   "altezza": 271,
+   "note": "Screenshot in-game (non mappa cartografica) dell'interno del ristorante di monjayaki di Tsukishima (tavoli con piastra alla griglia). Alt text originale \"The monjayaki restaurant in Persona 5\".",
+   "luoghiVisibili": [
+    "Ristorante di monjayaki (l'intera immagine raffigura l'interno del locale)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "tsukishima/tsukishima-monjayaki",
+     "x": 48.0,
+     "y": 58.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'interno del locale di monjayaki, tavoli con piastra alla griglia; spillo sui tavoli"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "meiji-shrine",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/8/8c/P5-MeijiShrine.jpg/revision/latest?cb=20171108195050",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5-MeijiShrine.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 749,
+   "altezza": 422,
+   "note": "Screenshot in-game (non mappa cartografica) dell'edificio principale del Santuario Meiji. Alt text originale \"Meiji Shrine in Persona 5\".",
+   "luoghiVisibili": [
+    "Santuario Meiji, area hangout (l'intera immagine raffigura il santuario)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "meiji-shrine/meiji-shrine-hangout",
+     "x": 42.0,
+     "y": 58.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'edificio principale del Santuario Meiji; spillo sull'edificio"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "ichigaya",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/0/05/Ichigaya.png/revision/latest?cb=20170807165442",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Ichigaya.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) del Laghetto di Ichigaya, con piattaforme galleggianti per la pesca e gabbie/retine visibili. Alt text originale \"Ichigaya in Persona 5.\" (Da notare: esiste anche un file \"IMAGINE_Ichigaya.png\" sulla stessa pagina relativo a Shin Megami Tensei IMAGINE, scartato perché non pertinente a Persona 5).",
+   "luoghiVisibili": [
+    "Laghetto di Ichigaya (l'intera immagine raffigura l'area di pesca)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "ichigaya/laghetto-ichigaya",
+     "x": 48.0,
+     "y": 62.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) dell'area di pesca con moli galleggianti e ceste; spillo centrale"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "suidobashi",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/8/89/Suidobashi.png/revision/latest?cb=20170808095223",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:Suidobashi.png",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 512,
+   "altezza": 512,
+   "note": "Screenshot in-game (non mappa cartografica) dell'area di divertimenti Dome Town presso il Tokyo Dome, con montagne russe e ruota panoramica visibili. Alt text originale \"Suidobashi in Persona 5.\"",
+   "luoghiVisibili": [
+    "Dome Town (l'intera immagine raffigura l'area attrazioni)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "suidobashi/dome-town",
+     "x": 55.0,
+     "y": 40.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) delle attrazioni (montagne russe e ruota panoramica) di Dome Town; spillo sulle attrazioni"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "asakusa",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/f/fc/P5-Asakusa.jpg/revision/latest?cb=20171108194811",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5-Asakusa.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 747,
+   "altezza": 422,
+   "note": "Screenshot in-game (non mappa cartografica) della via commerciale storica di Asakusa con lanterne rosse e bancarelle (insegna \"Asakusa Tori no Ichi\" visibile). Alt text originale \"Asakusa in Persona 5\".",
+   "luoghiVisibili": [
+    "Asakusa, area hangout (l'intera immagine raffigura la via storica)"
+   ],
+   "marcatori": [
+    {
+     "luogo": "asakusa/asakusa-hangout",
+     "x": 48.0,
+     "y": 48.0,
+     "confidenza": "bassa",
+     "nota": "screenshot (non mappa) della via storica con cancello rosso, lanterne e insegna 'Asakusa Tori no Ichi'; spillo centrale sulla via"
+    }
+   ]
+  },
+  {
+   "quartiereChiave": "mementos",
+   "url": "https://static.wikia.nocookie.net/megamitensei/images/8/80/P5R-New-Mementos.jpg/revision/latest?cb=20200513055035",
+   "pagina": "https://megamitensei.fandom.com/wiki/File:P5R-New-Mementos.jpg",
+   "fonte": "Megami Tensei Wiki (Fandom) - megamitensei.fandom.com",
+   "licenza": "Screenshot di gioco, © ATLUS; uso solo tramite collegamento diretto, nessuna redistribuzione.",
+   "larghezza": 869,
+   "altezza": 487,
+   "note": "CASO SPECIALE: Mementos non è un quartiere con negozi fissi ma un dungeon procedurale rigenerato ad ogni visita (layout casuali: lineare, a croce, rettangolare o a stanze), quindi non esiste una \"mappa del quartiere\" fissa come per gli altri. L'immagine scelta è uno screenshot in-game (non una mappa) che mostra l'ingresso/corridoio della nuova sezione dei Memento aggiunta in Royal (Path of Da'at), didascalia originale \"New section of Mementos revealed in Persona 5 Royal\". Non raffigura il negozio di Jose né l'ingresso specifico dalla metro di Shibuya citati nell'app. In alternativa è disponibile un concept art ufficiale ad alta risoluzione (4096x3072, verificato 200/image): https://static.wikia.nocookie.net/megamitensei/images/c/c0/Mementos_Dungeon_Art_P5R_2.png/revision/latest?cb=20200516153055",
+   "luoghiVisibili": [],
+   "marcatori": []
+  }
+ ]
+}

@@ -1,0 +1,1522 @@
+{
+ "trofei": [
+  {
+   "chiave": "assedio-al-castello-della-lussuria",
+   "ordine": 0,
+   "nome": "Assedio al castello della lussuria",
+   "nomeEn": "Castle of Lust: Seized",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo del castello.",
+   "come": "Si sblocca automaticamente il 2 maggio (lunedì 5/02), legato alla trama, dopo aver completato il Palazzo di Kamoshida.",
+   "mancabile": null,
+   "quando": "2 maggio",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "sequestro-del-museo-della-vanita",
+   "ordine": 1,
+   "nome": "Sequestro del museo della vanità",
+   "nomeEn": "Museum of Vanity: Repossessed",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo del museo.",
+   "come": "Si sblocca automaticamente, legato alla trama, dopo aver completato il Palazzo di Madarame (5 giugno).",
+   "mancabile": null,
+   "quando": "5 giugno",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "rapina-alla-banca-della-gola",
+   "ordine": 2,
+   "nome": "Rapina alla banca della gola",
+   "nomeEn": "Bank of Gluttony: Cleaned Out",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo della banca.",
+   "come": "Si sblocca automaticamente, legato alla trama, dopo aver completato il Palazzo di Kaneshiro (9 luglio).",
+   "mancabile": null,
+   "quando": "9 luglio",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "razzia-della-piramide-dell-ira",
+   "ordine": 3,
+   "nome": "Razzia della piramide dell'ira",
+   "nomeEn": "Pyramid of Wrath: Plundered",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo della piramide.",
+   "come": "Si sblocca automaticamente, legato alla trama, dopo aver completato il Palazzo di Futaba (22 agosto).",
+   "mancabile": null,
+   "quando": "22 agosto",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "annichilimento-dello-spaziotempo-dell-avarizia",
+   "ordine": 4,
+   "nome": "Annichilimento dello spaziotempo dell'avarizia",
+   "nomeEn": "Spaceport of Greed: Obliterated",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo del porto spaziale.",
+   "come": "Si sblocca automaticamente, legato alla trama, dopo aver completato il Palazzo di Okumura (11 ottobre).",
+   "mancabile": null,
+   "quando": "11 ottobre",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "lastrico-del-casino-dell-invidia",
+   "ordine": 5,
+   "nome": "Lastrico del casinò dell'invidia",
+   "nomeEn": "Casino of Jealousy: Bankrupted",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo del casinò.",
+   "come": "Si sblocca automaticamente, legato alla trama, dopo aver completato il Palazzo di Sae/Niijima (20 novembre).",
+   "mancabile": null,
+   "quando": "20 novembre",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "ammutinamento-della-crociera-della-superbia",
+   "ordine": 6,
+   "nome": "Ammutinamento della crociera della superbia",
+   "nomeEn": "Cruiser of Pride: Capsized",
+   "tipo": "bronzo",
+   "descrizione": "Completa il Palazzo della nave da crociera.",
+   "come": "Si sblocca automaticamente, legato alla trama, dopo aver completato il Palazzo di Shido (18 dicembre).",
+   "mancabile": null,
+   "quando": "18 dicembre",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "trickster-primordiale",
+   "ordine": 7,
+   "nome": "Trickster primordiale",
+   "nomeEn": "The Thorough Trickster",
+   "tipo": "bronzo",
+   "descrizione": "Completa i Memento.",
+   "come": "Si sblocca automaticamente dopo aver completato interamente l'esplorazione del Dedalo di Iweleth (24 dicembre).",
+   "mancabile": null,
+   "quando": "24 dicembre",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "riprenditi-il-futuro",
+   "ordine": 8,
+   "nome": "Riprenditi il futuro",
+   "nomeEn": "Take Back the Future",
+   "tipo": "bronzo",
+   "descrizione": "Completa tutti i Palazzi.",
+   "come": "Si sblocca automaticamente dopo aver completato l'esplorazione di tutti gli 8 Palazzi (Kamoshida, Madarame, Kaneshiro, Futaba, Okumura, Sae, Shido, Maruki), il 3 febbraio.",
+   "mancabile": null,
+   "quando": "3 febbraio",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "l-anima-della-ribellione",
+   "ordine": 9,
+   "nome": "L'anima della ribellione",
+   "nomeEn": "Spirit of Rebellion",
+   "tipo": "bronzo",
+   "descrizione": "Hai ottenuto Arsène.",
+   "come": "Si sblocca automaticamente l'11 aprile, legato alla trama iniziale.",
+   "mancabile": null,
+   "quando": "11 aprile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "ladri-fantasma-unitevi",
+   "ordine": 10,
+   "nome": "Ladri Fantasma: unitevi!",
+   "nomeEn": "Phantom Thieves: Assemble!",
+   "tipo": "bronzo",
+   "descrizione": "Fonda una tua squadra di ladri.",
+   "come": "Si sblocca automaticamente il 5 maggio, legato alla trama.",
+   "mancabile": null,
+   "quando": "5 maggio",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "un-passo-alla-volta",
+   "ordine": 11,
+   "nome": "Un passo alla volta",
+   "nomeEn": "One Step at a Time",
+   "tipo": "bronzo",
+   "descrizione": "Completa una richiesta dei Memento.",
+   "come": "Si sblocca automaticamente il 7 maggio completando la prima richiesta nei Memento.",
+   "mancabile": null,
+   "quando": "7 maggio",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "turista-a-tokyo",
+   "ordine": 12,
+   "nome": "Turista a Tokyo",
+   "nomeEn": "Tokyo Tourist",
+   "tipo": "bronzo",
+   "descrizione": "Vai in un luogo d'incontro con qualcuno.",
+   "come": "Si sblocca automaticamente il 28 aprile, recandosi in un luogo d'incontro (hangout spot) con un compagno.",
+   "mancabile": null,
+   "quando": "28 aprile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "il-risveglio-dei-ladri-fantasma",
+   "ordine": 13,
+   "nome": "Il risveglio dei Ladri Fantasma",
+   "nomeEn": "Awakening the Phantom Thieves",
+   "tipo": "bronzo",
+   "descrizione": "Evolvi la Persona di un membro del gruppo.",
+   "come": "Si sblocca automaticamente il 10 gennaio, legato alla trama.",
+   "mancabile": null,
+   "quando": "10 gennaio",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "io-sono-te",
+   "ordine": 14,
+   "nome": "Io sono te…",
+   "nomeEn": "I am Thou…",
+   "tipo": "bronzo",
+   "descrizione": "Ottieni una Persona tramite la negoziazione.",
+   "come": "Prima occasione il 15 aprile nel Palazzo di Kamoshida: negoziando con un nemico in difficoltà se ne può ottenere la Persona (es. scegliendo \"Dammi dei soldi\" poi \"Non dovevi affrontarmi\" con la Ragazza seducente per ottenere Pixie). Durante una Rapina è possibile negoziare con qualsiasi Ombra nemica.",
+   "mancabile": null,
+   "quando": "dal 15 aprile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "lavoro-di-squadra",
+   "ordine": 15,
+   "nome": "Lavoro di squadra",
+   "nomeEn": "Tactical Teamwork",
+   "tipo": "bronzo",
+   "descrizione": "Esegui una staffetta.",
+   "come": "Prima occasione nel Palazzo di Kamoshida, quando Morgana propone di eseguire una Staffetta: passare a un altro membro del gruppo lo stato \"1 More\" ottenuto.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "facciamolo-saltare",
+   "ordine": 16,
+   "nome": "Facciamolo saltare!",
+   "nomeEn": "Let's Blow It Up",
+   "tipo": "bronzo",
+   "descrizione": "Sconfiggi i nemici tramite un'esplosione di Ombra sciagura.",
+   "come": "Prima occasione nel Palazzo di Kamoshida: le Ombre sciagura, se sconfitte in un certo modo, lasciano un'esplosione che danneggia le Ombre circostanti; occorre eliminare nemici tramite quella esplosione (non funziona se l'Ombra sciagura è uccisa con attacco riflesso o Disperazione).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "tieniti-forte",
+   "ordine": 17,
+   "nome": "Tieniti forte!",
+   "nomeEn": "You'd Better Hang On!",
+   "tipo": "bronzo",
+   "descrizione": "Usa il rampino.",
+   "come": "Si sblocca automaticamente nel Palazzo di Kamoshida usando per la prima volta il rampino.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "supporto-tecnico",
+   "ordine": 18,
+   "nome": "Supporto tecnico",
+   "nomeEn": "Technician",
+   "tipo": "bronzo",
+   "descrizione": "Causa un colpo tecnico.",
+   "come": "Prima occasione nel Palazzo di Kamoshida contro il vero Capitano della Guardia: sfruttare un'alterazione di stato con l'abilità corrispondente per ottenere un attacco tecnico con danno aumentato.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "lo-scopo-di-un-ladro",
+   "ordine": 19,
+   "nome": "Lo scopo di un ladro",
+   "nomeEn": "The Purpose of a Thief",
+   "tipo": "bronzo",
+   "descrizione": "Ottieni un Demone del Tesoro.",
+   "come": "Prima occasione nel Palazzo di Madarame: i Demoni del Tesoro possono comparire da oggetti frangibili quando il livello di allerta è alto; sconfiggerne e catturarne uno (non utilizzabile in battaglia, solo come materiale di fusione).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "speciale",
+   "ordine": 20,
+   "nome": "Speciale!",
+   "nomeEn": "It's Showtime!",
+   "tipo": "bronzo",
+   "descrizione": "Hai eseguito un attacco Speciale.",
+   "come": "Prima occasione nel Palazzo di Kaneshiro: eseguire un attacco Speciale, mossa combinata fra due membri del gruppo che si attiva a inizio turno senza consumare HP o SP.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "il-cliente-preferito-di-jose",
+   "ordine": 21,
+   "nome": "Il cliente preferito di Jose",
+   "nomeEn": "Jose's Favorite Customer",
+   "tipo": "bronzo",
+   "descrizione": "Scambia fiori mentre sei nel Memento.",
+   "come": "Dopo la prima richiesta nei Memento, incontrare Jose e scambiargli dei fiori per oggetti per la prima volta (i fiori si perdono uscendo dal dungeon; Jose non appare in ogni area).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "filatelico-fantasma",
+   "ordine": 22,
+   "nome": "Filatelico Fantasma",
+   "nomeEn": "The Phantom Philatelist",
+   "tipo": "bronzo",
+   "descrizione": "Scambia timbri mentre sei nei Memento.",
+   "come": "Raccogliere timbri dai podi lasciati da Jose nei Memento e scambiarli con lui per la prima volta (i timbri danno punti per modificare la cognizione ambientale su soldi, oggetti, esperienza).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "devianza-cognitiva",
+   "ordine": 23,
+   "nome": "Devianza cognitiva",
+   "nomeEn": "The Deviated Cognition",
+   "tipo": "bronzo",
+   "descrizione": "Trova una deviazione nei Memento.",
+   "come": "Le Deviazioni si verificano casualmente nei singoli livelli dei Memento alterando la struttura del labirinto; basta imbattersi nella prima.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "debutto-mortale",
+   "ordine": 24,
+   "nome": "Debutto mortale",
+   "nomeEn": "A Deadly Debut",
+   "tipo": "bronzo",
+   "descrizione": "Porta a termine un'esecuzione con la Ghigliottina.",
+   "come": "Nella Stanza di Velluto selezionare \"Fusione\" con Igor e fondere per la prima volta 2 Personae qualsiasi (le Personae impiegate vanno perse; fondendo una Persona dell'Arcano di un Confidente si ottiene esperienza bonus).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "boia-efficiente",
+   "ordine": 25,
+   "nome": "Boia efficiente",
+   "nomeEn": "Efficient Executioner",
+   "tipo": "bronzo",
+   "descrizione": "Esegui un'esecuzione con la Ghigliottina di gruppo.",
+   "come": "Dopo aver portato le Gemelle Custodi al Rango 2 (richiederanno un Flauros con Tarukaja), completare una fusione avanzata di gruppo con le combinazioni di Personae indicate dalla guida.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "cuori-in-fiamme",
+   "ordine": 26,
+   "nome": "Cuori in fiamme",
+   "nomeEn": "Intensive Training",
+   "tipo": "bronzo",
+   "descrizione": "Usa un incenso su una Persona in isolamento.",
+   "come": "Portare le Gemelle Custodi al Rango 3 per sbloccare \"Isolamento\"; selezionare \"Addestra Personae\" nella Stanza di Velluto, mettere una Persona in isolamento e usare un Incenso (ottenibile da Jose nei Memento in cambio di fiori).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "il-successo-richiede-sacrifici",
+   "ordine": 27,
+   "nome": "Il successo richiede sacrifici",
+   "nomeEn": "Success Built on Sacrifice",
+   "tipo": "bronzo",
+   "descrizione": "Porta a termine un'esecuzione con la Forca.",
+   "come": "Nella Stanza di Velluto selezionare \"Crea Nuove Personae\" > \"Potenzia Persona\", scegliendo una Persona da rafforzare e una da sacrificare (Forca).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "amante-degli-incidenti",
+   "ordine": 28,
+   "nome": "Amante degli incidenti",
+   "nomeEn": "Accident-Prone",
+   "tipo": "bronzo",
+   "descrizione": "Esegui un'esecuzione durante un Allarme delle fusioni.",
+   "come": "Dopo una battaglia nel Metaverso può attivarsi un Allarme delle fusioni (Stanza di Velluto rossa, risultati potenziati e imprevedibili): eseguire una fusione durante l'allarme (termina uscendo dopo la fusione).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "esperimento-grandioso",
+   "ordine": 29,
+   "nome": "Esperimento grandioso",
+   "nomeEn": "A Grand Experiment",
+   "tipo": "bronzo",
+   "descrizione": "Porta a termine un'esecuzione con la Sedia elettrica.",
+   "come": "Nella Stanza di Velluto selezionare \"Crea Nuove Personae\" > \"Trasmuta Persona\" e giustiziare per la prima volta una Persona con la Sedia elettrica (produce oggetti come ricompensa).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "spazza-e-ramazza",
+   "ordine": 30,
+   "nome": "Spazza e ramazza",
+   "nomeEn": "LeBlanc Buffer",
+   "tipo": "bronzo",
+   "descrizione": "Pulisci il Leblanc.",
+   "come": "Interagire con i Bagni del Leblanc Café (vicino alle scale della mansarda) e selezionare \"Ora di pulire\" (aumenta Gentilezza +1 e affetto con Sojiro +1).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "se-lo-aiutate-e-squalificato",
+   "ordine": 31,
+   "nome": "Se lo aiutate è squalificato!",
+   "nomeEn": "Punch That Clock!",
+   "tipo": "bronzo",
+   "descrizione": "Trova un lavoro part-time.",
+   "come": "A Shibuya, al Sottopasso, consultare le riviste \"Cercalavoro\"; dire a Morgana \"Lavorerò qui\" poi \"Voglio lavorare\" per completare il primo turno di lavoro (consigliato il 26 aprile).",
+   "mancabile": null,
+   "quando": "dal 26 aprile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "rotea-la-mazza",
+   "ordine": 32,
+   "nome": "Rotea la mazza",
+   "nomeEn": "Batter Up!",
+   "tipo": "bronzo",
+   "descrizione": "Allenati alle gabbie di battuta.",
+   "come": "Alle Gabbie di battuta di Yongen-Jaya, selezionare \"Principiante\" (500 yen) e giocare almeno una partita.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "cotto-al-vapore",
+   "ordine": 33,
+   "nome": "Cotto al vapore",
+   "nomeEn": "Getting the Vapors",
+   "tipo": "bronzo",
+   "descrizione": "Non hai sopportato il calore dei bagni.",
+   "come": "In una sera piovosa, recarsi al Bagno Pubblico e rilassarsi cedendo al calore eccessivo dei vapori.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "soldi-facili",
+   "ordine": 34,
+   "nome": "Soldi facili",
+   "nomeEn": "Easy Money",
+   "tipo": "bronzo",
+   "descrizione": "Vinci alla Lotteria.",
+   "come": "Comprare un biglietto (3.000 yen) al Chiosco della lotteria in Piazza della Stazione a Shibuya e tornare la settimana successiva a verificare l'estrazione; ripetere finché non si vince (fattore fortuna).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "uomo-contro-artiglio",
+   "ordine": 35,
+   "nome": "Uomo contro artiglio",
+   "nomeEn": "Going Against the Crane",
+   "tipo": "bronzo",
+   "descrizione": "Ottieni un premio dal gioco dell'artiglio.",
+   "come": "Alla Sala giochi di Akihabara, giocare a \"L'artiglio\" (300 yen a partita) finché non si vince il primo premio in palio (es. Bambola di Jack Frost).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "tesori-nei-rifiuti",
+   "ordine": 36,
+   "nome": "Tesori nei rifiuti",
+   "nomeEn": "Trash Into Treasure",
+   "tipo": "bronzo",
+   "descrizione": "Vendi vestiti vecchi al Furugi no Neuchi.",
+   "come": "A Kichijoji, al negozio di vestiti usati (lato sud, strada a est), rivendere una vecchia armatura per la prima volta (10 punti negozio per armatura; 15 abiti bastano per la Cintura di Idaten con Auto-Masuku).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "occhio-di-falco",
+   "ordine": 37,
+   "nome": "Occhio di falco",
+   "nomeEn": "Dartslinger",
+   "tipo": "bronzo",
+   "descrizione": "Gioca una partita a freccette.",
+   "come": "A Kichijoji, edificio \"Freccette e Biliardo\": invitare compagni e giocare una partita a freccette (si può uscire subito dopo).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "non-sono-il-tipo-che-cerca-casini",
+   "ordine": 38,
+   "nome": "Non sono il tipo che cerca casini",
+   "nomeEn": "A Hustler's Journey",
+   "tipo": "bronzo",
+   "descrizione": "Gioca una partita a biliardo.",
+   "come": "A Kichijoji, \"Freccette e biliardo Penguin Sniper\": selezionare \"Giochiamo a biliardo\" (800 yen) e giocare una partita (+1 punto affetto per ogni compagno invitato).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "una-notte-a-kichijoji",
+   "ordine": 39,
+   "nome": "Una notte a Kichijoji",
+   "nomeEn": "A Night in Kichijoji",
+   "tipo": "bronzo",
+   "descrizione": "Vai al jazz club.",
+   "come": "Dopo aver scoperto Kichijoji e raggiunto Rango 4 con Akechi, si scopre il Jazz Club: visitarlo la prima volta (compagni invitati ricevono effetti potenziati; se la cantante si esibisce, cocktail speciale con effetti raddoppiati nei giorni feriali).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "momento-di-serenita",
+   "ordine": 40,
+   "nome": "Momento di serenità",
+   "nomeEn": "A Serene Experience",
+   "tipo": "bronzo",
+   "descrizione": "Visita un tempio.",
+   "come": "Dopo aver scoperto Kichijoji, raggiungere il Tempio (angolo sud-est) e parlare col \"Prete dall'aspetto gentile\" per meditare la prima volta (aumenta gli SP massimi ma consuma tempo).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "modifiche-professionali",
+   "ordine": 41,
+   "nome": "Modifiche professionali",
+   "nomeEn": "Professional Modification",
+   "tipo": "bronzo",
+   "descrizione": "Personalizza un'arma da fuoco.",
+   "come": "Raggiungere Rango 1 con Iwai, visitare il Negozio softair Untouchable e selezionare \"Voglio comprare\" per il tutorial sulla personalizzazione (il rango con Iwai amplia le opzioni e riduce i costi).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "il-patito-della-pesca",
+   "ordine": 42,
+   "nome": "Il patito della pesca",
+   "nomeEn": "Angler's Debut",
+   "tipo": "bronzo",
+   "descrizione": "Passa del tempo al laghetto di pesca.",
+   "come": "Dopo aver scoperto Ichigaya (rivista \"Vedetta lacustre\" o informazioni da Ryuji), recarsi lì (3.000 yen) e catturare un pesce qualsiasi (la Perizia migliora pescando e aumenta i tentativi per visita).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "signore-di-akihabara",
+   "ordine": 43,
+   "nome": "Signore di Akihabara",
+   "nomeEn": "Master of Akihabara",
+   "tipo": "bronzo",
+   "descrizione": "Fai un ordine dal menu speciale del Maid Café.",
+   "come": "Al Maid Café di Akihabara, ogni 1.000 yen spesi dà un timbro (bonus il sabato); raccolti 20 timbri si completa la carta e si può ordinare l'oggetto speciale in un'apertura serale (consigliata l'Omelette sincera, 5.000 yen, per 4 visite; il locale è aperto a tutte le ore, visitabile due volte al giorno).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "un-travestimento-sapiente",
+   "ordine": 44,
+   "nome": "Un travestimento sapiente",
+   "nomeEn": "A Most Studious Disguise",
+   "tipo": "argento",
+   "descrizione": "Prendi il massimo dei voti agli esami.",
+   "come": "Arrivare agli esami scolastici con Rango massimo di Conoscenza (5) e rispondere correttamente a tutte le domande per risultare primo della classe (Conoscenza si aumenta con cruciverba, letture, risposte corrette in classe, ecc.).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "perfezione-pura",
+   "ordine": 45,
+   "nome": "Perfezione pura",
+   "nomeEn": "Pure Perfection",
+   "tipo": "argento",
+   "descrizione": "Porta al livello massimo tutte le doti sociali.",
+   "come": "Raggiungere il Rango massimo (5) con tutte e 5 le doti sociali: Perizia, Gentilezza, Fascino, Coraggio e Conoscenza (lettura, Aojiru domenicale, cinema, videogiochi, film aumentano più doti insieme).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "persi-nella-traduzione",
+   "ordine": 46,
+   "nome": "Persi nella traduzione",
+   "nomeEn": "My Closest Partner",
+   "tipo": "argento",
+   "descrizione": "Instaura un rapporto speciale.",
+   "come": "Portare al Rango 9 il Confidente di una compagna disponibile per una relazione romantica; a quel punto le scelte determinano se il legame diventa una storia d'amore o resta amicizia.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "la-vera-confidenza",
+   "ordine": 47,
+   "nome": "La vera confidenza",
+   "nomeEn": "True Confidence",
+   "tipo": "argento",
+   "descrizione": "Porta al massimo un tuo Confidente.",
+   "come": "Raggiungere il Rango 10 (massimo) con uno qualsiasi dei Confidenti disponibili (23 in totale: Ryuji, Ann, Takemi, Kawakami, Yoshida, Yusuke, Sojiro, Mishima, Makoto, Ohya, Hifumi, Chihaya, Futaba, Iwai, Haru, Gemelle custodi, Akechi, Shinya, Maruki, Morgana, Igor, Sae, Kasumi).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "ladro-di-talento",
+   "ordine": 48,
+   "nome": "Ladro di talento",
+   "nomeEn": "Talent Thief",
+   "tipo": "argento",
+   "descrizione": "Ottieni un accessorio abilità da un signore del Palazzo.",
+   "come": "Ogni Palazzo nasconde 3 Semi della Bramosia; raccogliendo tutti e 3 quelli di un Palazzo si forma un accessorio speciale (progresso visibile aprendo la mappa con R1).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "la-ricerca-del-potere",
+   "ordine": 49,
+   "nome": "La ricerca del potere",
+   "nomeEn": "The Search for Power",
+   "tipo": "argento",
+   "descrizione": "Cambia completamente la cognizione del Memento.",
+   "come": "Con i timbri raccolti dai podi di Jose nei Memento, portare al massimo il cambiamento di cognizione in una delle tre aree disponibili (soldi, oggetti o esperienza); i punti investiti sono ripristinabili con fiori.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "ribelle-senza-pari",
+   "ordine": 50,
+   "nome": "Ribelle senza pari",
+   "nomeEn": "Unsurpassed Rebel",
+   "tipo": "argento",
+   "descrizione": "Sconfiggi il Mietitore.",
+   "come": "Il Mietitore (Ombra spaventosa potentissima, annunciata da un rumore di catene) può comparire restando troppo a lungo in un'area dei Memento: sconfiggerlo (in Royal è immune alla Disperazione; consigliato affrontarlo a Livello 99).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "la-strada-che-ho-scelto",
+   "ordine": 51,
+   "nome": "La strada che ho scelto",
+   "nomeEn": "The Path Chosen",
+   "tipo": "oro",
+   "descrizione": "Guarda il finale.",
+   "come": "Si sblocca automaticamente assistendo al vero finale del gioco, completando interamente il Palazzo di Maruki nel terzo semestre.",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  },
+  {
+   "chiave": "fantasmagorico-ladro-fantasma",
+   "ordine": 52,
+   "nome": "Fantasmagorico Ladro Fantasma",
+   "nomeEn": "Legendary Phantom Thief",
+   "tipo": "platino",
+   "descrizione": "Ottieni tutti i trofei.",
+   "come": "Si sblocca dopo aver ottenuto tutti gli altri 52 trofei (44 bronzo + 7 argento + 1 oro).",
+   "mancabile": null,
+   "quando": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-ai-trofei/",
+   "verificato": true
+  }
+ ],
+ "finali": [
+  {
+   "chiave": "finale-perfetto-royal",
+   "nome": "Finale perfetto (Royal) - True Ending",
+   "condizioni": [
+    "Portare il Rango Confidente di Takuto Maruki (Consigliere) almeno a 9 entro il 17 novembre (la guida riepiloga anche come \"prima del 18/11\"): è la condizione che sblocca il terzo semestre e distingue il finale Royal da quello standard.",
+    "Portare il Rango Confidente di Goro Akechi (Giustizia) almeno a 8 entro la stessa data (17 novembre): non cambia il finale in sé ma aggiunge una scena esclusiva nel finale Royal.",
+    "20 novembre - Interrogatorio con Sae Niijima: negare ogni coinvolgimento dei Ladri Fantasma (scegliere \"Mai sentiti nominare\", poi \"Non c'erano persone simili\", poi su Akechi \"Impossibile\" e \"Non so niente\"; poi \"Va contro la giustizia\", \"La chiami giustizia questa?\", \"Salvare gli innocenti\", \"E il vero colpevole?\", \"Non vuoi vincere?\", \"Era questo il tuo piano?\", \"Darglielo?\", \"Voglio fare un accordo\", \"Il telefono…\", \"Mostralo al vero colpevole\", \"Te l'ho già detto\", \"Devi fidarti…\"). Il Rango con Sae sale da 7 a 10 in un colpo solo.",
+    "24 dicembre - Scontro con il Dio del Controllo: rifiutare l'accordo scegliendo \"Mi rifiuto\" (Lavenza protegge il protagonista; riappare il vero Igor).",
+    "9 gennaio - Auditorium nel Palazzo di Maruki: rifiutare la realtà alternativa scegliendo \"Non posso accettare questa realtà\".",
+    "2 febbraio - in mansarda, la sera: scegliere \"Andiamo\", poi durante il colloquio con Maruki rispondere \"Sta bene\", \"Non possiamo accettare questa realtà\", \"Come hai fatto tu?\"; con Akechi, alla terza interazione rispondere \"Fermeremo Maruki\" (può scatenare la Terza evoluzione della Persona di Akechi se il legame è sviluppato).",
+    "Nota collaterale (fonte: guida al Confidente di Kasumi/Sumire, Arcano Fede, sullo stesso sito): il Confidente di Kasumi va portato al Rango 5 entro il 22 dicembre, altrimenti resta bloccato per il resto della partita; il limite dei primi 5 ranghi si rimuove poi dal 12 gennaio, quando la vera identità di Sumire viene rivelata nel Palazzo di Maruki. Questa scadenza non è indicata dalla guida ai finali come condizione che cambia la diramazione dell'ending, ma è un prerequisito per poter completare quel Confidente nella stessa run."
+   ],
+   "date": [
+    "17 novembre (Maruki rango 9 e Akechi rango 8)",
+    "20 novembre",
+    "24 dicembre",
+    "9 gennaio",
+    "2 febbraio"
+   ],
+   "descrizione": "La conclusione più completa e canonica del gioco: sblocca il terzo semestre con nuova linea narrativa e Palazzo di Maruki, e porta al vero finale esteso di Royal. Sblocca la Nuova Partita+.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/"
+  },
+  {
+   "chiave": "finale-standard",
+   "nome": "Finale standard - conclusione originale (equivalente a Persona 5 vanilla)",
+   "condizioni": [
+    "NON portare il Rango Confidente di Maruki al livello 9 entro il 17 novembre: il terzo semestre non si sblocca.",
+    "20 novembre - Interrogatorio con Sae: stesse scelte del finale perfetto (negare il coinvolgimento dei Ladri Fantasma).",
+    "24 dicembre - Scontro con il Dio del Controllo: scegliere \"Mi rifiuto\"."
+   ],
+   "date": [
+    "17 novembre (mancato Rango 9 Maruki)",
+    "20 novembre",
+    "24 dicembre"
+   ],
+   "descrizione": "Si ottiene semplicemente non soddisfacendo i requisiti del Finale perfetto Royal (in primis il Rango 9 di Maruki entro il 17 novembre). Il gioco prosegue senza terzo semestre e porta comunque a un finale positivo, ma \"privo degli approfondimenti e degli sviluppi introdotti in Persona 5 Royal\".",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/"
+  },
+  {
+   "chiave": "finale-negativo-1",
+   "nome": "Bad Ending #1 - tradimento durante l'interrogatorio",
+   "condizioni": [
+    "20 novembre - Interrogatorio con Sae: quando lei deduce l'identità dei complici, rispondere \"Esatto\" (confermare la loro identità) e poi confermare con \"Sì\" al dubbio del protagonista."
+   ],
+   "date": [
+    "20 novembre"
+   ],
+   "descrizione": "La storia si interrompe bruscamente, portando a una conclusione prematura, perché i Ladri Fantasma vengono traditi/esposti durante l'interrogatorio.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/"
+  },
+  {
+   "chiave": "finale-negativo-2",
+   "nome": "Bad Ending #2 - accordo con il Dio del Controllo",
+   "condizioni": [
+    "20 novembre - Interrogatorio con Sae: negare il coinvolgimento come nel finale perfetto (fino alla fine dell'interrogatorio, poi si può proseguire a piacere).",
+    "24 dicembre - Scontro con il Dio del Controllo: ACCETTARE l'accordo scegliendo \"D'accordo…\" e confermando \"È un ottimo accordo\"."
+   ],
+   "date": [
+    "20 novembre",
+    "24 dicembre"
+   ],
+   "descrizione": "Il protagonista rinuncia alla libertà in cambio di una realtà imposta dal Dio del Controllo, dando vita a un epilogo distorto.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/"
+  },
+  {
+   "chiave": "finale-negativo-3",
+   "nome": "Bad Ending #3 - realtà alternativa di Maruki accettata",
+   "condizioni": [
+    "Aver sbloccato il terzo semestre (Rango Maruki 9 entro il 17 novembre).",
+    "Opzione A - 9 gennaio, Auditorium nel Palazzo di Maruki: accettare la nuova realtà scegliendo \"Accetto questa realtà\" e confermare con \"Sul serio\".",
+    "Opzione B - 2 febbraio, in mansarda la sera: dopo il colloquio con Maruki e Akechi, scegliere \"Accetteremo l'offerta\" e confermare con \"Dico sul serio\"."
+   ],
+   "date": [
+    "9 gennaio",
+    "2 febbraio"
+   ],
+   "descrizione": "Il gioco arriva a una conclusione apparentemente positiva ma frutto di una realtà illusoria creata da Maruki (il protagonista e i suoi compagni vivono una vita idealizzata ma falsa).",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/"
+  },
+  {
+   "chiave": "game-over-palazzi",
+   "nome": "Game Over per scadenza dei Palazzi (non un vero finale)",
+   "condizioni": [
+    "Non completare un Palazzo entro la scadenza calendariale stabilita dalla trama."
+   ],
+   "date": [],
+   "descrizione": "Non è un vero finale del gioco: mostra una breve sequenza narrativa sulle conseguenze del fallimento, poi riporta indietro di una settimana o permette di caricare un salvataggio. Sono interessanti da vedere almeno una volta ma non sbloccano la Nuova Partita+.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-tutti-i-finali/"
+  }
+ ],
+ "covo": {
+  "introduzione": "Il Covo dei Ladri (Thieves Den) è un'area bonus accessibile da menu (fuori da dungeon e Stanza di Velluto) che si sblocca avanzando nella storia oltre il 5 maggio, quando i Ladri Fantasma si formano ufficialmente durante la festa al Wilton Hotel. I progressi sono condivisi fra tutti i salvataggi e si mantengono anche ricaricando partite: non serve completare tutto in un'unica run. Contiene 4 sezioni principali di Premi (Vita scolastica, Confidenti, Battaglia, Fantasma), la sezione Trasformazioni (Joker può assumere temporaneamente l'aspetto degli altri Ladri Fantasma su piastrelle dedicate), il Palace Maker (editor di decorazioni: statue dei boss, esseri cognitivi, Personae, elementi legati ai Confidenti), la Galleria (archivio di artwork, filmati e foto) e il Lettore Musicale, oltre al minigioco di carte Magnate.",
+  "medaglie": "Le Medaglie P sono la valuta speciale del Covo dei Ladri, ottenuta completando i Premi (sfide) e spesa per sbloccare i contenuti del Palace Maker e della Galleria. La guida indica un totale complessivo di 2.420 Medaglie P ottenibili completando tutte le sfide disponibili; il valore in medaglie assegnato a ciascuna singola sfida non è specificato dalla guida (solo il totale complessivo), quindi nei singoli elementi dell'array 'sfide' il campo medaglie è impostato a null per non riportare cifre non verificate. I singoli costi in Medaglie P dei contenuti acquistabili nel Palace Maker e in Galleria sono invece indicati puntualmente dalla guida (vedi array 'premi').",
+  "sfide": [
+   {
+    "nome": "Stomaco di ferro",
+    "requisito": "Completare le sfide del Big Bang Burger a Shibuya: la prima richiede almeno Rango 2 in Coraggio, Conoscenza e Perizia, le successive richiedono incrementi progressivi.",
+    "medaglie": null
+   },
+   {
+    "nome": "Dita d'oro",
+    "requisito": "Portare a termine tutti i videogiochi di Persona 5 Royal (facilitati dal libro \"Segreti di gioco\" acquistabile a Shinjuku dopo aver provato almeno un gioco; la maggior parte è ad Akihabara).",
+    "medaglie": null
+   },
+   {
+    "nome": "Mago delle parole",
+    "requisito": "Risolvere almeno 15 cruciverba (compaiono circa una volta a settimana sul tavolo del Leblanc).",
+    "medaglie": null
+   },
+   {
+    "nome": "Re dei fuoricampo",
+    "requisito": "Totalizzare 30 fuoricampo alle Gabbie di battuta di Yongen-Jaya.",
+    "medaglie": null
+   },
+   {
+    "nome": "Bagnante d'onore di Yongen",
+    "requisito": "Frequentare il bagno pubblico \"Fuji no Yu\" di Yongen-Jaya per 15 volte.",
+    "medaglie": null
+   },
+   {
+    "nome": "Venditore di seconda mano",
+    "requisito": "Accumulare 1.000 punti al negozio di abiti usati \"Furugi no Neuchi\" di Kichijoji vendendo vestiti sporchi trovati nei dungeon.",
+    "medaglie": null
+   },
+   {
+    "nome": "Studente lavoratore",
+    "requisito": "Lavorare part-time per un totale di 15 volte.",
+    "medaglie": null
+   },
+   {
+    "nome": "Il vice del Leblanc",
+    "requisito": "Preparare il miglior caffè e il miglior curry del Leblanc, il che richiede le abilità Maestria del caffè (Rango 6 con Sojiro) e Maestria del Curry (Rango massimo con Sojiro).",
+    "medaglie": null
+   },
+   {
+    "nome": "La leggenda del Drago Nascente",
+    "requisito": "Completare 13 sessioni di allenamento in palestra (la tredicesima consiste nell'abbattere il manichino).",
+    "medaglie": null
+   },
+   {
+    "nome": "Più bianco non si può!",
+    "requisito": "Lavare 10 tipologie diverse di vestiti sporchi alla Lavanderia di Yongen-Jaya (non basta usarla 10 volte, servono 10 tipi diversi).",
+    "medaglie": null
+   },
+   {
+    "nome": "Amante delle maid",
+    "requisito": "Frequentare il Maid Café di Akihabara per 4 volte (stessa procedura del trofeo \"Signore di Akihabara\").",
+    "medaglie": null
+   },
+   {
+    "nome": "Pescatore",
+    "requisito": "Accumulare 100.000 punti pescando a Ichigaya (i pesci più grandi e i \"pesci tesoro\" individuabili col libro \"Lo zen della pesca\" valgono di più; le notti di pioggia in estate sono le più redditizie).",
+    "medaglie": null
+   },
+   {
+    "nome": "Topo di biblioteca",
+    "requisito": "Leggere un totale di 40 libri (il libro \"Lettura rapida\", disponibile dal 7 gennaio dalla biblioteca della Shujin, raddoppia la velocità di lettura).",
+    "medaglie": null
+   },
+   {
+    "nome": "Habitué delle sale giochi",
+    "requisito": "Vincere 5 premi con il gioco dell'artiglio nella Sala giochi di Akihabara (300 yen a partita).",
+    "medaglie": null
+   },
+   {
+    "nome": "Il club dei Ladri Fantasma",
+    "requisito": "Massimizzare (Rango 10) tutti i Confidenti del gioco.",
+    "medaglie": null
+   },
+   {
+    "nome": "Dongiovanni",
+    "requisito": "Iniziare una relazione amorosa con ciascuno dei 10 Confidenti romantici e raggiungere l'evento di Rango 10 per tutti e 10.",
+    "medaglie": null
+   },
+   {
+    "nome": "Siamo tutti uguali",
+    "requisito": "Stringere un forte legame di amicizia (Rango 10, senza relazione romantica) con ciascuno dei 10 Confidenti con cui sarebbe possibile una relazione romantica.",
+    "medaglie": null
+   },
+   {
+    "nome": "Benefattore",
+    "requisito": "Fare regali ai Confidenti per un totale di 10 doni (le occasioni si presentano solo quando l'incontro non porta a un aumento di rango).",
+    "medaglie": null
+   },
+   {
+    "nome": "Amante dell'arte",
+    "requisito": "Far duplicare carte abilità da Yusuke Kitagawa (Rango 1+) per 10 volte.",
+    "medaglie": null
+   },
+   {
+    "nome": "Amante delle freccette",
+    "requisito": "Giocare a freccette a Kichijoji per un totale di 10 volte (aumenta il Rango Staffetta).",
+    "medaglie": null
+   },
+   {
+    "nome": "Gatto jazz",
+    "requisito": "Visitare il Jazz Club (Jazz Jin) di Kichijoji per 7 volte (richiede Rango 4 con Akechi per essere scoperto).",
+    "medaglie": null
+   },
+   {
+    "nome": "Maniaco del biliardo",
+    "requisito": "Giocare a biliardo (Penguin Sniper, Kichijoji) per 5 volte (sbloccato al Rango 2 con Akechi); aumenta il Rango tecnico.",
+    "medaglie": null
+   },
+   {
+    "nome": "Stanco delle spese",
+    "requisito": "Spendere un totale di 500.000 yen alla Clinica Medica di Tae Takemi a Yongen-Jaya.",
+    "medaglie": null
+   },
+   {
+    "nome": "Ricco guerrafondaio",
+    "requisito": "Spendere un totale di 1.000.000 di yen al negozio softair Untouchable di Munehisa Iwai (acquistare e poi rivendere protezioni/accessori riduce l'impatto economico).",
+    "medaglie": null
+   },
+   {
+    "nome": "Pistolero esperto",
+    "requisito": "Personalizzare 20 armi da fuoco diverse presso Untouchable (richiede almeno Rango 1 con Iwai, cioè Rango Coraggio 4; al Rango massimo con Iwai le personalizzazioni diventano gratuite).",
+    "medaglie": null
+   },
+   {
+    "nome": "Il giovane ladro",
+    "requisito": "Raccogliere un totale di 5 verdure dall'orto sul tetto della scuola, gestito con Haru Okumura (sbloccato al Rango 1 con Haru).",
+    "medaglie": null
+   },
+   {
+    "nome": "Lavoro di squadra esemplare",
+    "requisito": "Eseguire correttamente 50 Assalti sfruttando le debolezze nemiche.",
+    "medaglie": null
+   },
+   {
+    "nome": "Negoziatore",
+    "requisito": "Concludere con successo almeno 30 Negoziazioni con le Ombre (facilitato dal Controllo mentale di Yoshida a Rango 8 e dal Colpo d'avvertimento di Shinya a Rango 3).",
+    "medaglie": null
+   },
+   {
+    "nome": "Pistolero letale",
+    "requisito": "Usare l'abilità Abbattimento acrobatico almeno 30 volte (sbloccata al Rango 1 con Shinya; da un solo utilizzo per accesso al Metaverso a tre dopo il Rango 6).",
+    "medaglie": null
+   },
+   {
+    "nome": "Persuasore di Ombre",
+    "requisito": "Avviare (non necessariamente concludere con successo) 100 negoziazioni con le Ombre.",
+    "medaglie": null
+   },
+   {
+    "nome": "Bel colpo",
+    "requisito": "Sconfiggere 100 nemici con armi da fuoco (efficaci contro i nemici deboli alle \"abilità da arma da fuoco\"; le munizioni si ripristinano dopo ogni battaglia).",
+    "medaglie": null
+   },
+   {
+    "nome": "Devastatori Fantasma",
+    "requisito": "Eliminare 100 nemici tramite l'esplosione di un'Ombra sciagura (bisogna che la deflagrazione elimini anche le Ombre alleate in campo).",
+    "medaglie": null
+   },
+   {
+    "nome": "Tecnico esperto",
+    "requisito": "Causare 100 Colpi Tecnici combinando alterazioni di stato e danni mirati secondo la tabella specifica (es. Soggiogamento/Confusione/Disperazione/Paura/Amnesia/Furia -> Psicocinesi; Scottatura -> Nucleare o Vento; Congelamento/Scossa -> fisico, armi da fuoco o Nucleare; Vertigini/Sonno -> qualsiasi attacco).",
+    "medaglie": null
+   },
+   {
+    "nome": "Attacco finale",
+    "requisito": "Infliggere più di 9.999 danni in un singolo colpo senza usare un Assalto (consigliata difficoltà Spietata nei Memento a basso livello, dove le debolezze sfruttate triplicano il danno, più potenziamenti/depotenziamenti e passive come \"Amplifica\"/\"Potenzia\").",
+    "medaglie": null
+   },
+   {
+    "nome": "Fortunato",
+    "requisito": "Sconfiggere Demoni del Tesoro esplorando con costanza i Memento (numero non specificato dalla guida; facilitato da oggetti come le Trappole del tesoro).",
+    "medaglie": null
+   },
+   {
+    "nome": "Il vero mietitore",
+    "requisito": "Sconfiggere il Mietitore almeno 5 volte (in Royal non è più possibile sfruttare il trucco della stagione influenzale).",
+    "medaglie": null
+   },
+   {
+    "nome": "Senpai della vita",
+    "requisito": "Sconfiggere Jose, boss segreto del terzo semestre nel Dedalo di Da'at, dopo aver raccolto tutti i Timbri nei Memento.",
+    "medaglie": null
+   },
+   {
+    "nome": "Riabilitazione futura",
+    "requisito": "Sconfiggere le Gemelle Custodi in un combattimento opzionale disponibile solo in Nuova Partita+ (nei Memento, prima del 24 dicembre).",
+    "medaglie": null
+   },
+   {
+    "nome": "Vera riabilitazione",
+    "requisito": "Sconfiggere Lavenza, il boss segreto più potente del gioco, disponibile solo nel terzo semestre in Nuova Partita+ dopo aver rivelato il percorso verso il Tesoro del Palazzo di Maruki (richiede quindi almeno due complete del gioco).",
+    "medaglie": null
+   },
+   {
+    "nome": "Missione compiuta",
+    "requisito": "Completare tutte le richieste nei Memento, il che richiede di portare avanti quasi tutti i Confidenti (molte richieste si sbloccano fra Rango 7 e 8; il Confidente di Mishima ne introduce molte).",
+    "medaglie": null
+   },
+   {
+    "nome": "Collezionista di maschere",
+    "requisito": "Completare il Compendio delle Personae (le Personae DLC non contano): richiede tutti i Confidenti al massimo per le Personae supreme di ogni Arcano, lo sblocco degli eventi del terzo semestre, tutti i Demoni del Tesoro, alcune Richieste specifiche nei Memento (es. \"Bullismo sui bulli\" per Black Frost, \"La stalker informatica\" per Babau) e la Persona Satanael, ottenibile solo in Nuova Partita+.",
+    "medaglie": null
+   },
+   {
+    "nome": "Una bellissima maschera",
+    "requisito": "Potenziare una Persona fino al Livello 99 (nel terzo semestre facilitato usando ripetutamente la Ghigliottina durante gli Allarmi fusione).",
+    "medaglie": null
+   },
+   {
+    "nome": "Onnipotente",
+    "requisito": "Portare tutte le statistiche di una Persona del protagonista al livello 99 (via isolamento con incensi, oppure più rapidamente sacrificando Personae durante gli Allarmi fusione, che a volte danno dieci aumenti casuali di statistiche).",
+    "medaglie": null
+   },
+   {
+    "nome": "Killer professionista",
+    "requisito": "Tendere imboscate con il rampino (abilità Gancio a catena, sbloccata al Rango 4 con Kasumi) per 30 volte.",
+    "medaglie": null
+   },
+   {
+    "nome": "Nascosto nell'ombra",
+    "requisito": "Eseguire con successo 50 imboscate nei Palazzi.",
+    "medaglie": null
+   },
+   {
+    "nome": "Boia spietato",
+    "requisito": "Effettuare un totale di 20 esecuzioni nella Stanza di Velluto durante un Allarme delle fusioni.",
+    "medaglie": null
+   },
+   {
+    "nome": "Fanatico della sedia elettrica",
+    "requisito": "Creare 10 oggetti (armi, protezioni, accessori o carte abilità) tramite la Sedia elettrica.",
+    "medaglie": null
+   },
+   {
+    "nome": "Fiori per un ragazzo",
+    "requisito": "Raccogliere un totale di 1.000 fiori nei Memento.",
+    "medaglie": null
+   },
+   {
+    "nome": "Timbri ovunque",
+    "requisito": "Raccogliere un totale di 150 timbri nei Memento (facilitato dall'abilità Scansione dei Memento di Futaba, oltre il Rango 2 con lei).",
+    "medaglie": null
+   },
+   {
+    "nome": "Esperto di scasso",
+    "requisito": "Aprire un totale di 40 forzieri chiusi a chiave usando Grimaldelli (fabbricabili; il Grimaldello duraturo, creabile a metà gioco, è infinito e rimane in inventario anche in Nuova Partita+).",
+    "medaglie": null
+   },
+   {
+    "nome": "Un vero ladro",
+    "requisito": "Ottenere un totale di 150 oggetti cercando negli oggetti frangibili evidenziati dal Terzo Occhio nei Palazzi.",
+    "medaglie": null
+   },
+   {
+    "nome": "Trucco di sparizione",
+    "requisito": "Evitare 5 battaglie totali usando il Muro di fumo o la Nebbia ipnotica dopo essere stati scoperti.",
+    "medaglie": null
+   }
+  ],
+  "premi": [
+   {
+    "nome": "Personae della Stanza di Velluto (Palace Maker)",
+    "costo": 5,
+    "sblocco": "Varia per Persona (es. Arsène, Zorro, Captain Kidd, Carmen, Goemon, Ioanna, Necronomicon, Milady, Robin Hood, Loki, Cenerentola, oltre a \"La Stanza di Velluto\" e \"Ghigliottina\" come ambientazioni): 13 elementi, tutti a 5 Medaglie P.",
+    "effetto": "Decorazione del Covo dei Ladri (Palace Maker)."
+   },
+   {
+    "nome": "Mona-mobile (Metaverso)",
+    "costo": 5,
+    "sblocco": "Disponibile automaticamente.",
+    "effetto": "Decorazione Metaverso nel Palace Maker."
+   },
+   {
+    "nome": "Morgana Helicopter (Metaverso)",
+    "costo": 8,
+    "sblocco": "Sconfiggere Maruki nel terzo semestre.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Auto di Jose (Metaverso)",
+    "costo": 5,
+    "sblocco": "Sconfiggere Jose dopo aver ottenuto più di 123 timbri nei Memento.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Il Mietitore (Metaverso)",
+    "costo": 5,
+    "sblocco": "Sconfiggere il Mietitore almeno una volta.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Statua di Kamoshida (Metaverso)",
+    "costo": 8,
+    "sblocco": "Completare il Palazzo di Kamoshida.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "La Fonte infinita (Metaverso)",
+    "costo": 8,
+    "sblocco": "Completare il Palazzo di Madarame.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "ATM umani (Metaverso)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Kaneshiro.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Ombra di Futaba (Metaverso)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Futaba.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Esercito di Servobot (Metaverso)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Okumura.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Slot Machine gigante (Metaverso)",
+    "costo": 8,
+    "sblocco": "Completare il Palazzo di Niijima.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Daruma (Metaverso)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Shido.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Santo Graal (Metaverso)",
+    "costo": 8,
+    "sblocco": "Sconfiggere Yaldabaoth.",
+    "effetto": "Decorazione Metaverso."
+   },
+   {
+    "nome": "Asmodeus (statua Nemico - Kamoshida)",
+    "costo": 8,
+    "sblocco": "Completare il Palazzo di Kamoshida.",
+    "effetto": "Statua del signore del Palazzo nel Palace Maker."
+   },
+   {
+    "nome": "Azazel / Dipinto (statua Nemico - Madarame)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Madarame.",
+    "effetto": "Statua del signore del Palazzo."
+   },
+   {
+    "nome": "Bael / Piggytron (statua Nemico - Kaneshiro)",
+    "costo": 8,
+    "sblocco": "Completare il Palazzo di Kaneshiro.",
+    "effetto": "Statua del signore del Palazzo."
+   },
+   {
+    "nome": "Wakaba-Sphinge (statua Nemico - Futaba)",
+    "costo": 10,
+    "sblocco": "Completare il Palazzo di Futaba.",
+    "effetto": "Statua del mostro del Palazzo."
+   },
+   {
+    "nome": "Mammon e forme MDL (statua Nemico - Okumura)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Okumura.",
+    "effetto": "Statua del signore del Palazzo (Mammon; MDL-WKR, MDL-CH, MDL-AM, MDL-DM, MDL-GM, MDL-ED)."
+   },
+   {
+    "nome": "Leviatano forma umana e demoniaca (statua Nemico - Niijima)",
+    "costo": 5,
+    "sblocco": "Completare il Palazzo di Niijima.",
+    "effetto": "Statua della signora del Palazzo."
+   },
+   {
+    "nome": "Samael / Bestia del Sacrificio umano (statua Nemico - Shido)",
+    "costo": 8,
+    "sblocco": "Completare il Palazzo di Shido.",
+    "effetto": "Statua del signore del Palazzo."
+   },
+   {
+    "nome": "Yaldabaoth (statua Nemico)",
+    "costo": 10,
+    "sblocco": "Completare il Mondo del Clifoto.",
+    "effetto": "Statua del boss finale della trama base."
+   },
+   {
+    "nome": "Adam Kadmon (statua Nemico)",
+    "costo": 10,
+    "sblocco": "Completare il Palazzo di Maruki.",
+    "effetto": "Statua del boss finale del terzo semestre."
+   },
+   {
+    "nome": "Luoghi dei Confidenti (Palace Maker)",
+    "costo": 5,
+    "sblocco": "Portare al livello massimo il Confidente associato: Café Leblanc (Sojiro Sakura), Ore no Beko (Toranosuke Yoshida), Infermeria (Takuto Maruki), Sala interrogatori (Sae Niijima), Clinica Medica Takemi (Tae Takemi), Veggente (Chihaya Mifune), Gun About (Shinya Oda), Crossroads (Ichiko Ohya), Untouchable (Munehisa Iwai), Penguin Sniper (Goro Akechi), Chiesa (Hifumi Togo). 11 luoghi, tutti a 5 Medaglie P.",
+    "effetto": "Decorazione ambientazione Confidenti nel Palace Maker."
+   },
+   {
+    "nome": "Attività di vita quotidiana (Palace Maker)",
+    "costo": 5,
+    "sblocco": "Automatico con la trama o dopo il primo utilizzo, a seconda dell'elemento: Aula, Hawaii, Studio TV, Conferenza stampa (automatici); Lavanderia automatica, Bikkuri Boy, Laghetto di pesca, Distributori automatici, Distributori Gachapon (dopo il primo uso). 9 elementi, tutti a 5 Medaglie P.",
+    "effetto": "Decorazione vita quotidiana nel Palace Maker."
+   },
+   {
+    "nome": "Decorazioni per lo scenario (12 ambientazioni tematiche)",
+    "costo": null,
+    "sblocco": "Ornam. Covo dei Ladri e Ornam. Stanza di Velluto: disponibili automaticamente. Gli altri 10 (Ornam. Palazzo di Kamoshida/Madarame/Kaneshiro/Futaba/Okumura/Niijima/Shido, Ornam. Clifoto, Ornam. Palazzo di Maruki) si sbloccano completando il Palazzo/area corrispondente; Ornam. Memento esplorando i Memento.",
+    "effetto": "La guida non indica un costo in Medaglie P per queste decorazioni di scenario (a differenza degli altri elementi del Palace Maker)."
+   },
+   {
+    "nome": "Inserti, Assalti e Colpi di grazia da battaglia (Galleria)",
+    "costo": 3,
+    "sblocco": "Per ciascun personaggio, sbloccando il compagno in squadra (per l'inserto) e realizzando/concludendo un Assalto con lui in campo (per gli artwork di Assalto e Colpo di grazia).",
+    "effetto": "38 artwork totali coprono Protagonista, Morgana, Ryuji, Ann, Yusuke, Makoto, Futaba, Haru, Akechi, Akechi (Maschera nera), Sumire, Gemelle custodi, Lavenza; tutti a 3 Medaglie P ciascuno."
+   },
+   {
+    "nome": "Lettere di sfida (Galleria)",
+    "costo": 3,
+    "sblocco": "Dopo aver inviato la Lettera di sfida al rispettivo signore del Palazzo (Kamoshida, Madarame, Kaneshiro, Futaba, Okumura, Sae, Maruki).",
+    "effetto": "7 artwork, 3 Medaglie P ciascuno."
+   },
+   {
+    "nome": "Foto della vita quotidiana (Galleria)",
+    "costo": 3,
+    "sblocco": "Consultando i messaggi o scattando foto in date narrative precise (es. Festeggiamenti Ladri Fantasma 5 maggio, Festival estivo 17 luglio, Auguri di buon Natale 25 dicembre, Al santuario con Sumire 3 gennaio, ecc.).",
+    "effetto": "16 foto, 3 Medaglie P ciascuna."
+   },
+   {
+    "nome": "Altre immagini - Tokyo e Memento (Galleria)",
+    "costo": 3,
+    "sblocco": "Visitando Tokyo di giorno/notte, i Memento la prima volta, i Memento del terzo semestre (incl. nuova zona), e dopo aver sbloccato tutti i personaggi/Confidenti per le icone.",
+    "effetto": "6 immagini, 3 Medaglie P ciascuna."
+   },
+   {
+    "nome": "Concept Art / Bozzetti (Galleria)",
+    "costo": 5,
+    "sblocco": "Prevalentemente proseguendo con la trama; alcuni legati a sbloccare la Terza evoluzione della Persona di un personaggio o eventi del terzo semestre.",
+    "effetto": "Oltre 70 bozzetti che coprono protagonisti, Confidenti, abitanti del Metaverso e boss, quasi tutti a 5 Medaglie P."
+   },
+   {
+    "nome": "Artwork Speciale (copertine e illustrazioni celebrative, Galleria)",
+    "costo": 10,
+    "sblocco": "Disponibili automaticamente.",
+    "effetto": "20 illustrazioni (copertine di Persona 5 e Royal, illustrazioni celebrative per vendite/lancio, copertine Dengeki PlayStation, illustrazioni di Capodanno/Natale, ecc.), tutte a 10 Medaglie P."
+   },
+   {
+    "nome": "Filmati principali (Prologo e archi narrativi, Galleria)",
+    "costo": 5,
+    "sblocco": "Proseguendo con la trama (ogni filmato va visto almeno una volta in partita prima di poter essere acquistato); alcuni filmati dell'arco di Yaldabaoth e dell'arco di Maruki richiedono lo specifico finale ottenuto (conclusione originale, Bad ending #3 o Finale perfetto).",
+    "effetto": "Oltre 60 filmati coprono Prologo, arco di Kamoshida, Madarame, Kaneshiro, Futaba, Okumura, Niijima, Shido, Yaldabaoth, Maruki e gli Speciali (attacchi cooperativi), quasi tutti a 5 Medaglie P."
+   },
+   {
+    "nome": "Filmati speciali/crossover (Galleria)",
+    "costo": 10,
+    "sblocco": "Disponibili automaticamente (es. \"The Day Breakers\") o legati a contenuti musicali crossover (Dancing in Starlight): Brand New Days, Best Friends, P4U Medley, Dance!, Maze of Life, Shadow World, PSB 2017 Everyday Mix, Orchestra Medley 2017, P3D x P5D OP Mix.",
+    "effetto": "Filmati aggiuntivi perlopiù a 10 Medaglie P."
+   },
+   {
+    "nome": "Tracce musicali (Lettore Musicale/Galleria)",
+    "costo": null,
+    "sblocco": "Perlopiù proseguendo con la trama; alcune tracce sono legate a eventi specifici (es. \"Hoshi To Bokura To\" al finale base, \"Ideal and the Real -end version-\" al Bad ending #3, \"La nostra luce\" al Finale perfetto, \"Yaldabaoth\"/\"Our Beginning\" a scelte specifiche del 24 dicembre, \"Keep Your Faith\"/\"Throw Away Your Mask\" al terzo semestre).",
+    "effetto": "Oltre 60 tracce fra sigle, musiche di vita quotidiana, battaglia e dungeon; i costi verificati vanno da 1 a 10 Medaglie P a seconda del brano (la maggior parte a 5, alcune a 3 o 8, le sigle/temi finali principali a 8-10, una traccia risulta gratuita/non a pagamento)."
+   },
+   {
+    "nome": "Velo invisibile (ricompensa finale)",
+    "costo": null,
+    "sblocco": "Ottenere TUTTI i Premi del Covo dei Ladri; Jose invia la ricompensa nella stanza di Joker al Leblanc, da riscattare esaminando lo Scaffale in soffitta.",
+    "effetto": "Accessorio che impedisce alle Ombre di rilevare Joker nel Metaverso."
+   },
+   {
+    "nome": "Lettera dei Reali (ricompensa finale)",
+    "costo": null,
+    "sblocco": "Ottenere TUTTI i Premi del Covo dei Ladri; Jose invia la ricompensa nella stanza di Joker al Leblanc, da riscattare esaminando lo Scaffale in soffitta.",
+    "effetto": "Permette di evocare gratuitamente tutte le Personae già ottenute (particolarmente utile in Nuova Partita+)."
+   }
+  ],
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/covo-dei-ladri/"
+ },
+ "dlc": [
+  {
+   "nome": "Persona 5 Royal Battle Bundle",
+   "contenuto": "Set dedicati al supporto in battaglia: Set FULL MOON Sfida ospite d'onore, Set FOGGY DAY Sfida ospite d'onore, Pacchetto assistenza battaglia, Pacchetto assistenza esplorazioni, Set extra Battaglie sfida, Set di oggetti di guarigione, Set di carte abilità (7 set totali).",
+   "note": "Pensato per chi vuole affrontare le battaglie con più opzioni strategiche.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal Kasumi Costume Pack",
+   "contenuto": "4 set di costumi esclusivi per Kasumi Yoshizawa.",
+   "note": "Contenuto puramente cosmetico.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal Legacy DLC Bundle",
+   "contenuto": "Tutti i contenuti della versione originale di Persona 5: Personae aggiuntive, costumi speciali, Healing Item Set, Skill Card Set, traccia audio giapponese, e il nuovo livello di difficoltà \"Spietata\".",
+   "note": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal P5D Costume & BGM Set",
+   "contenuto": "Costumi e musiche da \"Persona 5: Dancing in Starlight\", inclusi brani utilizzabili durante l'esplorazione dei dungeon.",
+   "note": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal P5D Featherman Costume & BGM Set",
+   "contenuto": "Costumi a tema Featherman e brani sempre da Dancing in Starlight.",
+   "note": "Stile descritto come \"volutamente sopra le righe e nostalgico\".",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal Persona Bundle",
+   "contenuto": "Nuove Personae utilizzabili: Izanagi-no-okami e Izanagi-no-okami Picaro, Orfeo e Orfeo Picaro (versione femminile), Atena e Atena Picaro, Persona Raoul.",
+   "note": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal Persona Q2 Costume & BGM Special Set",
+   "contenuto": "Oggetti cosmetici ispirati a \"Persona Q2: New Cinema Labyrinth\".",
+   "note": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal SMT: Strange Journey Redux Costume & BGM Set",
+   "contenuto": "Outfit e musiche in crossover con \"Shin Megami Tensei: Strange Journey Redux\".",
+   "note": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal Tracksuit Costume Set",
+   "contenuto": "Tute sportive per i personaggi.",
+   "note": "Scelta puramente estetica.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal Velvet Room Costume & BGM Set",
+   "contenuto": "Costumi e brani musicali ispirati alla Stanza di Velluto.",
+   "note": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Persona 5 Royal DLC Pack",
+   "contenuto": "Pacchetto più completo: include tutti i DLC del Kasumi Costume Pack, tutti i contenuti del Battle Bundle, tutti i DLC del Persona Bundle, più 6 set di DLC individuali extra aggiuntivi.",
+   "note": "È il bundle più conveniente per chi vuole (quasi) tutto in un colpo solo.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  },
+  {
+   "nome": "Bonus per importazione salvataggio da Persona 5",
+   "contenuto": "50.000 yen, Catena di perline x3 (cura completa degli HP), Perlina rigenerante x3 (resurrezione automatica con 50% HP).",
+   "note": "Si ottiene importando un salvataggio di Persona 5 \"Vanilla\" sulla stessa piattaforma; non è necessario aver completato Persona 5 per ricevere il bonus.",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dlc-bonus/"
+  }
+ ],
+ "meteo": [
+  {
+   "condizione": "Sereno",
+   "effetti": [
+    "Condizione atmosferica base, senza modificatori speciali su Memento (frequenza nemici/forzieri/oggetti standard).",
+    "Il giorno successivo al completamento di un Palazzo il meteo è sempre sereno."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Nuvoloso",
+   "effetti": [
+    "Condizione atmosferica base, senza effetti particolari sui Memento (come il sereno)."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Pioggia",
+   "effetti": [
+    "È la condizione con il maggior numero di effetti pratici: alcune attività quotidiane danno bonus maggiori alle Doti Sociali durante il maltempo.",
+    "Il venditore ambulante di Shibuya e il venditore di patate dolci di Yongen-Jaya restano chiusi.",
+    "Alcuni oggetti sono acquistabili solo nei giorni di pioggia: Natto rugiadoso, Sandwich inzuppato, Frullato iperproteico.",
+    "I Confidenti Haru Okumura, Futaba Sakura, Chihaya Mifune e Toranosuke Yoshida non sono disponibili quando piove, indipendentemente dall'orario.",
+    "Nei Memento aumentano la frequenza dei nemici, la comparsa dei forzieri e la varietà degli oggetti recuperabili.",
+    "In città viene riprodotta la versione strumentale di \"Beneath the Mask -Rain-\"."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Neve",
+   "effetti": [
+    "Nell'originale Persona 5 non influiva sulle attività quotidiane; in Royal modifica alcune attività (es. bagni pubblici, pesca) in modo simile alla pioggia.",
+    "Nei Memento produce gli stessi effetti della pioggia: aumento di frequenza nemici, forzieri e varietà di oggetti."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Allerta: Pioggia torrenziale",
+   "effetti": [
+    "Le Ombre rare e i Demoni del Tesoro hanno probabilità maggiore di apparire.",
+    "Carte bianche e materiali rari (es. Mercurio) possono comparire insieme ad altri oggetti casuali.",
+    "I forzieri del tesoro hanno probabilità maggiore di apparire.",
+    "Date: 27/7, 29/7 (sera), 1/8 (giorno), 3/8, 8/8 (notte), 10/8 (sera), 11/8 (giorno), 16/8 (giorno), 17/8 (sera), 18/8 (giorno), 26/8 (sera), 27/8 (sera)."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Allerta: Allerta polline",
+   "effetti": [
+    "I nemici possono comparire addormentati, come per un effetto automatico di Nebbia ipnotica.",
+    "Le Ombre possono richiedere Gocce per occhioni durante le negoziazioni.",
+    "Date: 9/5, 10/5, 20/5, 23/5, 26/5, 31/5, 1/6, 2/6."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Allerta: Ondata di calore (di giorno)",
+   "effetti": [
+    "I distributori automatici restano senza bevande.",
+    "Le Ombre possono essere afflitte dallo stato In fiamme in combattimento.",
+    "Le Ombre possono richiedere bevande durante le negoziazioni.",
+    "Date (solo di giorno): 26/7, 28/7, 30/7, 31/7, 2/8, 4/8, 6/8, 7/8, 9/8, 12/8, 15/8, 17/8, 30/8."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Allerta: Notte torrida (di sera)",
+   "effetti": [
+    "I distributori automatici restano senza bevande.",
+    "Date (solo di sera): 30/7, 31/7, 2/8, 4/8, 6/8, 7/8, 9/8, 12/8, 15/8, 17/8, 22/8-26/8, 28/8, 30/8."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Allerta: Stagione influenzale",
+   "effetti": [
+    "Le Ombre possono essere afflitte da Disperazione in combattimento.",
+    "Le Ombre possono richiedere Scaldamani durante le negoziazioni.",
+    "Date: 13/11, 14/11, 15/11, 8/12, 9/12."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Allerta: Ondata di gelo",
+   "effetti": [
+    "Le Ombre possono essere afflitte da Congelamento in combattimento.",
+    "Frequenza di apparizione e ricompense nei Memento uguali a quelle di meteo sereno o nuvoloso (non ai bonus di pioggia/neve).",
+    "Le attività giornaliere restano comunque influenzate come nei giorni di pioggia, eccetto gli oggetti esclusivi venduti solo con la pioggia.",
+    "Date: 26/1, 27/1."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  },
+  {
+   "condizione": "Abilità passive legate al meteo",
+   "effetti": [
+    "Alcune abilità passive delle Personae, tra cui \"Ambiente benevolo\" e \"Condizioni favorevoli\", funzionano solo con specifiche condizioni atmosferiche.",
+    "Eccezione: le Personae con il Tratto \"Bimbo depresso\" possono attivare queste abilità anche con condizioni atmosferiche normali."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/effetti-del-meteo/"
+  }
+ ],
+ "nuovaPartitaPlus": {
+  "trasferito": [
+   "Tutte le statistiche/doti sociali (accesso immediato a dialoghi e attività che richiedono Coraggio, Fascino, Conoscenza, Gentilezza o Perizia).",
+   "Il Compendio delle Personae, intatto con tutte le Personae registrate.",
+   "Il denaro accumulato.",
+   "Tutte le armi, armature e accessori.",
+   "Le carte abilità, incluse quelle bianche, e gli oggetti che sbloccano fusioni speciali.",
+   "Aumenti permanenti di HP e SP ottenuti tramite allenamento, meditazione e i Ranghi Confidente di Kasumi e Maruki.",
+   "Bonus statistici ottenuti al Jazz Club.",
+   "Abilità insegnate tramite i cocktail della domenica (recuperabili dal Confessionale della Chiesa di Kanda).",
+   "Le carte abilità duplicate tramite Yusuke.",
+   "Le affinità dei boss già scoperte.",
+   "Le personalizzazioni delle armi da fuoco.",
+   "I set di Freccette.",
+   "Il Grimaldello duraturo.",
+   "Punteggi e ricompense delle Battaglie Sfida.",
+   "I timbri raccolti nei Memento.",
+   "La Vaschetta a stella ottenuta dallo scontro con Jose.",
+   "I regali ricevuti dai Confidenti durante il festival culturale, Natale, San Valentino e il 19 marzo."
+  ],
+  "nonTrasferito": [
+   "I livelli del protagonista e del party (resettati).",
+   "I Ranghi dei Confidenti (azzerati).",
+   "Il Rango Staffetta e il Rango Tecnico (azzerati).",
+   "Le Personae finali e di terzo livello dei membri del gruppo.",
+   "Le Personae equipaggiate a fine partita non presenti in inventario (restano comunque richiamabili dal Compendio pagando).",
+   "Libri, DVD e videogiochi.",
+   "Le decorazioni per la stanza.",
+   "Gli oggetti consumabili, gli strumenti d'infiltrazione, gli ingredienti di fabbricazione e i regali per i Confidenti (non ancora dati).",
+   "I punti accumulati al laghetto di pesca.",
+   "Il nome del protagonista e dei Ladri Fantasma (restano quelli scelti, non si possono ridefinire).",
+   "La cronologia delle scene d'intermezzo e dei tutorial.",
+   "La difficoltà (può essere scelta di nuovo liberamente)."
+  ],
+  "note": "Per accedere alla Nuova Partita+ occorre completare una prima run e, alla richiesta del gioco, salvare i progressi; caricando questo salvataggio si trasferiscono i dati indicati e si inizia una nuova run. Contenuti esclusivi della NG+: possibilità di affrontare Caroline e Justine in un combattimento opzionale prima del 24 dicembre; la battaglia segreta contro Lavenza nel terzo semestre (esclusiva P5R); possibilità di fondere Satanael, la Persona definitiva del protagonista; equipaggiamento dell'arma da mischia \"Paradiso perduto\" e della sua versione potenziata \"Paradiso perduto R\"; il vestito da principe di Akechi (Palazzo finale del terzo semestre) e l'abito scuro/Black Mask di Akechi (Palazzo di Niijima). Il file di salvataggio riceve un simbolo speciale di completamento. La NG+ è consigliata per concentrarsi su Confidenti, attività secondarie e boss segreti senza pressione, completando il gioco al 100%.",
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/nuova-partita-piu/"
+ },
+ "differenzeRoyal": [
+  "Nuovo personaggio giocabile principale, Kasumi Yoshizawa, con proprie missioni e scene sociali.",
+  "Un intero semestre scolastico extra (\"terzo semestre\") con un nuovo Palazzo e nuovi eventi narrativi.",
+  "Nuova area, Kichijoji, più grande di qualsiasi altra località del mondo reale nel gioco: club per freccette (migliora la Staffetta), jazz bar (incrementa statistiche del party), tempio per meditazione (aumenta gli SP permanenti di Joker), negozi e servizi esclusivi.",
+  "Due Confidenti completamente nuovi, oltre a scene aggiuntive che approfondiscono lo sviluppo dei Confidenti esistenti; lo scenario sociale di Akechi è stato completamente rielaborato.",
+  "Nuovi Attacchi Speciali: mosse cooperative dei Ladri Fantasma che si sbloccano con l'avanzare della storia.",
+  "La Staffetta è estesa a tutti i membri del gruppo fin dall'inizio.",
+  "Le munizioni delle armi da fuoco si ricaricano dopo ogni battaglia.",
+  "Ogni Persona ha un Tratto specifico (novità di Royal) ed è stata introdotta una terza evoluzione per ciascun membro del party.",
+  "Tutti i Palazzi sono stati in parte rielaborati: alcuni mantengono la struttura originale, altri hanno aree completamente nuove.",
+  "Joker possiede un rampino per accedere a nuove zone nei dungeon.",
+  "Ogni Palazzo nasconde 3 Semi della Bramosia: trovarli tutti garantisce un accessorio unico e ripristina parte degli SP del gruppo.",
+  "I boss sono stati modificati, con nuove meccaniche o fasi aggiuntive; in alcune location compaiono nemici aggiuntivi simili a mini-boss e Ombre rare/instabili che esplodono alla morte causando ingenti danni.",
+  "I Memento sono notevolmente ampliati (piani più grandi, maggiore libertà di esplorazione), con negozio di Jose (oggetti in cambio di fiori), sistema di timbri per bonus permanenti su EXP/denaro/oggetti (resettabili) e nuovi incarichi secondari.",
+  "La Stanza di Velluto offre battaglie opzionali speciali con ricompense varie e la modalità di Allarme casuale, che potenzia la fusione delle Personae con risultati anche inaspettati.",
+  "Il calendario di gioco è stato rielaborato in alcune parti, offrendo più tempo libero; Morgana non obbliga a dormire così spesso, dando generalmente più libertà nelle serate.",
+  "Nuova funzione di assistenza che suggerisce quale Confidente visitare e quale statistica potenziare; i Confidenti possono a volte richiamare dopo un'uscita insieme offrendo nuove scelte di dialogo; alcuni Confidenti hanno benefici e ricompense modificati.",
+  "Nuova area bonus Covo dei Ladri, accessibile in ogni momento, con artwork, modelli dei personaggi, cutscene e tracce musicali sbloccabili con la valuta di gioco (Medaglie P).",
+  "Colonna sonora ampliata con circa 30 nuovi brani.",
+  "Novità grafiche: nuova sequenza di apertura, menu principale rivisitato, font dei dialoghi aggiornato, nuovi effetti visivi alle finestre di dialogo, ritratti aggiuntivi dei personaggi, effetti meteo dinamici.",
+  "Nuove festività, eventi e scene extra nel calendario.",
+  "Due finali alternativi aggiuntivi rispetto all'originale (legati al terzo semestre).",
+  "La Nuova Partita+ trasferisce bonus aggiuntivi rispetto all'originale, come gli incrementi permanenti di HP e SP.",
+  "Alcune Personae e diversi nemici sono stati riequilibrati nei parametri e nelle abilità disponibili.",
+  "Versione PS5 (ottobre 2022): 60 fps (contro i 30 fps di PS4), risoluzione nativa 4K identica a PS4 Pro, tempi di caricamento leggermente ridotti, include tutti i DLC precedentemente rilasciati; non è previsto aggiornamento da PS4 e non è possibile trasferire i salvataggi; i trofei ottenuti su PS4 non si sbloccano automaticamente sulla lista PS5."
+ ],
+ "tempo": {
+  "fasce": [
+   "Mattina presto: ci si reca a scuola in metropolitana; durante il tragitto si possono incontrare amici, ascoltare conversazioni fra studenti o leggere un libro posseduto.",
+   "Mattina, mezzogiorno e pomeriggio (a scuola): durante le lezioni gli insegnanti possono fare domande; rispondere correttamente aumenta la Conoscenza. L'anno scolastico include attività stagionali come festival sportivi, giornate al mare, festival culturali e gite.",
+   "Dopo scuola: piena libertà di azione, con possibilità di esplorare dungeon, uscire con gli amici o migliorare le doti sociali; qualsiasi attività scelta fa avanzare il tempo fino alla sera riportando al Leblanc. Si può fare shopping, andare al cinema, ai bagni pubblici o lavorare part-time.",
+   "Sera: dopo un certo punto della storia si possono svolgere attività anche la sera, a meno di aver già esplorato un dungeon durante il giorno."
+  ],
+  "regole": [
+   "Si possono svolgere attività dopo la scuola dal lunedì al sabato, ma anche la domenica, nei giorni festivi e la sera.",
+   "Ogni azione scelta fa scorrere il tempo, quindi è necessario pianificare con attenzione per non sprecare giorni preziosi.",
+   "Le attività principali che consumano tempo includono l'esplorazione dei dungeon, il tempo passato con i Confidenti e l'incremento delle statistiche sociali.",
+   "Il meteo influisce direttamente sulle azioni disponibili: ad esempio studiare nei giorni di pioggia aumenta la concentrazione e permette di ottenere più punti Conoscenza; nei Memento il maltempo rende i nemici più difficili ma aumenta anche le ricompense."
+  ],
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/gestione-del-tempo-e-vita-quotidiana/"
+ }
+}

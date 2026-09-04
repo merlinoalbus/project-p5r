@@ -1,0 +1,4432 @@
+{
+ "consumabili": [
+  {
+   "nome": "Frutto del diavolo",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP di un alleato",
+   "dove": "Tesori (Dedalo di Aiyatsbus), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Benda adesiva",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP di un alleato",
+   "dove": "Farmacia Aohige, Shibuya (da 18 aprile)",
+   "prezzo": 120,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Medicina",
+   "nomeEn": "Medicine",
+   "categoria": "cura",
+   "effetto": "Ripristina 50 HP di un alleato",
+   "dove": "Ricompensa: Morgana (11 aprile), Ryuji (12 aprile)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Recup-RO: 50 mg",
+   "nomeEn": "Recov-R: 50mg",
+   "categoria": "cura",
+   "effetto": "Ripristina 50 HP di un alleato",
+   "dove": "Clinica Takemi, Yongen-Jaya (da 16 aprile; sconto a Rango Morte alto, 400¥)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Recup-RO: 100 mg",
+   "nomeEn": "Recov-R: 100mg",
+   "categoria": "cura",
+   "effetto": "Ripristina 100 HP di un alleato",
+   "dove": "Clinica Takemi (da 16 aprile, sconto 800¥); Televendite (9.980¥)",
+   "prezzo": 1600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Gelatina viennese",
+   "nomeEn": "Viennese Jelly",
+   "categoria": "cura",
+   "effetto": "Ridona 100 HP a un alleato",
+   "dove": "Prossimo Asso, Centro commerciale sotterraneo Shibuya (da 18 aprile)",
+   "prezzo": 1600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Takemedic",
+   "nomeEn": "Takemedic",
+   "categoria": "cura",
+   "effetto": "Ripristina 200 HP di un alleato",
+   "dove": "Clinica Takemi (Rango Morte 5; sconto 1.700¥)",
+   "prezzo": 3400,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sandwich inzuppato",
+   "nomeEn": "Dipped Katsu Sando",
+   "categoria": "cura",
+   "effetto": "Ripristina 200 HP di un alleato",
+   "dove": "Panetteria Yon-Germain (giorni di pioggia, 1 al giorno); gratis dal Frigorifero del Leblanc in date specifiche",
+   "prezzo": 2000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dango lunare",
+   "nomeEn": "Moon Dango",
+   "categoria": "cura",
+   "effetto": "Ripristina 200 HP di un alleato",
+   "dove": "Super Muramasa, Yongen-Jaya (autunno); Televendite (4.800¥)",
+   "prezzo": 640,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pietra vitale",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina il 30% degli HP di un alleato",
+   "dove": "Forzieri (Palazzo di Kamoshida), Dedali dei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Perlina",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina interamente gli HP di un alleato",
+   "dove": "Forzieri (vari Palazzi e Dedali), DLC, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Takemedic-All",
+   "nomeEn": "Takemedic-All",
+   "categoria": "cura",
+   "effetto": "Ripristina 50 HP di tutti gli alleati",
+   "dove": "Clinica Takemi (Rango Morte 1; sconto 950¥)",
+   "prezzo": 1900,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Takemedic-All V",
+   "nomeEn": "Takemedic-All V",
+   "categoria": "cura",
+   "effetto": "Ripristina 100 HP di tutti gli alleati",
+   "dove": "Clinica Takemi (Rango Morte 1; sconto 1.800¥)",
+   "prezzo": 3600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Takemedic-All Z",
+   "nomeEn": "Takemedic-All Z",
+   "categoria": "cura",
+   "effetto": "Ripristina 200 HP di tutti gli alleati",
+   "dove": "Clinica Takemi (Rango Morte 5; sconto 4.200¥)",
+   "prezzo": 8400,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Catena di perline",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina interamente gli HP di tutti gli alleati",
+   "dove": "Forzieri (vari Palazzi e Dedali), Richieste, Negozi del Palazzo di Niijima (120 Monete), Ricompense",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Mela Hogyoku",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina tutti gli HP di tutti gli alleati",
+   "dove": "Bonus per file di salvataggio di Persona 5 importato",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Vino della grazia",
+   "nomeEn": "Wine of Grace",
+   "categoria": "cura",
+   "effetto": "Ridona tutti gli HP a tutti gli alleati",
+   "dove": "Chiesa di Kanda (domenica)",
+   "prezzo": 14000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato osechi",
+   "nomeEn": "Osechi Chocolate",
+   "categoria": "cura",
+   "effetto": "Ripristina tutti gli HP di tutti gli alleati",
+   "dove": "Triple Seven, Central Street (da 13 gennaio, 1 a settimana)",
+   "prezzo": 3000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "IV 50",
+   "nomeEn": "Healing IV",
+   "categoria": "cura",
+   "effetto": "Ripristina il 50% degli HP di tutti gli alleati (solo in posti sicuri)",
+   "dove": "Clinica Takemi (da 16 aprile); DLC",
+   "prezzo": 1800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "IV 100",
+   "nomeEn": "Rejuvenating IV",
+   "categoria": "cura",
+   "effetto": "Ripristina il 100% degli HP di tutti gli alleati (solo in posti sicuri)",
+   "dove": "Clinica Takemi (Rango Morte 3; sconto 1.800¥)",
+   "prezzo": 3600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Goccia dell'anima",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 10 SP di un alleato",
+   "dove": "Forzieri (vari Palazzi e Dedali), Jose nei Memento (15 Fiori, max 5 al giorno), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Beni-Azuma",
+   "nomeEn": "Beni-Azuma",
+   "categoria": "sp",
+   "effetto": "Ripristina 10 SP di un alleato",
+   "dove": "Venditore di patate dolci, Yongen-Jaya (da 9 ottobre, 1 al giorno); Televendite (9.800¥)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sakura Mochi",
+   "nomeEn": "Sakura Mochi",
+   "categoria": "sp",
+   "effetto": "Ridona 10 SP a un alleato",
+   "dove": "Televendite (24 aprile)",
+   "prezzo": 5980,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Katsu a pezzettoni",
+   "nomeEn": "Chunky Katsu",
+   "categoria": "sp",
+   "effetto": "Ripristina 30 SP di un alleato",
+   "dove": "Friggitoria Macelleria Hagoromo, Kichijoji (da 5 giugno, domenica sera)",
+   "prezzo": 150,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Polvere d'anima",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 50 SP di un alleato",
+   "dove": "Forzieri (vari Palazzi e Dedali), Jose nei Memento (75 Fiori), ATM dei Memento",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Yaki-Imo leggendario",
+   "nomeEn": "Legendary Yaki-Imo",
+   "categoria": "sp",
+   "effetto": "Ripristina 50 SP di un alleato",
+   "dove": "Venditore di patate dolci (inverno, 1 a settimana); Televendite (9.800¥); Frigorifero Leblanc (15 ottobre)",
+   "prezzo": 1800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Anima da masticare",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Forzieri (Palazzo di Shido, Dedali), Jose nei Memento (170 Fiori, 1 al giorno), ATM dei Memento",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Bignè alla panna di Ann",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Ricompensa: Festival scolastico con Ann",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ciambelle di Makoto",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Ricompensa: Festival scolastico con Makoto",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Taiyaki di Sadayo",
+   "nomeEn": "Sadayo Taiyaki",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Ricompensa: Festival scolastico con Sadayo Kawakami",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Amezaiku di Sakura",
+   "nomeEn": "Sakura Amezaiku",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Ricompensa: Festival scolastico con Haru",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Hot dog di Ryuji",
+   "nomeEn": "Ryuji Dog",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Ricompensa: Festival scolastico con Ryuji",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Kit energetico S",
+   "nomeEn": "Stamina Kit S",
+   "categoria": "sp",
+   "effetto": "Ripristina il 20% degli SP di tutti gli alleati (solo in posti sicuri)",
+   "dove": "Ricompensa Morgana (Palazzo di Kamoshida), Jose nei Memento (80 Fiori, 2 al giorno)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Kit energetico L",
+   "nomeEn": "Stamina Kit L",
+   "categoria": "sp",
+   "effetto": "Ripristina il 40% degli SP di tutti gli alleati (solo in posti sicuri)",
+   "dove": "DLC; Jose nei Memento (210 Fiori, 1 al giorno)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pane per l'anima",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Forzieri (vari Palazzi e Dedali), Jose nei Memento (450 Fiori, 1 al giorno), DLC, ATM dei Memento",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Carota chiardiluna",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Coltivazione (Rango massimo Confidente Haru)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Soma",
+   "nomeEn": "Soma",
+   "categoria": "cura",
+   "effetto": "Ripristina interamente HP e SP di tutti gli alleati",
+   "dove": "Forzieri (vari Palazzi e Dedali), Negozi del Palazzo di Niijima (350 Monete), Jose nei Memento (520 Fiori, 1 al giorno), Richieste, DLC, ricompensa battaglia Caroline/Justine",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Elisir del padre",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ridona tutti gli HP e SP a tutti gli alleati",
+   "dove": "Scambio con il Mercante Sakai a Kichijoji in cambio di Panino supernova (22 gennaio - 2 febbraio)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Perlina rigenerante",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Rianima un alleato caduto con il 50% degli HP",
+   "dove": "Forzieri (vari Palazzi e Dedali), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Band-Ace",
+   "nomeEn": "Band-Ace",
+   "categoria": "cura",
+   "effetto": "Rianima un alleato caduto con il 50% degli HP",
+   "dove": "Bonus per file di salvataggio di Persona 5 importato",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Rianidrin",
+   "nomeEn": "Revivadrin",
+   "categoria": "cura",
+   "effetto": "Rianima un alleato caduto con il 50% degli HP",
+   "dove": "Clinica Takemi (da 16 aprile); Televendite (9.980¥); scambio gacha di Akihabara (da 2 settembre)",
+   "prezzo": 1800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Balsamo vitale",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Rianima un alleato caduto con il 100% degli HP",
+   "dove": "Forzieri (vari Palazzi e Dedali), DLC, scambio gacha Mothman muschiato (dopo 5 scambi), ricompensa battaglia Caroline/Justine, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Unguento vitale",
+   "nomeEn": "Life Ointment",
+   "categoria": "cura",
+   "effetto": "Rianima un alleato con il 100% degli HP",
+   "dove": "Clinica Takemi (Rango Morte 5; sconto 3.200¥), scambio gacha Kin-Ki kink",
+   "prezzo": 6400,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Melon pan",
+   "nomeEn": "Melon Pan",
+   "categoria": "cura",
+   "effetto": "Rianima un alleato caduto con il 100% degli HP",
+   "dove": "Panetteria Yon-Germain (estate, 1 a settimana); Televendite (fino a 69.800¥)",
+   "prezzo": 1000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Crostatina angelo",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Rianima un alleato caduto con il 100% degli HP",
+   "dove": "Panetteria Yon-Germain (inverno, 1 a settimana); Supermercato Taisho Store",
+   "prezzo": 1800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Reviv-all",
+   "nomeEn": "Reviv-All",
+   "categoria": "cura",
+   "effetto": "Rianima tutti gli alleati caduti con il 50% degli HP",
+   "dove": "Clinica Takemi (Rango Morte 10)",
+   "prezzo": 50000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Rinnov-all",
+   "nomeEn": "Renew-All",
+   "categoria": "cura",
+   "effetto": "Rianima tutti gli alleati caduti con il 100% degli HP",
+   "dove": "Clinica Takemi (Rango Morte 10)",
+   "prezzo": 250000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pappa reale R",
+   "nomeEn": "Royal Jelly R",
+   "categoria": "cura",
+   "effetto": "Rianima tutti gli alleati caduti con il 100% degli HP",
+   "dove": "Televendite (29 gennaio)",
+   "prezzo": 69800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Panfritto",
+   "nomeEn": "Fried Bread",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Negozio scolastico",
+   "prezzo": 90,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Re Karaage",
+   "nomeEn": "Karaage King",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Triple Seven (da 18 aprile)",
+   "prezzo": 120,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Starvicks",
+   "nomeEn": "Starvicks",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Second Maid",
+   "nomeEn": "Second Maid",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari); Televendite (2.980¥)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Earl Green",
+   "nomeEn": "Earl Green",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Manta",
+   "nomeEn": "Manta",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Nastea",
+   "nomeEn": "Nastea",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "1UP",
+   "nomeEn": "1UP",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Durian au lait",
+   "nomeEn": "Durian-au-Lait",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Acqua di Udagawa",
+   "nomeEn": "Udagawa Water",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Joylent",
+   "nomeEn": "Joylent",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Punch non filtrato",
+   "nomeEn": "Raw Punch",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Tè energetico",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Distributori automatici (vari)",
+   "prezzo": 130,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sandwich",
+   "nomeEn": "Sandwich",
+   "categoria": "cura",
+   "effetto": "Ripristina 10 HP",
+   "dove": "Panetteria Yon-Germain; Frigorifero Leblanc",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pane e marmellata",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Negozio scolastico",
+   "prezzo": 120,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Nikuman straniero",
+   "nomeEn": "Foreign Nikuman",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Triple Seven (da 18 aprile)",
+   "prezzo": 150,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Jagariko",
+   "nomeEn": "Jagariko",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Triple Seven; ricompensa Maruki (Rango 3)",
+   "prezzo": 160,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Patatine saturnine",
+   "nomeEn": "Saturn Fries",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Burger Shop (da 18 aprile)",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dr. Salt NEO",
+   "nomeEn": "Dr. Salt NEO",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Distributori automatici (vari), Sala giochi, scambio gacha",
+   "prezzo": 210,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Oh! Shiruko",
+   "nomeEn": "Oh! Shiruko",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Distributori automatici; Televendite (29.800¥)",
+   "prezzo": 210,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Zuppa a pezzettoni",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Distributore di Akihabara (da 2 settembre)",
+   "prezzo": 210,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Amazake definitivo",
+   "nomeEn": "Ultimate Amazake",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP",
+   "dove": "Distributori automatici; Televendite (29.800¥)",
+   "prezzo": 210,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Insalata venere",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Ripristina 30 HP",
+   "dove": "Burger Shop (da 18 aprile)",
+   "prezzo": 300,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Danish di frutta",
+   "nomeEn": "Fruit Danish",
+   "categoria": "cura",
+   "effetto": "Ripristina 30 HP",
+   "dove": "Panetteria Yon-Germain; Frigorifero Leblanc",
+   "prezzo": 400,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Soda di Udagawa",
+   "nomeEn": "Udagawa Soda",
+   "categoria": "cura",
+   "effetto": "Ripristina 30 HP",
+   "dove": "Distributore di Akihabara (da 2 settembre)",
+   "prezzo": 300,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Nikuman gustoso",
+   "nomeEn": "Juicy Nikuman",
+   "categoria": "cura",
+   "effetto": "Ripristina 30 HP",
+   "dove": "Street food Houraku, Kichijoji (da 5 giugno)",
+   "prezzo": 300,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Nikuman alla napoletana",
+   "nomeEn": "Napolitan Nikuman",
+   "categoria": "cura",
+   "effetto": "Ripristina 50 HP",
+   "dove": "Street food Houraku, Kichijoji (da 5 giugno)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Nikuman piccante",
+   "nomeEn": "Peppery Nikuman",
+   "categoria": "cura",
+   "effetto": "Ripristina 100 HP",
+   "dove": "Street food Houraku, Kichijoji (da 5 giugno)",
+   "prezzo": 1500,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Zuppa di zucca",
+   "nomeEn": "Pumpkin Soup",
+   "categoria": "cura",
+   "effetto": "Ripristina 100 HP",
+   "dove": "Televendite (2 ottobre)",
+   "prezzo": 14800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pane autunnale",
+   "nomeEn": "Autumn Bread",
+   "categoria": "cura",
+   "effetto": "Ripristina 200 HP",
+   "dove": "Negozio scolastico (venerdì d'autunno, 1 a settimana)",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Soba calmante",
+   "nomeEn": "Soothing Soba",
+   "categoria": "cura",
+   "effetto": "Ridona 200 HP",
+   "dove": "Triple Seven (estate, 1 a settimana)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Frullato proteico",
+   "nomeEn": "Protein",
+   "categoria": "cura",
+   "effetto": "Ripristina il 30% degli HP",
+   "dove": "Discount Rocinante (da 18 aprile), DLC, Richieste; Televendite (fino a 12.800¥)",
+   "prezzo": 2000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Frullato iperproteico",
+   "nomeEn": "Moist Protein",
+   "categoria": "cura",
+   "effetto": "Ridona il 30% degli HP",
+   "dove": "Prossimo Asso (giorni di pioggia, 1 al giorno); Televendite (fino a 12.800¥)",
+   "prezzo": 4500,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Proteine d'importazione",
+   "nomeEn": "Imported Protein",
+   "categoria": "cura",
+   "effetto": "Ripristina il 30% degli HP",
+   "dove": "Prossimo Asso (da 5 giugno, 1 al mese); Televendite (fino a 39.800¥)",
+   "prezzo": 8000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Big Bang Burger",
+   "nomeEn": "Big Bang Burger",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP a tutti gli alleati",
+   "dove": "Burger Shop (da 18 aprile), ricompense challenge",
+   "prezzo": 480,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Tris di calamari",
+   "nomeEn": "Squid Tri-Pack",
+   "categoria": "cura",
+   "effetto": "Ripristina 20 HP a tutti gli alleati",
+   "dove": "Super Muramasa (da 18 aprile)",
+   "prezzo": 2000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Carne in scatola spec.",
+   "nomeEn": "Corned Beef Special",
+   "categoria": "cura",
+   "effetto": "Ripristina 40 HP a tutti gli alleati",
+   "dove": "Verdura MealPort, Kichijoji (da 5 giugno)",
+   "prezzo": 1600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Festa in lattina",
+   "nomeEn": "Party in a Can",
+   "categoria": "cura",
+   "effetto": "Ripristina 40 HP a tutti gli alleati",
+   "dove": "Televendite (24 aprile)",
+   "prezzo": 5980,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Frutta secca",
+   "nomeEn": "Mixed Nuts",
+   "categoria": "cura",
+   "effetto": "Ripristina 40 HP a tutti gli alleati",
+   "dove": "Super Muramasa (da 18 aprile)",
+   "prezzo": 2800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Panino terrestre",
+   "nomeEn": "Earth Burger",
+   "categoria": "cura",
+   "effetto": "Ripristina 40 HP di un alleato",
+   "dove": "Burger Shop (da 18 aprile)",
+   "prezzo": 780,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Agodashi Oden",
+   "nomeEn": "Agodashi Oden",
+   "categoria": "cura",
+   "effetto": "Ripristina 50 HP a tutti gli alleati",
+   "dove": "Triple Seven (inverno, 1 a settimana)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Natto rugiadoso",
+   "nomeEn": "Drizzled Natto",
+   "categoria": "cura",
+   "effetto": "Ripristina 80 HP a tutti gli alleati",
+   "dove": "Taisho Store (giorni di pioggia, 1 al giorno)",
+   "prezzo": 1300,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pacco di frutta primav.",
+   "nomeEn": "Spring Fruit Pack",
+   "categoria": "cura",
+   "effetto": "Ripristina 80 HP a tutti gli alleati",
+   "dove": "Super Muramasa (da 18 aprile); Televendite (5.980¥)",
+   "prezzo": 1200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cereali assortiti",
+   "nomeEn": "Cereal Multi-Pack",
+   "categoria": "cura",
+   "effetto": "Ripristina 80 HP a tutti gli alleati",
+   "dove": "Verdura MealPort (da 5 giugno)",
+   "prezzo": 2800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Bomba di popcorn",
+   "nomeEn": "Popcorn Bomb",
+   "categoria": "cura",
+   "effetto": "Ripristina 100 HP a tutti gli alleati",
+   "dove": "Verdura MealPort (da 5 giugno)",
+   "prezzo": 3200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Panino lunare",
+   "nomeEn": "Moon Burger",
+   "categoria": "cura",
+   "effetto": "Ripristina 120 HP a tutti gli alleati",
+   "dove": "Burger Shop (autunno)",
+   "prezzo": 1180,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Panino supernova",
+   "nomeEn": "Supernova Burger",
+   "categoria": "cura",
+   "effetto": "Ripristina 200 HP a tutti gli alleati",
+   "dove": "Big Bang Burger (massimizzando il Rango di Haru)",
+   "prezzo": 1300,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Arginade",
+   "nomeEn": "Arginade",
+   "categoria": "sp",
+   "effetto": "Ripristina 5 SP",
+   "dove": "Distributori automatici (vari), Sala giochi",
+   "prezzo": 100,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Acqua della rinascita",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 5 SP",
+   "dove": "Distributori automatici (vari), Sala giochi; Televendite (2.980¥)",
+   "prezzo": 100,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Salgemma infranto",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 5 SP",
+   "dove": "Ottenuto trasformando una Pietra Sacra da Chihaya (ne produce 3)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Caffè del Leblanc",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 30 SP",
+   "dove": "Preparazione al Leblanc (Rango Ierofante 2)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Caffè acido",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 30 SP",
+   "dove": "Preparazione del caffè sbagliata al Leblanc",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Caffè amaro",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 30 SP",
+   "dove": "Preparazione del caffè sbagliata al Leblanc",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Caffè del maestro",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP",
+   "dove": "Preparazione al Leblanc (Rango Ierofante 6)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry decente",
+   "nomeEn": "Decent Curry",
+   "categoria": "sp",
+   "effetto": "Ripristina 20 SP a tutti gli alleati",
+   "dove": "Preparazione al Leblanc (Rango Ierofante 4) oppure insegnato da Kawakami",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry di fuoco",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 20 SP a tutti gli alleati",
+   "dove": "Preparazione del curry sbagliata al Leblanc",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry del Leblanc",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 50 SP a tutti gli alleati",
+   "dove": "Preparazione al Leblanc (Rango Ierofante 9)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry fiammante",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 50 SP a tutti gli alleati",
+   "dove": "Preparazione del curry sbagliata al Leblanc",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry infernale",
+   "nomeEn": "Inferno Curry",
+   "categoria": "sp",
+   "effetto": "Ripristina 50 SP a tutti gli alleati",
+   "dove": "Preparazione del curry sbagliata al Leblanc",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry del maestro",
+   "nomeEn": "Master Curry",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP a tutti gli alleati",
+   "dove": "Preparazione al Leblanc (Rango Ierofante 10)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Chimaki speciale",
+   "nomeEn": "Special Chimaki",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Street food Houraku (da 13 gennaio)",
+   "prezzo": 2000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pomodoro solare",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP a tutti gli alleati",
+   "dove": "Coltivazione (Rango massimo Confidente Haru)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Ryuji",
+   "nomeEn": "Ryuji's Chocolate",
+   "categoria": "sp",
+   "effetto": "Ripristina 10 SP di un alleato",
+   "dove": "Dono di Ryuji, 14 febbraio (se il protagonista è senza fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Sojiro",
+   "nomeEn": "Sojiro's Chocolate",
+   "categoria": "sp",
+   "effetto": "Ripristina 10 SP di un alleato",
+   "dove": "Dono di Sojiro, 14 febbraio (se il protagonista non ha una fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Sae",
+   "nomeEn": "Sae's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Sae, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Ann",
+   "nomeEn": "Ann's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Ann, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Makoto",
+   "nomeEn": "Makoto's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Makoto, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Futaba",
+   "nomeEn": "Futaba's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Futaba, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Haru",
+   "nomeEn": "Haru's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Haru, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Kawakami",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Kawakami, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Takemi",
+   "nomeEn": "Takemi's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Takemi, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Chihaya",
+   "nomeEn": "Chihaya's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Chihaya, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Ohya",
+   "nomeEn": "Ohya's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Ohya, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Hifumi",
+   "nomeEn": "Hifumi's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Hifumi, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Giri choco di Sumire",
+   "nomeEn": "Sumire's Giri-Choco",
+   "categoria": "sp",
+   "effetto": "Ripristina 100 SP di un alleato",
+   "dove": "Dono di Sumire, 15 febbraio (rapporto di amicizia, Rango massimo)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Ann",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Ann, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Makoto",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Makoto, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Futaba",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Futaba, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Haru",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Haru, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Kawakami",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Kawakami, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Takemi",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Takemi, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Chihaya",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Chihaya, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Ohya",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Ohya, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Hifumi",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Hifumi, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cioccolato di Sumire",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina tutti gli SP di un alleato",
+   "dove": "Dono di Sumire, 14 febbraio (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Ann",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Ann (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Makoto",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Makoto (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Futaba",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Futaba (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Haru",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Haru (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Kawakami",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Kawakami (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Takemi",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Takemi (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Chihaya",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Chihaya (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Ohya",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Ohya (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Hifumi",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Hifumi (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Dolce di Sumire",
+   "nomeEn": null,
+   "categoria": "sp",
+   "effetto": "Ripristina interamente gli SP di un alleato",
+   "dove": "Dono di Sumire (se fidanzata)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Panino con yakisoba",
+   "nomeEn": "Yakisoba Pan",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 50 HP",
+   "dove": "Negozio scolastico (venerdì, 1 a settimana)",
+   "prezzo": 150,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sicchenina",
+   "nomeEn": "Sikkenine",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 50 HP, riduce precisione ed elusione",
+   "dove": "Farmacia Aohige (da 18 aprile)",
+   "prezzo": 300,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Porzione di torimeshi",
+   "nomeEn": "Torimeshi Ration",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 50 HP, cura la Fame",
+   "dove": "Televendite; Distributore militare (Negozio Softair Untouchable)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Zuppa vegana",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina 50 HP, cura la Fame",
+   "dove": "Distributore militare (11 novembre - 6 dicembre)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Wafer dei ladri",
+   "nomeEn": "Phantom Wafers",
+   "categoria": "stato",
+   "effetto": "Ripristina 50 HP, cura le alterazioni di stato",
+   "dove": "Negozi (28 agosto - 10 ottobre); Televendite; ricompensa Maruki (Rango 7)",
+   "prezzo": 500,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Locusta alla maionese",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina 100 HP, riduce attacco/precisione/elusione",
+   "dove": "Distributore di Akihabara (da 2 settembre)",
+   "prezzo": 600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Miso di stella marina",
+   "nomeEn": "Miso Starfish",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 100 HP, riduce attacco/difesa",
+   "dove": "Distributore di Akihabara (da 2 settembre)",
+   "prezzo": 600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Curry alla fragola",
+   "nomeEn": "Strawberry Curry",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 100 HP, riduce difesa/precisione/elusione",
+   "dove": "Distributore di Akihabara; scambio gacha",
+   "prezzo": 600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sicchenina A",
+   "nomeEn": "Sikkenine A",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 100 HP, riduce attacco",
+   "dove": "Farmacia Aohige (da 18 aprile)",
+   "prezzo": 700,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sicchenina EX",
+   "nomeEn": "Sikkenine EX",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 200 HP, riduce difesa",
+   "dove": "Farmacia Aohige (da 18 aprile)",
+   "prezzo": 900,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Bevanda energetica",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 30% degli HP, potenzia attacco, riduce difesa",
+   "dove": "Distributore di Akihabara; scambio gacha",
+   "prezzo": 100,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Strano boccone",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 30% degli HP, potenzia attacco, riduce precisione/elusione",
+   "dove": "Distributore di Akihabara; Negoziazioni",
+   "prezzo": 100,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Razione militare",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 30% degli HP, potenzia precisione/elusione, riduce attacco",
+   "dove": "Distributore militare; Televendite",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Porzione di frutta",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 30% degli HP, potenzia attacco, riduce difesa",
+   "dove": "Distributore militare",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Salsa rancida",
+   "nomeEn": "Rancid Gravy",
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 30% degli HP, potenzia precisione/elusione, riduce attacco",
+   "dove": "Distributore di Akihabara; scambio gacha",
+   "prezzo": 100,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Porzione di porridge",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 30% degli HP, riduce elusione/precisione, potenzia attacco",
+   "dove": "Distributore militare",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Razione D",
+   "nomeEn": "D Ration",
+   "categoria": "battaglia",
+   "effetto": "Ridona il 10% degli SP, riduce attacco",
+   "dove": "Distributore militare (7-19 dicembre)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Razione di polpette",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ridona il 10% degli SP, riduce difesa",
+   "dove": "Distributore militare; Televendite",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pane nero",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Ripristina il 10% degli SP, riduce precisione/elusione",
+   "dove": "Distributore militare (7-19 dicembre)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Porzione di osechi",
+   "nomeEn": "Osechi Ration",
+   "categoria": "battaglia",
+   "effetto": "Ridona il 30% degli SP, abbassa tutte le statistiche",
+   "dove": "Distributore militare (13 gennaio - 2 febbraio)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Porzione di Mont Blanc",
+   "nomeEn": "Mont Blanc Ration",
+   "categoria": "battaglia",
+   "effetto": "Ripristina 50 HP, cura la Fame",
+   "dove": "Distributore militare (13 gennaio - 2 febbraio)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Porzione di kebab",
+   "nomeEn": "Kebab Ration",
+   "categoria": "battaglia",
+   "effetto": "Ridona il 30% degli HP, potenzia elusione/precisione, riduce attacco",
+   "dove": "Distributore militare (13 gennaio - 2 febbraio)",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Stufato misterioso",
+   "nomeEn": "Mystery Stew",
+   "categoria": "battaglia",
+   "effetto": "Ridona il 30% degli SP, abbassa tutte le statistiche",
+   "dove": "Distributore di Akihabara; scambio gacha",
+   "prezzo": 600,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Creatura",
+   "nomeEn": "Creature",
+   "categoria": "stato",
+   "effetto": "Cura un alleato addormentato",
+   "dove": "Sala giochi (da 18 aprile); Distributore di Akihabara",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Gocce per occhioni",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura le Vertigini di un alleato",
+   "dove": "Farmacia Aohige (da 18 aprile); Televendite (1.680¥)",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Calmella",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato impaurito",
+   "dove": "Ricompensa Maruki (Rango 5)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Riempitivo",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato affamato",
+   "dove": "Scambio gacha Die-soujou; ricompensa Maruki (Rango 9)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Tè caldo e aspro",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato addormentato",
+   "dove": "Farmacia Aohige (da 18 aprile); Televendite (1.680¥)",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Caramella frizzina",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura la Disperazione di un alleato",
+   "dove": "Farmacia Aohige (da 18 aprile); ricompensa Maruki (Rango 4)",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Sfera dell'aspersione",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato In fiamme",
+   "dove": "Negoziazioni (Mandragora, Sui-Ki)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Lenzuolo rinfrescante",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato In fiamme",
+   "dove": "Chiosco della stazione KiyasuKu; scambio gacha",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Pietra glaciale",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura il Congelamento di un alleato",
+   "dove": "Negoziazioni (Jack-o'-Lantern, Koppa Tengu)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Scaldamani",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato congelato",
+   "dove": "Chiosco della stazione KiyasuKu",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cristallo del rilascio",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura un alleato folgorato",
+   "dove": "Negoziazioni (Agathion, Apsaras)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Gomma non statica",
+   "nomeEn": "Non-Static Gum",
+   "categoria": "stato",
+   "effetto": "Cura un alleato Folgorato",
+   "dove": "Chiosco della stazione KiyasuKu; ricompensa Maruki (Rango 2)",
+   "prezzo": 200,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Nohar-M",
+   "nomeEn": "Nohar-M",
+   "categoria": "stato",
+   "effetto": "Cura In fiamme, Congelamento e Folgorazione",
+   "dove": "Clinica Takemi (da 16 aprile); Forzieri (Dedali); Negoziazioni",
+   "prezzo": 500,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Gel rilassante",
+   "nomeEn": "Relax Gel",
+   "categoria": "stato",
+   "effetto": "Cura Furia, Soggiogamento, Confusione, Paura e Disperazione",
+   "dove": "Clinica Takemi (da 16 aprile); Forzieri (vari Palazzi); Televendite; Palazzo di Maruki; Negoziazioni",
+   "prezzo": 900,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Capsula d'allerta",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura Vertigini, Amnesia e Sonno",
+   "dove": "Clinica Takemi (da 16 aprile); Forzieri (vari); Televendite; Negoziazioni",
+   "prezzo": 800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Hiranya",
+   "nomeEn": "Hiranya",
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni negative non speciali",
+   "dove": "Forzieri (vari Palazzi e Dedali), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Incenso del risveglio",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni di stato degli alleati",
+   "dove": "Negozio dell'usato Vestiti usati, Kichijoji (30-50 punti negozio)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Olio del recupero",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni negative",
+   "dove": "Body Chop (1 a settimana); Televendite (fino a 39.800¥)",
+   "prezzo": 5000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Aroma rinfrescante",
+   "nomeEn": "Refresh Aroma",
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni negative",
+   "dove": "Body Chop (autunno, 1 a settimana); Televendite (39.800¥)",
+   "prezzo": 8000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ceneri del pentimento",
+   "nomeEn": "Repentance Ashes",
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni di tutti gli alleati",
+   "dove": "Chiesa di Kanda (domenica)",
+   "prezzo": 12000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Amrita Soda",
+   "nomeEn": "Amrita Soda",
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni di tutti gli alleati",
+   "dove": "Forziere del Palazzo di Maruki; Negoziazioni (Garuda, Dioniso)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Daifuku alla fragola",
+   "nomeEn": "Strawberry Daifuku",
+   "categoria": "stato",
+   "effetto": "Cura tutte le alterazioni e ridona tutti gli HP",
+   "dove": "Televendite (22 gennaio); scambio con il Mercante Sakai (in cambio di una cartolina, 2-8 ottobre)",
+   "prezzo": 29800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala soggiogamento S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Soggiogamento a un nemico",
+   "dove": "Forzieri (Kaneshiro, Chemdah), Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala soggiogamento L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Soggiogamento a tutti i nemici",
+   "dove": "Forzieri (Adyeshach, Da'at), Jose nei Memento, Negoziazioni (Kurama Tengu)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala dell'amnesia S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Amnesia a un nemico",
+   "dove": "Jose nei Memento (30 Fiori)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala dell'amnesia L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Amnesia a tutti i nemici",
+   "dove": "Forziere del Dedalo di Adyeshach, Jose nei Memento",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala delle vertigini S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Vertigini a un nemico",
+   "dove": "Forzieri (Madarame, Maruki, Chemdah), Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala delle vertigini L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Vertigini a tutti i nemici",
+   "dove": "Forzieri (Akzeriyyuth, Da'at), Jose nei Memento",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala disperazione S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Disperazione a un nemico",
+   "dove": "Forzieri (Futaba, Kaitul), Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala disperazione L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Disperazione a tutti i nemici",
+   "dove": "Forziere del Dedalo di Sheriruth, Negoziazioni (Loa)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala della furia S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Furia a un nemico",
+   "dove": "Forziere del Palazzo di Okumura, Negoziazioni (Belphegor, Loa)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala della furia L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Furia a tutti i nemici",
+   "dove": "Negoziazioni (Ose)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala confusione S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Confusione a un nemico",
+   "dove": "Forziere del Palazzo di Niijima, Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala confusione L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Confusione a tutti i nemici",
+   "dove": "Forziere del Dedalo di Sheriruth, Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala della paura S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Paura a un nemico",
+   "dove": "Forzieri (Shido, Kaitul), Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala della paura L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Paura a tutti i nemici",
+   "dove": "Forziere del Dedalo di Sheriruth, Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala del sonno S",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Alta probabilità di infliggere Sonno a un nemico",
+   "dove": "Forzieri (Kamoshida, Dedali), Jose nei Memento, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiala del sonno L",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Sonno a tutti i nemici",
+   "dove": "Forzieri (Memento, Akzeriyyuth), Jose nei Memento",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Homunculus",
+   "nomeEn": "Homunculus",
+   "categoria": "battaglia",
+   "effetto": "Protegge una volta dalla morte istantanea",
+   "dove": "Affari Loschi di Tanaka (grado Caos), Forzieri (vari Palazzi/Dedali), DLC, Negoziazioni (Trono)",
+   "prezzo": 120000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Unguento magico",
+   "nomeEn": "Magic Ointment",
+   "categoria": "battaglia",
+   "effetto": "Respinge una volta gli attacchi magici non divini",
+   "dove": "Clinica Takemi (Rango Morte 10), Forzieri (Kamoshida, Okumura), Televendite, Negoziazioni",
+   "prezzo": 4000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Unguento fisico",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Crea una barriera che respinge una volta gli attacchi fisici",
+   "dove": "Clinica Takemi (Rango Morte 10), Forzieri (Kamoshida, Okumura), Televendite, Negoziazioni",
+   "prezzo": 4000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Muscoli d'acciaio S",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta l'attacco di un alleato per 3 turni",
+   "dove": "Televendite, ricompensa Maruki, Gabbie di battuta",
+   "prezzo": 4980,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Scorza dura S",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta la difesa di un alleato per 3 turni",
+   "dove": "Televendite, ricompensa Maruki, Gabbie di battuta",
+   "prezzo": 4980,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Piè veloce S",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta precisione ed elusione di un alleato per 3 turni",
+   "dove": "Televendite, ricompensa Gabbie di battuta",
+   "prezzo": 4980,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Rasetsu Ofuda",
+   "nomeEn": "Rasetsu Ofuda",
+   "categoria": "battaglia",
+   "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
+   "dove": "Forzieri (vari), Jose nei Memento (70 Fiori, 5 al giorno), Televendite (12.800¥), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Idaten Ofuda",
+   "nomeEn": "Idaten Ofuda",
+   "categoria": "battaglia",
+   "effetto": "Potenzia precisione ed elusione di tutti gli alleati per 3 turni",
+   "dove": "Forzieri (vari), Jose nei Memento (70 Fiori, 5 al giorno), Televendite (12.800¥), ricompensa Gabbie, Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Kongou Ofuda",
+   "nomeEn": "Kongou Ofuda",
+   "categoria": "battaglia",
+   "effetto": "Aumenta l'attacco di tutti gli alleati per 3 turni",
+   "dove": "Forzieri (vari), Jose nei Memento (70 Fiori, 5 al giorno), Televendite (12.800¥), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ofuda del potere",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta attacco/difesa/precisione/elusione di un alleato per 3 turni",
+   "dove": "Forzieri (vari Dedali), scambio con il Mercante Sakai (in cambio di Yaki-Imo leggendario)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Salvezza S",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta attacco/difesa/precisione/elusione di un alleato",
+   "dove": "Televendite, ricompensa Gabbie di battuta",
+   "prezzo": 14800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Trambusto S",
+   "nomeEn": "Hustle S",
+   "categoria": "battaglia",
+   "effetto": "Aumenta la probabilità di critico di un alleato",
+   "dove": "Prossimo Asso (da 18 aprile), Televendite",
+   "prezzo": 2000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ofuda della forza",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Raddoppia una volta gli attacchi fisici",
+   "dove": "Forzieri (Sheriruth, Da'at), Richieste, ricompensa Gabbie, scambio con il Mercante Sakai",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ofuda della magia",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Raddoppia una volta gli attacchi magici",
+   "dove": "Forzieri (Adyeshach, Sheriruth, Da'at), scambio con il Mercante Sakai",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Fagioli terrestri",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Raddoppia una volta gli attacchi fisici",
+   "dove": "Coltivazione (Rango Confidente Haru)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Cipolla stellare",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Raddoppia una volta gli attacchi magici",
+   "dove": "Coltivazione (Rango Confidente Haru)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ofuda invincibile",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Scudo che protegge tutti gli alleati dalla morte istantanea",
+   "dove": "Forzieri (Futaba, Chemdah, Kaitul)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Ofuda debilitante",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Riduce attacco/difesa/precisione/elusione di un nemico per 3 turni",
+   "dove": "Forzieri (vari Dedali), Negoziazioni",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Kajaclear-R",
+   "nomeEn": "Kajaclear-R",
+   "categoria": "battaglia",
+   "effetto": "Rimuove i malus alle statistiche di un alleato",
+   "dove": "Clinica Takemi (Rango Morte 3; sconto 1.900¥)",
+   "prezzo": 3800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Acqua battesimale",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Rimuove i bonus alle statistiche di tutti i nemici",
+   "dove": "Forzieri (vari), Chiesa di Kanda (domenica), Televendite (9.980¥), Negoziazioni",
+   "prezzo": 1000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Spray rapido",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Riduce precisione/elusione di tutti i nemici per 3 turni",
+   "dove": "Negozio Vestiti usati, Kichijoji (30 punti negozio), Televendite",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Spray detergente",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Riduce la difesa di tutti i nemici per 3 turni",
+   "dove": "Negozio Vestiti usati, Kichijoji (30 punti negozio), Televendite, ricompensa Maruki",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Spray debilitante",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Riduce l'attacco di tutti i nemici per 3 turni",
+   "dove": "Laghetto da pesca di Ichigaya (500 punti pesca)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Spray supremo",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Riduce le statistiche di un nemico per 3 turni",
+   "dove": "Negozio Vestiti usati, Kichijoji (50 punti negozio), Televendite",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Kundaclear-R",
+   "nomeEn": "Kundaclear-R",
+   "categoria": "battaglia",
+   "effetto": "Rimuove i malus alle statistiche di un alleato",
+   "dove": "Clinica Takemi (Rango Morte 3; sconto 1.900¥)",
+   "prezzo": 3800,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Acqua benedetta",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Rimuove tutti i malus alle statistiche di tutti gli alleati",
+   "dove": "Forzieri (vari Dedali), Chiesa di Kanda, Televendite (9.980¥)",
+   "prezzo": 2000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti/",
+   "verificato": true
+  },
+  {
+   "nome": "Spec. senso spirit",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta la probabilità di infliggere alterazioni negative a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero, dopo aver riparato il Laptop rotto)",
+   "prezzo": 5000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Chiodo ossidato",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 50 danni di tipo Maledetto a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 5000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Magatama infernale",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 150 danni elementali (Fuoco) a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 6000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Magatama ciclonico",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 150 danni elementali (Vento) a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 6000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Magatama ghiaccio",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 150 danni elementali (Ghiaccio) a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 6000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Magatama elettrico",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 150 danni elementali (Elettricità) a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 6000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Magatama divino",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 150 danni Psicocinetici a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 6000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Magatama esplosivo",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Infligge 150 danni Nucleari a un nemico",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero)",
+   "prezzo": 6000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Spec. spirit. oscuro",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Aumenta la probabilità di infliggere alterazioni negative a tutti i nemici",
+   "dove": "Affari Loschi di Tanaka, online (grado Oscurità)",
+   "prezzo": 5000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Sacra Sindone",
+   "nomeEn": null,
+   "categoria": "battaglia",
+   "effetto": "Media probabilità di infliggere morte istantanea di tipo Sacro",
+   "dove": "Affari Loschi di Tanaka, online (grado Oscurità)",
+   "prezzo": 10000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tavola Ouija",
+   "nomeEn": "Ouija Board",
+   "categoria": "battaglia",
+   "effetto": "Media probabilità di infliggere morte istantanea di tipo Maledetto",
+   "dove": "Affari Loschi di Tanaka, online (grado Oscurità)",
+   "prezzo": 10000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Fotocamera spirituale",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Uccide i nemici affetti da Paura (acquistabile una sola volta)",
+   "dove": "Affari Loschi di Tanaka, online (grado Oscurità)",
+   "prezzo": 5000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Maschera sorridente",
+   "nomeEn": null,
+   "categoria": "stato",
+   "effetto": "Media probabilità di infliggere Paura a tutti i nemici (acquistabile una sola volta)",
+   "dove": "Affari Loschi di Tanaka, online (grado Caos)",
+   "prezzo": 5000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Corona della salvezza",
+   "nomeEn": null,
+   "categoria": "cura",
+   "effetto": "Cura tutte le alterazioni e ripristina interamente HP di tutto il gruppo (acquistabile una sola volta)",
+   "dove": "Affari Loschi di Tanaka, online (grado Caos)",
+   "prezzo": 990000,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Ambra grigia",
+   "nomeEn": null,
+   "categoria": "altro",
+   "effetto": "Aumenta permanentemente Magia, Agilità e Forza di una Persona di +2",
+   "dove": "Jose nei Memento, Dedalo di Chemdah (80 Fiori)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Ambra grigia RS/FR",
+   "nomeEn": null,
+   "categoria": "altro",
+   "effetto": "Aumenta permanentemente Resistenza e Fortuna di una Persona di +2",
+   "dove": "Jose nei Memento, Dedalo di Kaitul (80 Fiori)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "nome": "Nirvana",
+   "nomeEn": null,
+   "categoria": "altro",
+   "effetto": "Aumenta permanentemente tutte le statistiche (Forza/Agilità/Resistenza/Magia/Fortuna) di una Persona di +3",
+   "dove": "Jose nei Memento, Dedalo di Adyeshach (80 Fiori)",
+   "prezzo": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  }
+ ],
+ "chiaveEMateriali": [
+  {
+   "nome": "Mappa del castello",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: antica mappa della pianta del Vecchio Castello",
+   "dove": "Palazzo di Kamoshida, Edificio ovest, 2° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mappa della torre",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: antica mappa della pianta della torre",
+   "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Libro del Re",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama, libro ponderoso trovato nello studio di Kamoshida",
+   "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Il libro della Regina",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama, libro ponderoso trovato nello studio di Kamoshida",
+   "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Il libro dello Schiavo",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama, libro ponderoso trovato nello studio di Kamoshida",
+   "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Il libro del palestrato",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama, libro ponderoso trovato nello studio di Kamoshida",
+   "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Medaglia di Kamoshida",
+   "nomeEn": "Kamoshida's Medal",
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: medaglia d'oro vinta in una competizione internazionale",
+   "dove": "Palazzo di Kamoshida, Edificio est, 3° piano",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Occhio dx lascivo",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: occhio della statua di Kamoshida",
+   "dove": "Bottino del Capitano della Guardia, Torre centrale del Palazzo di Kamoshida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Occhio sx lussurioso",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: occhio della statua di Kamoshida",
+   "dove": "Bottino del Capitano della Guardia, Torre centrale del Palazzo di Kamoshida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Semi della Bramosia (Lussuria/Vanità/Gola/Ira/Avarizia/Invidia/Superbia/Tristezza)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Otto pietre colorate che emanano energie legate a un peccato capitale, usate per la trama dei Memento",
+   "dove": "Vari punti dei Memento, a seconda del tipo di seme",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Opuscolo del museo 1",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa parziale del Palazzo di Madarame",
+   "dove": "Palazzo di Madarame",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Opuscolo del museo 2",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa parziale del Palazzo di Madarame",
+   "dove": "Palazzo di Madarame",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Chiave elettron. banca",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Apre porte nel Palazzo di Kaneshiro",
+   "dove": "Palazzo di Kaneshiro, Sala d'ingresso",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Planimetria della banca",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa del Palazzo di Kaneshiro",
+   "dove": "Palazzo di Kaneshiro",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Planimetria sotterraneo",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa del sotterraneo del Palazzo di Kaneshiro",
+   "dove": "Palazzo di Kaneshiro",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Chiave di destra",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Chiave per il caveau del Palazzo di Kaneshiro (1 di 2)",
+   "dove": "Ricompensa dopo scontri specifici, Palazzo di Kaneshiro",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Chiave di sinistra",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Chiave per il caveau del Palazzo di Kaneshiro (2 di 2)",
+   "dove": "Ricompensa dopo scontri specifici, Palazzo di Kaneshiro",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Diario di Kaneshiro",
+   "nomeEn": "Kaneshiro's Journal",
+   "tipo": "chiave",
+   "uso": "Contiene indizi cifrati (R=C=0, I=1, H=2) per risolvere un enigma del Palazzo",
+   "dove": "Palazzo di Kaneshiro, dopo aver sconfitto il trio Fuu-Ki, Sui-Ki e Kin-Ki",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Pagine strappate (1-6)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Frammenti con equazioni matematiche, usati per un enigma del Palazzo",
+   "dove": "Palazzo di Kaneshiro, vari caveau",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Papiro rubato",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Carte rubate ai banditi, apre nuove aree",
+   "dove": "Palazzo di Futaba, ricompensa dopo lo scontro con il Dio-uccello furente",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Gemme dell'abisso",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Gemma dall'aura oscura trovata nella Piramide",
+   "dove": "Palazzo di Futaba",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Gemme del rifiuto",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Gemma color cremisi trovata nella Piramide",
+   "dove": "Palazzo di Futaba",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Gemme del santuario",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Gemma color azzurro trovata nella Piramide",
+   "dove": "Palazzo di Futaba",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Schizzo di piramide",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Mappa di ogni piano del Palazzo di Futaba",
+   "dove": "Ricompensa dopo la consegna del Papiro rubato",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mappa porto spaziale",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa del Palazzo di Okumura",
+   "dove": "Palazzo di Okumura, Corridoi del complesso",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tesserino Capufficio",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Badge aziendale di rango junior",
+   "dove": "Palazzo di Okumura, ricompensa dopo scontri specifici",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tessera Dirett. Sezione",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Badge aziendale di rango intermedio",
+   "dove": "Palazzo di Okumura, ricompensa dopo scontri specifici",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tessera Direttore Capo",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Badge aziendale di rango elevato",
+   "dove": "Palazzo di Okumura, ricompensa dopo scontri specifici",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Chiave elettr. security",
+   "nomeEn": "Security Keycard",
+   "tipo": "chiave",
+   "uso": "Apre porte nel Palazzo di Niijima",
+   "dove": "Palazzo di Niijima, sconfiggendo le Regine di Mezzanotte",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tessera socio (Casinò)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Permette l'accesso ai piani riservati del Palazzo di Niijima",
+   "dove": "Ricompense, oppure acquistabile con le Monete del Casinò",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tessera puntate alte",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Permette l'accesso al piano puntate alte del Palazzo di Niijima",
+   "dove": "Ricompense, oppure acquistabile con le Monete del Casinò",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mappa del Casinò",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Mappa parziale del Palazzo di Niijima",
+   "dove": "Ricompense da vari nemici e NPC del Palazzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mappa piano riservato",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Mappa parziale del Palazzo di Niijima",
+   "dove": "Ricompense da vari nemici e NPC del Palazzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mappa piano p. alte",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Mappa parziale del Palazzo di Niijima",
+   "dove": "Ricompense da vari nemici e NPC del Palazzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mappa nave crociera",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa della nave da crociera del Palazzo di Shido",
+   "dove": "Palazzo di Shido, Passaggio centrale",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tessera socio (nave)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Permette l'accesso al ristorante del Palazzo di Shido",
+   "dove": "Palazzo di Shido, Sala centrale",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Lettera di raccomandazione",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Lettera da parte di un VIP, necessaria per procedere nella trama",
+   "dove": "Palazzo di Shido",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Disco vermiglio",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Una delle chiavi per aprire le porte nelle Profondità dei Memento",
+   "dove": "Profondità dei Memento, Corridoio della prigione",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Planimetria edificio",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa del Palazzo di Maruki",
+   "dove": "Palazzo di Maruki, ricompensa specifica",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Planimetria laboratorio",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto di trama: mappa del laboratorio del Palazzo di Maruki",
+   "dove": "Palazzo di Maruki, ricompensa specifica",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tesserino del personale",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Tessera che permette di superare determinate porte",
+   "dove": "Palazzo di Maruki, dopo scontri specifici",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Vecchia videocassetta",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Videocassetta senza etichetta, ancora funzionante, legata alla trama",
+   "dove": "Palazzo di Maruki, Sala di supporto",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Sacchetto di carta",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Contiene un modellino d'arma sospetto: avvia la Confidenza con Iwai",
+   "dove": "Dono di Iwai, mercoledì 5 aprile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Vecchia chiave",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Vecchia chiave di un forziere",
+   "dove": "Completando la richiesta \"Ladri fantasma VS ladri e basta\"",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Fiocco di neve malvagio",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Permette di fondere la Persona Frost Nero",
+   "dove": "Completando la richiesta \"Bullismo sui bulli\"",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Palla peli appiccicosa",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Permette di fondere la Persona Babau",
+   "dove": "Completando la richiesta \"La stalker informatica\"",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Nuovo CD di Star Lilina",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "CD musicale \"He's a Trickster☆\"",
+   "dove": "Regalo di Star Lilina ad Akihabara dopo la richiesta \"L'idol e l'unicorno\"",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Stella di Jose",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pietra a forma di stella che emette una luce misteriosa",
+   "dove": "Evento con Jose nei Memento",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Rampino",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Strumento che permette di spostarsi con disinvoltura durante le infiltrazioni",
+   "dove": "Dono di Morgana durante l'infiltrazione nel Palazzo di Kamoshida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Libro dei timbri",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Libro di Jose per raccogliere i Timbri trovati nei Memento",
+   "dove": "Evento con Jose nei Memento",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Vaschetta a stella",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Vaschetta creata da Jose per coltivare fiori (avvia la Coltivazione)",
+   "dove": "Sconfiggendo Jose dopo aver raccolto 123 o più Timbri",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Doppio segnalibro",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Segnalibro a due strati usato da Justine",
+   "dove": "Sconfiggendo le Gemelle Custodi in Nuova Partita+",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Cesta di vestiti",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Contiene 4 protezioni casuali (uomo/donna/Morgana) legate al Palazzo attivo; alternativa rapida alla lavanderia",
+   "dove": "Negozio Vestiti usati, Kichijoji (50 punti negozio, acquistabile una volta al giorno, stock rinnovato il giorno dopo)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+   "verificato": true
+  },
+  {
+   "nome": "Orologio da polso (Makoto)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Makoto se fidanzata",
+   "dove": "Dono di Makoto, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Cappello (Haru)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Haru se fidanzata",
+   "dove": "Dono di Haru, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Paraorecchie (Ann)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Ann se fidanzata",
+   "dove": "Dono di Ann, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Cuffie (Futaba)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Futaba se fidanzata",
+   "dove": "Dono di Futaba, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Portapenne (Kawakami)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Kawakami se fidanzata",
+   "dove": "Dono di Kawakami, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Sciarpone (Takemi)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Takemi se fidanzata",
+   "dove": "Dono di Takemi, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Colonia (Chihaya)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Chihaya se fidanzata",
+   "dove": "Dono di Chihaya, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Fotocamera (Ohya)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Ohya se fidanzata",
+   "dove": "Dono di Ohya, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Guanti (Hifumi)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Pegno d'amore: aumenta l'intimità con Hifumi se fidanzata",
+   "dove": "Dono di Hifumi, 24 dicembre (se fidanzata)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Calcolatore buchi (Makoto)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca la tecnica di battaglia Fattorizzazione Ombra",
+   "dove": "Dono di Makoto al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Fazzoletto colorato (Haru)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca la tecnica Miglioramento del suolo",
+   "dove": "Dono di Haru al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Rivista di moda (Ann)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca Tecnica sexy e Lacrime di coccodrillo",
+   "dove": "Dono di Ann al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Lista delle promesse (Futaba)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca Riavvio aureo e Scansione dei Memento",
+   "dove": "Dono di Futaba al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Servizio illimitato (Kawakami)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca il Massaggio speciale",
+   "dove": "Dono di Kawakami al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Piastrina (Takemi)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca l'accesso a nuovi oggetti venduti in clinica",
+   "dove": "Dono di Takemi al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Tarocchi – La Fortuna (Chihaya)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca predizioni specifiche",
+   "dove": "Dono di Chihaya al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Appunti dell'intervista (Ohya)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca tutti gli scoop",
+   "dove": "Dono di Ohya al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Pezzo di kosha (Hifumi)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca la tecnica Touryou",
+   "dove": "Dono di Hifumi al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Orologio sportivo (Ryuji)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca Harisen rigenerativo e Scatto furtivo",
+   "dove": "Dono di Ryuji al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Sciarpa di Morgana (Morgana)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca la tecnica Derubare",
+   "dove": "Dono di Morgana al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Appunti della ricetta (Sojiro)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca ricette migliori per caffè e curry del Leblanc",
+   "dove": "Dono di Sojiro al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Piano del documentario (Mishima)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca benefici aggiuntivi ai Punti Esperienza",
+   "dove": "Dono di Mishima al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Spilla del geco (Iwai)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca le personalizzazioni totali delle armi da fuoco",
+   "dove": "Dono di Iwai al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Chiave della cella (Lavenza)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca funzioni aggiuntive della Stanza di Velluto",
+   "dove": "Dono di Lavenza al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Speranza e desiderio (Yusuke)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca la copia delle Carte abilità",
+   "dove": "Dono di Yusuke al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Stilografica (Yoshida)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca tecniche oratorie",
+   "dove": "Dono di Yoshida al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Controller pistole (Shinya)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Sblocca tecniche con le armi da fuoco",
+   "dove": "Dono di Shinya al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Biglietto da visita (Sae)",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Oggetto commemorativo: Sae si presenta come \"avvocato\" invece che \"pubblico ministero\"",
+   "dove": "Dono di Sae al Rango massimo del Confidente, 19 marzo",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Lettera dei Reali",
+   "nomeEn": null,
+   "tipo": "chiave",
+   "uso": "Documento che permette di evocare gratuitamente una Persona",
+   "dove": "Scatolone in soffitta al Leblanc, dopo aver completato tutti i Covo dei Ladri",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/",
+   "verificato": true
+  },
+  {
+   "nome": "Gomitolo di seta",
+   "nomeEn": "Silk Yarn",
+   "tipo": "materiale",
+   "uso": "Materiale base per la fabbricazione di strumenti di infiltrazione (es. Grimaldello, Nebbia ipnotica, Trappola del Tesoro, Faretto)",
+   "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (1.150¥, da 18 aprile, 3 a settimana); drop da Mandragora e Jack-o'-lantern (Palazzo di Kamoshida); tesori di quasi tutti i Palazzi; Dedali di Qimranut, Aiyatsbus, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Pergamena spessa",
+   "nomeEn": "Thick Parchment",
+   "tipo": "materiale",
+   "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Muro di fumo, Palla evanescente, Faretto)",
+   "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (1.900¥, da 18 aprile, 3 a settimana); tesori di quasi tutti i Palazzi; Dedali di Chemdah, Kaitul, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Fibbia di latta",
+   "nomeEn": "Tin Clasp",
+   "tipo": "materiale",
+   "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Grimaldello)",
+   "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (2.050¥, da 18 aprile, 3 a settimana); drop da Incubo (Palazzo di Kamoshida); tesori di quasi tutti i Palazzi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Balsamo vegetale",
+   "nomeEn": "Plant Balm",
+   "tipo": "materiale",
+   "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Goho-M, Muro di fumo, Aroma calmante, Nebbia ipnotica, Trappola del Tesoro, Palla evanescente)",
+   "dove": "Fiorista Rafflesia, Centro commerciale sotterraneo di Shibuya (2.600¥, da 18 aprile, 2 a settimana); drop da Bicorno e Pixie (Palazzo di Kamoshida); tesori di quasi tutti i Palazzi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Sughero",
+   "nomeEn": "Cork Bark",
+   "tipo": "materiale",
+   "uso": "Materiale per la fabbricazione di strumenti di infiltrazione (es. Trappola del Tesoro, Faretto)",
+   "dove": "Fiorista Rafflesia, Shibuya (2.900¥, da 18 aprile, 2 a settimana); tesori della maggior parte dei Palazzi; Dedali di Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Sabbia ferrea",
+   "nomeEn": "Iron Sand",
+   "tipo": "materiale",
+   "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Nebbia ipnotica)",
+   "dove": "Negozio di elettronica Akiba, Akihabara (3.350¥, da 1° settembre, 3 a settimana); tesori dal Palazzo di Kaneshiro in poi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Lente condensante",
+   "nomeEn": "Condenser Lens",
+   "tipo": "materiale",
+   "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Ribalta)",
+   "dove": "Negozio di elettronica Akiba, Akihabara (3.600¥, da 1° settembre, 3 a settimana); tesori dal Palazzo di Kaneshiro in poi; Dedali di Chemdah, Akzeriyyuth, Adyeshach, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Foglio d'alluminio",
+   "nomeEn": "Aluminum Sheet",
+   "tipo": "materiale",
+   "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Grimaldello duraturo, Ribalta)",
+   "dove": "Negozio di elettronica Akiba, Akihabara (4.400¥, da 1° settembre, 2 a settimana); tesori dal Palazzo di Futaba in poi; Dedali di Kaitul, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Cuoio conciato",
+   "nomeEn": "Tanned Leather",
+   "tipo": "materiale",
+   "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione (es. Ribalta)",
+   "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (4.800¥, da 1° settembre, 3 a settimana); tesori dal Palazzo di Futaba in poi; Dedali di Kaitul, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Fosforo rosso",
+   "nomeEn": "Red Phosphorus",
+   "tipo": "materiale",
+   "uso": "Materiale avanzato per la fabbricazione di strumenti di infiltrazione",
+   "dove": "Negozio di elettronica Akiba, Akihabara (6.250¥, da 1° settembre, 2 a settimana); tesori dal Palazzo di Futaba in poi; Dedali di Kaitul, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Mercurio",
+   "nomeEn": "Liquid Mercury",
+   "tipo": "materiale",
+   "uso": "Materiale avanzato raro per la fabbricazione di strumenti di infiltrazione (es. Grimaldello duraturo)",
+   "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (6.600¥, da 1° ottobre, 1 a settimana); tesori dal Palazzo di Niijima in poi; Dedali di Kaitul, Sheriruth, Da'at",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/",
+   "verificato": true
+  },
+  {
+   "nome": "Kogatana nera",
+   "nomeEn": "Black Kogatana",
+   "tipo": "materiale",
+   "uso": "Oggetto \"mutageno\": sacrificato insieme a una Persona nella fusione speciale (Trasmutazione) introdotta in Royal per trasferire tratti",
+   "dove": "Negozio di articoli usati Yumenoshima, Yongen-Jaya (1.000¥, da 1° agosto); Affari Loschi di Tanaka, online (grado Oscurità, 1.000¥); scambio con il Mercante Sakai",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+   "verificato": false
+  },
+  {
+   "nome": "Veste nera",
+   "nomeEn": null,
+   "tipo": "materiale",
+   "uso": "Oggetto \"mutageno\": sacrificato insieme a una Persona nella fusione speciale (Trasmutazione) introdotta in Royal per trasferire tratti",
+   "dove": "Affari Loschi di Tanaka, online (grado Nero, 500¥); Jose nei Memento, Dedalo di Chemdah (30 Fiori); scambio con il Mercante Sakai",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": false
+  },
+  {
+   "nome": "Replica d'arma",
+   "nomeEn": null,
+   "tipo": "materiale",
+   "uso": "Oggetto \"mutageno\": sacrificato insieme a una Persona nella fusione speciale (Trasmutazione) introdotta in Royal per trasferire tratti; si ottiene anche scambiando 5 capsule Mothman muschiato al Gachapon di Akihabara",
+   "dove": "Affari Loschi di Tanaka, online (grado Caos, 1.000¥); Jose nei Memento, Dedalo di Chemdah (30 Fiori); scambio con il Mercante Sakai; Gachapon di Akihabara",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": false
+  },
+  {
+   "nome": "Roccia nera",
+   "nomeEn": null,
+   "tipo": "materiale",
+   "uso": "Materiale venduto alla Cristalloterapia Stoneon; secondo fonti secondarie inglesi si combina con una Persona per fabbricare accessori (collane elementali); il meccanismo esatto di combinazione non è specificato dalla guida italiana consultata",
+   "dove": "Cristalloterapia Stoneon, Kichijoji (4.000¥, 3 unità, rifornimento il 1° del mese successivo)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://samurai-gamers.com/persona-5/details-on-new-kichijoji-area/",
+   "verificato": false
+  },
+  {
+   "nome": "Incenso FR",
+   "nomeEn": "Incense ST",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
+   "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Incenso MA",
+   "nomeEn": "Incense MA",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
+   "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Incenso AG",
+   "nomeEn": "Incense AG",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
+   "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Incenso RS",
+   "nomeEn": "Incense EN",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
+   "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Incenso FO",
+   "nomeEn": "Incense LU",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per accelerare la crescita della Persona imprigionata, potenziandone una statistica specifica; richiede il Rango 3 del Confidente Forza (Gemelle Custodi); si può bruciare un solo incenso alla volta",
+   "dove": "Mantra Ganda, Kichijoji (4.000¥; negozio disponibile solo dopo aver sbloccato l'Isolamento al Rango 3 con le Gemelle Custodi)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Muschio FR-MA",
+   "nomeEn": "Musk ST-MA",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
+   "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Muschio FR-AG",
+   "nomeEn": "Musk ST-AG",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
+   "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Muschio MA-RS",
+   "nomeEn": "Musk MA-EN",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
+   "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Muschio MA-FO",
+   "nomeEn": "Musk MA-LU",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
+   "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Muschio RS-AG",
+   "nomeEn": "Musk EN-AG",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto: potenzia due statistiche della Persona imprigionata contemporaneamente; richiede il Rango 3 del Confidente Forza (Gemelle Custodi)",
+   "dove": "Mantra Ganda, Kichijoji (8.000¥, disponibile dal 1° luglio)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  },
+  {
+   "nome": "Sandalo rasta",
+   "nomeEn": "Rasta Sandalwood",
+   "tipo": "materiale",
+   "uso": "Bruciato durante l'Isolamento (Lockdown) nella Stanza di Velluto per potenziare la Persona imprigionata; variante di incenso di fascia alta",
+   "dove": "Mantra Ganda, Kichijoji (14.000¥, disponibile dal 1° ottobre)",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://www.allgamestaff.it/persona-5-royal/guida-rango-confidente-delle-gemelle-custodi-forza/",
+   "verificato": true
+  }
+ ],
+ "fabbricazione": {
+  "introduzione": "Al tavolo da lavoro nella stanza del protagonista (soffitta del Leblanc) si possono fabbricare strumenti di infiltrazione utili per esplorare Palazzi e Memento: alcuni aprono forzieri chiusi a chiave, altri aiutano a tendere imboscate, fuggire dagli scontri o ottenere vantaggi durante l'esplorazione. Ogni strumento richiede materiali specifici, ottenibili come drop dalle Ombre sconfitte, nei negozi cittadini o come bottino negli oggetti da esaminare nei Palazzi e nei Memento.",
+  "sblocco": "Si sblocca durante la prima settimana di gioco: Morgana chiede al protagonista di pulire il Tavolo da lavoro ingombro nella soffitta e gli insegna a fabbricare strumenti di infiltrazione. Il primo Grimaldello creato assegna anche un bonus di Perizia +2.",
+  "regole": [
+   "Fabbricare uno strumento consuma la fascia serale/notturna libera (un'azione), ma aumenta la Perizia del protagonista.",
+   "Ogni sessione di fabbricazione conferisce solitamente Perizia +2, talvolta Perizia +3 (fonte secondaria, non confermato dalla guida italiana).",
+   "Il numero di oggetti prodotti per sessione dipende dal rango di Perizia del protagonista; le fonti secondarie consultate non concordano sui valori esatti: una guida indica una progressione 1=2 pezzi, 2=3, 3=4, 4=5, 5=6; un'altra fonte parla invece di una progressione diversa (2 pezzi al rango 1, 3 al rango 2, poi la possibilità di ottenere il doppio/triplo dello stesso oggetto ai ranghi 3 e 5). Nessuna delle due è confermata dalla guida italiana, che non riporta la tabella numerica.",
+   "Il Confidente Iwai (Arcano Appeso) è l'unico legame che garantisce punti Perizia extra semplicemente frequentandolo (+2 Perizia per incontro, secondo fonte secondaria); l'accesso al suo Confidente richiede Coraggio a Rango 4.",
+   "Oltre alla fabbricazione, la Perizia aumenta anche con lavori part-time (Ore no Beko), Gabbie di battuta, Big Bang Challenge, freccette, biliardo, pesca, e leggendo libri/DVD/videogiochi specifici.",
+   "Il Grimaldello duraturo, una volta fabbricato, permette di aprire un numero indefinito di forzieri senza consumarsi."
+  ],
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/ ; https://www.allgamestaff.it/come-aumentare-la-perizia-in-persona-5-royal/",
+  "ricette": [
+   {
+    "attrezzo": "Grimaldello",
+    "effetto": "Apre un forziere chiuso a chiave",
+    "materiali": [
+     {
+      "nome": "Gomitolo di seta",
+      "quantita": 1
+     },
+     {
+      "nome": "Fibbia di latta",
+      "quantita": 1
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Disponibile dalla prima settimana (dopo aver pulito il Tavolo da lavoro su richiesta di Morgana); reperibile anche come ricompensa Bonus/DLC o alle Televendite",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Grimaldello duraturo",
+    "effetto": "Apre una quantità indefinita di forzieri chiusi a chiave, senza consumarsi",
+    "materiali": [
+     {
+      "nome": "Foglio d'alluminio",
+      "quantita": 20
+     },
+     {
+      "nome": "Mercurio",
+      "quantita": 10
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Richiede i materiali avanzati (Foglio d'alluminio, Mercurio) disponibili dal Palazzo di Niijima/Dedalo di Kaitul in poi; ottenibile solo tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Goho-M",
+    "effetto": "Permette di ritornare istantaneamente all'entrata del Metaverso",
+    "materiali": [
+     {
+      "nome": "Balsamo vegetale",
+      "quantita": 1
+     },
+     {
+      "nome": "Gomitolo di seta",
+      "quantita": 1
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile anche come ricompensa da Morgana durante la seconda esplorazione dei Memento; altrimenti solo tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Muro di fumo",
+    "effetto": "Permette di sfuggire ai nemici rendendosi non rilevabili per un breve periodo",
+    "materiali": [
+     {
+      "nome": "Pergamena spessa",
+      "quantita": 2
+     },
+     {
+      "nome": "Balsamo vegetale",
+      "quantita": 2
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile anche come ricompensa da Morgana nel Palazzo di Kamoshida o alle Televendite (Set Ladro Fantasma); altrimenti tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Nebbia ipnotica",
+    "effetto": "Una nebbiolina che fa addormentare i nemici nelle vicinanze",
+    "materiali": [
+     {
+      "nome": "Gomitolo di seta",
+      "quantita": 3
+     },
+     {
+      "nome": "Balsamo vegetale",
+      "quantita": 1
+     },
+     {
+      "nome": "Sabbia ferrea",
+      "quantita": 3
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile esclusivamente tramite fabbricazione (richiede la Sabbia ferrea, materiale avanzato dal Palazzo di Kaneshiro in poi)",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Aroma calmante",
+    "effetto": "Riduce il livello di allerta di un Palazzo",
+    "materiali": [
+     {
+      "nome": "Balsamo vegetale",
+      "quantita": 2
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile anche alle Televendite (Set Ladro Fantasma 2); altrimenti tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Trappola del Tesoro",
+    "effetto": "Aumenta la probabilità di incontrare Demoni del Tesoro nei Palazzi",
+    "materiali": [
+     {
+      "nome": "Gomitolo di seta",
+      "quantita": 2
+     },
+     {
+      "nome": "Balsamo vegetale",
+      "quantita": 3
+     },
+     {
+      "nome": "Sughero",
+      "quantita": 1
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile esclusivamente tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Palla evanescente",
+    "effetto": "Garantisce la fuga da una battaglia (non utilizzabile in alcuni scontri)",
+    "materiali": [
+     {
+      "nome": "Pergamena spessa",
+      "quantita": 1
+     },
+     {
+      "nome": "Balsamo vegetale",
+      "quantita": 1
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile anche come ricompensa da Morgana nel Palazzo di Kamoshida o alle Televendite; altrimenti tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Faretto",
+    "effetto": "Aumenta la probabilità che un alleato venga preso di mira dai nemici",
+    "materiali": [
+     {
+      "nome": "Pergamena spessa",
+      "quantita": 2
+     },
+     {
+      "nome": "Sughero",
+      "quantita": 2
+     },
+     {
+      "nome": "Gomitolo di seta",
+      "quantita": 1
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Ottenibile esclusivamente tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   },
+   {
+    "attrezzo": "Ribalta",
+    "effetto": "Aumenta notevolmente la probabilità che un alleato venga preso di mira dai nemici",
+    "materiali": [
+     {
+      "nome": "Lente condensante",
+      "quantita": 4
+     },
+     {
+      "nome": "Foglio d'alluminio",
+      "quantita": 2
+     },
+     {
+      "nome": "Cuoio conciato",
+      "quantita": 4
+     }
+    ],
+    "prodotti": null,
+    "sblocco": "Richiede materiali avanzati (dal Palazzo di Futaba in poi); ottenibile esclusivamente tramite fabbricazione",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/ ; https://samurai-gamers.com/persona-5/crafting-infiltration-tools-guide/",
+    "verificato": false
+   }
+  ]
+ },
+ "personalizzazioneArmi": {
+  "introduzione": "Sistema che permette di modificare le armi da fuoco dei membri del party presso il Negozio Softair Untouchable di Iwai a Shibuya. A differenza del gioco originale (dove ogni arma aveva varianti fisse predefinite), in Persona 5 Royal le modifiche si basano su formule che intervengono direttamente sulle statistiche base dell'arma: si possono installare Castelli (aumentano l'attacco), Canne (aumentano la precisione) e, dal Rango 3 di Iwai, Mimetiche che aggiungono un'alterazione elementale (In fiamme, Congelamento o Folgorazione) a ogni colpo. Le armi ottenute tramite l'esecuzione sulla Sedia elettrica hanno effetti unici e non possono ricevere Mimetiche; alcune armi iniziali non sono personalizzabili.",
+  "requisiti": "Richiede il legame di Confidente con Iwai (Arcano Appeso); il suo Confidente si avvia a Coraggio Rango 4.",
+  "costi": "Il costo di ogni personalizzazione è pari a 1/4 del prezzo base dell'arma; scende a 1/8 dal Rango 5 di Iwai; diventa completamente gratuita al Rango 10 (massimo).",
+  "effetti": [
+   {
+    "nome": "Canna lunga [CL]",
+    "effetto": "Aumenta la precisione (bonus variabile in base al personaggio: da +5 a +10 sulla precisione base)",
+    "costo": null
+   },
+   {
+    "nome": "Canna Giga [CG]",
+    "effetto": "Attacco x0,9; forte aumento di precisione (bonus variabile in base al personaggio: da +9 a +20)",
+    "costo": null
+   },
+   {
+    "nome": "Castello [CT]",
+    "effetto": "Attacco x1,2",
+    "costo": null
+   },
+   {
+    "nome": "Castello Superiore [CtS]",
+    "effetto": "Attacco x1,4; precisione -15",
+    "costo": null
+   },
+   {
+    "nome": "Castello Mega [CtM]",
+    "effetto": "Attacco x1,8; precisione -35",
+    "costo": null
+   },
+   {
+    "nome": "Mimetica di fuoco [F]",
+    "effetto": "Attacco x0,8; colpi x0,5; infligge In fiamme potente",
+    "costo": null
+   },
+   {
+    "nome": "Mimetica elettrica [E]",
+    "effetto": "Attacco x0,8; colpi x0,5; infligge Folgorazione potente",
+    "costo": null
+   },
+   {
+    "nome": "Mimetica di ghiaccio [G]",
+    "effetto": "Attacco x0,8; colpi x0,5; infligge Congelamento potente",
+    "costo": null
+   }
+  ],
+  "progressioneConfidente": [
+   {
+    "rango": 1,
+    "abilita": "Personalizzazione elementare",
+    "effetto": "Permette di personalizzare le armi da fuoco e installare i primi potenziamenti (Castelli e Canne)"
+   },
+   {
+    "rango": 3,
+    "abilita": "Personalizzazione mimetica",
+    "effetto": "Permette di applicare le Mimetiche, che infliggono un'alterazione negativa (fuoco, ghiaccio o elettricità) a ogni colpo"
+   },
+   {
+    "rango": 5,
+    "abilita": "Sconto",
+    "effetto": "Riduce il costo della personalizzazione da 1/4 a 1/8 del prezzo dell'arma"
+   },
+   {
+    "rango": 7,
+    "abilita": "Personalizzazione esperta",
+    "effetto": "Sblocca ulteriori elementi di personalizzazione"
+   },
+   {
+    "rango": 10,
+    "abilita": "Offre la casa",
+    "effetto": "Le personalizzazioni diventano completamente gratuite"
+   }
+  ],
+  "note": [
+   "Tutti i valori decimali dei moltiplicatori vengono arrotondati per eccesso.",
+   "I bonus di precisione delle Canne variano da personaggio a personaggio in base alla precisione base della sua arma.",
+   "Il nome dell'arma personalizzata viene affiancato dalla sigla della modifica applicata (es. 'Governance [CT]').",
+   "Trofeo 'Modifiche professionali': si sblocca personalizzando per la prima volta un'arma da fuoco.",
+   "Premio 'Pistolero esperto' (Covo dei Ladri): si ottiene personalizzando 20 armi da fuoco differenti."
+  ],
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/guida-personalizzazione-delle-armi/"
+ },
+ "abiti": {
+  "introduzione": "Gli abiti sono elementi puramente cosmetici che personalizzano l'aspetto del gruppo durante l'esplorazione del Metaverso e in battaglia, spesso richiamando altri titoli della serie Persona/Atlus o collaborazioni speciali. Non offrono alcun vantaggio statistico. Equipaggiando il protagonista con un abito proveniente da un DLC a pagamento, la musica di battaglia e dei risultati viene sostituita da tracce speciali incluse nel pacchetto.",
+  "elenco": [
+   {
+    "nome": "Vestito da Fantasma",
+    "per": "Protagonista",
+    "dove": "Costume predefinito (musica di battaglia/risultati speciale)",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Morgana classico",
+    "per": "Morgana",
+    "dove": "Abbigliamento predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Armatura pirata",
+    "per": "Ryuji",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Tutina in latex rosso",
+    "per": "Ann",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito del fuorilegge",
+    "per": "Yusuke",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Motocicl. metallaro",
+    "per": "Makoto",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito moschettiere",
+    "per": "Haru",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito da principe",
+    "per": "Akechi",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Abito scuro",
+    "per": "Akechi",
+    "dove": "Disponibile dal 2 gennaio",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Calzamaglia nera",
+    "per": "Sumire/Kasumi",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito dell'hacker",
+    "per": "Futaba",
+    "dove": "Costume predefinito",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme estiva",
+    "per": "Tutti tranne Morgana e Futaba",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme invernale",
+    "per": "Tutti tranne Morgana e Futaba",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo Karukozaka",
+    "per": "Tutti tranne Morgana e Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo St. Hermelin",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo Seven Sisters",
+    "per": "Tutti tranne Morgana e Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo Kasugayama",
+    "per": "Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo Gekkoukan",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo Yasogami",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Liceo Yumizuki / Liceo Ouran",
+    "per": "Tutti tranne Morgana e Akechi (non presenti nelle versioni rimasterizzate 2022)",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestiti estivi",
+    "per": "Tutti tranne Morgana e Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestiti invernali",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Pigiama",
+    "per": "Protagonista e Futaba",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Tuta da atletica",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Costume da bagno",
+    "per": "Tutti tranne Morgana e Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Abito da maggiordomo",
+    "per": "Personaggi maschili tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme da Maid",
+    "per": "Personaggi femminili e Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito natalizio",
+    "per": "Tutti",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme imperiale",
+    "per": "Akechi (non presente nelle versioni rimasterizzate 2022)",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme da Agente Ombra",
+    "per": "Tutti",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito da ballo",
+    "per": "Tutti",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Veste da samurai",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Costume da Trish (v1 e v2)",
+    "per": "Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Costume da Aigis",
+    "per": "Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Costume da Teddie",
+    "per": "Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme della Hazama",
+    "per": "Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Costume Gouto",
+    "per": "Morgana (non presente nelle versioni rimasterizzate 2022)",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Costume da Burroughs",
+    "per": "Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito di Vincent",
+    "per": "Protagonista",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Moda di Orlando",
+    "per": "Ryuji",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Tuta pecora smarrita",
+    "per": "Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Camicetta Catherine",
+    "per": "Ann",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Soprabito di Johnny",
+    "per": "Yusuke",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito di Katherine",
+    "per": "Makoto",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Uniforme di Erica",
+    "per": "Haru",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito del capo",
+    "per": "Akechi",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Tuta di Toby",
+    "per": "Futaba",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Pezzo di Rin",
+    "per": "Sumire",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Abito Featherman",
+    "per": "Tutti",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito New Cinema",
+    "per": "Tutti",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Testa Demonica",
+    "per": "Tutti (comprende il casco)",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Abito Demonica",
+    "per": "Tutti (senza casco)",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito luce stellare",
+    "per": "Tutti tranne Sumire",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito ultramarino",
+    "per": "Tutti tranne Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   },
+   {
+    "nome": "Vestito da naso lungo",
+    "per": "Morgana",
+    "dove": "Ricompensa Bonus e DLC di Persona 5 Royal (contenuto a pagamento); include tracce audio speciali per battaglie e risultati",
+    "fonte": "https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/"
+   }
+  ],
+  "lavanderia": {
+   "dove": "Lavanderia automatica di Yongen-Jaya (di fronte al Leblanc, accanto ai bagni pubblici)",
+   "costo": "Non specificato con un valore univoco dalla guida italiana consultata (che descrive solo il funzionamento). Fonti secondarie in lingua inglese non concordano tra loro: una indica 200¥ ad accesso, un'altra 400¥; per il servizio di Kawakami (Confidente Temperanza, dal Rango 3) le fonti secondarie indicano 5.000¥ a lavaggio, gratuito al Rango massimo (9-10).",
+   "regole": [
+    "Usando la Lavanderia automatica si fa passare il tempo, ma si possono lavare le armature sporche recuperate esplorando il Metaverso.",
+    "Si possono lavare fino a 4 pezzi di equipaggiamento sporco per ciclo.",
+    "L'oggetto pulito ottenuto in cambio dipende dal tipo di armatura sporca lavata, secondo una tabella di conversione (ogni armatura sporca corrisponde a una o più protezioni pulite specifiche).",
+    "Le armature/equipaggiamenti sporchi si ottengono come bottino nei Palazzi e nei Memento (forzieri, negoziazioni con le Ombre), analogamente all'equipaggiamento normale.",
+    "In alternativa alla lavanderia, si può acquistare la Cesta di vestiti (50 punti) al negozio Vestiti usati di Kichijoji: contiene 4 protezioni casuali (uomo/donna/Morgana) legate al Palazzo attivo, generalmente meno potenti di quelle ottenute lavando le armature sporche corrispondenti; acquistabile una sola volta al giorno, con stock rinnovato il giorno successivo.",
+    "Fonte secondaria (non confermata dalla guida italiana): dal Rango 3 del Confidente Temperanza (Kawakami) è possibile chiederle di occuparsi del bucato al posto del protagonista, a pagamento; dal Rango massimo lo fa gratuitamente."
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/protezioni/ ; https://www.allgamestaff.it/cosa-contiene-la-cesta-di-vestiti-in-persona-5-royal/ ; https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/ ; https://samurai-gamers.com/persona-5/laundromat-and-dirty-equipment-guide/ ; https://gamerant.com/persona-5-royal-how-get-kawakami-do-laundry/"
+  }
+ },
+ "scambi": [
+  {
+   "venditore": "Mercante Sakai",
+   "dove": "Kichijoji",
+   "quando": "Un'offerta diversa ogni settimana circa; il Mercante scompare e ritorna con nuovi baratti",
+   "offerte": [
+    {
+     "ricevi": "Frusta decorativa (arma di Ann: Fo +5)",
+     "dai": "Proteine d'importazione",
+     "note": "6/12 - 6/17"
+    },
+    {
+     "ricevi": "Veste nera (materiale mutageno per la Trasmutazione)",
+     "dai": "Panino con yakisoba",
+     "note": "6/26 - 7/2"
+    },
+    {
+     "ricevi": "Spada Koedo (arma di Yusuke: Amnesia debole)",
+     "dai": "Soba calmante",
+     "note": "7/11 - 7/12"
+    },
+    {
+     "ricevi": "La fattorizzazione (libro, bonus statistiche di studio)",
+     "dai": "Razione militare",
+     "note": "7/26 - 7/30"
+    },
+    {
+     "ricevi": "Replica d'arma (materiale mutageno per la Trasmutazione)",
+     "dai": "Acqua benedetta",
+     "note": "8/7 - 8/13"
+    },
+    {
+     "ricevi": "Pugno del padre (arma di Makoto: In fiamme medio)",
+     "dai": "Melon pan",
+     "note": "8/22 - 8/27"
+    },
+    {
+     "ricevi": "Ofuda della forza (raddoppia una volta gli attacchi fisici)",
+     "dai": "Wafer dei ladri",
+     "note": "9/4 - 9/6"
+    },
+    {
+     "ricevi": "Ofuda della magia (raddoppia una volta gli attacchi magici)",
+     "dai": "Maschera del ladro",
+     "note": "9/19 - 9/24"
+    },
+    {
+     "ricevi": "Daifuku alla fragola (cura alterazioni e ripristina tutti gli HP)",
+     "dai": "Cartolina",
+     "note": "10/2 - 10/8"
+    },
+    {
+     "ricevi": "Spada sangue ardente (arma di Morgana: In fiamme medio)",
+     "dai": "Strumento Girimehkala",
+     "note": "10/16 - 10/22"
+    },
+    {
+     "ricevi": "Distintivo dell'angelo (accessorio: elusione magia)",
+     "dai": "Stufato misterioso",
+     "note": "10/30 - 11/5"
+    },
+    {
+     "ricevi": "Ascia Kintaro (arma di Haru: +30 HP)",
+     "dai": "Dango lunare",
+     "note": "11/13 - 11/17"
+    },
+    {
+     "ricevi": "Ofuda del potere (potenzia le statistiche per 3 turni)",
+     "dai": "Yaki-Imo leggendario",
+     "note": "11/27 - 12/3"
+    },
+    {
+     "ricevi": "Mazza fervente (arma di Ryuji: In fiamme medio)",
+     "dai": "Crostatina angelo",
+     "note": "12/11 - 12/17"
+    },
+    {
+     "ricevi": "Cintura della forza (accessorio: resistenza fisica)",
+     "dai": "Chimaki speciale",
+     "note": "1/13 - 1/14"
+    },
+    {
+     "ricevi": "Elisir del padre (ripristina tutti gli HP e SP)",
+     "dai": "Panino supernova",
+     "note": "1/22 - 2/2"
+    }
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/scambi-oggetti-curiosi-venditori-nascosti/",
+   "verificato": true
+  },
+  {
+   "venditore": "Venditore Ambulante",
+   "dove": "Central Street, Shibuya",
+   "quando": "Sera, dal lunedì al venerdì (non nei giorni di pioggia)",
+   "offerte": [
+    {
+     "ricevi": "Specchio della vendetta (accessorio)",
+     "dai": "8.000¥",
+     "note": "Fascino Rango 2"
+    },
+    {
+     "ricevi": "Portafortuna croce (accessorio)",
+     "dai": "2.000¥",
+     "note": "Fascino Rango 2"
+    },
+    {
+     "ricevi": "Portafortuna teschio (accessorio)",
+     "dai": "2.000¥",
+     "note": "Fascino Rango 2"
+    },
+    {
+     "ricevi": "Cintura Rakshasa (accessorio)",
+     "dai": "9.000¥",
+     "note": "Fascino Rango 3"
+    },
+    {
+     "ricevi": "Cintura Vajra (accessorio)",
+     "dai": "9.000¥",
+     "note": "Fascino Rango 3"
+    },
+    {
+     "ricevi": "Cintura Skanda (accessorio)",
+     "dai": "9.000¥",
+     "note": "Fascino Rango 3"
+    },
+    {
+     "ricevi": "Specchio del rimbotto (accessorio)",
+     "dai": "16.000¥",
+     "note": "Fascino Rango 3"
+    },
+    {
+     "ricevi": "Anello del vento (accessorio)",
+     "dai": "4.000¥",
+     "note": "Fascino Rango 5"
+    },
+    {
+     "ricevi": "Piastrina incisa (accessorio)",
+     "dai": "4.000¥",
+     "note": "Fascino Rango 5"
+    },
+    {
+     "ricevi": "Specchio di rappresaglia (accessorio)",
+     "dai": "24.000¥",
+     "note": "Fascino Rango 5"
+    }
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/scambi-oggetti-curiosi-venditori-nascosti/",
+   "verificato": true
+  },
+  {
+   "venditore": "Gachapon di Akihabara (\"L'Uomo avido\")",
+   "dove": "Akihabara",
+   "quando": "Sempre disponibile; la macchina gacha costa 500¥ a capsula",
+   "offerte": [
+    {
+     "ricevi": "Dr. Salt NEO",
+     "dai": "Capsula Minidominazione",
+     "note": null
+    },
+    {
+     "ricevi": "Riempitivo + Lenzuolo rinfrescante",
+     "dai": "Capsula Die-soujou",
+     "note": null
+    },
+    {
+     "ricevi": "Bevanda energetica + Salsa rancida",
+     "dai": "Capsula Decarabia addobbato",
+     "note": null
+    },
+    {
+     "ricevi": "Curry alla fragola + Stufato misterioso",
+     "dai": "Capsula Strumento Girimehkala",
+     "note": null
+    },
+    {
+     "ricevi": "Rianidrin + Unguento vitale",
+     "dai": "Capsula Kin-Ki kink",
+     "note": null
+    },
+    {
+     "ricevi": "Replica d'arma (poi Balsamo vitale dal 5° scambio)",
+     "dai": "Capsula Mothman muschiato",
+     "note": "Mothman è la capsula più ricercata: dopo 5 scambi la ricompensa cambia in Balsamo vitale"
+    }
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "venditore": "Affari Loschi di Tanaka",
+   "dove": "Online, dal Laptop del protagonista (dopo averlo riparato con il Set di strumenti da PC di Akihabara)",
+   "quando": "Dal 19 dicembre al 30 gennaio; consegna in 3 giorni per ordine, un solo ordine alla volta",
+   "offerte": [
+    {
+     "ricevi": "Spec. senso spirit / Chiodo ossidato / Magatama (infernale, ciclonico, ghiaccio, elettrico)",
+     "dai": "5.000-6.000¥ (grado Nero, oltre 10.000¥ spesi)",
+     "note": "Sblocco progressivo in base al totale speso su Tanaka"
+    },
+    {
+     "ricevi": "Magatama (divino, esplosivo) / Veste nera / Spec. spirit. oscuro",
+     "dai": "500-6.000¥ (grado Nero avanzato)",
+     "note": null
+    },
+    {
+     "ricevi": "Kogatana nera / Sacra Sindone / Tavola Ouija / Fotocamera spirituale",
+     "dai": "1.000-10.000¥ (grado Oscurità, oltre 50.000¥ spesi)",
+     "note": "Fotocamera spirituale limitata a 1 unità"
+    },
+    {
+     "ricevi": "Replica d'arma / Homunculus / Maschera sorridente / Corona della salvezza",
+     "dai": "1.000-990.000¥ (grado Caos, oltre 100.000¥ spesi)",
+     "note": "Maschera sorridente limitata a 1 unità; Corona della salvezza limitata a 1 unità"
+    }
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/",
+   "verificato": true
+  },
+  {
+   "venditore": "Jose",
+   "dove": "Nei Memento, a bordo di un veicolo particolare (posizione segnalata sulla mappa quando appare)",
+   "quando": "Casualmente durante l'esplorazione dei Memento, dopo aver completato la prima richiesta; il catalogo cambia in base al Dedalo raggiunto",
+   "offerte": [
+    {
+     "ricevi": "Fiala vertigini S / Fiala del sonno S",
+     "dai": "30-40 Fiori",
+     "note": "[Dedalo di Aiyatsbus]"
+    },
+    {
+     "ricevi": "Goccia dell'anima / Polvere d'anima",
+     "dai": "15-75 Fiori",
+     "note": "[Dedalo di Aiyatsbus] Ripristino SP"
+    },
+    {
+     "ricevi": "Kit energetico S",
+     "dai": "80 Fiori",
+     "note": "[Dedalo di Aiyatsbus]"
+    },
+    {
+     "ricevi": "Carta bianca",
+     "dai": "15 Fiori",
+     "note": "[Dedalo di Chemdah]"
+    },
+    {
+     "ricevi": "Fiala confusione S",
+     "dai": "65 Fiori",
+     "note": "[Dedalo di Chemdah]"
+    },
+    {
+     "ricevi": "Fiala del sonno L",
+     "dai": "40 Fiori",
+     "note": "[Dedalo di Chemdah]"
+    },
+    {
+     "ricevi": "Ambra grigia (Ma/Ag/Fo +2 a una Persona)",
+     "dai": "80 Fiori",
+     "note": "[Dedalo di Chemdah]"
+    },
+    {
+     "ricevi": "Kogatana nera / Replica d'arma / Veste nera",
+     "dai": "30 Fiori",
+     "note": "[Dedalo di Chemdah] Oggetti mutageni per la Trasmutazione"
+    },
+    {
+     "ricevi": "Ambra grigia RS/FR (Rs/Fr +2 a una Persona)",
+     "dai": "80 Fiori",
+     "note": "[Dedalo di Kaitul]"
+    },
+    {
+     "ricevi": "Fiala delle vertigini L",
+     "dai": "40 Fiori",
+     "note": "[Dedalo di Kaitul]"
+    },
+    {
+     "ricevi": "Fiala della paura S",
+     "dai": "65 Fiori",
+     "note": "[Dedalo di Kaitul]"
+    },
+    {
+     "ricevi": "Ofuda speciali (potenziano precisione/elusione/attacco di gruppo)",
+     "dai": "70 Fiori",
+     "note": "[Dedalo di Akzeriyyuth]"
+    },
+    {
+     "ricevi": "Kit energetico L",
+     "dai": "210 Fiori",
+     "note": "[Dedalo di Akzeriyyuth]"
+    },
+    {
+     "ricevi": "Anima da masticare",
+     "dai": "170 Fiori",
+     "note": "[Dedalo di Akzeriyyuth]"
+    },
+    {
+     "ricevi": "Fiala confusione L",
+     "dai": "70 Fiori",
+     "note": "[Dedalo di Akzeriyyuth]"
+    },
+    {
+     "ricevi": "Fiala dell'amnesia S",
+     "dai": "30 Fiori",
+     "note": "[Dedalo di Akzeriyyuth]"
+    },
+    {
+     "ricevi": "Fiala della paura L",
+     "dai": "70 Fiori",
+     "note": "[Dedalo di Adyeshach]"
+    },
+    {
+     "ricevi": "Fiala soggiogamento S",
+     "dai": "70 Fiori",
+     "note": "[Dedalo di Adyeshach]"
+    },
+    {
+     "ricevi": "Nirvana (+3 a tutte le statistiche di una Persona)",
+     "dai": "80 Fiori",
+     "note": "[Dedalo di Adyeshach]"
+    },
+    {
+     "ricevi": "Pane per l'anima",
+     "dai": "450 Fiori",
+     "note": "[Dedalo di Sheriruth] Ripristino SP totale"
+    },
+    {
+     "ricevi": "Fiala dell'amnesia L",
+     "dai": "40 Fiori",
+     "note": "[Dedalo di Sheriruth]"
+    },
+    {
+     "ricevi": "Fiala disperazione S",
+     "dai": "100 Fiori",
+     "note": "[Dedalo di Sheriruth]"
+    },
+    {
+     "ricevi": "Soma",
+     "dai": "520 Fiori",
+     "note": "[Dedalo di Da'at] Ripristino HP e SP totale di gruppo"
+    },
+    {
+     "ricevi": "Fiala soggiogamento L",
+     "dai": "90 Fiori",
+     "note": "[Dedalo di Da'at]"
+    }
+   ],
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/negozi-speciali/ ; https://www.allgamestaff.it/persona-5-royal-guida-ai-memento/",
+   "verificato": true
+  }
+ ]
+}

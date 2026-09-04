@@ -1,0 +1,207 @@
+// ============================================================
+// Icone SVG di riserva per meteo, fasce della giornata, mappe e categorie (usate quando l'asset manca)
+// ============================================================
+
+import type { SVGProps } from 'react';
+
+interface IconProps extends SVGProps<SVGSVGElement> {
+  size?: number;
+}
+
+function base({ size = 16, ...rest }: IconProps) {
+  return {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+    ...rest,
+  };
+}
+
+/** Sole a raggi. */
+export function IconSole(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  );
+}
+
+/** Luna crescente con una stella. */
+export function IconLuna(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" />
+      <path d="M18 3l.6 1.6L20 5l-1.4.5L18 7l-.6-1.5L16 5l1.4-.4z" />
+    </svg>
+  );
+}
+
+/** Nuvola. */
+export function IconNuvola(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M7 18h10a4 4 0 0 0 .6-7.9A6 6 0 0 0 6.2 9.3 4.4 4.4 0 0 0 7 18z" />
+    </svg>
+  );
+}
+
+/** Nuvola con gocce. */
+export function IconPioggia(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M7 15h10a4 4 0 0 0 .6-7.9A6 6 0 0 0 6.2 6.3 4.4 4.4 0 0 0 7 15z" />
+      <path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3" />
+    </svg>
+  );
+}
+
+/** Fiocco di neve. */
+export function IconNeve(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 2v20M4 6l16 12M20 6 4 18M8.5 4.5 12 7l3.5-2.5M8.5 19.5 12 17l3.5 2.5M3 10.5 6 12l-3 1.5M21 10.5 18 12l3 1.5" />
+    </svg>
+  );
+}
+
+/** Nuvola con fulmine. */
+export function IconTemporale(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M7 14h10a4 4 0 0 0 .6-7.9A6 6 0 0 0 6.2 5.3 4.4 4.4 0 0 0 7 14z" />
+      <path d="M13 14l-2 4h3l-2 4" />
+    </svg>
+  );
+}
+
+/** Linee di nebbia. */
+export function IconNebbia(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M4 9h16M3 13h18M5 17h14" />
+    </svg>
+  );
+}
+
+/** Termometro. */
+export function IconTermometro(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M10 4a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0z" />
+      <path d="M12 9v6" />
+    </svg>
+  );
+}
+
+/** Fiore (polline). */
+export function IconPolline(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18" />
+    </svg>
+  );
+}
+
+/** Spirale (tifone). */
+export function IconTifone(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 12a3 3 0 1 0 3-3 5 5 0 1 0-5 5 7 7 0 1 0 7-7 9 9 0 1 0-9 9" />
+    </svg>
+  );
+}
+
+/** Mappa piegata con spillo. */
+export function IconMappa(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z" />
+      <path d="M9 4v14M15 6v14" />
+    </svg>
+  );
+}
+
+/** Sacchetto della spesa. */
+export function IconNegozio(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M5 8h14l-1 12H6z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </svg>
+  );
+}
+
+/** Cuore (cura). */
+export function IconCuore(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
+    </svg>
+  );
+}
+
+/** Goccia (SP). */
+export function IconGoccia(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z" />
+    </svg>
+  );
+}
+
+/** Scudo (battaglia / stato). */
+export function IconScudo(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />
+    </svg>
+  );
+}
+
+/** Bussola (esplorazione). */
+export function IconBussola(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M15.5 8.5 13.5 13.5 8.5 15.5l2-5z" />
+    </svg>
+  );
+}
+
+/** Valigetta (lavoro). */
+export function IconValigetta(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <rect x="3" y="7" width="18" height="13" rx="2" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 12h18" />
+    </svg>
+  );
+}
+
+/** Pellicola (film). */
+export function IconFilm(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4" />
+    </svg>
+  );
+}
+
+/** Controller (mini-giochi). */
+export function IconGioco(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <path d="M6 9h12a4 4 0 0 1 4 4v2a3 3 0 0 1-5.2 2L15 15H9l-1.8 2A3 3 0 0 1 2 15v-2a4 4 0 0 1 4-4z" />
+      <path d="M8 12v3M6.5 13.5h3M16 13h.01M18 12h.01" />
+    </svg>
+  );
+}

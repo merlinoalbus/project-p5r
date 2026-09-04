@@ -1,0 +1,4447 @@
+{
+ "fonti": {
+  "principale": "allgamestaff.it (guida italiana ufficiosa Persona 5 Royal)",
+  "note": "Dati raccolti il 2026-09-03/04. Nessuna fonte secondaria (Megami Tensei Wiki / game8) è stata necessaria: allgamestaff copriva tutti i punti richiesti con terminologia italiana coerente. La pagina 'danno-tecnico' non esiste più come URL a sé stante (404): la stessa tabella è pubblicata dentro la pagina 'sistema-di-battaglia'."
+ },
+ "sistema": {
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/sistema-di-battaglia/",
+  "avvioScontro": "Premendo il comando di attacco durante l'esplorazione. Se si sorprende il nemico alle spalle si ottiene 'Imboscata!' e il party agisce per primo; se si viene scoperti scatta 'Pericolo!', che impedisce cambio party, fuga e Staffetta.",
+  "comandi": [
+   "Attacca (colpo base, nessun consumo HP/SP)",
+   "Guardia (riduce i danni e impedisce l'atterramento)",
+   "Punta arma (consuma munizioni, danno maggiore)",
+   "Persona (abilità con consumo HP/SP)",
+   "Oggetti",
+   "Ordini (controllo alleati, analisi nemici)"
+  ],
+  "esitiColpo": {
+   "debole": "Danno aumentato e nemico atterrato",
+   "critico": "Colpo potente che può atterrare",
+   "tecnico": "Danno bonus se il nemico ha uno stato alterato compatibile (vedi tabella 'tecnico')",
+   "block": "Attacco annullato",
+   "resiste": "Danno ridotto"
+  },
+  "unoMore": "Colpendo una debolezza il nemico viene atterrato e si ottiene un turno extra ('1 More'), utile per concatenare azioni ed eliminare interi gruppi di nemici in un round.",
+  "statiAlterati": [
+   {
+    "stato": "In fiamme",
+    "effetto": "Danno continuo a ogni turno"
+   },
+   {
+    "stato": "Congelamento",
+    "effetto": "Incapacità di agire"
+   },
+   {
+    "stato": "Folgorazione",
+    "effetto": "Rischio di paralisi o reazioni anomale"
+   },
+   {
+    "stato": "Vertigini",
+    "effetto": "Precisione ridotta"
+   },
+   {
+    "stato": "Amnesia",
+    "effetto": "Impossibilità di usare abilità"
+   },
+   {
+    "stato": "Sonno",
+    "effetto": "Incapacità di agire, ma recupero HP/SP"
+   },
+   {
+    "stato": "Confusione",
+    "effetto": "Azioni casuali, possibile spreco di oggetti/denaro"
+   },
+   {
+    "stato": "Paura",
+    "effetto": "Possibile fuga automatica"
+   },
+   {
+    "stato": "Disperazione",
+    "effetto": "Perdita progressiva di SP e possibile KO"
+   },
+   {
+    "stato": "Furia",
+    "effetto": "Aumenta l'attacco, ma limita a un solo tipo di azione per turno"
+   },
+   {
+    "stato": "Soggiogamento",
+    "effetto": "Possibile attacco agli alleati o supporto involontario al nemico"
+   },
+   {
+    "stato": "Fame",
+    "effetto": "Riduzione drastica della potenza offensiva"
+   }
+  ],
+  "notaFineBattaglia": "Tutti gli stati alterati vengono rimossi al termine della battaglia."
+ },
+ "assaltoEHoldUp": {
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/sistema-di-battaglia/",
+  "rapina": "Quando tutti i nemici in campo vengono atterrati contemporaneamente, si attiva una Rapina (non attivabile se solo il protagonista può agire in quel momento).",
+  "assalto": "Durante la Rapina si può scegliere 'Assalto' (All-Out Attack): un attacco totale del party che infligge danni elevati a tutti i nemici.",
+  "holdUp": "In alternativa all'Assalto si può scegliere 'Parla' per negoziare con i nemici (vedi sezione negoziazione)."
+ },
+ "tecnico": {
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/sistema-di-battaglia/",
+  "stati": [
+   {
+    "stato": "Soggiogamento",
+    "elementi": [
+     "Psicocinesi"
+    ]
+   },
+   {
+    "stato": "In fiamme",
+    "elementi": [
+     "Nucleare",
+     "Vento"
+    ]
+   },
+   {
+    "stato": "Confusione",
+    "elementi": [
+     "Psicocinesi"
+    ]
+   },
+   {
+    "stato": "Disperazione",
+    "elementi": [
+     "Psicocinesi"
+    ]
+   },
+   {
+    "stato": "Vertigini",
+    "elementi": [
+     "Qualsiasi attacco"
+    ]
+   },
+   {
+    "stato": "Paura",
+    "elementi": [
+     "Psicocinesi"
+    ]
+   },
+   {
+    "stato": "Amnesia",
+    "elementi": [
+     "Psicocinesi"
+    ]
+   },
+   {
+    "stato": "Congelamento",
+    "elementi": [
+     "Attacchi fisici",
+     "Armi da fuoco",
+     "Nucleare"
+    ]
+   },
+   {
+    "stato": "Furia",
+    "elementi": [
+     "Psicocinesi"
+    ]
+   },
+   {
+    "stato": "Folgorazione",
+    "elementi": [
+     "Attacchi fisici",
+     "Armi da fuoco",
+     "Nucleare"
+    ]
+   },
+   {
+    "stato": "Sonno",
+    "elementi": [
+     "Qualsiasi attacco"
+    ]
+   }
+  ]
+ },
+ "staffetta": {
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/staffetta/",
+  "cosaE": "Passaggio del turno bonus '1 More' (ottenuto colpendo una debolezza, un colpo critico o un colpo tecnico) a un altro membro del gruppo.",
+  "disponibilita": "Utilizzabile da tutti i membri fin da subito, senza requisiti di Rango Confidente.",
+  "effetto": "Il personaggio che riceve la Staffetta ottiene un potenziamento offensivo (e alla cura); ogni passaggio successivo nella stessa catena incrementa ulteriormente il bonus.",
+  "livelli": "Ogni alleato ha un proprio livello individuale di Staffetta, migliorabile giocando a freccette al Penguin Sniper.",
+  "indicatoriVisivi": "Aura infuocata il cui colore cambia (rosso, giallo, blu) in base alla posizione nella catena.",
+  "ranghi": [
+   {
+    "rango": 1,
+    "bonus": "Aumento del danno inflitto e della cura erogata"
+   },
+   {
+    "rango": 2,
+    "bonus": "+HP automatico (+10%) al termine dell'azione"
+   },
+   {
+    "rango": 3,
+    "bonus": "Recupero SP (+2/+4/+6 a seconda della posizione nella catena)"
+   }
+  ],
+  "moltiplicatori": "Da circa 1,45x a 2,05x rispetto al danno/cura normali, in base a rango e posizione nella catena (un personaggio a Rango 3 al terzo passaggio infligge circa 2,05x danni normali).",
+  "effettoSpeciale": "Se tutti e quattro i membri attivi del party usano la Staffetta nella stessa catena, l'ultimo personaggio può usare qualsiasi abilità senza consumare HP o SP."
+ },
+ "speciali": {
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/speciali/",
+  "meccanica": "Attacco combinato eseguito da due membri dei Ladri Fantasma (chiamato 'Speciale' nella guida italiana). Sbloccato automaticamente in momenti specifici della trama grazie alla Stella dei Desideri; non è selezionabile manualmente.",
+  "attivazione": "Casuale, all'inizio del turno; possibilità aumentata ricevendo una Staffetta coinvolgente il protagonista o un membro in difficoltà, quando un personaggio scende sotto il 50% degli HP, o quando un nemico è vicino alla sconfitta/è Atterrato.",
+  "proprietaDanno": "Danno di tipo Divino che colpisce indipendentemente dalle resistenze elementali del nemico, pur essendo tecnicamente considerato danno fisico; non consuma HP/SP.",
+  "elenco": [
+   {
+    "nome": "Via col piombo",
+    "personaggi": [
+     "Morgana",
+     "Ann"
+    ],
+    "sblocco": "21 giugno"
+   },
+   {
+    "nome": "Mad Moxie",
+    "personaggi": [
+     "Ryuji",
+     "Makoto"
+    ],
+    "sblocco": "22 giugno"
+   },
+   {
+    "nome": "Gyudon senza gloria",
+    "personaggi": [
+     "Yusuke",
+     "Ryuji"
+    ],
+    "sblocco": "17 luglio"
+   },
+   {
+    "nome": "Kabuki Kid",
+    "personaggi": [
+     "Ann",
+     "Yusuke"
+    ],
+    "sblocco": "19 settembre"
+   },
+   {
+    "nome": "Duri al volante",
+    "personaggi": [
+     "Haru",
+     "Morgana"
+    ],
+    "sblocco": "20 settembre"
+   },
+   {
+    "nome": "Andarci giù duro",
+    "personaggi": [
+     "Makoto",
+     "Haru"
+    ],
+    "sblocco": "30 ottobre"
+   },
+   {
+    "nome": "Taglienti come lame",
+    "personaggi": [
+     "Akechi",
+     "Protagonista"
+    ],
+    "sblocco": "2 gennaio"
+   },
+   {
+    "nome": "Ballando con i Ladri",
+    "personaggi": [
+     "Kasumi",
+     "Protagonista"
+    ],
+    "sblocco": "20 gennaio (richiede Rango Confidente Fede di Kasumi al livello massimo)"
+   }
+  ]
+ },
+ "negoziazione": {
+  "urlFonti": [
+   "https://www.allgamestaff.it/persona-5-royal/sistema-di-battaglia/",
+   "https://www.allgamestaff.it/persona-5-royal/come-ottenere-tutte-le-personae/"
+  ],
+  "quandoSiPuoNegoziare": "Durante una Rapina (quando tutte le Ombre nemiche in campo sono state atterrate), selezionando 'Parla' invece di 'Assalto'. Si può negoziare con qualunque Ombra nemica presente nello scontro.",
+  "opzioniHoldUp": [
+   {
+    "opzione": "Donami il tuo potere",
+    "effetto": "Tentativo di ottenere la Persona dell'Ombra; se la Persona è già posseduta dal party, l'esito è che quella Persona già in possesso guadagna PE anche se non equipaggiata."
+   },
+   {
+    "opzione": "Fuori i soldi",
+    "effetto": "Richiesta di denaro (yen) all'Ombra."
+   },
+   {
+    "opzione": "Voglio un oggetto",
+    "effetto": "Richiesta di oggetti (spesso di qualità superiore a quelli droppati normalmente in combattimento)."
+   }
+  ],
+  "comeVerificarePersonalita": "Selezionando l'Ombra nella schermata della Rapina, oppure controllando la schermata di Analisi.",
+  "personalita": [
+   {
+    "nome": "Giocosa",
+    "descrizione": "Ombra dal carattere scherzoso.",
+    "risposteEfficaci": [
+     "È per l'automiglioramento",
+     "Devo togliermi le scarpe?"
+    ],
+    "risposteDaEvitare": [
+     "Risposte serie",
+     "Risposte vaghe"
+    ]
+   },
+   {
+    "nome": "Timida",
+    "descrizione": "Ombra riservata e insicura.",
+    "risposteEfficaci": [
+     "In realtà sono un ragazzino",
+     "Non ce n'è bisogno"
+    ],
+    "risposteDaEvitare": [
+     "Risposte vaghe",
+     "Risposte scherzose"
+    ]
+   },
+   {
+    "nome": "Irritabile",
+    "descrizione": "Ombra facilmente infastidita, poco incline a scherzi.",
+    "risposteEfficaci": [
+     "Perché? Non è così?",
+     "Senza impegno?"
+    ],
+    "risposteDaEvitare": [
+     "Risposte vaghe",
+     "Risposte gentili"
+    ]
+   },
+   {
+    "nome": "Cupa",
+    "descrizione": "Ombra malinconica/tetra.",
+    "risposteEfficaci": [
+     "Non ho preoccupazioni",
+     "Non è priva di significato"
+    ],
+    "risposteDaEvitare": [
+     "Risposte serie",
+     "Risposte scherzose"
+    ]
+   }
+  ],
+  "regole": [
+   "La negoziazione riesce (o fallisce) in base alla combinazione fra personalità dell'Ombra e tipo di risposta scelta dal giocatore.",
+   "Ogni personalità ha un tipo di risposta gradito, uno o più tipi indifferenti/neutri e uno o più tipi sgraditi.",
+   "In caso di successo si può scegliere una delle tre richieste dell'Hold Up (potere/Persona, denaro, oggetto).",
+   "Se l'Ombra corrisponde a una Persona già posseduta, chiederle 'Donami il tuo potere' fa guadagnare PE alla Persona posseduta anche se non è equipaggiata al momento."
+  ],
+  "incertezze": "La guida allgamestaff consultata non specifica esplicitamente un effetto diretto dei Rango Confidente (es. Temperanza/Kawakami) sull'esito della negoziazione stessa; i riferimenti trovati ai Confidenti riguardano bonus PL/esperienza nella creazione delle Persona, non la trattativa in Hold Up. Non è stato quindi possibile confermare o smentire un simile legame dalla fonte primaria: da verificare con fonte aggiuntiva se necessario."
+ },
+ "ombreSciagura": {
+  "nomeOriginale": "Disaster Shadow",
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/ombre-sciagura/",
+  "cosaSono": "Varianti nemiche riconoscibili dall'aura blu-violacea che le circonda. Condividono l'aspetto e le abilità della loro versione standard, ma hanno meccaniche di combattimento uniche e sono nettamente più pericolose.",
+  "comeRiconoscerle": "Aura blu-violacea intorno al modello dell'Ombra sul campo/in battaglia.",
+  "caratteristiche": [
+   "Subiscono il 30% di danni in più da qualsiasi fonte rispetto alla versione normale.",
+   "Non è possibile negoziare con loro, reclutarle o farle fuggire.",
+   "Gli stati alterati inflitti restano attivi su di loro senza eccezioni particolari."
+  ],
+  "comportamentoInBattaglia": {
+   "turnoProprio": "Restano passive: la guida descrive l'azione come 'borbotta…'.",
+   "quandoAttaccate": "Quando vengono prese di mira 'vanno fuori di sé e preparano un contrattacco', anche se l'attacco subito manca il bersaglio.",
+   "comeNeutralizzarle": "Colpirle mentre sono a terra (atterrate) con attacchi critici o sfruttando una debolezza le 'calma', impedendo il contrattacco preparato."
+  },
+  "effettiStati": {
+   "immobilizzanti": [
+    "Congelamento",
+    "Folgorazione",
+    "Sonno",
+    "Confusione",
+    "Disperazione"
+   ],
+   "soggiogamento": "Le fa comportare come un'Ombra normale (perde il comportamento da Ombra sciagura).",
+   "furia": "Le rende ancora più pericolose."
+  },
+  "esplosioneAllaSconfitta": {
+   "descrizione": "Alla sconfitta esplodono, infliggendo ingenti danni di tipo Divino a tutti i nemici vicini ancora in campo.",
+   "potenza": "Dipende dall'entità del danno dell'attacco finale che le ha sconfitte.",
+   "eccezioni": "Non esplodono (e non droppano nulla) se sconfitte con un attacco riflesso oppure con Disperazione/attacchi istantanei (uccisione istantanea)."
+  },
+  "ricompense": "Rilasciano oggetti rari specifici non ottenibili tramite i normali canali di negoziazione; il numero di oggetti è ridotto ma orientato verso materiali di alto valore.",
+  "doveCompaiono": "Nei Palazzi e nei Memento, come varianti casuali delle Ombre standard già presenti nell'area (la guida non fornisce un elenco fisso per zona, essendo una variante generata sulle Ombre normali già incontrabili).",
+  "elenco": null,
+  "incertezze": "La guida non fornisce un elenco chiuso di 'quali' Ombre possono diventare Ombre sciagura né una tabella di comparsa per Palazzo/area: sono presentate come variante trasversale applicabile a Ombre già esistenti."
+ },
+ "mietitore": {
+  "categoria": "Mietitore (Reaper)",
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/come-sconfiggere-mietitore/",
+  "dove": "Memento (qualunque Dedalo), compare restando sullo stesso piano per circa due minuti consecutivi.",
+  "comeSiManifesta": "Segnali di avvertimento: rumore di catene ed effetto visivo rosso sullo schermo; poi insegue il party attraverso le stanze (non attraversa i muri).",
+  "livelloConsigliato": "Almeno livello 60; scontro più gestibile a livello 70-75.",
+  "abilita": [
+   "Magie istantanee (Mudoon, Hamaon e varianti multi-bersaglio)",
+   "Attacchi Divini (Megidola, Megidolaon)",
+   "Magie elementali avanzate (Agidyne, Bufudyne, ecc.)",
+   "Attacchi fisici e con armi da fuoco",
+   "Abilità di supporto e assorbimento HP/SP"
+  ],
+  "immunita": [
+   "Colpi critici",
+   "Alterazioni di stato",
+   "Abilità di uccisione istantanea"
+  ],
+  "debolezze": null,
+  "strategia": [
+   "Lasciare che sia il Mietitore ad attaccare per primo, per ridurre i suoi turni disponibili.",
+   "Applicare potenziamenti di gruppo (Matarukaja, Marakukaja).",
+   "Indebolirlo con Debilitazione.",
+   "Usare Concentrazione seguita da magie potenti come Megidolaon.",
+   "Tenere sempre disponibili cura e resurrezione."
+  ],
+  "ricompense": "Grande quantità di esperienza e yen; possibilità di ottenere l'accessorio 'Pilastro divino' che dimezza i danni subiti."
+ },
+ "demoniTesoro": {
+  "categoria": "Demoni del Tesoro (Treasure Demons)",
+  "urlFonte": "https://www.allgamestaff.it/persona-5-royal/demoni-del-tesoro/",
+  "cosaSono": "Categoria speciale di nemici, distinta dalle Ombre tradizionali: non pensati per il combattimento diretto ma per vantaggi economici, esperienza e opportunità di fusione avanzate.",
+  "comeCompaiono": "Interagendo con oggetti frangibili o aprendo determinati forzieri; nei Memento il maltempo aumenta la probabilità di incontrarli, e la Trappola del tesoro ne moltiplica ulteriormente il tasso di comparsa.",
+  "primaComparsa": "18 maggio, durante l'infiltrazione nel Palazzo di Madarame.",
+  "comportamento": "Rimangono inattivi all'inizio ma tendono a fuggire rapidamente, generalmente entro il terzo turno: vanno abbattuti in fretta per poterli reclutare.",
+  "resistenzeGenerali": "Resistenza agli attacchi fisici e alle armi da fuoco, con debolezze elementali specifiche per ciascuno.",
+  "tecnicheConsigliate": [
+   "Abbattimento acrobatico (via Confidente di Shinya)",
+   "Colpi critici potenziati"
+  ],
+  "elenco": [
+   {
+    "nome": "Reggente",
+    "livello": 10,
+    "arcano": "Imperatore",
+    "dove": "Palazzo di Madarame, vari Dedali"
+   },
+   {
+    "nome": "Collana della Regina",
+    "livello": 15,
+    "arcano": "Imperatrice",
+    "dove": "Palazzo di Kaneshiro, Dedalo di Kaitul"
+   },
+   {
+    "nome": "Pietra di Scone",
+    "livello": 20,
+    "arcano": "Fortuna",
+    "dove": "Palazzo di Futaba, Dedalo di Akzeriyyuth"
+   },
+   {
+    "nome": "Koh-i-Noor",
+    "livello": 25,
+    "arcano": "Papessa",
+    "dove": "Palazzo di Okumura, Dedalo di Adyeshach"
+   },
+   {
+    "nome": "Orlov",
+    "livello": 30,
+    "arcano": "Forza",
+    "dove": "Palazzo di Niijima, Dedalo di Sheriruth"
+   },
+   {
+    "nome": "Amuleto dell'Imperatore",
+    "livello": 35,
+    "arcano": "Appeso",
+    "dove": "Palazzo di Shido, Dedalo di Sheriruth"
+   },
+   {
+    "nome": "Diamante Hope",
+    "livello": 40,
+    "arcano": "Morte",
+    "dove": "Palazzo di Shido, Profondità Memento, Dedalo di Da'at"
+   },
+   {
+    "nome": "Teschio di Cristallo",
+    "livello": 50,
+    "arcano": "Matto",
+    "dove": "Palazzo di Shido, Mondo del Clifoto, Dedalo di Da'at"
+   },
+   {
+    "nome": "Oricalco",
+    "livello": 60,
+    "arcano": "Fede",
+    "dove": "Palazzo di Maruki"
+   }
+  ]
+ },
+ "ombre": [
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Bestia bicorne sporca",
+   "persona": "Bicorno",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Bruto notturno",
+   "persona": "Incubo",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Castigatore divino",
+   "persona": "Arcangelo",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Sacro (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Cavaliere bellicoso",
+   "persona": "Eligor",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Cavaliere brutale",
+   "persona": "Berith",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Domestica combinaguai",
+   "persona": "Silky",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Famiglio in vaso",
+   "persona": "Agathion",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Fiordiforca",
+   "persona": "Mandragora",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Folle cavallo di palude",
+   "persona": "Kelpie",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Gatto cacciatore",
+   "persona": "Cait Sith",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Meretrice del crepuscolo",
+   "persona": "Succube",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Messaggero zelante",
+   "persona": "Angelo",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Piromane delle cripte",
+   "persona": "Jack-o'-lantern",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Vento"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "kamoshida",
+   "dungeon": "Palazzo di Kamoshida",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Ragazza seducente",
+   "persona": "Pixie",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Ghiaccio",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kamoshida/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Donna dell'albero funesto",
+   "persona": "Hua Po",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Guerriero notturno",
+   "persona": "Mokoi",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Tuono"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Leone dei tetti",
+   "persona": "Shiisaa",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Danno fisico",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Ninfa dell'acqua",
+   "persona": "Apsaras",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Portatore di disgrazie",
+   "persona": "Shiki-Ouji",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Danno fisico",
+    "Armi da fuoco",
+    "Sacro",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Reggente",
+   "persona": "Reggente",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Danno fisico",
+    "Armi da fuoco",
+    "Fuoco",
+    "Ghiaccio",
+    "Tuono",
+    "Vento",
+    "Sacro",
+    "Maledizione"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "madarame",
+   "dungeon": "Palazzo di Madarame (Museo)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Vecchietto della foglia",
+   "persona": "Koropokguru",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Armi da fuoco",
+    "Ghiaccio",
+    "Vento"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-madarame/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Amante geloso",
+   "persona": "Leanan Sidhe",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Vento",
+    "Psicocinesi"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Collana della Regina",
+   "persona": "Collana della Regina",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Attacchi fisici",
+    "Armi da fuoco"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Dama cannibale",
+   "persona": "Yaksini",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Ghiaccio"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Demone Acque Furibondo",
+   "persona": "Sui-Ki",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Ghiaccio (assorbe)",
+    "Tuono"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Demone della battaglia",
+   "persona": "Rakshasa",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Danni fisici",
+    "Armi da fuoco (annulla)",
+    "Fuoco",
+    "Maledizione"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Demone solenne",
+   "persona": "Oni",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici",
+    "Armi da fuoco"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Equino saggio",
+   "persona": "Orobas",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Vento",
+    "Maledizione"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Guardiano bicefalo",
+   "persona": "Orthrus",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Nucleare"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Melma nera",
+   "persona": "Fango pulsante",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Psicocinesi",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici",
+    "Armi da fuoco",
+    "Ghiaccio",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Pixie superiore",
+   "persona": "Maestra degli scherzi",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco",
+    "Nucleare"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "kaneshiro",
+   "dungeon": "Palazzo di Kaneshiro",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Vendicatore sconfitto",
+   "persona": "Take-Minakata",
+   "livello": 26,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Tuono (respinge)",
+    "Maledizione"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-kaneshiro/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Babbuino cantilenante",
+   "persona": "Thoth",
+   "livello": 36,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Nucleare",
+    "Sacro",
+    "Maledizione"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Donna serpente strisciante",
+   "persona": "Lamia",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Tuono",
+    "Maledizione"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Giudice delle anime",
+   "persona": "Anubis",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco",
+    "Sacro",
+    "Maledizione",
+    "Psicocinesi"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Ladro delle tavole",
+   "persona": "Anzu",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Tuono",
+    "Vento"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Messo del letargo",
+   "persona": "Sandman",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Tuono"
+   ],
+   "resistenze": [
+    "Vento"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Pietra di Scone",
+   "persona": "Pietra di Scone",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Attacchi fisici",
+    "Armi da fuoco"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Signora del passaggio",
+   "persona": "Iside",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Sacro"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Uomo serpente",
+   "persona": "Naga",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco",
+    "Tuono"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "futaba",
+   "dungeon": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Uomogufo minaccioso",
+   "persona": "Andras",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Ghiaccio",
+    "Psicocinesi",
+    "Maledizione"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-futaba/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Arahabaki",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Attacchi fisici (respinge)",
+    "Armi da fuoco (respinge)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Belphegor",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Tuono (dimezza)",
+    "Nucleare (dimezza)",
+    "Maledizione (respinge)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Decarabia",
+   "livello": null,
+   "debolezze": [
+    "Danni fisici"
+   ],
+   "resistenze": [
+    "Fuoco (respinge)",
+    "Nucleare (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Girimehkala",
+   "livello": 43,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (respinge)",
+    "Armi da fuoco (respinge)",
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Kaiwan",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Psicocinesi (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Koh-i-Noor",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Kumbhanda",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Lilim",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Mithras",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)",
+    "Fuoco (assorbe)",
+    "Nucleare (respinge)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Mothman",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco"
+   ],
+   "resistenze": [
+    "Tuono (annulla)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Servobot MDL-? (secondo modello)",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Nucleare"
+   ],
+   "resistenze": [],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Servobot MDL-CH",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Servobot MDL-DM",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Servobot MDL-WKR",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Vento"
+   ],
+   "resistenze": [],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "okumura",
+   "dungeon": "Palazzo di Okumura",
+   "area": null,
+   "areaChiave": null,
+   "ombra": null,
+   "persona": "Wakinyan",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Tuono (assorbe)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-okumura/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Avvoltoio arrogante",
+   "persona": "Jatayu",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Vento (respinge)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Bestia inespressiva",
+   "persona": "Unicorno",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Ghiaccio (annulla)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Giudice finale",
+   "persona": "Norna",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Tuono (respinge)",
+    "Vento (assorbe)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Guerriera dell'oltretomba",
+   "persona": "Valchiria",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Ghiaccio (respinge)",
+    "Sacro (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Guerriero divino",
+   "persona": "Potestà",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Vento (dimezza)",
+    "Sacro (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Leopardo crudele",
+   "persona": "Ose",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Orlov",
+   "persona": "Orlov",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Pachiderma benevolo",
+   "persona": "Ganesha",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)",
+    "Vento (assorbe)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Pavida signora dell'ombra",
+   "persona": "Skadi",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Ghiaccio (respinge)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Ragazza di montagna",
+   "persona": "Kikuri-Hime",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Vento (annulla)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Regina di Mezzanotte",
+   "persona": "Regina Mab",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Sacrificio lamentoso",
+   "persona": "Kushinada",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Sacro (respinge)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "niijima",
+   "dungeon": "Palazzo di Niijima (Sae) — Casinò",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Strega del sabba",
+   "persona": "Rangda",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (respinge)",
+    "Armi da fuoco (respinge)",
+    "Fuoco (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-sae/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Agile re delle scimmie",
+   "persona": "Hanuman",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Sacro (dimezza)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Amuleto dell'Imperatore",
+   "persona": "Amuleto dell'Imperatore",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Bellezza distruttiva",
+   "persona": "Parvati",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Ghiaccio (respinge)",
+    "Psicocinesi (dimezza)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Capro nero",
+   "persona": "Baphomet",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Demonessa sanguinaria",
+   "persona": "Dakini",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Dio-uccello furente",
+   "persona": "Garuda",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Vento (dimezza)",
+    "Sacro (respinge)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Furia nera",
+   "persona": "Kali",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco (respinge)",
+    "Fuoco (annulla)",
+    "Psicocinesi (respinge)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Leone danzante",
+   "persona": "Barong",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Tuono (dimezza)",
+    "Sacro (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Mastino dell'Ade",
+   "persona": "Cerbero",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Nucleare (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Oratore del Mare",
+   "persona": "Forneus",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio (assorbe)",
+    "Psicocinesi (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Re infedele dei sogni",
+   "persona": "Oberon",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Psicocinesi (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Re saggio infuriato",
+   "persona": "Atavaka",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (annulla)",
+    "Fuoco (respinge)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Regina degli scandali",
+   "persona": "Titania",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Nucleare (dimezza)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Signore delle nevi",
+   "persona": "Re Frost",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Ghiaccio (assorbe)",
+    "Sacro (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Stella egocentrica",
+   "persona": "Narciso",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Tuono (annulla)",
+    "Vento (dimezza)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "shido",
+   "dungeon": "Palazzo di Shido",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Suonatrice di vina",
+   "persona": "Sarasvati",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Ghiaccio (annulla)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-shido/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Custode del rogo sacrificale",
+   "persona": "Moloch",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Tuono (dimezza)",
+    "Vento (dimezza)",
+    "Psicocinesi (assorbe)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Diamante Hope",
+   "persona": "Diamante Hope",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "La prima strega",
+   "persona": "Lilith",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Ghiaccio (respinge)",
+    "Nucleare (respinge)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Primo sacerdote",
+   "persona": "Melchizedek",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Psicocinesi (dimezza)",
+    "Sacro (assorbe)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Re abissale dell'avarizia",
+   "persona": "Abaddon",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (assorbe)",
+    "Armi da fuoco (assorbe)",
+    "Maledizione (assorbe)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Serpenti ubriachi",
+   "persona": "Yamata-no-Orochi",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Ghiaccio (assorbe)",
+    "Vento (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Signore del tuono",
+   "persona": "Thor",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Tuono (annulla)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Teschio di Cristallo",
+   "persona": "Teschio di Cristallo",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "iweleth",
+   "dungeon": "Dedalo di Iweleth",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Vendicatore nero",
+   "persona": "Chernobog",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Ghiaccio (assorbe)",
+    "Tuono (annulla)",
+    "Maledizione (assorbe)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Araldo della depravazione",
+   "persona": "Belial",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (annulla)",
+    "Ghiaccio (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Ballerino mortale",
+   "persona": "Macabre",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Dio-leone deformato",
+   "persona": "Chimera",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Ghiaccio (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Generale necromante",
+   "persona": "Nebiros",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Psicocinesi (dimezza)",
+    "Maledizione (respinge)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Malvagio drago vorace",
+   "persona": "Fafnir",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (annulla)",
+    "Armi da fuoco (annulla)",
+    "Tuono (dimezza)",
+    "Fuoco (assorbe)",
+    "Nucleare (assorbe)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Organismo sintetico malvagio",
+   "persona": "Byakhee",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Vento (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Oricalco",
+   "persona": "Oricalco",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Orsacchiotto assassino",
+   "persona": "Babau",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Nucleare"
+   ],
+   "resistenze": [],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Sbruffone edonista",
+   "persona": "Dioniso",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Tuono (respinge)",
+    "Sacro (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "maruki",
+   "dungeon": "Palazzo di Maruki",
+   "area": null,
+   "areaChiave": null,
+   "ombra": "Teschio dei sogni",
+   "persona": "Loa",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Nucleare (dimezza)",
+    "Tuono (annulla)"
+   ],
+   "personalita": null,
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Agile re delle scimmie",
+   "persona": "Hanuman",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Sacro (dimezza)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Amante geloso",
+   "persona": "Leanan Sidhe",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Vento (dimezza)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Amul. dell'Imperatore",
+   "persona": "Amuleto dell'Imperatore",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "ombra": "Assassino di fuoco",
+   "persona": "Trono",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Vento (annulla)",
+    "Sacro (respinge)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Avvoltoio arrogante",
+   "persona": "Jatayu",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Vento (respinge)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Babbuino cantilenante",
+   "persona": "Thoth",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Nucleare (annulla)",
+    "Sacro (annulla)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Ballerino affascinante",
+   "persona": "Ame no Uzume",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Bellezza distruttiva",
+   "persona": "Parvati",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Ghiaccio (respinge)",
+    "Psicocinesi (dimezza)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "ombra": "Bestia bicorne sporca",
+   "persona": "Bicorno",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Bestia inespressiva",
+   "persona": "Unicorno",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Ghiaccio (annulla)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Bruto notturno",
+   "persona": "Incubo",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Cadavere d'uccello",
+   "persona": "Onmoraki",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Fuoco",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Capro nero",
+   "persona": "Baphomet",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Castigatore divino",
+   "persona": "Arcangelo",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Sacro (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Cavaliere bellicoso",
+   "persona": "Eligor",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "ombra": "Cavaliere brutale",
+   "persona": "Berith",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Chimera notturna",
+   "persona": "Nue",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Ghiaccio",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Collana della Regina",
+   "persona": "Collana della Regina",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Custode rogo sacrificale",
+   "persona": "Moloch",
+   "livello": null,
+   "debolezze": [
+    "Gelo"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Tuono (dimezza)",
+    "Vento (dimezza)",
+    "Psicocinesi (assorbe)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Dama cannibale",
+   "persona": "Yaksini",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Ghiaccio (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Demone del tornado",
+   "persona": "Fuu-Ki",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Vento (assorbe)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Demone dell'acqua furioso",
+   "persona": "Sui-Ki",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Ghiaccio (assorbe)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Demone della battaglia",
+   "persona": "Rakshasa",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Danni fisici (dimezza)",
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Demone saltellante",
+   "persona": "Obariyon",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Danni fisici (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Demone solenne",
+   "persona": "Oni",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Demonessa sanguinaria",
+   "persona": "Dakini",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Diamante Hope",
+   "persona": "Diamante Hope",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Diavolo dei raduni",
+   "persona": "Choronzon",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Fuoco (assorbe)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Dio-uccello furente",
+   "persona": "Garuda",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Vento (dimezza)",
+    "Sacro (respinge)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Divinità risvegliata",
+   "persona": "Arahabaki",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Attacchi fisici (respinge)",
+    "Armi da fuoco (respinge)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Domestica combinaguai",
+   "persona": "Silky",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Donna dell'albero funesto",
+   "persona": "Hua Po",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Donna serpente strisciante",
+   "persona": "Lamia",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Elefante ribelle",
+   "persona": "Girimehkala",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (respinge)",
+    "Armi da fuoco (respinge)",
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Equino saggio",
+   "persona": "Orobas",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Vento (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Fabbro amareggiato",
+   "persona": "Ippon-Datara",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)",
+    "Vento (respinge)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Falena vampirica",
+   "persona": "Mothman",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco"
+   ],
+   "resistenze": [
+    "Tuono (annulla)",
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Famiglio in vaso",
+   "persona": "Agathion",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Fango pulsante",
+   "persona": "Melma nera",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Psicocinesi",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)",
+    "Ghiaccio (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Fantasma di cane",
+   "persona": "Inugami",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Fantasma fuso",
+   "persona": "Legione",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)",
+    "Fuoco (dimezza)",
+    "Psicocinesi (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Felino asceso",
+   "persona": "Nekomata",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Psicocinesi (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "ombra": "Fiordiforca",
+   "persona": "Mandragora",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Folle cavallo di palude",
+   "persona": "Kelpie",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Furia nera",
+   "persona": "Kali",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco (respinge)",
+    "Fuoco (annulla)",
+    "Psicocinesi (respinge)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Gatto cacciatore",
+   "persona": "Cait Sith",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Ghast",
+   "persona": "Pisaca",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Giudice delle anime",
+   "persona": "Anubis",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Sacro (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Giudice finale",
+   "persona": "Norna",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Tuono (respinge)",
+    "Vento (assorbe)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Guardiano bicefalo",
+   "persona": "Orthrus",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Nucleare (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Guerriera dell'oltretomba",
+   "persona": "Valchiria",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Ghiaccio (respinge)",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Guerriero divino",
+   "persona": "Potestà",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Vento (dimezza)",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Guerriero notturno",
+   "persona": "Mokoi",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Tuono"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "ombra": "Inquisitore crudele",
+   "persona": "Dominazione",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Nucleare (respinge)",
+    "Sacro (annulla)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Koh-i-Noor",
+   "persona": "Koh-i-Noor",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "La prima strega",
+   "persona": "Lilith",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Ghiaccio (respinge)",
+    "Nucleare (respinge)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Ladro delle tavole",
+   "persona": "Anzu",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Vento (respinge)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Leone danzante",
+   "persona": "Barong",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Tuono (dimezza)",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Leone dei tetti",
+   "persona": "Shiisaa",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Danno fisico",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Leopardo crudele",
+   "persona": "Ose",
+   "livello": null,
+   "debolezze": [
+    "Sacro"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Maestra degli scherzi",
+   "persona": "Pixie superiore",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Nucleare (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Mastino dell'Ade",
+   "persona": "Cerbero",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)",
+    "Nucleare (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Meretrice del crepuscolo",
+   "persona": "Succube",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Messaggero zelante",
+   "persona": "Angelo",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Messo del letargo",
+   "persona": "Sandman",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Tuono"
+   ],
+   "resistenze": [
+    "Vento (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Monaco della valle",
+   "persona": "Kurama Tengu",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Ghiaccio (annulla)",
+    "Vento (riflette)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Monaco stolto",
+   "persona": "Koppa Tengu",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Vento"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Ninfa dell'acqua",
+   "persona": "Apsaras",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Oratore del Mare",
+   "persona": "Forneus",
+   "livello": null,
+   "debolezze": [
+    "Tuono"
+   ],
+   "resistenze": [
+    "Ghiaccio (assorbe)",
+    "Psicocinesi (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Orlov",
+   "persona": "Orlov",
+   "livello": null,
+   "debolezze": [
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "-",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Pachiderma benevolo",
+   "persona": "Ganesha",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)",
+    "Vento (assorbe)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Palindromo di turpitudine",
+   "persona": "Belphegor",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Tuono (dimezza)",
+    "Nucleare (dimezza)",
+    "Maledizione (respinge)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Pavida signora dell'ombra",
+   "persona": "Skadi",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Ghiaccio (respinge)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Pernice invocatempeste",
+   "persona": "Wakinyan",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Tuono (assorbe)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Pietra di Scone",
+   "persona": "Pietra di Scone",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "ombra": "Piromane delle cripte",
+   "persona": "Jack-o'-lantern",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Vento"
+   ],
+   "resistenze": [
+    "Fuoco (assorbe)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Portatore di disgrazie",
+   "persona": "Shiki-Ouji",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Danno fisico (annulla)",
+    "Armi da fuoco (annulla)",
+    "Sacro (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Portatrice di rovina",
+   "persona": "Lilim",
+   "livello": null,
+   "debolezze": [
+    "Vento",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Primo sacerdote",
+   "persona": "Melchizedek",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Psicocinesi (dimezza)",
+    "Sacro (assorbe)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Pupazzo di neve beffardo",
+   "persona": "Jack Frost",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Ghiaccio (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Ragazza di montagna",
+   "persona": "Kikuri-Hime",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Vento (annulla)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "ombra": "Ragazza seducente",
+   "persona": "Pixie",
+   "livello": null,
+   "debolezze": [
+    "Armi da fuoco",
+    "Ghiaccio",
+    "Maledizione"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Re abissale dell'avarizia",
+   "persona": "Abaddon",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (assorbe)",
+    "Armi da fuoco (assorbe)",
+    "Maledizione (assorbe)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Re infedele dei sogni",
+   "persona": "Oberon",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Tuono (dimezza)",
+    "Psicocinesi (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Re saggio infuriato",
+   "persona": "Atavaka",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (annulla)",
+    "Fuoco (respinge)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Reggente",
+   "persona": "Reggente",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Danno fisico",
+    "Armi da fuoco",
+    "Fuoco",
+    "Ghiaccio",
+    "Tuono",
+    "Vento",
+    "Sacro",
+    "Maledizione"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Regina degli scandali",
+   "persona": "Titania",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Nucleare (dimezza)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Regina di Mezzanotte",
+   "persona": "Regina Mab",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Sacrificio lamentoso",
+   "persona": "Kushinada",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Sacro (respinge)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Samurai assassino",
+   "persona": "Kin-Ki",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Danni fisici (dimezza)",
+    "Armi da fuoco (riflette)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Serpenti ubriachi",
+   "persona": "Yamata-no-Orochi",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Ghiaccio (assorbe)",
+    "Vento (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Signora del passaggio",
+   "persona": "Iside",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Sacro (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "ombra": "Signore dei cenotafi",
+   "persona": "Mot",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Tuono (assorbe)",
+    "Maledizione (respinge)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Signore del tuono",
+   "persona": "Thor",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Tuono (annulla)",
+    "Sacro (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Signore delle nevi",
+   "persona": "Re Frost",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Ghiaccio (assorbe)",
+    "Sacro (annulla)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Sole oscuro",
+   "persona": "Mithras",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)",
+    "Fuoco (assorbe)",
+    "Nucleare (respinge)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Aiyatsbus",
+   "areaChiave": "mementos-02-aiyatsbus",
+   "ombra": "Spiritello degli alberi",
+   "persona": "Kodama",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio"
+   ],
+   "resistenze": [
+    "Fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-aiyatsbus/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Spirito divoravita",
+   "persona": "Kumbhanda",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Spirito montano rumoroso",
+   "persona": "Sudama",
+   "livello": null,
+   "debolezze": [
+    "Ghiaccio",
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Vento (respinge)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Stella egocentrica",
+   "persona": "Narciso",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Tuono (annulla)",
+    "Vento (dimezza)",
+    "Sacro (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Stella senza desideri",
+   "persona": "Kaiwan",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Psicocinesi (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "ombra": "Straziato re dei desideri",
+   "persona": null,
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [],
+   "personalita": "Non reclutabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Strega del sabba",
+   "persona": "Rangda",
+   "livello": null,
+   "debolezze": [
+    "Tuono",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Attacchi fisici (respinge)",
+    "Armi da fuoco (respinge)",
+    "Fuoco (annulla)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Adyeshach",
+   "areaChiave": "mementos-06-adyeshach",
+   "ombra": "Subdolo pentacolo",
+   "persona": "Decarabia",
+   "livello": null,
+   "debolezze": [
+    "Danni fisici"
+   ],
+   "resistenze": [
+    "Fuoco (respinge)",
+    "Nucleare (dimezza)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-adyeshach/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Suonatrice di vina",
+   "persona": "Sarasvati",
+   "livello": null,
+   "debolezze": [
+    "Nucleare"
+   ],
+   "resistenze": [
+    "Ghiaccio (annulla)",
+    "Tuono (dimezza)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Da'at",
+   "areaChiave": "mementos-09-daat",
+   "ombra": "Svettante re dei desideri",
+   "persona": "Mara",
+   "livello": null,
+   "debolezze": [],
+   "resistenze": [
+    "Armi da fuoco (annulla)",
+    "Fuoco (assorbe)",
+    "Psicocinesi (respinge)",
+    "Sacro (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-daat/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Sheriruth",
+   "areaChiave": "mementos-07-sheriruth",
+   "ombra": "Teschio di Cristallo",
+   "persona": "Teschio di Cristallo",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Attacchi fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Giocosa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-sheriruth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Uomo serpente",
+   "persona": "Naga",
+   "livello": null,
+   "debolezze": [
+    "Vento"
+   ],
+   "resistenze": [
+    "Armi da fuoco (dimezza)",
+    "Tuono (annulla)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Akzeriyyuth",
+   "areaChiave": "mementos-05-akzeriyyuth",
+   "ombra": "Uomogufo minaccioso",
+   "persona": "Andras",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Ghiaccio (dimezza)",
+    "Psicocinesi (dimezza)",
+    "Maledizione (annulla)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-akzeriyyuth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Chemdah",
+   "areaChiave": "mementos-03-chemdah",
+   "ombra": "Vecchietto della foglia",
+   "persona": "Koropokguru",
+   "livello": null,
+   "debolezze": [
+    "Fuoco"
+   ],
+   "resistenze": [
+    "Armi da fuoco",
+    "Ghiaccio",
+    "Vento"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-chemdah/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Iweleth",
+   "areaChiave": "mementos-08-iweleth",
+   "ombra": "Vendicatore nero",
+   "persona": "Chernobog",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Sacro"
+   ],
+   "resistenze": [
+    "Arma da fuoco (dimezza)",
+    "Ghiaccio (assorbe)",
+    "Tuono (annulla)",
+    "Maledizione (assorbe)"
+   ],
+   "personalita": "Cupa",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-iweleth/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Kaitul",
+   "areaChiave": "mementos-04-kaitul",
+   "ombra": "Vendicatore sconfitto",
+   "persona": "Take-Minakata",
+   "livello": null,
+   "debolezze": [
+    "Psicocinesi"
+   ],
+   "resistenze": [
+    "Tuono (respinge)",
+    "Maledizione (dimezza)"
+   ],
+   "personalita": "Irritabile",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-kaitul/"
+  },
+  {
+   "dungeonChiave": "mementos",
+   "dungeon": "Mementos (i Dedali)",
+   "area": "Dedalo di Qimranut",
+   "areaChiave": "mementos-01-qimranut",
+   "ombra": "Viscida carne marcescente",
+   "persona": "Slime",
+   "livello": null,
+   "debolezze": [
+    "Fuoco",
+    "Vento"
+   ],
+   "resistenze": [
+    "Danni fisici (dimezza)",
+    "Armi da fuoco (dimezza)"
+   ],
+   "personalita": "Timida",
+   "fonte": "https://www.allgamestaff.it/persona-5-royal/dedalo-di-qimranut/"
+  }
+ ]
+}

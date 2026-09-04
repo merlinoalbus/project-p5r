@@ -20,7 +20,7 @@ describe('createApp', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.status).toBe('ok');
     expect(res.body.data.db.ok).toBe(true);
-    expect(typeof res.body.data.db.userVersion).toBe('number');
+    expect(res.body.data.db.userVersion).toBe(0);
     expect(res.headers['x-request-id']).toBeTruthy();
   });
 
@@ -55,6 +55,12 @@ describe('createApp', () => {
       .send('{"non": chiuso');
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('json-malformato');
+  });
+
+  it('percorso con codifica non valida → 400 percorso-non-valido (non 500)', async () => {
+    const res = await request(createApp()).get('/api/compendio/persona/%ZZ');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('percorso-non-valido');
   });
 
   it('preflight OPTIONS risponde con header CORS', async () => {

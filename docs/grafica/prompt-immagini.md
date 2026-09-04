@@ -6,7 +6,7 @@ Regole valide per TUTTI gli asset:
 - **Originali, ispirati allo stile**: nessuna copia delle illustrazioni ufficiali Atlus; i link servono all'IA grafica (o a chi la guida) come ispirazione di stile, palette e composizione.
 - **Ogni testo dentro l'immagine è in italiano** (nomi degli Arcani, etichette, sigle). **Per OGNI asset che contiene testo esiste la variante senza testo** con suffisso `-senza-testo` (es. `arcani/fool-senza-testo.png`): se il generatore sbaglia le lettere, consegna quella e il testo lo sovrappone l'app con il proprio font. Le sole parole non italiane ammesse dentro le immagini sono le sigle `P5R`, `DLC` e l'abbreviazione `MAX`.
 - Nota sui Confidenti (§9): per scelta dell'utente i ritratti sono generati da IA "ispirati" ai personaggi del gioco (aspetto descritto a parole, link alla fonte come ispirazione), non copie delle illustrazioni ufficiali.
-- Consegna in `public/asset/<categoria>/<nome-file>` con i nomi indicati; PNG con trasparenza dove richiesto, altrimenti WEBP/PNG. Le dimensioni sono quelle di consegna: genera più grande e ridimensiona.
+- Consegna in `public/asset/<categoria>/<nome-file>` con i nomi indicati; PNG con trasparenza dove richiesto, altrimenti WEBP/PNG. Le dimensioni sono quelle di consegna: genera più grande e ridimensiona. **Basta copiare i file**: il manifest (`/asset/manifest.json`) è generato automaticamente dal plugin Vite (`vite/assetPredefiniti.ts`, chiave = percorso senza estensione in slug), l'app li usa come grafica predefinita (preferenza in Impostazioni, attiva di default) e resta perfettamente funzionante se un file manca. Vedi `public/asset/README.md`.
 - Palette dell'app (`src/tailwind.css`): nero `#0b0b0e`, superficie `#23232d`, rosso `#e5352b`, bianco `#ececf1`, grigio `#6f6f80`. Colori degli elementi: Fisico `#c9a227`, Arma da fuoco `#8f8f9a`, Fuoco `#f0552b`, Ghiaccio `#5ec8f2`, Elettricità `#f2d94e`, Vento `#5fd67a`, Psichico `#e06bd6`, Nucleare `#4dd7c9`, Sacro `#f5f0c8`, Oscurità `#a05cf0`, Quasi-divino `#ffffff`, Guarigione `#7fe0a5`, Alterazione `#d9a066`, Supporto `#8ab4f8`, Passiva `#b0b0c0`.
 
 ## 0. Blocco di stile comune (da anteporre a ogni prompt)
@@ -121,7 +121,7 @@ Variante senza testo per ogni carta: `arcani/<chiave>-senza-testo.png` (senza ti
 | `sun.png` | XIX | IL SOLE | sole con volto e raggi, bambino su cavallo bianco, girasoli |
 | `judgement.png` | XX | IL GIUDIZIO | angelo con tromba, figure che si alzano dalle tombe |
 | `world.png` | XXI | IL MONDO | figura danzante dentro una corona d'alloro, quattro creature agli angoli |
-| `faith.png` | — | LA FEDE | (arcano Royal; carta non reperita fra i riferimenti) figura in piedi con il capo alto e le mani giunte al petto, fascio di stelle bianche a quattro punte che sale in spirale, dietro un cerchio raggiato; ispirazione del motivo a stelle: https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 |
+| `faith.png` | — | LA FEDE | (arcano Royal) figura papale incappucciata in trono con tiara e croce a tre bracci, mano alzata in benedizione, due accoliti incatenati in basso; ispirazione (NON copiare): https://static.wikia.nocookie.net/megamitensei/images/e/e6/Faith.png/revision/latest?cb=20200508064816 (carta ufficiale "LA FOI"); motivo a stelle dell'icona di Kasumi: https://static.wikia.nocookie.net/megamitensei/images/b/bf/Persona_5_Confidant_Guides_Icon_%28Faith%29_-_Kasumi_Yoshizawa.png/revision/latest?cb=20241201203857 |
 | `councillor.png` | — | IL CONSIGLIERE | (arcano Royal) figura seduta di tre quarti con un libro aperto e una mano tesa in gesto di aiuto, sole velato alle spalle; ispirazione: https://static.wikia.nocookie.net/megamitensei/images/5/5b/P5_Royal_Consultant_Arcana.png/revision/latest?cb=20200508064739 |
 
 Prompt di esempio (Matto):
@@ -389,12 +389,74 @@ https://static.wikia.nocookie.net/megamitensei/images/1/1e/P5_CalendarSwitch.png
 Etichette del giorno (sprite testo) — `meteo/fascia-<chiave>.png` (600×160), chiavi `mattina`, `pausa-pranzo`, `dopo-la-scuola`, `sera`, `notte`, `giornata`: testi **MATTINA**, **PAUSA PRANZO**, **DOPO LA SCUOLA**, **SERA**, **NOTTE**, **GIORNATA** in lettering a ritaglio bianco su nero (variante `meteo/fascia-senza-testo.png`: sola targhetta vuota); ispirazione HUD:
 https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1687950/ss_663171dc3afce8fe987e57e8659f91b69faa39bc.1920x1080.jpg
 
+## 13. Guida, Palazzi e stati vuoti (Fase 11.6, richiesti il 2026-09-04)
+Chiavi già cablate nell'app: appena i file compaiono in `public/asset/` sostituiscono le riserve vettoriali.
+
+### 13.1 Icona di navigazione della Guida — `ui/nav-guida.png` + `ui/nav-guida-attiva.png` (256×256, trasparente)
+Stesse regole di §7.1 (bianco su trasparente; variante rossa `-attiva`). Soggetto: libro aperto con una stella a ritaglio che spunta dalle pagine.
+
+### 13.2 Icone delle sezioni della Guida (15) — `guida/<chiave>.png` (256×256, trasparente)
+Nessun testo, nessun personaggio (senza spoiler).
+```
+[blocco di stile] Icona piatta bianca con contorno nero e un accento rosso #e5352b, angoli tagliati, leggibile a 48 px,
+sfondo trasparente. Soggetto: <vedi tabella>.
+```
+| File | Soggetto |
+|---|---|
+| `percorso.png` | foglio di calendario con una stella e una freccia in avanti |
+| `domande.png` | banco di scuola con un punto interrogativo a ritaglio |
+| `cruciverba.png` | griglia di cruciverba con una matita |
+| `calendario.png` | calendario con nuvola e sole |
+| `dungeon.png` | maschera dei Ladri davanti a un portale |
+| `richieste.png` | busta chiusa con sigillo rosso |
+| `battaglia.png` | due spade incrociate con un lampo |
+| `citta.png` | skyline di Tokyo con torre e treno |
+| `negozi.png` | sacchetto della spesa con il simbolo dello yen |
+| `attivita.png` | manubrio, libro e videocassetta impilati |
+| `completamento.png` | coppa con corona d'alloro |
+| `sfide.png` | scudo con fiamma |
+| `personaggi.png` | tre sagome con maschera |
+| `oggetti.png` | zaino aperto con attrezzi |
+| `confidenti.png` | due mani che si stringono con un cuore |
+
+### 13.3 Emblemi dei Palazzi e dei Dedali (10) — `palazzi/<chiave>.png` (512×512, trasparente)
+Stemmi araldici a ritaglio in bianco, nero e rosso; NESSUN personaggio né volto (senza spoiler). Nessun testo.
+```
+[blocco di stile] Stemma araldico a ritaglio, bianco e nero con un accento rosso #e5352b, retino nelle ombre, forma a scudo
+irregolare con tagli diagonali, sfondo trasparente. Soggetto: <vedi tabella>.
+```
+| File | Soggetto |
+|---|---|
+| `kamoshida.png` | castello con torri e una corona |
+| `madarame.png` | cornice dorata di un quadro con un pennello |
+| `kaneshiro.png` | caveau di banca con un lucchetto |
+| `futaba.png` | piramide con un occhio in cima |
+| `okumura.png` | razzo e stazione spaziale con un ingranaggio |
+| `niijima.png` | fiche da casinò con una carta da gioco |
+| `shido.png` | nave da crociera su un'onda |
+| `iweleth.png` | grata di un pozzo con catene e una croce |
+| `maruki.png` | provetta di laboratorio con un fiore e un caduceo |
+| `mementos.png` | treno della metropolitana in un tunnel |
+
+### 13.4 Icone giorno e sera (2) — `ui/giorno.png`, `ui/sera.png` (256×256, trasparente)
+Nessun testo (le fasce testuali della giornata sono in §11). Stile di §4: `giorno.png` sole a raggi netti; `sera.png` luna crescente con una stella.
+
+### 13.5 Stati vuoti dedicati (4, con variante senza testo) — `illustrazioni/<nome>.png` (1200×800, trasparente)
+Stile e regole di §8 (testo in maiuscolo a ritaglio, variante `-senza-testo`).
+| File | Testo nell'immagine | Scena |
+|---|---|---|
+| `vuoto-obiettivi.png` | NESSUN OBIETTIVO | bersaglio con una freccia e una maschera appesa a un chiodo |
+| `vuoto-piani.png` | NESSUN PIANO | mappa arrotolata con una bussola |
+| `vuoto-cicli.png` | NESSUN CICLO | due frecce che si inseguono attorno a una maschera |
+| `vuoto-storico.png` | NESSUN EVENTO | orologio da parete con una pagina strappata |
+
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.
 2. Icone elementi (4), affinità (5), navigazione (7.1) → usate in ogni scheda.
 3. Carte degli Arcani (3) e icone arcano (3.1) → compendio e Confidenti.
 4. Doti sociali (6), badge (7.2–7.3), stati vuoti (8).
 5. Confidenti (9), poi le Persona (10) a lotti, infine meteo (11).
+6. Guida, Palazzi e stati vuoti (13): chiavi già cablate, l'app li mostra appena consegnati.
 
 Consegna: caricare i file in `public/asset/…` rispettando i nomi; l'app li sostituisce ai segnaposto vettoriali
 attuali (`src/components/shared/icons.tsx`) man mano che arrivano.
