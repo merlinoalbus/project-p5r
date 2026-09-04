@@ -3,9 +3,9 @@
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
 **521 file richiesti: 235 completati e approvati, 286 ancora da consegnare** (37 aggiunti il 2026-09-04 con la Fase 11.6: §13 di `prompt-immagini.md`).
-**484 file richiesti: 336 completati e approvati, 148 ancora da consegnare.**
+**484 file richiesti: 461 completati e approvati, 23 ancora da consegnare.**
 
-Persona completate e approvate: **84**. Persona generate e in validazione: **53**. Persona ancora da generare: **95**.
+Persona completate e approvate: **209**. Persona generate e in validazione: **0**. Persona ancora da generare: **23**.
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -44,218 +44,218 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | ui | 51 | 47 | 4 |
 | illustrazioni | 23 | 15 | 8 |
 | confidenti | 46 | 46 | 0 |
-| persona | 232 | 84 | 148 |
+| persona | 232 | 177 | 55 |
 | meteo | 17 | 17 | 0 |
 
 ## Elenco completo
 
 ### persona
 
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/arsene.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/jack-o-lantern.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/pixie.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/agathion.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/mandrake.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/bicorn.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/cait-sith.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/incubus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kelpie.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/saki-mitama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/silky.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/genbu.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/succubus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/obariyon.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/angel.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/berith.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/hua-po.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/koropokkuru.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/mokoi.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/regent.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/slime.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/apsaras.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/jack-frost.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kodama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/koppa-tengu.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orpheus-f.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kushi-mitama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/onmoraki.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/ame-no-uzume.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/ippon-datara.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orpheus-f-picaro.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/archangel.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/inugami.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/makami.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/queens-necklace.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/shiisaa.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/eligor.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/high-pixie.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kaguya.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/suzaku.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/matador.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/nekomata.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orobas.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/sudama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/black-ooze.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/shiki-ouji.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/flauros.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/leanan-sidhe.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/izanagi.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/nue.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/oni.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/stone-of-scone.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/yaksini.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orthrus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/phoenix.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/jikokuten.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/nigi-mitama.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/fuu-ki.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/izanagi-picaro.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/sandman.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/naga.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/rakshasa.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/sui-ki.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/anzu.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kaguya-picaro.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kin-ki.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/koh-i-noor.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/setanta.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/isis.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/lamia.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/orpheus.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/take-minakata.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/andras.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/clotho.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/tam-lin.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/choronzon.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/pisaca.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/orpheus-picaro.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/principality.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/ara-mitama.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/ariadne.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/neko-shogun.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/orlov.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/kurama-tengu.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/zouchouten.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/decarabia.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/lilim.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/mitra.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/mothman.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/anubis.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/thunderbird.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/arahabaki.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/emperors-amulet.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/lachesis.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/kaiwan.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/thoth.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/belphegor.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/hell-biker.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/legion.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/white-rider.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/atropos.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/mithras.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/unicorn.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/daisoujou.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/hariti.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/hope-diamond.png` — 768×768
-- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/persona/kikuri-hime.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/power.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/red-rider.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/ariadne-picaro.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/hecatoncheires.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/kumbhanda.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/kushinada.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/ose.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/girimehkala.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/queen-mab.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/yurlungur.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/ananta.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/magatsu-izanagi.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/valkyrie.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/byakko.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/pazuzu.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/athena.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/fortuna.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/horus.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/magatsu-izanagi-picaro.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/narcissus.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/rangda.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/bugs.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/koumokuten.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/athena-picaro.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/crystal-skull.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/dakini.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/sarasvati.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/tsukiyomi.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/jatayu.png` — 768×768
-- [ ] **GENERATO — validazione lotto in corso** — `public/asset/persona/seth.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/barong.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/garuda.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/mishaguji.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/norn.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/ganesha.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/skadi.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/okuninushi.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/pale-rider.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/cerberus.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/raja-naga.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/tsukiyomi-picaro.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/asterius.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/parvati.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/titania.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/yatagarasu.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/baphomet.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/melchizedek.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/black-rider.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/trumpeter.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/lilith.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/moloch.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/orichalcum.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/king-frost.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/asterius-picaro.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/chernobog.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/seiryu.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/forneus.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/kali.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/hanuman.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/thor.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/yamata-no-orochi.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/atavaka.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/thanatos.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/oberon.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/quetzalcoatl.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/bishamonten.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/black-frost.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/dominion.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/vasuki.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/lakshmi.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/thanatos-picaro.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/byakhee.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/loa.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/dionysus.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/mot.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/throne.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/macabre.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/mara.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/chimera.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/nebiros.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/abaddon.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/sandalphon.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/asura.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/cu-chulainn.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/kohryu.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/raoul.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/gabriel.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/scathach.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/raphael.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/arsene.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/jack-o-lantern.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/pixie.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/agathion.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mandrake.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/bicorn.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/cait-sith.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/incubus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kelpie.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/saki-mitama.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/silky.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/genbu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/succubus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/obariyon.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/angel.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/berith.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hua-po.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/koropokkuru.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mokoi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/regent.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/slime.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/apsaras.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/jack-frost.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kodama.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/koppa-tengu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orpheus-f.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kushi-mitama.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/onmoraki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ame-no-uzume.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ippon-datara.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orpheus-f-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/archangel.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/inugami.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/makami.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/queens-necklace.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/shiisaa.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/eligor.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/high-pixie.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kaguya.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/suzaku.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/matador.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/nekomata.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orobas.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/sudama.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/black-ooze.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/shiki-ouji.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/flauros.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/leanan-sidhe.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/izanagi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/nue.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/oni.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/stone-of-scone.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/yaksini.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orthrus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/phoenix.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/jikokuten.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/nigi-mitama.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/fuu-ki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/izanagi-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/sandman.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/naga.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/rakshasa.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/sui-ki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/anzu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kaguya-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kin-ki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/koh-i-noor.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/setanta.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/isis.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lamia.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orpheus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/take-minakata.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/andras.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/clotho.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/tam-lin.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/choronzon.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/pisaca.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orpheus-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/principality.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ara-mitama.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ariadne.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/neko-shogun.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orlov.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kurama-tengu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/zouchouten.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/decarabia.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lilim.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mitra.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mothman.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/anubis.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/thunderbird.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/arahabaki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/emperors-amulet.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lachesis.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kaiwan.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/thoth.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/belphegor.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hell-biker.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/legion.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/white-rider.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/atropos.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mithras.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/unicorn.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/daisoujou.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hariti.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hope-diamond.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kikuri-hime.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/power.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/red-rider.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ariadne-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hecatoncheires.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kumbhanda.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kushinada.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ose.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/girimehkala.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/queen-mab.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/yurlungur.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ananta.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/magatsu-izanagi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/valkyrie.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/byakko.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/pazuzu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/athena.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/fortuna.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/horus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/magatsu-izanagi-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/narcissus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/rangda.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/bugs.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/koumokuten.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/athena-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/crystal-skull.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/dakini.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/sarasvati.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/tsukiyomi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/jatayu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/seth.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/barong.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/garuda.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mishaguji.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/norn.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ganesha.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/skadi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/okuninushi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/pale-rider.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/cerberus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/raja-naga.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/tsukiyomi-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/asterius.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/parvati.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/titania.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/yatagarasu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/baphomet.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/melchizedek.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/black-rider.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/trumpeter.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lilith.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/moloch.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/orichalcum.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/king-frost.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/asterius-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/chernobog.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/seiryu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/forneus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kali.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/hanuman.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/thor.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/yamata-no-orochi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/atavaka.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/thanatos.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/oberon.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/quetzalcoatl.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/bishamonten.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/black-frost.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/dominion.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/vasuki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/lakshmi.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/thanatos-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/byakhee.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/loa.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/dionysus.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mot.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/throne.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/macabre.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mara.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/chimera.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/nebiros.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/abaddon.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/sandalphon.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/asura.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/cu-chulainn.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/kohryu.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/raoul.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/gabriel.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/scathach.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/raphael.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/izanagi-no-okami.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/sraosha.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/vohu-manah.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/zaou-gongen.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/alilat.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/messiah.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/uriel.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/attis.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/baal.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/messiah.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/uriel.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/attis.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/baal.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/belial.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/shiva.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/alice.png` — 768×768
@@ -270,15 +270,15 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [ ] **DA CONSEGNARE** — `public/asset/persona/mother-harlot.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/fafnir.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/futsunushi.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/beelzebub.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/michael.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/yoshitsune.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/chi-you.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/izanagi-no-okami-picaro.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/metatron.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/ongyo-ki.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/mada.png` — 768×768
-- [ ] **DA CONSEGNARE** — `public/asset/persona/messiah-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/beelzebub.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/michael.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/yoshitsune.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/chi-you.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/izanagi-no-okami-picaro.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/metatron.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/ongyo-ki.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/mada.png` — 768×768
+- [x] **COMPLETATO — approvato dall'utente** — `public/asset/persona/messiah-picaro.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/satan.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/lucifer.png` — 768×768
 - [ ] **DA CONSEGNARE** — `public/asset/persona/maria.png` — 768×768
