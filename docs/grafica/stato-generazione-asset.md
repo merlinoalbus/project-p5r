@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**461 file richiesti: 174 completati e approvati, 287 ancora da consegnare.**
+**461 file richiesti: 197 completati e approvati, 264 ancora da consegnare.**
 
 Navigazione§7.1 completata:12file salvati e approvati. Non rigenerarli.
 
@@ -24,6 +24,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - Sfondi completi: quattro file (§2) approvati da galaxy_task_validator; pattern verificato anche in ripetizione 2×2.
 - Identità completa: quattro loghi (§1.1), tre icone (§1.2) e quattro splash (§1.3) approvati da galaxy_task_validator.
 - Scale-up in Python autorizzato dall’utente, purché il rapporto di forma sia già corretto: fattore identico sui due assi, nessun ritaglio o deformazione.
+- Ordine richiesto dall’utente: completare la categoria `persona` per ultima, dopo illustrazioni, confidenti e meteo.
 
 ## Riepilogo
 
@@ -36,8 +37,8 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | affinita | 12 | 12 | 0 |
 | doti | 12 | 12 | 0 |
 | ui | 47 | 47 | 0 |
-| illustrazioni | 15 | 0 | 15 |
-| confidenti | 23 | 0 | 23 |
+| illustrazioni | 15 | 15 | 0 |
+| confidenti | 23 | 8 | 15 |
 | persona | 232 | 0 | 232 |
 | meteo | 17 | 0 | 17 |
 
@@ -240,32 +241,32 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 
 ### illustrazioni
 
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-persona.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-persona-senza-testo.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-partita.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/vuoto-partita-senza-testo.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/errore.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/errore-senza-testo.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento.png` — 1200×800
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-1.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-2.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-3.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-4.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-5.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-6.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-7.png` — 256×256
-- [ ] **DA CONSEGNARE** — `public/asset/illustrazioni/caricamento-8.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-persona.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-persona-senza-testo.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-partita.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/vuoto-partita-senza-testo.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/errore.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/errore-senza-testo.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento.png` — 1200×800
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-1.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-2.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-3.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-4.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-5.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-6.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-7.png` — 256×256
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/illustrazioni/caricamento-8.png` — 256×256
 
 ### confidenti
 
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/igor.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/morgana.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/ryuji.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/ann.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/yusuke.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/makoto.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/futaba.png` — 768×1024
-- [ ] **DA CONSEGNARE** — `public/asset/confidenti/haru.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/igor.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/morgana.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ryuji.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/ann.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/yusuke.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/makoto.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/futaba.png` — 768×1024
+- [x] **COMPLETATO — approvato da galaxy_task_validator** — `public/asset/confidenti/haru.png` — 768×1024
 - [ ] **DA CONSEGNARE** — `public/asset/confidenti/akechi.png` — 768×1024
 - [ ] **DA CONSEGNARE** — `public/asset/confidenti/kasumi.png` — 768×1024
 - [ ] **DA CONSEGNARE** — `public/asset/confidenti/sojiro.png` — 768×1024
@@ -834,6 +835,64 @@ Lotto §7.7 generato con Imagegen, ridotto proporzionalmente a 256×256 con sfon
 | `public/asset/ui/tesoro-hope-diamond.png` | `exec-88cef5c4-83c9-4b14-bb72-87cd0cb3d5f4.png` |
 | `public/asset/ui/tesoro-orichalcum.png` | `exec-205487b0-d284-453c-a28b-70dc8f1efdef.png` |
 
+### Illustrazioni vuoto Persona
+
+Coppia §8 generata con Imagegen, ridotta proporzionalmente e centrata su canvas 1200×800, con sfondo alfa reale; approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/vuoto-persona.png` | `exec-12b40677-f3d5-45bf-9d2b-8bdaf0477bc4.png` |
+| `public/asset/illustrazioni/vuoto-persona-senza-testo.png` | `exec-2b43f2c8-68d2-4344-b681-07ce3ef545c4.png` |
+
+### Illustrazioni vuoto Partita
+
+Coppia §8 generata con Imagegen, ridotta proporzionalmente e centrata su canvas 1200×800, con sfondo alfa reale; approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/vuoto-partita.png` | `exec-a5386fc6-0b6f-48df-a6b1-cbdd63bc9416.png` |
+| `public/asset/illustrazioni/vuoto-partita-senza-testo.png` | `exec-a47905b0-b41a-400d-8e00-d72421572835.png` |
+
+### Illustrazioni errore
+
+Coppia §8 generata con Imagegen, ridotta proporzionalmente e centrata su canvas 1200×800, con sfondo alfa reale; approvata da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/errore.png` | `exec-65f896d3-0435-4f59-85ad-1e74ec2857ab.png` |
+| `public/asset/illustrazioni/errore-senza-testo.png` | `exec-42a38406-bd2d-48bc-a726-f832611b5d70.png` |
+
+### Illustrazioni caricamento
+
+Lotto §8 generato con Imagegen: illustrazione principale da sorgente 3:2 e otto fotogrammi da sprite sheet 3×3, ridotti proporzionalmente con sfondo alfa reale; approvato da galaxy_task_validator. Categoria illustrazioni completa: 15/15.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/illustrazioni/caricamento.png` | `exec-ea4cebf4-98a6-444e-9a86-244323842211.png` |
+| `public/asset/illustrazioni/caricamento-1.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 1 |
+| `public/asset/illustrazioni/caricamento-2.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 2 |
+| `public/asset/illustrazioni/caricamento-3.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 3 |
+| `public/asset/illustrazioni/caricamento-4.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 4 |
+| `public/asset/illustrazioni/caricamento-5.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 5 |
+| `public/asset/illustrazioni/caricamento-6.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 6 |
+| `public/asset/illustrazioni/caricamento-7.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 7 |
+| `public/asset/illustrazioni/caricamento-8.png` | `exec-296be0d4-1d61-46e0-b057-311b304c5bf5.png` — cella 8 |
+
+### Confidenti — lotto 1
+
+Primi otto ritratti §9 generati con Imagegen e adattati proporzionalmente a 768×1024 con sfondo alfa reale; approvati da galaxy_task_validator.
+
+| Asset | Sorgente Imagegen |
+|---|---|
+| `public/asset/confidenti/igor.png` | `exec-80853693-28f3-449c-860d-6bb463bcdfd0.png` |
+| `public/asset/confidenti/morgana.png` | `exec-69aca76c-87bd-4c92-9a20-963b6238c977.png` |
+| `public/asset/confidenti/ryuji.png` | `exec-adff4db2-005c-4c03-8d26-3d55e982404b.png` |
+| `public/asset/confidenti/ann.png` | `exec-cb22c942-6d24-41f2-a054-683708de2f75.png` |
+| `public/asset/confidenti/yusuke.png` | `exec-3de7658c-25f7-47ce-9371-d21b8e1af436.png` |
+| `public/asset/confidenti/makoto.png` | `exec-d0bfa718-89dd-4479-bfe4-11c7dd3d5b65.png` |
+| `public/asset/confidenti/futaba.png` | `exec-5ce61061-0534-4afa-a282-b2fe2b204a98.png` |
+| `public/asset/confidenti/haru.png` | `exec-b610619b-79fb-4bb4-8123-24ea266310fc.png` |
+
 ## Impronte dei file completati
 
 Rilevano eventuali sostituzioni accidentali dei file approvati.
@@ -1014,3 +1073,26 @@ Rilevano eventuali sostituzioni accidentali dei file approvati.
 | `public/asset/doti/perizia-senza-testo.png` | RGBA | 96d6742bcd2d836c12f29676bdcefd9641642413d1d6a4dc7dcd3aeb22f58abd |
 | `public/asset/doti/stella-vuota.png` | RGBA | 262e04ed68c6454aa5e77acf7cea19fed51ca02dc38603157cbdfd7d5bcedd02 |
 | `public/asset/doti/stella-vuota-senza-testo.png` | RGBA | 0373f44ffb735ed30b0cb5c5715c9cbcbbec2b4aedeb7f577a04df5e9813d33f |
+| `public/asset/illustrazioni/vuoto-persona.png` | RGBA | 52de5069ad4230c9690561e03dbf3fb47a95442e60601e2bfb8ed8f49fe8ea83 |
+| `public/asset/illustrazioni/vuoto-persona-senza-testo.png` | RGBA | 638dc466e5d1980326e37b92d870c32923245eef2f19b003f856f3cebdd4340e |
+| `public/asset/illustrazioni/vuoto-partita.png` | RGBA | 295f6e611c4e9ade5f7b07a3220de5d099b33ada1af5f1f20186c0fa8520b04c |
+| `public/asset/illustrazioni/vuoto-partita-senza-testo.png` | RGBA | 26bfb31135c1e285c89c23ef83ba9e265677a4afc5b12d603ccbe1ed4d12a317 |
+| `public/asset/illustrazioni/errore.png` | RGBA | 60a0ba328fb7061cd10efe8b27660c938582ab448da9a5931120c28d453b2def |
+| `public/asset/illustrazioni/errore-senza-testo.png` | RGBA | 31263c17bc9df77b6062a78aedb4c8a39bdf7895cd060d8f4f1fe51e7be3af30 |
+| `public/asset/illustrazioni/caricamento.png` | RGBA | 446196ee86eb17b89479b2aa645e4526f61f08ad4bf90f5626a41a56584c2982 |
+| `public/asset/illustrazioni/caricamento-1.png` | RGBA | 0f5b254338726132c8d2251b3ad92072141758a7eb383cfac6a2dc9dc6e48b88 |
+| `public/asset/illustrazioni/caricamento-2.png` | RGBA | 415e4fb5e7f87319f6b0e84542750a372d06d3f349eaf8cdf0172e8377591a49 |
+| `public/asset/illustrazioni/caricamento-3.png` | RGBA | b5598bea9584ed69040b38930968c84714e89d9ca040958348adbb0a0068bff3 |
+| `public/asset/illustrazioni/caricamento-4.png` | RGBA | 1fee950e16094f3eab190b3977a6b71b59b70270a974bd619d9bde714d5afbdc |
+| `public/asset/illustrazioni/caricamento-5.png` | RGBA | ab43a5345b3636ae19d62637ac1715ca6a9a32f527b8998ca8a78ee6b00e609a |
+| `public/asset/illustrazioni/caricamento-6.png` | RGBA | 932e128facd2897217adb882373f0157fb01a57dc3201e5efc9f94d9165868a0 |
+| `public/asset/illustrazioni/caricamento-7.png` | RGBA | 50566ee112da8c233200cd4b82c4c94b64962a54f8bb8907abb3ff9df1196ca8 |
+| `public/asset/illustrazioni/caricamento-8.png` | RGBA | d93b270ba8d1f3e1a689d198aa298b77a1e0ca6b93cddb46d79409501127161b |
+| `public/asset/confidenti/igor.png` | RGBA | 05e8d8c4a24fab808f86de0d8a41bc1a57afce2bfa4c54ce07f2541646db379d |
+| `public/asset/confidenti/morgana.png` | RGBA | 828ee84cc9543c7b32378ae3f8b86991322b874c996d7e234f9e4450b473982b |
+| `public/asset/confidenti/ryuji.png` | RGBA | 063cf6b9cd019688141b9f1df4c53237bebaf845d9a0794d1f6e06d89a692f4b |
+| `public/asset/confidenti/ann.png` | RGBA | 26b4a7fd38a01699d932c3c419784f564444986fcba4804deaff4e369bd4d6c5 |
+| `public/asset/confidenti/yusuke.png` | RGBA | 33ececb619bf492f9ec0ae2f451f6915334ab80bd1c37d93df1eacadd43a85b9 |
+| `public/asset/confidenti/makoto.png` | RGBA | 48a6feb961d4a7ab2f05912a659e7cc276d905f8961c085b80cb28177203323b |
+| `public/asset/confidenti/futaba.png` | RGBA | 4d89245c2883ab99c7efdcc14e433e298ef72c02cc01ecdbb81285a7c0d62806 |
+| `public/asset/confidenti/haru.png` | RGBA | c62b3789f7d353aa8a970663a2015f969d225af6d07d3f69f7e9ec979ec7ccec |
