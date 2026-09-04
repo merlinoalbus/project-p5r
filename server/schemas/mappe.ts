@@ -11,7 +11,7 @@ const entita = z.object({ tipo: z.string().min(1).max(40), chiave: z.string().mi
 
 export const paramsMappa = z.object({ chiave: chiaveMappa });
 export const paramsSpillo = z.object({ id: z.coerce.number().int().positive() });
-export const queryEsporta = z.object({ radice: chiaveMappa.optional(), immaginiSpilli: z.enum(['0', '1']).optional() });
+export const queryEsporta = z.object({ radice: chiaveMappa.optional() });
 export const queryDidascalia = z.object({ didascalia: z.string().max(300).optional() });
 export const bodyImmagineSpillo = z.object({ didascalia: z.string().max(300).optional(), ordine: z.number().int().min(0).max(999).optional() });
 export const queryMappa = z.object({ partita: z.coerce.number().int().positive().optional() });

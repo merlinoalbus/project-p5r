@@ -49,15 +49,15 @@ router.get('/albero', (_req, res) => {
 
 /** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */
 router.get('/esporta', validate({ query: queryEsporta }), (req, res) => {
-  const q = req.query as unknown as { radice?: string; immaginiSpilli?: string };
+  const q = req.query as unknown as { radice?: string };
   res.setHeader('Content-Disposition', `attachment; filename="mappe-${q.radice ?? 'tutte'}.json"`);
-  res.json(esportaMappe(q.radice, { immaginiSpilli: q.immaginiSpilli === '1' }));
+  res.json(esportaMappe(q.radice));
 });
 
 /** ZIP per il repository: seed della mappa (e discendenti) + asset delle immagini. */
 router.get('/esporta.zip', validate({ query: queryEsporta.required({ radice: true }) }), (req, res) => {
-  const q = req.query as unknown as { radice: string; immaginiSpilli?: string };
-  const z = creaPacchettoRepository(q.radice, { immaginiSpilli: q.immaginiSpilli === '1' });
+  const q = req.query as unknown as { radice: string };
+  const z = creaPacchettoRepository(q.radice);
   res.setHeader('Content-Type', 'application/zip');
   res.setHeader('Content-Disposition', `attachment; filename="${z.nomeFile}"`);
   res.send(z.contenuto);

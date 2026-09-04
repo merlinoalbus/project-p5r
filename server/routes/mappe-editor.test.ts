@@ -239,21 +239,20 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(pacchetto.immagini?.[area.chiave]?.mime).toBe('image/png');
   });
 
-  it('le immagini scaricate da terzi (piante delle guide) non entrano mai nei pacchetti: né nel JSON né nello ZIP, con l’elenco delle esclusioni', async () => {
+  it('le immagini scaricate dalle guide entrano nel pacchetto come tutte le altre, con la provenienza annotata (JSON e LEGGIMI)', async () => {
     const area = ((await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[]).filter((m) => m.tipo === 'area' && !m.immagineUrl)[1];
     salvaImmagine('mappa', area.chiave, 'image/png', PNG_2x3, 'https://omoteura.com/pianta.png');
-    expect(((await request(app).get(`/api/mappe/${area.chiave}`)).body.data as MappaDto).immagineUrl).toContain('/file');
     const json = (await request(app).get(`/api/mappe/esporta?radice=${area.chiave}`)).body.data as EsportazioneMappeDto;
-    expect(json.mappe[0].immagine).toBeNull();
-    expect(json.immagini).toEqual({});
-    expect(json.immaginiEscluse).toEqual([{ mappa: area.chiave, motivo: expect.stringContaining('omoteura.com') }]);
+    expect(json.mappe[0].immagine).toBe(area.chiave);
+    expect(json.immagini?.[area.chiave]).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
+    expect(json.provenienze).toEqual([{ mappa: area.chiave, origineUrl: 'https://omoteura.com/pianta.png' }]);
     const zip = await request(app).get(`/api/mappe/esporta.zip?radice=${area.chiave}`).buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
     const voci = leggiZip(zip.body as Buffer);
-    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', `data/seed/mappe/${area.chiave}.json`]);
-    expect(voci[0].contenuto.toString('utf-8')).toContain(`- ${area.chiave}: immagine scaricata da https://omoteura.com/pianta.png`);
+    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', `data/seed/mappe/${area.chiave}.json`, `public/asset/mappe/${area.chiave}.png`]);
+    expect(voci[0].contenuto.toString('utf-8')).toContain(`- ${area.chiave}: https://omoteura.com/pianta.png`);
     const seedArea = JSON.parse(voci[1].contenuto.toString('utf-8')) as EsportazioneMappeDto;
-    expect(seedArea.mappe[0]).toMatchObject({ immagine: null, asset: null });
-    expect(seedArea.immaginiEscluse).toBeUndefined();
+    expect(seedArea.mappe[0]).toMatchObject({ immagine: null, asset: `mappe/${area.chiave}` });
+    expect(seedArea.provenienze).toBeUndefined();
   });
 
   it('schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON e ZIP per il repository) e reimportazione', async () => {
@@ -281,18 +280,16 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const conf = (await request(app).post('/api/mappe/luogo-zip/spilli').send({ tipo: 'confidente', nome: 'Ryuji', x: 20, y: 20, riferimento: { tipo: 'confidente', chiave: 'ryuji' } })).body.data as SpilloDto;
     expect(conf.dettaglio?.immagine).toEqual({ url: null, asset: 'confidenti/ryuji-fedele' });
 
-    // esportazione per luogo: solo il sottoalbero; le schermate dell'istanza solo se richieste
-    const soloLuogo = (await request(app).get('/api/mappe/esporta?radice=luogo-zip')).body.data as EsportazioneMappeDto;
-    expect(soloLuogo.mappe.map((m) => m.chiave)).toEqual(['luogo-zip', 'luogo-zip-interno']);
-    expect(soloLuogo.mappe[0].spilli[0].immagini ?? []).toHaveLength(0);
-    const conSchermate = (await request(app).get('/api/mappe/esporta?radice=luogo-zip&immaginiSpilli=1')).body.data as EsportazioneMappeDto;
+    // esportazione per luogo: solo il sottoalbero, sempre con le schermate degli spilli
+    const conSchermate = (await request(app).get('/api/mappe/esporta?radice=luogo-zip')).body.data as EsportazioneMappeDto;
+    expect(conSchermate.mappe.map((m) => m.chiave)).toEqual(['luogo-zip', 'luogo-zip-interno']);
     expect(conSchermate.mappe[0].spilli[0].immagini).toHaveLength(2);
     expect(conSchermate.mappe[0].spilli[0].immagini!.map((i) => i.didascalia).sort()).toEqual(['Seconda', 'Vista dalla scala']);
     expect(conSchermate.mappe[0].spilli[0].immagini![0].mime).toBe('image/png');
     expect((await request(app).get('/api/mappe/esporta?radice=non-esiste')).status).toBe(404);
 
     // ZIP per il repository: LEGGIMI, seed del luogo con asset, immagini come file
-    const zip = await request(app).get('/api/mappe/esporta.zip?radice=luogo-zip&immaginiSpilli=1').buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
+    const zip = await request(app).get('/api/mappe/esporta.zip?radice=luogo-zip').buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
     expect(zip.status).toBe(200);
     expect(zip.headers['content-type']).toContain('application/zip');
     const voci = leggiZip(zip.body as Buffer);

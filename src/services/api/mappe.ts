@@ -48,11 +48,11 @@ export interface RiferimentoTrovatoApi { tipo: TipoRiferimento; chiave: string; 
 export const cercaRiferimenti = (tipo: TipoRiferimento, q: string, limite = 30): Promise<RiferimentoTrovatoApi[]> => apiGet(`/mappe/riferimenti${queryString({ tipo, q, limite })}`);
 
 /** Pacchetto JSON con mappe, spilli e immagini dell'istanza (base64); con `radice` solo quella mappa e le discendenti. */
-export const esportaMappe = (radice?: string, immaginiSpilli = false): Promise<EsportazioneMappeDto> => apiGet(`/mappe/esporta${queryString({ radice, immaginiSpilli: immaginiSpilli ? '1' : undefined })}`, { timeoutMs: 120_000 });
+export const esportaMappe = (radice?: string): Promise<EsportazioneMappeDto> => apiGet(`/mappe/esporta${queryString({ radice })}`, { timeoutMs: 120_000 });
 
 /** ZIP per il repository (seed del luogo + asset): restituisce il file e il nome suggerito. */
-export async function esportaPacchettoRepository(radice: string, immaginiSpilli: boolean): Promise<{ nome: string; blob: Blob }> {
-  const res = await httpFetch(`${API_BASE_URL}/mappe/esporta.zip${queryString({ radice, immaginiSpilli: immaginiSpilli ? '1' : undefined })}`, { method: 'GET' }, { maxRetries: 0, timeoutMs: 120_000 });
+export async function esportaPacchettoRepository(radice: string): Promise<{ nome: string; blob: Blob }> {
+  const res = await httpFetch(`${API_BASE_URL}/mappe/esporta.zip${queryString({ radice })}`, { method: 'GET' }, { maxRetries: 0, timeoutMs: 120_000 });
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new ApiError(res.status, body?.error?.code ?? 'http-error', body?.error?.message ?? `Esportazione fallita (${res.status})`, body?.error?.details, body?.requestId);

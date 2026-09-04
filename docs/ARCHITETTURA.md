@@ -453,8 +453,9 @@ accanto (Tokyo, poi la mappa dell'azione scelta con lo spillo centrato: `VisoreM
 `percorsoService.giornoPercorso` calcola per ogni azione `stato` (con partita: `statoAzione` valuta i semafori del rango atteso del
 Confidente — rossi → bloccata con motivo, tutti verdi → consigliata, grigi → neutra «da confermare») e `mappa` (`mappaAzione`: Palazzo →
 `dungeon-<k>`, richiesta → `dungeon-mementos`, negozio/Confidente → spillo del luogo in città). `creaPartita` imposta il giorno corrente al
-primo giorno del percorso (04-09). Esportazione delle mappe: le immagini con `origine_url` (piante scaricate da terzi) sono escluse da JSON e
-ZIP (`immaginiEscluse`, elencate nel LEGGIMI).
+primo giorno del percorso (04-09). Esportazione delle mappe: il pacchetto è completo (immagini di base e schermate degli spilli sempre incluse, puntate come asset);
+la provenienza delle immagini scaricate dalle guide è solo annotata (`provenienze`, LEGGIMI) — decisione dell'utente del 2026-09-04 sera,
+che supera la precedente esclusione.
 
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,

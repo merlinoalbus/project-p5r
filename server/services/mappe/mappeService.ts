@@ -376,17 +376,17 @@ function base64Immagine(ambito: string, chiave: string): { mime: string; base64:
 
 /** Pacchetto JSON con mappe, spilli (con schermate in base64) e immagini di base dell'istanza (base64): stesso formato del seed
  * `mappe-editor.json`. Con `radice` esporta solo quella mappa e le sue discendenti (un «luogo» completo). */
-export function esportaMappe(radice?: string, opz: { immaginiSpilli?: boolean } = {}): EsportazioneMappeDto {
+export function esportaMappe(radice?: string): EsportazioneMappeDto {
   const ammesse = radice ? new Set(discendentiDi(radice)) : null;
   const mappe: EsportazioneMappeDto['mappe'] = (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[]).filter((m) => !ammesse || ammesse.has(m.chiave)).map((m) => ({
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, larghezza: m.larghezza, altezza: m.altezza,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, collezionabile: s.collezionabile === 1, ordine: s.ordine,
-      // schermate: gli asset del repository sempre; quelle dell'istanza solo se richieste (mai schermate ufficiali nel repository pubblico)
+      // schermate: asset del repository oppure file dell'istanza in base64 (sempre inclusi: il pacchetto è completo)
       immagini: (prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(s.id) as RigaImmagineSpillo[]).flatMap((i): Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> => {
         if (i.asset) return [{ asset: i.asset, didascalia: i.didascalia }];
-        if (!opz.immaginiSpilli || !i.immagine_chiave) return [];
+        if (!i.immagine_chiave) return [];
         const b = base64Immagine('spillo', i.immagine_chiave);
         return b ? [{ mime: b.mime, base64: b.base64, didascalia: i.didascalia }] : [];
       }),
@@ -395,18 +395,14 @@ export function esportaMappe(radice?: string, opz: { immaginiSpilli?: boolean } 
   // il genitore fuori dal sottoalbero esportato resta indicato: all'importazione viene risolto se esiste
 
   const immagini: EsportazioneMappeDto['immagini'] = {};
-  const immaginiEscluse: NonNullable<EsportazioneMappeDto['immaginiEscluse']> = [];
+  const provenienze: NonNullable<EsportazioneMappeDto['provenienze']> = [];
   for (const m of mappe) {
-    // immagine registrata, oppure quella dell'istanza con la chiave della mappa
+    // immagine registrata, oppure quella dell'istanza con la chiave della mappa: sempre inclusa (pacchetto completo, decisione dell'utente
+    // del 2026-09-04); la provenienza delle immagini scaricate dalle guide resta annotata a titolo informativo
     const chiaveImg = m.immagine ?? (leggiImmagine('mappa', m.chiave) ? m.chiave : null);
     if (!chiaveImg) continue;
     const img = leggiImmagine('mappa', chiaveImg);
-    // le immagini scaricate da terzi (piante delle guide, © dei rispettivi autori) restano nell'istanza: mai nei pacchetti
-    if (img?.origineUrl) {
-      immaginiEscluse.push({ mappa: m.chiave, motivo: `immagine scaricata da ${img.origineUrl}: non ridistribuibile, resta nella tua istanza` });
-      m.immagine = null;
-      continue;
-    }
+    if (img?.origineUrl) provenienze.push({ mappa: m.chiave, origineUrl: img.origineUrl });
     m.immagine = chiaveImg;
     try {
       const f = fileImmagine('mappa', chiaveImg);
@@ -415,7 +411,7 @@ export function esportaMappe(radice?: string, opz: { immaginiSpilli?: boolean } 
       // immagine registrata ma file assente: esportata senza immagine
     }
   }
-  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(immaginiEscluse.length > 0 ? { immaginiEscluse } : {}) };
+  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
 export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[] }
@@ -483,9 +479,9 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
 const ESTENSIONE: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif' };
 
 /** ZIP con `data/seed/mappe/<radice>.json` (formato del seed: immagini di base come asset `mappe/<chiave>`, schermate degli spilli come
- * asset `spilli/<mappa>/<n>-<m>` se richieste) e i file in `public/asset/…`, pronto da estrarre nella radice del repository. */
-export function creaPacchettoRepository(radice: string, opz: { immaginiSpilli?: boolean } = {}): { nomeFile: string; contenuto: Buffer } {
-  const pacchetto = esportaMappe(radice, { immaginiSpilli: opz.immaginiSpilli });
+ * asset `spilli/<mappa>/<n>-<m>`) e i file in `public/asset/…`, pronto da estrarre nella radice del repository: diventa dato preimpostato dell'app. */
+export function creaPacchettoRepository(radice: string): { nomeFile: string; contenuto: Buffer } {
+  const pacchetto = esportaMappe(radice);
   const voci: VoceZip[] = [];
   const adesso = new Date();
   for (const m of pacchetto.mappe) {
@@ -510,9 +506,9 @@ export function creaPacchettoRepository(radice: string, opz: { immaginiSpilli?: 
       if (s.immagini.length === 0) delete s.immagini;
     });
   }
-  const escluse = pacchetto.immaginiEscluse ?? [];
+  const provenienze = pacchetto.provenienze ?? [];
   delete pacchetto.immagini;
-  delete pacchetto.immaginiEscluse;
+  delete pacchetto.provenienze;
   delete pacchetto.esportato;
   const leggimi = [
     `Pacchetto della mappa «${radice}» e delle sue mappe figlie (${pacchetto.mappe.length} mappe) — Project P5R, ${adesso.toISOString()}`,
@@ -520,10 +516,10 @@ export function creaPacchettoRepository(radice: string, opz: { immaginiSpilli?: 
     'Estrai questo archivio nella radice del repository:',
     `- data/seed/mappe/${radice}.json: mappe e spilli nel formato del seed (caricati all'avvio insieme a data/seed/mappe-editor.json)`,
     '- public/asset/mappe/*: immagini di base delle mappe (il manifest degli asset le raccoglie da solo)',
-    opz.immaginiSpilli ? '- public/asset/spilli/*: schermate degli spilli' : '- schermate degli spilli non incluse (restano nella tua istanza)',
-    ...(escluse.length > 0 ? ['', 'Immagini di base NON incluse perché scaricate da terzi (restano nella tua istanza):', ...escluse.map((e) => `- ${e.mappa}: ${e.motivo}`)] : []),
+    '- public/asset/spilli/*: schermate di riferimento degli spilli (puntate dagli spilli come asset spilli/<mappa>/<n>-<m>)',
+    ...(provenienze.length > 0 ? ['', 'Provenienza delle immagini di base scaricate dalle guide (a titolo informativo):', ...provenienze.map((e) => `- ${e.mappa}: ${e.origineUrl}`)] : []),
     '',
-    'Nel repository pubblico possono entrare solo immagini tue o generate: mai schermate o mappe ufficiali del gioco.',
+    'Consegna: estratto nella radice del repository e committato, il pacchetto viene caricato dal seed a ogni avvio (origine «seed»).',
     '',
   ].join('\n');
   voci.unshift({ nome: `data/seed/mappe/${radice}.json`, contenuto: Buffer.from(JSON.stringify(pacchetto, null, 1) + '\n', 'utf-8'), data: adesso });

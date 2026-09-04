@@ -1452,6 +1452,6 @@ export interface EsportazioneMappeDto {
     spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
-  /** Mappe la cui immagine di base non è stata esportata perché scaricata da terzi (piante delle guide, non ridistribuibili). */
-  immaginiEscluse?: Array<{ mappa: string; motivo: string }>;
+  /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */
+  provenienze?: Array<{ mappa: string; origineUrl: string }>;
 }
