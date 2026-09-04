@@ -45,7 +45,7 @@ export function NegozioPage() {
               {n.sblocco && <span><strong className="text-text">Sblocco:</strong> {n.sblocco}</span>}
             </div>
             {n.note && <p className="m-0 text-[13px] text-text-secondary">{n.note}</p>}
-            {n.fonte && <a href={n.fonte} target="_blank" rel="noreferrer" className="text-[12px] text-primary self-start">fonte</a>}
+            {n.fonte && <a href={n.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
             <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </div>
           {n.articoliElenco.length > 0 && (

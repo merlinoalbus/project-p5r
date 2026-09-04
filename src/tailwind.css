@@ -291,6 +291,15 @@
   .tabella tbody tr:hover { background: var(--color-bg-secondary); }
   .tabella tbody tr.riga-cliccabile { cursor: pointer; }
 
+  /* ---- Crediti alle fonti: discreti, grigi e piccoli ---- */
+  .credito {
+    font-size: 11px;
+    color: var(--color-text-muted);
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+  }
+  .credito:hover { color: var(--color-text-secondary); }
+
   /* ---- Card ---- */
   .card {
     background: var(--color-bg-secondary);
