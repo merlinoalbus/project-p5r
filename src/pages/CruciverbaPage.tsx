@@ -12,6 +12,8 @@ import { PageState } from '../components/shared/PageState';
 import { dataGiocoTesto as formattaDataGioco } from '../utils/dateGioco';
 import type { CruciverbaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 function Cruciverba({ c, partitaId, onCambiato }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void }) {
   const [mostra, setMostra] = useState(false);
@@ -29,7 +31,7 @@ function Cruciverba({ c, partitaId, onCambiato }: { c: CruciverbaDto; partitaId:
         <span className="text-text-secondary">{c.indizio}</span>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {mostra || c.fatto ? <span><strong>Risposta:</strong> {c.risposta}{c.rispostaEn && c.rispostaEn !== c.risposta ? <span className="text-text-muted"> ({c.rispostaEn})</span> : null}</span> : <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setMostra(true)}>Mostra la risposta</button>}
+        {mostra || c.fatto ? <span><strong>Risposta:</strong> {c.risposta}{c.rispostaEn && c.rispostaEn !== c.risposta ? <span className="text-text-muted"> ({c.rispostaEn})</span> : null}</span> : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Mostra la risposta" onClick={() => setMostra(true)} />}
       </div>
     </li>
   );

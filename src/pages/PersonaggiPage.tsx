@@ -3,7 +3,6 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getPersonaggi } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -14,6 +13,8 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
 import { PersonaDelPersonaggio } from '../components/guida/PersonaDelPersonaggio';
 import { getPersone } from '../services/api';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<string, number> }) {
   const [aperto, setAperto] = useState(false);
@@ -40,7 +41,7 @@ function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<s
             {(p.scuola || p.eta) && <p className="m-0"><strong>Scuola/età:</strong> {[p.scuola, p.eta].filter(Boolean).join(' · ')}{nota('scuola')}{nota('eta')}</p>}
             {(p.doppiatori.jp || p.doppiatori.en) && <p className="m-0"><strong>Doppiatori:</strong> {[p.doppiatori.jp ? `JP ${p.doppiatori.jp}` : null, p.doppiatori.en ? `EN ${p.doppiatori.en}` : null].filter(Boolean).join(' · ')}{nota('doppiatori')}</p>}
             <div className="flex flex-wrap gap-2 items-center">
-              {p.confidente && <Link to={`/confidenti/${p.confidente}`} className="btn btn-secondary btn-sm no-underline">Scheda Confidente</Link>}
+              {p.confidente && <CollegamentoVisivo tono="secondario" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda Confidente" to={`/confidenti/${p.confidente}`} />}
               {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
             </div>
           </div>

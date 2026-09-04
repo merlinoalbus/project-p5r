@@ -9,6 +9,8 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react';
 import { COLORE_TIPO, NOME_TIPO } from '../../utils/dungeon';
 import type { PuntoInteresseDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Elemento posizionabile sulla mappa (punto di interesse di un dungeon o luogo della città). */
 export interface PuntoMappa {
@@ -74,9 +76,9 @@ export function MappaInterattiva({ src, punti, selezionato, onSeleziona, posizio
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-1.5 text-[12px]">
-        <button type="button" className="btn btn-secondary btn-sm" onClick={() => setZoom((z) => Math.min(6, z * 1.25))} aria-label="Ingrandisci">+</button>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={() => setZoom((z) => Math.max(0.5, z / 1.25))} aria-label="Riduci">−</button>
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}>Adatta</button>
+        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="+" onClick={() => setZoom((z) => Math.min(6, z * 1.25))} aria-label="Ingrandisci" />
+        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riduci" dimensione={20} />} titolo="−" onClick={() => setZoom((z) => Math.max(0.5, z / 1.25))} aria-label="Riduci" />
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="adatta" dimensione={20} />} titolo="Adatta" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} />
         <span className="text-text-muted">Zoom {Math.round(zoom * 100)}% · trascina per spostare{posizionamento ? ' · tocca la mappa per fissare lo spillo del punto selezionato' : ''}</span>
       </div>
       <div

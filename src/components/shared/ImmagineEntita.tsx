@@ -17,6 +17,8 @@ import { notifica } from '../../stores/notificationStore';
 import { useAsset, useAssetStore } from '../../stores/assetStore';
 import { altezzaPerForma, chiaviAssetPredefinito, type FormaImmagine, type FormaRiquadro } from '../../utils/assetPredefiniti';
 import { Modal } from './Modal';
+import { PulsanteVisivo } from './PulsanteVisivo';
+import { IconaAzione } from './IconaAzione';
 
 interface Props {
   ambito: AmbitoImmagine;
@@ -180,8 +182,8 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
             {modificabile && !modalitaUrl && (
               <>
                 <input ref={inputFile} type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" className="hidden" onChange={(e) => void suFile(e.target.files?.[0])} />
-                <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => inputFile.current?.click()}>Carica file</button>
-                <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => setModalitaUrl(true)}>Da URL</button>
+                <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="carica" dimensione={22} />} titolo="Carica file" disabled={occupato} onClick={() => inputFile.current?.click()} />
+                <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="url" dimensione={22} />} titolo="Da URL" disabled={occupato} onClick={() => setModalitaUrl(true)} />
                 {presente && (
                   <button type="button" className="btn btn-danger" disabled={occupato} onClick={() => void suRimuovi()}>Rimuovi</button>
                 )}
@@ -189,12 +191,12 @@ export function ImmagineEntita({ ambito, chiave, etichetta, dimensione = 96, mod
             )}
             {modificabile && modalitaUrl && (
               <>
-                <button type="button" className="btn btn-secondary" disabled={occupato} onClick={() => { setModalitaUrl(false); setUrl(''); }}>Indietro</button>
+                <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="indietro" dimensione={22} />} titolo="Indietro" disabled={occupato} onClick={() => { setModalitaUrl(false); setUrl(''); }} />
                 <button type="button" className="btn btn-primary" disabled={occupato || !url.trim()} onClick={() => void suImporta()}>Importa</button>
               </>
             )}
-            {urlAlternativa && <button type="button" className="btn btn-secondary" onClick={() => setAlternativaFissa((v) => !v)} aria-pressed={alternativaFissa}>{alternativaFissa ? (srcUtente ? 'Immagine principale' : 'Ritratto fedele') : 'Versione stilizzata'}</button>}
-            <button type="button" className="btn btn-ghost" onClick={chiudi}>Chiudi</button>
+            {urlAlternativa && <PulsanteVisivo attivo={alternativaFissa} icona={<IconaAzione chiave="modifica" dimensione={22} />} titolo={alternativaFissa ? (srcUtente ? 'Immagine principale' : 'Ritratto fedele') : 'Versione stilizzata'} onClick={() => setAlternativaFissa((v) => !v)} />}
+            <PulsanteVisivo tono="fantasma" icona={<IconaAzione chiave="chiudi" dimensione={22} />} titolo="Chiudi" onClick={chiudi} />
           </>
         }
       >

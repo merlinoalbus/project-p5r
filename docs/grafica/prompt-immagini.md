@@ -89,7 +89,7 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-storico.png` | Storico | orologio da taschino |
 | `scheda-riepilogo.png` | Riepilogo | tre barre di altezza crescente |
 
-## 17. Icone delle azioni (32) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+## 17. Icone delle azioni (45) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo, nessun numero salvo dove indicato). L'app le
 mostra a 20–26 px dentro i pulsanti a tassello (fondo rosso quando il pulsante è acceso, bianco/nero quando è spento: il tratto bianco
 con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senza il file usa un'icona SVG in codice. Un file per chiave.
@@ -127,6 +127,19 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-deseleziona.png` | Deseleziona | quadratino con croce |
 | `azione-riprova.png` | Riprova dopo un errore | freccia circolare con punto esclamativo |
 | `azione-registra.png` | Registra nel compendio | libro chiuso con segnalibro e spunta |
+| `azione-indietro.png` | Indietro | freccia verso sinistra |
+| `azione-carica.png` | Carica un file / sostituisci | freccia verso l'alto su una base |
+| `azione-url.png` | Importa da un indirizzo | anello di catena |
+| `azione-chiudi.png` | Chiudi | croce |
+| `azione-attiva.png` | Attiva la partita | interruttore acceso |
+| `azione-mappa.png` | Posiziona o togli uno spillo | spillo da mappa |
+| `azione-ingrandisci.png` | Ingrandisci la mappa | lente con più |
+| `azione-riduci.png` | Riduci la mappa | lente con meno |
+| `azione-adatta.png` | Adatta la mappa all'area | riquadro con quattro frecce |
+| `azione-calendario.png` | Imposta la data di gioco / vai a oggi | calendario con un giorno evidenziato |
+| `azione-esaurito.png` | Segna un punto come esaurito | scrigno aperto e vuoto |
+| `azione-accettata.png` | Richiesta accettata | stretta di mano |
+| `azione-negozio.png` | Articoli in vendita | insegna con borsa della spesa |
 
 ## 18. Spilli delle mappe (14) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13)
 Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo

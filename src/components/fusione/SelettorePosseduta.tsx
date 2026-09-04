@@ -4,6 +4,8 @@
 
 import { AnteprimaPersona } from '../shared/AnteprimaPersona';
 import type { PersonaPossedutaDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   etichetta: string;
@@ -27,7 +29,7 @@ export function SelettorePosseduta({ etichetta, persone, sceltaId, onScegli, esc
             <span className="block font-display uppercase text-[18px] leading-none truncate">{scelta.nomeIt}</span>
             <span className="block text-[12px] text-text-secondary">{scelta.arcanaNome} · livello {scelta.livello}</span>
           </span>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`}>Cambia</button>
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Cambia" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`} />
         </div>
       ) : (
         <ul className="m-0 p-0 list-none grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-[260px] overflow-y-auto" aria-label={`Scelte per ${etichetta}`}>

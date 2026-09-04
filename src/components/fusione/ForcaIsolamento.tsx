@@ -12,6 +12,8 @@ import { Spinner } from '../shared/PageState';
 import { FORCA_INCIDENTE_BONUS, INCENSI, ISOLAMENTO_AVVISO, giorniIsolamento, guadagnoIncenso, moltiplicatoreForca, tierResistenza } from '../../../shared/bonusVelluto';
 import type { PersonaPossedutaDto, PersonaRiassuntoDto, VellutoDto } from '../../types';
 import { SelettorePosseduta } from './SelettorePosseduta';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -64,7 +66,7 @@ function Forca({ scorta, persone, velluto, partitaId, onScortaCambiata }: { scor
                       <span className="text-text-muted">{p.arcanaNome} · livello {p.livello}</span>
                       {p.carica && <span className="chip" title="Creata durante l'Allarme: alla Forca provoca un incidente garantito con +10 punti">gialla</span>}
                       <span className="ml-auto font-black tabular-nums">EXP ×{esito.moltiplicatore.toLocaleString('it-IT')}</span>
-                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSacrificioId(p.id)}>Esegui</button>
+                      <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo="Esegui" onClick={() => setSacrificioId(p.id)} />
                     </div>
                     <div className="text-[12px] text-text-muted">
                       {esito.fattori.length === 0 ? 'Nessun bonus' : esito.fattori.map((f) => `${f.nome} ×${f.valore.toLocaleString('it-IT')}`).join(' · ')}
