@@ -43,16 +43,19 @@ describe('API suggerimenti del giorno', () => {
     }
   });
 
-  it('un Palazzo suggerito accende la sua mappa e le sue aree; un’azione bloccata dal meteo non viene suggerita', async () => {
-    // 12 aprile: esplorazione del Palazzo di Kamoshida e cena con Ryuji, ma quel giorno piove
+  it('un Palazzo suggerito accende la sua mappa e le sue aree; un’azione bloccata dai requisiti non viene suggerita', async () => {
+    // 12 aprile: esplorazione del Palazzo di Kamoshida e cena con Ryuji (rango 1: apre proprio quel giorno)
     await request(app).put(`/api/partite/${id}/giorno`).send({ data: '04-12' });
     const s = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;
     expect(s.giorno).toBe('04-12');
     expect(s.dungeon).toContain('kamoshida');
     expect(s.mappe).toContain('dungeon-kamoshida');
     expect(s.aree.length).toBeGreaterThan(0);
-    // il rango 1 di Ryuji richiede che non piova: il 12 aprile piove, quindi non è un suggerimento del giorno
-    expect(s.confidenti).not.toContain('ryuji');
+    expect(s.confidenti).toContain('ryuji');
+    // 26 luglio: la guida propone di avviare Makoto, ma il rango 1 chiede Conoscenza 3 e la partita e a 1: azione bloccata, non suggerita
+    await request(app).put(`/api/partite/${id}/giorno`).send({ data: '07-26' });
+    const luglio = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;
+    expect(luglio.confidenti).not.toContain('makoto');
   });
 
   it('un Confidente suggerito accende il luogo dove si incontra, il quartiere e la mappa del quartiere', async () => {

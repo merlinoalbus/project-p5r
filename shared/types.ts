@@ -458,7 +458,7 @@ export interface ModificaDote {
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
 export interface SemaforoRequisitoDto {
   indice: number;
-  tipo: 'dote' | 'persona-arcano' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
+  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */

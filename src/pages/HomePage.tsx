@@ -69,7 +69,7 @@ function HomeConPartita({ partita }: { partita: PartitaDto }) {
               // Larghezza legata alla finestra: su telefono la stella occupa quasi tutta la colonna, da md in su torna
               // legata all'altezza (la Home deve restare in una schermata). Il rientro percentuale lascia spazio alle
               // targhette dei vertici, che sporgono oltre il riquadro della stella.
-              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 py-1 w-[min(58vw,250px)] sm:w-[min(32vw,200px)] md:w-[clamp(150px,20vh,240px)]" aria-label="Apri le Doti sociali">
+              <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 py-1 w-[min(58vw,250px)] sm:w-[min(32vw,200px)] md:w-[clamp(150px,20vh,240px)] lg:w-[clamp(200px,30vh,320px)]" aria-label="Apri le Doti sociali">
                 <div className="w-full flex justify-center px-[11%]">
                   <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={420} badgeAltezza={62} etichettaAria="Stella delle Doti sociali" />
                 </div>

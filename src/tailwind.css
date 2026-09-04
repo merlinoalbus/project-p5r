@@ -404,6 +404,8 @@
   .kpi-griglia { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; min-width: 0; }
   @media (min-width: 420px) { .kpi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
   @media (min-width: 768px) { .kpi-griglia { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); } }
+  /* Desktop: la carta e larga e le sei tessere su una riga si stiravano fino a 200 px l'una; tre per riga, compatte */
+  @media (min-width: 1024px) { .kpi-griglia { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 420px; } }
   .kpi-tile--compatto { padding: 5px 8px; min-width: 0; border-radius: var(--radius-md); }
   .kpi-tile--compatto .kpi-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
@@ -587,7 +589,9 @@
       min-height: 0;
     }
     .home-oggi, .home-mappa { min-height: 0; }
-    .home-oggi > *, .home-mappa > * { height: 100%; min-height: 0; }
+    /* solo il contenitore della guida riempie l'area: il titolo «Oggi» resta della sua altezza */
+    .home-oggi > .riempi-figli { flex: 1 1 auto; min-height: 0; }
+    .home-mappa > * { height: 100%; min-height: 0; }
   }
   @media (min-width: 1024px) {
     .home-griglia {

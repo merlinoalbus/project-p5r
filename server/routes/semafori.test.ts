@@ -28,10 +28,11 @@ describe('API semafori dei Confidenti', () => {
     const conf = (await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[];
     // ogni Confidente espone i semafori dei ranghi superiori a quello attuale, in ordine
     for (const c of conf) for (let i = 1; i < c.semafori.length; i++) expect(c.semafori[i].rango).toBeGreaterThan(c.semafori[i - 1].rango);
+    // Yusuke: il rango 1 apre il 18 giugno (Royal), al primo giorno di gioco la data e rossa
     const yusuke = conf.find((c) => c.chiave === 'yusuke')!;
-    const arcano = yusuke.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'persona-arcano');
-    expect(arcano).toBeDefined();
-    expect(arcano!.stato).toBe('rosso');
+    const dataYusuke = yusuke.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data');
+    expect(dataYusuke).toBeDefined();
+    expect(dataYusuke!.stato).toBe('rosso');
     // bloccato: il rango 1 non è raggiungibile (né lo sblocco) finché i requisiti non sono verdi; il server rifiuta con 409
     expect(yusuke.bloccato).toMatchObject({ rango: 1 });
     expect(yusuke.bloccato!.motivi.length).toBeGreaterThan(0);
@@ -51,11 +52,15 @@ describe('API semafori dei Confidenti', () => {
     const libero = aggiornati.find((c) => c.bloccato === null && c.rango < 10)!;
     expect(libero).toBeDefined();
     expect((await request(app).put(`/api/partite/${id}/confidenti/${libero.chiave}`).send({ rango: libero.rango + 1 })).status).toBe(200);
-    // una Persona dell'Imperatore in scorta → verde
-    const eligor = ((await request(app).get('/api/compendio/persona?q=Eligor')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Eligor')!;
-    await request(app).post(`/api/partite/${id}/persona`).send({ personaId: eligor.id });
-    const dopo = ((await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[]).find((c) => c.chiave === 'yusuke')!;
-    expect(dopo.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'persona-arcano')!.stato).toBe('verde');
+    // Gemelle Custodi: il rango 1 chiede una Jack Frost che conosca Mabufu; rosso finche non e in scorta con quella skill
+    const gemelle = conf.find((c) => c.chiave === 'gemelle')!;
+    const richiesta = gemelle.semafori.find((s) => s.rango === 1)!.requisiti.find((r) => r.tipo === 'persona-abilita')!;
+    expect(richiesta.stato).toBe('rosso');
+    const jack = ((await request(app).get('/api/compendio/persona?q=Jack%20Frost')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Jack Frost')!;
+    const mabufu = ((await request(app).get('/api/compendio/skill?q=Mabufu')).body.data as Array<{ id: number; nome: string }>).find((k) => k.nome === 'Mabufu')!;
+    await request(app).post(`/api/partite/${id}/persona`).send({ personaId: jack.id, skillIds: [mabufu.id] });
+    const dopo = ((await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[]).find((c) => c.chiave === 'gemelle')!;
+    expect(dopo.semafori.find((s) => s.rango === 1)!.requisiti.find((r) => r.tipo === 'persona-abilita')!.stato).toBe('verde');
     // Dote: rosso finché la Dote non raggiunge il rango richiesto
     const makoto = conf.find((c) => c.chiave === 'makoto')!;
     const dote = makoto.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'dote')!;
