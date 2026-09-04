@@ -15,6 +15,12 @@ import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import { NOME_TIPO_AZIONE, collegamentoAzione } from '../utils/percorso';
 import type { AzionePercorsoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { DataP5 } from '../components/shared/DataP5';
+import { MeteoIcona } from '../components/guida/MeteoIcona';
+import { FasciaGiornata } from '../components/guida/FasciaGiornata';
+import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
+import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 
 function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data: string; partitaId: number | null; onCambiata: (a: AzionePercorsoDto) => void }) {
   const [occupato, setOccupato] = useState(false);
@@ -27,6 +33,13 @@ function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data
   return (
     <li className={`flex items-start gap-2 py-1.5 ${a.fatta ? 'opacity-60' : ''}`}>
       {partitaId && <input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={a.fatta} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`Fatto: ${a.azione.slice(0, 60)}`} />}
+      {a.riferimento?.tipo === 'confidente' ? (
+        <ImmagineEntita ambito="confidente" chiave={a.riferimento.chiave} etichetta={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} adatta="copri" />
+      ) : a.riferimento?.tipo === 'dungeon' ? (
+        <EmblemaDungeon chiave={a.riferimento.chiave} nome={a.riferimentoTesto ?? a.riferimento.chiave} dimensione={40} />
+      ) : (
+        <IconaCategoria categoria={a.tipo} dimensione={40} />
+      )}
       <div className="flex flex-col gap-0.5 text-[13px] min-w-0">
         <span className={a.fatta ? 'line-through' : ''}>{a.azione}</span>
         <span className="flex flex-wrap items-center gap-1.5">
@@ -87,9 +100,9 @@ export function PercorsoPage() {
           </div>
           <section className="card flex flex-col gap-1 text-[13px]">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="m-0 text-[17px] font-semibold">{dataGiocoTesto(g.giorno)} <span className="text-text-muted font-normal">({g.giornoSettimana})</span></h2>
+              <h2 className="m-0 flex items-center gap-3 flex-wrap"><DataP5 data={g.giorno} giornoSettimana={g.giornoSettimana} evidenzia={g.dataCorrente === g.giorno} /></h2>
               <span className="chip">{g.fase}</span>
-              {g.meteo && <span className="chip">{g.meteo}</span>}
+              {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={26} conTesto />}
             </div>
             {g.trama ? <p className="m-0">{g.trama}</p> : <p className="m-0 text-text-muted">Nessun evento di trama annotato.</p>}
             {g.vincoli.length > 0 && <p className="m-0 text-text-secondary"><strong className="text-text">Vincoli:</strong> {g.vincoli.join(' · ')}</p>}
@@ -99,13 +112,13 @@ export function PercorsoPage() {
           </section>
           {azioniGiorno.length > 0 && (
             <section className="card flex flex-col gap-1">
-              <h2 className="m-0 text-[15px] font-semibold">Di giorno</h2>
+              <FasciaGiornata fascia="giorno" dettaglio={partitaId ? `${azioniGiorno.filter((a) => a.fatta).length} su ${azioniGiorno.length}` : undefined} />
               <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Azioni di giorno">{azioniGiorno.map((a) => <Azione key={a.indice} a={a} data={g.giorno} partitaId={partitaId} onCambiata={aggiorna} />)}</ul>
             </section>
           )}
           {azioniSera.length > 0 && (
             <section className="card flex flex-col gap-1">
-              <h2 className="m-0 text-[15px] font-semibold">Di sera</h2>
+              <FasciaGiornata fascia="sera" dettaglio={partitaId ? `${azioniSera.filter((a) => a.fatta).length} su ${azioniSera.length}` : undefined} />
               <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Azioni di sera">{azioniSera.map((a) => <Azione key={a.indice} a={a} data={g.giorno} partitaId={partitaId} onCambiata={aggiorna} />)}</ul>
             </section>
           )}

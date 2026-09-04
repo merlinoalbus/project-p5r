@@ -12,7 +12,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import type { PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../types';
 
 const { getPercorsoIndice, getPercorsoGiorno, impostaAzionePercorso, impostaGiornoCorrente } = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaAzionePercorso: vi.fn(), impostaGiornoCorrente: vi.fn() }));
-vi.mock('../services/api', () => ({ getPercorsoIndice, getPercorsoGiorno, impostaAzionePercorso, impostaGiornoCorrente }));
+vi.mock('../services/api', () => ({ getPercorsoIndice, getPercorsoGiorno, impostaAzionePercorso, impostaGiornoCorrente, getImmagini: vi.fn().mockResolvedValue([]), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn(), urlImmagine: (ambito: string, chiave: string) => `/api/immagini/${ambito}/${chiave}/file` }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-11', giornoSettimana: 'lun', fase: 'Palazzo di Kamoshida', meteo: null, azioni: 1, fatte: 0, avvisi: 0, coperto: true }, { giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', meteo: null, azioni: 3, fatte: 0, avvisi: 1, coperto: true }, { giorno: '05-01', giornoSettimana: 'dom', fase: 'Dopo il Palazzo di Kamoshida', meteo: null, azioni: 0, fatte: 0, avvisi: 0, coperto: false }], dataCorrente: '04-12', totaleGiorni: 3, giorniCoperti: 2 };
@@ -35,8 +35,8 @@ describe('PercorsoPage', () => {
     render(<MemoryRouter initialEntries={['/guida/percorso']}><Routes><Route path="/guida/percorso" element={<PercorsoPage />} /><Route path="/guida/percorso/:data" element={<PercorsoPage />} /></Routes></MemoryRouter>);
     expect(await screen.findByText('Primo accesso al Palazzo di Kamoshida.')).toBeInTheDocument();
     expect(getPercorsoGiorno).toHaveBeenCalledWith('04-12', 4);
-    expect(screen.getByRole('heading', { name: 'Di giorno' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Di sera' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Di giorno/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^Di sera/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Ryuji Sakamoto - Carro' })).toHaveAttribute('href', '/confidenti/ryuji');
     expect(screen.getByRole('link', { name: 'Palazzo di Kamoshida' })).toHaveAttribute('href', '/guida/dungeon/kamoshida');
     expect(screen.getByText('Confidenti sbloccati: Ryuji (Carro) rango 1')).toBeInTheDocument();

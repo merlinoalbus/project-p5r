@@ -485,6 +485,47 @@
     text-transform: uppercase;
   }
 
+  /* ---- Guida (11.5): data in stile P5, miniatura della mappa, icona di categoria ---- */
+  .data-p5 { display: inline-flex; align-items: center; gap: 8px; }
+  .data-p5__giorno {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 4px 10px 2px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-family: var(--font-display);
+    font-size: 30px;
+    line-height: 1;
+    clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  }
+  .data-p5--evidenza .data-p5__giorno { background: var(--color-primary); color: #fff; }
+  .data-p5__testo { display: inline-flex; flex-direction: column; line-height: 1.1; }
+  .data-p5__mese { font-family: var(--font-display); text-transform: uppercase; font-size: 17px; letter-spacing: 0.03em; }
+  .data-p5__settimana { font-size: 12px; color: var(--color-text-secondary); }
+  .data-p5--compatta .data-p5__giorno { min-width: 34px; font-size: 20px; padding: 3px 7px 1px; }
+  .data-p5--compatta .data-p5__mese { font-size: 13px; }
+  .data-p5--compatta .data-p5__settimana { font-size: 11px; }
+  .miniatura-mappa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+  .icona-categoria {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--color-primary);
+    color: #fff;
+    clip-path: polygon(22% 0, 100% 0, 78% 100%, 0 100%);
+  }
+
   /* ---- Etichette di navigazione in carattere «menu» ---- */
   .voce-menu { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400; }
 

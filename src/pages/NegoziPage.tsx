@@ -14,6 +14,7 @@ import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO, PERSONAGGI } from '../utils
 import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import type { NegozioRiassuntoDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { IconaCategoria } from '../components/guida/IconaCategoria';
 
 export function NegoziPage() {
   useDocumentTitle('Negozi e inventario');
@@ -70,7 +71,7 @@ export function NegoziPage() {
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>
                       <Link to={`/guida/negozi/${n.chiave}`} className="card card--cliccabile no-underline text-text flex flex-col gap-1 h-full">
-                        <span className="flex flex-wrap items-center gap-2"><strong className="text-[15px]">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span></span>
+                        <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase text-[18px] leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span></span>
                         <span className="text-[12px] text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
                         {n.luogo && <span className="text-[12px] text-text-muted">{n.luogo}</span>}
                       </Link>

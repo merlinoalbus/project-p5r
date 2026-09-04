@@ -13,6 +13,7 @@ import { PageState } from '../components/shared/PageState';
 import { NOME_DOTE, NOME_FASCIA, NOME_TIPO_ATTIVITA } from '../utils/citta';
 import type { AttivitaDto, AttivitaTutteDto, FilmDto, LibroDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { IconaCategoria } from '../components/guida/IconaCategoria';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['libri', 'Libri'], ['film', 'Film e DVD']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -108,7 +109,7 @@ export function AttivitaPage() {
           <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori, studio, libri e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.libriLetti} libri letti, ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare libri letti e film visti.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
-              {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
+              {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={18} />{l}</button>)}
             </div>
             <select className="form-input w-auto ml-auto" value={dote} onChange={(e) => setDote(e.target.value)} aria-label="Dote">
               <option value="">Tutte le Doti</option>

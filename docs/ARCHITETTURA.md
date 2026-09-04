@@ -330,8 +330,19 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   15 `guida/*`, 10 `palazzi/*`, `ui/giorno`/`ui/sera`, 4 illustrazioni di stato vuoto (con varianti senza testo). Le chiavi sono già usate
   dai componenti: alla consegna nessuna modifica al codice.
 
+### Impatto visivo — Guida giorno per giorno, calendario e sezioni (11.5)
+- **Data in stile P5** `components/shared/DataP5.tsx` (giorno grande su cartiglio, mese e giorno della settimana; variante compatta ed evidenza)
+  nella Guida giorno per giorno e nel Calendario (scheda «Oggi» e righe dei giorni).
+- **Meteo a icone** `components/guida/MeteoIcona.tsx` + `utils/meteo.ts`: il testo della guida («Sereno/Nuvoloso», «Neve (ondata di gelo)») è
+  scomposto in segmenti giorno/sera con la chiave dell'icona `meteo/<chiave>` (asset §11, in arrivo) e i modificatori caldo/freddo; riserva
+  vettoriale (`iconeGuida.tsx`) e testo completo nel `title`/`aria-label`.
+- **Fasce della giornata** `FasciaGiornata` («Di giorno»/«Di sera» con `ui/giorno`/`ui/sera`, riserva sole/luna) e azioni del percorso con
+  ritratto del Confidente, emblema del Palazzo o `IconaCategoria` del tipo.
+- **Copertine e categorie**: `MiniaturaMappa` (mappa del quartiere già scaricata nell'istanza, altrimenti icona) nelle schede della città;
+  `IconaCategoria` (cartiglio rosso con icona) per tipi di negozio, categorie degli oggetti e schede delle attività.
+
 ## 8. Build, test, deploy
-- Test (Vitest, 20 file / 79 casi): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 81 file / 231 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla
