@@ -3,6 +3,7 @@
 // ============================================================
 
 import { Router } from 'express';
+import { z } from 'zod';
 import { prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { validate } from '../middleware/validate.js';
@@ -20,6 +21,8 @@ import { impostaLettura } from '../services/attivitaService.js';
 import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
 import { confermaRequisito } from '../services/semaforiService.js';
+import { impostaRaccolto } from '../services/mappe/mappeService.js';
+import { bodyRaccolto } from '../schemas/mappe.js';
 import { impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
 import { t } from '../services/traduzioniService.js';
@@ -128,6 +131,11 @@ router.get('/:id/compendio', validate({ params: paramsPartita }), (req, res) => 
 });
 router.put('/:id/compendio/:personaId', validate({ params: paramsPartitaPersona, body: bodyCompendio }), (req, res) => {
   res.json(aggiornaCompendio(Number(req.params.id), Number(req.params.personaId), req.body));
+});
+
+/** Stato «raccolto» di uno spillo della mappa nella partita (Fase 13). */
+router.put('/:id/spilli/:spilloId', validate({ params: z.object({ id: z.coerce.number().int().positive(), spilloId: z.coerce.number().int().positive() }), body: bodyRaccolto }), (req, res) => {
+  res.json(impostaRaccolto(Number(req.params.id), Number(req.params.spilloId), (req.body as { raccolto: boolean }).raccolto));
 });
 
 // ---- Persona possedute ----

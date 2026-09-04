@@ -387,6 +387,23 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   fonte_descrizione` dopo l'upsert delle Persona (migrazione 024 aggiunge le colonne). Testi originali sull'origine della figura, mai il testo
   del gioco. `PersonaDettaglioDto.descrizione/fonteDescrizione`; scheda con riquadro «Chi è» ad altezza fissa e scorrimento verticale.
 
+### Mappe a livelli e spilli dell'editor (Fase 13.1)
+Studio in `docs/MAPPE.md`. Migrazione 027: `mappa` (albero con `genitore_chiave`, `immagine_chiave` nell'ambito «mappa» dell'istanza oppure
+`asset` del repository, `larghezza`/`altezza`, `entita_tipo`/`entita_chiave` verso quartiere/dungeon/area, `origine` seed|utente, `note`),
+`spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts`, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
+richiesta|attivita, `collezionabile`), `spillo_partita` (raccolto per partita). `server/services/mappe/sincronizzaMappe.ts` è idempotente:
+crea `tokyo` → `citta-<quartiere>` e `dungeon-<chiave>` → `<area>` dalle tabelle della guida e trasforma `marcatore_mappa`/`marcatore_luogo` in
+spilli (riferimento `punto`/`luogo`, stessa origine); gira nella migrazione (istanze esistenti) e alla fine di `caricaSeed`, seguita
+dall'importazione del seed `data/seed/mappe-editor.json` (origine «seed», mai sopra le mappe modificate dall'utente).
+`server/services/mappe/mappeService.ts`: albero, dettaglio (percorso, figli, spilli con `dettaglio` dell'entità: articoli del negozio con
+`comprato`, stato del punto, Confidente, richiesta) e stato «raccolto» (uno spillo di un punto già ottenuto/esaurito nella Guida conta come
+raccolto; `impostaRaccolto` aggiorna anche `punto_partita`), editor (CRUD con validazione dei riferimenti e dei cicli genitore), immagine di
+base (`impostaImmagineMappa`, corpo grezzo `image/*`, dimensioni da `dimensioniImmagine` PNG/GIF/JPEG/WEBP), `esportaMappe`/`importaMappe`
+(pacchetto JSON versione 1 con immagini in base64; nessuna dipendenza ZIP disponibile). Rotte in `server/routes/mappe.ts` (`/albero`,
+`/esporta`, `/importa`, `/entita/:tipo/:chiave`, `/:chiave`, `/:chiave/immagine`, `/:chiave/spilli`, `/spilli/:id`) e
+`PUT /api/partite/:id/spilli/:spilloId`; schemi zod in `server/schemas/mappe.ts`; client `src/services/api/mappe.ts`. Le vecchie rotte
+dei marcatori e delle piante restano per le pagine attuali finché 13.4 non le sostituisce.
+
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
   confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
@@ -406,7 +423,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 - Tasselli Persona (`PersonaChip`, `.persona-chip*`): taglio diagonale, cornice rossa con la figura intera (`AnteprimaPersona contieni`), nome nel carattere P5 (17/19 px), tessera «Lv N», icona dell'arcano (`arcani/icona/<slug>`), rombo dorato per le rare, spunta verde d'angolo per la scorta (classe `persona-chip--scorta` conservata per i test). Operatori `OperatoreRicetta` («+» rosso, freccia bianca) condivisi da `RicettaRiga`, `CicliFusione` e ricette speciali; righe `.ricetta-riga` con tipo a etichetta, costo P5 e barra rossa quando tutti gli ingredienti sono in scorta.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 85 file / 246 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 86 file / 252 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla

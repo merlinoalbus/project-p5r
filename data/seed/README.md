@@ -16,6 +16,7 @@ Pipeline (in `scripts/seed/`, comandi `npm run seed:scarica | seed:normalizza | 
 
 | File | Contenuto |
 |---|---|
+| `mappe-editor.json` | Mappe e spilli creati con l'editor in app ed esportati per il repository (formato del pacchetto di esportazione, versione 1, senza immagini: le immagini di base sono asset in `public/asset/mappe/`); origine «seed», non sovrascrive le mappe modificate nell'istanza |
 | `confidenti-requisiti.json` | Requisiti strutturati per raggiungere ogni rango dei Confidenti (Dote, Persona dell'arcano, Palazzo, richiesta dei Mementos, altro Confidente, data, meteo, manuale), estratti dalle note di `confidenti-dettaglio.json` con il testo originale; alimentano i semafori della Partita |
 | `descrizioni-persona.json` | 232 descrizioni originali in italiano (2–3 frasi) sull'origine mitologica, folcloristica, religiosa o letteraria di ogni Persona, con fonte sintetica; redatte per l'app (mai testo del gioco), senza spoiler della trama; ordine di `persona.json` |
 | `persona.json` | 232 Persona: arcano, livello base, tipo di eredità, flag (speciale/rara/DLC/Confidente max), tratto, oggetti da esecuzione (normale/Allarme), 10 affinità, 5 statistiche, skill con livello di apprendimento, aree e piani di Mementos |
