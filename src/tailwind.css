@@ -275,6 +275,19 @@
     border-bottom: 1px solid var(--color-border-light);
     vertical-align: middle;
   }
+  /* su schermi stretti celle più compatte, così le tabelle restano leggibili senza scorrimento */
+  @media (max-width: 640px) {
+    .tabella { font-size: 13px; }
+    .tabella th, .tabella td { padding: 6px 6px; }
+  }
+  /* tabella adattiva: sotto i 640px ogni riga diventa un blocco «etichetta: valore» (etichetta da data-etichetta) */
+  @media (max-width: 640px) {
+    .tabella--adattiva thead { display: none; }
+    .tabella--adattiva tbody tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+    .tabella--adattiva tbody tr:hover { background: transparent; }
+    .tabella--adattiva td { display: flex; gap: 8px; padding: 2px 0; border-bottom: 0; }
+    .tabella--adattiva td::before { content: attr(data-etichetta); flex: 0 0 34%; color: var(--color-text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding-top: 2px; }
+  }
   .tabella tbody tr:hover { background: var(--color-bg-secondary); }
   .tabella tbody tr.riga-cliccabile { cursor: pointer; }
 
@@ -298,7 +311,11 @@
     border-radius: var(--radius-full);
     font-size: 12px;
     font-weight: 600;
-    white-space: nowrap;
+    /* i chip lunghi (effetti dei regali, livelli, note) vanno a capo invece di uscire dallo schermo */
+    white-space: normal;
+    text-align: left;
+    max-width: 100%;
+    line-height: 1.25;
     border: 1px solid transparent;
     background: var(--color-surface);
     color: var(--color-text-secondary);

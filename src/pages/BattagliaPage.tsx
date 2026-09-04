@@ -125,9 +125,9 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
     <div className="flex flex-col gap-3 text-[13px]">
       <p className="m-0 text-text-secondary">{d.sistema.esitiColpo.tecnico}. Colpisci un nemico già colpito da uno stato alterato con l'elemento indicato per ottenere un colpo Tecnico (danno bonus e possibile «1 More»).</p>
       <div className="overflow-x-auto">
-        <table className="tabella">
+        <table className="tabella tabella--adattiva">
           <thead><tr><th>Stato alterato</th><th>Colpo tecnico con</th><th>Effetto dello stato</th></tr></thead>
-          <tbody>{d.tecnico.stati.map((s) => <tr key={s.stato}><td><strong>{s.stato}</strong></td><td>{s.elementi.join(', ')}</td><td className="text-text-secondary">{effetti.get(s.stato) ?? '—'}</td></tr>)}</tbody>
+          <tbody>{d.tecnico.stati.map((s) => <tr key={s.stato}><td data-etichetta="Stato"><strong>{s.stato}</strong></td><td data-etichetta="Tecnico con">{s.elementi.join(', ')}</td><td data-etichetta="Effetto" className="text-text-secondary">{effetti.get(s.stato) ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
       <section className="card flex flex-col gap-1">
@@ -163,9 +163,9 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         <Voce titolo="Attivazione">{sp.attivazione}</Voce>
         <Voce titolo="Danno">{sp.proprietaDanno}</Voce>
         <div className="overflow-x-auto">
-          <table className="tabella text-[12px]">
+          <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Speciale</th><th>Coppia</th><th>Sblocco</th></tr></thead>
-            <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td><strong>{e.nome}</strong></td><td>{e.personaggi.join(' e ')}</td><td>{e.sblocco}</td></tr>)}</tbody>
+            <tbody>{sp.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Speciale"><strong>{e.nome}</strong></td><td data-etichetta="Coppia">{e.personaggi.join(' e ')}</td><td data-etichetta="Sblocco">{e.sblocco}</td></tr>)}</tbody>
           </table>
         </div>
         <Fonte url={sp.urlFonte} />
@@ -225,9 +225,9 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         <Voce titolo="Resistenze">{t.resistenzeGenerali}</Voce>
         {t.tecnicheConsigliate.length > 0 && <Voce titolo="Tecniche consigliate">{t.tecnicheConsigliate.join('; ')}</Voce>}
         <div className="overflow-x-auto">
-          <table className="tabella text-[12px]">
+          <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Demone del Tesoro</th><th>Livello</th><th>Arcano</th><th>Dove</th></tr></thead>
-            <tbody>{t.elenco.map((e) => <tr key={e.nome}><td><strong>{e.nome}</strong></td><td className="tabular-nums">{e.livello}</td><td>{e.arcano}</td><td>{e.dove}</td></tr>)}</tbody>
+            <tbody>{t.elenco.map((e) => <tr key={e.nome}><td data-etichetta="Demone"><strong>{e.nome}</strong></td><td data-etichetta="Livello" className="tabular-nums">{e.livello}</td><td data-etichetta="Arcano">{e.arcano}</td><td data-etichetta="Dove">{e.dove}</td></tr>)}</tbody>
           </table>
         </div>
         <Fonte url={t.urlFonte} />

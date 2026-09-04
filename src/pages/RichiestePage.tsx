@@ -97,9 +97,9 @@ export function RichiestePage() {
               {d.jose.bossSegreto && <p className="m-0"><strong>Boss segreto:</strong> {d.jose.bossSegreto.nome} — {d.jose.bossSegreto.condizione}</p>}
               {d.jose.scambi.length > 0 && (
                 <div className="overflow-x-auto">
-                  <table className="tabella text-[12px]">
+                  <table className="tabella tabella--adattiva text-[12px]">
                     <thead><tr><th>Oggetto</th><th>Fiori</th><th>Effetto</th><th>Requisito</th></tr></thead>
-                    <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td>{s.nome}</td><td className="tabular-nums">{s.costo}</td><td>{s.effetto}</td><td>{s.requisito}</td></tr>)}</tbody>
+                    <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td data-etichetta="Oggetto"><strong>{s.nome}</strong></td><td data-etichetta="Fiori" className="tabular-nums">{s.costo}</td><td data-etichetta="Effetto">{s.effetto}</td><td data-etichetta="Requisito">{s.requisito}</td></tr>)}</tbody>
                   </table>
                 </div>
               )}
