@@ -14,6 +14,9 @@ function normalizza(s: string): string {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 }
 
+/** Varianti di nome usate dalla guida che non coincidono con il compendio (verificate sulle affinità). */
+const ALIAS_MASCHERE: Record<string, string> = { norna: 'Norn' };
+
 /** Indice nome (inglese e italiano, normalizzato) → Persona del compendio. */
 function indicePersona(): Map<string, { id: number; nome: string; nomeIt: string }> {
   const nomiIt = mappaAmbito('persona');
@@ -32,7 +35,8 @@ export function battaglia(): BattagliaDto {
   if (!seed) throw httpErrors.notFound('battaglia-non-disponibile', 'I dati della guida alla battaglia non sono caricati.');
   const idx = indicePersona();
   const ombre: OmbraDto[] = seed.ombre.map((o) => {
-    const p = o.persona ? idx.get(normalizza(o.persona)) ?? null : null;
+    const chiave = o.persona ? normalizza(o.persona) : '';
+    const p = o.persona ? idx.get(chiave) ?? (ALIAS_MASCHERE[chiave] ? idx.get(normalizza(ALIAS_MASCHERE[chiave])) : undefined) ?? null : null;
     return { ...o, personaCollegata: p };
   });
   return { ...seed, ombre };

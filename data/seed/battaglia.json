@@ -2200,7 +2200,8 @@
    "debolezze": [],
    "resistenze": [
     "Attacchi fisici (annulla)",
-    "Ghiaccio (dimezza)"
+    "Ghiaccio (dimezza)",
+    "Maledizione (annulla)"
    ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
@@ -2217,7 +2218,8 @@
     "Sacro"
    ],
    "resistenze": [
-    "Tuono (dimezza)"
+    "Tuono (dimezza)",
+    "Maledizione (annulla)"
    ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
@@ -2235,7 +2237,8 @@
     "Maledizione"
    ],
    "resistenze": [
-    "Fuoco (assorbe)"
+    "Fuoco (assorbe)",
+    "Ghiaccio (annulla)"
    ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
@@ -2252,7 +2255,8 @@
     "Sacro"
    ],
    "resistenze": [
-    "Psicocinesi (dimezza)"
+    "Psicocinesi (dimezza)",
+    "Maledizione (respinge)"
    ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
@@ -2288,7 +2292,11 @@
     "Ghiaccio",
     "Nucleare"
    ],
-   "resistenze": [],
+   "resistenze": [
+    "Fuoco (annulla)",
+    "Vento (annulla)",
+    "Maledizione (annulla)"
+   ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
   },
@@ -2337,7 +2345,8 @@
    "debolezze": [],
    "resistenze": [
     "Tuono (respinge)",
-    "Sacro (annulla)"
+    "Sacro (annulla)",
+    "Maledizione (annulla)"
    ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
@@ -2355,7 +2364,8 @@
    ],
    "resistenze": [
     "Fuoco (dimezza)",
-    "Nucleare (dimezza)"
+    "Nucleare (dimezza)",
+    "Tuono (annulla)"
    ],
    "personalita": null,
    "fonte": "https://www.allgamestaff.it/persona-5-royal/palazzo-di-maruki/"
