@@ -77,7 +77,7 @@ export function QuartierePage() {
             {q.fonte && <a href={q.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
           </div>
           <section className="flex flex-col gap-1.5">
-            <MappaIncorporata chiave={`citta-${q.chiave}`} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza={520} />
+            <MappaIncorporata chiave={`citta-${q.chiave}`} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(480px, calc(100vh - 280px))" />
             <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
               {q.pianta ? (
                 <span>Mappa da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Spilli e immagine si modificano dall'editor.</span>

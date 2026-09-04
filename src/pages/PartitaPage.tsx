@@ -18,11 +18,13 @@ import { StoricoPartita } from '../components/partita/StoricoPartita';
 import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
+import { OggiPartita } from '../components/partita/OggiPartita';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
-type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
+type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
+  { k: 'oggi', l: 'Oggi' },
   { k: 'doti', l: 'Doti sociali' },
   { k: 'confidenti', l: 'Confidenti' },
   { k: 'scorta', l: 'Scorta' },
@@ -41,7 +43,7 @@ export function PartitaPage() {
   const [nuova, setNuova] = useState(false);
   const [params, setParams] = useSearchParams();
   const richiesta = params.get('scheda');
-  const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'doti';
+  const scheda: Scheda = SCHEDE.some((s) => s.k === richiesta) ? (richiesta as Scheda) : 'oggi';
 
   return (
     <PageState isLoading={caricamento && !caricata} error={errore} onRetry={() => void carica()}>
@@ -66,6 +68,7 @@ export function PartitaPage() {
               <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
             ))}
           </div>
+          {scheda === 'oggi' && <OggiPartita key={attiva.id} partita={attiva} />}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <DotiSociali partitaId={attiva.id} />}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}

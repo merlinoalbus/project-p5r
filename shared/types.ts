@@ -913,6 +913,12 @@ export interface RiferimentoAzioneDto {
   chiave: string;
 }
 
+/** Stato dell'azione nella partita (12.4): consigliata (requisiti del rango soddisfatti), bloccata (requisiti rossi, con motivo), neutra. */
+export interface StatoAzioneDto {
+  tipo: 'consigliata' | 'bloccata' | 'neutra';
+  motivo: string | null;
+}
+
 export interface AzionePercorsoDto {
   indice: number;
   fascia: 'giorno' | 'sera';
@@ -926,6 +932,10 @@ export interface AzionePercorsoDto {
   fatta: boolean;
   /** Punti applicati alla spunta (Fase 12.3): Doti «+N» dalle note della guida e note del Confidente; annullati togliendo la spunta. */
   effetti: EffettiAzioneDto | null;
+  /** Stato rispetto alla partita (solo con partita): consigliata/bloccata/neutra con motivo. */
+  stato: StatoAzioneDto | null;
+  /** Mappa (e spillo) collegati al luogo dell'azione: Palazzo, Mementos, negozio, luogo del Confidente. */
+  mappa: { chiave: string; spilloId: number | null } | null;
 }
 
 export interface PercorsoGiornoRiassuntoDto {
@@ -1442,4 +1452,6 @@ export interface EsportazioneMappeDto {
     spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
+  /** Mappe la cui immagine di base non è stata esportata perché scaricata da terzi (piante delle guide, non ridistribuibili). */
+  immaginiEscluse?: Array<{ mappa: string; motivo: string }>;
 }

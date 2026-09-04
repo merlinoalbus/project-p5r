@@ -19,9 +19,9 @@ const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-11', giornoSettimana:
 const giorno: PercorsoGiornoDto = {
   giorno: '04-12', giornoSettimana: 'mar', fase: 'Palazzo di Kamoshida', trama: 'Primo accesso al Palazzo di Kamoshida.', vincoli: [], meteo: null,
   azioni: [
-    { indice: 0, fascia: 'giorno', azione: 'Rispondere alla domanda in classe su Nemici', tipo: 'esame', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: 'Conoscenza +1', fatta: false, effetti: null },
-    { indice: 1, fascia: 'giorno', azione: 'Palazzo di Kamoshida: esplorazione del secondo livello', tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', rangoAtteso: null, note: null, fatta: false, effetti: null },
-    { indice: 2, fascia: 'sera', azione: 'Cena con Ryuji', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji Sakamoto - Carro', rangoAtteso: 1, note: null, fatta: false, effetti: null },
+    { indice: 0, fascia: 'giorno', azione: 'Rispondere alla domanda in classe su Nemici', tipo: 'esame', riferimento: null, riferimentoTesto: null, rangoAtteso: null, note: 'Conoscenza +1', fatta: false, effetti: null, stato: null, mappa: null },
+    { indice: 1, fascia: 'giorno', azione: 'Palazzo di Kamoshida: esplorazione del secondo livello', tipo: 'palazzo', riferimento: { tipo: 'dungeon', chiave: 'kamoshida' }, riferimentoTesto: 'Palazzo di Kamoshida', rangoAtteso: null, note: null, fatta: false, effetti: null, stato: null, mappa: null },
+    { indice: 2, fascia: 'sera', azione: 'Cena con Ryuji', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'ryuji' }, riferimentoTesto: 'Ryuji Sakamoto - Carro', rangoAtteso: 1, note: null, fatta: false, effetti: null, stato: null, mappa: null },
   ],
   avvisi: ['Confidenti sbloccati: Ryuji (Carro) rango 1'], fonte: 'https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/', coperto: true, precedente: '04-11', successivo: '04-13', dataCorrente: '04-12', fatte: 0,
 };

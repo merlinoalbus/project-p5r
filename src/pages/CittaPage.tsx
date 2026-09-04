@@ -20,7 +20,7 @@ export function CittaPage() {
       {q && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i quartieri come passaggi: tocca un quartiere per aprirne la mappa con negozi, ristoranti, attività e Confidenti. Sotto, le schede dei quartieri con luoghi, orari e sblocchi." />
-          <MappaIncorporata chiave="tokyo" altezza={560} />
+          <MappaIncorporata chiave="tokyo" altezza="max(520px, calc(100vh - 260px))" />
           <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
             {q.map((x) => (
               <li key={x.chiave}>

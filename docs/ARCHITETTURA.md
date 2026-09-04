@@ -445,6 +445,17 @@ corrente e tiene allineati elenco dei punti e visore (l'elenco ricarica il visor
 Il vecchio `MappaInterattiva` e le funzioni client dei marcatori sono rimossi: il posizionamento vive solo nell'editor; le rotte server dei
 marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) restano perché alimentano la sincronizzazione iniziale degli spilli e i test.
 
+### Scheda «Oggi» e stato delle azioni della guida (Fase 12.4 / 13.5)
+`GiornoGuida` (`src/components/guida/GiornoGuida.tsx`) rende la scheda del giorno e le azioni (spunta con note del Confidente, collegamenti,
+«Sulla mappa» quando l'azione ha una mappa collegata) ed è usato dalla pagina della guida e da `OggiPartita`
+(`src/components/partita/OggiPartita.tsx`: scheda «Oggi» predefinita della Partita e sezione «Oggi» della Home) con `MappaIncorporata`
+accanto (Tokyo, poi la mappa dell'azione scelta con lo spillo centrato: `VisoreMappa.selezioneIniziale`, `MappaPage` con `?spillo=`).
+`percorsoService.giornoPercorso` calcola per ogni azione `stato` (con partita: `statoAzione` valuta i semafori del rango atteso del
+Confidente — rossi → bloccata con motivo, tutti verdi → consigliata, grigi → neutra «da confermare») e `mappa` (`mappaAzione`: Palazzo →
+`dungeon-<k>`, richiesta → `dungeon-mementos`, negozio/Confidente → spillo del luogo in città). `creaPartita` imposta il giorno corrente al
+primo giorno del percorso (04-09). Esportazione delle mappe: le immagini con `origine_url` (piante scaricate da terzi) sono escluse da JSON e
+ZIP (`immaginiEscluse`, elencate nel LEGGIMI).
+
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
   confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
@@ -464,7 +475,7 @@ marcatori (`PUT /api/mappe/marcatori`, `/marcatori-luoghi`) restano perché alim
 - Tasselli Persona (`PersonaChip`, `.persona-chip*`): taglio diagonale, cornice rossa con la figura intera (`AnteprimaPersona contieni`), nome nel carattere P5 (17/19 px), tessera «Lv N», icona dell'arcano (`arcani/icona/<slug>`), rombo dorato per le rare, spunta verde d'angolo per la scorta (classe `persona-chip--scorta` conservata per i test). Operatori `OperatoreRicetta` («+» rosso, freccia bianca) condivisi da `RicettaRiga`, `CicliFusione` e ricette speciali; righe `.ricetta-riga` con tipo a etichetta, costo P5 e barra rossa quando tutti gli ingredienti sono in scorta; anche «Fusioni speciali» della scheda Persona usa gli stessi tasselli.
 
 ## 8. Build, test, deploy
-- Test (Vitest, 90 file / 270 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
+- Test (Vitest, 91 file / 274 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).
 - Dev: `scripts/start-all.sh` (BE con `tsx watch`, FE con `vite --host`), log `BE.log`/`FE.log`, PID in `.pids/`.
   Stop (`termina_server` in `scripts/_comuni.sh`): individua il listener sulla porta (deve essere `node`), risale i padri fino alla

@@ -5,7 +5,7 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import type { AzionePercorsoDto, EffettiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, ConfidentePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto, StatoAzioneDto } from '../../shared/types.js';
 import { aggiornaConfidente, aggiornaDote, confidenti } from './partiteService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
@@ -54,13 +54,51 @@ export function giornoPercorso(data: string, partitaId?: number): PercorsoGiorno
   if (!r) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
   const fatte = fattePartita(partitaId, data);
   const effetti = effettiPartita(partitaId, data);
-  const azioni = (JSON.parse(r.azioni_json) as AzioneSeed[]).map((a, i) => ({ ...a, indice: i, fatta: fatte.has(`${data}/${i}`), effetti: effetti.get(`${data}/${i}`) ?? null }));
+  const conf = partitaId ? new Map(confidenti(partitaId).map((c) => [c.chiave, c])) : null;
+  const azioni = (JSON.parse(r.azioni_json) as AzioneSeed[]).map((a, i) => ({ ...a, indice: i, fatta: fatte.has(`${data}/${i}`), effetti: effetti.get(`${data}/${i}`) ?? null, stato: conf ? statoAzione(a, conf) : null, mappa: mappaAzione(a) }));
   const prec = prepared('SELECT data FROM giorno_percorso WHERE ordine < ? ORDER BY ordine DESC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   const succ = prepared('SELECT data FROM giorno_percorso WHERE ordine > ? ORDER BY ordine ASC LIMIT 1').get(r.ordine) as { data: string } | undefined;
   return {
     giorno: r.data, giornoSettimana: r.giorno_settimana, fase: r.fase, trama: r.trama, vincoli: JSON.parse(r.vincoli_json) as string[], meteo: r.meteo, azioni, avvisi: JSON.parse(r.avvisi_json) as string[], fonte: r.fonte, coperto: r.coperto === 1,
     precedente: prec?.data ?? null, successivo: succ?.data ?? null, dataCorrente: dataCorrente(partitaId), fatte: azioni.filter((a) => a.fatta).length,
   };
+}
+
+/** Stato dell'azione nella partita (12.4): per gli incontri con un Confidente valuta i semafori del rango atteso (o del prossimo). */
+export function statoAzione(a: AzioneSeed, conf: Map<string, ConfidentePartitaDto>): StatoAzioneDto {
+  if (a.tipo !== 'confidente' || a.riferimento?.tipo !== 'confidente') return { tipo: 'neutra', motivo: null };
+  const c = conf.get(a.riferimento.chiave);
+  if (!c) return { tipo: 'neutra', motivo: null };
+  const atteso = a.rangoAtteso ?? null;
+  if (atteso !== null && c.rango >= atteso) return { tipo: 'neutra', motivo: `rango ${atteso} già raggiunto` };
+  if (!c.sbloccato && (atteso ?? 1) > 1) return { tipo: 'bloccata', motivo: 'Confidente non ancora sbloccato nella partita' };
+  const obiettivo = atteso ?? c.rango + 1;
+  const sem = c.semafori.find((s) => s.rango === obiettivo) ?? c.semafori[0];
+  if (!sem || sem.requisiti.length === 0) return { tipo: 'neutra', motivo: null };
+  const rossi = sem.requisiti.filter((r) => r.stato === 'rosso');
+  if (rossi.length > 0) return { tipo: 'bloccata', motivo: rossi.map((r) => (r.dettaglio ? `${r.testo} (${r.dettaglio})` : r.testo)).join(' · ') };
+  if (sem.pronto || sem.requisiti.every((r) => r.stato === 'verde')) return { tipo: 'consigliata', motivo: `requisiti del rango ${sem.rango} soddisfatti` };
+  const grigi = sem.requisiti.filter((r) => r.stato === 'grigio');
+  return { tipo: 'neutra', motivo: grigi.length > 0 ? `da confermare: ${grigi.map((r) => r.testo).join(' · ')}` : null };
+}
+
+/** Mappa (e spillo) del luogo dell'azione: Palazzo → `dungeon-<k>`, richiesta → Mementos, negozio/Confidente → spillo del luogo in città. */
+export function mappaAzione(a: AzioneSeed): { chiave: string; spilloId: number | null } | null {
+  const r = a.riferimento;
+  const mappaEsiste = (chiave: string) => !!prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave);
+  if (r?.tipo === 'dungeon') return mappaEsiste(`dungeon-${r.chiave}`) ? { chiave: `dungeon-${r.chiave}`, spilloId: null } : null;
+  if (r?.tipo === 'richiesta' || a.tipo === 'richiesta') return mappaEsiste('dungeon-mementos') ? { chiave: 'dungeon-mementos', spilloId: null } : null;
+  if (r?.tipo === 'negozio') {
+    const s = prepared(`SELECT id, mappa_chiave FROM spillo WHERE (riferimento_tipo = 'negozio' AND riferimento_chiave = ?)
+      OR (riferimento_tipo = 'luogo' AND riferimento_chiave IN (SELECT chiave FROM luogo WHERE negozio = ?)) ORDER BY id LIMIT 1`).get(r.chiave, r.chiave) as { id: number; mappa_chiave: string } | undefined;
+    return s ? { chiave: s.mappa_chiave, spilloId: s.id } : null;
+  }
+  if (r?.tipo === 'confidente') {
+    const s = prepared(`SELECT s.id, s.mappa_chiave FROM spillo s WHERE (s.riferimento_tipo = 'confidente' AND s.riferimento_chiave = ?)
+      OR (s.riferimento_tipo = 'luogo' AND s.riferimento_chiave IN (SELECT chiave FROM luogo WHERE confidenti_json LIKE ?)) ORDER BY s.id LIMIT 1`).get(r.chiave, `%"${r.chiave}"%`) as { id: number; mappa_chiave: string } | undefined;
+    return s ? { chiave: s.mappa_chiave, spilloId: s.id } : null;
+  }
+  return null;
 }
 
 /** Segna (o toglie) un'azione del giorno come fatta nella partita; evento alla prima spunta. */

@@ -55,11 +55,12 @@ describe('API semafori dei Confidenti', () => {
     // requisito inesistente → 404; corpo non valido → 400
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji/requisiti`).send({ rango: 9, indice: 40, confermato: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/confidenti/ryuji/requisiti`).send({ rango: 2, confermato: true })).status).toBe(400);
-    // data: senza giorno corrente è grigio; con il giorno corrente diventa verde o rosso
+    // data: la nuova partita parte dal primo giorno del gioco (04-09), quindi il requisito è già verde o rosso; cambiando il giorno resta valutato
+    expect(((await request(app).get(`/api/partite/${id}`)).body.data as { dataGioco: string | null }).dataGioco).toBe('04-09');
     const conData = conf.find((c) => c.semafori.some((s) => s.requisiti.some((r) => r.tipo === 'data')));
     if (conData) {
       const rd = conData.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data')!;
-      expect(rd.stato).toBe('grigio');
+      expect(['verde', 'rosso']).toContain(rd.stato);
       await request(app).put(`/api/partite/${id}/giorno`).send({ data: '12-24' });
       const aggData = ((await request(app).get(`/api/partite/${id}/confidenti`)).body.data as ConfidentePartitaDto[]).find((c) => c.chiave === conData.chiave)!;
       expect(['verde', 'rosso']).toContain(aggData.semafori.flatMap((s) => s.requisiti).find((r) => r.tipo === 'data')!.stato);

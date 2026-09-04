@@ -62,6 +62,11 @@ export interface DatiPartita {
 }
 
 /** Crea una partita; se è la prima (o `attiva` è richiesto) diventa attiva. */
+/** Primo giorno del percorso della guida ('MM-GG'): giorno corrente predefinito di una nuova partita. */
+function primoGiornoDelGioco(): string | null {
+  return (prepared('SELECT data FROM giorno_percorso ORDER BY ordine LIMIT 1').get() as { data: string } | undefined)?.data ?? null;
+}
+
 export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean }): PartitaDto {
   const db = getDb();
   return db.transaction(() => {
@@ -71,7 +76,7 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     if (attiva) prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1').run();
     const info = prepared(`INSERT INTO partita (nome, note, attiva, livello_protagonista, data_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
-      dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? null, dati.difficolta ?? 'normale',
+      dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.difficolta ?? 'normale',
       dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso,
     );
     const id = Number(info.lastInsertRowid);
