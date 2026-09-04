@@ -37,6 +37,14 @@ describe('API sfide', () => {
     expect(d.tratti.elenco).toHaveLength(90);
     expect(d.tratti.elenco[0]).toMatchObject({ nome: 'Stirpe ardente', effetto: expect.stringContaining('Fuoco') });
     expect(d.tratti.fonte.startsWith('https://www.allgamestaff.it/')).toBe(true);
+    expect(d.tratti.elenco.filter((x) => x.personaggio).length).toBe(18);
+    expect(d.tratti.elenco.find((x) => x.nome === 'Presenza fiera')).toMatchObject({ personaggio: 'Zorro / Mercurio', nomeEn: expect.any(String) });
+    expect(d.tratti.elenco.filter((x) => x.nomeEn).length).toBe(90);
+    expect(d.bossSegreti[0].statistiche).toMatchObject({ hp: 9999, sp: 999 });
+    expect(d.bossSegreti[2].statistiche).toMatchObject({ hp: 25000 });
+    expect(d.bossSegreti[2].nota).toContain('Gemelle Custodi');
+    expect(d.bossSegreti[1].statistiche).toBeNull();
+    expect(d.quizTv).toMatchObject({ numeroDomandeTotali: 11, verificato: true });
   });
 
   it('le 11 domande del game show in TV sono tra le domande (tipo «altro»), ordinate per anno scolastico', async () => {

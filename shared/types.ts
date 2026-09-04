@@ -755,6 +755,10 @@ export interface BossSegretoDto {
   debolezze: string[];
   strategia: string[];
   ricompense: string[];
+  /** Statistiche riportate dalla guida (HP, SP, PE, denaro, bottino), se note. */
+  statistiche: Record<string, string | number> | null;
+  /** Nota di trasparenza sull'inclusione della voce. */
+  nota: string | null;
   fonte: string;
   verificato: boolean;
 }
@@ -764,8 +768,8 @@ export interface SfideDto {
   bossSegreti: BossSegretoDto[];
   /** Scheda di Magnate come raccolta dalla guida (campi testuali e tabelle), con `fonte`. */
   magnate: (Record<string, unknown> & { fonte: string }) | null;
-  tratti: { introduzione: string; fonte: string; verificato: boolean; elenco: Array<{ nome: string; nomeEn: string | null; effetto: string; categoria: string | null }> };
-  quizTv: { introduzione: string; fonte: string };
+  tratti: { introduzione: string; fonte: string; verificato: boolean; elenco: Array<{ nome: string; nomeEn: string | null; effetto: string; categoria: string | null; /** Compagno/Persona a cui appartiene un tratto «Alleati». */ personaggio: string | null }> };
+  quizTv: { introduzione: string; numeroDomandeTotali: number | null; fonte: string; verificato: boolean };
 }
 
 // ---- Completamento: trofei, finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo (Fase 9.1) ----
