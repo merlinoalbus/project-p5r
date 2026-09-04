@@ -356,6 +356,8 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 - `shared/PulsanteVisivo.tsx` (`PulsanteVisivo`, `CollegamentoVisivo`): pulsante o collegamento a tassello con icona (`iconeGuida` SVG o asset),
   titolo in carattere display (17 px) e dettaglio nel sans; toni primario/secondario/fantasma/pericolo, `attivo` per gli interruttori; usato in tutta
   la sezione Partita al posto dei pulsanti grigi di solo testo (regola dell'utente 2026-09-04). Schede e filtri: `chip chip--icona` con icona.
+  Dal 12.8 la stessa regola vale in tutte le sezioni (pagine della Guida, Compendio, Impostazioni, finestre delle immagini e delle mappe,
+  selettori della Fusione): i soli pulsanti di solo testo rimasti sono gli «Annulla» delle finestre modali.
   Le icone vengono da `shared/IconaAzione.tsx` (`IconaAzione` → asset `ui/azione-<chiave>` §17, `IconaScheda` → `ui/scheda-<chiave>` §16, riserva SVG
   di `iconeGuida`): le chiavi sono il censimento degli asset richiesti a Codex.
 - `StellaCinque`: riquadro quadrato (`aspect-ratio`) con `container-type: inline-size`; i badge ai vertici hanno altezza in `cqw` (proporzione

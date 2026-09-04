@@ -7,9 +7,9 @@
 
 import type { ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
-import { IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconElenco, IconEvoca, IconGioca, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMatita, IconMedaglia, IconMessaggio, IconOrologio, IconPersone, IconPodio, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita } from './iconeGuida';
+import { IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconElenco, IconEvoca, IconGioca, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMatita, IconMedaglia, IconMessaggio, IconNegozio, IconOrologio, IconPersone, IconPodio, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita } from './iconeGuida';
 
-export type ChiaveAzione = 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra';
+export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro';
 export type ChiaveScheda = 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo';
 
 const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = {
@@ -45,6 +45,19 @@ const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = 
   'deseleziona': (d) => <IconAnnullaCerchio size={d} />,
   'riprova': (d) => <IconRicalcola size={d} />,
   'registra': (d) => <IconLibro size={d} />,
+  'negozio': (d) => <IconNegozio size={d} />,
+  'accettata': (d) => <IconSpunta size={d} />,
+  'esaurito': (d) => <IconAnnullaCerchio size={d} />,
+  'calendario': (d) => <IconOrologio size={d} />,
+  'adatta': (d) => <IconRicalcola size={d} />,
+  'riduci': (d) => <IconCerchio size={d} />,
+  'ingrandisci': (d) => <IconStella size={d} />,
+  'mappa': (d) => <IconMappa size={d} />,
+  'attiva': (d) => <IconGioca size={d} />,
+  'chiudi': (d) => <IconAnnullaCerchio size={d} />,
+  'url': (d) => <IconApri size={d} />,
+  'carica': (d) => <IconAltro size={d} />,
+  'indietro': (d) => <IconIndietro size={d} />,
 };
 
 const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = {

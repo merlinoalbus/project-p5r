@@ -20,6 +20,8 @@ import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { dataBreve } from '../utils/testoBreve';
 import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
 import type { AreaDungeonDto, PuntoInteresseDto, StatoPunto } from '../types';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
@@ -160,8 +162,8 @@ export function DungeonDettaglioPage() {
                     <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
                   )}
                 </span>
-                {download.errore && area.pianta && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void download.ricarica()}>Riprova</button>}
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => setMappaVersione((v) => v + 1)}>Ricarica mappa</button>
+                {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
               </div>
               {mappaPronta ? (
                 <MappaInterattiva
@@ -211,10 +213,10 @@ export function DungeonDettaglioPage() {
                         {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
                         <div className="flex flex-wrap gap-1.5">
                           {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
-                          {partitaId && p.esauribile && p.stato !== 'esaurito' && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void cambiaStato(p, 'esaurito')}>Esaurito</button>}
-                          {partitaId && p.stato && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void cambiaStato(p, null)}>Riapri</button>}
-                          {p.marcatore && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void rimuoviSpillo(p)}>Togli spillo</button>}
-                          {!p.marcatore && mappaPronta && <button type="button" className="btn btn-ghost btn-sm" onClick={() => setPosizionamento(true)}>Posiziona sulla mappa</button>}
+                          {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
+                          {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
+                          {p.marcatore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Togli spillo" onClick={() => void rimuoviSpillo(p)} />}
+                          {!p.marcatore && mappaPronta && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Posiziona sulla mappa" onClick={() => setPosizionamento(true)} />}
                         </div>
                         {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti ottenuti.</span>}
                       </div>

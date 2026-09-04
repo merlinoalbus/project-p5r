@@ -6,6 +6,8 @@ import type { ReactNode } from 'react';
 import { IconAlert } from './icons';
 import { AssetImg } from './AssetImg';
 import { useAssetMulti } from '../../stores/assetStore';
+import { PulsanteVisivo } from './PulsanteVisivo';
+import { IconaAzione } from './IconaAzione';
 
 const FOTOGRAMMI = Array.from({ length: 8 }, (_, i) => `illustrazioni/caricamento-${i + 1}`);
 const ILLUSTRAZIONE_NEUTRA = 'illustrazioni/vuoto-persona-senza-testo';
@@ -56,9 +58,7 @@ export function PageState({ isLoading, error, onRetry, children }: PageStateProp
         <h3 className="m-0 font-decor uppercase tracking-wide text-[26px] leading-none text-error">Qualcosa è andato storto</h3>
         <p className="m-0 text-text-secondary max-w-[420px]">{error}</p>
         {onRetry && (
-          <button type="button" className="btn btn-secondary" onClick={onRetry}>
-            Riprova
-          </button>
+          <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="riprova" dimensione={22} />} titolo="Riprova" onClick={onRetry} />
         )}
       </div>
     );

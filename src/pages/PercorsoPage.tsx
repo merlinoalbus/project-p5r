@@ -21,6 +21,8 @@ import { FasciaGiornata } from '../components/guida/FasciaGiornata';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data: string; partitaId: number | null; onCambiata: (a: AzionePercorsoDto) => void }) {
   const [occupato, setOccupato] = useState(false);
@@ -114,7 +116,7 @@ export function PercorsoPage() {
               {giorniDelMese.map((x) => <option key={x.giorno} value={x.giorno}>{dataGiocoTesto(x.giorno)} ({x.giornoSettimana}){x.azioni ? ` · ${x.fatte}/${x.azioni}` : ''}</option>)}
             </select>
             <button type="button" className="btn btn-secondary btn-sm touch" disabled={!g.successivo} onClick={() => vai(g.successivo)} aria-label="Giorno successivo"><IconChevronRight size={16} /></button>
-            {indice.dati.dataCorrente && indice.dati.dataCorrente !== g.giorno && <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => vai(indice.dati?.dataCorrente ?? null)}>Vai a oggi</button>}
+            {indice.dati.dataCorrente && indice.dati.dataCorrente !== g.giorno && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Vai a oggi" onClick={() => vai(indice.dati?.dataCorrente ?? null)} />}
             {partitaId && g.dataCorrente !== g.giorno && <button type="button" className="btn btn-primary btn-sm touch ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()}>Segna come giorno corrente</button>}
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>

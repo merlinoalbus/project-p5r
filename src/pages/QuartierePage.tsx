@@ -14,6 +14,8 @@ import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
 import { COLORE_TIPO_LUOGO, NOME_TIPO_LUOGO } from '../utils/citta';
 import type { LuogoDto } from '../types';
+import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 function Luogo({ l, selezionato, onSeleziona, mappaPronta, onPosiziona, onTogliSpillo }: { l: LuogoDto; selezionato: boolean; onSeleziona: () => void; mappaPronta: boolean; onPosiziona: () => void; onTogliSpillo: () => void }) {
   return (
@@ -25,8 +27,8 @@ function Luogo({ l, selezionato, onSeleziona, mappaPronta, onPosiziona, onTogliS
         {!l.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria, non confermato sulla guida italiana">da fonte secondaria</span>}
         {l.marcatore && <span className="text-[12px] text-text-muted">📍 sulla mappa</span>}
         {mappaPronta && (l.marcatore
-          ? <button type="button" className="btn btn-ghost btn-sm ml-auto" onClick={(e) => { e.stopPropagation(); onTogliSpillo(); }}>Togli spillo</button>
-          : <button type="button" className="btn btn-ghost btn-sm ml-auto" onClick={(e) => { e.stopPropagation(); onPosiziona(); }}>Posiziona sulla mappa</button>)}
+          ? <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Togli spillo" onClick={(e) => { e.stopPropagation(); onTogliSpillo(); }} />
+          : <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Posiziona sulla mappa" onClick={(e) => { e.stopPropagation(); onPosiziona(); }} />)}
       </div>
       <p className="m-0">{l.cosaOffre}</p>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
@@ -47,7 +49,7 @@ function Luogo({ l, selezionato, onSeleziona, mappaPronta, onPosiziona, onTogliS
           </table>
         </div>
       )}
-      {l.negozio && <Link to={`/guida/negozi/${l.negozio}`} className="btn btn-ghost btn-sm self-start no-underline">Articoli in vendita</Link>}
+      {l.negozio && <CollegamentoVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Articoli in vendita" to={`/guida/negozi/${l.negozio}`} />}
       {l.note && <p className="m-0 text-[12px] text-text-muted">{l.note}</p>}
       {l.fonte && <a href={l.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
     </li>
@@ -107,8 +109,8 @@ export function QuartierePage() {
                   <>Nessuna mappa pubblicata per questo quartiere{q.piantaAssente ? `: ${q.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
                 )}
               </span>
-              {download.errore && q.pianta && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void download.ricarica()}>Riprova</button>}
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setMappaVersione((v) => v + 1)}>Ricarica mappa</button>
+              {download.errore && q.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
             </div>
             {mappaPronta ? (
               <MappaInterattiva

@@ -12,6 +12,8 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { Modal } from '../shared/Modal';
 import { azzeraCacheImmagini } from '../shared/immaginiCache';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const AMBITI: Array<{ chiave: AmbitoImmagine; nome: string }> = [
   { chiave: 'persona', nome: 'Persona' },
@@ -65,7 +67,7 @@ export function ImmaginiCaricate() {
           return (
             <li key={a.chiave} className="flex items-center justify-between gap-2 border border-border-light px-3 py-2">
               <span className="text-[13px]"><strong>{a.nome}</strong> <span className="text-text-muted">· {n} {n === 1 ? 'immagine' : 'immagini'}</span></span>
-              <button type="button" className="btn btn-ghost btn-sm" disabled={n === 0 || occupato} onClick={() => setDaRimuovere(a.chiave)} aria-label={`Rimuovi le immagini caricate per ${a.nome}`}>Rimuovi</button>
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" disabled={n === 0 || occupato} onClick={() => setDaRimuovere(a.chiave)} aria-label={`Rimuovi le immagini caricate per ${a.nome}`} />
             </li>
           );
         })}

@@ -6,6 +6,8 @@ import { useMemo, useState } from 'react';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import type { PersonaRiassuntoDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   etichetta: string;
@@ -39,7 +41,7 @@ export function SelettorePersona({ etichetta, persone, scelta, onScegli, senzaRa
           <div className="font-semibold text-[15px]">{scelta.nomeIt}{scelta.nomeIt !== scelta.nome && <span className="text-[12px] font-normal text-text-muted"> {scelta.nome}</span>}</div>
           <div className="text-[12px] text-text-secondary">{scelta.arcanaNome} · livello {scelta.livello}{scelta.rara ? ' · Demone del Tesoro' : ''}{scelta.speciale ? ' · speciale' : ''}{scelta.dlc ? ' · DLC' : ''}</div>
         </div>
-        <button type="button" className="btn btn-secondary btn-sm" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`}>Cambia</button>
+        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Cambia" onClick={() => onScegli(null)} aria-label={`Cambia ${etichetta}`} />
       </div>
     );
   }

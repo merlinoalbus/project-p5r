@@ -10,6 +10,8 @@ import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
 import type { TraduzioneDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const NOMI_AMBITO: Record<string, string> = {
   arcana: 'Arcani', elementoSkill: 'Elementi delle skill', elementoAffinita: 'Elementi delle affinità', affinita: 'Codici di affinità',
@@ -72,8 +74,8 @@ export function TraduzioniEditor() {
                 <div className="flex gap-2 items-center flex-wrap">
                   <span className="flex-1 text-[14px]">{t.testo}</span>
                   {t.fonte === 'utente' && <span className="chip chip--attivo">modificata</span>}
-                  <button type="button" className="btn btn-secondary btn-sm" onClick={() => { setInModifica(t); setTesto(t.testo); }}>Modifica</button>
-                  {t.fonte === 'utente' && <button type="button" className="btn btn-ghost btn-sm" onClick={() => void applica(t)}>Ripristina</button>}
+                  <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => { setInModifica(t); setTesto(t.testo); }} />
+                  {t.fonte === 'utente' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ripristina" onClick={() => void applica(t)} />}
                 </div>
               )}
             </li>

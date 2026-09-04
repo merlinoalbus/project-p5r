@@ -3,7 +3,6 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -12,6 +11,8 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 type Filtro = 'tutte' | 'da-fare' | 'accettate' | 'completate';
 
@@ -43,12 +44,12 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
           {r.ricompense.length > 0 && <span><strong>Ricompense:</strong> {r.ricompense.join(', ')}</span>}
           {r.note && <span className="text-text-secondary">{r.note}</span>}
           <div className="flex flex-wrap gap-1.5 items-center">
-            {r.areaChiave && <Link to={`/guida/dungeon/mementos?area=${r.areaChiave}`} className="btn btn-ghost btn-sm no-underline">Apri il Dedalo</Link>}
-            {r.confidente && <Link to={`/confidenti/${r.confidente.chiave}`} className="btn btn-ghost btn-sm no-underline">Scheda Confidente</Link>}
+            {r.areaChiave && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Apri il Dedalo" to={`/guida/dungeon/mementos?area=${r.areaChiave}`} />}
+            {r.confidente && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda Confidente" to={`/confidenti/${r.confidente.chiave}`} />}
             {r.fonte && <a href={r.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
-            {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <button type="button" className="btn btn-secondary btn-sm" disabled={occupato} onClick={() => void cambia('accettata')}>Accettata</button>}
+            {partitaId && r.stato !== 'accettata' && r.stato !== 'completata' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="accettata" dimensione={20} />} titolo="Accettata" disabled={occupato} onClick={() => void cambia('accettata')} />}
             {partitaId && r.stato !== 'completata' && <button type="button" className="btn btn-primary btn-sm" disabled={occupato} onClick={() => void cambia('completata')}>Completata</button>}
-            {partitaId && r.stato && <button type="button" className="btn btn-ghost btn-sm" disabled={occupato} onClick={() => void cambia(null)}>Riapri</button>}
+            {partitaId && r.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" disabled={occupato} onClick={() => void cambia(null)} />}
           </div>
         </div>
       )}

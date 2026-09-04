@@ -12,6 +12,8 @@ import { caricaFont, eliminaFont } from '../../services/api/font';
 import { useFontStore } from '../../stores/fontStore';
 import { notifica } from '../../stores/notificationStore';
 import type { FontDto, RuoloFont } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Ruolo {
   ruolo: RuoloFont;
@@ -74,8 +76,8 @@ function RigaRuolo({ def, stato }: { def: Ruolo; stato: FontDto | undefined }) {
           <span className="chip">Predefinito: {def.predefinito}</span>
         )}
         <input ref={input} type="file" accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2" className="hidden" aria-label={`File del font per ${def.nome}`} onChange={(e) => { const f = e.target.files?.[0]; if (f) void carica(f); }} />
-        <button type="button" className="btn btn-secondary btn-sm" disabled={occupato} onClick={() => input.current?.click()}>{stato?.presente ? 'Sostituisci' : 'Carica un file'}</button>
-        {stato?.presente && <button type="button" className="btn btn-ghost btn-sm" disabled={occupato} onClick={() => void rimuovi()}>Rimuovi</button>}
+        <PulsanteVisivo compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={stato?.presente ? 'Sostituisci' : 'Carica un file'} disabled={occupato} onClick={() => input.current?.click()} />
+        {stato?.presente && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" disabled={occupato} onClick={() => void rimuovi()} />}
       </div>
     </li>
   );

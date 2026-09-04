@@ -9,6 +9,8 @@ import { SelettorePersona } from './SelettorePersona';
 import { RicettaRiga } from './RicettaRiga';
 import { Spinner } from '../shared/PageState';
 import type { PersonaRiassuntoDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   persone: PersonaRiassuntoDto[];
@@ -87,9 +89,7 @@ export function RicettePersona({ persone, partitaId, livelloProtagonista, inScor
             </ul>
           ) : null}
           {dati && dati.ricette.length < dati.totale && (
-            <button type="button" className="btn btn-secondary self-center" disabled={caricamento} onClick={() => setLimite((l) => l + 100)}>
-              Mostra altre ({dati.totale - dati.ricette.length} rimanenti)
-            </button>
+            <PulsanteVisivo className="self-center" icona={<IconaAzione chiave="carica-altri" dimensione={22} />} titolo="Mostra altre" dettaglio={`${dati.totale - dati.ricette.length} rimanenti`} disabled={caricamento} onClick={() => setLimite((l) => l + 100)} />
           )}
         </>
       )}

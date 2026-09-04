@@ -29,6 +29,8 @@ import { BadgeStato } from '../components/compendio/PiastrellaPersona';
 import { getFusioniCon, getRicettePer, getPossedute } from '../services/api';
 import { RicettaRiga } from '../components/fusione/RicettaRiga';
 import { Modal } from '../components/shared/Modal';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 const NOMI_STATISTICHE: Record<(typeof ORDINE_STATISTICHE)[number], string> = { forza: 'Forza', magia: 'Magia', resistenza: 'Resistenza', agilita: 'Agilità', fortuna: 'Fortuna' };
 
@@ -213,7 +215,7 @@ export function PersonaDettaglioPage() {
                   <button type="button" className="btn btn-primary" disabled={occupato} onClick={() => void aggiungi()}>
                     Aggiungi alla scorta al livello {livelloScelto}
                   </button>
-                  <button type="button" className="btn btn-secondary" onClick={() => setObiettivoAperto(true)}>Aggiungi agli obiettivi</button>
+                  <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Aggiungi agli obiettivi" onClick={() => setObiettivoAperto(true)} />
                 </div>
               )}
               {attiva && obiettivoAperto && (

@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import { NuovaPartitaModal } from '../partita/NuovaPartitaModal';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 /** Gestione delle partite multiple. */
 export function GestionePartite() {
@@ -54,7 +56,7 @@ export function GestionePartite() {
               <span className="chip">Liv. {p.livelloProtagonista}</span>
               <span className="text-[12px] text-text-muted">{p.difficolta}{p.nuovaPartitaPlus ? ' · NG+' : ''}</span>
               <span className="flex-1" />
-              {p.attiva ? <span className="chip chip--attivo">Attiva</span> : <button type="button" className="btn btn-secondary btn-sm" disabled={occupato === p.id} onClick={() => void attiva(p.id)}>Rendi attiva</button>}
+              {p.attiva ? <span className="chip chip--attivo">Attiva</span> : <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="attiva" dimensione={20} />} titolo="Rendi attiva" disabled={occupato === p.id} onClick={() => void attiva(p.id)} />}
               <button type="button" className="btn btn-danger btn-sm" disabled={occupato === p.id} onClick={() => void rimuovi(p.id, p.nome)}>Elimina</button>
             </li>
           ))}

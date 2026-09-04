@@ -44,7 +44,7 @@ describe('ImmagineEntita', () => {
     const finestra = screen.getByRole('dialog', { name: 'Agi' });
     expect(within(finestra).getByText('Nessuna immagine: mostrate le iniziali')).toBeInTheDocument();
     expect(within(finestra).queryByRole('button', { name: 'Carica file' })).not.toBeInTheDocument();
-    await act(async () => { within(finestra).getByText('Chiudi', { selector: 'button.btn-ghost' }).click(); });
+    await act(async () => { within(finestra).getAllByRole('button', { name: 'Chiudi' }).find((b) => b.classList.contains('btn-visivo'))!.click(); });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 

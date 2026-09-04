@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getConfidenteDettaglio, getConfidentiPartita, impostaRegaloFatto, confermaRequisitoConfidente } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -14,6 +14,8 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { SemaforiRango } from '../components/partita/SemaforiRango';
 import { IconChevronLeft } from '../components/shared/icons';
 import type { DialogoConfidenteDto } from '../types';
+import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
@@ -91,7 +93,7 @@ export function ConfidenteDettaglioPage() {
                 <h1 className="titolo-display m-0">{c.nome}</h1>
                 <span className="chip chip--attivo">{c.arcanaNome}</span>
                 {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
-                {mio && <Link to="/partita?scheda=confidenti" className="btn btn-ghost btn-sm no-underline">Aggiorna il rango</Link>}
+                {mio && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Aggiorna il rango" to="/partita?scheda=confidenti" />}
               </div>
               <div className="text-[13px] text-text-secondary flex flex-col gap-1">
                 <span><strong className="text-text">Dove:</strong> {c.disponibilita.luogo || '—'}</span>

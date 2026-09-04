@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EFFETTI_ALLARME } from '../../../shared/bonusVelluto';
 import type { VellutoDto } from '../../types';
+import { PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   velluto: VellutoDto | null;
@@ -34,7 +36,7 @@ export function PannelloVelluto({ velluto, onCambiaAllarme }: Props) {
           Allarme {v.allarmeAttivo ? 'attivo' : 'spento'}
         </button>
         <span className="chip" title={v.gemelle.prossimo ? `Prossimo: rango ${v.gemelle.prossimo.rango} → ${v.gemelle.prossimo.nome}` : 'Tutti gli sblocchi ottenuti'}>Gemelle rango {v.gemelle.rango}</span>
-        <button type="button" className="btn btn-ghost btn-sm ml-auto" onClick={() => setAperto((a) => !a)} aria-expanded={aperto}>{aperto ? 'Nascondi dettagli' : 'Dettagli'}</button>
+        <PulsanteVisivo tono="fantasma" compatto className="ml-auto" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo={aperto ? 'Nascondi dettagli' : 'Dettagli'} onClick={() => setAperto((a) => !a)} aria-expanded={aperto} />
       </div>
       {aperto && (
         <div className="flex flex-col gap-3 pt-1">

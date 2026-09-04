@@ -20,6 +20,8 @@ import { IconChevronRight } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { chiaviPresenti } from '../components/shared/immaginiCache';
 import { ricordaUltimaPersona, ultimaPersonaVista } from '../utils/ultimaPersona';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 type Ordine = 'livello' | 'nome' | 'arcana';
 type Immagine = '' | 'con' | 'senza';
@@ -173,7 +175,7 @@ export function CompendioPage() {
           <button type="button" className={`btn btn-sm ${pannelloAperto ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPannelloAperto((v) => !v)} aria-expanded={pannelloAperto} aria-controls="pannello-filtri-compendio">
             Filtri{filtriAttivi.length > 0 ? ` (${filtriAttivi.length})` : ''}
           </button>
-          {filtriAttivi.length > 0 && <button type="button" className="btn btn-ghost btn-sm" onClick={azzeraFiltri}>Azzera</button>}
+          {filtriAttivi.length > 0 && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Azzera" onClick={azzeraFiltri} />}
         </div>
         {filtriAttivi.length > 0 && (
           <ul className="m-0 p-0 list-none flex flex-wrap gap-1.5" aria-label="Filtri attivi">

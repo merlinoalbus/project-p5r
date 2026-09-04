@@ -15,6 +15,8 @@ import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DataP5 } from '../components/shared/DataP5';
 import { MeteoIcona } from '../components/guida/MeteoIcona';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenza', sblocco: 'Sblocco', esame: 'Esame', festa: 'Festa', vacanza: 'Vacanza', consiglio: 'Consiglio', meteo: 'Meteo' };
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
@@ -45,7 +47,7 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
             </div>
           ))}
           {g.tempoLibero && <span className="text-[12px] text-text-muted">Tempo libero: giorno {g.tempoLibero.giorno ? 'sì' : 'no'}, sera {g.tempoLibero.sera ? 'sì' : 'no'}.</span>}
-          {onImposta && !oggi && <button type="button" className="btn btn-secondary btn-sm self-start" onClick={onImposta}>Imposta come data di gioco della partita</button>}
+          {onImposta && !oggi && <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="calendario" dimensione={20} />} titolo="Imposta come data di gioco della partita" onClick={onImposta} />}
         </div>
       )}
     </li>
