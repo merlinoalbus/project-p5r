@@ -27,6 +27,7 @@ import { migration017 } from './017_negozi.js';
 import { migration018 } from './018_percorso.js';
 import { migration019 } from './019_trofei.js';
 import { migration020 } from './020_piante.js';
+import { migration021 } from './021_origine_immagine.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020];
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021];

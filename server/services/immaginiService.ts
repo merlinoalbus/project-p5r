@@ -31,14 +31,14 @@ const ESTENSIONE_PER_MIME: Record<string, string> = {
 /** Dimensione massima accettata (byte). */
 export const MAX_BYTE_IMMAGINE = 8 * 1024 * 1024;
 
-interface RigaImmagine { id: number; ambito: string; chiave: string; nome_file: string; mime: string; byte: number; created_at: string }
+interface RigaImmagine { id: number; ambito: string; chiave: string; nome_file: string; mime: string; byte: number; created_at: string; origine_url: string | null }
 
 function dirImmagini(ambito: string): string {
   return path.join(config.dataDir, 'immagini', ambito);
 }
 
 function dto(r: RigaImmagine): ImmagineDto {
-  return { id: r.id, ambito: r.ambito, chiave: r.chiave, mime: r.mime, byte: r.byte, url: `/api/immagini/${encodeURIComponent(r.ambito)}/${encodeURIComponent(r.chiave)}/file`, createdAt: r.created_at };
+  return { id: r.id, ambito: r.ambito, chiave: r.chiave, mime: r.mime, byte: r.byte, url: `/api/immagini/${encodeURIComponent(r.ambito)}/${encodeURIComponent(r.chiave)}/file`, createdAt: r.created_at, origineUrl: r.origine_url ?? null };
 }
 
 /** Elenco delle immagini, opzionalmente per ambito. */
@@ -64,8 +64,8 @@ export function fileImmagine(ambito: string, chiave: string): { percorso: string
   return { percorso, mime: r.mime };
 }
 
-/** Salva (o sostituisce) l'immagine di un'entità. */
-export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: string, contenuto: Buffer): ImmagineDto {
+/** Salva (o sostituisce) l'immagine di un'entità; `origineUrl` è l'indirizzo da cui è stata scaricata (null per i file caricati). */
+export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: string, contenuto: Buffer, origineUrl: string | null = null): ImmagineDto {
   const estensione = ESTENSIONE_PER_MIME[mime];
   if (!estensione) throw httpErrors.badRequest('formato-non-ammesso', `Formato '${mime}' non ammesso: usa PNG, JPEG, WEBP, GIF o SVG.`);
   if (contenuto.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Il contenuto dell\'immagine è vuoto.');
@@ -78,9 +78,9 @@ export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: stri
   const precedente = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
   try {
     getDb().transaction(() => {
-      prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at) VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at`)
-        .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso());
+      prepared(`INSERT INTO immagine (ambito, chiave, nome_file, mime, byte, created_at, origine_url) VALUES (?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(ambito, chiave) DO UPDATE SET nome_file = excluded.nome_file, mime = excluded.mime, byte = excluded.byte, created_at = excluded.created_at, origine_url = excluded.origine_url`)
+        .run(ambito, chiave, nomeFile, mime, contenuto.length, nowIso(), origineUrl);
     })();
   } catch (err) {
     // Il DB ha rifiutato la riga: nessun file orfano sul disco.
@@ -115,7 +115,7 @@ export async function importaImmagineDaUrl(ambito: AmbitoImmagine, chiave: strin
   if (!res.ok) throw httpErrors.badRequest('download-fallito', `Il server remoto ha risposto ${res.status}.`);
   const mime = (res.headers.get('content-type') ?? '').split(';')[0].trim();
   const contenuto = Buffer.from(await res.arrayBuffer());
-  return salvaImmagine(ambito, chiave, mime, contenuto);
+  return salvaImmagine(ambito, chiave, mime, contenuto, u.toString());
 }
 
 export function eliminaImmagine(ambito: string, chiave: string): void {

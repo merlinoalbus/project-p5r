@@ -44,8 +44,19 @@ function motiviAssenza(): Map<string, string> {
   return m;
 }
 
-function mappePresenti(): Set<string> {
-  return new Set((prepared("SELECT chiave FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string }>).map((r) => r.chiave));
+function mappePresenti(): Map<string, string | null> {
+  return new Map((prepared("SELECT chiave, origine_url FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string; origine_url: string | null }>).map((r) => [r.chiave, r.origine_url ?? null]));
+}
+
+/** Fonte effettiva della pianta presente: la principale, un'alternativa o l'indirizzo grezzo se non riconosciuto. */
+function piantaScaricata(origine: string | null | undefined, pianta: PiantaAreaDto | null): AreaDungeonDto['piantaScaricata'] {
+  if (!origine) return null;
+  if (pianta && pianta.url === origine) return { url: origine, fonte: pianta.fonte, pagina: pianta.pagina };
+  const alt = pianta?.alternative.find((a) => a.url === origine);
+  if (alt) return { url: origine, fonte: alt.fonte, pagina: alt.pagina };
+  let host = origine;
+  try { host = new URL(origine).hostname.replace(/^www\./, ''); } catch { /* indirizzo non URL: si mostra com'è */ }
+  return { url: origine, fonte: host, pagina: null };
 }
 
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, conPartita: boolean): DungeonRiassuntoDto {
@@ -73,7 +84,7 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const piante = pianteAree();
   const assenti = motiviAssenza();
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
-    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave), pianta: piantaDto(piante.get(a.chiave)), piantaAssente: piante.has(a.chiave) ? null : (assenti.get(a.chiave) ?? null),
+    chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave), pianta: piantaDto(piante.get(a.chiave)), piantaScaricata: mappe.has(a.chiave) ? piantaScaricata(mappe.get(a.chiave), piantaDto(piante.get(a.chiave))) : null, piantaAssente: piante.has(a.chiave) ? null : (assenti.get(a.chiave) ?? null),
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine').all(a.chiave) as RigaPunto[]).map((p): PuntoInteresseDto => ({
       chiave: p.chiave, ordine: p.ordine, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dettagli: JSON.parse(p.dettagli_json) as Record<string, unknown>, fonte: p.fonte,
       stato: stati.get(p.chiave) ?? null, marcatore: marc.get(p.chiave) ?? null,

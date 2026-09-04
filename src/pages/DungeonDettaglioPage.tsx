@@ -51,6 +51,10 @@ export function DungeonDettaglioPage() {
   const download = useCarica(() => (area && !area.mappa && area.pianta ? scaricaPianta(area.chiave).then((r) => { segnaImmaginePresente('mappa', r.area); return r; }) : Promise.resolve(null)), [area?.chiave, area?.mappa, area?.pianta?.url]);
   const scaricata = !!area && !!download.dati && download.dati.area === area.chiave;
   const mappaPronta = !!area && (area.mappa || mappaVersione > 0 || scaricata);
+  // Credito della fonte davvero usata: quella registrata nell'immagine, oppure quella appena scaricata (principale o alternativa)
+  const fonteUsata = area?.piantaScaricata ?? (scaricata && download.dati && area?.pianta
+    ? { url: download.dati.url, fonte: download.dati.fonte, pagina: download.dati.url === area.pianta.url ? area.pianta.pagina : (area.pianta.alternative.find((x) => x.url === download.dati?.url)?.pagina ?? null) }
+    : null);
 
   const puntiVisibili = useMemo(() => (area?.punti ?? []).filter((p) => (filtro.size === 0 || filtro.has(p.tipo)) && (mostraGestiti || !p.stato)), [area, filtro, mostraGestiti]);
   const gestitiArea = (area?.punti ?? []).filter((p) => p.stato).length;
@@ -123,7 +127,15 @@ export function DungeonDettaglioPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />
                 <span className="text-[12px] text-text-muted flex-1 min-w-[200px]">
-                  {area.pianta ? (
+                  {fonteUsata ? (
+                    <>
+                      Pianta scaricata da <a href={fonteUsata.pagina ?? fonteUsata.url} target="_blank" rel="noreferrer" className="text-primary">{fonteUsata.fonte}</a>{area.pianta && fonteUsata.url === area.pianta.url && area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}{area.pianta && fonteUsata.url !== area.pianta.url ? ' (fonte alternativa: la principale non era raggiungibile)' : ''}, nella tua istanza. Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
+                    </>
+                  ) : area.mappa && !area.pianta ? (
+                    <>Immagine della pianta importata da te. Gli spilli si spostano in modalità «posiziona».</>
+                  ) : area.mappa ? (
+                    <>Immagine della pianta importata da te (la guida <a href={area.pianta!.pagina ?? area.pianta!.url} target="_blank" rel="noreferrer" className="text-primary">{area.pianta!.fonte}</a> ne pubblica una). Gli spilli si spostano in modalità «posiziona».</>
+                  ) : area.pianta ? (
                     <>
                       Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="text-primary">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
                     </>
