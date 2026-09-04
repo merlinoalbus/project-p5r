@@ -5,7 +5,7 @@
 // Test PianiSalvati — avanzamento, passi eseguibili, albero, filtro per obiettivo, rinomina ed eliminazione
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { PianiSalvati } from './PianiSalvati';
 import type { NodoPianoDto, PianoSalvatoDto } from '../../types';
@@ -34,10 +34,10 @@ describe('PianiSalvati', () => {
     expect((await screen.findAllByRole('link', { name: 'Jack Frost' }))[0]).toHaveAttribute('href', '/compendio/persona/88');
     expect(getPianiSalvati).toHaveBeenCalledWith(7, undefined);
     expect(screen.getByText('2/2')).toBeInTheDocument();
-    expect(screen.getByRole('list', { name: 'Passi eseguibili' }).querySelector('a')).toHaveAttribute('href', '/fusione?vista=calcolatore&a=1&b=2');
+    expect(within(screen.getByRole('list', { name: 'Passi eseguibili' })).getByRole('link', { name: 'Ricetta' })).toHaveAttribute('href', '/fusione?vista=calcolatore&a=1&b=2');
     expect(await screen.findByRole('button', { name: 'Esegui' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Mostra albero' }));
-    expect(screen.getByRole('link', { name: /Arsène/ })).toHaveClass('persona-chip--scorta');
+    expect(within(screen.getByRole('list', { name: 'Passi eseguibili' })).getByRole('link', { name: /Arsène/ })).toHaveClass('persona-chip--scorta');
     // rinomina
     fireEvent.click(screen.getByRole('button', { name: /Il mio piano/ }));
     aggiornaPianoSalvato.mockResolvedValue({ ...piano, titolo: 'Nuovo titolo' });

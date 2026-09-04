@@ -10,6 +10,8 @@ import { Modal } from '../shared/Modal';
 import { Spinner } from '../shared/PageState';
 import { ElementoChip } from '../compendio/ElementoChip';
 import type { EsitoFusioneScortaDto } from '../../types';
+import { PersonaChip } from './PersonaChip';
+import { OperatoreRicetta } from './RicettaRiga';
 
 interface Props {
   partitaId: number;
@@ -57,9 +59,9 @@ export function EseguiFusioneModal({ partitaId, possedutaIds, risultatoId, onChi
       {a && (
         <form className="flex flex-col gap-3 text-[13px]" onSubmit={(e) => { e.preventDefault(); void esegui(); }}>
           <div className="flex flex-wrap items-center gap-2">
-            {a.ingredienti.map((i) => <span key={i.possedutaId} className="chip">{i.nomeIt} L{i.livello}</span>)}
-            <span aria-hidden="true">→</span>
-            <span className="chip chip--attivo">{a.risultato.nomeIt} · {a.risultato.arcanaNome}</span>
+            {a.ingredienti.map((i, n) => <span key={i.possedutaId} className="ricetta-riga__gruppo"><PersonaChip p={{ id: i.personaId, nome: i.nome, nomeIt: i.nomeIt, livello: i.livello }} suffisso={i.carica ? ' ⚡ carica' : undefined} />{n < a.ingredienti.length - 1 && <OperatoreRicetta tipo="piu" />}</span>)}
+            <OperatoreRicetta tipo="risultato" />
+            <PersonaChip p={a.risultato} evidenza />
             <span className="text-text-muted">fusione {a.tipo === 'speciale' ? 'speciale' : a.tipo === 'tesoro' ? 'con Demone del Tesoro' : a.tipo === 'stesso-arcano' ? 'stesso arcano' : 'normale'}{a.allarme ? ' · Allarme attivo' : ''}</span>
           </div>
           {a.sopraProtagonista && <p className="m-0 text-warning">Il risultato supera il livello del protagonista: in gioco serve il «Trattamento speciale» delle Gemelle (a pagamento).</p>}
