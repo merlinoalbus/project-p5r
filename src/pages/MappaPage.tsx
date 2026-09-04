@@ -2,13 +2,13 @@
 // MappaPage — indice delle mappe (albero) e visore a schermo intero di una mappa (Fase 13.2)
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { getAlberoMappe, getMappa, impostaAcquisto, impostaSpilloRaccolto, impostaStatoPunto } from '../services/api';
+import { useMappaPartita } from '../hooks/useMappaPartita';
+import { getAlberoMappe } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
-import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { VisoreMappa } from '../components/mappe/VisoreMappa';
@@ -16,8 +16,7 @@ import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaSpillo } from '../components/mappe/IconaSpillo';
 import { NOME_TIPO_MAPPA } from '../../shared/spilli';
-import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
-import type { StatoPuntoMappa } from '../components/mappe/VisoreMappa';
+import type { MappaRiassuntoDto } from '../types';
 
 export function MappaPage() {
   const { chiave } = useParams<{ chiave: string }>();
@@ -70,50 +69,10 @@ function IndiceMappe() {
 /** Visore a schermo intero con lo stato della partita attiva. */
 function DettaglioMappa({ chiave, partitaId }: { chiave: string; partitaId: number | null }) {
   const navigate = useNavigate();
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId]);
-  const [aggiornati, setAggiornati] = useState<Map<number, SpilloDto>>(new Map());
-  const mappa: MappaDto | null = useMemo(() => (dati ? { ...dati, spilli: dati.spilli.map((s) => aggiornati.get(s.id) ?? s) } : null), [dati, aggiornati]);
+  const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId);
   useDocumentTitle(mappa ? `${mappa.nome} — Mappe` : 'Mappa');
-
-  const raccolto = async (s: SpilloDto, valore: boolean) => {
-    if (!partitaId) return;
-    try {
-      const nuovo = await impostaSpilloRaccolto(partitaId, s.id, valore);
-      setAggiornati((m) => new Map(m).set(nuovo.id, nuovo));
-      notifica('success', valore ? `«${s.nome}» segnato come raccolto.` : `«${s.nome}» riaperto.`);
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-    }
-  };
-
-  /** Stato del punto della Guida (ottenuto/esaurito/riaperto): lo spillo collegato segue lo stato (raccolto se gestito). */
-  const statoPunto = async (s: SpilloDto, stato: StatoPuntoMappa) => {
-    if (!partitaId || s.dettaglio?.tipo !== 'punto' || !s.dettaglio.punto) return;
-    const punto = s.dettaglio.punto;
-    try {
-      const aggiornato = await impostaStatoPunto(partitaId, punto.chiave, stato);
-      setAggiornati((m) => new Map(m).set(s.id, { ...s, raccolto: aggiornato.stato !== null, dettaglio: { ...s.dettaglio!, punto: { ...punto, stato: aggiornato.stato } } }));
-      notifica('success', stato === null ? `«${s.nome}» riaperto.` : `«${s.nome}» segnato come ${stato}.`);
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-    }
-  };
-
-  /** Acquisto di un articolo del negozio collegato allo spillo. */
-  const acquisto = async (s: SpilloDto, articoloChiave: string, fatto: boolean) => {
-    if (!partitaId || !s.dettaglio?.negozio) return;
-    const negozio = s.dettaglio.negozio;
-    try {
-      const a = await impostaAcquisto(partitaId, articoloChiave, fatto);
-      setAggiornati((m) => new Map(m).set(s.id, { ...s, dettaglio: { ...s.dettaglio!, negozio: { ...negozio, articoli: negozio.articoli.map((x) => (x.chiave === a.chiave ? { ...x, comprato: a.acquistato } : x)) } } }));
-      notifica('success', fatto ? `«${a.nomeIt ?? a.nome}» segnato come comprato.` : `«${a.nomeIt ?? a.nome}» riaperto.`);
-    } catch (err) {
-      notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
-    }
-  };
-
   return (
-    <PageState isLoading={caricamento} error={errore} onRetry={ricarica}>
+    <PageState isLoading={caricamento && !mappa} error={errore} onRetry={ricarica}>
       {mappa && (
         <VisoreMappa
           key={mappa.chiave}

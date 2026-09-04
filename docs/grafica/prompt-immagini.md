@@ -202,3 +202,9 @@ e vengono pubblicate nel repository. Nessun testo dentro l'immagine (nomi e spil
 | `citta-suidobashi.png` | Suidobashi (Dome Town) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
 | `citta-asakusa.png` | Asakusa | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
 | `citta-mementos.png` | Mementos (ingresso) | pianta stilizzata del quartiere con le vie principali e sagome degli edifici tipici (senza testo: i nomi dei luoghi li mette l'app con gli spilli) |
+
+## 20. Icona della sezione «Mappe» della Guida (1) — `guida/mappe.png` (256×256, trasparente) — richiesta il 2026-09-04 (Fase 13.4)
+Stessa famiglia delle icone delle sezioni della Guida (§13): tratto bianco spesso con ombra rossa sfalsata, nessun testo.
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `guida/mappe.png` | piastrella «Mappe» nell'indice della Guida (Tokyo, quartieri, Palazzi e Dedali a livelli) | mappa ripiegata con uno spillo a goccia piantato sopra |

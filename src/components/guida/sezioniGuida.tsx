@@ -4,6 +4,7 @@
 
 import type { ReactNode } from 'react';
 import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../shared/icons';
+import { IconMappa } from '../shared/iconeGuida';
 
 export interface SezioneGuida {
   chiave: string;
@@ -21,6 +22,7 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'domande', to: '/guida/domande', titolo: 'Domande in classe ed esami', descrizione: 'Risposte corrette per data, prossime domande, spunta «fatta»', icona: <IconBook size={DIM} /> },
   { chiave: 'cruciverba', to: '/guida/cruciverba', titolo: 'Cruciverba di Leblanc', descrizione: '38 cruciverba con indizio e risposta (+1 nota di Conoscenza), spunta «risolto»', icona: <IconBook size={DIM} /> },
   { chiave: 'calendario', to: '/guida/calendario', titolo: 'Calendario di gioco', descrizione: 'Meteo, eventi, scadenze dei Palazzi, consigli per settimana', icona: <IconStar size={DIM} /> },
+  { chiave: 'mappe', to: '/guida/mappe', titolo: 'Mappe', descrizione: 'Tokyo, quartieri, aree dei Palazzi e piani dei Dedali: mappe a livelli con spilli, collezionabili raccolti, negozi ed editor', icona: <IconMappa size={DIM} /> },
   { chiave: 'dungeon', to: '/guida/dungeon', titolo: 'Palazzi e Dedali', descrizione: 'Aree, punti di interesse, boss e mappe interattive con avanzamento', icona: <IconMask size={DIM} /> },
   { chiave: 'richieste', to: '/guida/richieste', titolo: 'Richieste dei Mementos', descrizione: '33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose', icona: <IconBook size={DIM} /> },
   { chiave: 'battaglia', to: '/guida/battaglia', titolo: 'Aiuto in battaglia', descrizione: 'Debolezze delle Ombre per area, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro', icona: <IconBolt size={DIM} /> },
