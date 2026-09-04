@@ -476,6 +476,44 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-storico.png` | Storico | orologio da taschino |
 | `scheda-riepilogo.png` | Riepilogo | tre barre di altezza crescente |
 
+## 17. Icone delle azioni (31) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo, nessun numero salvo dove indicato). L'app le
+mostra a 20–26 px dentro i pulsanti a tassello (fondo rosso quando il pulsante è acceso, bianco/nero quando è spento: il tratto bianco
+con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senza il file usa un'icona SVG in codice. Un file per chiave.
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `azione-regalo.png` | Regalo a un Confidente | pacco regalo con fiocco |
+| `azione-uscita.png` | Uscita insieme | porta aperta con freccia che esce |
+| `azione-annulla-ultimo.png` | Annulla l’ultimo incremento | freccia curva che torna indietro |
+| `azione-sbloccato.png` | Confidente sbloccato | lucchetto aperto |
+| `azione-bloccato.png` | Confidente bloccato | lucchetto chiuso |
+| `azione-note.png` | Note personali | foglietto con matita |
+| `azione-modifica.png` | Modifica | matita inclinata |
+| `azione-sms.png` | Invito accettato via SMS | fumetto con tre puntini |
+| `azione-esame-primo.png` | Primo agli esami | medaglia con il numero 1 |
+| `azione-esame-top10.png` | Fra i primi dieci agli esami | podio a tre gradini con una stella |
+| `azione-fortuna.png` | Lettura della fortuna di Chihaya | sfera di cristallo con stelle |
+| `azione-libro.png` | Libro a resa maggiorata | libro aperto |
+| `azione-evoca.png` | Evoca dal Registro | scintille attorno a una carta |
+| `azione-esegui.png` | Esegui l’anello o il passo | triangolo di avvio |
+| `azione-allarme.png` | Allarme della Stanza di Velluto | sirena lampeggiante |
+| `azione-elimina.png` | Elimina | cestino |
+| `azione-ricalcola.png` | Ricalcola il piano | freccia circolare |
+| `azione-riapri.png` | Riapri l’obiettivo | freccia circolare aperta con punto |
+| `azione-albero.png` | Mostra l’albero del piano | tre nodi collegati a ramo |
+| `azione-ricetta.png` | Come ottenere la Persona | ampolla da alchimista |
+| `azione-piano.png` | Piano di fusione | blocco degli appunti con spunta |
+| `azione-scheda.png` | Apri la scheda | riquadro con freccia in alto a destra |
+| `azione-raggiunto.png` | Segna raggiunto / raggiunti | spunta in cerchio |
+| `azione-annulla.png` | Annulla / annullati | croce in cerchio |
+| `azione-tutti.png` | Tutti (filtro) | elenco puntato |
+| `azione-aperti.png` | Aperti (filtro) | cerchio vuoto |
+| `azione-obiettivo.png` | Nuovo obiettivo / solo mancanti | bersaglio con freccia |
+| `azione-carica-altri.png` | Carica altre voci | freccia in basso con base |
+| `azione-seleziona.png` | Seleziona tutte le voci | doppia spunta |
+| `azione-deseleziona.png` | Deseleziona | quadratino con croce |
+| `azione-riprova.png` | Riprova dopo un errore | freccia circolare con punto esclamativo |
+
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.
 2. Icone elementi (4), affinità (5), navigazione (7.1) → usate in ogni scheda.

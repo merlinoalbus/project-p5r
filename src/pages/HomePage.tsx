@@ -40,13 +40,13 @@ export function HomePage() {
             <span className="chip">Liv. {attiva.livelloProtagonista}</span>
             {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
           </div>
-          <div className="flex gap-4 flex-wrap items-center">
+          <div className="flex flex-col items-center gap-3">
             {doti.dati && doti.dati.length > 0 && (
               <Link to="/partita?scheda=doti" className="no-underline text-text shrink-0 px-8 py-3" aria-label="Apri le Doti sociali">
                 <StellaCinque assi={doti.dati.map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))} dimensione={300} badgeAltezza={40} etichettaAria="Stella delle Doti sociali" />
               </Link>
             )}
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap justify-center">
             {doti.dati?.map((d) => (
               <Link key={d.chiave} to="/partita?scheda=doti" className="kpi-tile no-underline text-text min-w-[110px]">
                 <span className="kpi-label">{d.nome}</span>
@@ -60,7 +60,7 @@ export function HomePage() {
             </div>
           </div>
           {scorta.dati && (
-            <div className="flex flex-wrap items-center gap-1.5" aria-label="Arcani potenziati dalla scorta">
+            <div className="flex flex-wrap items-center justify-center gap-1.5 text-center" aria-label="Arcani potenziati dalla scorta">
               <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Arcani potenziati · Confidenti ×1,5 con una Persona in scorta</span>
               {arcaniInScorta.length === 0 && <span className="text-[12px] text-text-muted">nessuna Persona in scorta</span>}
               {arcaniInScorta.map((a) => (

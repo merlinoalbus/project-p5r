@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { IconaScheda } from '../components/shared/IconaAzione';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState, EmptyState } from '../components/shared/PageState';
@@ -18,22 +19,19 @@ import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
-import { AssetImg } from '../components/shared/AssetImg';
-import { IconAppunti, IconBersaglio, IconCarte, IconCiclo, IconLibro, IconOrologio, IconPersone, IconRiepilogo, IconStella } from '../components/shared/iconeGuida';
-import type { ReactNode } from 'react';
 
 type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
-const SCHEDE: Array<{ k: Scheda; l: string; icona: ReactNode }> = [
-  { k: 'doti', l: 'Doti sociali', icona: <IconStella size={15} /> },
-  { k: 'confidenti', l: 'Confidenti', icona: <IconPersone size={15} /> },
-  { k: 'scorta', l: 'Scorta', icona: <IconCarte size={15} /> },
-  { k: 'compendio', l: 'Compendio personale', icona: <IconLibro size={15} /> },
-  { k: 'obiettivi', l: 'Obiettivi', icona: <IconBersaglio size={15} /> },
-  { k: 'piani', l: 'Piani salvati', icona: <IconAppunti size={15} /> },
-  { k: 'cicli', l: 'Cicli', icona: <IconCiclo size={15} /> },
-  { k: 'storico', l: 'Storico', icona: <IconOrologio size={15} /> },
-  { k: 'riepilogo', l: 'Riepilogo', icona: <IconRiepilogo size={15} /> },
+const SCHEDE: Array<{ k: Scheda; l: string }> = [
+  { k: 'doti', l: 'Doti sociali' },
+  { k: 'confidenti', l: 'Confidenti' },
+  { k: 'scorta', l: 'Scorta' },
+  { k: 'compendio', l: 'Compendio personale' },
+  { k: 'obiettivi', l: 'Obiettivi' },
+  { k: 'piani', l: 'Piani salvati' },
+  { k: 'cicli', l: 'Cicli' },
+  { k: 'storico', l: 'Storico' },
+  { k: 'riepilogo', l: 'Riepilogo' },
 ];
 
 /** Pagina della partita attiva con schede; senza partite propone la creazione. */
@@ -65,7 +63,7 @@ export function PartitaPage() {
           </IntestazionePagina>
           <div className="flex gap-1.5 flex-wrap">
             {SCHEDE.map((s) => (
-              <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><AssetImg nome={`ui/scheda-${s.k}`} alt="" decorativa className="h-4 w-4 object-contain" fallback={s.icona} />{s.l}</button>
+              <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
             ))}
           </div>
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}

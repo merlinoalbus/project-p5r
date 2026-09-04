@@ -9,7 +9,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
-import { IconBersaglio } from '../shared/iconeGuida';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -53,7 +53,7 @@ export function CompendioPersonale({ partitaId }: Props) {
           <span className="text-[12px] text-text-muted">{fatte} di {totale}</span>
         </div>
         <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca Persona…" />
-        <button type="button" className={`chip chip--icona touch ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconBersaglio size={14} />Solo mancanti</button>
+        <button type="button" className={`chip chip--icona touch ${soloMancanti ? 'chip--attivo' : ''}`} onClick={() => setSoloMancanti((v) => !v)} aria-pressed={soloMancanti}><IconaAzione chiave="obiettivo" dimensione={14} />Solo mancanti</button>
       </div>
       <ul className="m-0 p-0 list-none card py-0 divide-y divide-border-light">
         {lista.map((p) => {

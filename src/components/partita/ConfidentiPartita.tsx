@@ -22,7 +22,8 @@ import { slug } from '../../../shared/slug';
 import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconApri, IconIndietro, IconLucchettoAperto, IconLucchettoChiuso, IconMaschera, IconMatita, IconMedaglia, IconMessaggio, IconPodio, IconRegalo, IconUscita } from '../shared/iconeGuida';
+import { IconMaschera } from '../shared/iconeGuida';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -80,9 +81,9 @@ export function ConfidentiPartita({ partitaId }: Props) {
       <div className="flex flex-col gap-1.5 mb-3" role="group" aria-label="Moltiplicatori dei punti">
         <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Moltiplicatori · valgono per tutti i punti registrati</span>
         <div className="flex flex-wrap gap-2">
-          <PulsanteVisivo attivo={esame === 'top10'} icona={<IconPodio size={24} />} titolo="Esami top 10" dettaglio="×1,2 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-label="Esami top 10 ×1,2" title="Fra i primi dieci agli ultimi esami: punti ×1,2 con i compagni di scuola fino all'esame successivo" />
-          <PulsanteVisivo attivo={esame === 'primo'} icona={<IconMedaglia size={24} />} titolo="Esami 1º" dettaglio="×1,5 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-label="Esami 1º ×1,5" title="Primo del corso agli ultimi esami: punti ×1,5 con i compagni di scuola fino all'esame successivo" />
-          <PulsanteVisivo attivo={invito} icona={<IconMessaggio size={24} />} titolo="Invito SMS" dettaglio="×1,2 su tutta l'uscita" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2" />
+          <PulsanteVisivo attivo={esame === 'top10'} icona={<IconaAzione chiave="esame-top10" dimensione={24} />} titolo="Esami top 10" dettaglio="×1,2 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-label="Esami top 10 ×1,2" title="Fra i primi dieci agli ultimi esami: punti ×1,2 con i compagni di scuola fino all'esame successivo" />
+          <PulsanteVisivo attivo={esame === 'primo'} icona={<IconaAzione chiave="esame-primo" dimensione={24} />} titolo="Esami 1º" dettaglio="×1,5 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-label="Esami 1º ×1,5" title="Primo del corso agli ultimi esami: punti ×1,5 con i compagni di scuola fino all'esame successivo" />
+          <PulsanteVisivo attivo={invito} icona={<IconaAzione chiave="sms" dimensione={24} />} titolo="Invito SMS" dettaglio="×1,2 su tutta l'uscita" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2" />
         </div>
       </div>
       <p className="m-0 mb-3 text-[12px] text-text-muted">
@@ -120,7 +121,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       {c.regaliFatti.length > 0 && <span className="text-[12px] text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
                     </div>
                   </div>
-                  <CollegamentoVisivo to={`/confidenti/${c.chiave}`} tono="fantasma" compatto className="shrink-0" icona={<IconApri size={20} />} titolo="Scheda" aria-label={`Scheda di ${c.nome}: risposte migliori, abilità, regali`} />
+                  <CollegamentoVisivo to={`/confidenti/${c.chiave}`} tono="fantasma" compatto className="shrink-0" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda" aria-label={`Scheda di ${c.nome}: risposte migliori, abilità, regali`} />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango {c.rango === 10 ? 'MAX' : c.rango}</span>
@@ -167,16 +168,16 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       })}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconRegalo size={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
-                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconUscita size={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`} />
-                      <PulsanteVisivo tono="fantasma" compatto icona={<IconIndietro size={20} />} titolo={`Annulla ultimo${ultimo[c.chiave] > 0 ? ` (−${formattaPunti(ultimo[c.chiave])})` : ''}`} disabled={occ || !(ultimo[c.chiave] > 0)} onClick={() => void salva(c.chiave, { deltaPunti: -(ultimo[c.chiave] ?? 0) })} aria-label={`${c.nome}: annulla l'ultimo incremento`} />
+                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="regalo" dimensione={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
+                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconaAzione chiave="uscita" dimensione={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`} />
+                      <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla-ultimo" dimensione={20} />} titolo={`Annulla ultimo${ultimo[c.chiave] > 0 ? ` (−${formattaPunti(ultimo[c.chiave])})` : ''}`} disabled={occ || !(ultimo[c.chiave] > 0)} onClick={() => void salva(c.chiave, { deltaPunti: -(ultimo[c.chiave] ?? 0) })} aria-label={`${c.nome}: annulla l'ultimo incremento`} />
                     </div>
                   </div>
                 )}
 
                 <div className="flex items-center gap-2 flex-wrap mt-auto">
-                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconLucchettoAperto size={20} /> : <IconLucchettoChiuso size={20} />} titolo={c.sbloccato ? 'Sbloccato' : 'Bloccato'} dettaglio={c.rango > 0 ? 'dal rango 1' : undefined} disabled={occ || c.rango > 0} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : 'bloccato'}`} />
-                  <PulsanteVisivo tono="fantasma" compatto icona={<IconMatita size={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={() => { setModifica(c); setNote(c.note); }} />
+                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconaAzione chiave="sbloccato" dimensione={20} /> : <IconaAzione chiave="bloccato" dimensione={20} />} titolo={c.sbloccato ? 'Sbloccato' : 'Bloccato'} dettaglio={c.rango > 0 ? 'dal rango 1' : undefined} disabled={occ || c.rango > 0} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : 'bloccato'}`} />
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="note" dimensione={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={() => { setModifica(c); setNote(c.note); }} />
                 </div>
                 {c.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap line-clamp-2">{c.note}</p>}
               </div>

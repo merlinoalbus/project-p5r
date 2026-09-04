@@ -17,7 +17,7 @@ import { statistichePerLivello } from '../../../shared/statistiche';
 import type { PersonaPossedutaDto, StatisticheDto } from '../../types';
 import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconCestino, IconMatita } from '../shared/iconeGuida';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -61,8 +61,8 @@ export function ScortaPersona({ partitaId }: Props) {
                 {!p.inSquadra && <span className="chip">In deposito</span>}
                 {!p.statisticheBase && <span className="chip chip--attivo">Potenziata</span>}
                 <span className="flex-1" />
-                <PulsanteVisivo compatto icona={<IconMatita size={20} />} titolo="Modifica" onClick={() => setModifica(p)} />
-                <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo="Rimuovi" onClick={() => void rimuovi(p)} />
+                <PulsanteVisivo compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => setModifica(p)} />
+                <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Rimuovi" onClick={() => void rimuovi(p)} />
               </div>
               <div className="flex flex-wrap gap-1">
                 {p.skill.map((s) => (

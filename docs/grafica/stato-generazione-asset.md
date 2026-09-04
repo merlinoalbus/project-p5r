@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**535 file richiesti: 521 completati e approvati, 14 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
+**566 file richiesti: 521 completati e approvati, 45 ancora da consegnare.** La Fase 11.6 (§13) è completa e validata 37/37.
 
 Persona completate e approvate: **232**. Persona generate e in validazione: **0**. Persona da rigenerare: **0**.
 
@@ -49,8 +49,42 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | palazzi | 10 | 10 | 0 |
 | personaggi | 5 | 0 | 5 |
 | ui (schede Partita, §16) | 9 | 0 | 9 |
+| ui (azioni, §17) | 31 | 0 | 31 |
 
 ## Elenco completo
+
+### ui — azioni (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-regalo.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-uscita.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-annulla-ultimo.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-sbloccato.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-bloccato.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-note.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-modifica.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-sms.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-esame-primo.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-esame-top10.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-fortuna.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-libro.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-evoca.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-esegui.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-allarme.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-elimina.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-ricalcola.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-riapri.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-albero.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-ricetta.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-piano.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-scheda.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-raggiunto.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-annulla.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-tutti.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-aperti.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-obiettivo.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-carica-altri.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-seleziona.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-deseleziona.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-riprova.png` — 128×128 (§17)
 
 ### ui — schede della Partita (§16)
 - [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-doti.png` — 128×128 (§16)

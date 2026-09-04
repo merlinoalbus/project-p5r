@@ -13,7 +13,7 @@ import { formattaYen } from '../../utils/punti';
 import type { CicloSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconCestino, IconEvoca, IconGioca, IconRicetta } from '../shared/iconeGuida';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -81,16 +81,16 @@ function SchedaCicloSalvato({ ciclo, partitaId, onCambiato, onElimina }: { ciclo
           <span className={`chip ${av.ingredientePossedutaId ? 'chip--attivo' : ''}`}>{a.ingrediente.nomeIt}: {av.ingredientePossedutaId ? 'in scorta' : 'non in scorta'}</span>
           <span className={`chip ${av.partnerPossedutaId ? 'chip--attivo' : ''}`}>{a.partner.nomeIt}: {av.partnerPossedutaId ? 'in scorta' : av.partnerRegistrato ? 'da evocare dal Registro' : a.partnerModo === 'cattura' ? 'da catturare' : 'da procurare'}</span>
           {!av.partnerPossedutaId && (
-            <PulsanteVisivo compatto icona={<IconEvoca size={20} />} titolo={av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaYen(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`} disabled={occupato} onClick={() => void procuraPartner()} />
+            <PulsanteVisivo compatto icona={<IconaAzione chiave="evoca" dimensione={20} />} titolo={av.partnerRegistrato ? `Evoca ${a.partner.nomeIt} (${formattaYen(a.partnerCosto)})` : `Segna ${a.partner.nomeIt} ottenuta`} disabled={occupato} onClick={() => void procuraPartner()} />
           )}
-          {!av.ingredientePossedutaId && ciclo.anelloCorrente === 0 && <CollegamentoVisivo to={`/fusione?vista=piani&piani=${a.ingrediente.id}`} tono="fantasma" compatto icona={<IconRicetta size={20} />} titolo={`Come ottenere ${a.ingrediente.nomeIt}`} />}
+          {!av.ingredientePossedutaId && ciclo.anelloCorrente === 0 && <CollegamentoVisivo to={`/fusione?vista=piani&piani=${a.ingrediente.id}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricetta" dimensione={20} />} titolo={`Come ottenere ${a.ingrediente.nomeIt}`} />}
           {!av.ingredientePossedutaId && ciclo.anelloCorrente > 0 && <span className="text-[12px] text-warning">Il risultato dell'anello precedente non è in scorta: reimposta l'anello corrente.</span>}
-          <PulsanteVisivo tono="primario" compatto icona={<IconGioca size={20} />} titolo={`Esegui anello ${ciclo.anelloCorrente + 1}`} disabled={!av.eseguibile} onClick={() => setEsecuzione(true)} />
+          <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="esegui" dimensione={20} />} titolo={`Esegui anello ${ciclo.anelloCorrente + 1}`} disabled={!av.eseguibile} onClick={() => setEsecuzione(true)} />
         </div>
       </div>
       {ciclo.note && <div className="text-[13px] text-text-secondary">{ciclo.note}</div>}
       <div className="flex flex-wrap gap-1.5">
-        <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo="Elimina" onClick={onElimina} />
+        <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" onClick={onElimina} />
       </div>
       {esecuzione && av.ingredientePossedutaId && av.partnerPossedutaId && (
         <EseguiFusioneModal partitaId={partitaId} possedutaIds={[av.ingredientePossedutaId, av.partnerPossedutaId]} risultatoId={a.risultato.id} onChiudi={() => setEsecuzione(false)} onEseguita={() => void dopoEsecuzione()} />
@@ -120,7 +120,7 @@ export function CicliSalvati({ partitaId }: Props) {
         I cicli salvati dalla vista «Cicli di fusione» si eseguono qui anello per anello: procura il partner (evocazione dal Registro o cattura), esegui la fusione dalla scorta, e al ritorno sulla Persona di partenza il giro viene contato.
         {lista.dati && lista.dati.length > 0 && ` Giri completati in totale: ${totaleGiri}.`}
       </p>
-      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void lista.ricarica()}>Riprova</button></div>}
+      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && lista.dati.length === 0 && (
         <EmptyState illustrazione="vuoto-cicli" title="Nessun ciclo salvato" hint="Trova un ciclo nella pagina Fusione («Cicli di fusione») e premi «Salva ciclo»." action={<Link to="/fusione?vista=cicli" className="btn btn-primary no-underline">Vai ai cicli di fusione</Link>} />

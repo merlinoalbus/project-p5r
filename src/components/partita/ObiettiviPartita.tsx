@@ -14,14 +14,14 @@ import { SelettoreSkill } from '../fusione/SelettoreSkill';
 import { PRIORITA, linkPiano } from '../../utils/obiettivi';
 import type { ObiettivoDto, PersonaRiassuntoDto, SkillRiassuntoDto, StatoObiettivo } from '../../types';
 import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconAnnullaCerchio, IconAppunti, IconBersaglio, IconCerchio, IconCestino, IconElenco, IconMatita, IconRicalcola, IconRicetta, IconSpunta } from '../shared/iconeGuida';
 import type { ReactNode } from 'react';
+import { IconaAzione } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
 }
 
-const ICONE_STATO: Record<StatoObiettivo | 'tutti', ReactNode> = { tutti: <IconElenco size={14} />, aperto: <IconCerchio size={14} />, raggiunto: <IconSpunta size={14} />, annullato: <IconAnnullaCerchio size={14} /> };
+const ICONE_STATO: Record<StatoObiettivo | 'tutti', ReactNode> = { tutti: <IconaAzione chiave="tutti" dimensione={14} />, aperto: <IconaAzione chiave="aperti" dimensione={14} />, raggiunto: <IconaAzione chiave="raggiunto" dimensione={14} />, annullato: <IconaAzione chiave="annulla" dimensione={14} /> };
 
 const STATI: ReadonlyArray<{ v: StatoObiettivo | 'tutti'; l: string }> = [
   { v: 'aperto', l: 'Aperti' },
@@ -72,10 +72,10 @@ export function ObiettiviPartita({ partitaId }: Props) {
             {ICONE_STATO[s.v]}{s.l}{s.v !== 'tutti' ? ` (${conteggi[s.v]})` : ''}
           </button>
         ))}
-        <PulsanteVisivo tono="primario" className="ml-auto" icona={<IconBersaglio size={22} />} titolo="Nuovo obiettivo" onClick={() => setNuovo(true)} />
+        <PulsanteVisivo tono="primario" className="ml-auto" icona={<IconaAzione chiave="obiettivo" dimensione={22} />} titolo="Nuovo obiettivo" onClick={() => setNuovo(true)} />
       </div>
       <p className="m-0 text-[13px] text-text-secondary">Una Persona che vuoi ottenere, con le skill che deve avere e il livello minimo. L'obiettivo si chiude da solo quando una copia che soddisfa le condizioni entra nella scorta (o viene aggiornata).</p>
-      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void lista.ricarica()}>Riprova</button></div>}
+      {lista.errore && <div className="text-[13px] text-error">{lista.errore} <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void lista.ricarica()} /></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && visibili.length === 0 && (
         <EmptyState illustrazione="vuoto-obiettivi" title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />
@@ -109,14 +109,14 @@ export function ObiettiviPartita({ partitaId }: Props) {
                   {o.note && <span className="text-text-muted"> · {o.note}</span>}
                 </div>
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {!o.rara && <CollegamentoVisivo to={linkPiano(o)} compatto icona={<IconAppunti size={20} />} titolo="Piano di fusione" />}
-                  <CollegamentoVisivo to={`/fusione?vista=ricette&ricette=${o.personaId}`} tono="fantasma" compatto icona={<IconRicetta size={20} />} titolo="Come ottenerla" />
-                  {o.pianiSalvati > 0 && <CollegamentoVisivo to={`/partita?scheda=piani&obiettivo=${o.id}`} tono="fantasma" compatto icona={<IconAppunti size={20} />} titolo={o.pianiSalvati === 1 ? '1 piano salvato' : `${o.pianiSalvati} piani salvati`} />}
-                  <PulsanteVisivo tono="fantasma" compatto icona={<IconMatita size={20} />} titolo="Modifica" onClick={() => setModifica(o)} />
-                  {o.stato === 'aperto' && <PulsanteVisivo compatto icona={<IconSpunta size={20} />} titolo="Segna raggiunto" onClick={() => void cambiaStato(o, 'raggiunto')} />}
-                  {o.stato === 'aperto' && <PulsanteVisivo tono="fantasma" compatto icona={<IconAnnullaCerchio size={20} />} titolo="Annulla" onClick={() => void cambiaStato(o, 'annullato')} />}
-                  {o.stato !== 'aperto' && <PulsanteVisivo tono="fantasma" compatto icona={<IconRicalcola size={20} />} titolo="Riapri" onClick={() => void cambiaStato(o, 'aperto')} />}
-                  <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo="Elimina" onClick={() => void elimina(o)} />
+                  {!o.rara && <CollegamentoVisivo to={linkPiano(o)} compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo="Piano di fusione" />}
+                  <CollegamentoVisivo to={`/fusione?vista=ricette&ricette=${o.personaId}`} tono="fantasma" compatto icona={<IconaAzione chiave="ricetta" dimensione={20} />} titolo="Come ottenerla" />
+                  {o.pianiSalvati > 0 && <CollegamentoVisivo to={`/partita?scheda=piani&obiettivo=${o.id}`} tono="fantasma" compatto icona={<IconaAzione chiave="piano" dimensione={20} />} titolo={o.pianiSalvati === 1 ? '1 piano salvato' : `${o.pianiSalvati} piani salvati`} />}
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica" onClick={() => setModifica(o)} />
+                  {o.stato === 'aperto' && <PulsanteVisivo compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Segna raggiunto" onClick={() => void cambiaStato(o, 'raggiunto')} />}
+                  {o.stato === 'aperto' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="annulla" dimensione={20} />} titolo="Annulla" onClick={() => void cambiaStato(o, 'annullato')} />}
+                  {o.stato !== 'aperto' && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(o, 'aperto')} />}
+                  <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" onClick={() => void elimina(o)} />
                 </div>
               </div>
             </li>

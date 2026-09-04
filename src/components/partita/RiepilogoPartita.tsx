@@ -10,7 +10,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { notifica } from '../../stores/notificationStore';
 import type { Difficolta, PartitaDto } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
-import { IconAllarme } from '../shared/iconeGuida';
+import { IconaAzione } from '../shared/IconaAzione';
 
 const DIFFICOLTA: Array<{ v: Difficolta; l: string }> = [
   { v: 'sicura', l: 'Sicura' },
@@ -92,7 +92,7 @@ export function RiepilogoPartita({ partita }: Props) {
         <div className={`card flex flex-col gap-2 ${allarme ? 'border-primary bg-primary-bg' : ''}`}>
           <span className="form-label m-0">Stanza di Velluto</span>
           <div className="text-[13px] text-text-secondary">Segna quando la Stanza è in <strong className="text-text">Allarme</strong>: le fusioni danno più skill e statistiche, ma la ghigliottina può incepparsi.</div>
-          <PulsanteVisivo attivo={allarme} className="self-start" icona={<IconAllarme size={24} />} titolo={allarme ? 'Allarme attivo' : 'Attiva Allarme'} dettaglio={allarme ? 'tocca per disattivare' : 'fusioni con più skill e statistiche'} onClick={() => void cambiaAllarme(!allarme)} />
+          <PulsanteVisivo attivo={allarme} className="self-start" icona={<IconaAzione chiave="allarme" dimensione={24} />} titolo={allarme ? 'Allarme attivo' : 'Attiva Allarme'} dettaglio={allarme ? 'tocca per disattivare' : 'fusioni con più skill e statistiche'} onClick={() => void cambiaAllarme(!allarme)} />
         </div>
         <div className="card flex flex-col gap-2">
           <div className="flex items-center justify-between">
