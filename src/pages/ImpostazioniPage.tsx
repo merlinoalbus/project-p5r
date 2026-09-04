@@ -7,10 +7,12 @@ import { useConfigStore } from '../stores/configStore';
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { GestionePartite } from '../components/impostazioni/GestionePartite';
 import { TraduzioniEditor } from '../components/impostazioni/TraduzioniEditor';
+import { CaratteriEditor } from '../components/impostazioni/CaratteriEditor';
 import { ImportaRiferimenti } from '../components/impostazioni/ImportaRiferimenti';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 /** Impostazioni dell'app. */
 export function ImpostazioniPage() {
@@ -23,7 +25,7 @@ export function ImpostazioniPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="m-0 text-2xl font-bold">Impostazioni</h1>
+      <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini e traduzioni della tua istanza." />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
         <h2 className="m-0 text-[15px] font-semibold">Grafica</h2>
@@ -42,6 +44,7 @@ export function ImpostazioniPage() {
           </span>
         </label>
       </section>
+      <CaratteriEditor />
       <section className="card flex flex-col gap-3">
         <h2 className="m-0 text-[15px] font-semibold">Immagini degli Arcani</h2>
         <p className="m-0 text-[13px] text-text-secondary">Carica le tue carte (vedi <code>docs/grafica/prompt-immagini.md</code>): hanno la precedenza sulla grafica predefinita e vengono usate nel compendio e nei Confidenti.</p>

@@ -8,6 +8,7 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 export function DungeonPage() {
   useDocumentTitle('Palazzi e Dedali');
@@ -17,10 +18,7 @@ export function DungeonPage() {
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Palazzi e Dedali</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">Aree e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; importando le piante delle aree ottieni le mappe interattive.</p>
-          </div>
+          <IntestazionePagina titolo="Palazzi e Dedali" sottotitolo="Aree e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; importando le piante delle aree ottieni le mappe interattive." />
           <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Dungeon">
             {dati.dati.map((d) => (
               <li key={d.chiave}>

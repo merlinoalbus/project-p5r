@@ -8,6 +8,7 @@ import { useCarica } from '../hooks/useCarica';
 import { getDoti, getPossedute } from '../services/api';
 import { usePartitaStore } from '../stores/partitaStore';
 import { IconBolt, IconBook, IconFusion, IconMask, IconStar } from '../components/shared/icons';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 /** Pagina iniziale con lo stato della partita attiva e gli accessi rapidi. */
 export function HomePage() {
@@ -18,7 +19,7 @@ export function HomePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="m-0 text-2xl font-bold">Compagno di gioco — Persona 5 Royal</h1>
+      <IntestazionePagina titolo="Compagno di gioco" sottotitolo="Persona 5 Royal: Doti, Confidenti, Persona possedute e guida giorno per giorno, con lo stato della tua partita." illustrazione="identita/logo-senza-testo" />
       {attiva ? (
         <div className="card flex flex-col gap-3">
           <div className="flex items-center gap-2 flex-wrap">

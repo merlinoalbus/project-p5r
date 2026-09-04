@@ -73,7 +73,7 @@ export function ObiettiviPartita({ partitaId }: Props) {
       {lista.errore && <div className="text-[13px] text-error">{lista.errore} <button type="button" className="btn btn-ghost btn-sm" onClick={() => void lista.ricarica()}>Riprova</button></div>}
       {!lista.dati && !lista.errore && <div className="flex justify-center py-6"><Spinner /></div>}
       {lista.dati && visibili.length === 0 && (
-        <EmptyState icon="🎯" title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />
+        <EmptyState illustrazione="vuoto-obiettivi" title={stato === 'aperto' ? 'Nessun obiettivo aperto' : 'Nessun obiettivo'} hint="Crea un obiettivo da qui o dalla scheda di una Persona («Aggiungi agli obiettivi»)." />
       )}
       {visibili.length > 0 && (
         <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Obiettivi">

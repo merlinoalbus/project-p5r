@@ -73,7 +73,7 @@ export function ConfidenteDettaglioPage() {
             <ImmagineEntita ambito="confidente" chiave={c.chiave} etichetta={c.nome} dimensione={160} forma="carta" modificabile />
             <div className="flex-1 min-w-0 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="m-0 text-2xl font-bold">{c.nome}</h1>
+                <h1 className="titolo-display m-0">{c.nome}</h1>
                 <span className="chip chip--attivo">{c.arcanaNome}</span>
                 {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
                 {mio && <Link to="/partita?scheda=confidenti" className="btn btn-ghost btn-sm no-underline">Aggiorna il rango</Link>}

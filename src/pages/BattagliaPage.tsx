@@ -11,6 +11,7 @@ import { PageState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { BattagliaDto, OmbraDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 const SCHEDE = [
   ['ombre', 'Ombre per area'],
@@ -246,10 +247,7 @@ export function BattagliaPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Aiuto in battaglia</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">Debolezze delle Ombre per area, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff.</p>
-          </div>
+          <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per area, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
           <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
           </div>

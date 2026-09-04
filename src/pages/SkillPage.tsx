@@ -12,6 +12,7 @@ import { PageState, EmptyState } from '../components/shared/PageState';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { ORDINE_ELEMENTI_SKILL, coloreElemento } from '../utils/elementi';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 /** Elenco skill: ricerca su nome ed effetto italiano, filtro per elemento. */
 export function SkillPage() {
@@ -32,10 +33,11 @@ export function SkillPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-baseline justify-between gap-3 flex-wrap">
-        <h1 className="m-0 text-2xl font-bold">Skill</h1>
-        <span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length}` : ''}</span>
-      </div>
+      <IntestazionePagina
+        titolo="Skill"
+        sottotitolo="Tutte le abilità con effetto, costo ed elemento, e le Persona che le apprendono."
+        azioni={<span className="text-[13px] text-text-muted">{dati ? `${filtrate.length} di ${dati.length}` : ''}</span>}
+      />
       <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca per nome o effetto…" />
       <div className="flex gap-1.5 flex-wrap">
         <button type="button" className={`chip touch ${elemento === '' ? 'chip--attivo' : ''}`} onClick={() => setElemento('')} aria-pressed={elemento === ''}>Tutti</button>

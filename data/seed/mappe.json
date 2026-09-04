@@ -113,7 +113,7 @@
      "y": 65.0,
      "confidenza": "media",
      "etichetta": "✕",
-     "nota": "Simbolo rosso 'X' (porta chiusa/vicolo cieco) nello stesso punto in cui il testo di legenda (voce ⑧) descrive la porta chiusa a chiave aggirata arrampicandosi sugli scaffali e passando dal condotto d'"
+     "nota": "Simbolo rosso 'X' (porta chiusa/vicolo cieco) nello stesso punto in cui il testo di legenda (voce ⑧) descrive la porta chiusa a chiave aggirata arrampicandosi sugli scaffali e passando dal condotto d'aerazione; nessuna icona di condotto distinta è visibile separatamente, quindi il marcatore è posto sulla porta stessa."
     }
    ]
   },
@@ -147,7 +147,7 @@
      "y": 87.0,
      "confidenza": "alta",
      "etichetta": "S",
-     "nota": "Icona blu 'S' (セーフルーム) riconosciuta autonomamente come Safe Room. Nessuna voce di legenda ha puntoChiave in quest'area (tutte le voci sono su libri/enigmi di un'altra sezione), ma è l'unico punto app "
+     "nota": "Icona blu 'S' (セーフルーム) riconosciuta autonomamente come Safe Room. Nessuna voce di legenda ha puntoChiave in quest'area (tutte le voci sono su libri/enigmi di un'altra sezione), ma è l'unico punto app della zona ed è visivamente inequivocabile."
     }
    ]
   },
@@ -184,7 +184,7 @@
      "y": 49.0,
      "confidenza": "bassa",
      "etichetta": "(sala con motivo circolare)",
-     "nota": "Nessuna icona esplicita per l'enigma delle leve/urna; posizione dedotta dalla sala con motivo puntinato circolare, subito dopo le scale di accesso al 2P, coerente con la descrizione testuale ('poco do"
+     "nota": "Nessuna icona esplicita per l'enigma delle leve/urna; posizione dedotta dalla sala con motivo puntinato circolare, subito dopo le scale di accesso al 2P, coerente con la descrizione testuale ('poco dopo il 2F, Terzo Occhio, urna in fondo alla stanza'). Stima architetturale, non un'icona dedicata: confidenza bassa."
     },
     {
      "punto": "kamoshida-06-corridoio-delle-sbarre-enigma-delle-leve/1",
@@ -192,7 +192,7 @@
      "y": 86.0,
      "confidenza": "alta",
      "etichetta": "防具：夜警の胸当て",
-     "nota": "Icona di forziere chiuso (lucchetto rosa/magenta) con etichetta «防具：夜警の胸当て» (Armatura da guardia notturna), posta esattamente di fronte alla Safe Room — corrispondenza diretta col forziere chiuso 'Arm"
+     "nota": "Icona di forziere chiuso (lucchetto rosa/magenta) con etichetta «防具：夜警の胸当て» (Armatura da guardia notturna), posta esattamente di fronte alla Safe Room — corrispondenza diretta col forziere chiuso 'Armatura della Guardia' dell'app."
     }
    ]
   },
@@ -254,7 +254,7 @@
      "y": 43.0,
      "confidenza": "bassa",
      "etichetta": "(sala a scaffali)",
-     "nota": "Nessuna etichetta esplicita; posizione dedotta dalla stanza con motivo a barre verticali (scaffalatura) sulla mappa condivisa del 2P, coerente con la descrizione testuale dell'Enigma della Biblioteca "
+     "nota": "Nessuna etichetta esplicita; posizione dedotta dalla stanza con motivo a barre verticali (scaffalatura) sulla mappa condivisa del 2P, coerente con la descrizione testuale dell'Enigma della Biblioteca (voce ①: libri da riporre negli scaffali). Stima architetturale: confidenza bassa."
     }
    ]
   },
@@ -364,7 +364,7 @@
      "y": 26.0,
      "confidenza": "media",
      "etichetta": "△ (icona di pericolo)",
-     "nota": "Doppia icona triangolare azzurra ('pericolo/nemico forte') lungo il corridoio subito dopo l'ingresso, in corrispondenza della voce di legenda ④ (boss fight contro l'Ufficiale della punizione celeste ="
+     "nota": "Doppia icona triangolare azzurra ('pericolo/nemico forte') lungo il corridoio subito dopo l'ingresso, in corrispondenza della voce di legenda ④ (boss fight contro l'Ufficiale della punizione celeste = Castigatore Divino, confidenza alta nella legenda); posizione dell'icona stimata con confidenza media perché non è un'etichetta testuale univoca."
     }
    ]
   },
@@ -449,7 +449,7 @@
      "y": 94.0,
      "confidenza": "alta",
      "etichetta": "イシ2-13",
-     "nota": "Quadrato rosso con etichetta «イシ2-13» nella mappa 4; il testo di legenda lo identifica come «色欲の緑のイシ» (Seme verde della lussuria), riconosciuto autonomamente come punto di tipo volontà (Seme lussuria "
+     "nota": "Quadrato rosso con etichetta «イシ2-13» nella mappa 4; il testo di legenda lo identifica come «色欲の緑のイシ» (Seme verde della lussuria), riconosciuto autonomamente come punto di tipo volontà (Seme lussuria verde) dell'app."
     }
    ]
   },
@@ -483,7 +483,7 @@
      "y": 13.0,
      "confidenza": "alta",
      "etichetta": "S",
-     "nota": "Icona blu 'S' (セーフルーム) chiaramente visibile in cima alla sala circolare; riconosciuta autonomamente come Safe Room. Gli altri punti (leve/ascensori, 2 forzieri, miniboss, seme) non sono stati posizion"
+     "nota": "Icona blu 'S' (セーフルーム) chiaramente visibile in cima alla sala circolare; riconosciuta autonomamente come Safe Room. Gli altri punti (leve/ascensori, 2 forzieri, miniboss, seme) non sono stati posizionati: l'immagine assegnata a quest'area mostra in realtà il combattimento contro un diverso nemico ('Cavaliere in armatura dorata', testo in basso «ここにいる金鎧シャドウを倒す»), un'anomalia già segnalata nei dati di origine, quindi non è stato usato per marcare lo Straziato re dei desideri per evitare un'etichettatura fuorviante."
     }
    ]
   },
@@ -689,7 +689,7 @@
      "y": 32.0,
      "confidenza": "alta",
      "etichetta": "宝2-2",
-     "nota": "Quadrato rosso con etichetta «宝2-2». Il testo di legenda scaricato non nomina esplicitamente questo forziere, ma la pagina sorgente omoteura (HTML grezzo consultato per disambiguare) riporta per l'imm"
+     "nota": "Quadrato rosso con etichetta «宝2-2». Il testo di legenda scaricato non nomina esplicitamente questo forziere, ma la pagina sorgente omoteura (HTML grezzo consultato per disambiguare) riporta per l'immagine root01-03-01 la tabella oggetti: «火の勾玉×3（消費物）マップ1・宝2-2» = 3x Magatama di Fuoco, che corrisponde esattamente e senza ambiguità all'unico forziere dell'app in quest'area."
     }
    ]
   },
@@ -736,7 +736,7 @@
      "y": 32.0,
      "confidenza": "bassa",
      "etichetta": "【1】",
-     "nota": "Etichetta 【1】 sulla sala esagonale centrale; il testo di legenda ('evento generico') è stato abbinato dai curatori alla rimozione della Barriera bloccante, senza citazione testuale diretta (confidenza"
+     "nota": "Etichetta 【1】 sulla sala esagonale centrale; il testo di legenda ('evento generico') è stato abbinato dai curatori alla rimozione della Barriera bloccante, senza citazione testuale diretta (confidenza bassa già nella fonte)."
     }
    ]
   },
@@ -760,7 +760,7 @@
      "y": 89.0,
      "confidenza": "media",
      "etichetta": "鍵宝3-4",
-     "nota": "Quadrato rosso con prefisso «鍵» (chiuso a chiave) accanto al forziere 3-5; riconosciuto autonomamente come forziere chiuso (unico dell'area). Il testo di legenda cita per lo stesso gruppo «宝玉輪» (nome "
+     "nota": "Quadrato rosso con prefisso «鍵» (chiuso a chiave) accanto al forziere 3-5; riconosciuto autonomamente come forziere chiuso (unico dell'area). Il testo di legenda cita per lo stesso gruppo «宝玉輪» (nome giapponese diverso da 'Catena di perline'), da cui la confidenza media già segnalata nella fonte."
     },
     {
      "punto": "madarame-06-sala-del-tesoro-atrio/8",
@@ -904,7 +904,7 @@
      "y": 72.0,
      "confidenza": "bassa",
      "etichetta": "【2】",
-     "nota": "Etichetta 【2】 nella mappa 3; il testo di legenda abbina qui la seconda Safe Room ('Sala principale superiore') tramite la voce 【5】 ('si preme un interruttore'), ma senza icona 'S' visibile in questo p"
+     "nota": "Etichetta 【2】 nella mappa 3; il testo di legenda abbina qui la seconda Safe Room ('Sala principale superiore') tramite la voce 【5】 ('si preme un interruttore'), ma senza icona 'S' visibile in questo punto — confidenza bassa già segnalata nella fonte."
     },
     {
      "punto": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore/5",
@@ -1007,7 +1007,7 @@
      "y": 76.0,
      "confidenza": "alta",
      "etichetta": "鍵宝12",
-     "nota": "Quadrato rosso con prefisso «鍵» (chiuso a chiave) ed etichetta «鍵宝12». L'HTML grezzo omoteura consultato per disambiguare conferma: «鍵宝12から「ナックルダスター」を入手したら真に装備させること» = Tirapugni (arma per Makoto/'真'),"
+     "nota": "Quadrato rosso con prefisso «鍵» (chiuso a chiave) ed etichetta «鍵宝12». L'HTML grezzo omoteura consultato per disambiguare conferma: «鍵宝12から「ナックルダスター」を入手したら真に装備させること» = Tirapugni (arma per Makoto/'真'), corrispondenza esatta col forziere Tirapugni dell'app."
     },
     {
      "punto": "kaneshiro-03-ufficio-riciclaggio/3",
@@ -1015,7 +1015,7 @@
      "y": 88.0,
      "confidenza": "bassa",
      "etichetta": "宝11",
-     "nota": "Quadrato rosso con etichetta «宝11». L'HTML grezzo omoteura lo identifica come «地返しの玉» (Sfera del ritorno); il nome non coincide esattamente con 'Perlina rigenerante' dell'app, ma è l'unico forziere (n"
+     "nota": "Quadrato rosso con etichetta «宝11». L'HTML grezzo omoteura lo identifica come «地返しの玉» (Sfera del ritorno); il nome non coincide esattamente con 'Perlina rigenerante' dell'app, ma è l'unico forziere (non chiuso) rimasto senza altro riscontro in quest'area, da cui la confidenza bassa."
     }
    ]
   },
@@ -1039,7 +1039,7 @@
      "y": 68.0,
      "confidenza": "alta",
      "etichetta": "【9】",
-     "nota": "Etichetta 【9】 nella mappa 2. Il testo di legenda per questo punto (pannelli PIN) era stato collegato con un codice (0931) proveniente da un'altra immagine; l'HTML grezzo omoteura relativo a QUESTA imm"
+     "nota": "Etichetta 【9】 nella mappa 2. Il testo di legenda per questo punto (pannelli PIN) era stato collegato con un codice (0931) proveniente da un'altra immagine; l'HTML grezzo omoteura relativo a QUESTA immagine (root-13-02, 'Piano 2' del caveau) conferma al punto 【9】: «暗証番号入力パネルを調べて「2319」と入力する» — il codice HUGE=2319, cioè uno dei 3 pannelli PIN dello stesso punto app (puzzle Pannelli PIN del caveau)."
     },
     {
      "punto": "kaneshiro-04-caveau-sotterraneo/5",
@@ -1047,7 +1047,7 @@
      "y": 39.0,
      "confidenza": "media",
      "etichetta": "【3】",
-     "nota": "Etichetta 【3】 (la prima di tre «電源ボックスを調べる» consecutive, 【3】-【4】-【5】, tutte nello stesso punto app). Corrisponde al Terminale di controllo — Caveau 1P, verificato tramite l'HTML grezzo omoteura di que"
+     "nota": "Etichetta 【3】 (la prima di tre «電源ボックスを調べる» consecutive, 【3】-【4】-【5】, tutte nello stesso punto app). Corrisponde al Terminale di controllo — Caveau 1P, verificato tramite l'HTML grezzo omoteura di questa stessa immagine (root-13-02); confidenza media per l'ambiguità fra le 3 ripetizioni della stessa azione."
     }
    ]
   },
@@ -1101,7 +1101,7 @@
      "y": 87.0,
      "confidenza": "bassa",
      "etichetta": "【1】",
-     "nota": "Marcatore numerico 【1】 visibile in fondo al corridoio verticale, subito sopra l'etichetta スタート地点 (punto di partenza). La legenda lo abbina a 'Tesoro avvistato' con confidenza semantica bassa (testo ge"
+     "nota": "Marcatore numerico 【1】 visibile in fondo al corridoio verticale, subito sopra l'etichetta スタート地点 (punto di partenza). La legenda lo abbina a 'Tesoro avvistato' con confidenza semantica bassa (testo generico 'scatta un evento'); la posizione sulla pianta è invece certa."
     },
     {
      "punto": "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/1",
@@ -1109,7 +1109,7 @@
      "y": 32.0,
      "confidenza": "bassa",
      "etichetta": "【3】",
-     "nota": "Marcatore numerico 【3】 in cima al corridoio verticale, ultimo evento prima del ritorno forzato al mondo reale. Abbinato a 'Ombra di Futaba (blocco narrativo)' con confidenza semantica bassa da legenda"
+     "nota": "Marcatore numerico 【3】 in cima al corridoio verticale, ultimo evento prima del ritorno forzato al mondo reale. Abbinato a 'Ombra di Futaba (blocco narrativo)' con confidenza semantica bassa da legenda; posizione visiva certa."
     }
    ]
   },
@@ -1133,7 +1133,7 @@
      "y": 20.0,
      "confidenza": "media",
      "etichetta": "【1】",
-     "nota": "Marcatore 【1】 in cima alla struttura a scalinata sulla destra della pianta (unico marcatore presente nell'immagine, che copre solo la seconda parte dell'area). Abbinato dalla legenda a 'si parla con l"
+     "nota": "Marcatore 【1】 in cima alla struttura a scalinata sulla destra della pianta (unico marcatore presente nell'immagine, che copre solo la seconda parte dell'area). Abbinato dalla legenda a 'si parla con l'Ombra di Futaba, si ottiene la Piantina della piramide' -> Papiro rubato."
     }
    ]
   },
@@ -1157,7 +1157,7 @@
      "y": 79.0,
      "confidenza": "bassa",
      "etichetta": "宝1-1",
-     "nota": "Il punto app è un GRUPPO di forzieri (Ofuda invincibile, Perlina, Fiale disperazione S x3, Pane sacramentale x3) descritto dal testo con riferimento a '宝1-4'. La pianta (in stile multi-riquadro Mappa1"
+     "nota": "Il punto app è un GRUPPO di forzieri (Ofuda invincibile, Perlina, Fiale disperazione S x3, Pane sacramentale x3) descritto dal testo con riferimento a '宝1-4'. La pianta (in stile multi-riquadro Mappa1-4, numerazione a griglia) mostra invece 3 forzieri numerati (宝1-1, 1-2, 1-3) più un forziere-mimic (宝魔): nessuno etichettato esplicitamente '1-4' nonostante ricerca sistematica con zoom su tutti e 4 i riquadri. Scelto 宝1-1 (Mappa4, l'ultimo forziere prima dell'uscita 次のチャート) come posizione rappresentativa del gruppo; la corrispondenza esatta con l'oggetto citato (Pane sacramentale) resta incerta."
     }
    ]
   },
@@ -1181,7 +1181,7 @@
      "y": 58.0,
      "confidenza": "alta",
      "etichetta": "【1】",
-     "nota": "Marcatore 【1】 con quadrato arancione (icona oggetto) nella stanza inferiore di Map2; corrisponde a 'si esamina la statua di pietra misteriosa al livello inferiore, si ottiene una Gemma dell'abisso' (p"
+     "nota": "Marcatore 【1】 con quadrato arancione (icona oggetto) nella stanza inferiore di Map2; corrisponde a 'si esamina la statua di pietra misteriosa al livello inferiore, si ottiene una Gemma dell'abisso' (prima statua)."
     },
     {
      "punto": "futaba-05-camera-dei-sarcofagi/1",
@@ -1237,7 +1237,7 @@
      "y": 69.0,
      "confidenza": "media",
      "etichetta": "イシ1-8",
-     "nota": "Icona 'イシ1-8' (rettangolo con quadrato rosso) riconosciuta per analogia lessicale con i semi di Volontà (イシ) confermati in altre aree del Palazzo. IMPORTANTE: l'immagine mostra marcatori 【6】【7】【8】【9】 "
+     "nota": "Icona 'イシ1-8' (rettangolo con quadrato rosso) riconosciuta per analogia lessicale con i semi di Volontà (イシ) confermati in altre aree del Palazzo. IMPORTANTE: l'immagine mostra marcatori 【6】【7】【8】【9】 (numerazione che continua da una parte 1 non catalogata con marcatori 1-5), mentre la legenda testuale usa 【1】/【2】 come etichette locali proprie: non è stato possibile cercare letteralmente il numero della legenda sulla pianta, quindi l'abbinamento di questo punto (Seme di Volontà dell'Ira rosso) è avvenuto per riconoscimento diretto del tipo/icona, non tramite la legenda."
     },
     {
      "punto": "futaba-07-camera-del-rigetto-chamber-of-rejection/5",
@@ -1245,7 +1245,7 @@
      "y": 70.0,
      "confidenza": "media",
      "etichetta": "宝1-5",
-     "nota": "Icona forziere '宝1-5' (non chiusa a chiave), unico forziere semplice dell'area non altrimenti assegnato; riconosciuto per tipo (forziere) senza abbinamento diretto in legenda, a causa del disallineame"
+     "nota": "Icona forziere '宝1-5' (non chiusa a chiave), unico forziere semplice dell'area non altrimenti assegnato; riconosciuto per tipo (forziere) senza abbinamento diretto in legenda, a causa del disallineamento di numerazione descritto sopra (nota su イシ1-8)."
     }
    ]
   },
@@ -1277,7 +1277,7 @@
      "y": 51.0,
      "confidenza": "alta",
      "etichetta": "【12】",
-     "nota": "Marcatore 【12】, posizionato nella stanza con una griglia di 12 piccoli rettangoli ben visibile (i sarcofagi stessi); corrisponde al Puzzle delle 12 bare/sarcofagi. Anche 【13】 (switch, stessa area) pun"
+     "nota": "Marcatore 【12】, posizionato nella stanza con una griglia di 12 piccoli rettangoli ben visibile (i sarcofagi stessi); corrisponde al Puzzle delle 12 bare/sarcofagi. Anche 【13】 (switch, stessa area) punta allo stesso punto app; scelta la posizione di 【12】 perché è la stanza visivamente riconoscibile."
     },
     {
      "punto": "futaba-08-camera-del-rimorso-chamber-of-guilt/2",
@@ -1317,7 +1317,7 @@
      "y": 42.0,
      "confidenza": "media",
      "etichetta": "鍵宝1-15",
-     "nota": "Icona forziere con prefisso 鍵 (chiuso a chiave) in Map2, riconosciuta per tipo; nessuna voce di legenda per quest'area la cita (tutte le voci hanno puntoChiave null) -> Forziere intrappolato - Veste n"
+     "nota": "Icona forziere con prefisso 鍵 (chiuso a chiave) in Map2, riconosciuta per tipo; nessuna voce di legenda per quest'area la cita (tutte le voci hanno puntoChiave null) -> Forziere intrappolato - Veste nera."
     },
     {
      "punto": "futaba-09-camera-del-santuario-chamber-of-sanctuary/2",
@@ -1388,7 +1388,7 @@
      "y": 12.0,
      "confidenza": "media",
      "etichetta": "【2】",
-     "nota": "Marcatore 【2】 nella stanza superiore, vicino a un'icona ottagonale (porta di autenticazione biometrica); corrisponde all'evento che riporta forzatamente al mondo reale -> battaglia di risveglio di Har"
+     "nota": "Marcatore 【2】 nella stanza superiore, vicino a un'icona ottagonale (porta di autenticazione biometrica); corrisponde all'evento che riporta forzatamente al mondo reale -> battaglia di risveglio di Haru (Fidanzato di Haru)."
     }
    ]
   },
@@ -1475,7 +1475,7 @@
      "y": 85.0,
      "confidenza": "bassa",
      "etichetta": "宝2-6",
-     "nota": "Unico forziere semplice non-mimic rimasto senza assegnazione più specifica in Map2; posizione (raggiungibile lateralmente) non pienamente coerente con la descrizione app ('seconda serie di tubi verso "
+     "nota": "Unico forziere semplice non-mimic rimasto senza assegnazione più specifica in Map2; posizione (raggiungibile lateralmente) non pienamente coerente con la descrizione app ('seconda serie di tubi verso sud dalla prima rampa'), quindi confidenza bassa -> Forziere Replica d'arma."
     },
     {
      "punto": "okumura-05-linea-esportazioni/2",
@@ -1531,7 +1531,7 @@
      "y": 83.0,
      "confidenza": "media",
      "etichetta": "宝2-9",
-     "nota": "Icona forziere reale (rossa) '宝2-9', unica candidata plausibile nell'area; la legenda cita esplicitamente スナフソウル 宝2-9 (stesso nome giapponese di 'Polvere d'anima') ma con posizione numerica segnalata "
+     "nota": "Icona forziere reale (rossa) '宝2-9', unica candidata plausibile nell'area; la legenda cita esplicitamente スナフソウル 宝2-9 (stesso nome giapponese di 'Polvere d'anima') ma con posizione numerica segnalata come non perfettamente combaciante -> Forziere Polvere d'anima."
     }
    ]
   },
@@ -1619,7 +1619,7 @@
      "y": 50.0,
      "confidenza": "alta",
      "etichetta": "【3】",
-     "nota": "Marcatore 【3】 su una leva (etichetta Ω); corrisponde a 'si esamina una leva, si sblocca la Camera Stagna Omega blu' -> Enigma delle Camere Stagne Alfa/Omega. Anche 【4】 punta allo stesso punto app (ste"
+     "nota": "Marcatore 【3】 su una leva (etichetta Ω); corrisponde a 'si esamina una leva, si sblocca la Camera Stagna Omega blu' -> Enigma delle Camere Stagne Alfa/Omega. Anche 【4】 punta allo stesso punto app (stessa meccanica); scelto 【3】 come rappresentante centrale."
     },
     {
      "punto": "okumura-09-interscambio/2",
@@ -1651,7 +1651,7 @@
      "y": 74.0,
      "confidenza": "alta",
      "etichetta": "S",
-     "nota": "Icona S/セーフルーム esplicita, posizione preferita rispetto al marcatore 【1】 della legenda (che ha confidenza bassa ed è posizionato più in basso, su un evento generico d'arrivo) -> Ottava Safe Room (final"
+     "nota": "Icona S/セーフルーム esplicita, posizione preferita rispetto al marcatore 【1】 della legenda (che ha confidenza bassa ed è posizionato più in basso, su un evento generico d'arrivo) -> Ottava Safe Room (finale)."
     },
     {
      "punto": "okumura-10-produzione-armamenti/1",
@@ -1754,7 +1754,7 @@
      "y": 89.0,
      "confidenza": "media",
      "etichetta": "【3】",
-     "nota": "Marcatore 【3】 adiacente a un piccolo cancello/gate disegnato sulla pianta; corrisponde a 'si esamina il lettore di tessere' -> Gate con lettore di Tessera socio. Anche 【4】 (più a nord) punta allo stes"
+     "nota": "Marcatore 【3】 adiacente a un piccolo cancello/gate disegnato sulla pianta; corrisponde a 'si esamina il lettore di tessere' -> Gate con lettore di Tessera socio. Anche 【4】 (più a nord) punta allo stesso punto app; scelto 【3】 perché più vicino al gate."
     }
    ]
   },
@@ -1778,7 +1778,7 @@
      "y": 27.0,
      "confidenza": "media",
      "etichetta": "【7】",
-     "nota": "Marcatore 【7】, vicino a una struttura a griglia/condotto presso lo スタート地点; corrisponde a 'si esamina il lettore di tessere' -> Terminale di controllo VERDE (corrispondenza già segnalata come non verif"
+     "nota": "Marcatore 【7】, vicino a una struttura a griglia/condotto presso lo スタート地点; corrisponde a 'si esamina il lettore di tessere' -> Terminale di controllo VERDE (corrispondenza già segnalata come non verificata con citazione diretta nella fonte originale). Anche 【8】 punta allo stesso punto app; scelto 【7】."
     }
    ]
   },
@@ -1898,7 +1898,7 @@
      "y": 53.0,
      "confidenza": "alta",
      "etichetta": "宝2-8",
-     "nota": "Icona forziere '宝2-8' (Map2). Il testo di legenda cita sia 宝2-8 (Hiranya) sia 宝2-9 (Incenso della fortuna, Map1, x=38 y=23) per lo stesso punto app (gruppo forziere zona elevata est); scelto 宝2-8 come"
+     "nota": "Icona forziere '宝2-8' (Map2). Il testo di legenda cita sia 宝2-8 (Hiranya) sia 宝2-9 (Incenso della fortuna, Map1, x=38 y=23) per lo stesso punto app (gruppo forziere zona elevata est); scelto 宝2-8 come rappresentante, posizionato più a est/in quota."
     },
     {
      "punto": "niijima-09-stanza-slot-machine-1/5",
@@ -1962,7 +1962,7 @@
      "y": 89.0,
      "confidenza": "alta",
      "etichetta": "鍵宝3-1",
-     "nota": "Icona forziere chiuso a chiave '鍵宝3-1' con etichetta esplicita, corrisponde esattamente a 'si ottiene il Pugnale reale' citato dalla legenda -> Forziere chiuso Piano Puntate. Unico punto app di quest'"
+     "nota": "Icona forziere chiuso a chiave '鍵宝3-1' con etichetta esplicita, corrisponde esattamente a 'si ottiene il Pugnale reale' citato dalla legenda -> Forziere chiuso Piano Puntate. Unico punto app di quest'area."
     }
    ]
   },
@@ -1986,7 +1986,7 @@
      "y": 50.0,
      "confidenza": "alta",
      "etichetta": "【4】",
-     "nota": "Centro del cerchio (il ring dell'arena), a cui punta il marcatore 【4】; corrisponde all'ingresso nel ring -> Round 1, due Ganesha. Un solo marcatore visivo copre 4 punti app in sequenza narrativa (roun"
+     "nota": "Centro del cerchio (il ring dell'arena), a cui punta il marcatore 【4】; corrisponde all'ingresso nel ring -> Round 1, due Ganesha. Un solo marcatore visivo copre 4 punti app in sequenza narrativa (round 1-2-3 + ricompensa), tutti nella stessa posizione fisica del ring: stesso marcatore assegnato a ciascuno."
     },
     {
      "punto": "niijima-12-arena-combattimenti/1",
@@ -2098,7 +2098,7 @@
      "y": 24.0,
      "confidenza": "media",
      "etichetta": "【1】",
-     "nota": "Stessa posizione della Fase 1 (nessun marcatore distinto per la Fase 2 nella pianta, che non descrive le fasi in dettaglio); assegnata per continuità diretta dello stesso scontro nella stessa stanza. "
+     "nota": "Stessa posizione della Fase 1 (nessun marcatore distinto per la Fase 2 nella pianta, che non descrive le fasi in dettaglio); assegnata per continuità diretta dello stesso scontro nella stessa stanza. Tipo 'boss' ammesso al riconoscimento indipendente dalla legenda."
     }
    ]
   },
@@ -2122,7 +2122,7 @@
      "y": 56.9,
      "confidenza": "media",
      "etichetta": "【1】",
-     "nota": "Unica voce di legenda della pianta (minima, solo transizione): esaminando la porta principale si viene condotti alla sala successiva dove si attiva la Stanza di Velluto, coerente col punto sicura 'Saf"
+     "nota": "Unica voce di legenda della pianta (minima, solo transizione): esaminando la porta principale si viene condotti alla sala successiva dove si attiva la Stanza di Velluto, coerente col punto sicura 'Safe Room - Passaggio Centrale'. Etichetta 【1】 leggibile chiaramente accanto alla porta/rientranza sul lato destro. Confidenza abbassata a media perché la legenda di origine segnala confidenza bassa sull'abbinamento semantico."
     }
    ]
   },
@@ -2146,7 +2146,7 @@
      "y": 78.0,
      "confidenza": "media",
      "etichetta": "宝魔 (icona forziere arancione)",
-     "nota": "Nessuna voce di legenda testuale ha puntoChiave per quest'area. Riconosciuto un riquadro arancione (icona tipica di forziere/scrigno nelle chart map di omoteura) con etichetta JP '宝魔' collegata da una"
+     "nota": "Nessuna voce di legenda testuale ha puntoChiave per quest'area. Riconosciuto un riquadro arancione (icona tipica di forziere/scrigno nelle chart map di omoteura) con etichetta JP '宝魔' collegata da una linea spezzata, nel pannello 'マップ2' in basso a sinistra. È l'unico riquadro arancione con etichetta esplicita che lo qualifica come oggetto di pregio, assegnato quindi all'unico punto tipo forziere dell'area (Modello di pistola). Altri riquadri arancioni/bianchi non etichettati presenti sulla mappa non sono stati assegnati (troppa ambiguità con gli Ornamenti Daruma, tipo 'oggetto' non ricercabile senza legenda)."
     }
    ]
   },
@@ -2194,7 +2194,7 @@
      "y": 76.1,
      "confidenza": "media",
      "etichetta": "icona 'S' (セーフルーム)",
-     "nota": "La voce di legenda 【1】 (puntoChiave assegnato a questo punto, confidenza originale bassa) è posizionata vicino all'ingresso della sala grigia delle statue, NON sopra l'icona 'S' chiaramente visibile p"
+     "nota": "La voce di legenda 【1】 (puntoChiave assegnato a questo punto, confidenza originale bassa) è posizionata vicino all'ingresso della sala grigia delle statue, NON sopra l'icona 'S' chiaramente visibile poco più a sud-ovest. Ho preferito posizionare lo spillo sull'icona 'S' (セーフルーム, esplicitamente indicata come riconoscibile senza legenda) perché rappresenta in modo inequivocabile la Safe Room, più preciso del testo generico de 【1】 ('avanzando scatta un evento')."
     },
     {
      "punto": "shido-04-corridoio-mezzavia-tribordo/1",
@@ -2202,7 +2202,7 @@
      "y": 13.6,
      "confidenza": "alta",
      "etichetta": "【2】",
-     "nota": "Stanzino in alto a sinistra raggiungibile da un corridoio dedicato; contiene un'icona quadrata arancione (l'interruttore) accanto all'etichetta 【2】 ('si esamina l'interruttore'), corrispondenza testua"
+     "nota": "Stanzino in alto a sinistra raggiungibile da un corridoio dedicato; contiene un'icona quadrata arancione (l'interruttore) accanto all'etichetta 【2】 ('si esamina l'interruttore'), corrispondenza testuale diretta e confidenza originale alta."
     },
     {
      "punto": "shido-04-corridoio-mezzavia-tribordo/5",
@@ -2210,7 +2210,7 @@
      "y": 61.1,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Sul percorso sono presenti 3 icone quadrate arancioni non etichettate, in numero uguale ai 3 forzieri dell'area (punti 5,6,7); questa è la più vicina al punto di partenza. A"
+     "nota": "Nessun riscontro testuale. Sul percorso sono presenti 3 icone quadrate arancioni non etichettate, in numero uguale ai 3 forzieri dell'area (punti 5,6,7); questa è la più vicina al punto di partenza. Assegnazione per esclusione/posizione, non confermata da testo: possibile scambio con gli altri due forzieri."
     },
     {
      "punto": "shido-04-corridoio-mezzavia-tribordo/6",
@@ -2218,7 +2218,7 @@
      "y": 39.6,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Icona quadrata arancione sul corridoio che porta alla stanza sul lato destro della pianta, coerente con la descrizione 'lungo il percorso verso l'ascensore per Ponte Piscina"
+     "nota": "Nessun riscontro testuale. Icona quadrata arancione sul corridoio che porta alla stanza sul lato destro della pianta, coerente con la descrizione 'lungo il percorso verso l'ascensore per Ponte Piscina' (l'ascensore è verosimilmente oltre questa diramazione a est). Assegnazione basata su posizione/narrazione, confidenza bassa."
     },
     {
      "punto": "shido-04-corridoio-mezzavia-tribordo/7",
@@ -2226,7 +2226,7 @@
      "y": 95.6,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Icona quadrata arancione sul corridoio inferiore, raggiungibile solo passando per la sala centrale delle statue (coerente con 'stanza dopo aver disattivato le statue'). Asse"
+     "nota": "Nessun riscontro testuale. Icona quadrata arancione sul corridoio inferiore, raggiungibile solo passando per la sala centrale delle statue (coerente con 'stanza dopo aver disattivato le statue'). Assegnazione basata su posizione/narrazione, confidenza bassa."
     }
    ]
   },
@@ -2250,7 +2250,7 @@
      "y": 40.0,
      "confidenza": "alta",
      "etichetta": "icona 'S' (セーフルーム)",
-     "nota": "Nessuna voce di legenda testuale disponibile per quest'area (anomalia di parsing segnalata in legende.json). Icona 'S' blu chiaramente visibile e inequivocabile in una stanzetta in basso nella sala su"
+     "nota": "Nessuna voce di legenda testuale disponibile per quest'area (anomalia di parsing segnalata in legende.json). Icona 'S' blu chiaramente visibile e inequivocabile in una stanzetta in basso nella sala superiore; identificata analizzando i pixel blu puri (0,0,255) della sola glifo, isolata dalle altre linee/testo blu della mappa."
     },
     {
      "punto": "shido-05-ponte-piscina/2",
@@ -2258,7 +2258,7 @@
      "y": 25.6,
      "confidenza": "media",
      "etichetta": "鍵宝2-4 (icona rossa)",
-     "nota": "Nessuna voce di legenda testuale. Individuato via analisi pixel un riquadro rosso puro (255,0,0), distinto dai riquadri arancioni, con etichetta JP '鍵宝2-4' (鍵=chiave/lucchetto + 宝=tesoro = forziere ch"
+     "nota": "Nessuna voce di legenda testuale. Individuato via analisi pixel un riquadro rosso puro (255,0,0), distinto dai riquadri arancioni, con etichetta JP '鍵宝2-4' (鍵=chiave/lucchetto + 宝=tesoro = forziere chiuso a chiave), posizionato nella sala superiore vicino alla zona di partenza. Assegnato al punto 'davanti al punto di arrivo nell'area' (più vicino ai due forzieri chiusi alla posizione di ingresso) piuttosto che a 'Camicia inamovibile' (vicino a un ospite, nessuna icona NPC riconoscibile su questa chart)."
     }
    ]
   },
@@ -2290,7 +2290,7 @@
      "y": 69.0,
      "confidenza": "alta",
      "etichetta": "【6】",
-     "nota": "Punto puzzle 'Doppio pulsante per statue' abbinato da 2 gruppi di voci di legenda ('【3】-【5】' sblocco di 3 porte, confidenza media, e '【6】' esamina interruttore, confidenza alta). Essendo un solo spill"
+     "nota": "Punto puzzle 'Doppio pulsante per statue' abbinato da 2 gruppi di voci di legenda ('【3】-【5】' sblocco di 3 porte, confidenza media, e '【6】' esamina interruttore, confidenza alta). Essendo un solo spillo per punto app, usata la posizione di 【6】 (icona arancione dell'interruttore vero e proprio) perché più specifica e con confidenza maggiore; 【3】,【4】,【5】 segnano invece le porte sbloccate di conseguenza (stesso punto app, non duplicato)."
     },
     {
      "punto": "shido-06-corridoio-superiore-tribordo/2",
@@ -2298,7 +2298,7 @@
      "y": 24.1,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Icona arancione nella stanza in alto a destra, raggiungibile dal corridoio principale passando vicino alla porta sigillata 【3】; coerente con la descrizione 'stanza raggiunta"
+     "nota": "Nessun riscontro testuale. Icona arancione nella stanza in alto a destra, raggiungibile dal corridoio principale passando vicino alla porta sigillata 【3】; coerente con la descrizione 'stanza raggiunta tramite una porta a nord' (Homunculus). Assegnazione per posizione, confidenza bassa (possibile scambio con gli altri forzieri dell'area)."
     },
     {
      "punto": "shido-06-corridoio-superiore-tribordo/3",
@@ -2314,7 +2314,7 @@
      "y": 44.3,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Icona arancione vicino alla zona di partenza sul lato ovest della mappa, coerente con 'in fondo a un corridoio ovest' (Idaten Ofuda). Assegnazione per posizione, confidenza "
+     "nota": "Nessun riscontro testuale. Icona arancione vicino alla zona di partenza sul lato ovest della mappa, coerente con 'in fondo a un corridoio ovest' (Idaten Ofuda). Assegnazione per posizione, confidenza bassa."
     }
    ]
   },
@@ -2338,7 +2338,7 @@
      "y": 89.6,
      "confidenza": "alta",
      "etichetta": "icona 'S' (セーフルーム)",
-     "nota": "La voce 【1】 (confidenza originale bassa, 'arrivando scatta un evento') è posizionata in alto nella sala superiore; preferita l'icona 'S' blu inequivocabile in basso, molto più precisa per la Safe Room"
+     "nota": "La voce 【1】 (confidenza originale bassa, 'arrivando scatta un evento') è posizionata in alto nella sala superiore; preferita l'icona 'S' blu inequivocabile in basso, molto più precisa per la Safe Room."
     },
     {
      "punto": "shido-07-ponte-di-poppa/2",
@@ -2346,7 +2346,7 @@
      "y": 71.9,
      "confidenza": "alta",
      "etichetta": "宝2-8 (icona rossa)",
-     "nota": "Corrispondenza diretta: la voce di legenda cita testualmente 'チューインソウル（消費物）宝2-8' (Anima da masticare, forziere 2-8); icona quadrata rossa individuata via analisi pixel esattamente accanto all'etichett"
+     "nota": "Corrispondenza diretta: la voce di legenda cita testualmente 'チューインソウル（消費物）宝2-8' (Anima da masticare, forziere 2-8); icona quadrata rossa individuata via analisi pixel esattamente accanto all'etichetta '宝2-8' nella pianta."
     },
     {
      "punto": "shido-07-ponte-di-poppa/4",
@@ -2354,7 +2354,7 @@
      "y": 61.0,
      "confidenza": "alta",
      "etichetta": "【2】",
-     "nota": "Etichetta 【2】 sulla porta verso la Sala Intrattenimento (adiacente a '次のチャート', next chart); corrisponde a 'esaminando la porta, scontro con 2x Guru caprino della setta malvagia' = miniboss Capro nero "
+     "nota": "Etichetta 【2】 sulla porta verso la Sala Intrattenimento (adiacente a '次のチャート', next chart); corrisponde a 'esaminando la porta, scontro con 2x Guru caprino della setta malvagia' = miniboss Capro nero x2."
     }
    ]
   },
@@ -2378,7 +2378,7 @@
      "y": 28.8,
      "confidenza": "media",
      "etichetta": "鍵宝2-9 (icona rossa)",
-     "nota": "Nessuna voce di legenda (anomalia di parsing). Pianta a 4 mappe verticali impilate (マップ1-4); マップ1 mostra un'icona a spirale (scala a chiocciola) subito dopo la partenza; l'icona rossa 'lucchetto' etic"
+     "nota": "Nessuna voce di legenda (anomalia di parsing). Pianta a 4 mappe verticali impilate (マップ1-4); マップ1 mostra un'icona a spirale (scala a chiocciola) subito dopo la partenza; l'icona rossa 'lucchetto' etichettata '鍵宝2-9' compare all'inizio di マップ2, collegata a マップ1 dal connettore '2-1' -- coerente con 'forziere chiuso in fondo a un corridoio DOPO LA SCALA A CHIOCCIOLA' (Ascia di Gilgamesh)."
     },
     {
      "punto": "shido-08-sala-intrattenimento/4",
@@ -2426,7 +2426,7 @@
      "y": 12.6,
      "confidenza": "bassa",
      "etichetta": "icone arancioni (2, non etichettate)",
-     "nota": "Nessun riscontro testuale. Stanzino in alto a destra raggiunto tramite una linea di collegamento (condotto) dal corridoio principale, contenente 2 icone arancioni identiche non etichettate: coerente c"
+     "nota": "Nessun riscontro testuale. Stanzino in alto a destra raggiunto tramite una linea di collegamento (condotto) dal corridoio principale, contenente 2 icone arancioni identiche non etichettate: coerente con 'corridoio con due Ornamenti Daruma raggiunto con un condotto verso nord-ovest poi sud' (Seme superbia verde). Spillo posizionato al centro tra le 2 icone, non potendo distinguere quale (se non entrambe) rappresenti Daruma vs seme."
     },
     {
      "punto": "shido-09-corridoio-inferiore-babordo/4",
@@ -2434,7 +2434,7 @@
      "y": 80.4,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Icona arancione adiacente alla zona delimitata in rosso 'sconfiggi i nemici qui' (presumibile zona Furia nera), coerente con 'Muschio FR-RS, forziere vicino alla Furia nera'"
+     "nota": "Nessun riscontro testuale. Icona arancione adiacente alla zona delimitata in rosso 'sconfiggi i nemici qui' (presumibile zona Furia nera), coerente con 'Muschio FR-RS, forziere vicino alla Furia nera'."
     }
    ]
   },
@@ -2490,7 +2490,7 @@
      "y": 76.5,
      "confidenza": "media",
      "etichetta": "宝2-13 (icona rossa)",
-     "nota": "La voce '(oggetto)' cita '宝玉輪（consumabile）宝2-13' (Anello di giada) ma il pipeline non l'ha abbinata a nessun punto (puntoChiave nullo, confidenza bassa). È l'unico forziere del testo rimasto senza cor"
+     "nota": "La voce '(oggetto)' cita '宝玉輪（consumabile）宝2-13' (Anello di giada) ma il pipeline non l'ha abbinata a nessun punto (puntoChiave nullo, confidenza bassa). È l'unico forziere del testo rimasto senza corrispondenza e l'unico punto app 'forziere' rimasto libero (Catena di perline): nome diverso ma verosimilmente lo stesso oggetto (玉輪 = perline/anello), quindi assegnato con confidenza media. Icona rossa individuata via analisi pixel nella stanzetta sud (vicino 【2】)."
     },
     {
      "punto": "shido-11-corridoio-mezzavia-babordo/2",
@@ -2498,7 +2498,7 @@
      "y": 39.4,
      "confidenza": "alta",
      "etichetta": "宝2-14 (icona rossa)",
-     "nota": "Voce '▶' (uscita) riporta esplicitamente 'si ottiene il Pane per l'anima dal forziere 2-14'; icona rossa '宝2-14' individuata via analisi pixel nella sala grigia (statue) a est, coerente con 'forziere "
+     "nota": "Voce '▶' (uscita) riporta esplicitamente 'si ottiene il Pane per l'anima dal forziere 2-14'; icona rossa '宝2-14' individuata via analisi pixel nella sala grigia (statue) a est, coerente con 'forziere nella stanza custodita dalla Furia nera'."
     }
    ]
   },
@@ -2522,7 +2522,7 @@
      "y": 20.8,
      "confidenza": "media",
      "etichetta": "【1】",
-     "nota": "Unico punto app dell'area (dialogo col cameriere), abbinato per esclusione all'evento generico d'arrivo (confidenza originale media). Presente anche un'icona 'S' (Safe Room) vicino allo start, ma non "
+     "nota": "Unico punto app dell'area (dialogo col cameriere), abbinato per esclusione all'evento generico d'arrivo (confidenza originale media). Presente anche un'icona 'S' (Safe Room) vicino allo start, ma non genera spillo: non esiste un punto app 'sicura' in questa seconda visita (già catalogata nella prima visita, shido-02)."
     }
    ]
   },
@@ -2546,7 +2546,7 @@
      "y": 19.5,
      "confidenza": "bassa",
      "etichetta": "【6】",
-     "nota": "'Si esamina il condotto e si sceglie Proviamoci' abbinato a 'Sala ospiti VIP' (confidenza originale bassa). Immagine è la 3a di una serie (マップ1-4, ordine di percorso 4->3->2->1); le prime 1-2 immagini"
+     "nota": "'Si esamina il condotto e si sceglie Proviamoci' abbinato a 'Sala ospiti VIP' (confidenza originale bassa). Immagine è la 3a di una serie (マップ1-4, ordine di percorso 4->3->2->1); le prime 1-2 immagini della sezione non risultano catalogate in mappe-jp.json."
     }
    ]
   },
@@ -2594,7 +2594,7 @@
      "y": 46.6,
      "confidenza": "alta",
      "etichetta": "(continua) dopo 【3】",
-     "nota": "'Subito dopo, scontro con Goro Akechi' (Round 1) -- nessun marcatore numerato proprio sulla pianta: è parte dello stesso scontro a raffica al centro della Sala Macchine iniziato a 【3】, stessa posizion"
+     "nota": "'Subito dopo, scontro con Goro Akechi' (Round 1) -- nessun marcatore numerato proprio sulla pianta: è parte dello stesso scontro a raffica al centro della Sala Macchine iniziato a 【3】, stessa posizione (confidenza originale alta)."
     },
     {
      "punto": "shido-14-sala-macchine/6",
@@ -2626,7 +2626,7 @@
      "y": 57.5,
      "confidenza": "alta",
      "etichetta": "【1】",
-     "nota": "Unico punto app dell'area; 'si esamina la porta dell'Aula Magna' corrisponde esattamente a 'Porte dell'Aula Magna' (confidenza originale alta). Icona 'S' presente ma non genera spillo: nessun punto si"
+     "nota": "Unico punto app dell'area; 'si esamina la porta dell'Aula Magna' corrisponde esattamente a 'Porte dell'Aula Magna' (confidenza originale alta). Icona 'S' presente ma non genera spillo: nessun punto sicura in questa seconda area (probabile riuso della Safe Room di shido-01, stesso Passaggio Centrale)."
     }
    ]
   },
@@ -2650,7 +2650,7 @@
      "y": 49.8,
      "confidenza": "alta",
      "etichetta": "【1】a",
-     "nota": "Scontro composito unico al centro dell'Aula Magna: 'Bestia Regale del Sacrificio Umano' (prima forma). Tutte le 5 fasi del boss finale condividono la stessa posizione (【1】), essendo un unico scontro a"
+     "nota": "Scontro composito unico al centro dell'Aula Magna: 'Bestia Regale del Sacrificio Umano' (prima forma). Tutte le 5 fasi del boss finale condividono la stessa posizione (【1】), essendo un unico scontro a fasi successive."
     },
     {
      "punto": "shido-16-aula-magna-tesoro-e-boss-finali/1",
@@ -2721,7 +2721,7 @@
      "y": 93.2,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Unica icona colorata della pianta, nella sala di partenza; assegnata per esclusione alla Sciabola oscura (raggiunta con rampino da un punto di aggancio), unico forziere dell"
+     "nota": "Nessun riscontro testuale. Unica icona colorata della pianta, nella sala di partenza; assegnata per esclusione alla Sciabola oscura (raggiunta con rampino da un punto di aggancio), unico forziere dell'area."
     },
     {
      "punto": "iweleth-02-corridoio-della-prigione-parte-i/3",
@@ -2909,7 +2909,7 @@
      "y": 30.5,
      "confidenza": "media",
      "etichetta": "宝4 (icona rossa)",
-     "nota": "Nessun riscontro nel testo di legenda catturato (che cita solo 宝5/宝6, in realtà appartenenti a iweleth-12 per errore di estrazione). Icona rossa '宝4' individuata via analisi pixel, non menzionata nell"
+     "nota": "Nessun riscontro nel testo di legenda catturato (che cita solo 宝5/宝6, in realtà appartenenti a iweleth-12 per errore di estrazione). Icona rossa '宝4' individuata via analisi pixel, non menzionata nella legenda ma visibile chiaramente sulla pianta e con numerazione coerente (precede 5 e 6); assegnata per esclusione a 'Pane per l'anima', unico forziere dell'area."
     },
     {
      "punto": "iweleth-11-cammino-per-il-santo-graal-parte-iii/1",
@@ -2941,7 +2941,7 @@
      "y": 18.5,
      "confidenza": "alta",
      "etichetta": "宝5 (icona rossa)",
-     "nota": "Testo di legenda (catturato per errore sotto iweleth-11) cita 'dal forziere 5 si ottiene Soma'. Icona rossa '宝5' individuata via analisi pixel sul ramo sinistro della pianta, coerente con 'forziere su"
+     "nota": "Testo di legenda (catturato per errore sotto iweleth-11) cita 'dal forziere 5 si ottiene Soma'. Icona rossa '宝5' individuata via analisi pixel sul ramo sinistro della pianta, coerente con 'forziere sulla sinistra'."
     },
     {
      "punto": "iweleth-12-cammino-per-il-santo-graal-parte-iv/1",
@@ -3012,7 +3012,7 @@
      "y": 49.4,
      "confidenza": "media",
      "etichetta": "宝1-2 (icona rossa)",
-     "nota": "Nessuna voce di legenda. Unica icona rossa della pianta, etichettata '宝1-2', in cima a マップ4 (subito dopo la salita iniziale): coerente con 'Forziere iniziale, a sinistra salendo le scale', primo forzi"
+     "nota": "Nessuna voce di legenda. Unica icona rossa della pianta, etichettata '宝1-2', in cima a マップ4 (subito dopo la salita iniziale): coerente con 'Forziere iniziale, a sinistra salendo le scale', primo forziere del Palazzo."
     }
    ]
   },
@@ -3068,7 +3068,7 @@
      "y": 58.1,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale. Unica icona colorata della pianta, nella sala raggiunta con il trasferimento forzato dopo 【1】, sul lato ovest: coerente con 'Forziere nella sala retrostante, nella sala a ov"
+     "nota": "Nessun riscontro testuale. Unica icona colorata della pianta, nella sala raggiunta con il trasferimento forzato dopo 【1】, sul lato ovest: coerente con 'Forziere nella sala retrostante, nella sala a ovest del Corridoio'."
     }
    ]
   },
@@ -3115,7 +3115,7 @@
      "y": 27.7,
      "confidenza": "media",
      "etichetta": "宝3-4 (icona rossa)",
-     "nota": "Voce '▶' cita 'si ottiene un Ofuda di forte indebolimento dal forziere 2-4' (confidenza originale alta); l'icona rossa individuata via analisi pixel riporta però l'etichetta '宝3-4' (verificato con zoo"
+     "nota": "Voce '▶' cita 'si ottiene un Ofuda di forte indebolimento dal forziere 2-4' (confidenza originale alta); l'icona rossa individuata via analisi pixel riporta però l'etichetta '宝3-4' (verificato con zoom ravvicinato), non '宝2-4' -- probabile refuso/contaminazione tra pagine nel testo di legenda (fenomeno già osservato altrove nel dataset). Assegnata comunque a questo punto per corrispondenza del nome oggetto (Ofuda di forte indebolimento), confidenza abbassata a media per la discrepanza numerica."
     }
    ]
   },
@@ -3147,7 +3147,7 @@
      "y": 17.8,
      "confidenza": "alta",
      "etichetta": "【9】",
-     "nota": "Punto puzzle 'Porta parlante' abbinato da 2 gruppi di voci ('【2】-【3】' esamina il diario x2, media, e '【9】' esamina la porta e risponde 'Il suo amore', alta). Usata la posizione di 【9】, più specifica e"
+     "nota": "Punto puzzle 'Porta parlante' abbinato da 2 gruppi di voci ('【2】-【3】' esamina il diario x2, media, e '【9】' esamina la porta e risponde 'Il suo amore', alta). Usata la posizione di 【9】, più specifica e con confidenza maggiore."
     },
     {
      "punto": "maruki-07-sala-di-controllo/4",
@@ -3155,7 +3155,7 @@
      "y": 90.2,
      "confidenza": "media",
      "etichetta": "宝4-1 (icona rossa)",
-     "nota": "La voce '(oggetti)' cita '宝玉輪（消費物）宝4-1' (Anello di giada) senza puntoChiave assegnato (la legenda lega esplicitamente la voce solo a 'Infini-sciabola', 4-2). Icona '宝4-1' individuata e confermata via "
+     "nota": "La voce '(oggetti)' cita '宝玉輪（消費物）宝4-1' (Anello di giada) senza puntoChiave assegnato (la legenda lega esplicitamente la voce solo a 'Infini-sciabola', 4-2). Icona '宝4-1' individuata e confermata via zoom in マップ2; assegnata per esclusione all'unico forziere rimasto (Catena di perline), coerente con l'analogia già osservata in altre aree (nome giapponese 'anello di perline/giada' -> 'catena di perline')."
     },
     {
      "punto": "maruki-07-sala-di-controllo/5",
@@ -3235,7 +3235,7 @@
      "y": 43.7,
      "confidenza": "media",
      "etichetta": "宝4-10 (icona rossa)",
-     "nota": "Nessuna voce di legenda con puntoChiave (testo catturato appartiene alla Sala di supporto successiva). Unica icona rossa della pianta, etichettata '宝4-10', non menzionata nel testo estratto ma chiaram"
+     "nota": "Nessuna voce di legenda con puntoChiave (testo catturato appartiene alla Sala di supporto successiva). Unica icona rossa della pianta, etichettata '宝4-10', non menzionata nel testo estratto ma chiaramente visibile: assegnata per esclusione all'unico forziere dell'area (Tavola Ouija)."
     }
    ]
   },
@@ -3267,7 +3267,7 @@
      "y": 24.2,
      "confidenza": "alta",
      "etichetta": "【14】",
-     "nota": "Punto puzzle 'Porta parlante' abbinato da 2 voci ('【12】' esamina la vecchia TV, media, e '【14】' esamina la porta e risponde 'Voglio diventare quella persona', alta). Usata la posizione di 【14】, più sp"
+     "nota": "Punto puzzle 'Porta parlante' abbinato da 2 voci ('【12】' esamina la vecchia TV, media, e '【14】' esamina la porta e risponde 'Voglio diventare quella persona', alta). Usata la posizione di 【14】, più specifica."
     }
    ]
   },
@@ -3291,7 +3291,7 @@
      "y": 60.3,
      "confidenza": "alta",
      "etichetta": "【2】",
-     "nota": "Punto puzzle RGB abbinato da 3 voci (【1】 evento generico bassa, 【2】 'si esamina il dispositivo RGB, si accendono tutti i colori' alta, 【4】 'si spegne il rosso' alta). Usata la posizione di 【2】, prima "
+     "nota": "Punto puzzle RGB abbinato da 3 voci (【1】 evento generico bassa, 【2】 'si esamina il dispositivo RGB, si accendono tutti i colori' alta, 【4】 'si spegne il rosso' alta). Usata la posizione di 【2】, prima azione ad alta confidenza del meccanismo."
     },
     {
      "punto": "maruki-11-corridoio-del-crepuscolo/2",
@@ -3299,7 +3299,7 @@
      "y": 33.3,
      "confidenza": "bassa",
      "etichetta": "icona arancione (forziere, non etichettata)",
-     "nota": "Nessun riscontro testuale diretto (l'unico forziere con etichetta esplicita sulla pianta, 宝4-14 'Ofuda di potenziamento istantaneo', non corrisponde per nome a nessuno dei 3 forzieri di quest'area e n"
+     "nota": "Nessun riscontro testuale diretto (l'unico forziere con etichetta esplicita sulla pianta, 宝4-14 'Ofuda di potenziamento istantaneo', non corrisponde per nome a nessuno dei 3 forzieri di quest'area e non è stato assegnato). Icona arancione nella stanza ovest del bivio: coerente con 'Ofuda del potere, vicino all'inizio dell'area, verso ovest'."
     },
     {
      "punto": "maruki-11-corridoio-del-crepuscolo/4",
@@ -3347,7 +3347,7 @@
      "y": 94.1,
      "confidenza": "media",
      "etichetta": "(continua) dopo 【3】",
-     "nota": "Fase Adam Kadmon a danno ridotto: la nota di legende.json chiarisce che il testo giapponese non la distingue esplicitamente dalla forma finale (trattate come scontro continuo): nessun marcatore propri"
+     "nota": "Fase Adam Kadmon a danno ridotto: la nota di legende.json chiarisce che il testo giapponese non la distingue esplicitamente dalla forma finale (trattate come scontro continuo): nessun marcatore proprio, posizionata nella stessa sequenza di 【3】 per coerenza narrativa."
     },
     {
      "punto": "maruki-12-eden-modello-psi-cognitivo-eden/3",
@@ -3355,7 +3355,7 @@
      "y": 94.1,
      "confidenza": "alta",
      "etichetta": "(continua) dopo 【3】",
-     "nota": "'Infine scontro con Adam Kadmon' + 'scontro finale solo protagonista' (le due voci relative a questo punto, confidenza originale alta e media), stessa posizione della sequenza -- battaglia di sopravvi"
+     "nota": "'Infine scontro con Adam Kadmon' + 'scontro finale solo protagonista' (le due voci relative a questo punto, confidenza originale alta e media), stessa posizione della sequenza -- battaglia di sopravvivenza finale del gioco."
     }
    ]
   },

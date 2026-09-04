@@ -86,7 +86,7 @@ export function QuartierePage() {
         <div className="flex flex-col gap-3">
           <button type="button" className="btn btn-ghost btn-sm self-start touch" onClick={() => navigate('/guida/citta')}><IconChevronLeft size={16} /> La città</button>
           <div>
-            <h1 className="m-0 text-2xl font-bold">{q.nome}</h1>
+            <h1 className="titolo-display m-0">{q.nome}</h1>
             {q.sblocco && <p className="m-0 mt-1 text-[13px]"><strong>Sblocco:</strong> {q.sblocco}</p>}
             {q.descrizione && <p className="m-0 mt-1 text-[13px] text-text-secondary">{q.descrizione}</p>}
             {q.fonte && <a href={q.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}

@@ -12,6 +12,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { MESI_GIOCO, dataGiocoTesto } from '../utils/dateGioco';
 import type { GiornoCalendarioDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenza', sblocco: 'Sblocco', esame: 'Esame', festa: 'Festa', vacanza: 'Vacanza', consiglio: 'Consiglio', meteo: 'Meteo' };
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
@@ -78,10 +79,7 @@ export function CalendarioPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-4">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Calendario di gioco</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">Giorno per giorno dal 9 aprile: meteo previsto, eventi della storia, scadenze dei Palazzi, esami, sblocchi e feste (guida allgamestaff, meteo da wikiwiki.jp). {partitaId ? (d.dataGioco ? `Oggi nella partita è ${dataGiocoTesto(d.dataGioco)}.` : 'Apri un giorno e imposta la data di gioco della partita.') : 'Attiva una partita per seguire la data di gioco.'}</p>
-          </div>
+          <IntestazionePagina titolo="Calendario di gioco" sottotitolo={<>Giorno per giorno dal 9 aprile: meteo previsto, eventi della storia, scadenze dei Palazzi, esami, sblocchi e feste (guida allgamestaff, meteo da wikiwiki.jp). {partitaId ? (d.dataGioco ? `Oggi nella partita è ${dataGiocoTesto(d.dataGioco)}.` : 'Apri un giorno e imposta la data di gioco della partita.') : 'Attiva una partita per seguire la data di gioco.'}</>} />
 
           {d.oggi && (
             <section className="card flex flex-col gap-2 border-primary">

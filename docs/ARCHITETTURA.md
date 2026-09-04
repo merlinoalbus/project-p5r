@@ -233,6 +233,7 @@ chiave `citta-<quartiere>`), scaricata al primo uso; `MappaInterattiva` accetta 
 |---|---|
 | Compendio | `GET /api/compendio/arcani`, `/glossario`, `/termini` (glossario italiano ↔ inglese per categoria), `/fusione/regole`, `/persona?q&arcana&livelloMin&livelloMax&dlc&rara&speciale&skill`, `/persona/:id`, `/skill?q&elemento`, `/skill/:id`, `/oggetti?q&categoria`, `/confidenti` |
 | Traduzioni | `GET /api/traduzioni?ambito&q&soloUtente`, `GET /ambiti`, `PUT /:ambito/:chiave {testo}` (→ fonte utente), `DELETE /:ambito/:chiave` (ripristina il seed) |
+| Font (Fase 11.1) | `GET /api/font` (stato dei ruoli display/menu/decor), `GET /api/font/:ruolo/file`, `PUT /api/font/:ruolo` (file come corpo grezzo fino a 4 MB, formato TTF/OTF/WOFF/WOFF2 riconosciuto dalla firma), `DELETE /api/font/:ruolo`; file in `DATA_DIR/font/<ruolo>.<formato>`, nessuna tabella |
 | Partite | `GET/POST /api/partite`, `GET /attiva`, `GET/PUT/DELETE /:id`, `POST /:id/attiva`; `GET /:id/doti` (punti, rango, nomeRango, sogliaProssima, mancanti, ranghi[]), `PATCH /:id/doti/:chiave {punti|delta|note 1–3 + libro/fortuna}`; `GET /:id/confidenti` (punti, puntiNecessari, mancanti, personaArcanoInScorta), `PUT /:id/confidenti/:chiave {sbloccato,rango,punti|deltaPunti|noteRisposta 1–3|regalo|uscita + bonusArcano/esame/invito,note}`; `GET /:id/compendio`, `PUT /:id/compendio/:personaId`; `GET/POST /:id/persona`, `PUT/DELETE /:id/persona/:possedutaId` |
 | Fusione | `GET /api/fusione/fondi?a&b&partita|dlc` (esito con motivo), `GET /api/fusione/ricette/:personaId?partita|dlc&livelloMax&limite` (totale, totaleSenzaFiltri, ricette per costo), `GET /api/fusione/con/:personaId?…` (fusioni con la Persona come ingrediente), `GET /api/fusione/piani/:personaId?partita&profondita≤4&alternative≤10&catture&limitaLivello|livelloMax&skill=id,…(≤4)&slotFortunato` (piani ricorsivi con propagazione delle skill), `GET /api/fusione/velluto?partita` (sconto, Allarme, Gemelle, ranghi per arcano), `GET /api/fusione/eredita?a&b&partita&livelloA&livelloB` (slot, candidate, tratti), `GET /api/fusione/cerca-skill?skill=id,…(≤4)&risultato&partita&livelloMax&limite` (ricette che consentono le skill) |
 | Immagini | `GET /api/immagini?ambito`, `GET /:ambito/:chiave`, `GET /:ambito/:chiave/file`, `PUT /:ambito/:chiave` (corpo grezzo `image/*`, max 8 MB), `POST /:ambito/:chiave/da-url {url}`, `DELETE /:ambito/:chiave`; catalogo dei riferimenti (solo link): `GET /catalogo?ambito` (voci + `presente`), `POST /catalogo/importa {ambito, chiavi ≤20, sovrascrivi}` → `{importate, saltate, fallite[{chiave, motivo}]}` |
@@ -281,6 +282,28 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   `overflow-wrap: anywhere` sul body (testi di gioco con token lunghi non generano scroll orizzontale a 375 px).
 - Meccaniche di gioco nel tracker: Doti = note→punti (2/3/5, libro 7, fortuna ×1,5 per difetto) con soglie dei 5 ranghi; Confidenti = note→punti (5/10/15, regalo 50, uscita 10) × bonus arcano 1,5 × esami × invito, verso
   il rango successivo con soglie per Confidente (`docs/riferimenti/confidenti-punti.md`), azzerati al cambio di rango; `src/utils/punti.ts` replica la formula per l'anteprima.
+
+### Impatto visivo — fondamenta (Fase 11.1)
+- **Tipografia a tre ruoli**: token `--font-display` (titoli, numeri), `--font-menu` (navigazione, pulsanti, chip), `--font-decor`
+  (tasselli decorativi) in `src/tailwind.css`; ogni lista inizia con la famiglia dell'utente («P5R Display/Menu/Decor»), poi il
+  predefinito libero auto-ospitato in `public/font/` (Anton, Bebas Neue, Special Elite, Inter; licenze in `public/font/LICENZE.md`),
+  poi le riserve di sistema. Il browser sostituisce per singolo carattere i glifi che un font non contiene (accentate dei font P5).
+- **Font dell'utente**: `stores/fontStore.ts` legge `GET /api/font` all'avvio e scrive le regole `@font-face` in `<style id="p5r-font-utente">`
+  (URL con la data di modifica come anti-cache); `components/impostazioni/CaratteriEditor.tsx` carica/sostituisce/rimuove un file per
+  ruolo con anteprima immediata. I file vivono solo nell'istanza (`data/font/` è in .gitignore e .dockerignore).
+- **Sfondi a tema**: `components/layout/sfondi.ts` abbina prefisso di percorso → asset (Stanza di Velluto per Compendio/Skill/Fusione,
+  con variante Allarme; Mementos per la Guida; splash dell'identità per Home e Partita); `MainLayout` rende un livello `.sfondo-sezione`
+  (assoluto, sotto il contenuto, velo scuro) sopra il pattern ripetibile; le card sono leggermente traslucide.
+- **Intestazione comune** `components/shared/IntestazionePagina.tsx`: titolo h1 a tasselli (una parola per cartiglio, colori alternati,
+  inclinazione, nome accessibile intero), sottotitolo, azioni, illustrazione da asset, collegamento «indietro»; usata da tutte le pagine
+  di elenco; le schede di dettaglio usano la classe `.titolo-display` in attesa della loro riprogettazione (11.2–11.5).
+- **`StellaCinque`** (`components/shared/StellaCinque.tsx` + `stellaGeometria.ts`): radar SVG a N assi con griglia, poligono animato
+  con requestAnimationFrame (rispetta `prefers-reduced-motion`), vertici con badge da asset o testo, opzionalmente pulsanti.
+- **Stati di pagina** (`PageState.tsx`): caricamento con gli otto fotogrammi `illustrazioni/caricamento-1…8` (animazione CSS a passi,
+  ritardi negativi), errore con `illustrazioni/errore-senza-testo`, stati vuoti con illustrazione dedicata → neutra → icona
+  (`useAssetMulti` in `assetStore`); l'ErrorBoundary mostra la stessa illustrazione.
+- **Pulsanti e chip** a taglio diagonale disegnati in CSS: il riquadro resta rettangolare (outline di focus visibile), bordo e
+  riempimento sono due pseudo-elementi ritagliati con `clip-path`; i pulsanti usano il carattere «menu» in maiuscolo.
 
 ## 8. Build, test, deploy
 - Test (Vitest, 20 file / 79 casi): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),

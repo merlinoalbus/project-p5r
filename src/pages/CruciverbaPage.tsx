@@ -11,6 +11,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { dataGiocoTesto as formattaDataGioco } from '../utils/dateGioco';
 import type { CruciverbaDto } from '../types';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 function Cruciverba({ c, partitaId, onCambiato }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void }) {
   const [mostra, setMostra] = useState(false);
@@ -47,10 +48,7 @@ export function CruciverbaPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <div>
-            <h1 className="m-0 text-2xl font-bold">Cruciverba di Leblanc</h1>
-            <p className="m-0 mt-1 text-[13px] text-text-secondary">{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale una nota di Conoscenza.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</p>
-          </div>
+          <IntestazionePagina titolo="Cruciverba di Leblanc" sottotitolo={<>{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale una nota di Conoscenza.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</>} />
           {partitaId && <label className="flex items-center gap-2 text-[13px] touch self-start"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da fare</label>}
           <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Cruciverba">
             {visibili.map((c) => <Cruciverba key={c.giorno} c={c} partitaId={partitaId} onCambiato={aggiorna} />)}

@@ -28,7 +28,7 @@ export function BottomNav() {
           {({ isActive }) => (
             <>
               <IconaNav voce={item} attiva={isActive} />
-              <span>{item.label}</span>
+              <span className="voce-menu text-[12px]">{item.label}</span>
             </>
           )}
         </NavLink>

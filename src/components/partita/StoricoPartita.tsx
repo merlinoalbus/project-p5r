@@ -88,7 +88,7 @@ export function StoricoPartita({ partitaId, perPagina = 30, compatto = false }: 
       {eventi && eventi.length === 0 && (
         compatto
           ? <p className="m-0 text-[13px] text-text-muted">Ancora nessun evento: ogni modifica alla partita comparirà qui.</p>
-          : <EmptyState icon="🕘" title="Nessun evento" hint={gruppo === 'tutti' ? 'Le modifiche a scorta, Confidenti, Doti, compendio e Stanza di Velluto vengono registrate automaticamente.' : 'Nessun evento in questo gruppo.'} />
+          : <EmptyState illustrazione="vuoto-storico" title="Nessun evento" hint={gruppo === 'tutti' ? 'Le modifiche a scorta, Confidenti, Doti, compendio e Stanza di Velluto vengono registrate automaticamente.' : 'Nessun evento in questo gruppo.'} />
       )}
       {eventi && eventi.length > 0 && (
         <ol className="m-0 p-0 list-none flex flex-col divide-y divide-border-light" aria-label="Eventi della partita">

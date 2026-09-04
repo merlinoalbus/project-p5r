@@ -17,6 +17,7 @@ import { StoricoPartita } from '../components/partita/StoricoPartita';
 import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
+import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
 type Scheda = 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
@@ -51,13 +52,14 @@ export function PartitaPage() {
         />
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="m-0 text-2xl font-bold">{attiva.nome}</h1>
-            <span className="chip">Liv. {attiva.livelloProtagonista}</span>
-            {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
-            {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
-            {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
-          </div>
+          <IntestazionePagina titolo={attiva.nome} compatta>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="chip">Liv. {attiva.livelloProtagonista}</span>
+              {attiva.dataGioco && <span className="chip">{attiva.dataGioco}</span>}
+              {attiva.nuovaPartitaPlus && <span className="chip">NG+</span>}
+              {attiva.allarmeAttivo && <span className="chip chip--attivo">ALLARME</span>}
+            </div>
+          </IntestazionePagina>
           <div className="flex gap-1.5 flex-wrap">
             {SCHEDE.map((s) => (
               <button key={s.k} type="button" className={`chip touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}>{s.l}</button>

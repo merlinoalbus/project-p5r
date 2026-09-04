@@ -98,7 +98,7 @@ export function DungeonDettaglioPage() {
           <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
           <div className="card flex flex-col gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="m-0 text-2xl font-bold">{d.nome}</h1>
+              <h1 className="titolo-display m-0">{d.nome}</h1>
               {d.sovrano && <span className="chip">{d.sovrano}</span>}
               {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
               {d.livelloConsigliato && <span className="chip">Livello {d.livelloConsigliato}</span>}
