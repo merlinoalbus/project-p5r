@@ -13,7 +13,7 @@ import { PageState } from '../components/shared/PageState';
 import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import type { DomandaDto, DomandeDto } from '../types';
 
-const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', altro: 'Altro' };
+const NOME_TIPO: Record<DomandaDto['tipo'], string> = { classe: 'In classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame di fine semestre', altro: 'Game show in TV' };
 
 type Filtro = 'tutte' | 'da-fare' | 'fatte' | 'esami';
 

@@ -208,6 +208,9 @@ spunta con evento «percorso», impostazione del giorno corrente.
 Migrazione 019: `trofeo` (chiave stabile, tipo, come/quando, `verificato`) e `trofeo_partita`; finali, Covo dei Ladri, DLC, meteo, Nuova Partita+,
 differenze e tempo sono JSON in `dati_guida` («completamento»). `completamentoService`: elenco con ottenuti, spunta con evento «trofeo».
 
+### Sfide (Fase 9.2)
+`sfide.json` è consultazione pura in `dati_guida` («sfide»); le domande del game show in TV riusano il modello `domanda` (tipo «altro», chi «Game show in TV») e quindi la spunta per partita.
+
 ## 5 bis. API (step 0.4)
 | Area | Endpoint principali |
 |---|---|

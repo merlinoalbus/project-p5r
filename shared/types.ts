@@ -727,6 +727,47 @@ export interface DomandeDto {
   totale: number;
 }
 
+// ---- Sfide: Battaglie Sfida, boss segreti, Magnate, tratti (Fase 9.2) ----
+
+export interface BattagliaSfidaDto {
+  chiave: string;
+  nome: string;
+  nomeIt: string | null;
+  regole: string;
+  nemici: string[];
+  punteggi: string | null;
+  ricompense: string[];
+  strategia: string;
+  livelloConsigliato: string | null;
+  fonte: string;
+  verificato: boolean;
+}
+
+export interface BossSegretoDto {
+  chiave: string;
+  nome: string;
+  dove: string;
+  quando: string;
+  requisiti: string[];
+  livelloConsigliato: string | null;
+  mosse: string[];
+  resistenze: string[];
+  debolezze: string[];
+  strategia: string[];
+  ricompense: string[];
+  fonte: string;
+  verificato: boolean;
+}
+
+export interface SfideDto {
+  battaglieSfida: { introduzione: string; sblocco: string; regoleGenerali: string; fonte: string; elenco: BattagliaSfidaDto[] };
+  bossSegreti: BossSegretoDto[];
+  /** Scheda di Magnate come raccolta dalla guida (campi testuali e tabelle), con `fonte`. */
+  magnate: (Record<string, unknown> & { fonte: string }) | null;
+  tratti: { introduzione: string; fonte: string; verificato: boolean; elenco: Array<{ nome: string; nomeEn: string | null; effetto: string; categoria: string | null }> };
+  quizTv: { introduzione: string; fonte: string };
+}
+
 // ---- Completamento: trofei, finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo (Fase 9.1) ----
 
 export interface TrofeoDto {

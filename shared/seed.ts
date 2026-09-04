@@ -73,6 +73,9 @@ export interface FusioneSeed {
 /** Aiuto in battaglia (guida allgamestaff): sezioni testuali e indice delle Ombre; stessa forma del DTO senza il collegamento alle Persona. */
 export type BattagliaSeed = Record<string, unknown> & { ombre: Array<{ dungeonChiave: string; persona: string | null; ombra: string | null }> };
 
+/** Sfide (guida allgamestaff): Battaglie Sfida, boss segreti, Magnate, tratti; contenuti di consultazione in JSON. */
+export type SfideSeed = Record<string, unknown>;
+
 /** Completamento (guida allgamestaff): trofei più sezioni di consultazione (finali, Covo dei Ladri, DLC, meteo, Nuova Partita+, tempo). */
 export interface CompletamentoSeed {
   trofei: Array<{ chiave: string; ordine: number; nome: string; nomeEn: string | null; tipo: 'bronzo' | 'argento' | 'oro' | 'platino'; descrizione: string; come: string; mancabile: boolean | null; quando: string | null; fonte: string; verificato: boolean }>;

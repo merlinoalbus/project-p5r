@@ -89,7 +89,7 @@ Persona possedute con statistiche potenziate e skill (già in Fase 0), più: sto
 | Step | Contenuto | Stato |
 |---|---|---|
 | 9.1 | Completamento: seed `completamento.json` (53 trofei con nome italiano e inglese, tipo, come e quando; 6 finali con condizioni e date; Covo dei Ladri con 52 sfide e 36 voci di catalogo; 12 DLC; 11 voci sugli effetti del meteo; Nuova Partita+; differenze Royal/vanilla; fasce orarie e regole del tempo); migrazione 019 (`trofeo`, `trofeo_partita`), consultazione in `dati_guida`; `GET /api/compendio/completamento?partita`, `PUT /api/partite/:id/trofei` (evento «trofeo»); pagina «Guida → Trofei, finali e Covo dei Ladri» a schede | ✅ 2026-09-04 |
-| 9.2 | Sfide e boss: 7 Battaglie Sfida (regole, nemici, punteggi, ricompense, strategia), boss segreti (Jose, Gemelle Custodi, Lavenza), Magnate, domande del game show in TV (nelle Domande), tratti delle Persona con effetto in italiano | ⬜ (dati raccolti) |
+| 9.2 | Sfide e boss: seed `sfide.json` in `dati_guida` (7 Battaglie Sfida con regole, nemici, punteggi, ricompense e strategia; boss segreti Jose, Gemelle Custodi e Lavenza con mosse, resistenze e strategia; Magnate; 90 tratti delle Persona con effetto in italiano); le 11 domande del game show in TV entrano in `domande.json` (tipo «altro», con spunta per partita); `GET /api/compendio/sfide`; pagina «Guida → Battaglie Sfida, boss segreti e tratti» a schede con ricerca dei tratti | ⏳ in validazione |
 
 ⬜ 9 (voce precedente) Trofei, finali, Covo dei Ladri
 

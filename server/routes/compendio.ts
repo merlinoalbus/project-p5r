@@ -15,6 +15,9 @@ import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
 import { completamento } from '../services/completamentoService.js';
+import { datiGuida } from '../services/richiesteService.js';
+import { httpErrors } from '../utils/httpError.js';
+import type { SfideDto } from '../../shared/types.js';
 import { validate } from '../middleware/validate.js';
 import { paramsId, queryOggetti, queryPersona, querySkill } from '../schemas/compendio.js';
 import {
@@ -67,6 +70,11 @@ router.get('/oggetti', validate({ query: queryOggetti }), (req, res) => {
 
 router.get('/confidenti', (_req, res) => {
   res.json(elencaConfidenti());
+});
+router.get('/sfide', (_req, res) => {
+  const dati = datiGuida<SfideDto>('sfide');
+  if (!dati) throw httpErrors.notFound('sfide-non-disponibili', 'I dati delle sfide non sono caricati.');
+  res.json(dati);
 });
 router.get('/completamento', validate({ query: queryDomande }), (req, res) => {
   res.json(completamento((req.query as unknown as { partita?: number }).partita));
