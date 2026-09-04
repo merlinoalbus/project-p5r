@@ -54,7 +54,7 @@ export function PartitaPage() {
           action={<button type="button" className="btn btn-primary" onClick={() => setNuova(true)}>Crea partita</button>}
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className={`flex flex-col gap-3 ${scheda === 'oggi' || scheda === 'doti' ? 'scheda-riempi md:min-h-0' : ''}`}>
           <IntestazionePagina titolo={attiva.nome} compatta>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="chip">Liv. {attiva.livelloProtagonista}</span>
@@ -68,9 +68,9 @@ export function PartitaPage() {
               <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
             ))}
           </div>
-          {scheda === 'oggi' && <OggiPartita key={attiva.id} partita={attiva} />}
+          {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
-          {scheda === 'doti' && <DotiSociali partitaId={attiva.id} />}
+          {scheda === 'doti' && <div className="md:flex-1 md:min-h-0"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
           {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}

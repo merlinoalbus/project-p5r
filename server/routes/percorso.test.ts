@@ -108,7 +108,7 @@ describe('API percorso giorno per giorno', () => {
     await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: conDote.indice, fatta: false });
     expect(((await request(app).get(`/api/partite/${id}/doti`)).body.data as Array<{ chiave: string; punti: number }>).find((d) => d.chiave === 'conoscenza')!.punti).toBe(0);
     // Confidente: serve il rango 1 e la scelta delle note; senza Persona del Carro in scorta 2 note = 10 punti
-    await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ rango: 1 });
+    await request(app).put(`/api/partite/${id}/confidenti/ryuji`).send({ forza: true, rango: 1 });
     const indice = (await request(app).get(`/api/compendio/percorso?partita=${id}`)).body.data as PercorsoIndiceDto;
     let trovata: { data: string; indice: number } | null = null;
     for (const giorno of indice.giorni) {

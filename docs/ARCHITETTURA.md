@@ -433,7 +433,7 @@ verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in
 e la mappa verticale dei Mementos sono immagini dell'utente nell'istanza (mai nel repository) con i quartieri e i Dedali come passaggi;
 gli accessi ai Palazzi e ai Mementos sono passaggi dentro le mappe dei luoghi (es. la stazione di Shibuya). Esportazione: `esportaMappe(radice)`
 limita al sottoalbero; `creaPacchettoRepository` produce lo ZIP (scrittore «store» in `server/utils/zip.ts`) con `data/seed/mappe/<chiave>.json`
-(immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>` solo se richieste) e i file in `public/asset/`;
+(immagini di base come `asset: mappe/<chiave>`, schermate come `asset: spilli/<mappa>/<n>-<m>`) e i file in `public/asset/`;
 `caricaSeed` importa `mappe-editor.json` e poi ogni `data/seed/mappe/*.json` (nell'hash del seed).
 
 ### Integrazione delle mappe nelle pagine (Fase 13.4)
@@ -453,13 +453,21 @@ accanto (Tokyo, poi la mappa dell'azione scelta con lo spillo centrato: `VisoreM
 `percorsoService.giornoPercorso` calcola per ogni azione `stato` (con partita: `statoAzione` valuta i semafori del rango atteso del
 Confidente — rossi → bloccata con motivo, tutti verdi → consigliata, grigi → neutra «da confermare») e `mappa` (`mappaAzione`: Palazzo →
 `dungeon-<k>`, richiesta → `dungeon-mementos`, negozio/Confidente → spillo del luogo in città). `creaPartita` imposta il giorno corrente al
-primo giorno del percorso (04-09). Esportazione delle mappe: il pacchetto è completo (immagini di base e schermate degli spilli sempre incluse, puntate come asset);
+primo giorno del percorso (04-09). Home, scheda «Oggi» e «Doti sociali» della Partita stanno in una schermata senza scorrimento su
+desktop e tablet (`.home`/`.scheda-riempi`: altezza della finestra meno la cornice; scorrono solo la guida del giorno e l'elenco delle Doti;
+la mappa incorporata riempie la colonna); lo schermo intero della mappa si apre in pagina («Torna alla pagina» o Esc) senza cambiare
+rotta. Cache delle immagini: gli URL dei file caricati sono versionati (`urlImmagineVersionata`: data di creazione dall'elenco + contatore
+locale) e il server risponde con `Cache-Control: private, max-age=31536000, immutable` quando c'è `?v=`, altrimenti rivalidazione; gli
+asset del repository hanno un'ora di cache piena in nginx (`stale-while-revalidate` di un giorno). Esportazione delle mappe: il pacchetto è completo (immagini di base e schermate degli spilli sempre incluse, puntate come asset);
 la provenienza delle immagini scaricate dalle guide è solo annotata (`provenienze`, LEGGIMI) — decisione dell'utente del 2026-09-04 sera,
 che supera la precedente esclusione.
 
 ### Semafori dei Confidenti e punti dalla guida (Fase 12.3)
 - `data/seed/confidenti-requisiti.json` (estratto dalle note di `confidenti-dettaglio.json`; tipi dote, persona-arcano, palazzo, richiesta,
   confidente, data, meteo, manuale) → `confidente_requisito` (migrazione 026, ricaricata dal seed); conferme manuali in `requisito_partita`.
+  Blocco (specifica 12.3): `ConfidentePartitaDto.bloccato` = requisiti non verdi del rango successivo; `aggiornaConfidente` rifiuta con 409
+  `confidente-bloccato` ogni aumento di rango (e lo sblocco) verso un rango i cui semafori non sono tutti verdi o confermati; la carta è spenta
+  (`poster--bloccato`) con i motivi e «+»/sblocco disattivati. Elenco dei requisiti manuali e condizionali: `docs/riferimenti/semafori-confidenti.md`.
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, boss segnati, richieste completate, ranghi, giorno e meteo
   correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
   `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.

@@ -5,11 +5,12 @@
 // Stesso visore dello schermo intero: navigazione fra i livelli apre la pagina a schermo intero; «Modifica mappa» apre l'editor.
 // ============================================================
 
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useMappaPartita } from '../../hooks/useMappaPartita';
 import { VisoreMappa } from './VisoreMappa';
-import { CollegamentoVisivo } from '../shared/PulsanteVisivo';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { Spinner } from '../shared/PageState';
 
@@ -33,6 +34,14 @@ export function MappaIncorporata({ chiave, versione, onCambiato, altezza, classN
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
   const { mappa, caricamento, errore, ricarica, raccolto, statoPunto, acquisto } = useMappaPartita(chiave, partitaId, { versione, onCambiato });
+  // Schermo intero in pagina: stessa istanza del visore (zoom e selezione restano), «Torna alla pagina» o Esc per rientrare
+  const [intero, setIntero] = useState(false);
+  useEffect(() => {
+    if (!intero) return;
+    const suTasto = (e: KeyboardEvent) => { if (e.key === 'Escape') setIntero(false); };
+    window.addEventListener('keydown', suTasto);
+    return () => window.removeEventListener('keydown', suTasto);
+  }, [intero]);
   if (!mappa && caricamento) return <div className="flex items-center justify-center py-10 text-text-muted" aria-busy="true"><Spinner /></div>;
   if (!mappa) {
     return (
@@ -43,19 +52,21 @@ export function MappaIncorporata({ chiave, versione, onCambiato, altezza, classN
     );
   }
   return (
-    <div className={className} style={{ height: altezza ?? 560 }}>
+    <div className={className} style={altezza !== undefined ? { height: altezza } : className ? undefined : { height: 560 }}>
       <VisoreMappa
         key={`${mappa.chiave}-${spilloIniziale ?? ''}`}
         mappa={mappa}
         partitaId={partitaId}
         selezioneIniziale={spilloIniziale ?? null}
-        incorporato
+        incorporato={!intero}
         onNaviga={(k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`)}
         onRaccolto={raccolto}
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}
+        onChiudi={intero ? () => setIntero(false) : undefined}
+        etichettaChiudi="Torna alla pagina"
         azioni={<>
-          <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`} tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Schermo intero" />
+          {!intero && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="ingrandisci" dimensione={20} />} titolo="Schermo intero" onClick={() => setIntero(true)} />}
           <CollegamentoVisivo to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}/modifica`} tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Modifica mappa" />
         </>}
       />

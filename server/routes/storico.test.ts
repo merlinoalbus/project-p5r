@@ -57,11 +57,13 @@ describe('API storico', () => {
     expect(s.eventi[0].titolo).toContain(dote.nomeRango);
 
     // Confidenti: sblocco e rango
-    await request(app).put(`/api/partite/${id}/confidenti/gemelle`).send({ rango: 3 });
+    await request(app).put(`/api/partite/${id}/confidenti/gemelle`).send({ forza: true, rango: 3 });
     await request(app).put(`/api/partite/${id}/confidenti/gemelle`).send({ note: 'ciao' });
     s = (await request(app).get(`/api/partite/${id}/storico?tipi=confidente-sbloccato,confidente-rango`)).body.data as StoricoDto;
-    expect(s.eventi.map((e) => e.tipo)).toEqual(['confidente-rango', 'confidente-sbloccato']);
+    // due eventi di rango: il salto forzato oltre i requisiti (tracciato) e il cambio di rango vero e proprio
+    expect(s.eventi.map((e) => e.tipo)).toEqual(['confidente-rango', 'confidente-rango', 'confidente-sbloccato']);
     expect(s.eventi[0].titolo).toMatch(/rango 3/);
+    expect(s.eventi.some((e) => e.titolo.includes('nonostante i requisiti'))).toBe(true);
 
     // Persona: aggiunta (+ registrazione nel compendio), livello, skill, statistiche, rimozione
     const pixie = await idDi('Pixie');

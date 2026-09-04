@@ -5,7 +5,7 @@
 // Test CittaPage e QuartierePage — mappa incorporata di Tokyo/quartiere e schede dei luoghi senza posizionamento (Fase 13.4)
 // ============================================================
 
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
@@ -25,7 +25,13 @@ describe('CittaPage', () => {
     expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
     expect(api.getMappa).toHaveBeenCalledWith('tokyo', undefined);
     expect(screen.getByRole('button', { name: 'Passaggio: Shibuya' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Schermo intero' })).toHaveAttribute('href', '/guida/mappe/tokyo');
+    fireEvent.click(screen.getByRole('button', { name: 'Schermo intero' }));
+    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--intero');
+    fireEvent.click(screen.getByRole('button', { name: 'Torna alla pagina' }));
+    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--incorporato');
+    fireEvent.click(screen.getByRole('button', { name: 'Schermo intero' }));
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.getByTestId('visore-mappa')).toHaveClass('visore-mappa--incorporato');
     expect(screen.getByRole('link', { name: 'Modifica mappa' })).toHaveAttribute('href', '/guida/mappe/tokyo/modifica');
     expect(within(screen.getByRole('list', { name: 'Quartieri' })).getByRole('link', { name: /Shibuya/ })).toHaveAttribute('href', '/guida/citta/shibuya');
   });

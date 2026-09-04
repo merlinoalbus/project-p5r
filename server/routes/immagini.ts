@@ -35,8 +35,10 @@ router.get('/:ambito/:chiave', validate({ params: paramsImmagine }), (req, res) 
 router.get('/:ambito/:chiave/file', validate({ params: paramsImmagine }), (req, res) => {
   const { percorso, mime } = fileImmagine(String(req.params.ambito), String(req.params.chiave));
   res.type(mime);
-  // Rivalidazione a ogni richiesta (ETag/Last-Modified di sendFile): una sostituzione è visibile subito.
-  res.setHeader('Cache-Control', 'private, no-cache');
+  // URL versionato (`?v=`): il file può restare in cache per un anno perché ogni sostituzione cambia l'URL; senza versione,
+  // rivalidazione a ogni richiesta (ETag/Last-Modified di sendFile) così una sostituzione è visibile subito.
+  const versionato = typeof req.query.v === 'string' && req.query.v.length > 0;
+  res.setHeader('Cache-Control', versionato ? 'private, max-age=31536000, immutable' : 'private, no-cache');
   res.sendFile(percorso);
 });
 
