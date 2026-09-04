@@ -378,6 +378,11 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   così ogni giro usa Persona diverse); `GET /api/fusione/cicli/:id?lunghezzaMin&partnerDistinti` e selettori «Anelli da … a …» + chip
   «Partner distinti» nella vista Cicli.
 
+### Descrizioni delle Persona (Fase 12.9)
+- `data/seed/descrizioni-persona.json` (232 voci `{nome, descrizione, fonte}`, nel `FILE_SEED` e quindi nell'hash) → `UPDATE persona SET descrizione,
+  fonte_descrizione` dopo l'upsert delle Persona (migrazione 024 aggiunge le colonne). Testi originali sull'origine della figura, mai il testo
+  del gioco. `PersonaDettaglioDto.descrizione/fonteDescrizione`; scheda con riquadro «Chi è» ad altezza fissa e scorrimento verticale.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 82 file / 237 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).

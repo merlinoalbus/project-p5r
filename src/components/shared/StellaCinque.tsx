@@ -10,7 +10,10 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
-import { CENTRO, RAGGIO, RAGGIO_ETICHETTE, arrotonda, poligonoStella, puntoStella } from './stellaGeometria';
+import { CENTRO, RAGGIO, arrotonda, poligonoStella, puntoStella } from './stellaGeometria';
+
+/** Di quanto (px) il bordo interno della targhetta supera la punta del vertice verso il centro: la targhetta copre la punta. */
+const SOVRAPPOSIZIONE = 14;
 
 export interface AsseStella {
   chiave: string;
@@ -103,15 +106,23 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
         })}
       </svg>
       {assi.map((a, i) => {
-        const [x, y] = puntoStella(i, n, RAGGIO_ETICHETTE);
-        const stile = { left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' } as const;
+        // Etichetta ancorata al vertice reale del poligono: il bordo della targhetta rivolto al centro tocca il vertice (più un
+        // piccolo margine) e la targhetta si estende verso l'esterno lungo l'asse, così la verticale non si allontana e le laterali
+        // non coprono il pentagono. dx/dy sono la direzione centro → vertice (−1…1).
+        const [x, y] = puntoStella(i, n, RAGGIO);
+        const dx = (x - CENTRO) / RAGGIO;
+        const dy = (y - CENTRO) / RAGGIO;
+        // La targhetta «incappuccia» il vertice: il suo bordo interno passa SOVRAPPOSIZIONE px oltre la punta, verso il centro.
+        const stile = { left: `${arrotonda(x)}%`, top: `${arrotonda(y)}%`, transform: `translate(calc(-50% + ${arrotonda(dx * 50)}% - ${arrotonda(dx * SOVRAPPOSIZIONE)}px), calc(-50% + ${arrotonda(dy * 50)}% - ${arrotonda(dy * SOVRAPPOSIZIONE)}px))` } as const;
+        // Il tassello del rango sta sempre sul lato esterno (lontano dal centro): angolo destro/sinistro e alto/basso secondo dx/dy.
+        const angoloTassello = { [dx >= 0 ? 'right' : 'left']: `calc(${altezzaBadge} * -0.22)`, [dy < 0 ? 'top' : 'bottom']: `calc(${altezzaBadge} * -0.2)` } as const;
         // Il badge scala con la larghezza reale del riquadro (unità di contenitore): stessa proporzione su ogni schermo.
         const contenuto = (
           <>
             <span className="relative inline-block">
-              <AssetImg nome={a.badge ?? null} alt="" decorativa className="block w-auto object-contain drop-shadow" style={{ height: altezzaBadge, maxWidth: `calc(${altezzaBadge} * 3)` }} fallback={<span className="text-[12px] font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
+              <AssetImg nome={a.badge ?? null} alt="" decorativa className="block w-auto object-contain drop-shadow" style={{ height: altezzaBadge, maxWidth: `calc(${altezzaBadge} * 2.6)` }} fallback={<span className="text-[12px] font-semibold uppercase tracking-wide">{a.etichetta}</span>} />
               {a.badgeSotto && (
-                <AssetImg nome={a.badgeSotto} alt="" decorativa className="absolute w-auto object-contain drop-shadow" style={{ height: `calc(${altezzaBadge} * 0.66)`, right: `calc(${altezzaBadge} * -0.22)`, bottom: `calc(${altezzaBadge} * -0.2)` }} fallback={a.testo !== undefined ? <span className="absolute -right-1 -bottom-2 chip chip--attivo text-[10px] leading-none py-0.5 px-1.5">{a.testo}</span> : null} />
+                <AssetImg nome={a.badgeSotto} alt="" decorativa className="absolute w-auto object-contain drop-shadow" style={{ height: `calc(${altezzaBadge} * 0.66)`, ...angoloTassello }} fallback={a.testo !== undefined ? <span className="absolute chip chip--attivo text-[10px] leading-none py-0.5 px-1.5" style={{ [dx >= 0 ? 'right' : 'left']: -4, [dy < 0 ? 'top' : 'bottom']: -8 }}>{a.testo}</span> : null} />
               )}
             </span>
             {!a.badgeSotto && a.testo !== undefined && <span className="chip chip--attivo text-[11px] leading-none py-0.5 px-2">{a.testo}</span>}
@@ -120,7 +131,7 @@ export function StellaCinque({ assi, dimensione = 320, livelli = 5, onScegli, se
         // Nome dell'asse in un suggerimento al passaggio del mouse (o al fuoco): i badge sono icone senza testo.
         const classi = `absolute flex flex-col items-center gap-0.5 text-center whitespace-nowrap con-suggerimento ${selezionato === a.chiave ? 'text-primary' : 'text-text'}`;
         return onScegli ? (
-          <button key={a.chiave} type="button" className={`${classi} touch bg-transparent border-0 p-1 cursor-pointer`} style={stile} onClick={() => onScegli(a.chiave)} aria-pressed={selezionato === a.chiave} aria-label={a.etichetta} title={a.etichetta} data-suggerimento={a.etichetta}>
+          <button key={a.chiave} type="button" className={`${classi} touch bg-transparent border-0 p-0 cursor-pointer`} style={stile} onClick={() => onScegli(a.chiave)} aria-pressed={selezionato === a.chiave} aria-label={a.etichetta} title={a.etichetta} data-suggerimento={a.etichetta}>
             {contenuto}
           </button>
         ) : (

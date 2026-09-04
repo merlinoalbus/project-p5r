@@ -61,11 +61,11 @@ export function DotiSociali({ partitaId }: Props) {
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
       <div className="grid gap-4 items-start lg:grid-cols-[minmax(280px,380px)_1fr]">
-        <section className="card flex flex-col items-center gap-3 lg:sticky lg:top-0" aria-label="Stella delle Doti">
+        <section className="card flex flex-col items-center gap-3 lg:sticky lg:top-0 px-10 pt-6 overflow-visible" aria-label="Stella delle Doti">
           <StellaCinque
             assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
-            dimensione={320}
-            badgeAltezza={44}
+            dimensione={280}
+            badgeAltezza={42}
             etichettaAria="Stella delle Doti sociali"
             onScegli={vaiAllaDote}
             selezionato={selezionata}

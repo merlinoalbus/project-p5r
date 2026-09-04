@@ -16,6 +16,7 @@ Pipeline (in `scripts/seed/`, comandi `npm run seed:scarica | seed:normalizza | 
 
 | File | Contenuto |
 |---|---|
+| `descrizioni-persona.json` | 232 descrizioni originali in italiano (2–3 frasi) sull'origine mitologica, folcloristica, religiosa o letteraria di ogni Persona, con fonte sintetica; redatte per l'app (mai testo del gioco), senza spoiler della trama; ordine di `persona.json` |
 | `persona.json` | 232 Persona: arcano, livello base, tipo di eredità, flag (speciale/rara/DLC/Confidente max), tratto, oggetti da esecuzione (normale/Allarme), 10 affinità, 5 statistiche, skill con livello di apprendimento, aree e piani di Mementos |
 | `skill.json` | 525 skill: elemento, costo (SP / % HP / nessuno), effetto, fonti da esecuzione, fonte carta, negoziazione, fonte esclusiva |
 | `oggetti.json` | 223 oggetti da esecuzione: categoria, vincolo d'uso, descrizione |

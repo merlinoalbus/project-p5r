@@ -71,6 +71,8 @@ describe('API', () => {
     expect(res.status).toBe(200);
     const d = res.body.data as PersonaDettaglioDto;
     expect(d.arcanaNome).toBe('Mago');
+    expect(d.descrizione.length).toBeGreaterThan(60);
+    expect(d.fonteDescrizione.length).toBeGreaterThan(0);
     expect(d.skill.length).toBeGreaterThan(0);
     expect(d.skill[0].effettoNome).not.toBe(d.skill[0].effetto);
     expect(d.trattoDettaglio?.elemento).toBe('trait');
