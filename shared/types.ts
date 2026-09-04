@@ -1211,7 +1211,7 @@ export interface PiantaAreaDto {
   licenza: string;
   larghezza: number | null;
   altezza: number | null;
-  /** «area» se la pianta è dell'area, «dungeon» se copre più aree. */
+  /** «area» se la pianta è dell'area, «dungeon» se copre più aree, «quartiere» per le mappe della città. */
   copertura: string;
   note: string;
   alternative: Array<{ url: string; pagina: string | null; fonte: string }>;
