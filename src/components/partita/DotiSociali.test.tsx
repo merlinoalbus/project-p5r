@@ -47,9 +47,26 @@ describe('DotiSociali', () => {
     expect(screen.getByLabelText('Fascino: aggiungi 3 note (10 punti)')).toBeInTheDocument();
 
     await act(async () => { screen.getByLabelText('Fascino: aggiungi 3 note (10 punti)').click(); });
-    expect(aggiornaDote).toHaveBeenCalledWith(1, 'fascino', { note: 3, libro: true, fortuna: true } satisfies ModificaDote);
+    expect(aggiornaDote).toHaveBeenCalledWith(1, 'fascino', { note: 3, libro: true, fortuna: true, cinema: false } satisfies ModificaDote);
     expect(await screen.findByText('Rango 2 · Interessante')).toBeInTheDocument();
     expect(screen.getByText(/Mancano/)).toHaveTextContent('Mancano 45 punti al rango 3 · Affascinante (52)');
+  });
+
+  it('«Anima da cineasta» alza di uno scalino l’anteprima e viene inviato al backend', async () => {
+    getDoti.mockResolvedValue([dote(0, 1, 'Indifferente', 6)]);
+    aggiornaDote.mockResolvedValue(dote(3, 1, 'Indifferente', 6));
+    render(<DotiSociali partitaId={1} />);
+    await screen.findByText('Rango 1 · Indifferente');
+    await act(async () => { screen.getByRole('button', { name: /Anima da cineasta/ }).click(); });
+    // 2→3, 3→5, 5→7
+    expect(screen.getByLabelText('Fascino: aggiungi 1 nota (3 punti)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Fascino: aggiungi 2 note (5 punti)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Fascino: aggiungi 3 note (7 punti)')).toBeInTheDocument();
+    // con la fortuna, dopo il cinema: 3→4, 5→7, 7→10
+    await act(async () => { screen.getByRole('button', { name: 'Fortuna ×1,5: lettura della fortuna di Chihaya' }).click(); });
+    expect(screen.getByLabelText('Fascino: aggiungi 3 note (10 punti)')).toBeInTheDocument();
+    await act(async () => { screen.getByLabelText('Fascino: aggiungi 1 nota (4 punti)').click(); });
+    expect(aggiornaDote).toHaveBeenCalledWith(1, 'fascino', { note: 1, libro: false, fortuna: true, cinema: true } satisfies ModificaDote);
   });
 
   it('al rango massimo non mostra soglie e disabilita il −1 a zero punti', async () => {

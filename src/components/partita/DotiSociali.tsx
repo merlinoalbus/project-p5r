@@ -3,8 +3,9 @@
 // ============================================================
 //
 // Nel gioco ogni azione mostra 1–3 note: 1 nota = 2 punti, 2 note = 3, 3 note = 5
-// (7 con libri a resa maggiorata); la lettura della fortuna di Chihaya moltiplica
-// ×1,5 (per difetto). La conversione la fa il backend (`note`, `libro`, `fortuna`).
+// (7 con libri a resa maggiorata); «Anima da cineasta» (Royal) alza di uno scalino film e DVD;
+// la lettura della fortuna di Chihaya moltiplica ×1,5 (per difetto), per ultima.
+// La conversione la fa il backend (`note`, `libro`, `fortuna`, `cinema`).
 // La stella (Fase 11.2) mostra l'avanzamento continuo di ogni dote: ranghi completati
 // più la quota verso il prossimo; toccare un vertice porta alla scheda della dote.
 // ============================================================
@@ -28,8 +29,13 @@ interface Props {
   partitaId: number;
 }
 
-function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean): number {
-  const base = note === 1 ? 2 : note === 2 ? 3 : libro ? 7 : 5;
+const PUNTI_SCALINO = [2, 3, 5, 7] as const;
+
+/** Stessa regola del server (`puntiDaNote`): scalini 2/3/5/7, «Anima da cineasta» +1 scalino, poi ×1,5 per difetto. */
+function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean, cinema = false): number {
+  let scalino = note === 3 && libro ? 4 : note;
+  if (cinema) scalino = Math.min(4, scalino + 1);
+  const base = PUNTI_SCALINO[scalino - 1];
   return fortuna ? Math.floor(base * 1.5) : base;
 }
 
@@ -39,6 +45,7 @@ export function DotiSociali({ partitaId }: Props) {
   const [occupata, setOccupata] = useState<string | null>(null);
   const [fortuna, setFortuna] = useState(false);
   const [libro, setLibro] = useState(false);
+  const [cinema, setCinema] = useState(false);
   const [selezionata, setSelezionata] = useState<string | null>(null);
   const sugg = useSuggerimenti();
 
@@ -81,6 +88,7 @@ export function DotiSociali({ partitaId }: Props) {
             <div className="flex flex-wrap justify-center gap-2">
               <PulsanteVisivo attivo={fortuna} icona={<IconaAzione chiave="fortuna" dimensione={24} />} titolo="Fortuna ×1,5" dettaglio="lettura di Chihaya" onClick={() => setFortuna((v) => !v)} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)" />
               <PulsanteVisivo attivo={libro} icona={<IconaAzione chiave="libro" dimensione={24} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
+              <PulsanteVisivo attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={24} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema((v) => !v)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title="Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ×1,5 di Chihaya" />
             </div>
           </div>
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
@@ -99,11 +107,11 @@ export function DotiSociali({ partitaId }: Props) {
                         type="button"
                         className="btn btn-primary btn-nota min-w-[64px]"
                         disabled={occupata === d.chiave}
-                        onClick={() => void modifica(d.chiave, { note: n, libro, fortuna })}
-                        aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna)} punti)`}
+                        onClick={() => void modifica(d.chiave, { note: n, libro, fortuna, cinema })}
+                        aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna, cinema)} punti)`}
                       >
                         <span aria-hidden="true">{'♪'.repeat(n)}</span>
-                        <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortuna)}</span>
+                        <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortuna, cinema)}</span>
                       </button>
                     ))}
                     <button type="button" className="btn btn-secondary btn-nota min-w-[46px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>

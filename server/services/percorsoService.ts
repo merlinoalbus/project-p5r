@@ -6,7 +6,7 @@ import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { AzionePercorsoDto, ConfidentePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto, StatoAzioneDto } from '../../shared/types.js';
-import { aggiornaConfidente, aggiornaDote, confidenti } from './partiteService.js';
+import { aggiornaConfidente, aggiornaDote, confidenti, puntiDaNote } from './partiteService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
 type AzioneSeed = Omit<AzionePercorsoDto, 'indice' | 'fatta'>;
@@ -106,7 +106,7 @@ export function mappaAzione(a: AzioneSeed): { chiave: string; spilloId: number |
 /** Nomi delle Doti nelle note della guida («Perizia +2», «Conoscenza +1, Fascino +1»). */
 const DOTI_NOTE: Record<string, string> = { conoscenza: 'conoscenza', coraggio: 'coraggio', fascino: 'fascino', gentilezza: 'gentilezza', perizia: 'perizia' };
 
-/** Estrae dalle note della guida gli incrementi delle Doti («Perizia +2»): punti nella scala della guida (1 nota = 2 punti). */
+/** Estrae dalle note della guida gli incrementi delle Doti («Perizia +2»): sono NOTE (1–3), non punti — 132 azioni segnano «+1» e un guadagno da un punto non esiste nel gioco. */
 export function dotiDalleNote(note: string | null | undefined): Array<{ chiave: string; delta: number }> {
   if (!note) return [];
   const out: Array<{ chiave: string; delta: number }> = [];
@@ -167,11 +167,20 @@ export function impostaAzione(partitaId: number, data: string, indice: number, f
   return { ...a, indice, fatta, effetti };
 }
 
+/** Vero se la partita ha letto «Anima da cineasta» (Royal): i punti di film e DVD salgono di uno scalino. */
+function haAnimaDaCineasta(partitaId: number): boolean {
+  return !!prepared("SELECT 1 FROM lettura_partita WHERE partita_id = ? AND tipo = 'libro' AND chiave = 'anima-da-cineasta'").get(partitaId);
+}
+
 function applicaEffetti(partitaId: number, a: AzioneSeed, opz: OpzioniSpunta): EffettiAzioneDto | null {
   const doti: EffettiAzioneDto['doti'] = [];
+  const cinema = (a.tipo === 'dvd' || a.riferimento?.tipo === 'film') && haAnimaDaCineasta(partitaId);
   for (const d of dotiDalleNote(a.note)) {
-    const agg = aggiornaDote(partitaId, d.chiave, { delta: d.delta });
-    doti.push({ chiave: d.chiave, nome: agg.nome, delta: d.delta });
+    // le note della guida diventano punti (2/3/5), con lo scalino in più di «Anima da cineasta» su film e DVD
+    const note = Math.min(3, Math.max(1, d.delta)) as 1 | 2 | 3;
+    const punti = puntiDaNote(note, false, false, cinema);
+    const agg = aggiornaDote(partitaId, d.chiave, { delta: punti });
+    doti.push({ chiave: d.chiave, nome: agg.nome, delta: punti, note, cinema });
   }
   let confidente: EffettiAzioneDto['confidente'] = null;
   if (a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente' && opz.noteRisposta) {
@@ -191,7 +200,7 @@ function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
 }
 
 function descriviEffetti(e: EffettiAzioneDto): string {
-  const parti = e.doti.map((d) => `${d.nome} +${d.delta}`);
+  const parti = e.doti.map((d) => `${d.nome} +${d.delta}${d.note ? ` (${'♪'.repeat(d.note)}${d.cinema ? ' + Anima da cineasta' : ''})` : ''}`);
   if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti (${e.confidente.noteRisposta} ${e.confidente.noteRisposta === 1 ? 'nota' : 'note'}${e.confidente.bonusArcano ? ', bonus arcano' : ''})`);
   return parti.join(', ');
 }
