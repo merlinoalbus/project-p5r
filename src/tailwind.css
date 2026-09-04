@@ -319,15 +319,22 @@
   @media (max-width: 640px) { .ricetta-riga { grid-template-columns: 1fr; } .ricetta-riga__dati { justify-content: flex-start; } }
 
   /* ---- Visore delle mappe a livelli (Fase 13.2): tela, spilli a goccia, pannello laterale ---- */
-  .visore-mappa { display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-text); }
+  .visore-mappa { display: flex; flex-direction: column; background: var(--color-bg); color: var(--color-text); container-type: inline-size; }
   .visore-mappa--intero { position: fixed; inset: 0; z-index: 60; }
-  .visore-mappa--incorporato { position: relative; height: 100%; min-height: 420px; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+  .visore-mappa--incorporato { position: relative; height: 100%; min-height: 220px; border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
   .visore-mappa__barra { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 92%, transparent); }
   .visore-mappa__percorso { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; font-size: 13px; }
   .visore-mappa__briciola { background: none; border: 0; padding: 4px 2px; color: var(--color-text-secondary); cursor: pointer; font: inherit; text-decoration: underline dotted; text-underline-offset: 3px; min-height: 32px; }
   .visore-mappa__briciola:hover { color: var(--color-primary); }
   .visore-mappa__titolo { font-family: var(--font-display); font-size: 19px; text-transform: uppercase; letter-spacing: .02em; }
   .visore-mappa__strumenti { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  /* Colonna stretta (mappa incorporata accanto alla guida): barra a sole icone, il testo resta nel nome accessibile */
+  @container (max-width: 460px) {
+    .visore-mappa__barra { padding: 4px 6px; gap: 4px 6px; }
+    .visore-mappa__strumenti .btn-visivo__testo { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .visore-mappa__strumenti .btn-visivo { padding: 4px 8px; gap: 0; }
+    .visore-mappa__titolo { font-size: 15px; }
+  }
   .visore-mappa__corpo { position: relative; flex: 1; display: grid; grid-template-columns: 340px minmax(0, 1fr); min-height: 0; }
   .visore-mappa--pannello-chiuso .visore-mappa__corpo { grid-template-columns: minmax(0, 1fr); }
   .visore-mappa__tela { position: relative; overflow: hidden; background: radial-gradient(circle at 50% 40%, #1b1b22 0, #0b0b0e 75%); touch-action: none; user-select: none; min-height: 0; }
@@ -368,8 +375,25 @@
   .spillo-popup__chiudi { background: none; border: 0; color: var(--color-text-muted); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 2px; min-width: 28px; min-height: 28px; }
   .spillo-popup__chiudi:hover { color: var(--color-text); }
   /* ---- Home in una schermata (desktop): il contenuto riempie l'altezza disponibile e scorre solo la guida del giorno ---- */
-  @media (min-width: 768px) { .home, .scheda-riempi { height: calc(100vh - var(--altezza-cornice-pagina, 96px)); min-height: 0; } }
-  @media (min-width: 768px) { .scheda-riempi > .md\:flex-1 > * { height: 100%; min-height: 0; } }
+  /* La pagina riempie l'area di lettura (main è flex-col con overflow proprio): niente 100vh, niente taglio del contenuto. */
+  @media (min-width: 768px) {
+    .home, .scheda-riempi { flex: 1 1 auto; min-height: 0; }
+    /* i contenitori marcati passano l'altezza al figlio (PageState non aggiunge un livello proprio) */
+    .riempi-figli, .riempi-figli > * { height: 100%; min-height: 0; }
+  }
+  /* Schermi bassi (tablet in orizzontale, portatili 768-860 px): la Home si comprime per restare in una schermata */
+  @media (min-width: 768px) and (max-height: 900px) {
+    .home > .intestazione p, .home > .intestazione .intestazione__illustrazione { display: none; }
+    .home > .intestazione { padding-bottom: 0; }
+    /* accessi rapidi più bassi: la colonna destra lascia spazio alla mappa */
+    .home .accessi-rapidi .card { padding: 7px 10px; }
+  }
+
+  /* Tessera compatta dei KPI (Home in una schermata) */
+  .kpi-tile--compatto { padding: 5px 8px; min-width: 0; border-radius: var(--radius-md); }
+  .kpi-tile--compatto .kpi-label { font-size: 10px; letter-spacing: .04em; }
+  .kpi-tile--compatto .kpi-value { font-size: 20px; line-height: 1.05; }
+
   /* ---- Confidenti bloccati dai requisiti (12.3): carta spenta, motivi in evidenza ---- */
   .poster--bloccato { filter: grayscale(.85); opacity: .7; }
   .poster--bloccato:hover, .poster--bloccato:focus-within { filter: grayscale(.5); opacity: .9; }

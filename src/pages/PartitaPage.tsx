@@ -68,9 +68,9 @@ export function PartitaPage() {
               <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
             ))}
           </div>
-          {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
+          {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
-          {scheda === 'doti' && <div className="md:flex-1 md:min-h-0"><DotiSociali partitaId={attiva.id} /></div>}
+          {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
           {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
