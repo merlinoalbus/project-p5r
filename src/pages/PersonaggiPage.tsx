@@ -12,8 +12,10 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import type { PersonaggioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
+import { PersonaDelPersonaggio } from '../components/guida/PersonaDelPersonaggio';
+import { getPersone } from '../services/api';
 
-function Personaggio({ p }: { p: PersonaggioDto }) {
+function Personaggio({ p, idCompendio }: { p: PersonaggioDto; idCompendio: Map<string, number> }) {
   const [aperto, setAperto] = useState(false);
   const secondari = new Set(p.campiDaFontiSecondarie);
   const nota = (campo: string) => (secondari.has(campo) ? <span className="text-[11px] text-text-muted" title="Dato da fonte secondaria, non dalla guida italiana"> (fonte secondaria)</span> : null);
@@ -28,11 +30,11 @@ function Personaggio({ p }: { p: PersonaggioDto }) {
           {p.giocabile && <span className="chip text-[11px]">giocabile</span>}
         </div>
         <p className="m-0">{p.ruolo}</p>
+        {p.persona.length > 0 && <PersonaDelPersonaggio personaggio={p.nome} persone={p.persona} idCompendio={idCompendio} />}
         <button type="button" className="text-left text-[12px] text-primary touch self-start" onClick={() => setAperto((v) => !v)} aria-expanded={aperto}>{aperto ? 'Meno dettagli' : 'Più dettagli'}</button>
         {aperto && (
           <div className="flex flex-col gap-1">
             {p.presentazione && <p className="m-0 text-text-secondary">{p.presentazione}</p>}
-            {p.persona.length > 0 && <p className="m-0"><strong>Persona:</strong> {p.persona.join(' → ')}</p>}
             {(p.armi.mischia || p.armi.distanza) && <p className="m-0"><strong>Armi:</strong> {[p.armi.mischia, p.armi.distanza].filter(Boolean).join(' · ')}{nota('armi')}</p>}
             {p.battaglia && <p className="m-0"><strong>In battaglia:</strong> {p.battaglia}{nota('battaglia')}</p>}
             {(p.scuola || p.eta) && <p className="m-0"><strong>Scuola/età:</strong> {[p.scuola, p.eta].filter(Boolean).join(' · ')}{nota('scuola')}{nota('eta')}</p>}
@@ -54,6 +56,8 @@ export function PersonaggiPage() {
   const d = dati.dati;
   const [gruppo, setGruppo] = useState<string>('');
   const perChiave = useMemo(() => new Map((d?.personaggi ?? []).map((p) => [p.chiave, p])), [d]);
+  const compendio = useCarica(() => getPersone(), []);
+  const idCompendio = useMemo(() => new Map((compendio.dati ?? []).flatMap((p) => [[p.nomeIt, p.id] as [string, number], [p.nome, p.id] as [string, number], [p.nomeIt.toLowerCase(), p.id] as [string, number]])), [compendio.dati]);
   const gruppi = useMemo(() => (d?.gruppi ?? []).filter((g) => !gruppo || g.nome === gruppo), [d, gruppo]);
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
@@ -68,7 +72,7 @@ export function PersonaggiPage() {
             <section key={g.nome} className="flex flex-col gap-2">
               <h2 className="m-0 text-[15px] font-semibold">{g.nome}</h2>
               <ul className="m-0 p-0 list-none grid gap-2 xl:grid-cols-2" aria-label={g.nome}>
-                {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} />)}
+                {g.membri.map((m) => perChiave.get(m)).filter((p): p is PersonaggioDto => !!p).map((p) => <Personaggio key={`${g.nome}-${p.chiave}`} p={p} idCompendio={idCompendio} />)}
               </ul>
             </section>
           ))}
