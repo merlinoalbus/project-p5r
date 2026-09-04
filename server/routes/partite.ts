@@ -25,7 +25,7 @@ import { t } from '../services/traduzioniService.js';
 import { eliminaEventi, eliminaEvento, storico } from '../services/storicoService.js';
 import type { TipoEvento } from '../../shared/eventi.js';
 import {
-  aggiornaCompendio, aggiornaConfidente, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita,
+  aggiornaCompendio, aggiornaConfidente, aggiornaDote, aggiornaPartita, aggiornaPosseduta, aggiungiPosseduta, attivaPartita, compendioPartita, registraPossedutaNelCompendio,
   confidenti, creaPartita, dotiSociali, elencaPartite, eliminaPartita, impostaRegaloFatto, leggiPartita, partitaAttiva, personePossedute, rimuoviPosseduta,
 } from '../services/partiteService.js';
 
@@ -135,6 +135,10 @@ router.put('/:id/persona/:possedutaId', validate({ params: paramsPartitaPossedut
 router.delete('/:id/persona/:possedutaId', validate({ params: paramsPartitaPosseduta }), (req, res) => {
   rimuoviPosseduta(Number(req.params.id), Number(req.params.possedutaId));
   res.status(204).end();
+});
+/** Registra nel compendio l'istantanea dell'esemplare (livello, bonus, skill, tratto, carica). */
+router.post('/:id/persona/:possedutaId/registra', validate({ params: paramsPartitaPosseduta }), (req, res) => {
+  res.json(registraPossedutaNelCompendio(Number(req.params.id), Number(req.params.possedutaId)));
 });
 
 // ---- Obiettivi (Fase 5.2) ----

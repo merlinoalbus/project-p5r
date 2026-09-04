@@ -21,10 +21,10 @@ import { CHIAVI_STATISTICHE, type Statistiche } from '../../shared/statistiche.j
 import { FORCA_INCIDENTE_BONUS, INCENSI, bonusLivelliFusione, guadagnoIncenso, moltiplicatoreForca, puntiAllarmeFusione, tierResistenza } from '../../shared/bonusVelluto.js';
 import type { AnteprimaFusioneDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, PersonaPossedutaDto, SkillRiassuntoDto } from '../../shared/types.js';
 
-interface RigaScorta { id: number; persona_id: number; livello: number; forza: number | null; magia: number | null; resistenza: number | null; agilita: number | null; fortuna: number | null; carica: number; nome: string; arcana: string; livello_base: number; rara: number }
+interface RigaScorta { id: number; persona_id: number; livello: number; carica: number; nome: string; arcana: string; livello_base: number; rara: number }
 
 function possedutaOErrore(partitaId: number, possedutaId: number): RigaScorta {
-  const r = prepared(`SELECT pp.id, pp.persona_id, pp.livello, pp.forza, pp.magia, pp.resistenza, pp.agilita, pp.fortuna, pp.carica, p.nome, p.arcana, p.livello AS livello_base, p.rara
+  const r = prepared(`SELECT pp.id, pp.persona_id, pp.livello, pp.carica, p.nome, p.arcana, p.livello AS livello_base, p.rara
     FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.id = ? AND pp.partita_id = ?`).get(possedutaId, partitaId) as RigaScorta | undefined;
   if (!r) throw httpErrors.notFound('posseduta-non-trovata', `La Persona posseduta ${possedutaId} non è nella scorta di questa partita.`);
   return r;
@@ -116,8 +116,8 @@ export interface DatiFusioneScorta {
   trattoSkillId?: number | null;
   /** Livello di partenza osservato in gioco (default: base + bonus minimo). */
   livello?: number;
-  /** Statistiche osservate (con l'Allarme il gioco aggiunge punti casuali): se assenti restano stimate. */
-  statistiche?: Statistiche | null;
+  /** Bonus per statistica osservati (con l'Allarme il gioco aggiunge punti casuali): se assenti le statistiche restano la stima. */
+  bonus?: Statistiche | null;
   note?: string;
 }
 
@@ -147,7 +147,7 @@ export function eseguiFusione(partitaId: number, dati: DatiFusioneScorta): Esito
     const doppione = prepared('SELECT id FROM persona_posseduta WHERE partita_id = ? AND persona_id = ?').get(partitaId, anteprima.risultato.id) as { id: number } | undefined;
     if (doppione) throw httpErrors.conflict('persona-gia-posseduta', `${anteprima.risultato.nomeIt} è già nella scorta: rimuovila o usala prima di fondere un altro esemplare.`);
     const risultato = aggiungiPosseduta(partitaId, anteprima.risultato.id, {
-      livello, skillIds: skillFinali, trattoSkillId: dati.trattoSkillId ?? null, statistiche: dati.statistiche ?? null, note: dati.note ?? '', carica: anteprima.allarme,
+      livello, skillIds: skillFinali, trattoSkillId: dati.trattoSkillId ?? null, bonus: dati.bonus ?? null, note: dati.note ?? '', carica: anteprima.allarme,
       origine: `fusione ${anteprima.tipo === 'speciale' ? 'speciale' : anteprima.tipo === 'tesoro' ? 'con Demone del Tesoro' : anteprima.tipo === 'stesso-arcano' ? 'stesso arcano' : 'normale'}${anteprima.allarme ? ' durante l\'Allarme' : ''}`,
     });
     const nomiEreditate = scelte.map((id) => anteprima.candidate.find((c) => c.id === id)?.nomeIt ?? String(id));
@@ -206,20 +206,14 @@ export function eseguiForca(partitaId: number, dati: DatiForca): EsitoForcaDto {
   const adesso = nowIso();
   return getDb().transaction(() => {
     prepared('DELETE FROM persona_posseduta WHERE id = ? AND partita_id = ?').run(sac.id, partitaId);
-    // Statistiche: se l'utente indica punti, si parte dai valori attuali (registrati o stimati) e si sommano.
+    // Punti statistica della Forca: si sommano al bonus (restano quando il ricevente sale di livello).
     if (totalePunti > 0) {
-      const attuali = possedutaDto(partitaId, ric.id).statistiche;
-      const nuove: Statistiche = { ...attuali };
-      for (const k of CHIAVI_STATISTICHE) nuove[k] = Math.min(99, attuali[k] + (punti[k] ?? 0));
-      prepared('UPDATE persona_posseduta SET forza = ?, magia = ?, resistenza = ?, agilita = ?, fortuna = ? WHERE id = ?').run(nuove.forza, nuove.magia, nuove.resistenza, nuove.agilita, nuove.fortuna, ric.id);
+      prepared('UPDATE persona_posseduta SET bonus_forza = bonus_forza + ?, bonus_magia = bonus_magia + ?, bonus_resistenza = bonus_resistenza + ?, bonus_agilita = bonus_agilita + ?, bonus_fortuna = bonus_fortuna + ? WHERE id = ?')
+        .run(punti.forza ?? 0, punti.magia ?? 0, punti.resistenza ?? 0, punti.agilita ?? 0, punti.fortuna ?? 0, ric.id);
     }
     prepared('UPDATE persona_posseduta SET livello = ?, updated_at = ? WHERE id = ?').run(nuovoLivello, adesso, ric.id);
     prepared('DELETE FROM persona_posseduta_skill WHERE posseduta_id = ?').run(ric.id);
     skillFinali.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(ric.id, i + 1, sid));
-    if (nuovoLivello !== ric.livello) {
-      prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, updated_at) VALUES (?, ?, 1, ?, ?)
-        ON CONFLICT(partita_id, persona_id) DO UPDATE SET livello_registrato = MAX(COALESCE(compendio_partita.livello_registrato, 0), excluded.livello_registrato), updated_at = excluded.updated_at`).run(partitaId, ric.persona_id, nuovoLivello, adesso);
-    }
     const nomiSkill = nuove.map((id) => skillDto(id)?.nomeIt ?? String(id));
     registraEvento(partitaId, 'forca', `Forca: ${t('persona', sac.nome)} sacrificata per ${t('persona', ric.nome)}`,
       dati.incidente
@@ -285,10 +279,8 @@ export function eseguiIsolamento(partitaId: number, dati: DatiIsolamento): Esito
   if (finali.length > 8) throw httpErrors.badRequest('troppe-skill', 'La Persona ha già 8 skill: indica quale dimenticare per apprendere la resistenza.');
   const adesso = nowIso();
   return getDb().transaction(() => {
-    const attuali = possedutaDto(partitaId, p.id).statistiche;
-    const nuove: Statistiche = { ...attuali };
-    for (const k of stat) nuove[k] = Math.min(99, attuali[k] + guadagno.puntiPerStatistica);
-    if (guadagno.puntiPerStatistica > 0) prepared('UPDATE persona_posseduta SET forza = ?, magia = ?, resistenza = ?, agilita = ?, fortuna = ? WHERE id = ?').run(nuove.forza, nuove.magia, nuove.resistenza, nuove.agilita, nuove.fortuna, p.id);
+    // I punti dell'incenso si sommano al bonus della statistica scelta (restano ai livelli successivi).
+    for (const k of stat) if (guadagno.puntiPerStatistica > 0) prepared(`UPDATE persona_posseduta SET bonus_${k} = bonus_${k} + ? WHERE id = ?`).run(guadagno.puntiPerStatistica, p.id);
     prepared('UPDATE persona_posseduta SET updated_at = ? WHERE id = ?').run(adesso, p.id);
     prepared('DELETE FROM persona_posseduta_skill WHERE posseduta_id = ?').run(p.id);
     finali.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(p.id, i + 1, sid));

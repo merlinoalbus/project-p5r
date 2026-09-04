@@ -362,6 +362,17 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   `badgeAltezza/dimensione`) così restano in scala su ogni schermo; `badgeSotto` (tassello del rango) sta in angolo al badge; nome dell'asse in un
   suggerimento al passaggio del mouse (`.con-suggerimento`, `data-suggerimento`).
 
+### Statistiche con bonus e istantanea del compendio (Fase 12.2)
+- `persona_posseduta.bonus_*` (migrazione 023): le statistiche effettive sono `statistichePerLivello(base, livelloBase, livello) + bonus`
+  (clamp 1–99) e seguono il livello; i valori assoluti registrati prima della migrazione diventano scarti rispetto alla stima
+  (`convertiAssoluteInBonus`, anche negativi per non perdere nulla) e le vecchie colonne restano NULL. Forca (`puntiStatistica`) e
+  Isolamento (incenso) sommano al bonus. DTO: `bonus`, `statisticheStimate`, `statisticheBase` (= nessun bonus).
+- `compendio_partita` conserva l'istantanea (`livello_registrato`, `bonus_*`, `skill_ids_json`, `tratto_skill_id`, `carica`): scritta
+  quando una Persona entra in scorta (ottenerla la registra, come in gioco) e con `POST /api/partite/:id/persona/:possedutaId/registra`
+  («Registra» sulla carta della scorta, mostrato quando l'esemplare differisce dall'istantanea); livello e bonus NON seguono più le
+  modifiche automaticamente. `POST /api/partite/:id/persona` con `daRegistro: true` (evocazione) ripristina l'istantanea (400 se non
+  registrata) senza toccarla. La registrazione manuale dal compendio personale crea un'istantanea di solo livello.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 82 file / 237 casi al 2026-09-04): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).

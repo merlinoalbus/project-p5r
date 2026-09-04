@@ -476,7 +476,7 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-storico.png` | Storico | orologio da taschino |
 | `scheda-riepilogo.png` | Riepilogo | tre barre di altezza crescente |
 
-## 17. Icone delle azioni (31) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+## 17. Icone delle azioni (32) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo, nessun numero salvo dove indicato). L'app le
 mostra a 20–26 px dentro i pulsanti a tassello (fondo rosso quando il pulsante è acceso, bianco/nero quando è spento: il tratto bianco
 con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senza il file usa un'icona SVG in codice. Un file per chiave.
@@ -513,6 +513,7 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-seleziona.png` | Seleziona tutte le voci | doppia spunta |
 | `azione-deseleziona.png` | Deseleziona | quadratino con croce |
 | `azione-riprova.png` | Riprova dopo un errore | freccia circolare con punto esclamativo |
+| `azione-registra.png` | Registra nel compendio | libro chiuso con segnalibro e spunta |
 
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.

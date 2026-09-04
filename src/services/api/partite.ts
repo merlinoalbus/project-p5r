@@ -22,7 +22,10 @@ export interface DatiPartita {
 /** Dati di una Persona posseduta. */
 export interface DatiPosseduta {
   livello?: number;
-  statistiche?: StatisticheDto | null;
+  /** Bonus per statistica (null = azzera). */
+  bonus?: StatisticheDto | null;
+  /** Evocazione dal Registro: i valori non indicati vengono dall'istantanea del compendio. */
+  daRegistro?: boolean;
   trattoSkillId?: number | null;
   inSquadra?: boolean;
   note?: string;
@@ -86,6 +89,8 @@ export const aggiungiPosseduta = (id: number, personaId: number, dati: DatiPosse
 export const aggiornaPosseduta = (id: number, possedutaId: number, dati: DatiPosseduta): Promise<PersonaPossedutaDto> =>
   apiPut(`/partite/${id}/persona/${possedutaId}`, dati);
 export const rimuoviPosseduta = (id: number, possedutaId: number): Promise<void> => apiDelete(`/partite/${id}/persona/${possedutaId}`);
+/** Registra nel compendio l'istantanea dell'esemplare (livello, bonus, skill, tratto, carica). */
+export const registraPosseduta = (id: number, possedutaId: number): Promise<CompendioPartitaDto[]> => apiPost(`/partite/${id}/persona/${possedutaId}/registra`);
 
 /** Dati di un obiettivo. */
 export interface DatiObiettivo {
