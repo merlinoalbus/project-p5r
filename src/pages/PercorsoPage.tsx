@@ -13,7 +13,7 @@ import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft, IconChevronRight } from '../components/shared/icons';
 import { dataGiocoTesto, meseGioco } from '../utils/dateGioco';
 import { NOME_TIPO_AZIONE, collegamentoAzione } from '../utils/percorso';
-import type { AzionePercorsoDto } from '../types';
+import type { AzionePercorsoDto, EffettiAzioneDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DataP5 } from '../components/shared/DataP5';
 import { MeteoIcona } from '../components/guida/MeteoIcona';
@@ -24,10 +24,19 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 
 function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data: string; partitaId: number | null; onCambiata: (a: AzionePercorsoDto) => void }) {
   const [occupato, setOccupato] = useState(false);
-  const cambia = async (fatta: boolean) => {
+  // Azione «tempo con un Confidente»: alla spunta l'app chiede quante note (1–3) si sono ottenute (scelta A, 2 preselezionato).
+  const [chiediNote, setChiediNote] = useState(false);
+  const chiedeNote = a.tipo === 'confidente' && a.riferimento?.tipo === 'confidente';
+  const cambia = async (fatta: boolean, noteRisposta?: 1 | 2 | 3, senzaPunti = false) => {
     if (!partitaId) return;
+    if (fatta && chiedeNote && noteRisposta === undefined && !senzaPunti) { setChiediNote(true); return; }
+    setChiediNote(false);
     setOccupato(true);
-    try { onCambiata(await impostaAzionePercorso(partitaId, data, a.indice, fatta)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
+    try {
+      const agg = await impostaAzionePercorso(partitaId, data, a.indice, fatta, noteRisposta);
+      onCambiata(agg);
+      if (fatta && agg.effetti) notifica('success', descriviEffetti(agg.effetti));
+    } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   const link = collegamentoAzione(a);
   return (
@@ -47,7 +56,18 @@ function Azione({ a, data, partitaId, onCambiata }: { a: AzionePercorsoDto; data
           {link ? <Link to={link.href} className="chip chip--attivo no-underline text-[11px]">{link.etichetta}</Link> : a.riferimentoTesto && <span className="chip text-[11px]">{a.riferimentoTesto}</span>}
           {a.rangoAtteso !== null && <span className="text-[12px] text-text-muted">rango atteso {a.rangoAtteso}</span>}
           {a.note && <span className="text-[12px] text-text-secondary">{a.note}</span>}
+          {a.fatta && a.effetti && <span className="chip chip--attivo text-[11px]" title="Punti applicati alla spunta: si annullano togliendola">{descriviEffetti(a.effetti)}</span>}
         </span>
+        {chiediNote && (
+          <span className="flex flex-wrap items-center gap-1.5 text-[12px]" role="group" aria-label="Note ottenute con il Confidente">
+            <span className="text-text-secondary">Quante note hai ottenuto?</span>
+            {([1, 2, 3] as const).map((n) => (
+              <button key={n} type="button" className={`chip touch ${n === 2 ? 'chip--attivo' : ''}`} disabled={occupato} onClick={() => void cambia(true, n)} aria-label={`${n} ${n === 1 ? 'nota' : 'note'}`}>{'\u266a'.repeat(n)}</button>
+            ))}
+            <button type="button" className="chip touch" disabled={occupato} onClick={() => void cambia(true, undefined, true)}>Nessun punto</button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => setChiediNote(false)}>Annulla</button>
+          </span>
+        )}
       </div>
     </li>
   );
@@ -127,4 +147,11 @@ export function PercorsoPage() {
       )}
     </PageState>
   );
+}
+
+/** Testo breve degli effetti applicati alla spunta (es. «Perizia +2 · Ryuji Sakamoto +15 punti»). */
+function descriviEffetti(e: EffettiAzioneDto): string {
+  const parti = e.doti.map((d) => `${d.nome} +${d.delta}`);
+  if (e.confidente) parti.push(`${e.confidente.nome} +${e.confidente.punti} punti`);
+  return parti.join(' \u00b7 ');
 }

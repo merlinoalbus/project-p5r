@@ -878,6 +878,11 @@ export interface CompletamentoDto {
 
 // ---- Guida giorno per giorno (Fase 7.5b) ----
 
+export interface EffettiAzioneDto {
+  doti: Array<{ chiave: string; nome: string; delta: number }>;
+  confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
+}
+
 export interface RiferimentoAzioneDto {
   tipo: 'confidente' | 'dungeon' | 'richiesta' | 'libro' | 'film' | 'attivita' | 'negozio' | 'dote';
   chiave: string;
@@ -894,6 +899,8 @@ export interface AzionePercorsoDto {
   note: string | null;
   /** Fatta nella partita. */
   fatta: boolean;
+  /** Punti applicati alla spunta (Fase 12.3): Doti «+N» dalle note della guida e note del Confidente; annullati togliendo la spunta. */
+  effetti: EffettiAzioneDto | null;
 }
 
 export interface PercorsoGiornoRiassuntoDto {
