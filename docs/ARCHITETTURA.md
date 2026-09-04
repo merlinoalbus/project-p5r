@@ -353,6 +353,9 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   (`storicoService.eliminaEventi`, transazione) e selezione multipla nel componente; `SelettorePosseduta` + `AnteprimaPersona` (miniatura
   non interattiva: immagine caricata → asset `persona/<slug>` → iniziali) al posto delle tendine di Forca e Isolamento.
 - Font dell'utente con `unicode-range` al latino di base: i glifi accentati mappati ma vuoti (P5 Hatty) arrivano dal font di riserva.
+- `shared/PulsanteVisivo.tsx` (`PulsanteVisivo`, `CollegamentoVisivo`): pulsante o collegamento a tassello con icona (`iconeGuida` SVG o asset),
+  titolo in carattere display (17 px) e dettaglio nel sans; toni primario/secondario/fantasma/pericolo, `attivo` per gli interruttori; usato in tutta
+  la sezione Partita al posto dei pulsanti grigi di solo testo (regola dell'utente 2026-09-04). Schede e filtri: `chip chip--icona` con icona.
 - `StellaCinque`: riquadro quadrato (`aspect-ratio`) con `container-type: inline-size`; i badge ai vertici hanno altezza in `cqw` (proporzione
   `badgeAltezza/dimensione`) così restano in scala su ogni schermo; `badgeSotto` (tassello del rango) sta in angolo al badge; nome dell'asse in un
   suggerimento al passaggio del mouse (`.con-suggerimento`, `data-suggerimento`).

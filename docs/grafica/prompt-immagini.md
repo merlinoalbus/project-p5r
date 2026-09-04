@@ -461,6 +461,21 @@ Chiavi cablate in Guida → Personaggi (cast) e Guida → Sfide (boss segreti).
 | `jose.png` | Jose | bambino misterioso dei Mementos con tuta bianca, cappello e piccola auto giocattolo |
 | `lavenza.png` | Lavenza | assistente della Stanza di Velluto con abito blu, lunghi capelli biondi e il grande libro dei Compendi |
 
+## 16. Icone delle schede della Partita (9) — `ui/scheda-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo). L'app le mostra a 16 px accanto al nome
+della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda (lo stato attivo lo dà lo sfondo rosso del tassello).
+| File | Scheda | Soggetto |
+|---|---|---|
+| `scheda-doti.png` | Doti sociali | stella a cinque punte |
+| `scheda-confidenti.png` | Confidenti | due volti di profilo |
+| `scheda-scorta.png` | Scorta | due carte sovrapposte |
+| `scheda-compendio.png` | Compendio personale | libro aperto |
+| `scheda-obiettivi.png` | Obiettivi | bersaglio con freccia |
+| `scheda-piani.png` | Piani salvati | blocco degli appunti con spunta |
+| `scheda-cicli.png` | Cicli | due frecce in cerchio |
+| `scheda-storico.png` | Storico | orologio da taschino |
+| `scheda-riepilogo.png` | Riepilogo | tre barre di altezza crescente |
+
 ## 12. Ordine di produzione consigliato
 1. Identità (1.1–1.3) e sfondi (2.1–2.2) → l'app diventa riconoscibile subito.
 2. Icone elementi (4), affinità (5), navigazione (7.1) → usate in ogni scheda.

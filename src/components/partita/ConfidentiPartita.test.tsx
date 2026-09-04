@@ -44,7 +44,7 @@ describe('ConfidentiPartita', () => {
     aggiornaConfidente.mockResolvedValueOnce(confidente({ regaliFatti: [], personaArcanoInScorta: true, punti: 15, mancanti: 5 }));
     render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
 
-    const chip = await screen.findByRole('button', { name: '×1,5 Persona Carro (in scorta)' });
+    const chip = await screen.findByRole('button', { name: 'Persona Carro ×1,5 · in scorta' });
     expect(chip).toHaveAttribute('aria-pressed', 'true');
     // anteprime con bonus: 7,5 / 15 / 22,5; regalo 75; uscita 15
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 1 nota (7,5 punti)')).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe('ConfidentiPartita', () => {
   it('senza Persona in scorta il bonus è spento ma forzabile', async () => {
     getConfidentiPartita.mockResolvedValue([confidente({})]);
     render(<MemoryRouter><ConfidentiPartita partitaId={1} /></MemoryRouter>);
-    const chip = await screen.findByRole('button', { name: '×1,5 Persona Carro' });
+    const chip = await screen.findByRole('button', { name: 'Persona Carro ×1,5 · attiva a mano' });
     expect(chip).toHaveAttribute('aria-pressed', 'false');
     expect(screen.getByLabelText('Ryuji Sakamoto: risposta da 3 note (15 punti)')).toBeInTheDocument();
     await act(async () => { chip.click(); });
@@ -90,8 +90,8 @@ describe('ConfidentiPartita', () => {
     expect(within(cards[2]).getByText('Rango massimo raggiunto.')).toBeInTheDocument();
     expect(within(cards[2]).getByText('MAX')).toBeInTheDocument();
     expect(within(cards[2]).getByLabelText('Rango di Morgana più uno')).toBeDisabled();
-    // rango > 0 → la casella "Sbloccato" non è modificabile; a rango 0 lo è
-    expect(within(cards[0]).getByRole('checkbox')).toBeDisabled();
-    expect(within(cards[1]).getByRole('checkbox')).toBeEnabled();
+    // rango > 0 → l'interruttore «Sbloccato» non è modificabile; a rango 0 lo è
+    expect(within(cards[0]).getByRole('button', { name: /: sbloccato$/ })).toBeDisabled();
+    expect(within(cards[1]).getByRole('button', { name: /: bloccato$/ })).toBeEnabled();
   });
 });

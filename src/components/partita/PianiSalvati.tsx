@@ -13,6 +13,8 @@ import { EseguiFusioneModal } from '../fusione/EseguiFusioneModal';
 import { formattaYen } from '../../utils/punti';
 import type { PianoSalvatoDto } from '../../types';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconAlbero, IconCestino, IconMatita, IconRicalcola } from '../shared/iconeGuida';
 
 interface Props {
   partitaId: number;
@@ -37,7 +39,7 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
             <button type="submit" className="btn btn-primary btn-sm">Ok</button>
           </form>
         ) : (
-          <button type="button" className="chip touch" onClick={() => setModificaTitolo(true)} title="Rinomina">{piano.titolo || 'Senza titolo'} ✎</button>
+          <button type="button" className="chip chip--icona touch" onClick={() => setModificaTitolo(true)} title="Rinomina">{piano.titolo || 'Senza titolo'}<IconMatita size={13} /></button>
         )}
         {piano.obiettivoId && <Link to="/partita?scheda=obiettivi" className="chip no-underline" title={`Obiettivo ${piano.obiettivoStato ?? ''}`}>Obiettivo{piano.obiettivoStato === 'raggiunto' ? ' raggiunto' : ''}</Link>}
         <span className="ml-auto font-black tabular-nums">{formattaYen(piano.costo)}</span>
@@ -71,9 +73,9 @@ function SchedaPiano({ piano, inScorta, possedutaDi, partitaId, onCambiaTitolo, 
       )}
       {piano.note && <div className="text-[13px] text-text-secondary">{piano.note}</div>}
       <div className="flex flex-wrap gap-1.5">
-        <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => setAperto((a) => !a)} aria-expanded={aperto}>{aperto ? 'Nascondi albero' : 'Mostra albero'}</button>
-        <Link to={`/fusione?vista=piani&piani=${piano.personaId}${piano.skill.length ? `&skill=${piano.skill.map((s) => s.id).join(',')}` : ''}`} className="btn btn-ghost btn-sm no-underline">Ricalcola</Link>
-        <button type="button" className="btn btn-ghost btn-sm touch text-error" onClick={onElimina}>Elimina</button>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconAlbero size={20} />} titolo={aperto ? 'Nascondi albero' : 'Mostra albero'} onClick={() => setAperto((a) => !a)} aria-expanded={aperto} />
+        <CollegamentoVisivo to={`/fusione?vista=piani&piani=${piano.personaId}${piano.skill.length ? `&skill=${piano.skill.map((s) => s.id).join(',')}` : ''}`} tono="fantasma" compatto icona={<IconRicalcola size={20} />} titolo="Ricalcola" />
+        <PulsanteVisivo tono="pericolo" compatto icona={<IconCestino size={20} />} titolo="Elimina" onClick={onElimina} />
       </div>
       {aperto && <AlberoPiano radice={piano.piano.radice} inScorta={inScorta} />}
       {passoInEsecuzione !== null && av.passi[passoInEsecuzione] && (

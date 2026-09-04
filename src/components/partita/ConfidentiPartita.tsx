@@ -10,7 +10,6 @@
 // ============================================================
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { aggiornaConfidente, getConfidentiPartita } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -22,6 +21,8 @@ import { AnelloAvanzamento } from '../shared/AnelloAvanzamento';
 import { slug } from '../../../shared/slug';
 import type { BonusEsame, ConfidentePartitaDto, ModificaConfidente } from '../../types';
 import { anteprimaPunti, formattaPunti } from '../../utils/punti';
+import { CollegamentoVisivo, PulsanteVisivo } from '../shared/PulsanteVisivo';
+import { IconApri, IconIndietro, IconLucchettoAperto, IconLucchettoChiuso, IconMaschera, IconMatita, IconMedaglia, IconMessaggio, IconPodio, IconRegalo, IconUscita } from '../shared/iconeGuida';
 
 interface Props {
   partitaId: number;
@@ -76,11 +77,13 @@ export function ConfidentiPartita({ partitaId }: Props) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="flex flex-wrap items-center gap-2 mb-3 text-[13px]">
-        <span className="text-text-muted">Moltiplicatori attivi:</span>
-        <button type="button" className={`chip touch ${esame === 'top10' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-pressed={esame === 'top10'} title="Fra i primi dieci agli ultimi esami: punti ×1,2 con i compagni di scuola fino all'esame successivo">Esami top 10 ×1,2</button>
-        <button type="button" className={`chip touch ${esame === 'primo' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-pressed={esame === 'primo'} title="Primo del corso agli ultimi esami: punti ×1,5 con i compagni di scuola fino all'esame successivo">Esami 1º ×1,5</button>
-        <button type="button" className={`chip touch ${invito ? 'chip--attivo' : ''}`} onClick={() => setInvito((v) => !v)} aria-pressed={invito} title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2">Invito SMS ×1,2</button>
+      <div className="flex flex-col gap-1.5 mb-3" role="group" aria-label="Moltiplicatori dei punti">
+        <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Moltiplicatori · valgono per tutti i punti registrati</span>
+        <div className="flex flex-wrap gap-2">
+          <PulsanteVisivo attivo={esame === 'top10'} icona={<IconPodio size={24} />} titolo="Esami top 10" dettaglio="×1,2 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-label="Esami top 10 ×1,2" title="Fra i primi dieci agli ultimi esami: punti ×1,2 con i compagni di scuola fino all'esame successivo" />
+          <PulsanteVisivo attivo={esame === 'primo'} icona={<IconMedaglia size={24} />} titolo="Esami 1º" dettaglio="×1,5 con i compagni di scuola" onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-label="Esami 1º ×1,5" title="Primo del corso agli ultimi esami: punti ×1,5 con i compagni di scuola fino all'esame successivo" />
+          <PulsanteVisivo attivo={invito} icona={<IconMessaggio size={24} />} titolo="Invito SMS" dettaglio="×1,2 su tutta l'uscita" onClick={() => setInvito((v) => !v)} aria-label="Invito SMS ×1,2" title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2" />
+        </div>
       </div>
       <p className="m-0 mb-3 text-[12px] text-text-muted">
         Le note mostrate in gioco valgono 5, 10 o 15 punti; il bonus della Persona dello stesso arcano (×1,5) viene proposto in base alla scorta della partita e si può forzare su ogni Confidente.
@@ -117,7 +120,7 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       {c.regaliFatti.length > 0 && <span className="text-[12px] text-text-muted">{c.regaliFatti.length} {c.regaliFatti.length === 1 ? 'regalo consegnato' : 'regali consegnati'}</span>}
                     </div>
                   </div>
-                  <Link to={`/confidenti/${c.chiave}`} className="btn btn-ghost btn-sm no-underline shrink-0" aria-label={`Scheda di ${c.nome}: risposte migliori, abilità, regali`}>Scheda →</Link>
+                  <CollegamentoVisivo to={`/confidenti/${c.chiave}`} tono="fantasma" compatto className="shrink-0" icona={<IconApri size={20} />} titolo="Scheda" aria-label={`Scheda di ${c.nome}: risposte migliori, abilità, regali`} />
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[12px] uppercase tracking-wide text-text-muted flex-1">Rango {c.rango === 10 ? 'MAX' : c.rango}</span>
@@ -143,15 +146,15 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       <span className="text-text-secondary">/ {c.puntiNecessari} — {c.mancanti === 0 ? <strong className="text-primary">soglia raggiunta</strong> : <>mancano <strong className="text-text">{formattaPunti(c.mancanti ?? 0)}</strong></>}</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <button
-                        type="button"
-                        className={`chip touch ${bonus ? 'chip--attivo' : ''}`}
+                      <PulsanteVisivo
+                        attivo={bonus}
+                        compatto
+                        icona={<AssetImg nome={`arcani/icona/${slug(c.arcana)}`} alt="" decorativa className="h-6 w-6 object-contain" fallback={<IconMaschera size={20} />} />}
+                        titolo={`Persona ${c.arcanaNome}`}
+                        dettaglio={c.personaArcanoInScorta ? '×1,5 · in scorta' : '×1,5 · attiva a mano'}
                         onClick={() => setBonusForzato((b) => ({ ...b, [c.chiave]: !bonus }))}
-                        aria-pressed={bonus}
                         title={c.personaArcanoInScorta ? `Nella scorta c'è una Persona ${c.arcanaNome}: bonus ×1,5 attivo` : `Nessuna Persona ${c.arcanaNome} in scorta: attiva il bonus a mano se la possiedi`}
-                      >
-                        ×1,5 Persona {c.arcanaNome}{c.personaArcanoInScorta ? ' (in scorta)' : ''}
-                      </button>
+                      />
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {([1, 2, 3] as const).map((n) => {
@@ -164,27 +167,16 @@ export function ConfidentiPartita({ partitaId }: Props) {
                       })}
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      <button type="button" className="btn btn-secondary btn-sm flex-1 min-w-[96px]" disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`}>
-                        Regalo +{formattaPunti(anteprimaPunti(50, bonus, esame, invito))}
-                      </button>
-                      <button type="button" className="btn btn-secondary btn-sm flex-1 min-w-[96px]" disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`}>
-                        Uscita +{formattaPunti(anteprimaPunti(10, bonus, esame, invito))}
-                      </button>
-                      <button type="button" className="btn btn-ghost btn-sm" disabled={occ || !(ultimo[c.chiave] > 0)} onClick={() => void salva(c.chiave, { deltaPunti: -(ultimo[c.chiave] ?? 0) })} aria-label={`${c.nome}: annulla l'ultimo incremento`}>
-                        Annulla ultimo{ultimo[c.chiave] > 0 ? ` (−${formattaPunti(ultimo[c.chiave])})` : ''}
-                      </button>
+                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconRegalo size={24} />} titolo="Regalo" dettaglio={`+${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { regalo: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: regalo gradito (${formattaPunti(anteprimaPunti(50, bonus, esame, invito))} punti)`} />
+                      <PulsanteVisivo className="flex-1 min-w-[120px]" icona={<IconUscita size={24} />} titolo="Uscita" dettaglio={`+${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti`} disabled={occ} onClick={() => void salva(c.chiave, { uscita: true, bonusArcano: bonus, esame: esame ?? undefined, invito })} aria-label={`${c.nome}: uscita insieme (${formattaPunti(anteprimaPunti(10, bonus, esame, invito))} punti)`} />
+                      <PulsanteVisivo tono="fantasma" compatto icona={<IconIndietro size={20} />} titolo={`Annulla ultimo${ultimo[c.chiave] > 0 ? ` (−${formattaPunti(ultimo[c.chiave])})` : ''}`} disabled={occ || !(ultimo[c.chiave] > 0)} onClick={() => void salva(c.chiave, { deltaPunti: -(ultimo[c.chiave] ?? 0) })} aria-label={`${c.nome}: annulla l'ultimo incremento`} />
                     </div>
                   </div>
                 )}
 
                 <div className="flex items-center gap-2 flex-wrap mt-auto">
-                  <label className="flex items-center gap-1.5 text-[13px] text-text-secondary touch">
-                    <input type="checkbox" className="w-5 h-5" checked={c.sbloccato} disabled={occ || c.rango > 0} onChange={(e) => void salva(c.chiave, { sbloccato: e.target.checked })} />
-                    Sbloccato
-                  </label>
-                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setModifica(c); setNote(c.note); }}>
-                    {c.note ? 'Note ✎' : 'Aggiungi note'}
-                  </button>
+                  <PulsanteVisivo attivo={c.sbloccato} compatto icona={c.sbloccato ? <IconLucchettoAperto size={20} /> : <IconLucchettoChiuso size={20} />} titolo={c.sbloccato ? 'Sbloccato' : 'Bloccato'} dettaglio={c.rango > 0 ? 'dal rango 1' : undefined} disabled={occ || c.rango > 0} onClick={() => void salva(c.chiave, { sbloccato: !c.sbloccato })} aria-label={`${c.nome}: ${c.sbloccato ? 'sbloccato' : 'bloccato'}`} />
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconMatita size={20} />} titolo={c.note ? 'Note' : 'Aggiungi note'} onClick={() => { setModifica(c); setNote(c.note); }} />
                 </div>
                 {c.note && <p className="m-0 text-[12px] text-text-secondary whitespace-pre-wrap line-clamp-2">{c.note}</p>}
               </div>
