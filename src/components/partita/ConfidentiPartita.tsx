@@ -78,8 +78,8 @@ export function ConfidentiPartita({ partitaId }: Props) {
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
       <div className="flex flex-wrap items-center gap-2 mb-3 text-[13px]">
         <span className="text-text-muted">Moltiplicatori attivi:</span>
-        <button type="button" className={`chip touch ${esame === 'top10' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-pressed={esame === 'top10'} title="Fra i primi dieci agli ultimi esami: ×1,2 con i compagni di scuola">Esami top 10 ×1,2</button>
-        <button type="button" className={`chip touch ${esame === 'primo' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-pressed={esame === 'primo'} title="Primo del corso agli ultimi esami: ×1,5 con i compagni di scuola">Esami 1º ×1,5</button>
+        <button type="button" className={`chip touch ${esame === 'top10' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'top10' ? null : 'top10'))} aria-pressed={esame === 'top10'} title="Fra i primi dieci agli ultimi esami: punti ×1,2 con i compagni di scuola fino all'esame successivo">Esami top 10 ×1,2</button>
+        <button type="button" className={`chip touch ${esame === 'primo' ? 'chip--attivo' : ''}`} onClick={() => setEsame((e) => (e === 'primo' ? null : 'primo'))} aria-pressed={esame === 'primo'} title="Primo del corso agli ultimi esami: punti ×1,5 con i compagni di scuola fino all'esame successivo">Esami 1º ×1,5</button>
         <button type="button" className={`chip touch ${invito ? 'chip--attivo' : ''}`} onClick={() => setInvito((v) => !v)} aria-pressed={invito} title="Invito accettato subito via SMS la sera prima: tutti i punti guadagnati durante l'uscita valgono ×1,2">Invito SMS ×1,2</button>
       </div>
       <p className="m-0 mb-3 text-[12px] text-text-muted">

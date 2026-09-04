@@ -320,6 +320,16 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   arcano, livello grande, badge, statistiche a pentagono (`StellaCinque` con `ui/stat-*`) accanto alle barre; sezioni in due colonne da `xl`;
   icone degli elementi grandi nelle skill.
 
+### Impatto visivo — Guida (11.4) e asset richiesti (11.6)
+- **Indice della Guida**: `components/guida/sezioniGuida.tsx` (percorso, titolo, descrizione, icona di riserva) → `GuidaPage` a piastrelle
+  con `guida/<chiave>` (asset in arrivo) e riserva vettoriale su cartiglio rosso.
+- **Palazzi e Dedali**: `EmblemaDungeon` (`palazzi/<chiave>` → icona dell'arcano del sovrano → iniziale in display), `AnelloAvanzamento`
+  con la quota dei punti gestiti nella partita, date e livello in chip brevi (`utils/testoBreve.ts`: `dataBreve`, `sintesi`) con il testo
+  completo nel `title`; nella scheda del Palazzo i testi lunghi sono ripiegati con `TestoRipiegabile` («altro»/«meno»).
+- **Asset richiesti a Codex** (§13 di `docs/grafica/prompt-immagini.md`, registrati in `stato-generazione-asset.md`): `ui/nav-guida(-attiva)`,
+  15 `guida/*`, 10 `palazzi/*`, `ui/giorno`/`ui/sera`, 4 illustrazioni di stato vuoto (con varianti senza testo). Le chiavi sono già usate
+  dai componenti: alla consegna nessuna modifica al codice.
+
 ## 8. Build, test, deploy
 - Test (Vitest, 20 file / 79 casi): BE su DB in memoria con seed reale (`server/routes/api.test.ts`, migrazioni, seed, `partiteService.test.ts` per le meccaniche pure),
   FE in jsdom con API simulate via `vi.mock` (`DotiSociali`, `ConfidentiPartita`, `Modal`, `ImmagineEntita`, `AffinitaGriglia`, `useCarica`, `utils/punti`).

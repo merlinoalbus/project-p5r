@@ -1,34 +1,29 @@
 // ============================================================
-// GuidaPage — ingresso della sezione Guida: domande in classe, calendario (e i moduli delle fasi successive)
+// GuidaPage — indice della Guida a piastrelle illustrate (asset `guida/<sezione>` in arrivo con la 11.6, riserva vettoriale)
 // ============================================================
 
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../components/shared/icons';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { AssetImg } from '../components/shared/AssetImg';
+import { SEZIONI_GUIDA } from '../components/guida/sezioniGuida';
 
 export function GuidaPage() {
   useDocumentTitle('Guida');
   return (
     <div className="flex flex-col gap-4">
       <IntestazionePagina titolo="Guida" sottotitolo="La guida italiana allgamestaff resa consultabile in gioco, con lo stato della tua partita." />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Link to="/guida/percorso" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Guida giorno per giorno</strong><br /><span className="text-[12px] text-text-secondary">Cosa fare oggi, di giorno e di sera: Confidenti, Palazzi, Doti, acquisti, avvisi sulle scadenze; giorno corrente e azioni spuntabili</span></span></Link>
-        <Link to="/guida/domande" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Domande in classe ed esami</strong><br /><span className="text-[12px] text-text-secondary">Risposte corrette per data, prossime domande, spunta «fatta»</span></span></Link>
-        <Link to="/guida/cruciverba" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Cruciverba di Leblanc</strong><br /><span className="text-[12px] text-text-secondary">38 cruciverba con indizio e risposta (+1 nota di Conoscenza), spunta «risolto»</span></span></Link>
-        <Link to="/guida/calendario" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Calendario di gioco</strong><br /><span className="text-[12px] text-text-secondary">Meteo, eventi, scadenze dei Palazzi, consigli per settimana</span></span></Link>
-        <Link to="/guida/dungeon" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconMask size={22} className="text-primary" /><span><strong>Palazzi e Dedali</strong><br /><span className="text-[12px] text-text-secondary">Aree, punti di interesse, boss e mappe interattive con avanzamento</span></span></Link>
-        <Link to="/guida/richieste" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Richieste dei Mementos</strong><br /><span className="text-[12px] text-text-secondary">33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose</span></span></Link>
-        <Link to="/guida/battaglia" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBolt size={22} className="text-primary" /><span><strong>Aiuto in battaglia</strong><br /><span className="text-[12px] text-text-secondary">Debolezze delle Ombre per area, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro</span></span></Link>
-        <Link to="/guida/citta" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconHome size={22} className="text-primary" /><span><strong>La città</strong><br /><span className="text-[12px] text-text-secondary">Quartieri e luoghi: negozi, ristoranti, attività, Confidenti, orari e sblocchi</span></span></Link>
-        <Link to="/guida/negozi" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBolt size={22} className="text-primary" /><span><strong>Negozi e inventario</strong><br /><span className="text-[12px] text-text-secondary">47 negozi e 499 articoli: armi, protezioni, accessori, oggetti, regali e cibo con prezzi, sblocchi e acquisti per partita</span></span></Link>
-        <Link to="/guida/attivita" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Attività e Doti sociali</strong><br /><span className="text-[12px] text-text-secondary">Mini-giochi, lavori, studio, libri e film con le note delle Doti; libri letti e film visti per partita</span></span></Link>
-        <Link to="/guida/completamento" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Trofei, finali e Covo dei Ladri</strong><br /><span className="text-[12px] text-text-secondary">53 trofei con spunta per partita, condizioni dei finali, sfide e premi del Covo, DLC, effetti del meteo, Nuova Partita+</span></span></Link>
-        <Link to="/guida/sfide" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconMask size={22} className="text-primary" /><span><strong>Battaglie Sfida, boss segreti e tratti</strong><br /><span className="text-[12px] text-text-secondary">7 Battaglie Sfida, Jose, Gemelle Custodi e Lavenza, Magnate, 90 tratti delle Persona in italiano</span></span></Link>
-        <Link to="/guida/personaggi" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconMask size={22} className="text-primary" /><span><strong>Personaggi</strong><br /><span className="text-[12px] text-text-secondary">Il cast senza spoiler: Ladri Fantasma, Stanza di Velluto, Confidenti e terzo semestre, con Persona, armi e ruolo in battaglia</span></span></Link>
-        <Link to="/guida/oggetti" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconBook size={22} className="text-primary" /><span><strong>Oggetti, materiali e fabbricazione</strong><br /><span className="text-[12px] text-text-secondary">247 consumabili, oggetti chiave e materiali, ricette degli attrezzi, personalizzazione delle armi, abiti e lavanderia, scambi</span></span></Link>
-        <Link to="/partita?scheda=confidenti" className="card card--cliccabile no-underline text-text flex items-center gap-3"><IconStar size={22} className="text-primary" /><span><strong>Confidenti</strong><br /><span className="text-[12px] text-text-secondary">Risposte migliori, abilità e regali per ogni Confidente</span></span></Link>
-      </div>
+      <ul className="m-0 p-0 list-none grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-4" aria-label="Sezioni della guida">
+        {SEZIONI_GUIDA.map((s) => (
+          <li key={s.chiave} className="min-w-0">
+            <Link to={s.to} className="card card--cliccabile piastrella piastrella-guida no-underline text-text flex flex-col gap-2 h-full">
+              <AssetImg nome={`guida/${s.chiave}`} alt="" decorativa className="piastrella-guida__icona object-contain" fallback={<span className="piastrella-guida__riserva" aria-hidden="true">{s.icona}</span>} />
+              <span className="font-display uppercase text-[20px] leading-none">{s.titolo}</span>
+              <span className="text-[12px] text-text-secondary">{s.descrizione}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

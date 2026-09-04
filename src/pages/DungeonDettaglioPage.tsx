@@ -14,6 +14,10 @@ import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { segnaImmaginePresente } from '../components/shared/immaginiCache';
 import { IconChevronLeft } from '../components/shared/icons';
 import { MappaInterattiva } from '../components/guida/MappaInterattiva';
+import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
+import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
+import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
+import { dataBreve } from '../utils/testoBreve';
 import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
 import type { AreaDungeonDto, PuntoInteresseDto, StatoPunto } from '../types';
 
@@ -96,20 +100,33 @@ export function DungeonDettaglioPage() {
       {d && area && (
         <div className="flex flex-col gap-4">
           <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
-          <div className="card flex flex-col gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="titolo-display m-0">{d.nome}</h1>
-              {d.sovrano && <span className="chip">{d.sovrano}</span>}
-              {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
-              {d.livelloConsigliato && <span className="chip">Livello {d.livelloConsigliato}</span>}
+          <div className="card flex gap-4">
+            <div className="flex flex-col items-center gap-2 shrink-0">
+              <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={96} />
+              {d.gestiti !== null && d.punti > 0 && (
+                <AnelloAvanzamento quota={d.gestiti / d.punti} dimensione={60} spessore={4} etichetta={`Avanzamento in ${d.nome}: ${d.gestiti} punti gestiti su ${d.punti}`}>
+                  <span className="font-display text-[16px] leading-none tabular-nums">{Math.round((d.gestiti / d.punti) * 100)}%</span>
+                </AnelloAvanzamento>
+              )}
             </div>
-            <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4 gap-y-1">
-              {d.date.sblocco && <span><strong className="text-text">Sblocco:</strong> {d.date.sblocco}</span>}
-              {d.date.scadenza && <span><strong className="text-text">Scadenza:</strong> {d.date.scadenza}</span>}
-              {d.date.furtoConsigliato && <span><strong className="text-text">Furto consigliato:</strong> {d.date.furtoConsigliato}</span>}
-              <span>{d.aree.length} aree · {d.punti} punti di interesse · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti nella partita` : ''}</span>
+            <div className="flex-1 min-w-0 flex flex-col gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="titolo-display m-0">{d.nome}</h1>
+                {d.sovrano && <span className="chip">{d.sovrano}</span>}
+                {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {d.date.sblocco && <span className="chip" title={d.date.sblocco}>Sblocco {dataBreve(d.date.sblocco)}</span>}
+                {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
+                {d.date.furtoConsigliato && <span className="chip" title={d.date.furtoConsigliato}>Furto consigliato {dataBreve(d.date.furtoConsigliato)}</span>}
+                <span className="chip">{d.aree.length} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
+              </div>
+              {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="text-[13px] text-text-secondary" />}
+              {d.date.sblocco && d.date.sblocco !== dataBreve(d.date.sblocco) && <TestoRipiegabile testo={`Sblocco: ${d.date.sblocco}`} massimo={90} className="text-[12px] text-text-muted" />}
+              {d.date.scadenza && d.date.scadenza !== dataBreve(d.date.scadenza) && <TestoRipiegabile testo={`Scadenza: ${d.date.scadenza}`} massimo={90} className="text-[12px] text-text-muted" />}
+              {d.date.furtoConsigliato && d.date.furtoConsigliato !== dataBreve(d.date.furtoConsigliato) && <TestoRipiegabile testo={`Furto consigliato: ${d.date.furtoConsigliato}`} massimo={90} className="text-[12px] text-text-muted" />}
+              {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
             </div>
-            {d.note && <p className="m-0 text-[12px] text-text-muted whitespace-pre-wrap">{d.note}</p>}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Aree">
