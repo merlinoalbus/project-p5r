@@ -35,7 +35,7 @@ describe('CalendarioPage', () => {
     getCalendario.mockResolvedValue(dati);
     aggiornaPartita.mockResolvedValue({ id: 7, nome: 'Prova', dataGioco: '05-11' });
     render(<MemoryRouter><CalendarioPage /></MemoryRouter>);
-    expect(await screen.findByRole('heading', { name: /Oggi: 1 maggio, Domenica/ })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /Oggi.*1 maggio, Domenica/ })).toBeInTheDocument();
     expect(getCalendario).toHaveBeenCalledWith(7);
     expect(screen.getByText('Consigli della settimana quattro.')).toBeInTheDocument();
     expect(screen.getByText(/fra 10 giorni/)).toBeInTheDocument();

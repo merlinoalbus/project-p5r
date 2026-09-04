@@ -19,7 +19,7 @@ export function BadgeStato({ nome, testo }: { nome: 'dlc' | 'tesoro' | 'speciale
   return <AssetImg nome={`ui/badge-${nome}`} alt={testo} className="h-6 w-auto object-contain" fallback={<span className="chip">{testo}</span>} />;
 }
 
-/** Piastrella cliccabile verso la scheda; l'arte resta modificabile senza seguire il collegamento. */
+/** Piastrella cliccabile verso la scheda; l'arte si ingrandisce senza seguire il collegamento (si sostituisce dalla scheda di dettaglio, per evitare caricamenti accidentali scorrendo la griglia). */
 export function PiastrellaPersona({ persona: p }: Props) {
   return (
     <li className="min-w-0">

@@ -13,6 +13,8 @@ import { PageState } from '../components/shared/PageState';
 import { MESI_GIOCO, dataGiocoTesto } from '../utils/dateGioco';
 import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { DataP5 } from '../components/shared/DataP5';
+import { MeteoIcona } from '../components/guida/MeteoIcona';
 
 const NOME_TIPO: Record<string, string> = { storia: 'Storia', scadenza: 'Scadenza', sblocco: 'Sblocco', esame: 'Esame', festa: 'Festa', vacanza: 'Vacanza', consiglio: 'Consiglio', meteo: 'Meteo' };
 const CLASSE_TIPO: Record<string, string> = { scadenza: 'chip--attivo', esame: 'chip--attivo' };
@@ -23,9 +25,8 @@ function Giorno({ g, oggi, aperto, onToggle, onImposta }: { g: GiornoCalendarioD
   return (
     <li className={`rounded-lg border ${oggi ? 'border-primary bg-primary-bg' : 'border-border-light'}`}>
       <button type="button" className="w-full text-left px-3 py-2 flex flex-wrap items-center gap-2 touch" onClick={onToggle} aria-expanded={aperto} aria-label={`${dataGiocoTesto(g.data)}, ${g.giornoSettimana}`}>
-        <strong className="tabular-nums w-[110px]">{dataGiocoTesto(g.data)}</strong>
-        <span className={`text-[12px] ${festivo ? 'text-primary' : 'text-text-muted'}`}>{g.giornoSettimana}</span>
-        {g.meteo && <span className="text-[12px] text-text-secondary">{g.meteo}</span>}
+        <DataP5 data={g.data} giornoSettimana={g.giornoSettimana} compatta evidenzia={oggi || festivo} className="w-[132px]" />
+        {g.meteo && <MeteoIcona meteo={g.meteo} dimensione={20} />}
         {g.tempoLibero && !g.tempoLibero.giorno && !g.tempoLibero.sera && <span className="chip text-[11px]">Nessun tempo libero</span>}
         {oggi && <span className="chip chip--attivo">Oggi nella partita</span>}
         <span className="ml-auto flex flex-wrap gap-1">
@@ -83,7 +84,7 @@ export function CalendarioPage() {
 
           {d.oggi && (
             <section className="card flex flex-col gap-2 border-primary">
-              <h2 className="m-0 text-[15px] font-semibold">Oggi: {dataGiocoTesto(d.oggi.data)}, {d.oggi.giornoSettimana}{d.oggi.meteo ? ` · ${d.oggi.meteo}` : ''}</h2>
+              <h2 className="m-0 flex items-center gap-3 flex-wrap"><span className="font-display uppercase tracking-wide text-[20px] leading-none">Oggi</span><DataP5 data={d.oggi.data} giornoSettimana={d.oggi.giornoSettimana} evidenzia />{d.oggi.meteo && <MeteoIcona meteo={d.oggi.meteo} dimensione={26} conTesto />}</h2>
               {d.oggi.eventi.length > 0 ? (
                 <ul className="m-0 p-0 list-none flex flex-col gap-1 text-[13px]" aria-label="Eventi di oggi">
                   {d.oggi.eventi.map((e) => <li key={e.id}><span className={`chip text-[11px] ${CLASSE_TIPO[e.tipo] ?? ''}`}>{NOME_TIPO[e.tipo] ?? e.tipo}</span> <strong>{e.titolo}</strong>{e.dettaglio ? <span className="text-text-secondary"> — {e.dettaglio}</span> : null}</li>)}
