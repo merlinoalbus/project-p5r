@@ -6,7 +6,7 @@
 //   1. requestContext  — requestId + child logger per richiesta
 //   2. responseShape   — envelope { data } su ogni res.json
 //   3. cors + express.json
-//   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini, /api/fusione, /api/mappe, /api/font
+//   4. router di area: /api/compendio, /api/traduzioni, /api/partite, /api/immagini, /api/fusione, /api/mappe, /api/font, /api/impostazioni
 //   5. /api/health + /api/config
 //   6. 404 JSON per /api/* sconosciute
 //   7. errorHandler    — SEMPRE ultimo
@@ -28,6 +28,7 @@ import immaginiRouter from './routes/immagini.js';
 import fusioneRouter from './routes/fusione.js';
 import mappeRouter from './routes/mappe.js';
 import fontRouter from './routes/font.js';
+import impostazioniRouter from './routes/impostazioni.js';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
 z.config(z.locales.it());
@@ -51,6 +52,7 @@ export function createApp(): Express {
   app.use('/api/fusione', fusioneRouter);
   app.use('/api/mappe', mappeRouter);
   app.use('/api/font', fontRouter);
+  app.use('/api/impostazioni', impostazioniRouter);
 
   // ---- Health ----
   app.get('/api/health', (_req, res) => {

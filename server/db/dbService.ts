@@ -69,8 +69,12 @@ export function closeDb(): void {
     }
   }
   stmtCache.clear();
-  db?.close();
-  db = null;
+  // `db = null` anche se la chiusura fallisce: una connessione rotta lasciata nel modulo verrebbe restituita da initDb()
+  try {
+    db?.close();
+  } finally {
+    db = null;
+  }
 }
 
 // ---- Cache statement ----
