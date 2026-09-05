@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**670 file richiesti: 665 completati e approvati, 5 ancora da consegnare.** La Fase 11.6 (§13) e le mappe (§19) sono complete e validate; restano da consegnare `spillo-dialogo.png` (§18, tipo aggiunto il 2026-09-05), `azione-copia.png` e `azione-incolla.png` (§17, editor delle mappe, 2026-09-05), oltre a `guida/mappe.png` (§20) e `scheda-oggi.png` (§16).
+**670 file richiesti: 668 completati e approvati, 2 ancora da consegnare.** Tutte le categorie sono complete e validate, salvo le due icone dell'editor delle mappe `azione-copia.png` e `azione-incolla.png` (§17, richieste il 2026-09-05).
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -47,11 +47,11 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | palazzi | 10 | 10 | 0 |
 | personaggi | 10 | 10 | 0 |
 | ui (azioni, §17) | 48 | 46 | 2 |
-| ui (schede Partita e Fusione, §16) | 18 | 17 | 1 |
+| ui (schede Partita e Fusione, §16) | 18 | 18 | 0 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
-| ui (spilli, §18) | 20 | 19 | 1 |
+| ui (spilli, §18) | 20 | 20 | 0 |
 | mappe (§19) | 25 | 25 | 0 |
-| guida (sezione Mappe, §20) | 1 | 0 | 1 |
+| guida (sezione Mappe, §20) | 1 | 1 | 0 |
 
 ## Elenco degli asset da consegnare
 
@@ -104,7 +104,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-punto-sensibile.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro-palazzo.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-dialogo.png` — 128×128 (§18)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-dialogo.png` — 128×128 PNG RGBA (§18): spillo completo a goccia gialla con fumetto bianco, contorno nero e accento rosso, alfa nativo; consegnato da Codex come `spillo-dialoghi.png` e rinominato al merge del 2026-09-05 perché l'app cerca `ui/spillo-dialogo`
 
 ### mappe (§19)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
@@ -134,7 +134,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/citta-mementos.png` — 2048×1536 (§19)
 
 ### guida — sezione Mappe (§20)
-- [ ] **DA CONSEGNARE** — `public/asset/guida/mappe.png` — 256×256 (§20)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/guida/mappe.png` — 256×256 (§20)
 
 ### ui — azioni (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-regalo.png` — 128×128 (§17)
@@ -196,7 +196,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-cicli.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-storico.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-riepilogo.png` — 128×128 (§16)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/scheda-oggi.png` — 128×128 (§16)
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-oggi.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-calcolatore.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-ricette.png` — 128×128 (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-fusione-con.png` — 128×128 (§16)
