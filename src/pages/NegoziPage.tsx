@@ -19,6 +19,9 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
+import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 
 export function NegoziPage() {
   const sugg = useSuggerimenti();
@@ -31,14 +34,16 @@ export function NegoziPage() {
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
   const [per, setPer] = useState('');
+  // negozio aggiunto dall'utente: resta anche quando i dati della guida vengono aggiornati (16.1)
+  const [nuovoNegozio, setNuovoNegozio] = useState(false);
   const cerca = q.trim().length >= 2 || categoria !== '' || per !== '';
   const risultati = useCarica(() => (cerca ? ricercaArticoli({ q: q.trim() || undefined, categoria: categoria || undefined, per: per || undefined }, partitaId ?? undefined) : Promise.resolve(null)), [q, categoria, per, partitaId, cerca, momento]);
   const lista = negozi.dati;
   const gruppi = useMemo(() => {
     const m = new Map<string, { nome: string; negozi: NegozioRiassuntoDto[] }>();
     for (const n of lista ?? []) {
-      const k = n.luogoChiave ?? '__altro';
-      const g = m.get(k) ?? { nome: n.quartiereNome ?? 'Online, ambulanti e altri', negozi: [] };
+      const k = n.luogoChiave ?? (n.tipo === 'online' ? '__online' : n.tipo === 'ambulante' ? '__ambulanti' : '__altro');
+      const g = m.get(k) ?? { nome: n.quartiereNome ?? (k === '__online' ? 'Online' : k === '__ambulanti' ? 'Ambulanti' : 'Quartiere da assegnare'), negozi: [] };
       g.negozi.push(n); m.set(k, g);
     }
     return [...m.entries()];
@@ -47,7 +52,9 @@ export function NegoziPage() {
     <PageState isLoading={negozi.caricamento && !negozi.dati} error={negozi.errore} onRetry={() => void negozi.ricarica()}>
       {negozi.dati && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{negozi.dati.length} negozi e punti di acquisto con {negozi.dati.reduce((s, n) => s + n.articoli, 0)} articoli: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</>} />
+          <IntestazionePagina titolo="Negozi e inventario" sottotitolo={<>{negozi.dati.length} negozi e punti di acquisto con {negozi.dati.reduce((s, n) => s + n.articoli, 0)} articoli: armi, protezioni, accessori, oggetti, regali, cibo e materiali con prezzi, sblocchi e condizioni. Cerca un articolo in tutti i negozi o apri un negozio.</>}
+            azioni={<PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un negozio" dettaglio="resta dopo gli aggiornamenti" onClick={() => setNuovoNegozio(true)} />} />
+          {nuovoNegozio && <ModuloCatalogo tipo="negozio" onChiudi={() => setNuovoNegozio(false)} onSalvato={() => { setNuovoNegozio(false); void negozi.ricarica(); }} />}
           <div className="flex flex-col gap-1.5">
             <CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un articolo (nome, effetto) o un negozio…" />
             <div className="flex flex-wrap gap-1.5">
@@ -61,6 +68,7 @@ export function NegoziPage() {
               </select>
             </div>
           </div>
+          {cerca && q.trim().length >= 2 && <section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{(lista ?? []).filter(n => `${n.nome} ${n.quartiereNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(q.trim().toLocaleLowerCase('it'))).map(n => <Link className="card touch" key={n.chiave} to={`/guida/negozi/${n.chiave}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link>)}</section>}
           {cerca ? (
             <PageState isLoading={risultati.caricamento && !risultati.dati} error={risultati.errore} onRetry={() => void risultati.ricarica()}>
               {risultati.dati && (
@@ -73,7 +81,7 @@ export function NegoziPage() {
           ) : (
             gruppi.map(([k, g]) => (
               <section key={k} className="flex flex-col gap-1.5">
-                <h2 className="m-0 text-[15px] font-semibold">{k === '__altro' ? g.nome : <Link to={`/guida/citta/${k}`} className="no-underline text-text">{g.nome}</Link>}</h2>
+                <h2 className="m-0 text-[15px] font-semibold">{k.startsWith('__') ? g.nome : <Link to={`/guida/citta/${k}`} className="no-underline text-text">{g.nome}</Link>}</h2>
                 <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`Negozi: ${g.nome}`}>
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>

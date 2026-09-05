@@ -61,6 +61,7 @@ interface Props {
   editor?: StrumentiEditor;
   /** Spillo da selezionare e centrare all'apertura (es. dall'azione della guida). */
   selezioneIniziale?: number | null;
+  puntoIniziale?: {x:number;y:number;zoom:number}|null;
   /** Contenuto del pannello laterale al posto di quello predefinito (editor). */
   pannello?: ReactNode;
   /** Elemento davanti al percorso nella barra (es. targhetta «Modifica»). */
@@ -121,7 +122,7 @@ function articoloDeterminativo(n: number): string {
   return n === 8 || n === 11 || (n >= 80 && n <= 89) || (n >= 800 && n <= 899) ? 'gli' : 'i';
 }
 
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale, puntoIniziale }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
@@ -152,7 +153,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   }, [richiestaScheda]);
   const [occupato, setOccupato] = useState(false);
   const assetBase = useAsset(mappa.asset);
-  const src = mappa.immagineUrl ?? assetBase ?? null;
+  const assetOriginale = useAsset(mappa.assetOriginale);
+  const src = mappa.immagineUrl ?? assetBase ?? assetOriginale ?? null;
 
   // Dimensioni naturali: dal DTO quando note, altrimenti dall'immagine caricata, altrimenti un quadrato di riserva.
   const nat: Dimensioni = natCaricata ?? (mappa.larghezza && mappa.altezza ? { w: mappa.larghezza, h: mappa.altezza } : { w: DIMENSIONE_RISERVA, h: DIMENSIONE_RISERVA });
@@ -218,6 +220,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selezioneIniziale, dim.w, dim.h, nat.w, nat.h, mappa.chiave]);
+  useEffect(() => {
+    if (!puntoIniziale || selezioneIniziale || dim.w === 0 || dim.h === 0) return;
+    const {x,y,zoom:fattore}=puntoIniziale;
+    const id=setTimeout(()=>{const z=stato.current.zoomMin*limita(fattore,1,6);setZoomEsplicito(z);setPanEsplicito({x:dim.w/2-x/100*nat.w*z,y:dim.h/2-y/100*nat.h*z});},0);
+    return ()=>clearTimeout(id);
+  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h]);
   const zoomCentro = (fattore: number) => applicaZoom(zoom * fattore, dim.w / 2, dim.h / 2);
   const centraSu = (s: SpilloDto) => {
     const z = Math.max(zoom, zoomMin * 2.5);

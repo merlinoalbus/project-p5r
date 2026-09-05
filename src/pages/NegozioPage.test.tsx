@@ -70,6 +70,6 @@ describe('NegozioPage', () => {
     expect(await screen.findByRole('heading', { name: 'Untouchable' })).toBeInTheDocument();
     expect(getNegozio).toHaveBeenCalledWith('untouchable', undefined);
     expect(screen.queryByRole('checkbox', { name: /Solo disponibili ora/ })).toBeNull();
-    expect(screen.getAllByRole('row')).toHaveLength(4);
+    expect(screen.getAllByRole('listitem')).toHaveLength(3);
   });
 });

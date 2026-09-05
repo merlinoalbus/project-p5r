@@ -12,3 +12,4 @@ export * from './mappe';
 export * from './fusione';
 export * from './font';
 export * from './impostazioni';
+export * from './catalogo';

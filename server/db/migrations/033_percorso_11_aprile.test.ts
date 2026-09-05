@@ -22,7 +22,7 @@ describe('migrazione 033 — percorso dell’11 aprile', () => {
     const r = prepared('SELECT azioni_json FROM giorno_percorso WHERE data = ?').get(DATA_11_APRILE) as { azioni_json: string };
     const azioni = JSON.parse(r.azioni_json) as Array<{ fascia: string; tipo: string; azione: string }>;
     expect(azioni.some((a) => a.tipo === 'esame')).toBe(false);
-    expect(azioni.map((a) => `${a.fascia}:${a.tipo}`)).toEqual(['giorno:palazzo']);
+    expect(azioni.map((a) => `${a.fascia}:${a.tipo}`)).toEqual(['giorno:palazzo', 'sera:velluto']);
   });
 
   it('toglie la spunta dell’indice 0 e scala di uno le successive, in ogni partita, conservando gli effetti registrati e gli altri giorni', () => {

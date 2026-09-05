@@ -527,3 +527,18 @@ che supera la precedente esclusione.
 - Il backend in Docker gira come `node --import tsx server/index.ts` (PID 1 = node, riceve SIGTERM da `docker stop`).
 - Runtime (`docker-compose.yml`, stack Portainer dal repo): nessuna porta pubblicata; FE nginx sulla rete esterna `PROXY_NETWORK` (default `proxy`) raggiunto da cloudflared come `http://project_p5r_fe:80`, BE solo su rete interna (3101, proxato da nginx su `/api/`),
   volume `project_p5r_data` su `/data` (DB creato al primo boot, seed nell'immagine), label watchtower per l'aggiornamento automatico.
+
+### Catalogo personale e agenda (2026-09-05)
+La migrazione 035 separa origine, personalizzazioni e nascondimenti. Il reseed conserva articoli personali/acquisti e riallinea le spunte soltanto su identità certe; quelle ambigue diventano azioni personali mantenendo effetti reversibili. Il quartiere dei negozi è `luogo_chiave`, distinto dalla descrizione `luogo`. La ricerca include negozi vuoti; i prodotti usano un unico elenco accessibile adattato tramite container queries.
+
+### Condizioni procedurali (2026-09-05)
+Migrazioni 036–037: regole JSON comuni a spilli, negozi e articoli; definizioni di fatti e valori separati per partita; data strutturata di sblocco dei quartieri. Il valutatore usa dati registrati: AND/OR a tre stati, blocchi solo alla radice con precedenza. Nessun testo del catalogo o del quartiere viene interpretato durante la valutazione. La conversione una tantum conserva le frasi ambigue come da configurare. Le esportazioni includono gli stati referenziati, rifiutano definizioni in conflitto e conservano vincoli non validi/mancanti come ignoti, anche oltre il limite. Un acquisto mantiene la disponibilità ereditata dal negozio.
+
+### Percorsi delle mappe (migrazione 038)
+L’identità interna resta stabile; mappa_percorso deriva chiave pubblica e nome composto dalla gerarchia, escludendo il contenitore Città. mappa_alias conserva i vecchi URL. Rinomina e spostamento aggiornano atomicamente tutto il sottoalbero; collisioni e cicli annullano l’operazione. Pin, immagini e progressi usano l’identità interna. Ricerca e ZIP usano i nomi attuali; le immagini del repository già esistenti restano leggibili tramite assetOriginale e vengono esportate con il percorso attuale.
+
+### Editor a sezioni
+Spilli, Mappa, Collegamenti e File espongono gli strumenti per attività. I contenuti delle sezioni restano montati: una bozza non si perde passando a un altro pannello. La selezione dalla mappa riapre Spilli, anche se il pin era già selezionato. Su telefono la mappa precede il pannello; comandi di sezione e campi hanno bersagli da 44 px. Ricerca riferimenti con area e quartiere leggibili su più righe.
+
+### Ingresso dei quartieri (039)
+quartiere_ingresso conserva mappa interna, x/y percentuali e fattore di ingrandimento 1–6. Il quartiere espone percorso attuale e ingresso; il menu Città e i pin di Tokyo aprono la pagina del quartiere, che centra il visore sul punto configurato. Rinomina conserva la destinazione; eliminazione della destinazione e ripristino esplicito tornano alla mappa del quartiere adattata alla finestra. Il backup completo e i pacchetti delle mappe comprendono la configurazione; importazioni senza sovrascrittura preservano ingressi esistenti.

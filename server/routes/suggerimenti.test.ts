@@ -28,8 +28,8 @@ describe('API suggerimenti del giorno', () => {
   it('una nuova partita parte dal primo giorno e suggerisce le entità delle azioni ancora da fare', async () => {
     const primo = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;
     expect(primo.giorno).toBe('04-09');
-    // il 9 aprile e il prologo: nessuna azione collegata a un'entita, quindi nessun alone
-    expect(primo.motivi).toEqual([]);
+    // Il prologo comprende la presentazione di Igor, senza aumento di rango: quindi nessun alone
+    expect(primo.motivi).toEqual(expect.arrayContaining([expect.objectContaining({ chiave: 'igor', fascia: 'sera' })]));
     // dall'11 aprile ci sono azioni con riferimento: ogni motivo punta a una chiave della sua categoria
     await request(app).put(`/api/partite/${id}/giorno`).send({ data: '04-11' });
     const s = (await request(app).get(`/api/partite/${id}/suggerimenti`)).body.data as SuggerimentiOggiDto;

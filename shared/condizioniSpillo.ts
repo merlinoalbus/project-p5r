@@ -31,6 +31,15 @@ export const MESI_GIOCO = [
 
 /** Condizione calcolabile dall'app (mai «manuale»). Le date sono «MM-GG» del calendario di gioco. */
 export type RequisitoSpillo =
+  | { tipo: 'gruppo'; modo: 'tutte' | 'almeno-una'; condizioni: RequisitoSpillo[] }
+  | { tipo: 'non'; condizione: RequisitoSpillo }
+  | { tipo: 'stato'; chiave: string; confronto: 'almeno' | 'uguale' | 'massimo'; valore: number }
+  | { tipo: 'articolo'; articolo: string }
+  | { tipo: 'lettura'; categoria: 'libro' | 'film'; chiave: string }
+  | { tipo: 'persona-arcano'; arcano: string }
+  | { tipo: 'persona-abilita'; persona: string; abilita: string }
+  | { tipo: 'da-configurare'; nota: string }
+
   | { tipo: 'data'; dal: string }
   | { tipo: 'intervallo'; dal: string; al: string }
   | { tipo: 'palazzo'; dungeon: string }
@@ -110,6 +119,9 @@ export function dataLeggibile(d: string): string {
 
 /** Nomi da mostrare al posto delle chiavi (Confidenti, quartieri, richieste, Palazzi): chi li ha li passa, altrimenti resta la chiave. */
 export interface NomiCondizioni {
+  stati?: Record<string, string>;
+  articoli?: Record<string, string>;
+  letture?: Record<string, string>;
   confidenti?: Record<string, string>;
   quartieri?: Record<string, string>;
   richieste?: Record<string, string>;
@@ -124,6 +136,15 @@ function congiunzione(voci: string[]): string {
 /** Testo in italiano della condizione, nello stesso stile dei requisiti della guida («dal 18 aprile», «Rango Confidente Sojiro 4»). */
 export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni = {}): string {
   switch (r.tipo) {
+    case 'gruppo': return (r.modo === 'tutte' ? 'Tutte: ' : 'Almeno una: ') + r.condizioni.map(c => descriviRequisitoSpillo(c, nomi)).join(' · ');
+    case 'non': return 'Bloccato quando: ' + descriviRequisitoSpillo(r.condizione, nomi);
+    case 'stato': return (nomi.stati?.[r.chiave] ?? r.chiave) + ' ' + r.confronto + ' ' + r.valore;
+    case 'articolo': return 'Articolo ottenuto: ' + (nomi.articoli?.[r.articolo] ?? r.articolo);
+    case 'lettura': return (r.categoria === 'libro' ? 'Libro letto: ' : 'Film visto: ') + (nomi.letture?.[r.chiave] ?? r.chiave);
+    case 'persona-arcano': return 'Persona in scorta dell’Arcano ' + r.arcano;
+    case 'persona-abilita': return r.persona + ' in scorta con ' + r.abilita;
+    case 'da-configurare': return 'Da configurare: ' + r.nota;
+
     case 'data': return `dal ${dataLeggibile(r.dal)}`;
     case 'intervallo': return r.dal === r.al ? `solo il ${dataLeggibile(r.dal)}` : `solo dal ${dataLeggibile(r.dal)} al ${dataLeggibile(r.al)}`;
     case 'palazzo': return `dopo il ${nomi.dungeon?.[r.dungeon] ?? PALAZZI_CONDIZIONE.find((p) => p.chiave === r.dungeon)?.nome ?? r.dungeon}`;
@@ -150,10 +171,24 @@ function intero(x: unknown, min: number, max: number): number | null {
  * Riporta un valore qualsiasi (pacchetto importato, seed, corpo API) a una condizione valida, oppure `null` se non lo è.
  * Le chiavi (Confidente, quartiere, richiesta, Palazzo) vengono solo ripulite: la loro esistenza la verifica il server sul DB.
  */
-export function normalizzaRequisitoSpillo(x: unknown): RequisitoSpillo | null {
+export function normalizzaRequisitoSpillo(x: unknown, profondita = 0): RequisitoSpillo | null {
+  if (profondita > 5) return null;
   if (!x || typeof x !== 'object') return null;
   const o = x as Record<string, unknown>;
   switch (o.tipo) {
+    case 'gruppo': {
+      if (!['tutte','almeno-una'].includes(String(o.modo)) || !Array.isArray(o.condizioni) || o.condizioni.length < 1 || o.condizioni.length > 20) return null;
+      const condizioni = o.condizioni.map(c => normalizzaRequisitoSpillo(c, profondita + 1));
+      return condizioni.every((c): c is RequisitoSpillo => c !== null) ? { tipo: 'gruppo', modo: o.modo as 'tutte' | 'almeno-una', condizioni } : null;
+    }
+    case 'non': { if (profondita !== 0) return null; const c = normalizzaRequisitoSpillo(o.condizione, profondita + 1); return c ? { tipo:'non', condizione:c } : null; }
+    case 'stato': return typeof o.chiave === 'string' && /^[a-z0-9-]{1,120}$/.test(o.chiave) && ['almeno','uguale','massimo'].includes(String(o.confronto)) && Number.isInteger(o.valore) && Number(o.valore) >= 0 && Number(o.valore) <= 9999999 ? { tipo:'stato', chiave:o.chiave, confronto:o.confronto as 'almeno'|'uguale'|'massimo', valore:Number(o.valore) } : null;
+    case 'articolo': { const articolo=testoPulito(o.articolo,200); return articolo ? { tipo:'articolo', articolo } : null; }
+    case 'lettura': { const chiave=testoPulito(o.chiave,200); return chiave && (o.categoria === 'libro' || o.categoria === 'film') ? { tipo:'lettura', categoria:o.categoria, chiave } : null; }
+    case 'persona-arcano': { const arcano=testoPulito(o.arcano,80); return arcano ? { tipo:'persona-arcano',arcano } : null; }
+    case 'persona-abilita': { const persona=testoPulito(o.persona,120),abilita=testoPulito(o.abilita,120); return persona && abilita ? {tipo:'persona-abilita',persona,abilita}:null; }
+    case 'da-configurare': { const nota=testoPulito(o.nota,2000); return nota ? {tipo:'da-configurare',nota}:null; }
+
     case 'data': { const dal = testoPulito(o.dal, 5); return dal && dataValida(dal) ? { tipo: 'data', dal } : null; }
     // il periodo segue il calendario di gioco (aprile → marzo): la fine non può precedere l'inizio
     case 'intervallo': { const dal = testoPulito(o.dal, 5); const al = testoPulito(o.al, 5); return dal && al && dataValida(dal) && dataValida(al) && ordineGioco(dal) <= ordineGioco(al) ? { tipo: 'intervallo', dal, al } : null; }
@@ -190,4 +225,14 @@ export function normalizzaCondizioniSpillo(x: unknown, max = 20): RequisitoSpill
     if (out.length >= max) break;
   }
   return out;
+}
+
+/** Un dato danneggiato non deve sbloccare accidentalmente un elemento. */
+export function leggiCondizioniSalvate(json: string | null): RequisitoSpillo[] {
+  if (!json) return [];
+  try {
+    const v:unknown=JSON.parse(json);
+    if (Array.isArray(v) && v.length<=20 && v.every(c=>normalizzaRequisitoSpillo(c)!==null)) return normalizzaCondizioniSpillo(v);
+  } catch { /* Errore esposto come requisito da configurare. */ }
+  return [{tipo:'da-configurare',nota:'Condizioni salvate non valide: ricontrollare la configurazione.'}];
 }

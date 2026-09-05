@@ -9,7 +9,7 @@ import { calendario } from '../services/calendarioService.js';
 import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
-import { dettaglioQuartiere, elencaQuartieri } from '../services/cittaService.js';
+import { dettaglioQuartiere, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
 import { attivitaTutte } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
@@ -108,6 +108,8 @@ router.get('/articoli', validate({ query: queryArticoli }), (req, res) => {
 router.get('/cruciverba', validate({ query: queryDomande }), (req, res) => {
   res.json(cruciverba((req.query as unknown as { partita?: number }).partita));
 });
+router.delete('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string().min(1).max(80)})}),(req,res)=>{impostaIngressoQuartiere(String(req.params.chiave),null);res.status(204).end();});
+router.put('/citta/:chiave/ingresso',validate({params:z.object({chiave:z.string().min(1).max(80)}),body:z.object({mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6).default(2.5)}).strict()}),(req,res)=>{res.json(impostaIngressoQuartiere(String(req.params.chiave),req.body));});
 router.get('/citta', (_req, res) => {
   res.json(elencaQuartieri());
 });

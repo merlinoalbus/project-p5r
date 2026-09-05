@@ -178,3 +178,12 @@ describe('VisoreMappa', () => {
     expect(within(popup.getByRole('group', { name: 'Condizioni di visibilità' })).getByText('dal 18 giugno')).toBeInTheDocument();
   });
 });
+
+it('centra il punto iniziale con lo zoom configurato senza selezionare un pin',async()=>{
+ const misura=vi.spyOn(HTMLElement.prototype,'getBoundingClientRect').mockReturnValue({width:1000,height:500,left:0,top:0,right:1000,bottom:500,x:0,y:0,toJSON:()=>({})});
+ try {
+  monta({puntoIniziale:{x:20,y:80,zoom:2.5}});
+  await waitFor(()=>expect(document.querySelector('.visore-mappa__livello')).toHaveStyle({transform:'translate(0px, -750px) scale(2.5)'}));
+  expect(screen.queryByRole('dialog')).toBeNull();
+ }finally{misura.mockRestore();}
+});

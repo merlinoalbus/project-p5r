@@ -7,7 +7,7 @@ import { AMBITI_IMMAGINE } from '../services/immaginiService.js';
 
 export const paramsImmagine = z.object({
   ambito: z.enum(AMBITI_IMMAGINE),
-  chiave: z.string().min(1).max(120),
+  chiave: z.string().min(1).max(200),
 });
 
 export const queryImmagini = z.object({

@@ -1,3 +1,4 @@
+<!-- Chiusura 2026-09-06: le 2 icone §17.1 e i 14 spilli §18.1 sono consegnati e validati; i prompt restano come specifica e tracciabilità. -->
 # Prompt per la generazione degli asset grafici — stile Persona 5 Royal
 
 Versione 3 — 2026-09-04: questo documento elenca SOLO gli asset ancora da consegnare (le sezioni conservano la numerazione storica). Le

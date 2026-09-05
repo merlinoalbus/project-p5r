@@ -1,3 +1,4 @@
+import { IngressoQuartiere } from '../components/mappe/IngressoQuartiere';
 // ============================================================
 // QuartierePage — luoghi di un quartiere: cosa offrono, quando, sblocco, Confidenti, piatti; mappa del quartiere con i luoghi come spilli (Fase 8.1, mappe 13.4)
 // ============================================================
@@ -64,9 +65,10 @@ export function QuartierePage() {
   const dati = useCarica(() => getQuartiere(chiave), [chiave]);
   const q = dati.dati;
   useDocumentTitle(q?.nome ?? 'Quartiere');
+  const [configuraIngresso,setConfiguraIngresso]=useState(false);
   const [tipo, setTipo] = useState<string>('');
   // Mappa pubblicata ma non ancora nell'istanza: scaricata appena il quartiere è aperto, poi il visore la usa come immagine di base
-  const download = useCarica(() => (q && !q.mappa && q.pianta ? scaricaPiantaQuartiere(q.chiave) : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url]);
+  const download = useCarica(() => (q && !q.ingresso && !q.mappa && q.pianta ? scaricaPiantaQuartiere(q.chiave) : Promise.resolve(null)), [q?.chiave, q?.mappa, q?.pianta?.url, q?.ingresso]);
   const scaricata = !!q && !!download.dati && download.dati.quartiere === q.chiave;
   const tipi = useMemo(() => [...new Set((q?.luoghi ?? []).map((l) => l.tipo))], [q]);
   const visibili = useMemo(() => (q?.luoghi ?? []).filter((l) => !tipo || l.tipo === tipo), [q, tipo]);
@@ -81,10 +83,11 @@ export function QuartierePage() {
             {q.descrizione && <p className="m-0 mt-1 text-[13px] text-text-secondary">{q.descrizione}</p>}
             {q.fonte && <a href={q.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
           </div>
+          {configuraIngresso ? <IngressoQuartiere key={q.chiave} quartiere={q} onSalvato={async()=>{await dati.ricarica();}} onChiudi={()=>setConfiguraIngresso(false)} /> : <button type="button" className="btn btn-secondary self-start touch" onClick={()=>setConfiguraIngresso(true)}>Configura ingresso da Città</button>}
           <section className="flex flex-col gap-1.5">
-            <MappaIncorporata chiave={`citta-${q.chiave}`} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(480px, calc(100vh - 280px))" />
+            <MappaIncorporata chiave={q.ingresso?.mappa??q.mappaChiave??`citta-${q.chiave}`} puntoIniziale={q.ingresso} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(480px, calc(100vh - 280px))" />
             <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
-              {q.pianta ? (
+              {q.ingresso ? <span>Ingresso configurato: {q.ingresso.nome}.</span> : q.pianta ? (
                 <span>Mappa da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Spilli e immagine si modificano dall'editor.</span>
               ) : (
                 <span>Nessuna mappa pubblicata per questo quartiere{q.piantaAssente ? `: ${q.piantaAssente}` : ''}: carica una tua immagine dall'editor della mappa (resta nella tua istanza).</span>
