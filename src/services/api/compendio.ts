@@ -42,7 +42,8 @@ export const getPercorsoIndice = (partita?: number): Promise<PercorsoIndiceDto> 
 /** Scheda di un giorno del percorso. */
 export const getPercorsoGiorno = (data: string, partita?: number): Promise<PercorsoGiornoDto> => apiGet(`/compendio/percorso/${data}${queryString({ partita })}`);
 /** Negozi con conteggi degli articoli. */
-export const getNegozi = (): Promise<NegozioRiassuntoDto[]> => apiGet('/compendio/negozi');
+/** Elenco dei negozi; con `partita` ogni negozio porta la disponibilità alla data corrente (sblocco del negozio). */
+export const getNegozi = (partita?: number): Promise<NegozioRiassuntoDto[]> => apiGet(`/compendio/negozi${queryString({ partita })}`);
 /** Scheda di un negozio con gli articoli (acquisti della partita se indicata). */
 export const getNegozio = (chiave: string, partita?: number): Promise<NegozioDettaglioDto> => apiGet(`/compendio/negozi/${encodeURIComponent(chiave)}${queryString({ partita })}`);
 /** Ricerca degli articoli in tutti i negozi. */

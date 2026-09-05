@@ -9,7 +9,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from '../services/seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import type { AzionePercorsoDto, PercorsoGiornoDto, PercorsoIndiceDto, StoricoDto } from '../../shared/types.js';
+import type { AzionePercorsoDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto, StoricoDto } from '../../shared/types.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../data/seed');
 const app = createApp();
@@ -58,8 +58,10 @@ describe('API percorso giorno per giorno', () => {
     expect(a.fatta).toBe(false);
     expect((await request(app).put(`/api/partite/${id}/percorso`).send({ data: '04-12', indice: 99, fatta: true })).status).toBe(404);
     expect((await request(app).put(`/api/partite/${id}/percorso`).send({ data: '2016-04-12', indice: 0, fatta: true })).status).toBe(400);
-    const gc = (await request(app).put(`/api/partite/${id}/giorno`).send({ data: '05-19' })).body.data as { dataCorrente: string };
+    const gc = (await request(app).put(`/api/partite/${id}/giorno`).send({ data: '05-19' })).body.data as GiornoCorrenteDto;
     expect(gc.dataCorrente).toBe('05-19');
+    expect(gc.partita.id).toBe(id);
+    expect(gc.partita.dataGioco).toBe('05-19');
     const i = (await request(app).get(`/api/compendio/percorso?partita=${id}`)).body.data as PercorsoIndiceDto;
     expect(i.dataCorrente).toBe('05-19');
     expect((await request(app).put(`/api/partite/${id}/giorno`).send({ data: '13-40' })).status).toBe(404);

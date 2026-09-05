@@ -73,4 +73,21 @@ describe('API negozi e inventario', () => {
     expect(dopo.acquistati).toBe(1);
     expect(dopo.articoliElenco).toHaveLength(18);
   });
+
+  it('disponibilità con la partita: ricerca e scheda valutano allo stesso modo «Rango Confidente N» (Confidente del negozio)', async () => {
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Disponibilità' })).body.data as { id: number }).id;
+    const scheda = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
+    const conRango = scheda.articoliElenco.filter((a) => /^Rango Confidente \d+$/.test(a.condizione ?? ''));
+    expect(conRango.length).toBeGreaterThan(0);
+    for (const a of conRango) expect(a.disponibilita).toMatchObject({ stato: 'bloccato', requisiti: [expect.objectContaining({ tipo: 'confidente', stato: 'rosso' })] });
+    const ricerca = (await request(app).get(`/api/compendio/articoli?q=Takemedic&partita=${id}`)).body.data as RicercaArticoliDto;
+    const trovato = ricerca.articoli.find((a) => a.chiave === conRango.find((c) => c.nome === 'Takemedic')?.chiave) ?? ricerca.articoli.find((a) => a.negozioChiave === 'clinica-takemi');
+    expect(trovato).toBeDefined();
+    expect(trovato!.disponibilita).toEqual(scheda.articoliElenco.find((a) => a.chiave === trovato!.chiave)!.disponibilita);
+    // senza partita nessuna disponibilità; l'elenco dei negozi con la partita la porta
+    expect(((await request(app).get('/api/compendio/negozi/clinica-takemi')).body.data as NegozioDettaglioDto).articoliElenco[0].disponibilita).toBeUndefined();
+    const elenco = (await request(app).get(`/api/compendio/negozi?partita=${id}`)).body.data as NegozioRiassuntoDto[];
+    expect(elenco.every((n) => n.disponibilita !== undefined)).toBe(true);
+    expect(elenco.find((n) => n.chiave === 'untouchable')?.disponibilita?.stato).toBe('disponibile');
+  });
 });

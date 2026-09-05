@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
 import { IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconElenco, IconEvoca, IconGioca, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMatita, IconMedaglia, IconMessaggio, IconNegozio, IconOrologio, IconPersone, IconPodio, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita, IconFiltro, IconAdatta, IconZoomMeno, IconZoomPiu } from './iconeGuida';
 
-export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro' | 'filtri';
+export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro' | 'filtri' | 'copia' | 'incolla';
 export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico' | 'riepilogo' | 'fusione-speciali' | 'fusione-forca' | 'fusione-cicli' | 'fusione-skill' | 'fusione-piani' | 'fusione-con' | 'fusione-ricette' | 'fusione-calcolatore';
 
 const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = {
@@ -47,6 +47,8 @@ const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = 
   'registra': (d) => <IconLibro size={d} />,
   'negozio': (d) => <IconNegozio size={d} />,
   'filtri': (d) => <IconFiltro size={d} />,
+  'copia': (d) => <IconCarte size={d} />,
+  'incolla': (d) => <IconAppunti size={d} />,
   'accettata': (d) => <IconSpunta size={d} />,
   'esaurito': (d) => <IconAnnullaCerchio size={d} />,
   'calendario': (d) => <IconOrologio size={d} />,
@@ -84,7 +86,7 @@ const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = 
 
 interface Props<C extends string> {
   chiave: C;
-  /** Lato in px (default 24). */
+  /** Lato in px (default 24). Dentro un PulsanteVisivo/CollegamentoVisivo è ininfluente: il riquadro del pulsante impone la dimensione via CSS (40/32/48 px). */
   dimensione?: number;
   className?: string;
 }

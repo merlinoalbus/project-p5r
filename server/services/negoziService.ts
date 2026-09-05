@@ -4,22 +4,23 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
+import { statoDisponibilitaPartita, valutaDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
 import { registraEvento } from './storicoService.js';
 import type { ArticoloDto, NegozioDettaglioDto, NegozioRiassuntoDto, RicercaArticoliDto } from '../../shared/types.js';
 
 interface RigaNegozio { chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string; gestore: string | null; confidente_chiave: string | null; orari: string | null; sblocco: string | null; note: string | null; fonte: string; confidente_nome?: string | null; quartiere_nome?: string | null; articoli?: number; verificati?: number }
-interface RigaArticolo { chiave: string; negozio_chiave: string; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
+interface RigaArticolo { chiave: string; negozio_chiave: string; negozio_confidente?: string | null; ordine: number; nome: string; nome_it: string | null; categoria: string; per: string | null; prezzo: number | null; effetto: string | null; statistiche: string | null; disponibile_dal: string | null; condizione: string | null; nota: string | null; fonte: string; verificato: number; negozio_nome?: string }
 
 const SQL_NEGOZIO = `SELECT n.*, c.nome AS confidente_nome, q.nome AS quartiere_nome,
   (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave) AS articoli, (SELECT COUNT(*) FROM articolo a WHERE a.negozio_chiave = n.chiave AND a.verificato = 1) AS verificati
   FROM negozio n LEFT JOIN confidente c ON c.chiave = n.confidente_chiave LEFT JOIN quartiere q ON q.chiave = n.luogo_chiave`;
 
-function riassunto(r: RigaNegozio): NegozioRiassuntoDto {
-  return { chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore, confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null, orari: r.orari, sblocco: r.sblocco, articoli: r.articoli ?? 0, verificati: r.verificati ?? 0 };
+function riassunto(r: RigaNegozio, st?: StatoDisponibilita): NegozioRiassuntoDto {
+  return { ...(st ? { disponibilita: valutaDisponibilita([r.sblocco], st, { confidenteNegozio: r.confidente_chiave }) } : {}), chiave: r.chiave, nome: r.nome, luogo: r.luogo, luogoChiave: r.luogo_chiave, quartiereNome: r.quartiere_nome ?? null, tipo: r.tipo as NegozioRiassuntoDto['tipo'], gestore: r.gestore, confidente: r.confidente_chiave ? { chiave: r.confidente_chiave, nome: r.confidente_nome ?? r.confidente_chiave } : null, orari: r.orari, sblocco: r.sblocco, articoli: r.articoli ?? 0, verificati: r.verificati ?? 0 };
 }
 
-function articoloDto(r: RigaArticolo, acquistati: Set<string>): ArticoloDto {
-  return { chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', nome: r.nome, nomeIt: r.nome_it, categoria: r.categoria as ArticoloDto['categoria'], per: r.per, prezzo: r.prezzo, effetto: r.effetto, statistiche: r.statistiche, disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, fonte: r.fonte, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave) };
+function articoloDto(r: RigaArticolo, acquistati: Set<string>, st?: StatoDisponibilita, confidenteNegozio?: string | null): ArticoloDto {
+  return { chiave: r.chiave, negozioChiave: r.negozio_chiave, negozioNome: r.negozio_nome ?? '', nome: r.nome, nomeIt: r.nome_it, categoria: r.categoria as ArticoloDto['categoria'], per: r.per, prezzo: r.prezzo, effetto: r.effetto, statistiche: r.statistiche, disponibileDal: r.disponibile_dal, condizione: r.condizione, nota: r.nota, fonte: r.fonte, verificato: r.verificato === 1, acquistato: acquistati.has(r.chiave), ...(st ? { disponibilita: valutaDisponibilita([r.disponibile_dal, r.condizione], st, { confidenteNegozio }) } : {}) };
 }
 
 function acquistiPartita(partitaId: number | undefined): Set<string> {
@@ -29,8 +30,9 @@ function acquistiPartita(partitaId: number | undefined): Set<string> {
 }
 
 /** Negozi in ordine con conteggi degli articoli. */
-export function elencaNegozi(): NegozioRiassuntoDto[] {
-  return (prepared(`${SQL_NEGOZIO} ORDER BY n.ordine`).all() as RigaNegozio[]).map(riassunto);
+export function elencaNegozi(partitaId?: number): NegozioRiassuntoDto[] {
+  const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  return (prepared(`${SQL_NEGOZIO} ORDER BY n.ordine`).all() as RigaNegozio[]).map((r) => riassunto(r, st));
 }
 
 /** Scheda di un negozio con gli articoli (acquistati nella partita, se indicata). */
@@ -38,21 +40,24 @@ export function dettaglioNegozio(chiave: string, partitaId?: number): NegozioDet
   const n = prepared(`${SQL_NEGOZIO} WHERE n.chiave = ?`).get(chiave) as RigaNegozio | undefined;
   if (!n) throw httpErrors.notFound('negozio-non-trovato', `Il negozio '${chiave}' non esiste.`);
   const acquistati = acquistiPartita(partitaId);
-  const articoli = (prepared('SELECT a.*, n.nome AS negozio_nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.negozio_chiave = ? ORDER BY a.ordine').all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati));
-  return { ...riassunto(n), note: n.note, fonte: n.fonte, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
+  const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
+  const articoli = (prepared('SELECT a.*, n.nome AS negozio_nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave WHERE a.negozio_chiave = ? ORDER BY a.ordine').all(chiave) as RigaArticolo[]).map((r) => articoloDto(r, acquistati, st, n.confidente_chiave));
+  return { ...riassunto(n, st), note: n.note, fonte: n.fonte, articoliElenco: articoli, acquistati: articoli.filter((a) => a.acquistato).length };
 }
 
 /** Ricerca degli articoli in tutti i negozi per testo, categoria e destinatario (massimo 300 risultati). */
 export function ricercaArticoli(filtro: { q?: string; categoria?: string; per?: string }, partitaId?: number): RicercaArticoliDto {
   const acquistati = acquistiPartita(partitaId);
+  const st = partitaId === undefined ? undefined : statoDisponibilitaPartita(partitaId);
   const cond: string[] = []; const par: unknown[] = [];
   if (filtro.q) { cond.push("(a.nome LIKE ? OR a.nome_it LIKE ? OR a.effetto LIKE ? OR n.nome LIKE ?)"); const like = `%${filtro.q}%`; par.push(like, like, like, like); }
   if (filtro.categoria) { cond.push('a.categoria = ?'); par.push(filtro.categoria); }
   if (filtro.per) { cond.push("(a.per = ? OR a.per = 'tutti')"); par.push(filtro.per); }
   const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
   const totale = (prepared(`SELECT COUNT(*) AS n FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave ${where}`).get(...par) as { n: number }).n;
-  const righe = prepared(`SELECT a.*, n.nome AS negozio_nome FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave ${where} ORDER BY n.ordine, a.ordine LIMIT 300`).all(...par) as RigaArticolo[];
-  return { articoli: righe.map((r) => articoloDto(r, acquistati)), totale };
+  const righe = prepared(`SELECT a.*, n.nome AS negozio_nome, n.confidente_chiave AS negozio_confidente FROM articolo a JOIN negozio n ON n.chiave = a.negozio_chiave ${where} ORDER BY n.ordine, a.ordine LIMIT 300`).all(...par) as RigaArticolo[];
+  // «Rango Confidente 3» senza nome è il Confidente del negozio: la ricerca deve valutarlo come la scheda
+  return { articoli: righe.map((r) => articoloDto(r, acquistati, st, r.negozio_confidente ?? null)), totale };
 }
 
 /** Segna (o toglie) un articolo come acquistato/ottenuto nella partita; evento alla prima spunta. */

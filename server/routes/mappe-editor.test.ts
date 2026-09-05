@@ -42,13 +42,18 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const quartieri = albero.filter((m) => m.tipo === 'quartiere');
     expect(quartieri.length).toBeGreaterThan(5);
     expect(quartieri.every((q) => q.genitore === 'tokyo' && q.entita?.tipo === 'quartiere' && q.asset === `mappe/${q.chiave}`)).toBe(true);
-    expect(tokyo.numeroFigli).toBe(quartieri.length);
+    // i figli di Tokyo sono i quartieri della guida più le mappe dei pacchetti dell'utente agganciate a Tokyo (es. una banchina della metropolitana)
+    expect(tokyo.numeroFigli).toBe(albero.filter((m) => m.genitore === 'tokyo').length);
+    expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
     const palazzi = albero.filter((m) => m.tipo === 'palazzo');
     expect(palazzi.length).toBeGreaterThan(3);
     expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'dungeon-mementos')).toBe(true);
     const aree = albero.filter((m) => m.tipo === 'area');
     expect(aree.length).toBeGreaterThan(10);
-    expect(aree.every((a) => a.genitore?.startsWith('dungeon-') && a.entita?.tipo === 'area')).toBe(true);
+    // le aree dei Palazzi/Dedali vengono dalla guida (entità «area»); i pacchetti dell'utente possono aggiungere aree anche sotto Tokyo o un quartiere
+    const areeDungeon = aree.filter((a) => a.genitore?.startsWith('dungeon-'));
+    expect(areeDungeon.length).toBeGreaterThan(10);
+    expect(areeDungeon.every((a) => a.entita?.tipo === 'area')).toBe(true);
     // ogni chiave è instradabile (minuscole, cifre, trattini)
     for (const m of albero) expect(m.chiave).toMatch(/^[a-z0-9][a-z0-9-]{1,79}$/);
     // i marcatori del seed sono diventati spilli (punti nelle aree, luoghi nei quartieri)
@@ -56,7 +61,12 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(quartieri.reduce((n, q) => n + q.numeroSpilli, 0)).toBeGreaterThan(0);
     // passaggi automatici: Tokyo → ogni quartiere, Palazzo → ogni area (da posizionare nell'editor)
     const tokyoDett = (await request(app).get('/api/mappe/tokyo')).body.data as MappaDto;
-    expect(tokyoDett.spilli.filter((s) => s.tipo === 'passaggio' && s.riferimento?.tipo === 'mappa').map((s) => s.riferimento!.chiave).sort()).toEqual(quartieri.map((q) => q.chiave).sort());
+    // ogni quartiere ha il passaggio automatico da Tokyo; una mappa dell'utente agganciata a Tokyo ma raggiunta da un passaggio
+    // posato altrove (es. la banchina della metropolitana da Yongen-Jaya) non ne riceve uno doppio
+    const passaggiTokyo = tokyoDett.spilli.filter((s) => s.tipo === 'passaggio' && s.riferimento?.tipo === 'mappa').map((s) => s.riferimento!.chiave);
+    for (const q of quartieri) expect(passaggiTokyo).toContain(q.chiave);
+    const figlieTokyo = new Set(albero.filter((m) => m.genitore === 'tokyo').map((m) => m.chiave));
+    for (const p of passaggiTokyo) expect(figlieTokyo.has(p)).toBe(true);
     const kamoshida = (await request(app).get('/api/mappe/dungeon-kamoshida')).body.data as MappaDto;
     expect(kamoshida.spilli.length).toBe(kamoshida.figli.length);
     expect(kamoshida.spilli.every((s) => s.tipo === 'passaggio' && s.dettaglio?.tipo === 'mappa' && s.x >= 0 && s.x <= 100)).toBe(true);
@@ -117,6 +127,13 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(s).toMatchObject({ tipo: 'forziere', collezionabile: true, raccolto: false, origine: 'utente', colore: expect.any(String), tipoNome: 'Forziere' });
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'forziere', nome: 'Fuori', x: 150, y: 10 })).status).toBe(400);
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'drago', nome: 'Tipo ignoto', x: 1, y: 1 })).status).toBe(400);
+    // tipo «dialogo»: collezionabile per default, senza riferimento; rimosso subito per non alterare i conteggi che seguono
+    const dialogo = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'dialogo', nome: 'Passante loquace', x: 30, y: 30 })).body.data as SpilloDto;
+    expect(dialogo).toMatchObject({ tipo: 'dialogo', tipoNome: 'Dialogo', colore: '#6366f1', collezionabile: true, raccolto: false, riferimento: null, origine: 'utente' });
+    expect((await request(app).delete(`/api/mappe/spilli/${dialogo.id}`)).status).toBe(204);
+    // il pacchetto data/seed/mappe/citta-yongen-jaya.json entra col tipo dedicato
+    const yongen = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
+    expect(yongen.spilli.find((s) => s.nome === 'Poliziotto Dialogo')).toMatchObject({ tipo: 'dialogo', tipoNome: 'Dialogo', origine: 'seed', collezionabile: true, riferimento: null });
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Verso il nulla', x: 1, y: 1, riferimento: { tipo: 'mappa', chiave: 'non-esiste' } })).status).toBe(404);
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'negozio', nome: 'Negozio fantasma', x: 1, y: 1, riferimento: { tipo: 'negozio', chiave: 'non-esiste' } })).status).toBe(404);
     const passaggio = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Torna a Shibuya', x: 50, y: 95, riferimento: { tipo: 'mappa', chiave: 'citta-shibuya' } })).body.data as SpilloDto;
