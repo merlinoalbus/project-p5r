@@ -6,13 +6,13 @@
 // ============================================================
 
 import { useState } from 'react';
-import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../services/api';
+import { getPercorsoGiorno, getPercorsoIndice, impostaFasciaGioco, impostaGiornoCorrente } from '../services/api';
 import { useCarica } from './useCarica';
 import { notifica } from '../stores/notificationStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimentiStore } from '../stores/suggerimentiStore';
 import { dataGiocoTesto } from '../utils/dateGioco';
-import type { AzionePercorsoDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../types';
+import type { AzionePercorsoDto, FasciaGioco, PercorsoGiornoDto, PercorsoIndiceDto } from '../types';
 
 export interface StatoMappaOggi {
   chiave: string;
@@ -31,6 +31,9 @@ export interface Oggi {
   vaiAlGiorno: (data: string | null) => void;
   aggiornaAzione: (a: AzionePercorsoDto) => void;
   segnaCorrente: () => Promise<void>;
+  /** Momento della giornata nella partita («giorno» o «sera»): decide quali spilli, articoli e negozi sono disponibili ora. */
+  fascia: FasciaGioco;
+  impostaFascia: (fascia: FasciaGioco) => Promise<void>;
   occupato: boolean;
   mappa: StatoMappaOggi;
   sullaMappa: (a: AzionePercorsoDto) => void;
@@ -45,6 +48,8 @@ export function useOggi(partitaId: number): Oggi {
   const giorno = useCarica(() => (data ? getPercorsoGiorno(data, partitaId) : Promise.resolve(null)), [data, partitaId]);
   const [mappa, setMappa] = useState<StatoMappaOggi>({ chiave: 'tokyo', spilloId: null, azione: null });
   const [occupato, setOccupato] = useState(false);
+  // la fascia vive nella partita dello store: cambiandola si ricaricano da sole mappa incorporata, negozi e articoli
+  const fascia = usePartitaStore((s) => (s.attiva?.id === partitaId ? s.attiva.fasciaGioco ?? 'giorno' : 'giorno'));
   const g = giorno.dati;
 
   return {
@@ -72,6 +77,21 @@ export function useOggi(partitaId: number): Oggi {
         // cambiando giorno cambiano le azioni suggerite: l'alone dorato si aggiorna da solo
         useSuggerimentiStore.getState().invalida();
         notifica('success', `Giorno corrente: ${dataGiocoTesto(g.giorno)}.`);
+      } catch (err) {
+        notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
+      } finally {
+        setOccupato(false);
+      }
+    },
+    fascia,
+    impostaFascia: async (nuova) => {
+      if (nuova === fascia) return;
+      setOccupato(true);
+      try {
+        const partita = await impostaFasciaGioco(partitaId, nuova);
+        usePartitaStore.getState().aggiornaLocale(partita);
+        useSuggerimentiStore.getState().invalida();
+        notifica('success', nuova === 'sera' ? 'Ora è sera nella partita.' : 'Ora è giorno nella partita.');
       } catch (err) {
         notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
       } finally {

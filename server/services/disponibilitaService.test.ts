@@ -17,7 +17,7 @@ function stato(sovrascrivi: Partial<StatoDisponibilita> = {}): StatoDisponibilit
   return {
     doti: new Map([['fascino', 1], ['coraggio', 1], ['conoscenza', 1], ['perizia', 1], ['gentilezza', 1]]),
     arcaniInScorta: new Set(), personeConAbilita: new Set(), bossGestiti: new Set(), richiesteCompletate: new Set(),
-    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), dataGioco: '04-20', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
+    ranghiConfidenti: new Map([['sojiro', 1], ['iwai', 0]]), dataGioco: '04-20', fasciaGioco: 'giorno', meteoOggi: 'Sereno', conferme: new Set(), giornoSettimana: 'mercoledi',
     sbloccoQuartieri: new Map([['akihabara', { nome: 'Akihabara', dal: '08-31' }], ['shinjuku', { nome: 'Shinjuku', dal: '06-18' }], ['kichijoji', { nome: 'Kichijoji', dal: null }]]),
     ...sovrascrivi,
   };
@@ -43,7 +43,13 @@ describe('requisitiDaTesto', () => {
       { tipo: 'richiesta', richiesta: 'Lo zio ingordo', testo: 'Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo' },
     ]);
     expect(requisitiDaTesto('solo nei giorni di pioggia')).toEqual([{ tipo: 'piove', testo: 'solo nei giorni di pioggia' }]);
-    expect(requisitiDaTesto('solo la domenica sera')).toEqual([{ tipo: 'giorno-settimana', giorni: ['domenica'], testo: 'solo la domenica sera' }]);
+    // la fascia della giornata si legge insieme al resto della frase
+    expect(requisitiDaTesto('solo la domenica sera')).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo la domenica sera' }, { tipo: 'giorno-settimana', giorni: ['domenica'], testo: 'solo la domenica sera' }]);
+    expect(requisitiDaTesto('solo di sera')).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }]);
+    expect(requisitiDaTesto('Aperto solo di giorno')).toEqual([{ tipo: 'fascia', fascia: 'giorno', testo: 'Aperto solo di giorno' }]);
+    expect(requisitiDaTesto('esclusivamente di sera')).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'esclusivamente di sera' }]);
+    // «al giorno» è una quantità, non una fascia
+    expect(requisitiDaTesto('un succo al giorno')).toEqual([]);
     expect(requisitiDaTesto('solo in inverno')).toEqual([{ tipo: 'stagione', stagione: 'inverno', testo: 'solo in inverno' }]);
     expect(requisitiDaTesto('scambio disponibile dal 26 al 30 luglio')).toEqual([{ tipo: 'intervallo', dal: '07-26', al: '07-30', testo: 'scambio disponibile dal 26 al 30 luglio' }]);
     expect(requisitiDaTesto('scambio disponibile dal 22 gennaio al 2 febbraio')[0]).toMatchObject({ tipo: 'intervallo', dal: '01-22', al: '02-02' });
@@ -61,6 +67,7 @@ describe('requisitiDaTesto', () => {
     expect(requisitiDaTesto('Disponibile dal 5 giugno, quando si sblocca Kichijoji')).toEqual([{ tipo: 'data', dal: '06-05', testo: 'Disponibile dal 5 giugno, quando si sblocca Kichijoji' }]);
     expect(requisitiDaTesto('richiede Coraggio Rango 2, Conoscenza Rango 2 e Perizia Rango 2').map((r) => r.tipo === 'dote' ? `${r.dote}${r.rango}` : r.tipo)).toEqual(['coraggio2', 'conoscenza2', 'perizia2']);
     expect(requisitiDaTesto('Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia')).toEqual([
+      { tipo: 'fascia', fascia: 'sera', testo: 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia' },
       { tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi'], testo: 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia' },
       { tipo: 'meteo', condizione: 'non-piove', testo: 'Solo dal lunedì al venerdì, di sera; non disponibile in caso di pioggia' },
     ]);
@@ -119,6 +126,17 @@ describe('valutaDisponibilita', () => {
     expect(richiesta.requisiti[0].dettaglio).not.toMatch(/conferma qui/);
     expect(valutaDisponibilita(['dopo Palazzo di Kamoshida'], stato()).requisiti[0].dettaglio).toBe('Palazzo di Kamoshida: segna il boss come sconfitto nella Guida');
     expect(valutaDisponibilita([null, 'richiede il completamento della richiesta Lo zio ingordo'], stato({ richiesteCompletate: new Set(['lo zio ingordo']) })).stato).toBe('disponibile');
+  });
+
+  it('fascia della giornata: «solo di sera» è bloccato di giorno, disponibile di sera; senza fascia resta «ignoto»', () => {
+    expect(valutaDisponibilita([null, 'solo di sera'], stato()).stato).toBe('bloccato');
+    expect(valutaDisponibilita([null, 'solo di sera'], stato()).requisiti[0]).toMatchObject({ tipo: 'fascia', stato: 'rosso', dettaglio: 'Solo di sera: ora è giorno' });
+    expect(valutaDisponibilita([null, 'solo di sera'], stato({ fasciaGioco: 'sera' })).stato).toBe('disponibile');
+    expect(valutaDisponibilita([null, 'aperto solo di giorno'], stato({ fasciaGioco: 'sera' })).stato).toBe('bloccato');
+    expect(valutaDisponibilita([null, 'solo di sera'], stato({ fasciaGioco: null })).stato).toBe('ignoto');
+    // «solo la domenica sera»: entrambe le condizioni devono valere
+    expect(valutaDisponibilita([null, 'solo la domenica sera'], stato({ fasciaGioco: 'sera', giornoSettimana: 'domenica' })).stato).toBe('disponibile');
+    expect(valutaDisponibilita([null, 'solo la domenica sera'], stato({ fasciaGioco: 'giorno', giornoSettimana: 'domenica' })).stato).toBe('bloccato');
   });
 
   it('pioggia, giorno della settimana, stagione e intervallo', () => {
