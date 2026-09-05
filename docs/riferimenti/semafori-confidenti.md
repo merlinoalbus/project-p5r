@@ -1,6 +1,6 @@
 # Semafori dei Confidenti — cosa l'app verifica da sola e cosa resta da confermare a mano
 
-Fonte: `data/seed/confidenti-requisiti.json` (143 ranghi, 174 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nel seed resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
+Fonte: `data/seed/confidenti-requisiti.json` (146 ranghi, 177 requisiti), ricostruito dalla guida Royal di allgamestaff (una pagina per Confidente, letta due volte da agenti indipendenti con citazione letterale obbligatoria; nel seed resta solo ciò su cui le due letture concordano o che è citato con certezza). Ogni requisito è un semaforo: verde = soddisfatto, rosso = non ancora, grigio = l'app non può saperlo e chiede la conferma. Un Confidente con almeno un semaforo non verde per il rango successivo è **bloccato**: carta grigia, «+» e sblocco disattivati; «Segna comunque» forza il rango e resta nello storico.
 
 Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli della guida (data consigliata, Persona dello stesso arcano per il bonus punti, regali, risposte) e le descrizioni di eventi automatici di trama non sono semafori.
 
@@ -9,7 +9,7 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 | Tipo | Quanti | Valutazione |
 |---|---|---|
 | `meteo` | 63 | automatica dal calendario del giorno corrente (pioggia sì/no); grigio se il meteo del giorno non è noto |
-| `data` | 51 | automatica: giorno corrente della partita (aprile prima di marzo); grigio se il giorno non è impostato |
+| `data` | 54 | automatica: giorno corrente della partita (aprile prima di marzo); grigio se il giorno non è impostato |
 | `dote` | 17 | automatica: rango della Dote nella partita |
 | `palazzo` | 15 | automatica quando il boss del Palazzo è segnato «ottenuto» nella Guida; altrimenti grigio da confermare |
 | `richiesta` | 11 | automatica quando la richiesta dei Mementos è completata nella partita; altrimenti grigio da confermare |
@@ -322,7 +322,7 @@ Regola di merito: un semaforo è solo ciò che il gioco **impone**. I consigli d
 ## Note sulle date
 
 - Igor: la pagina Royal indica il 12 aprile; la guida giorno per giorno del progetto (e il gioco) lo avvia la sera dell'11 aprile, che resta la data del requisito.
-- Le altre date di rango 1 sono quelle che la pagina Royal dichiara come sblocco. Non hanno una data di rango 1 (la pagina riporta solo un «giorno consigliato» o un'intestazione nuda): Yusuke, Makoto, Chihaya, Takemi, Sojiro, Ohya, Iwai, Yoshida.
+- Le altre date di rango 1 sono quelle che la pagina Royal dichiara come sblocco. Tre le ha fissate l'utente (2026-09-05): Yusuke «dal 18 giugno», Takemi «dal 15 aprile» (Rango 2: Coraggio di livello 2), Ohya «dal 18 giugno». Non hanno una data di rango 1 (la pagina riporta solo un «giorno consigliato» o un'intestazione nuda): Makoto, Chihaya, Sojiro, Iwai, Yoshida.
 
 ## Nota sulla pioggia
 

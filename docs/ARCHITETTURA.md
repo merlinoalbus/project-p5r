@@ -353,8 +353,10 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   (`storicoService.eliminaEventi`, transazione) e selezione multipla nel componente; `SelettorePosseduta` + `AnteprimaPersona` (miniatura
   non interattiva: immagine caricata → asset `persona/<slug>` → iniziali) al posto delle tendine di Forca e Isolamento.
 - Font dell'utente con `unicode-range` al latino di base: i glifi accentati mappati ma vuoti (P5 Hatty) arrivano dal font di riserva.
-- `shared/PulsanteVisivo.tsx` (`PulsanteVisivo`, `CollegamentoVisivo`): pulsante o collegamento a tassello con icona (`iconeGuida` SVG o asset),
-  titolo in carattere display (17 px) e dettaglio nel sans; toni primario/secondario/fantasma/pericolo, `attivo` per gli interruttori; usato in tutta
+- `shared/PulsanteVisivo.tsx` (`PulsanteVisivo`, `CollegamentoVisivo`): pulsante o collegamento a tassello a immagine prevalente: icona
+  (`iconeGuida` SVG o asset) di 40 px (32 px compatta, 48 px con `disposizione="colonna"`, 28 px nel popup dello spillo) imposta dal CSS
+  del pulsante (`--btn-visivo-icona`, riempimento `!important` perché AssetImg usa stili inline), titolo in carattere display (14 px, 13 px
+  compatto, 12 px a colonna) e dettaglio nel sans (11 px); toni primario/secondario/fantasma/pericolo, `attivo` per gli interruttori; usato in tutta
   la sezione Partita al posto dei pulsanti grigi di solo testo (regola dell'utente 2026-09-04). Schede e filtri: `chip chip--icona` con icona.
   Dal 12.8 la stessa regola vale in tutte le sezioni (pagine della Guida, Compendio, Impostazioni, finestre delle immagini e delle mappe,
   selettori della Fusione, «Filtri» del Compendio, «Salva piano», «Azzera i bonus», gli «Annulla» inline): i soli pulsanti di solo testo rimasti sono
@@ -468,6 +470,7 @@ che supera la precedente esclusione.
   Blocco (specifica 12.3): `ConfidentePartitaDto.bloccato` = requisiti non verdi del rango successivo; `aggiornaConfidente` rifiuta con 409
   `confidente-bloccato` ogni aumento di rango (e lo sblocco) verso un rango i cui semafori non sono tutti verdi o confermati; la carta è spenta
   (`poster--bloccato`) con i motivi e «+»/sblocco disattivati. Elenco dei requisiti manuali e condizionali: `docs/riferimenti/semafori-confidenti.md`.
+- `disponibilitaService` (15.18): `requisitiDaTesto` traduce i testi liberi della guida (`disponibileDal`, `condizione` degli articoli, `sblocco` dei negozi) in requisiti — quelli dei semafori (`data`, `palazzo`, `dote`, `confidente`, `richiesta`, `meteo`) più i locali (`intervallo`, `piove`, `giorno-settimana`, `stagione`, `quartiere`, `ignoto`); «a partire dall'arco del Palazzo di X» diventa `palazzo` sul Palazzo precedente, «da quando si sblocca <quartiere>» legge la data dalla tabella `quartiere` (solo se il testo dello sblocco comincia con una data). `statoDisponibilitaPartita` = `statoPartitaSemafori` + giorno della settimana + sblocchi dei quartieri; `valutaDisponibilita(testi, stato, ctx)` → `{ stato: disponibile | bloccato | ignoto, requisiti }` (rosso ⇒ bloccato; grigio ⇒ ignoto, mai nascosto). Usato da `negoziService` (elenco con `?partita=`, scheda, ricerca) e da `mappeService.negozioDettaglio`; il rumore (posizione, prezzo, rifornimenti, «fin dai primi giorni», orari) non produce requisiti.
 - `semaforiService`: stato della partita letto una volta (Doti, arcani in scorta, boss segnati, richieste completate, ranghi, giorno e meteo
   correnti, conferme) e valutazione per requisito → `SemaforoRequisitoDto` (verde/rosso/grigio, dettaglio, manuale, confermato);
   `ConfidentePartitaDto.semafori` per i ranghi superiori; `PUT /api/partite/:id/confidenti/:chiave/requisiti`.

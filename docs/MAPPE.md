@@ -96,6 +96,7 @@ Regole:
 | sicura | spillo-sicura | azzurro | no | punto |
 | scorciatoia | spillo-scorciatoia | grigio | no | punto |
 | confidente | spillo-confidente | rosa | no | confidente |
+| dialogo | spillo-dialogo | indaco | sì (conversazione fatta) | — (personaggio non Confidente; luogo scelto a mano se utile) |
 | attivita | spillo-attivita | giallo | no | attivita / luogo |
 | ristorante | spillo-ristorante | marrone | no | luogo |
 | distributore | spillo-distributore | ciano | no | luogo |
@@ -151,7 +152,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 - Stessa superficie del visore in modalità dedicata (barra rossa «Modifica: <mappa>» sempre visibile, uscita con conferma se ci sono
   modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
-  spillo nel punto); **Elimina** è un pulsante nel pannello dello spillo selezionato (non uno strumento a parte); pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
+  spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile e riferimento — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).

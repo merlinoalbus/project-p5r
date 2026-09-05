@@ -8,6 +8,7 @@ import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
+import { useSuggerimentiStore } from '../stores/suggerimentiStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft, IconChevronRight } from '../components/shared/icons';
@@ -36,9 +37,12 @@ export function PercorsoPage() {
     if (!partitaId || !g) return;
     setOccupatoGiorno(true);
     try {
-      await impostaGiornoCorrente(partitaId, g.giorno);
+      const esito = await impostaGiornoCorrente(partitaId, g.giorno);
       giorno.imposta({ ...g, dataCorrente: g.giorno });
       if (indice.dati) indice.imposta({ ...indice.dati, dataCorrente: g.giorno });
+      // la data di gioco vive in `partitaStore.attiva`: si allinea alla partita restituita dal server e i suggerimenti del giorno vengono ricaricati
+      usePartitaStore.getState().aggiornaLocale(esito.partita);
+      useSuggerimentiStore.getState().invalida();
       notifica('success', `Giorno corrente: ${dataGiocoTesto(g.giorno)}.`);
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupatoGiorno(false); }
   };

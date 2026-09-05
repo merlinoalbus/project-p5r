@@ -385,6 +385,17 @@
  },
  {
   "confidente": "yusuke",
+  "rango": 1,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "06-18",
+    "testo": "Rango 1: si sblocca a partire dal 18 giugno (indicazione dell'utente, 2026-09-05)."
+   }
+  ]
+ },
+ {
+  "confidente": "yusuke",
   "rango": 4,
   "requisiti": [
    {
@@ -1031,6 +1042,17 @@
  },
  {
   "confidente": "takemi",
+  "rango": 1,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "04-15",
+    "testo": "Rango 1: si sblocca a partire dal 15 aprile (indicazione dell'utente, 2026-09-05)."
+   }
+  ]
+ },
+ {
+  "confidente": "takemi",
   "rango": 2,
   "requisiti": [
    {
@@ -1109,6 +1131,17 @@
     "tipo": "richiesta",
     "richiesta": "Le fatiche di una maid in cattedra",
     "testo": "Completare la richiesta dei Mementos \"Le fatiche di una maid in cattedra\""
+   }
+  ]
+ },
+ {
+  "confidente": "ohya",
+  "rango": 1,
+  "requisiti": [
+   {
+    "tipo": "data",
+    "dal": "06-18",
+    "testo": "Rango 1: si sblocca a partire dal 18 giugno (indicazione dell'utente, 2026-09-05)."
    }
   ]
  },

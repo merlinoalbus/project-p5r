@@ -6,7 +6,7 @@
 // `ui/spillo-<tipo>` (prompt §18) con riserva SVG in codice (`IconaSpillo`).
 // ============================================================
 
-export const TIPI_SPILLO = ['passaggio', 'negozio', 'forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'sicura', 'scorciatoia', 'confidente', 'attivita', 'ristorante', 'distributore', 'treno', 'nota'] as const;
+export const TIPI_SPILLO = ['passaggio', 'negozio', 'forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'sicura', 'scorciatoia', 'confidente', 'dialogo', 'attivita', 'ristorante', 'distributore', 'treno', 'nota'] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
 
 export const TIPI_RIFERIMENTO = ['mappa', 'negozio', 'punto', 'luogo', 'confidente', 'richiesta', 'attivita'] as const;
@@ -36,6 +36,8 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   sicura: { nome: 'Stanza sicura', colore: '#38bdf8', collezionabile: false, riferimento: 'punto' },
   scorciatoia: { nome: 'Scorciatoia', colore: '#9ca3af', collezionabile: false, riferimento: 'punto' },
   confidente: { nome: 'Confidente', colore: '#ec4899', collezionabile: false, riferimento: 'confidente' },
+  /** Conversazione con un personaggio che non è un Confidente: si «raccoglie» una volta fatta; nessun riferimento tipico (il luogo si sceglie a mano se serve). */
+  dialogo: { nome: 'Dialogo', colore: '#6366f1', collezionabile: true, riferimento: null },
   attivita: { nome: 'Attività', colore: '#facc15', collezionabile: false, riferimento: 'luogo' },
   ristorante: { nome: 'Ristorante', colore: '#a16207', collezionabile: false, riferimento: 'luogo' },
   distributore: { nome: 'Distributore', colore: '#06b6d4', collezionabile: false, riferimento: 'luogo' },

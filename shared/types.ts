@@ -460,7 +460,7 @@ export interface ModificaDote {
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
 export interface SemaforoRequisitoDto {
   indice: number;
-  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
+  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale' | 'giorno-settimana' | 'stagione';
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */
@@ -993,6 +993,12 @@ export interface PercorsoIndiceDto {
   giorniCoperti: number;
 }
 
+/** Esito di PUT /partite/:id/giorno: il giorno impostato e la partita aggiornata (data di gioco e `updatedAt`), da riportare nello store senza ricaricare l'elenco. */
+export interface GiornoCorrenteDto {
+  dataCorrente: string;
+  partita: PartitaDto;
+}
+
 export interface PercorsoGiornoDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;
@@ -1026,6 +1032,14 @@ export interface NegozioRiassuntoDto {
   sblocco: string | null;
   articoli: number;
   verificati: number;
+  /** Solo con `partita`: valutazione dello sblocco del negozio alla data corrente. */
+  disponibilita?: DisponibilitaDto;
+}
+
+/** Disponibilità nella partita alla data corrente: «bloccato» con almeno un requisito rosso, «ignoto» se resta del grigio, altrimenti disponibile. */
+export interface DisponibilitaDto {
+  stato: 'disponibile' | 'bloccato' | 'ignoto';
+  requisiti: SemaforoRequisitoDto[];
 }
 
 export interface ArticoloDto {
@@ -1045,6 +1059,8 @@ export interface ArticoloDto {
   nota: string | null;
   fonte: string;
   verificato: boolean;
+  /** Solo con `partita`: valutazione di `disponibileDal` e `condizione` alla data corrente (stessi requisiti dei semafori). */
+  disponibilita?: DisponibilitaDto;
   /** Acquistato/ottenuto nella partita. */
   acquistato: boolean;
 }
@@ -1429,7 +1445,7 @@ export interface DettaglioSpilloDto {
   mappa?: { chiave: string; nome: string; tipo: TipoMappa };
   punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; stato: string | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
-  negozio?: { chiave: string; nome: string; tipo: string; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean }> } | null;
+  negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
