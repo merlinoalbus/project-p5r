@@ -867,6 +867,8 @@
   /* ---- Evidenza temporanea (ritorno dalla scheda alla Persona vista) ---- */
   @keyframes evidenza { from { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 55%, transparent); } to { box-shadow: 0 0 0 0 transparent; } }
   .card--evidenza { border-color: var(--color-primary); animation: evidenza 3s ease-out forwards; }
+  /* sezione «Di giorno» / «Di sera» del momento corrente della partita (15.27) */
+  .card--adesso { border-color: var(--color-primary); box-shadow: inset 3px 0 0 var(--color-primary); }
 
   /* ---- Etichette di navigazione in carattere «menu» ---- */
   .voce-menu { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 400; }

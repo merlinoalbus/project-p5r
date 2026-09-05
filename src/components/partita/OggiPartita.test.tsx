@@ -70,12 +70,18 @@ describe('OggiPartita', () => {
     const gruppo = within(await screen.findByRole('group', { name: 'Momento della giornata nella partita' }));
     expect(gruppo.getByRole('button', { name: /Giorno/ })).toHaveAttribute('aria-pressed', 'true');
     expect(gruppo.getByRole('button', { name: /Sera/ })).toHaveAttribute('aria-pressed', 'false');
+    // la sezione del momento corrente porta il chip «Adesso» (15.27): di giorno è «Di giorno»
+    expect(screen.getByText('Adesso').closest('section')).toHaveTextContent('Di giorno');
+    expect(screen.getByText('Adesso').closest('section')).toHaveAttribute('aria-current', 'true');
     await screen.findByRole('application', { name: 'Mappa: Tokyo' });
     const caricamentiMappa = api.getMappa.mock.calls.length;
     fireEvent.click(gruppo.getByRole('button', { name: /Sera/ }));
     await waitFor(() => expect(api.impostaFasciaGioco).toHaveBeenCalledWith(4, 'sera'));
     await waitFor(() => expect(usePartitaStore.getState().attiva?.fasciaGioco).toBe('sera'));
     expect(gruppo.getByRole('button', { name: /Sera/ })).toHaveAttribute('aria-pressed', 'true');
+    // passati alla sera, «Adesso» si sposta sulla sezione «Di sera» e le sue azioni sono quelle evidenziate
+    await waitFor(() => expect(screen.getByText('Adesso').closest('section')).toHaveTextContent('Di sera'));
+    expect(screen.getByText('Adesso').closest('section')).toHaveTextContent('Vai da Takemi');
     // la disponibilità degli spilli dipende dalla fascia: la mappa viene ricaricata
     await waitFor(() => expect(api.getMappa.mock.calls.length).toBeGreaterThan(caricamentiMappa));
   });

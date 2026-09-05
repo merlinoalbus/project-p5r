@@ -358,15 +358,6 @@
    "azioni": [
     {
      "fascia": "giorno",
-     "azione": "Rispondere alla domanda in classe (non determinante)",
-     "tipo": "esame",
-     "riferimento": null,
-     "riferimentoTesto": null,
-     "rangoAtteso": null,
-     "note": null
-    },
-    {
-     "fascia": "giorno",
      "azione": "Prima infiltrazione tutorial nel Palazzo di Kamoshida: combattimento contro Piromani delle cripte, Bruto notturno, Ragazze seducenti; evocazione di Arsene; incontro con Morgana",
      "tipo": "palazzo",
      "riferimento": {
