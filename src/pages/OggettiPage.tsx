@@ -8,6 +8,7 @@ import { getOggettiGuida } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
@@ -182,9 +183,9 @@ export function OggettiPage() {
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Oggetti, materiali e fabbricazione" sottotitolo={<>{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Le armi, le protezioni e gli accessori sono nel Compendio; i prezzi dei negozi in Negozi e inventario.</>} />
-          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
+          <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'consumabili' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
-          </div>
+          </FilaScorrevole>
           {scheda === 'consumabili' && <SchedaConsumabili d={d} />}
           {scheda === 'chiave' && <SchedaChiave d={d} />}
           {scheda === 'fabbricazione' && <SchedaFabbricazione d={d} />}

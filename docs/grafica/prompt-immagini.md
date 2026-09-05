@@ -98,9 +98,9 @@ della scheda; senza il file usa un'icona SVG in codice. Un solo file per scheda 
 | `scheda-fusione-forca.png` | Fusione → Forca e Isolamento | ghigliottina stilizzata |
 | `scheda-fusione-speciali.png` | Fusione → Ricette speciali | pergamena con sigillo |
 
-## 17. Icone delle azioni (46) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
+## 17. Icone delle azioni (48) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-04
 Stile delle icone di navigazione §7.1 (tratto bianco spesso, ombra rossa sfalsata, nessun testo, nessun numero salvo dove indicato). L'app le
-mostra a 20–26 px dentro i pulsanti a tassello (fondo rosso quando il pulsante è acceso, bianco/nero quando è spento: il tratto bianco
+mostra a 28–48 px dentro i pulsanti a tassello (32 px compatti, 40 px normali, 48 px negli interruttori a colonna, 28 px nel popup dello spillo; fondo rosso quando il pulsante è acceso, bianco/nero quando è spento: il tratto bianco
 con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senza il file usa un'icona SVG in codice. Un file per chiave.
 | File | Uso nell'app | Soggetto |
 |---|---|---|
@@ -150,12 +150,14 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-accettata.png` | Richiesta accettata | stretta di mano |
 | `azione-negozio.png` | Articoli in vendita | insegna con borsa della spesa |
 | `azione-filtri.png` | Apre e chiude il pannello dei filtri del Compendio (acceso quando è aperto, con il conteggio dei filtri attivi accanto) | imbuto stilizzato con tre linee che vi scendono dentro |
+| `azione-copia.png` | Copia lo spillo selezionato negli appunti dell'editor delle mappe (2026-09-05) | due fogli sovrapposti, quello davanti con l'angolo piegato |
+| `azione-incolla.png` | Incolla lo spillo copiato in un punto della mappa (strumento dell'editor, 2026-09-05) | tavoletta con la molletta e un foglio che vi entra |
 
-## 18. Spilli delle mappe (19) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13)
+## 18. Spilli delle mappe (20) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13), `spillo-dialogo` aggiunto il 2026-09-05
 Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo
 (passaggio blu, negozio verde, forziere oro, tesoro viola, boss rosso, miniboss arancio, sicura azzurro, scorciatoia grigio, Confidente rosa,
 attività giallo, ristorante marrone, distributore ciano, treno verde scuro, nota bianco, nemico bordeaux, oggetto chiave blu,
-punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia magenta). Senza testo. L'app usa un SVG in codice se manca il file.
+punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia magenta, dialogo indaco). Senza testo. L'app usa un SVG in codice se manca il file.
 | File | Tipo di spillo | Soggetto |
 |---|---|---|
 | `spillo-passaggio.png` | ingresso/passaggio verso un'altra mappa | porta ad arco con freccia |
@@ -177,6 +179,7 @@ punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia ma
 | `spillo-punto-sensibile.png` | punto sensibile | mirino sopra un nucleo vulnerabile crepato |
 | `spillo-tesoro-palazzo.png` | tesoro principale del Palazzo | corona-reliquia radiante su piedistallo, distinta dalla gemma di tesoro |
 | `spillo-seme-bramosia.png` | Seme della Bramosia | pietra-teschio crepata con viticci e richiami alle tre varianti rossa, verde e blu |
+| `spillo-dialogo.png` | dialogo con un personaggio che non è un Confidente | fumetto di dialogo con tre puntini, distinto dal foglietto con puntina della nota e dai due volti del Confidente |
 
 ## 19. Mappe di base della città (25) — `mappe/<chiave>.png` (2048×1536, opache) — richieste il 2026-09-04 (Fase 13)
 Piante ILLUSTRATE originali in stile guida strategica (vista dall'alto leggermente prospettica, sagome nere degli edifici, strade chiare,
@@ -217,5 +220,5 @@ Stessa famiglia delle icone delle sezioni della Guida (§13): tratto bianco spes
 | `guida/mappe.png` | piastrella «Mappe» nell'indice della Guida (Tokyo, quartieri, Palazzi e Dedali a livelli) | mappa ripiegata con uno spillo a goccia piantato sopra |
 
 ### Aggiunta del 2026-09-05 — dialoghi (corretta su conferma utente)
-ui/spillo-dialoghi.png — 128×128 PNG RGBA. Spillo completo a goccia gialla come spillo-attivita, fumetto bianco con tre punti neri al posto della stella, contorno nero e accento rosso. Alfa reale generato nativamente, nessuno scontorno; solo ridimensionamento proporzionale.
+ui/spillo-dialogo.png (consegnato come `spillo-dialoghi.png`, rinominato al merge del 2026-09-05: l'app cerca `ui/spillo-dialogo`) — 128×128 PNG RGBA. Spillo completo a goccia gialla come spillo-attivita, fumetto bianco con tre punti neri al posto della stella, contorno nero e accento rosso. Alfa reale generato nativamente, nessuno scontorno; solo ridimensionamento proporzionale.
 Prompt Imagegen: Create a transparent-background PNG asset. One complete yellow map pin, same family and silhouette as spillo-attivita: yellow teardrop, black outline, narrow red accent offset to right. Replace star with a white speech balloon outlined black containing three black dots. Flat solid colors. Actual native transparent alpha background, no painted checkerboard. Square canvas, complete uncropped marker, transparent margins.

@@ -8,9 +8,11 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { OggiPartita } from './OggiPartita';
+import { usePartitaStore } from '../../stores/partitaStore';
+import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
@@ -56,5 +58,29 @@ describe('OggiPartita', () => {
     expect(within(screen.getByRole('list', { name: 'Azioni di giorno' })).getByRole('listitem')).toHaveAttribute('aria-current', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Torna a Tokyo' }));
     expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
+  });
+
+  it('«Segna come giorno corrente» allinea la data di gioco della partita nello store (chip, Riepilogo, ScuolaOggi) e rinfresca i suggerimenti del giorno', async () => {
+    const partita = { id: 4, nome: 'Prova', dataGioco: '04-11', updatedAt: '2026-09-04T18:46:48.095Z' } as PartitaDto;
+    usePartitaStore.setState({ partite: [partita], attiva: partita });
+    useSuggerimentiStore.setState({ partitaId: 4, dati: null, caricamento: false });
+    // il server e la sua «data corrente» sono simulati con una variabile: dopo la PUT anche le riletture del giorno la vedono
+    let corrente = '04-11';
+    api.getPercorsoIndice.mockImplementation(async () => ({ ...indice, dataCorrente: corrente }));
+    api.getPercorsoGiorno.mockImplementation(async () => ({ ...giorno, dataCorrente: corrente }));
+    const aggiornata = { ...partita, dataGioco: '04-12', updatedAt: '2026-09-05T10:00:00.000Z' };
+    api.impostaGiornoCorrente.mockImplementation(async (_id: number, data: string) => { corrente = data; return { dataCorrente: data, partita: aggiornata }; });
+    api.getSuggerimenti.mockResolvedValue({ giorno: '04-12', motivi: [] });
+    render(<MemoryRouter><OggiPartita partita={partita} /></MemoryRouter>);
+    const pulsante = await screen.findByRole('button', { name: 'Segna come giorno corrente' });
+    expect(api.getSuggerimenti).not.toHaveBeenCalled();
+    fireEvent.click(pulsante);
+    await waitFor(() => expect(api.impostaGiornoCorrente).toHaveBeenCalledWith(4, '04-12'));
+    expect(await screen.findByText('Oggi nella partita')).toBeInTheDocument();
+    // lo store della partita è allineato senza ricaricare l'elenco: attiva e voce in `partite`
+    expect(usePartitaStore.getState().attiva).toEqual(aggiornata);
+    expect(usePartitaStore.getState().partite[0]).toEqual(aggiornata);
+    // i suggerimenti del giorno vengono ricaricati per la stessa partita
+    await waitFor(() => expect(api.getSuggerimenti).toHaveBeenCalledWith(4));
   });
 });

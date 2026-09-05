@@ -8,6 +8,7 @@ import { getBattaglia } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { CampoRicerca } from '../components/shared/CampoRicerca';
 import { normalizzaTesto } from '../utils/testo';
 import type { BattagliaDto, OmbraDto } from '../types';
@@ -256,9 +257,9 @@ export function BattagliaPage() {
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per area, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
-          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
+          <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
-          </div>
+          </FilaScorrevole>
           {scheda === 'ombre' && <SchedaOmbre ombre={d.ombre} />}
           {scheda === 'negoziazione' && <SchedaNegoziazione d={d} />}
           {scheda === 'tecnico' && <SchedaTecnico d={d} />}

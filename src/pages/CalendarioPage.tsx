@@ -10,6 +10,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { MESI_GIOCO, dataGiocoTesto } from '../utils/dateGioco';
 import type { GiornoCalendarioDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
@@ -111,11 +112,11 @@ export function CalendarioPage() {
             </section>
           )}
 
-          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Mesi">
+          <FilaScorrevole className="items-center" role="tablist" aria-label="Mesi">
             {MESI_CHIAVE.filter((m) => d.mesi.includes(m)).map((m, i) => (
               <button key={m} type="button" role="tab" className={`chip touch ${mese === m ? 'chip--attivo' : ''}`} onClick={() => setMeseScelto(m)} aria-selected={mese === m}>{MESI_GIOCO[MESI_CHIAVE.indexOf(m)] ?? m}{i === 0 ? '' : ''}</button>
             ))}
-          </div>
+          </FilaScorrevole>
           <ul className="m-0 p-0 list-none flex flex-col gap-1.5" aria-label={`Giorni di ${MESI_GIOCO[MESI_CHIAVE.indexOf(mese)] ?? mese}`}>
             {giorniMese.map((g) => (
               <Giorno key={g.data} g={g} oggi={g.data === d.dataGioco} aperto={aperto === g.data} onToggle={() => setAperto((a) => (a === g.data ? null : g.data))} onImposta={partitaId ? () => void imposta(g.data) : undefined} />

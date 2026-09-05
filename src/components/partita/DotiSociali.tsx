@@ -3,13 +3,14 @@
 // ============================================================
 //
 // Nel gioco ogni azione mostra 1–3 note: 1 nota = 2 punti, 2 note = 3, 3 note = 5
-// (7 con libri a resa maggiorata); la lettura della fortuna di Chihaya moltiplica
-// ×1,5 (per difetto). La conversione la fa il backend (`note`, `libro`, `fortuna`).
+// (7 con libri a resa maggiorata); «Anima da cineasta» (Royal) alza di uno scalino film e DVD;
+// la lettura della fortuna di Chihaya moltiplica ×1,5 (per difetto), per ultima.
+// La conversione la fa il backend (`note`, `libro`, `fortuna`, `cinema`).
 // La stella (Fase 11.2) mostra l'avanzamento continuo di ogni dote: ranghi completati
 // più la quota verso il prossimo; toccare un vertice porta alla scheda della dote.
 // ============================================================
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { aggiornaDote, getDoti } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
@@ -20,13 +21,21 @@ import { avanzamentoDote, quotaVersoProssimoRango } from '../../utils/doti';
 import type { DoteSocialePartitaDto, ModificaDote } from '../../types';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
+import { useSuggerimenti } from '../../stores/suggerimentiStore';
+import { classiSuggerito } from '../../utils/suggerimenti';
+import { TargaSuggerito } from '../shared/Suggerito';
 
 interface Props {
   partitaId: number;
 }
 
-function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean): number {
-  const base = note === 1 ? 2 : note === 2 ? 3 : libro ? 7 : 5;
+const PUNTI_SCALINO = [2, 3, 5, 7] as const;
+
+/** Stessa regola del server (`puntiDaNote`): scalini 2/3/5/7, «Anima da cineasta» +1 scalino, poi ×1,5 per difetto. */
+function puntiAnteprima(note: 1 | 2 | 3, libro: boolean, fortuna: boolean, cinema = false): number {
+  let scalino = note === 3 && libro ? 4 : note;
+  if (cinema) scalino = Math.min(4, scalino + 1);
+  const base = PUNTI_SCALINO[scalino - 1];
   return fortuna ? Math.floor(base * 1.5) : base;
 }
 
@@ -36,7 +45,9 @@ export function DotiSociali({ partitaId }: Props) {
   const [occupata, setOccupata] = useState<string | null>(null);
   const [fortuna, setFortuna] = useState(false);
   const [libro, setLibro] = useState(false);
+  const [cinema, setCinema] = useState(false);
   const [selezionata, setSelezionata] = useState<string | null>(null);
+  const sugg = useSuggerimenti();
 
   const modifica = async (chiave: string, mod: ModificaDote) => {
     if (!dati) return;
@@ -60,46 +71,54 @@ export function DotiSociali({ partitaId }: Props) {
 
   return (
     <PageState isLoading={caricamento} error={errore} onRetry={() => void ricarica()}>
-      <div className="grid gap-3 items-start md:grid-cols-[minmax(250px,320px)_1fr] md:h-full md:min-h-0 md:items-stretch">
-        <section className="card flex flex-col items-center gap-2 px-6 pt-4 pb-3 overflow-visible md:min-h-0 md:overflow-y-auto" aria-label="Stella delle Doti">
-          <StellaCinque
-            assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
-            dimensione={220}
-            badgeAltezza={34}
-            etichettaAria="Stella delle Doti sociali"
-            onScegli={vaiAllaDote}
-            selezionato={selezionata}
-          />
+      <div className="grid gap-3 items-start grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(340px,460px)_minmax(0,1fr)] md:h-full md:min-h-0 md:items-stretch">
+        <section className="card flex flex-col items-center justify-center gap-2 px-4 pt-3 pb-3 overflow-visible min-w-0 md:min-h-0" aria-label="Stella delle Doti">
+          <div className="w-full flex justify-center px-[12%]">
+            <StellaCinque
+              assi={(dati ?? []).map((d) => ({ chiave: d.chiave, etichetta: d.nome, valore: avanzamentoDote(d), badge: `doti/${d.chiave}`, badgeSotto: `ui/rango-${d.rango}`, testo: `Rango ${d.rango}` }))}
+              dimensione={480}
+              badgeAltezza={70}
+              etichettaAria="Stella delle Doti sociali"
+              onScegli={vaiAllaDote}
+              selezionato={selezionata}
+            />
+          </div>
           <div className="w-full flex flex-col items-center gap-1.5" role="group" aria-label="Modificatori delle note">
             <span className="text-[11px] font-semibold uppercase tracking-[.06em] text-text-muted">Modificatori · valgono per tutte le note</span>
             <div className="flex flex-wrap justify-center gap-2">
-              <PulsanteVisivo attivo={fortuna} icona={<IconaAzione chiave="fortuna" dimensione={24} />} titolo="Fortuna ×1,5" dettaglio="lettura di Chihaya" onClick={() => setFortuna((v) => !v)} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)" />
-              <PulsanteVisivo attivo={libro} icona={<IconaAzione chiave="libro" dimensione={24} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
+              <PulsanteVisivo disposizione="colonna" attivo={fortuna} icona={<IconaAzione chiave="fortuna" dimensione={48} />} titolo="Fortuna ×1,5" dettaglio="lettura di Chihaya" onClick={() => setFortuna((v) => !v)} aria-label="Fortuna ×1,5: lettura della fortuna di Chihaya" title="Lettura della fortuna di Chihaya: punti ×1,5 (per difetto)" />
+              <PulsanteVisivo disposizione="colonna" attivo={libro} icona={<IconaAzione chiave="libro" dimensione={48} />} titolo="Libro" dettaglio="3 note = 7 punti" onClick={() => setLibro((v) => !v)} aria-label="Libro: 3 note valgono 7 punti" title="Libri a resa maggiorata: 3 note valgono 7 punti" />
+              <PulsanteVisivo disposizione="colonna" attivo={cinema} icona={<IconaAzione chiave="esegui" dimensione={48} />} titolo="Anima da cineasta" dettaglio="film e DVD +1 scalino" onClick={() => setCinema((v) => !v)} aria-label="Anima da cineasta: film e DVD salgono di uno scalino (2→3, 3→5, 5→7)" title="Libro «Anima da cineasta» (Royal): guardando film e DVD i punti salgono di uno scalino, prima del ×1,5 di Chihaya" />
             </div>
           </div>
           <p className="m-0 text-[12px] text-text-muted text-center">Tocca un vertice per andare alla dote.</p>
         </section>
-        <ul className="m-0 p-0 list-none flex flex-col gap-2 md:min-h-0 md:overflow-y-auto md:pr-1">
+        <ul className="m-0 p-0 list-none flex flex-col gap-2 min-w-0 md:min-h-0 md:overflow-y-auto md:pr-1">
           {dati?.map((d) => (
-            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-1.5 py-2.5 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''}`}>
-              <CartaDote dote={d} />
-              <div className="flex flex-wrap gap-2">
-                {([1, 2, 3] as const).map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className="btn btn-primary btn-sm flex-1 min-w-[84px]"
-                    disabled={occupata === d.chiave}
-                    onClick={() => void modifica(d.chiave, { note: n, libro, fortuna })}
-                    aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna)} punti)`}
-                  >
-                    <span aria-hidden="true">{'♪'.repeat(n)}</span>
-                    <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortuna)}</span>
-                  </button>
-                ))}
-                <button type="button" className="btn btn-secondary btn-sm min-w-[56px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
-                <button type="button" className="btn btn-secondary btn-sm min-w-[56px]" disabled={occupata === d.chiave} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
-              </div>
+            <li key={d.chiave} id={`dote-${d.chiave}`} className={`card flex flex-col gap-1.5 py-2 transition-colors ${selezionata === d.chiave ? 'border-primary' : ''} ${classiSuggerito(sugg.evidenziato('doti', d.chiave))}`}>
+              <CartaDote
+                dote={d}
+                suggerita={sugg.evidenziato('doti', d.chiave) ? sugg.motivo('doti', d.chiave) : null}
+                azioni={(
+                  <div className="flex flex-wrap items-center gap-1.5 min-w-0 max-w-full">
+                    {([1, 2, 3] as const).map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        className="btn btn-primary btn-nota min-w-[64px]"
+                        disabled={occupata === d.chiave}
+                        onClick={() => void modifica(d.chiave, { note: n, libro, fortuna, cinema })}
+                        aria-label={`${d.nome}: aggiungi ${n} ${n === 1 ? 'nota' : 'note'} (${puntiAnteprima(n, libro, fortuna, cinema)} punti)`}
+                      >
+                        <span aria-hidden="true">{'♪'.repeat(n)}</span>
+                        <span className="text-[13px] opacity-90">+{puntiAnteprima(n, libro, fortuna, cinema)}</span>
+                      </button>
+                    ))}
+                    <button type="button" className="btn btn-secondary btn-nota min-w-[46px]" disabled={occupata === d.chiave || d.punti === 0} onClick={() => void modifica(d.chiave, { delta: -1 })} aria-label={`${d.nome}: togli un punto`}>−1</button>
+                    <button type="button" className="btn btn-secondary btn-nota min-w-[46px]" disabled={occupata === d.chiave} onClick={() => void modifica(d.chiave, { delta: 1 })} aria-label={`${d.nome}: aggiungi un punto`}>+1</button>
+                  </div>
+                )}
+              />
             </li>
           ))}
         </ul>
@@ -108,29 +127,33 @@ export function DotiSociali({ partitaId }: Props) {
   );
 }
 
-/** Intestazione compatta della dote: targhetta, rango con titolo, punti, barra verso il rango successivo. */
-function CartaDote({ dote: d }: { dote: DoteSocialePartitaDto }) {
+/** Intestazione compatta della dote: targhetta, rango con titolo, punti, barra e — sulla stessa riga — i pulsanti delle note. */
+function CartaDote({ dote: d, azioni, suggerita }: { dote: DoteSocialePartitaDto; azioni?: ReactNode; suggerita?: string | null }) {
   const quota = Math.round(quotaVersoProssimoRango(d) * 100);
   const prossimo = d.ranghi.find((r) => r.rango === d.rango + 1);
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2 flex-wrap">
-        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-12 w-auto object-contain" fallback={<span className="font-display uppercase text-[20px] leading-none">{d.nome}</span>} />
+        <AssetImg nome={`doti/${d.chiave}`} alt={d.nome} className="h-7 w-auto object-contain" fallback={<span className="font-display uppercase text-[20px] leading-none">{d.nome}</span>} />
         <span className="flex items-center gap-1.5">
           <span className="sr-only">Rango {d.rango} · {d.nomeRango}</span>
           <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">Rango</span>
           <AssetImg nome={`ui/rango-${d.rango}`} alt="" decorativa className="h-9 w-auto object-contain" fallback={<span className="font-display text-[20px] leading-none" aria-hidden="true">{d.rango}</span>} />
           <span className="font-display uppercase text-[20px] leading-none" aria-hidden="true">{d.nomeRango}</span>
         </span>
-        <span className="ml-auto font-display text-[30px] leading-none tabular-nums">{d.punti}<span className="text-[12px] font-sans text-text-muted"> punti</span></span>
+        {suggerita !== null && suggerita !== undefined && <TargaSuggerito motivo={suggerita} compatta />}
+        <span className="ml-auto font-display text-[26px] leading-none tabular-nums">{d.punti}<span className="text-[12px] font-sans text-text-muted"> punti</span></span>
       </div>
       <div className="h-2 bg-bg-tertiary overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={d.sogliaProssima === null ? 100 : quota} aria-label={`Progresso verso il rango ${d.rango + 1}`}>
         <div className="h-full bg-primary transition-[width]" style={{ width: `${d.sogliaProssima === null ? 100 : quota}%` }} />
       </div>
-      <div className="text-[13px] text-text-secondary">
-        {d.mancanti !== null && prossimo
-          ? <>Mancano <strong className="text-text">{d.mancanti}</strong> punti al rango {prossimo.rango} · {prossimo.nome} ({d.sogliaProssima})</>
-          : <>Rango massimo raggiunto.</>}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="text-[13px] text-text-secondary min-w-0">
+          {d.mancanti !== null && prossimo
+            ? <>Mancano <strong className="text-text">{d.mancanti}</strong> punti al rango {prossimo.rango} · {prossimo.nome} ({d.sogliaProssima})</>
+            : <>Rango massimo raggiunto.</>}
+        </div>
+        {azioni}
       </div>
     </div>
   );

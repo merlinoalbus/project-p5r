@@ -2,7 +2,8 @@
 // semaforiService — semafori dei requisiti per rango dei Confidenti (Fase 12.3)
 // ============================================================
 //
-// Ogni requisito del seed viene valutato sullo stato della partita: Doti (rango), Persona dell'arcano in scorta, Palazzo (boss
+// Ogni requisito del seed viene valutato sullo stato della partita: Doti (rango), Persona dell'arcano in scorta, Persona con una
+// skill precisa in scorta (Gemelle Custodi), Palazzo (boss
 // segnato ottenuto/esaurito nella Guida), richiesta dei Mementos completata, rango di un altro Confidente, data di gioco corrente,
 // meteo del giorno corrente. I requisiti non verificabili («manuale») sono grigi finché l'utente non li conferma; un requisito
 // verificabile ma senza dati sufficienti (nessun giorno corrente, boss non segnato) è grigio e accetta la conferma manuale.
@@ -14,12 +15,14 @@ import { t } from './traduzioniService.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
 import type { SemaforiRangoDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
-interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoSeed['tipo']; dati_json: string; testo: string }
+export interface RigaRequisito { confidente_chiave: string; rango: number; indice: number; tipo: RequisitoSeed['tipo']; dati_json: string; testo: string }
 
 /** Stato della partita letto una volta per tutti i Confidenti. */
 export interface StatoPartitaSemafori {
   doti: Map<string, number>;
   arcaniInScorta: Set<string>;
+  /** Coppie «persona|abilità» (minuscole) presenti nella scorta: per le richieste delle Gemelle Custodi. */
+  personeConAbilita: Set<string>;
   bossGestiti: Set<string>;
   richiesteCompletate: Set<string>;
   ranghiConfidenti: Map<string, number>;
@@ -30,6 +33,9 @@ export interface StatoPartitaSemafori {
 
 export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<string, number>, doti: Map<string, number>): StatoPartitaSemafori {
   const arcani = new Set((prepared('SELECT DISTINCT p.arcana FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id WHERE pp.partita_id = ?').all(partitaId) as Array<{ arcana: string }>).map((r) => r.arcana));
+  const abilita = new Set((prepared(`SELECT p.nome AS persona, s.nome AS abilita FROM persona_posseduta pp JOIN persona p ON p.id = pp.persona_id
+    JOIN persona_posseduta_skill ps ON ps.posseduta_id = pp.id JOIN skill s ON s.id = ps.skill_id WHERE pp.partita_id = ?`).all(partitaId) as Array<{ persona: string; abilita: string }>)
+    .map((r) => `${r.persona.toLowerCase()}|${r.abilita.toLowerCase()}`));
   const boss = new Set((prepared(`SELECT DISTINCT a.dungeon_chiave FROM punto_partita sp JOIN punto_interesse pi ON pi.chiave = sp.punto_chiave JOIN dungeon_area a ON a.chiave = pi.area_chiave
     WHERE sp.partita_id = ? AND pi.tipo = 'boss'`).all(partitaId) as Array<{ dungeon_chiave: string }>).map((r) => r.dungeon_chiave));
   const richieste = new Set((prepared("SELECT rp.richiesta_chiave, r.nome FROM richiesta_partita rp JOIN richiesta r ON r.chiave = rp.richiesta_chiave WHERE rp.partita_id = ? AND rp.stato = 'completata'").all(partitaId) as Array<{ richiesta_chiave: string; nome: string }>).flatMap((r) => [r.richiesta_chiave, r.nome.toLowerCase()]));
@@ -37,7 +43,16 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const dataGioco = partita?.data_gioco ?? null;
   const meteo = dataGioco ? (prepared('SELECT meteo FROM giorno_calendario WHERE data = ?').get(dataGioco) as { meteo: string | null } | undefined)?.meteo ?? null : null;
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
-  return { doti, arcaniInScorta: arcani, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, dataGioco, meteoOggi: meteo, conferme };
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, dataGioco, meteoOggi: meteo, conferme };
+}
+
+const NOMI_MESI = ['', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+/** «04-18» → «18 aprile» (le date del gioco sono senza anno); testi non in quel formato restano com'erano. */
+export function dataLeggibile(d: string): string {
+  const m = /^(\d{2})-(\d{2})$/.exec(d);
+  if (!m) return d;
+  const mese = NOMI_MESI[Number(m[1])];
+  return mese ? `${Number(m[2])} ${mese}` : d;
 }
 
 function confrontaDate(a: string, b: string): number {
@@ -49,7 +64,7 @@ function confrontaDate(a: string, b: string): number {
 const NOMI_DOTI: Record<string, string> = { conoscenza: 'Conoscenza', coraggio: 'Coraggio', fascino: 'Fascino', gentilezza: 'Gentilezza', perizia: 'Perizia' };
 const NOMI_DUNGEON: Record<string, string> = { kamoshida: 'Palazzo di Kamoshida', madarame: 'Palazzo di Madarame', kaneshiro: 'Palazzo di Kaneshiro', futaba: 'Palazzo di Futaba', okumura: 'Palazzo di Okumura', niijima: 'Palazzo di Niijima', shido: 'Palazzo di Shido', maruki: 'Palazzo di Maruki', iweleth: 'Prigione di Iweleth' };
 
-function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
+export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
   const dati = JSON.parse(r.dati_json) as Record<string, string | number>;
   const chiaveConferma = `${r.confidente_chiave}/${r.rango}/${r.indice}`;
   const confermato = st.conferme.has(chiaveConferma);
@@ -64,6 +79,12 @@ function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDt
     case 'persona-arcano': {
       const ok = st.arcaniInScorta.has(String(dati.arcano));
       return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Persona ${t('arcana', String(dati.arcano))} in scorta` : `Nessuna Persona ${t('arcana', String(dati.arcano))} in scorta`, manuale: false };
+    }
+    case 'persona-abilita': {
+      const persona = String(dati.persona);
+      const skill = String(dati.abilita);
+      const ok = st.personeConAbilita.has(`${persona.toLowerCase()}|${skill.toLowerCase()}`);
+      return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `${persona} con ${skill} in scorta` : `Nessuna ${persona} con ${skill} in scorta`, manuale: false };
     }
     case 'palazzo': {
       const nome = NOMI_DUNGEON[String(dati.dungeon)] ?? String(dati.dungeon);
@@ -81,9 +102,9 @@ function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDt
       return { ...base, stato: attuale >= richiesto ? 'verde' : 'rosso', dettaglio: `${t('confidente', String(dati.confidente))}: rango ${attuale} di ${richiesto}`, manuale: false };
     }
     case 'data': {
-      if (!st.dataGioco) return grigio(`Disponibile dal ${String(dati.dal)}: imposta il giorno corrente della partita`);
+      if (!st.dataGioco) return grigio(`Disponibile dal ${dataLeggibile(String(dati.dal))}: imposta il giorno corrente della partita`);
       const ok = confrontaDate(st.dataGioco, String(dati.dal)) >= 0;
-      return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Disponibile dal ${String(dati.dal)} (oggi ${st.dataGioco})` : `Disponibile dal ${String(dati.dal)}, oggi è il ${st.dataGioco}`, manuale: false };
+      return { ...base, stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Disponibile dal ${dataLeggibile(String(dati.dal))} (oggi ${dataLeggibile(st.dataGioco)})` : `Disponibile dal ${dataLeggibile(String(dati.dal))}, oggi è il ${dataLeggibile(st.dataGioco)}`, manuale: false };
     }
     case 'meteo': {
       if (!st.meteoOggi) return grigio('Evento all\'aperto: meteo del giorno corrente non noto');

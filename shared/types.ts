@@ -453,12 +453,14 @@ export interface ModificaDote {
   libro?: boolean;
   /** Moltiplicatore ×1,5 (lettura della fortuna di Chihaya), arrotondato per difetto. */
   fortuna?: boolean;
+  /** «Anima da cineasta» (Royal): film e DVD salgono di uno scalino (2→3, 3→5, 5→7), prima del ×1,5. */
+  cinema?: boolean;
 }
 
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
 export interface SemaforoRequisitoDto {
   indice: number;
-  tipo: 'dote' | 'persona-arcano' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale';
+  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale' | 'giorno-settimana' | 'stagione';
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */
@@ -908,7 +910,8 @@ export interface CompletamentoDto {
 // ---- Guida giorno per giorno (Fase 7.5b) ----
 
 export interface EffettiAzioneDto {
-  doti: Array<{ chiave: string; nome: string; delta: number }>;
+  /** `delta` sono i punti applicati; `note` le note della guida da cui derivano (1–3); `cinema` se «Anima da cineasta» ha alzato lo scalino. */
+  doti: Array<{ chiave: string; nome: string; delta: number; note?: number; cinema?: boolean }>;
   confidente: { chiave: string; nome: string; noteRisposta: 1 | 2 | 3; punti: number; bonusArcano: boolean } | null;
 }
 
@@ -918,6 +921,34 @@ export interface RiferimentoAzioneDto {
 }
 
 /** Stato dell'azione nella partita (12.4): consigliata (requisiti del rango soddisfatti), bloccata (requisiti rossi, con motivo), neutra. */
+/** Chiavi da evidenziare in oro nell'interfaccia: entità coinvolte nelle azioni ancora da fare del giorno corrente (12.4). */
+export interface SuggerimentiOggiDto {
+  /** Giorno corrente della partita ('MM-GG'); null se non impostato. Non si chiama `data` per non sembrare l'envelope delle risposte. */
+  giorno: string | null;
+  confidenti: string[];
+  /** Personaggi della guida legati ai Confidenti suggeriti. */
+  personaggi: string[];
+  dungeon: string[];
+  /** Aree del Palazzo o del dedalo suggerito. */
+  aree: string[];
+  libri: string[];
+  film: string[];
+  /** Articoli a scaffale corrispondenti ai libri e ai film suggeriti. */
+  articoli: string[];
+  attivita: string[];
+  richieste: string[];
+  negozi: string[];
+  /** Chiavi dei luoghi della città («<quartiere>/<luogo>»). */
+  luoghi: string[];
+  quartieri: string[];
+  doti: string[];
+  /** Chiavi delle mappe a livelli e id degli spilli da accendere nel visore. */
+  mappe: string[];
+  spilli: number[];
+  /** Perché una chiave è suggerita: testo dell'azione della guida. */
+  motivi: Array<{ categoria: string; chiave: string; azione: string; fascia: 'giorno' | 'sera' }>;
+}
+
 export interface StatoAzioneDto {
   tipo: 'consigliata' | 'bloccata' | 'neutra';
   motivo: string | null;
@@ -962,6 +993,12 @@ export interface PercorsoIndiceDto {
   giorniCoperti: number;
 }
 
+/** Esito di PUT /partite/:id/giorno: il giorno impostato e la partita aggiornata (data di gioco e `updatedAt`), da riportare nello store senza ricaricare l'elenco. */
+export interface GiornoCorrenteDto {
+  dataCorrente: string;
+  partita: PartitaDto;
+}
+
 export interface PercorsoGiornoDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;
@@ -995,6 +1032,14 @@ export interface NegozioRiassuntoDto {
   sblocco: string | null;
   articoli: number;
   verificati: number;
+  /** Solo con `partita`: valutazione dello sblocco del negozio alla data corrente. */
+  disponibilita?: DisponibilitaDto;
+}
+
+/** Disponibilità nella partita alla data corrente: «bloccato» con almeno un requisito rosso, «ignoto» se resta del grigio, altrimenti disponibile. */
+export interface DisponibilitaDto {
+  stato: 'disponibile' | 'bloccato' | 'ignoto';
+  requisiti: SemaforoRequisitoDto[];
 }
 
 export interface ArticoloDto {
@@ -1014,6 +1059,8 @@ export interface ArticoloDto {
   nota: string | null;
   fonte: string;
   verificato: boolean;
+  /** Solo con `partita`: valutazione di `disponibileDal` e `condizione` alla data corrente (stessi requisiti dei semafori). */
+  disponibilita?: DisponibilitaDto;
   /** Acquistato/ottenuto nella partita. */
   acquistato: boolean;
 }
@@ -1398,7 +1445,7 @@ export interface DettaglioSpilloDto {
   mappa?: { chiave: string; nome: string; tipo: TipoMappa };
   punto?: { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: boolean; dungeon: string; area: string; stato: string | null };
   luogo?: { chiave: string; quartiere: string; tipo: string; nome: string; cosaOffre: string; quando: string | null };
-  negozio?: { chiave: string; nome: string; tipo: string; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean }> } | null;
+  negozio?: { chiave: string; nome: string; tipo: string; disponibilita?: DisponibilitaDto; articoli: Array<{ chiave: string; nome: string; categoria: string; prezzo: number | null; disponibileDal: string | null; comprato: boolean; disponibilita?: DisponibilitaDto }> } | null;
   confidente?: { chiave: string; nome: string; arcanaNome: string };
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }

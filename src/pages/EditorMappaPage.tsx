@@ -16,8 +16,8 @@ import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
-import { VisoreMappa, GalleriaSpillo, type StrumentiEditor } from '../components/mappe/VisoreMappa';
-import { IconaSpillo } from '../components/mappe/IconaSpillo';
+import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
+import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
@@ -26,12 +26,23 @@ const NOME_RIFERIMENTO: Record<TipoRiferimento, string> = { mappa: 'Altra mappa'
 
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
+/** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
+export interface AppuntiSpillo { tipo: TipoSpillo; nome: string; descrizione: string; collezionabile: boolean; riferimento: { tipo: TipoRiferimento; chiave: string } | null }
+const CHIAVE_APPUNTI = 'p5r.editor.appunti-spillo';
+function leggiAppunti(): AppuntiSpillo | null {
+  try { const raw = sessionStorage.getItem(CHIAVE_APPUNTI); return raw ? (JSON.parse(raw) as AppuntiSpillo) : null; } catch { return null; }
+}
+function scriviAppunti(a: AppuntiSpillo | null): void {
+  try { if (a) sessionStorage.setItem(CHIAVE_APPUNTI, JSON.stringify(a)); else sessionStorage.removeItem(CHIAVE_APPUNTI); } catch { /* memoria di sessione non disponibile: gli appunti restano solo in pagina */ }
+}
+
 export function EditorMappaPage() {
   const { chiave = '' } = useParams<{ chiave: string }>();
   const navigate = useNavigate();
   const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave), [chiave]);
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
-  const [strumento, setStrumento] = useState<'seleziona' | 'aggiungi'>('seleziona');
+  const [strumento, setStrumento] = useState<StrumentoEditor>('seleziona');
+  const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
   const [occupato, setOccupato] = useState(false);
@@ -57,15 +68,30 @@ export function EditorMappaPage() {
     strumento,
     selezionatoId,
     onSeleziona: setSelezionatoId,
-    onClickMappa: (x, y) => void esegui(async () => {
-      const s = await creaSpillo(chiave, { tipo: tipoNuovo, nome: DEFINIZIONI_SPILLO[tipoNuovo].nome, x, y });
-      setSelezionatoId(s.id);
-      setStrumento('seleziona');
-    }, `Spillo «${DEFINIZIONI_SPILLO[tipoNuovo].nome}» aggiunto: completa nome e riferimento nel pannello.`),
+    onClickMappa: (x, y) => {
+      if (strumento === 'incolla') {
+        if (!appunti) { setStrumento('seleziona'); return; }
+        void esegui(async () => {
+          const s = await creaSpillo(chiave, { ...appunti, x, y });
+          setSelezionatoId(s.id);
+          setStrumento('seleziona');
+        }, `Spillo «${appunti.nome}» incollato: stesso tipo, descrizione e riferimento dell'originale.`);
+        return;
+      }
+      void esegui(async () => {
+        const s = await creaSpillo(chiave, { tipo: tipoNuovo, nome: DEFINIZIONI_SPILLO[tipoNuovo].nome, x, y });
+        setSelezionatoId(s.id);
+        setStrumento('seleziona');
+      }, `Spillo «${DEFINIZIONI_SPILLO[tipoNuovo].nome}» aggiunto: completa nome e riferimento nel pannello.`);
+    },
     onSposta: (id, x, y) => void esegui(() => aggiornaSpillo(id, { x, y })),
   };
 
   const selezionato = dati?.spilli.find((s) => s.id === selezionatoId) ?? null;
+  const copia = (a: AppuntiSpillo) => {
+    setAppunti(a); scriviAppunti(a); setStrumento('incolla');
+    notifica('info', `Spillo «${a.nome}» copiato: tocca la mappa (anche di un altro luogo) nel punto dove incollarlo.`);
+  };
 
   return (
     <PageState isLoading={caricamento && !dati} error={errore} onRetry={ricarica}>
@@ -82,8 +108,8 @@ export function EditorMappaPage() {
           azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />}
           pannello={
             <PannelloEditor
-              mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato}
-              onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={setSelezionatoId}
+              mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti}
+              onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={setSelezionatoId} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={(id) => esegui(async () => { await eliminaSpillo(id); setSelezionatoId(null); }, 'Spillo eliminato.')}
               onAggiungiImmagine={(id, file, didascalia) => esegui(() => aggiungiImmagineSpillo(id, file, didascalia), 'Schermata aggiunta allo spillo (resta nella tua istanza).')}
@@ -149,11 +175,13 @@ export function EditorMappaPage() {
 interface PropsPannello {
   mappa: MappaDto;
   albero: MappaRiassuntoDto[];
-  strumento: 'seleziona' | 'aggiungi';
+  strumento: StrumentoEditor;
   tipoNuovo: TipoSpillo;
   selezionato: SpilloDto | null;
   occupato: boolean;
-  onStrumento: (s: 'seleziona' | 'aggiungi') => void;
+  appunti: AppuntiSpillo | null;
+  onStrumento: (s: StrumentoEditor) => void;
+  onCopia: (a: AppuntiSpillo) => void;
   onTipoNuovo: (t: TipoSpillo) => void;
   onSeleziona: (id: number | null) => void;
   onSalvaSpillo: (id: number, dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>;
@@ -175,7 +203,7 @@ interface PropsPannello {
 
 /** Pannello laterale dell'editor: strumenti, proprietà dello spillo, immagine e proprietà della mappa, albero, esportazione/importazione. */
 function PannelloEditor(p: PropsPannello) {
-  const { mappa, strumento, tipoNuovo, selezionato, occupato } = p;
+  const { mappa, strumento, tipoNuovo, selezionato, occupato, appunti } = p;
   const inputImmagine = useRef<HTMLInputElement | null>(null);
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
@@ -187,22 +215,23 @@ function PannelloEditor(p: PropsPannello) {
         <div className="editor-mappa__strumenti" role="group" aria-label="Strumento attivo">
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'seleziona'} icona={<IconaAzione chiave="seleziona" dimensione={20} />} titolo="Seleziona" dettaglio="sposta trascinando" onClick={() => p.onStrumento('seleziona')} />
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'aggiungi'} icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi" dettaglio="tocca la mappa" onClick={() => p.onStrumento('aggiungi')} />
+          <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'incolla'} icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Incolla" dettaglio={appunti ? `«${appunti.nome}»` : 'copia prima uno spillo'} disabled={!appunti} onClick={() => p.onStrumento('incolla')} />
         </div>
         {strumento === 'aggiungi' && (
           <div className="editor-mappa__palette" role="group" aria-label="Tipo del nuovo spillo">
             {TIPI_SPILLO.map((t) => (
               <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} onClick={() => p.onTipoNuovo(t)}>
-                <span className="spillo-mappa__punto" style={{ background: DEFINIZIONI_SPILLO[t].colore }} aria-hidden="true"><IconaSpillo tipo={t} dimensione={12} /></span>
+                <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
                 <span className="truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
               </button>
             ))}
           </div>
         )}
-        <p className="m-0 text-[12px] text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio).'}</p>
+        <p className="m-0 text-[12px] text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione e riferimento; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio); il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
       </section>
 
       {selezionato && (
-        <FormSpillo key={selezionato.id} spillo={selezionato} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onElimina={() => p.onEliminaSpillo(selezionato.id)} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
+        <FormSpillo key={selezionato.id} spillo={selezionato} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
       )}
 
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
@@ -254,10 +283,10 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; occupato: boolean; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; occupato: boolean; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
 
 /** Proprietà dello spillo selezionato con la ricerca dell'entità da collegare. */
-function FormSpillo({ spillo: s, occupato, onSalva, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
+function FormSpillo({ spillo: s, occupato, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
   const inputSchermata = useRef<HTMLInputElement | null>(null);
   const [didascaliaNuova, setDidascaliaNuova] = useState('');
   const [nome, setNome] = useState(s.nome);
@@ -289,7 +318,7 @@ function FormSpillo({ spillo: s, occupato, onSalva, onElimina, onCreaMappaColleg
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
       <div className="flex items-start gap-2">
-        <span className="spillo-mappa__punto spillo-mappa__punto--grande" style={{ background: DEFINIZIONI_SPILLO[tipo].colore }} aria-hidden="true"><IconaSpillo tipo={tipo} dimensione={20} /></span>
+        <PuntoSpillo tipo={tipo} colore={DEFINIZIONI_SPILLO[tipo].colore} grande />
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
           <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">x {s.x}% · y {s.y}% · {s.origine}</p>
@@ -339,6 +368,7 @@ function FormSpillo({ spillo: s, occupato, onSalva, onElimina, onCreaMappaColleg
 
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: nome.trim() || s.nome, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null })} />
           {!riferimento && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>

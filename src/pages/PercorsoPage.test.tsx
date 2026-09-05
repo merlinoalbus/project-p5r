@@ -49,5 +49,12 @@ describe('PercorsoPage', () => {
     expect(await screen.findByText('Giorno dopo.')).toBeInTheDocument();
     expect(getPercorsoGiorno).toHaveBeenLastCalledWith('04-13', 4);
     expect(screen.getByRole('button', { name: 'Segna come giorno corrente' })).toBeInTheDocument();
+    // «Segna come giorno corrente» allinea la data di gioco della partita nello store (chip dell'intestazione, Riepilogo, ScuolaOggi)
+    const aggiornata = { id: 4, nome: 'Prova', dataGioco: '04-13' } as PartitaDto;
+    impostaGiornoCorrente.mockResolvedValue({ dataCorrente: '04-13', partita: aggiornata });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Segna come giorno corrente' })); });
+    expect(impostaGiornoCorrente).toHaveBeenCalledWith(4, '04-13');
+    expect(await screen.findByText('Oggi nella partita')).toBeInTheDocument();
+    expect(usePartitaStore.getState().attiva).toEqual(aggiornata);
   });
 });

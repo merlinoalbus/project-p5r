@@ -28,7 +28,7 @@ export function PartitaSelettore() {
 
   return (
     <select
-      className="form-input w-auto max-w-[180px] sm:max-w-[240px] min-h-[40px] py-1 text-[13px]"
+      className="form-input w-auto min-w-0 shrink max-w-[150px] sm:max-w-[240px] min-h-[40px] py-1 text-[13px] truncate"
       value={attiva?.id ?? ''}
       onChange={(e) => void cambia(e.target.value)}
       aria-label="Partita attiva"

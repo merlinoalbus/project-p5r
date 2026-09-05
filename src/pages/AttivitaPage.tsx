@@ -10,10 +10,14 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { NOME_DOTE, NOME_FASCIA, NOME_TIPO_ATTIVITA } from '../utils/citta';
 import type { AttivitaDto, AttivitaTutteDto, FilmDto, LibroDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['libri', 'Libri'], ['film', 'Film e DVD']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -25,11 +29,13 @@ function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
 
 function Attivita({ a }: { a: AttivitaDto }) {
   const [aperta, setAperta] = useState(false);
+  const sugg = useSuggerimenti();
   return (
-    <li className="card flex flex-col gap-1 text-[13px]">
+    <li className={`card flex flex-col gap-1 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
       <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((x) => !x)} aria-expanded={aperta}>
         <strong className="text-[15px]">{a.nome}</strong>
         <span className="chip">{NOME_TIPO_ATTIVITA[a.tipo] ?? a.tipo}</span>
+        {sugg.evidenziato('attivita', a.chiave) && <TargaSuggerito motivo={sugg.motivo('attivita', a.chiave)} compatta />}
         {a.fascia && <span className="chip">{NOME_FASCIA[a.fascia] ?? a.fascia}</span>}
         <Doti doti={a.doti} />
         {!a.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
@@ -55,6 +61,8 @@ function Attivita({ a }: { a: AttivitaDto }) {
 
 function Lettura({ x, tipo, partitaId, onCambiata }: { x: LibroDto | FilmDto; tipo: 'libro' | 'film'; partitaId: number | null; onCambiata: (x: LibroDto | FilmDto) => void }) {
   const [occupato, setOccupato] = useState(false);
+  const sugg = useSuggerimenti();
+  const categoria = tipo === 'libro' ? 'libri' : 'film';
   const cambia = async (fatto: boolean) => {
     if (!partitaId) return;
     setOccupato(true);
@@ -63,10 +71,11 @@ function Lettura({ x, tipo, partitaId, onCambiata }: { x: LibroDto | FilmDto; ti
   const libro = tipo === 'libro' ? (x as LibroDto) : null;
   const film = tipo === 'film' ? (x as FilmDto) : null;
   return (
-    <li className={`card flex flex-col gap-1 text-[13px] ${x.fatto ? 'opacity-70' : ''}`}>
+    <li className={`card flex flex-col gap-1 text-[13px] ${x.fatto ? 'opacity-70' : ''} ${classiSuggerito(sugg.evidenziato(categoria, x.chiave))}`}>
       <div className="flex flex-wrap items-center gap-2">
         {partitaId && <input type="checkbox" className="w-5 h-5" checked={x.fatto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`${x.nomeIt ?? x.nome} ${tipo === 'libro' ? 'letto' : 'visto'}`} />}
         <strong className={`text-[15px] ${x.fatto ? 'line-through' : ''}`}>{x.nomeIt ?? x.nome}</strong>
+        {sugg.evidenziato(categoria, x.chiave) && <TargaSuggerito motivo={sugg.motivo(categoria, x.chiave)} compatta />}
         {x.nomeIt && x.nomeIt !== x.nome && <span className="text-text-muted text-[12px]">({x.nome})</span>}
         {x.dote && <span className="chip chip--attivo">{NOME_DOTE[x.dote]}{x.note !== null ? ` ${'♪'.repeat(Math.min(3, x.note))}` : ''}</span>}
         {film && <span className="chip">{film.dove === 'cinema' ? 'Cinema' : 'DVD'}</span>}
@@ -108,9 +117,9 @@ export function AttivitaPage() {
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori, studio, libri e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.libriLetti} libri letti, ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare libri letti e film visti.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Sezioni">
+            <FilaScorrevole role="tablist" aria-label="Sezioni">
               {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={18} />{l}</button>)}
-            </div>
+            </FilaScorrevole>
             <select className="form-input w-auto ml-auto" value={dote} onChange={(e) => setDote(e.target.value)} aria-label="Dote">
               <option value="">Tutte le Doti</option>
               {Object.entries(NOME_DOTE).map(([k, n]) => <option key={k} value={k}>{n}</option>)}

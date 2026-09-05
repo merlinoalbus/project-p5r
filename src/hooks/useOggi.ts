@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { getPercorsoGiorno, getPercorsoIndice, impostaGiornoCorrente } from '../services/api';
 import { useCarica } from './useCarica';
 import { notifica } from '../stores/notificationStore';
+import { usePartitaStore } from '../stores/partitaStore';
+import { useSuggerimentiStore } from '../stores/suggerimentiStore';
 import { dataGiocoTesto } from '../utils/dateGioco';
 import type { AzionePercorsoDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../types';
 
@@ -62,9 +64,13 @@ export function useOggi(partitaId: number): Oggi {
       if (!g) return;
       setOccupato(true);
       try {
-        await impostaGiornoCorrente(partitaId, g.giorno);
+        const esito = await impostaGiornoCorrente(partitaId, g.giorno);
         giorno.imposta({ ...g, dataCorrente: g.giorno });
         if (indice.dati) indice.imposta({ ...indice.dati, dataCorrente: g.giorno });
+        // la data di gioco vive in `partitaStore.attiva` (chip dell'intestazione, Riepilogo, ScuolaOggi, Calendario): si allinea alla partita restituita dal server
+        usePartitaStore.getState().aggiornaLocale(esito.partita);
+        // cambiando giorno cambiano le azioni suggerite: l'alone dorato si aggiorna da solo
+        useSuggerimentiStore.getState().invalida();
         notifica('success', `Giorno corrente: ${dataGiocoTesto(g.giorno)}.`);
       } catch (err) {
         notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');

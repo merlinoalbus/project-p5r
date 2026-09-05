@@ -69,7 +69,7 @@
      ]
     },
     {
-     "tipo": "nota",
+     "tipo": "dialogo",
      "nome": "Poliziotto Dialogo",
      "descrizione": "Un poliziotto appena arrivi a Tongen-Java prima di andare al Caffè Le Blanc",
      "x": 43.6,
@@ -83,6 +83,59 @@
        "didascalia": ""
       }
      ]
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore",
+     "descrizione": "",
+     "x": 84.2,
+     "y": 63.9,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/distributore-tabaccaio"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Uomo indisposto",
+     "descrizione": "Dialogo uomo triste per il cinema chiuso.",
+     "x": 35.9,
+     "y": 65.6,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Ascolta",
+     "descrizione": "Dialogo tra bambina e adulta su animale scomparso",
+     "x": 18.3,
+     "y": 35.7,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0
+    },
+    {
+     "tipo": "punto-sensibile",
+     "nome": "Casa di Sojiro Sakura",
+     "descrizione": "",
+     "x": 20.6,
+     "y": 12.5,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Ascolta",
+     "descrizione": "Ascolta il corriere. Attenzione Appare dopo aver interagito con la casa di Sojiro.",
+     "x": 31,
+     "y": 14.7,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0
     },
     {
      "tipo": "confidente",
@@ -100,9 +153,9 @@
     {
      "tipo": "attivita",
      "nome": "Bagno pubblico (Terme Yongen-Jaya)",
-     "descrizione": "Aumenta la dote Fascino, in particolare nei giorni di pioggia. Distributori automatici con Arginade e Acqua della rinascita a prezzo ridotto (100¥).",
-     "x": 88.7,
-     "y": 59.9,
+     "descrizione": "Aumenta la dote Fascino, in particolare nei giorni di pioggia.",
+     "x": 87.2,
+     "y": 60.6,
      "riferimento": {
       "tipo": "luogo",
       "chiave": "yongen-jaya/bagno-pubblico"
@@ -125,7 +178,7 @@
     },
     {
      "tipo": "negozio",
-     "nome": "Super Muramasa",
+     "nome": "Supermercato Muramasa",
      "descrizione": "Snack e specialità stagionali.",
      "x": 43,
      "y": 48.3,
@@ -151,7 +204,7 @@
     },
     {
      "tipo": "attivita",
-     "nome": "Batting Cage",
+     "nome": "Gabbie di Battuta",
      "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
      "x": 50.6,
      "y": 54.9,
@@ -179,8 +232,8 @@
      "tipo": "attivita",
      "nome": "Lavanderia",
      "descrizione": "Pulizia/valutazione di armature sporche recuperate nei Palazzi/Memento.",
-     "x": 78.5,
-     "y": 65,
+     "x": 78.4,
+     "y": 65.3,
      "riferimento": {
       "tipo": "luogo",
       "chiave": "yongen-jaya/lavanderia-yongen"

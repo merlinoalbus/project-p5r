@@ -95,8 +95,8 @@ router.get('/percorso', validate({ query: queryDomande }), (req, res) => {
 router.get('/percorso/:data', validate({ params: z.object({ data: z.string().regex(/^\d{2}-\d{2}$/) }), query: queryDomande }), (req, res) => {
   res.json(giornoPercorso(String(req.params.data), (req.query as unknown as { partita?: number }).partita));
 });
-router.get('/negozi', (_req, res) => {
-  res.json(elencaNegozi());
+router.get('/negozi', validate({ query: queryDomande }), (req, res) => {
+  res.json(elencaNegozi((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/negozi/:chiave', validate({ params: z.object({ chiave: z.string().min(1).max(80) }), query: queryDomande }), (req, res) => {
   res.json(dettaglioNegozio(String(req.params.chiave), (req.query as unknown as { partita?: number }).partita));
