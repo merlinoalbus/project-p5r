@@ -10,6 +10,8 @@
 // ============================================================
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
+import { dataLeggibile } from '../../shared/condizioniSpillo.js';
+export { dataLeggibile };
 import { httpErrors } from '../utils/httpError.js';
 import { t } from './traduzioniService.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
@@ -46,15 +48,6 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, dataGioco, meteoOggi: meteo, conferme };
 }
 
-const NOMI_MESI = ['', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-/** «04-18» → «18 aprile» (le date del gioco sono senza anno); testi non in quel formato restano com'erano. */
-export function dataLeggibile(d: string): string {
-  const m = /^(\d{2})-(\d{2})$/.exec(d);
-  if (!m) return d;
-  const mese = NOMI_MESI[Number(m[1])];
-  return mese ? `${Number(m[2])} ${mese}` : d;
-}
-
 function confrontaDate(a: string, b: string): number {
   // calendario di gioco: da aprile (04) a marzo (03) dell'anno dopo
   const ordine = (d: string): number => { const [m, g] = d.split('-').map(Number); return ((m + 8) % 12) * 100 + g; };
@@ -62,7 +55,7 @@ function confrontaDate(a: string, b: string): number {
 }
 
 const NOMI_DOTI: Record<string, string> = { conoscenza: 'Conoscenza', coraggio: 'Coraggio', fascino: 'Fascino', gentilezza: 'Gentilezza', perizia: 'Perizia' };
-const NOMI_DUNGEON: Record<string, string> = { kamoshida: 'Palazzo di Kamoshida', madarame: 'Palazzo di Madarame', kaneshiro: 'Palazzo di Kaneshiro', futaba: 'Palazzo di Futaba', okumura: 'Palazzo di Okumura', niijima: 'Palazzo di Niijima', shido: 'Palazzo di Shido', maruki: 'Palazzo di Maruki', iweleth: 'Prigione di Iweleth' };
+const NOMI_DUNGEON: Record<string, string> = { kamoshida: 'Palazzo di Kamoshida', madarame: 'Palazzo di Madarame', kaneshiro: 'Palazzo di Kaneshiro', futaba: 'Palazzo di Futaba', okumura: 'Palazzo di Okumura', niijima: 'Palazzo di Niijima', shido: 'Palazzo di Shido', maruki: 'Palazzo di Maruki', iweleth: 'Dedalo di Iweleth' };
 
 export function valuta(r: RigaRequisito, st: StatoPartitaSemafori): SemaforoRequisitoDto {
   const dati = JSON.parse(r.dati_json) as Record<string, string | number>;

@@ -64,6 +64,11 @@ spillo
   ordine           INTEGER NOT NULL DEFAULT 0
   origine          TEXT NOT NULL     'seed' | 'utente'
   updated_at       TEXT NOT NULL
+  condizioni_json  TEXT NULL         migrazione 029 (15.22): elenco JSON delle condizioni di visibilità (`shared/condizioniSpillo.ts`);
+                                     NULL = sempre visibile; con la partita lo spillo bloccato sparisce dalla mappa
+  seed_identita_json TEXT NULL       migrazione 030: identità (tipo, nome, x, y, riferimento) dello spillo del seed quando l'utente lo
+                                     modifica e diventa `utente`; al reseed il pacchetto salta lo spillo con quella identità (niente doppioni,
+                                     modifiche e condizioni conservate)
 
 spillo_partita  (stato per partita)
   partita_id, spillo_id PK, raccolto INTEGER NOT NULL DEFAULT 0, updated_at
@@ -115,7 +120,7 @@ volontà → seme-bramosia, tesoro → tesoro-palazzo, ombra-sciagura → nemico
 | GET | `/api/mappe/:chiave?partita=` | mappa con spilli e stato raccolto/ottenuto della partita, articoli dei negozi collegati |
 | POST/PUT/DELETE | `/api/mappe`, `/api/mappe/:chiave` | editor: crea, rinomina, sposta nell'albero, elimina (con conferma se ha figli) |
 | PUT | `/api/mappe/:chiave/immagine` | immagine di base (corpo grezzo `image/*`, come `/api/immagini`), larghezza/altezza calcolate |
-| POST/PUT/DELETE | `/api/mappe/:chiave/spilli`, `/api/mappe/spilli/:id` | editor: spilli (tipo, nome, descrizione, x/y, riferimento, collezionabile) |
+| POST/PUT/DELETE | `/api/mappe/:chiave/spilli`, `/api/mappe/spilli/:id` | editor: spilli (tipo, nome, descrizione, x/y, riferimento, collezionabile, condizioni di visibilità) |
 | PUT | `/api/partite/:id/spilli/:spilloId` | `{ raccolto }` in uso normale (punto 9) |
 | GET | `/api/mappe/esporta` | ZIP con `mappe.json` (mappe + spilli + tipi) e `immagini/<chiave>.<ext>` (punto 1) |
 | POST | `/api/mappe/importa` | ZIP (stesso formato): unione per chiave, con `sovrascrivi` |
@@ -128,7 +133,9 @@ profondità del punto 10, oltre all'interfaccia).
 Stato: il pacchetto JSON (versione 1) è quello descritto sotto; per il repository l'editor produce inoltre uno ZIP per luogo (radice + discendenti) con `data/seed/mappe/<chiave>.json` e gli asset in `public/asset/mappe/` (e `public/asset/spilli/` per le schermate degli spilli), scritto da `server/utils/zip.ts` senza dipendenze; il seed carica `mappe-editor.json` e poi `data/seed/mappe/*.json`. Decisione dell'utente (2026-09-04 sera): il pacchetto è completo, immagini di base e schermate degli spilli comprese, puntate come asset; l'utente lo consegna e viene caricato come dato preimpostato dell'app (supera la precedente esclusione delle piante scaricate).
 
 `mappe.json` esportato = `{ versione: 1, mappe: [{ chiave, nome, tipo, genitore, ordine, immagine: 'immagini/<chiave>.png' | asset, larghezza,
-altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine }] }] }`. Lo stesso file, con le
+altezza, entita, note, spilli: [{ tipo, nome, descrizione, x, y, riferimento, collezionabile, ordine, condizioni }] }] }` (`condizioni` assente quando vuoto:
+elenco di `RequisitoSpillo` di `shared/condizioniSpillo.ts`; all'importazione le voci non calcolabili o con chiavi assenti dalla Guida vengono scartate e contate
+nell'esito). Lo stesso file, con le
 immagini in `public/asset/mappe/`, è letto da `caricaSeed` come `data/seed/mappe-editor.json` (origine `seed`): un `POST /importa` dello
 ZIP esportato e un commit sono l'intero flusso «creo in app → pubblico nel repository». Il pacchetto è completo: immagini di base e schermate degli spilli comprese, anche quelle scaricate dalle guide (la loro provenienza
 è annotata nel LEGGIMI; decisione dell'utente del 2026-09-04 sera, registrata in `DECISIONI.md`). Le mappe `seed` sono modificabili
@@ -152,8 +159,18 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 - Stessa superficie del visore in modalità dedicata (barra rossa «Modifica: <mappa>» sempre visibile, uscita con conferma se ci sono
   modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
-  spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile e riferimento — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
+  spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile, riferimento e condizioni di visibilità — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
+- **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`): elenco delle condizioni dello spillo con «Togli» e costruttore «Nuova condizione»
+  con il tipo scelto da un elenco chiuso e i parametri da selettori, mai testo libero — da una data (giorno + mese del calendario di gioco), solo in un
+  periodo, dopo un Palazzo (elenco dei Palazzi della Guida), Dote almeno a un rango (1–5), Confidente almeno a un rango (1–10, elenco dei Confidenti),
+  richiesta dei Mementos completata (elenco), solo con la pioggia / mai con la pioggia, giorni della settimana (pulsanti), stagione, da quando si
+  sblocca un quartiere (solo i quartieri il cui sblocco nella Guida comincia con una data, es. Shinjuku 18 giugno, Akihabara 31 agosto, Kichijoji
+  5 giugno: quelli legati a Confidenti o libri non sono calcolabili e non vengono offerti né accettati). Sono le stesse condizioni che l'app sa
+  calcolare per articoli e Confidenti: le condizioni non calcolabili («dopo aver pescato una volta») non esistono per gli spilli. Le condizioni viaggiano con «Copia/Incolla», con i pacchetti (campo `condizioni` dello spillo) e
+  con l'esportazione JSON. Nel visore, con una partita attiva, lo spillo con una condizione rossa sparisce (chip «Mostra anche i non ancora
+  disponibili (N)» nella barra laterale); popup e scheda mostrano ogni condizione con il suo semaforo e il chip «Non ancora»; senza partita le
+  condizioni si leggono soltanto. Tutti gli spilli esistenti (seed e utente) sono nati senza condizioni.
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
 - Gestione dell'albero: crea mappa (tipo, nome, genitore), rinomina, sposta, elimina; anteprima delle miniature.
