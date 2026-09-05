@@ -25,12 +25,14 @@ export function NegoziPage() {
   useDocumentTitle('Negozi e inventario');
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
-  const negozi = useCarica(() => getNegozi(partitaId ?? undefined), [partitaId]);
+  // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
+  const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}`;
+  const negozi = useCarica(() => getNegozi(partitaId ?? undefined), [partitaId, momento]);
   const [q, setQ] = useState('');
   const [categoria, setCategoria] = useState('');
   const [per, setPer] = useState('');
   const cerca = q.trim().length >= 2 || categoria !== '' || per !== '';
-  const risultati = useCarica(() => (cerca ? ricercaArticoli({ q: q.trim() || undefined, categoria: categoria || undefined, per: per || undefined }, partitaId ?? undefined) : Promise.resolve(null)), [q, categoria, per, partitaId, cerca]);
+  const risultati = useCarica(() => (cerca ? ricercaArticoli({ q: q.trim() || undefined, categoria: categoria || undefined, per: per || undefined }, partitaId ?? undefined) : Promise.resolve(null)), [q, categoria, per, partitaId, cerca, momento]);
   const lista = negozi.dati;
   const gruppi = useMemo(() => {
     const m = new Map<string, { nome: string; negozi: NegozioRiassuntoDto[] }>();

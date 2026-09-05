@@ -164,7 +164,9 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - **Condizioni di visibilità** (15.22, `CondizioniSpilloEditor`): elenco delle condizioni dello spillo con «Togli» e costruttore «Nuova condizione»
   con il tipo scelto da un elenco chiuso e i parametri da selettori, mai testo libero — da una data (giorno + mese del calendario di gioco), solo in un
   periodo, dopo un Palazzo (elenco dei Palazzi della Guida), Dote almeno a un rango (1–5), Confidente almeno a un rango (1–10, elenco dei Confidenti),
-  richiesta dei Mementos completata (elenco), solo con la pioggia / mai con la pioggia, giorni della settimana (pulsanti), stagione, da quando si
+  richiesta dei Mementos completata (elenco), solo con la pioggia / mai con la pioggia, solo di giorno / solo di sera (il momento della giornata
+  della partita, impostato nella scheda «Oggi»: «giorno» = mattina, pranzo, pomeriggio, dopo scuola; torna a «giorno» quando cambia il giorno
+  corrente), giorni della settimana (pulsanti), stagione, da quando si
   sblocca un quartiere (solo i quartieri il cui sblocco nella Guida comincia con una data, es. Shinjuku 18 giugno, Akihabara 31 agosto, Kichijoji
   5 giugno: quelli legati a Confidenti o libri non sono calcolabili e non vengono offerti né accettati). Sono le stesse condizioni che l'app sa
   calcolare per articoli e Confidenti: le condizioni non calcolabili («dopo aver pescato una volta») non esistono per gli spilli. Le condizioni viaggiano con «Copia/Incolla», con i pacchetti (campo `condizioni` dello spillo) e

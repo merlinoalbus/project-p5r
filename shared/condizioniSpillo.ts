@@ -3,8 +3,9 @@
 // ============================================================
 //
 // Uno spillo può avere condizioni strutturate, le stesse che l'app sa valutare da sola per articoli e Confidenti: data, periodo,
-// Palazzo completato, Dote, rango di un Confidente, richiesta dei Mementos, pioggia, giorni della settimana, stagione, sblocco di un
-// quartiere. Niente condizioni «manuali» o testuali: se l'app non può calcolarla, non è una condizione dello spillo (richiesta dell'utente,
+// Palazzo completato, Dote, rango di un Confidente, richiesta dei Mementos, pioggia, momento della giornata (giorno/sera, fascia della
+// partita), giorni della settimana, stagione, sblocco di un quartiere con data nella Guida. Niente condizioni «manuali» o testuali: se
+// l'app non può calcolarla, non è una condizione dello spillo (richiesta dell'utente,
 // 2026-09-05). Con una partita attiva lo spillo bloccato sparisce dalla mappa (con «Mostra anche i non ancora disponibili»); senza partita
 // le condizioni sono solo mostrate. Condiviso fra server (validazione, valutazione, pacchetti) e frontend (editor, visore).
 // ============================================================
@@ -40,7 +41,9 @@ export type RequisitoSpillo =
   | { tipo: 'meteo'; condizione: 'non-piove' }
   | { tipo: 'giorno-settimana'; giorni: string[] }
   | { tipo: 'stagione'; stagione: string }
-  | { tipo: 'quartiere'; quartiere: string };
+  | { tipo: 'quartiere'; quartiere: string }
+  /** Momento della giornata della partita (scheda «Oggi»): le due fasce della guida. */
+  | { tipo: 'fascia'; fascia: 'giorno' | 'sera' };
 
 export type TipoCondizioneSpillo = RequisitoSpillo['tipo'];
 
@@ -54,6 +57,8 @@ export const SCELTE_CONDIZIONE = [
   { chiave: 'richiesta', nome: 'Richiesta dei Mementos completata' },
   { chiave: 'piove', nome: 'Solo nei giorni di pioggia' },
   { chiave: 'non-piove', nome: 'Mai nei giorni di pioggia' },
+  { chiave: 'fascia-giorno', nome: 'Solo di giorno (mattina, pranzo, pomeriggio, dopo scuola)' },
+  { chiave: 'fascia-sera', nome: 'Solo di sera' },
   { chiave: 'giorno-settimana', nome: 'Solo in certi giorni della settimana' },
   { chiave: 'stagione', nome: 'Solo in una stagione' },
   { chiave: 'quartiere', nome: 'Da quando si sblocca un quartiere' },
@@ -130,6 +135,7 @@ export function descriviRequisitoSpillo(r: RequisitoSpillo, nomi: NomiCondizioni
     case 'giorno-settimana': return `solo ${congiunzione(r.giorni.map((g) => GIORNI_SETTIMANA.find((x) => x.chiave === g)?.nome ?? g))}`;
     case 'stagione': return `solo in ${r.stagione}`;
     case 'quartiere': return `da quando si sblocca ${nomi.quartieri?.[r.quartiere] ?? r.quartiere}`;
+    case 'fascia': return `solo di ${r.fascia}`;
   }
 }
 
@@ -164,6 +170,7 @@ export function normalizzaRequisitoSpillo(x: unknown): RequisitoSpillo | null {
     }
     case 'stagione': { const stagione = testoPulito(o.stagione, 20); return stagione && STAGIONI.some((s) => s.chiave === stagione) ? { tipo: 'stagione', stagione } : null; }
     case 'quartiere': { const quartiere = testoPulito(o.quartiere, 60); return quartiere && /^[a-z0-9-]+$/.test(quartiere) ? { tipo: 'quartiere', quartiere } : null; }
+    case 'fascia': return o.fascia === 'giorno' || o.fascia === 'sera' ? { tipo: 'fascia', fascia: o.fascia } : null;
     default: return null;
   }
 }

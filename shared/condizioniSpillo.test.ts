@@ -22,6 +22,8 @@ describe('descriviRequisitoSpillo', () => {
     expect(descriviRequisitoSpillo({ tipo: 'giorno-settimana', giorni: ['domenica'] })).toBe('solo domenica');
     expect(descriviRequisitoSpillo({ tipo: 'stagione', stagione: 'inverno' })).toBe('solo in inverno');
     expect(descriviRequisitoSpillo({ tipo: 'quartiere', quartiere: 'akihabara' }, { quartieri: { akihabara: 'Akihabara' } })).toBe('da quando si sblocca Akihabara');
+    expect(descriviRequisitoSpillo({ tipo: 'fascia', fascia: 'sera' })).toBe('solo di sera');
+    expect(descriviRequisitoSpillo({ tipo: 'fascia', fascia: 'giorno' })).toBe('solo di giorno');
   });
 });
 
@@ -60,6 +62,8 @@ describe('normalizzaRequisitoSpillo', () => {
     // tutti i giorni = nessuna condizione
     expect(normalizzaRequisitoSpillo({ tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'] })).toBeNull();
     expect(normalizzaRequisitoSpillo({ tipo: 'meteo', condizione: 'piove' })).toBeNull();
+    expect(normalizzaRequisitoSpillo({ tipo: 'fascia', fascia: 'sera' })).toEqual({ tipo: 'fascia', fascia: 'sera' });
+    expect(normalizzaRequisitoSpillo({ tipo: 'fascia', fascia: 'notte' })).toBeNull();
     // le condizioni non calcolabili dall'app non esistono per gli spilli
     expect(normalizzaRequisitoSpillo({ tipo: 'manuale', testo: 'dopo aver pescato' })).toBeNull();
     expect(normalizzaRequisitoSpillo({ tipo: 'ignoto', testo: 'x' })).toBeNull();
