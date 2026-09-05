@@ -13,8 +13,8 @@ import { CampoRicerca } from '../shared/CampoRicerca';
 import { ElementoChip } from '../compendio/ElementoChip';
 import { StatisticheBarre } from '../compendio/StatisticheBarre';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
-import { statistichePerLivello } from '../../../shared/statistiche';
-import type { CompendioPartitaDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
+import { origineStima, statisticheStimate } from '../../../shared/statistiche';
+import type { CompendioPartitaDto, OsservazioneStatisticheDto, PersonaPossedutaDto, StatisticheDto } from '../../types';
 import { ORDINE_STATISTICHE, SIGLA_STATISTICA } from '../../utils/elementi';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
@@ -73,6 +73,11 @@ export function ScortaPersona({ partitaId }: Props) {
                 {p.nomeIt !== p.nome && <span className="text-[12px] text-text-muted">{p.nome}</span>}
                 <span className="chip">{p.arcanaNome}</span>
                 {!p.inSquadra && <span className="chip">In deposito</span>}
+                {p.statisticheConfermate
+                  ? <span className="chip chip--attivo" title="Statistiche lette nel gioco a questo livello">Valori reali</span>
+                  : p.origineStima === 'osservate' && p.osservate
+                    ? <span className="chip" title={`Stima dai valori reali registrati al livello ${p.osservate.livello}: ${descriviOsservate(p.osservate)}`}>Stima dal liv. {p.osservate.livello}</span>
+                    : <span className="chip" title={p.osservate ? `Stima dalla base del dataset: il livello ${p.livello} è sotto quello dei valori reali registrati (${p.osservate.livello})` : 'Stima dalla base del dataset: registra i valori letti nel gioco con «Modifica»'}>Stima</span>}
                 {!p.statisticheBase && <span className="chip chip--attivo" title={descriviBonus(p.bonus)}>Bonus {totaleBonus(p.bonus) > 0 ? '+' : ''}{totaleBonus(p.bonus)}</span>}
                 {(() => { const st = statoIstantanea(p, istantanee.get(p.personaId)); return st === 'aggiornata' ? <span className="chip" title="Il compendio conserva questa versione">Registrata</span> : null; })()}
                 <span className="flex-1" />
@@ -91,7 +96,7 @@ export function ScortaPersona({ partitaId }: Props) {
               </div>
               {p.tratto && <div className="text-[12px] text-text-secondary">Tratto: <strong className="text-text">{p.tratto.nomeIt}</strong> — {p.tratto.effettoNome}</div>}
               <details className="text-[13px]">
-                <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheBase ? '(stima del livello)' : `(stima più bonus ${descriviBonus(p.bonus)})`}</summary>
+                <summary className="cursor-pointer text-text-secondary touch flex items-center">Statistiche al livello {p.livello} {p.statisticheConfermate ? '(valori reali letti nel gioco)' : `(${p.origineStima === 'osservate' && p.osservate ? `stima dai valori reali del livello ${p.osservate.livello}` : 'stima del livello'}${p.statisticheBase ? '' : ` più bonus ${descriviBonus(p.bonus)}`})`}</summary>
                 <div className="pt-2"><StatisticheBarre statistiche={p.statistiche} base={p.statisticheStimate} compatta /></div>
               </details>
             </li>
@@ -168,8 +173,21 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
   const [inSquadra, setInSquadra] = useState(posseduta.inSquadra);
   const [note, setNote] = useState(posseduta.note);
   const [bonus, setBonus] = useState<StatisticheDto>(posseduta.bonus);
-  const stimate = statistichePerLivello(posseduta.statisticheBaseLivello, posseduta.livelloBase, livello);
+  // valori reali letti nel gioco (15.26): `reali` = quelli scritti in questa finestra (null = non toccati); «dimentica» annulla quelli registrati
+  const [reali, setReali] = useState<OsservazioneStatisticheDto | null>(null);
+  const [dimentica, setDimentica] = useState(false);
+  const osservate = reali ?? (dimentica ? null : posseduta.osservate);
+  const origine = origineStima(osservate, livello);
+  const stimate = statisticheStimate(posseduta.statisticheBaseLivello, posseduta.livelloBase, osservate, livello);
   const effettive = Object.fromEntries(ORDINE_STATISTICHE.map((k) => [k, Math.min(99, Math.max(1, stimate[k] + bonus[k]))])) as unknown as StatisticheDto;
+  const realeMostrato = (k: keyof StatisticheDto) => (reali && reali.livello === livello ? reali[k] : effettive[k]);
+  // scrivere un valore reale registra tutti e cinque i valori al livello corrente e azzera i bonus (i valori reali li comprendono già)
+  const impostaReale = (k: keyof StatisticheDto, valore: number) => {
+    const partenza: OsservazioneStatisticheDto = reali && reali.livello === livello ? reali : { livello, ...effettive };
+    setReali({ ...partenza, [k]: Math.min(99, Math.max(1, Math.round(valore) || 1)) });
+    setBonus({ forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 });
+    setDimentica(false);
+  };
   const [skillIds, setSkillIds] = useState<number[]>(posseduta.skill.map((s) => s.id));
   const [ricerca, setRicerca] = useState('');
   const [occupato, setOccupato] = useState(false);
@@ -185,6 +203,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
     try {
       const p = await aggiornaPosseduta(partitaId, posseduta.id, {
         livello, inSquadra, note, skillIds, bonus,
+        ...(reali ? { osservate: reali } : dimentica ? { osservate: null } : {}),
       });
       notifica('success', 'Persona aggiornata.');
       onSalvata(p);
@@ -213,18 +232,41 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-3">
           <label className="form-label">Livello
-            <input type="number" min={1} max={99} className="form-input mt-1" value={livello} onChange={(e) => setLivello(Math.min(99, Math.max(1, Number(e.target.value) || 1)))} />
+            <input type="number" min={1} max={99} className="form-input mt-1" value={livello} onFocus={(e) => e.target.select()} onChange={(e) => setLivello(Math.min(99, Math.max(1, Number(e.target.value) || 1)))} />
           </label>
           <label className="flex items-center gap-2 text-[13px] touch">
             <input type="checkbox" checked={inSquadra} onChange={(e) => setInSquadra(e.target.checked)} /> In squadra (non in deposito)
           </label>
+          <div className="flex flex-col gap-1">
+            <span className="form-label m-0">Valori reali nel gioco al livello {livello}</span>
+            <div className="grid grid-cols-5 gap-1">
+              {ORDINE_STATISTICHE.map((k) => (
+                <label key={k} className="text-[11px] text-text-muted text-center">
+                  {SIGLA_STATISTICA[k]}
+                  <input type="number" min={1} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={realeMostrato(k)} onFocus={(e) => e.target.select()} onChange={(e) => impostaReale(k, Number(e.target.value))} aria-label={`${SIGLA_STATISTICA[k]} reale`} />
+                </label>
+              ))}
+            </div>
+            <p className="m-0 text-[11px] text-text-muted">
+              {reali
+                ? `Registrerai i valori letti nel gioco al livello ${reali.livello}: da qui in su la stima riparte da questi e i bonus ripartono da zero, perché i valori reali li comprendono già.`
+                : osservate
+                  ? `Valori reali registrati al livello ${osservate.livello} (${descriviOsservate(osservate)}). ${origine === 'osservate' ? 'La stima riparte da questi valori.' : 'Sotto quel livello la stima usa la base del dataset.'}`
+                  : 'Scrivi ciò che leggi nella scheda della Persona: nel gioco la crescita ha una ripartizione propria di ogni Persona che l\'app non conosce e stima.'}
+            </p>
+            {posseduta.osservate && !dimentica && !reali && (
+              <div className="flex justify-end">
+                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="deseleziona" dimensione={20} />} titolo="Dimentica i valori reali" dettaglio="torna alla stima dalla base" onClick={() => setDimentica(true)} />
+              </div>
+            )}
+          </div>
           <div className="flex flex-col gap-1">
             <span className="form-label m-0">Bonus per statistica (Potenziamento, Addestramento, Isolamento, Forca)</span>
             <div className="grid grid-cols-5 gap-1">
               {ORDINE_STATISTICHE.map((k) => (
                 <label key={k} className="text-[11px] text-text-muted text-center">
                   {SIGLA_STATISTICA[k]} <span className="text-text-secondary">({stimate[k]})</span>
-                  <input type="number" min={-99} max={99} className="form-input form-input--compatto mt-1 px-1 text-center w-full" value={bonus[k]} onChange={(e) => setBonus({ ...bonus, [k]: Math.max(-99, Math.min(99, Number(e.target.value) || 0)) })} aria-label={`Bonus ${SIGLA_STATISTICA[k]}`} />
+                  <input type="number" min={-99} max={99} className="form-input form-input--compatto min-h-[44px] mt-1 px-1 text-center w-full" value={bonus[k]} onFocus={(e) => e.target.select()} onChange={(e) => setBonus({ ...bonus, [k]: Math.max(-99, Math.min(99, Number(e.target.value) || 0)) })} aria-label={`Bonus ${SIGLA_STATISTICA[k]}`} />
                   <span className="block text-[12px] font-semibold text-text mt-0.5">= {effettive[k]}</span>
                 </label>
               ))}
@@ -236,7 +278,7 @@ function ModificaPossedutaModal({ posseduta, partitaId, onChiudi, onSalvata }: {
           <StatisticheBarre
             statistiche={effettive}
             base={stimate}
-            didascalia={`Stima al livello ${livello} (+3 punti per livello dalla base di livello ${posseduta.livelloBase}) più i bonus: i bonus restano quando la Persona sale di livello.`}
+            didascalia={`Stima al livello ${livello} ${origine === 'osservate' && osservate ? `dai valori reali registrati al livello ${osservate.livello}` : `dalla base di livello ${posseduta.livelloBase}`} (+3 punti per livello) più i bonus: i bonus restano quando la Persona sale di livello.`}
           />
           <label className="form-label">Note
             <textarea className="form-input mt-1 min-h-[80px]" value={note} onChange={(e) => setNote(e.target.value)} />
@@ -290,10 +332,15 @@ function descriviBonus(b: StatisticheDto): string {
   return ORDINE_STATISTICHE.filter((k) => b[k] !== 0).map((k) => `${SIGLA_STATISTICA[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ') || 'nessuno';
 }
 
+function descriviOsservate(o: OsservazioneStatisticheDto): string {
+  return ORDINE_STATISTICHE.map((k) => `${SIGLA_STATISTICA[k]} ${o[k]}`).join(' · ');
+}
+
 /** Confronta l'esemplare con l'istantanea del compendio: assente, da aggiornare o aggiornata. */
 function statoIstantanea(p: PersonaPossedutaDto, c: CompendioPartitaDto | undefined): 'assente' | 'da-aggiornare' | 'aggiornata' {
   if (!c || !c.registrata || c.livelloRegistrato === null) return 'assente';
   const stesseSkill = c.skill.length === p.skill.length && c.skill.every((s, i) => s.id === p.skill[i]?.id);
   const stessoBonus = ORDINE_STATISTICHE.every((k) => c.bonus[k] === p.bonus[k]);
-  return c.livelloRegistrato === p.livello && stesseSkill && stessoBonus && (c.tratto?.id ?? null) === (p.tratto?.id ?? null) && c.carica === p.carica ? 'aggiornata' : 'da-aggiornare';
+  const stesseOsservate = (c.osservate === null) === (p.osservate === null) && (!c.osservate || !p.osservate || (c.osservate.livello === p.osservate.livello && ORDINE_STATISTICHE.every((k) => c.osservate![k] === p.osservate![k])));
+  return c.livelloRegistrato === p.livello && stesseSkill && stessoBonus && stesseOsservate && (c.tratto?.id ?? null) === (p.tratto?.id ?? null) && c.carica === p.carica ? 'aggiornata' : 'da-aggiornare';
 }

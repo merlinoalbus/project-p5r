@@ -369,7 +369,8 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
   suggerimento al passaggio del mouse (`.con-suggerimento`, `data-suggerimento`).
 
 ### Statistiche con bonus e istantanea del compendio (Fase 12.2)
-- `persona_posseduta.bonus_*` (migrazione 023): le statistiche effettive sono `statistichePerLivello(base, livelloBase, livello) + bonus`
+- `persona_posseduta.osservate_*` e `compendio_partita.osservate_*` (migrazione 032, 15.26): valori reali letti nel gioco a un livello; da lì in su la stima riparte da loro (`statisticheStimate` in `shared/statistiche.ts`), registrarli azzera i bonus, l'istantanea del compendio li conserva e l'evocazione dal Registro li ripristina.
+- `persona_posseduta.bonus_*` (migrazione 023): le statistiche effettive sono `statisticheStimate(base, livelloBase, osservate, livello) + bonus` (dal 15.26; prima `statistichePerLivello(base, livelloBase, livello) + bonus`)
   (clamp 1–99) e seguono il livello; i valori assoluti registrati prima della migrazione diventano scarti rispetto alla stima
   (`convertiAssoluteInBonus`, anche negativi per non perdere nulla) e le vecchie colonne restano NULL. Forca (`puntiStatistica`) e
   Isolamento (incenso) sommano al bonus. DTO: `bonus`, `statisticheStimate`, `statisticheBase` (= nessun bonus).
