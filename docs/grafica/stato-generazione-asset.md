@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**667 file richiesti: 665 completati e approvati, 2 ancora da consegnare.** La Fase 11.6 (§13), gli spilli (§18) e le mappe (§19) sono completi e validati.
+**670 file richiesti: 665 completati e approvati, 5 ancora da consegnare.** La Fase 11.6 (§13) e le mappe (§19) sono complete e validate; restano da consegnare `spillo-dialogo.png` (§18, tipo aggiunto il 2026-09-05), `azione-copia.png` e `azione-incolla.png` (§17, editor delle mappe, 2026-09-05), oltre a `guida/mappe.png` (§20) e `scheda-oggi.png` (§16).
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -46,10 +46,10 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | guida | 15 | 15 | 0 |
 | palazzi | 10 | 10 | 0 |
 | personaggi | 10 | 10 | 0 |
-| ui (azioni, §17) | 46 | 46 | 0 |
+| ui (azioni, §17) | 48 | 46 | 2 |
 | ui (schede Partita e Fusione, §16) | 18 | 17 | 1 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
-| ui (spilli, §18) | 19 | 19 | 0 |
+| ui (spilli, §18) | 20 | 19 | 1 |
 | mappe (§19) | 25 | 25 | 0 |
 | guida (sezione Mappe, §20) | 1 | 0 | 1 |
 
@@ -104,6 +104,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-punto-sensibile.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro-palazzo.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-dialogo.png` — 128×128 (§18)
 
 ### mappe (§19)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
@@ -182,6 +183,8 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-accettata.png` — 128×128 (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-negozio.png` — 128×128 (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-filtri.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-copia.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-incolla.png` — 128×128 (§17)
 
 ### ui — schede della Partita (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-doti.png` — 128×128 (§16)

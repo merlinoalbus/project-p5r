@@ -5,8 +5,8 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import type { AzionePercorsoDto, ConfidentePartitaDto, EffettiAzioneDto, PercorsoGiornoDto, PercorsoIndiceDto, StatoAzioneDto } from '../../shared/types.js';
-import { aggiornaConfidente, aggiornaDote, confidenti, puntiDaNote } from './partiteService.js';
+import type { AzionePercorsoDto, ConfidentePartitaDto, EffettiAzioneDto, GiornoCorrenteDto, PercorsoGiornoDto, PercorsoIndiceDto, StatoAzioneDto } from '../../shared/types.js';
+import { aggiornaConfidente, aggiornaDote, confidenti, leggiPartita, puntiDaNote } from './partiteService.js';
 
 interface Riga { data: string; ordine: number; giorno_settimana: string; fase: string; trama: string; vincoli_json: string; meteo: string | null; azioni_json: string; avvisi_json: string; fonte: string; coperto: number }
 type AzioneSeed = Omit<AzionePercorsoDto, 'indice' | 'fatta'>;
@@ -206,10 +206,10 @@ function descriviEffetti(e: EffettiAzioneDto): string {
   return parti.join(', ');
 }
 
-/** Imposta il giorno corrente della partita (data del calendario di gioco). */
-export function impostaGiornoCorrente(partitaId: number, data: string): { dataCorrente: string } {
+/** Imposta il giorno corrente della partita (data del calendario di gioco) e restituisce anche la partita aggiornata, così il client allinea lo store senza ricaricare l'elenco. */
+export function impostaGiornoCorrente(partitaId: number, data: string): GiornoCorrenteDto {
   partitaEsiste(partitaId);
   if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
   prepared('UPDATE partita SET data_gioco = ?, updated_at = ? WHERE id = ?').run(data, nowIso(), partitaId);
-  return { dataCorrente: data };
+  return { dataCorrente: data, partita: leggiPartita(partitaId) };
 }

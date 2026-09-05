@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 // ============================================================
-// Test EditorMappaPage — aggiunta di uno spillo con un tocco sulla mappa, proprietà e riferimento cercato, spostamento, mappa (Fase 13.3)
+// Test EditorMappaPage — aggiunta di uno spillo con un tocco sulla mappa, proprietà e riferimento cercato, copia/incolla, mappa (Fase 13.3, 15.18)
 // ============================================================
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -33,6 +33,7 @@ function monta() {
 describe('EditorMappaPage', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();
+    sessionStorage.clear();
     api.getAlberoMappe.mockResolvedValue(albero);
     api.getMappa.mockResolvedValue(base);
   });
@@ -73,6 +74,38 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(elimina).not.toBeDisabled());
     fireEvent.click(elimina);
     await waitFor(() => expect(api.eliminaSpillo).toHaveBeenCalledWith(9));
+  });
+
+  it('«Copia» sullo spillo selezionato mette negli appunti tutti i campi tranne la posizione; con «Incolla» un tocco sulla mappa crea lo spillo identico nel nuovo punto', async () => {
+    const negozio: SpilloDto = { ...nota, id: 12, tipo: 'negozio', tipoNome: 'Negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', riferimento: { tipo: 'negozio', chiave: 'untouchable' } };
+    api.getMappa.mockResolvedValue({ ...base, spilli: [negozio] });
+    api.creaSpillo.mockResolvedValue({ ...negozio, id: 13, x: 50, y: 50 });
+    monta();
+    // senza appunti «Incolla» è spento
+    expect(await screen.findByRole('button', { name: /Incolla/ })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Negozio: Untouchable' }));
+    const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Untouchable' }));
+    fireEvent.click(form.getByRole('button', { name: /Copia/ }));
+    // la copia attiva subito lo strumento «Incolla» e gli appunti sopravvivono in sessione
+    const incolla = screen.getByRole('button', { name: /Incolla/ });
+    expect(incolla).not.toBeDisabled();
+    expect(incolla).toHaveAttribute('aria-pressed', 'true');
+    expect(JSON.parse(sessionStorage.getItem('p5r.editor.appunti-spillo') ?? 'null')).toEqual({ tipo: 'negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', collezionabile: false, riferimento: { tipo: 'negozio', chiave: 'untouchable' } });
+    const tela = screen.getByRole('application');
+    fireEvent.pointerDown(tela, { pointerId: 1, clientX: 0, clientY: 0 });
+    fireEvent.pointerUp(tela, { pointerId: 1, clientX: 0, clientY: 0 });
+    await waitFor(() => expect(api.creaSpillo).toHaveBeenCalledWith('citta-shibuya', { tipo: 'negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', collezionabile: false, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, x: 50, y: 50 }));
+    // dopo l'incolla si torna a «Seleziona», gli appunti restano per altre copie
+    await waitFor(() => expect(screen.getByRole('button', { name: /Seleziona/ })).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.getByRole('button', { name: /Incolla/ })).not.toBeDisabled();
+  });
+
+  it('gli appunti salvati in sessione riattivano «Incolla» all\'apertura dell\'editor (copia da un\'altra mappa)', async () => {
+    sessionStorage.setItem('p5r.editor.appunti-spillo', JSON.stringify({ tipo: 'forziere', nome: 'Scrigno', descrizione: '', collezionabile: true, riferimento: null }));
+    monta();
+    const incolla = await screen.findByRole('button', { name: /Incolla/ });
+    expect(incolla).not.toBeDisabled();
+    expect(incolla).toHaveTextContent('«Scrigno»');
   });
 
   it('le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa', async () => {

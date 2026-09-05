@@ -113,7 +113,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
 function negozioDettaglio(chiave: string, partitaId?: number): NonNullable<DettaglioSpilloDto['negozio']> | null {
   try {
     const n = dettaglioNegozio(chiave, partitaId);
-    return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato })) };
+    return { chiave: n.chiave, nome: n.nome, tipo: n.tipo, disponibilita: n.disponibilita, articoli: n.articoliElenco.map((a) => ({ chiave: a.chiave, nome: a.nomeIt ?? a.nome, categoria: a.categoria, prezzo: a.prezzo, disponibileDal: a.disponibileDal, comprato: a.acquistato, disponibilita: a.disponibilita })) };
   } catch {
     return null;
   }

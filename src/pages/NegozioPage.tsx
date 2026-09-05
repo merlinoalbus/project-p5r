@@ -12,6 +12,7 @@ import { PageState } from '../components/shared/PageState';
 import { IconChevronLeft } from '../components/shared/icons';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { ArticoliTabella } from '../components/guida/ArticoliTabella';
+import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 
 export function NegozioPage() {
   const { chiave = '' } = useParams();
@@ -24,9 +25,12 @@ export function NegozioPage() {
   const [categoria, setCategoria] = useState('');
   const [per, setPer] = useState('');
   const [nascondiAcquistati, setNascondiAcquistati] = useState(false);
+  // con una partita attiva l'elenco mostra solo ciò che è raggiungibile alla data corrente; i bloccati si possono riaprire
+  const [soloDisponibili, setSoloDisponibili] = useState(true);
   const categorie = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.categoria))], [n]);
   const destinatari = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.per).filter((p): p is string => !!p && p !== 'tutti'))], [n]);
-  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato)), [n, categoria, per, nascondiAcquistati]);
+  const bloccati = useMemo(() => (n?.articoliElenco ?? []).filter((a) => a.disponibilita?.stato === 'bloccato').length, [n]);
+  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato) && (!partitaId || !soloDisponibili || a.disponibilita?.stato !== 'bloccato')), [n, categoria, per, nascondiAcquistati, soloDisponibili, partitaId]);
   return (
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (
@@ -37,6 +41,7 @@ export function NegozioPage() {
               <h1 className="titolo-display m-0">{n.nome}</h1>
               <span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>
               {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
+              <ChipDisponibilita disponibilita={n.disponibilita} />
             </div>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-text-secondary">
               {n.luogo && <span><strong className="text-text">Dove:</strong> {n.luogoChiave ? <Link to={`/guida/citta/${n.luogoChiave}`}>{n.luogo}</Link> : n.luogo}</span>}
@@ -63,6 +68,7 @@ export function NegozioPage() {
                 </select>
               )}
               {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={nascondiAcquistati} onChange={(e) => setNascondiAcquistati(e.target.checked)} /> Nascondi acquistati</label>}
+              {partitaId && bloccati > 0 && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDisponibili} onChange={(e) => setSoloDisponibili(e.target.checked)} /> Solo disponibili ora <span className="text-text-muted">({bloccati} non ancora)</span></label>}
             </div>
           )}
           {n.articoliElenco.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
