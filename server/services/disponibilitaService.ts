@@ -61,6 +61,8 @@ type RequisitoLocale =
   | { tipo: 'stagione'; stagione: string; testo: string }
   /** «da quando si sblocca Akihabara»: la data la dà la Guida (tabella `quartiere`). */
   | { tipo: 'quartiere'; quartiere: string; testo: string }
+  /** «solo di sera», «aperto solo di giorno»: il momento della giornata della partita (scheda «Oggi»). */
+  | { tipo: 'fascia'; fascia: 'giorno' | 'sera'; testo: string }
   | { tipo: 'ignoto'; testo: string };
 
 export type RequisitoDisponibilita = RequisitoSeed | RequisitoLocale;
@@ -71,7 +73,7 @@ export interface ContestoTesto {
 }
 
 /** Frammenti che non sono condizioni (note di posizione, rifornimenti, dettagli di prezzo): non producono requisiti. */
-const RUMORE = /^(sempre disponibile|sempre acquistabile|rifornimento|riforniti|nuovi prodotti|rango massimo(?! del confidente)|rango cliente iniziale|grado base|scambio con|barattando|solo di (?:sera|giorno|notte)|aperto solo|esclusivamente di sera|(?:disponibile |disponibili |presente )?fin da|elenco parziale|distributori speciali|\d+ distributori|shujin academy|sottopasso di shibuya|sala giochi|accanto al|in vendita anche|\d+ punti negozio|\d+ o \d+ punti negozio|\d+ monete|\d+ yen|discrepanza|contenuto royal|esclusivo royal|terzo semestre|fonte non italiana|articolo piu caro|kasumi\/sumire|akechi torna|oggetto selezionato|un solo acquisto|un succo al giorno|prezzo variabile)/;
+const RUMORE = /^(sempre disponibile|sempre acquistabile|rifornimento|riforniti|nuovi prodotti|rango massimo(?! del confidente)|rango cliente iniziale|grado base|scambio con|barattando|(?:disponibile |disponibili |presente )?fin da|elenco parziale|distributori speciali|\d+ distributori|shujin academy|sottopasso di shibuya|sala giochi|accanto al|in vendita anche|\d+ punti negozio|\d+ o \d+ punti negozio|\d+ monete|\d+ yen|discrepanza|contenuto royal|esclusivo royal|terzo semestre|fonte non italiana|articolo piu caro|kasumi\/sumire|akechi torna|oggetto selezionato|un solo acquisto|un succo al giorno|prezzo variabile)/;
 
 /**
  * Traduce un testo della guida in requisiti. Le parti separate da «;», «,» o « e » vengono lette una per una; ogni parte
@@ -85,8 +87,16 @@ export function requisitiDaTesto(testo: string | null | undefined, ctx: Contesto
   const t = piatto(testo).replace(/\(([^)]*)\)/g, (m, dentro: string) => (dentro.trim().split(/\s+/).length <= 2 ? m : ''));
   // le frasi con più condizioni («Rango Confidente Sojiro 9, richiede il completamento della richiesta Lo zio ingordo») si spezzano
   const parti = t.split(/\s*;\s*|,\s*(?=richiede|dopo|dal |solo|rango|esclusivo|contenuto|fonte|terzo|oppure|un solo)|\s+oppure\s+/).map((p) => p.trim()).filter(Boolean);
-  for (const parte of parti) {
+  for (let parte of parti) {
     if (RUMORE.test(parte)) continue;
+    // Fascia della giornata: «solo di sera», «solo la domenica sera», «aperto solo di giorno», «esclusivamente di sera», «solo di notte».
+    // La parola viene tolta e il resto della frase continua a essere letto («solo la domenica sera» → domenica + sera).
+    const fascia = /\b(?:sera|serale|notte)\b/.test(parte) ? 'sera' : /\bdi giorno\b|\bdiurn[oa]\b/.test(parte) ? 'giorno' : null;
+    if (fascia) {
+      out.push({ tipo: 'fascia', fascia, testo: testo.trim() });
+      parte = parte.replace(/\b(?:apert[oa] |disponibile )?(?:solo |esclusivamente )?(?:di |la |alla |a )?(?:sera|serale|notte|giorno|diurn[oa])\b/g, ' ').replace(/\s+/g, ' ').replace(/^[\s,;:]+|[\s,;:]+$/g, '');
+      if (!parte) continue;
+    }
     let m: RegExpExecArray | null;
     // intervallo: «scambio disponibile dal 26 al 30 luglio», «dal 22 gennaio al 2 febbraio», «disponibile solo dal 28 agosto al 10 ottobre»
     if ((m = /dal\s+(\d{1,2}|primo)\s+(?:([a-z]+)\s+)?al\s+(\d{1,2})\s+([a-z]+)/.exec(parte))) {
@@ -208,6 +218,11 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       if (!st.giornoSettimana) return { ...base, tipo: 'giorno-settimana', stato: 'grigio', dettaglio: 'Imposta il giorno corrente della partita', manuale: false };
       const ok = r.giorni.includes(st.giornoSettimana);
       return { ...base, tipo: 'giorno-settimana', stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Oggi è ${st.giornoSettimana}` : `Solo ${r.giorni.join(', ')}: oggi è ${st.giornoSettimana}`, manuale: false };
+    }
+    case 'fascia': {
+      if (!st.fasciaGioco) return { ...base, tipo: 'fascia', stato: 'grigio', dettaglio: 'Imposta il momento della giornata nella scheda Oggi', manuale: false };
+      const ok = st.fasciaGioco === r.fascia;
+      return { ...base, tipo: 'fascia', stato: ok ? 'verde' : 'rosso', dettaglio: ok ? `Ora è ${st.fasciaGioco}` : `Solo di ${r.fascia}: ora è ${st.fasciaGioco}`, manuale: false };
     }
     case 'stagione': {
       if (!st.dataGioco) return { ...base, tipo: 'stagione', stato: 'grigio', dettaglio: 'Imposta il giorno corrente della partita', manuale: false };

@@ -27,6 +27,7 @@ export const condizioneSpillo = z.discriminatedUnion('tipo', [
   z.object({ tipo: z.literal('giorno-settimana'), giorni: z.array(giorno).min(1).max(6) }),
   z.object({ tipo: z.literal('stagione'), stagione }),
   z.object({ tipo: z.literal('quartiere'), quartiere: chiaveEntita }),
+  z.object({ tipo: z.literal('fascia'), fascia: z.enum(['giorno', 'sera']) }),
 ]);
 const condizioni = z.array(condizioneSpillo).max(20).nullable().optional();
 

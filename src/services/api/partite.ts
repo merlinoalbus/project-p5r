@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto } from '../../types';
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, FasciaGioco, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
 /** Campi modificabili di una partita. */
@@ -12,6 +12,8 @@ export interface DatiPartita {
   note?: string;
   livelloProtagonista?: number;
   dataGioco?: string | null;
+  /** Momento della giornata corrente («giorno» o «sera»). */
+  fasciaGioco?: FasciaGioco;
   difficolta?: Difficolta;
   nuovaPartitaPlus?: boolean;
   dlcPosseduti?: number[];
@@ -38,6 +40,8 @@ export const getPartite = (): Promise<PartitaDto[]> => apiGet('/partite');
 export const getPartitaAttiva = (): Promise<PartitaDto | null> => apiGet('/partite/attiva');
 export const creaPartita = (dati: DatiPartita & { nome: string; attiva?: boolean }): Promise<PartitaDto> => apiPost('/partite', dati);
 export const aggiornaPartita = (id: number, dati: DatiPartita): Promise<PartitaDto> => apiPut(`/partite/${id}`, dati);
+/** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */
+export const impostaFasciaGioco = (id: number, fascia: FasciaGioco): Promise<PartitaDto> => apiPut(`/partite/${id}`, { fasciaGioco: fascia });
 export const attivaPartita = (id: number): Promise<PartitaDto> => apiPost(`/partite/${id}/attiva`);
 export const eliminaPartita = (id: number): Promise<void> => apiDelete(`/partite/${id}`);
 

@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react';
 import { useCarica } from './useCarica';
 import { getMappa, impostaAcquisto, impostaSpilloRaccolto, impostaStatoPunto } from '../services/api';
 import { notifica } from '../stores/notificationStore';
+import { usePartitaStore } from '../stores/partitaStore';
 import type { MappaDto, SpilloDto } from '../types';
 import type { StatoPuntoMappa } from '../components/mappe/VisoreMappa';
 
@@ -25,7 +26,9 @@ export interface MappaPartita {
 
 /** Carica la mappa `chiave` con lo stato della partita; `versione` forza un nuovo caricamento; `onCambiato` avvisa la pagina ospite di ogni azione salvata. */
 export function useMappaPartita(chiave: string, partitaId: number | null, opz: { versione?: string | number; onCambiato?: () => void } = {}): MappaPartita {
-  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, opz.versione]);
+  // la fascia della giornata e il giorno corrente della partita decidono quali spilli sono disponibili: al cambio si ricarica
+  const momento = usePartitaStore((s) => (s.attiva?.id === partitaId ? `${s.attiva.dataGioco ?? ''}|${s.attiva.fasciaGioco ?? ''}` : ''));
+  const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave, partitaId ?? undefined), [chiave, partitaId, opz.versione, momento]);
   const [aggiornati, setAggiornati] = useState<Map<number, SpilloDto>>(new Map());
   const mappa = useMemo(() => (dati ? { ...dati, spilli: dati.spilli.map((s) => aggiornati.get(s.id) ?? s) } : null), [dati, aggiornati]);
   const errori = (err: unknown) => notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
