@@ -7,7 +7,10 @@
 // **3 punti** distribuiti fra le statistiche. In gioco la ripartizione dipende dai level-up (e dal
 // bonus di fusione/Potenziamento manipolabile, vedi docs/riferimenti/manipolazione-statistiche.md);
 // qui si stima ripartendo i punti in proporzione alle statistiche base (metodo del resto maggiore),
-// con il tetto di 99 per statistica. L'utente può sempre registrare i valori reali nella scorta.
+// con il tetto di 99 per statistica. La ripartizione reale del gioco ha pesi propri di ogni Persona
+// che il dataset non conosce (Arsène al livello 2: FR 4 MA 2 nel gioco, FR 3 MA 3 qui): perciò
+// l'utente registra nella scorta i VALORI REALI letti nel gioco a un livello (15.26) e da lì in su la
+// stima riparte da quelli (`statisticheStimate`), con i bonus di Potenziamento e simili a parte.
 // ============================================================
 
 export interface Statistiche {
@@ -56,4 +59,26 @@ export function statistichePerLivello(base: Statistiche, livelloBase: number, li
     esito[q.k] = Math.min(MASSIMO_STATISTICA, base[q.k] + interi[i]);
   });
   return esito;
+}
+
+/** Valori reali letti nella scheda della Persona nel gioco a un livello (15.26). */
+export interface Osservazione extends Statistiche {
+  livello: number;
+}
+
+/** Da dove parte la stima al `livello`: dai valori reali registrati (se il livello è almeno quello registrato) o dalla base del dataset. */
+export function origineStima(osservate: Osservazione | null | undefined, livello: number): 'base' | 'osservate' {
+  return osservate && Math.floor(livello) >= osservate.livello ? 'osservate' : 'base';
+}
+
+/**
+ * Statistiche stimate al `livello`: al livello registrato sono esattamente i valori reali; sopra ripartono da quelli
+ * (+3 punti per livello in proporzione ai valori reali); sotto il livello registrato, o senza valori reali, si usa la base del dataset.
+ */
+export function statisticheStimate(base: Statistiche, livelloBase: number, osservate: Osservazione | null | undefined, livello: number): Statistiche {
+  if (osservate && origineStima(osservate, livello) === 'osservate') {
+    const { livello: livelloOsservato, ...valori } = osservate;
+    return statistichePerLivello(valori, livelloOsservato, livello);
+  }
+  return statistichePerLivello(base, livelloBase, livello);
 }

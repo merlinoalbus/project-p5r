@@ -2,9 +2,35 @@
 // Test statistichePerLivello — +3 punti per livello in proporzione alle statistiche base
 // ============================================================
 
-import { PUNTI_PER_LIVELLO, statistichePerLivello, totaleStatistiche } from './statistiche.js';
+import { PUNTI_PER_LIVELLO, origineStima, statistichePerLivello, statisticheStimate, totaleStatistiche } from './statistiche.js';
 
 const arsene = { forza: 2, magia: 2, resistenza: 2, agilita: 3, fortuna: 1 }; // livello 1
+
+describe('statisticheStimate con i valori reali osservati (15.26)', () => {
+  // Arsène al livello 2 nel gioco dell'utente: FR 4, MA 2, RS 2, AG 4, FO 1 (la stima dalla base dava 3/3/2/4/1)
+  const reali = { livello: 2, forza: 4, magia: 2, resistenza: 2, agilita: 4, fortuna: 1 };
+
+  it('senza valori reali la stima parte dalla base del dataset', () => {
+    expect(origineStima(null, 2)).toBe('base');
+    expect(statisticheStimate(arsene, 1, null, 2)).toEqual(statistichePerLivello(arsene, 1, 2));
+    expect(statisticheStimate(arsene, 1, null, 2)).toEqual({ forza: 3, magia: 3, resistenza: 2, agilita: 4, fortuna: 1 });
+  });
+
+  it('al livello registrato restituisce esattamente i valori reali; da lì in su riparte da loro (+3 per livello, in proporzione ai valori reali)', () => {
+    expect(origineStima(reali, 2)).toBe('osservate');
+    expect(statisticheStimate(arsene, 1, reali, 2)).toEqual({ forza: 4, magia: 2, resistenza: 2, agilita: 4, fortuna: 1 });
+    const l3 = statisticheStimate(arsene, 1, reali, 3);
+    expect(totaleStatistiche(l3)).toBe(13 + PUNTI_PER_LIVELLO);
+    // la forza (4) ora cresce almeno quanto la magia (2): la ripartizione segue i valori reali, non più la base
+    expect(l3.forza - reali.forza).toBeGreaterThanOrEqual(l3.magia - reali.magia);
+    expect(l3.forza).toBeGreaterThanOrEqual(4);
+  });
+
+  it('sotto il livello registrato (una Persona non scende di livello, ma l’utente può correggere) torna alla base del dataset', () => {
+    expect(origineStima(reali, 1)).toBe('base');
+    expect(statisticheStimate(arsene, 1, reali, 1)).toEqual(arsene);
+  });
+});
 
 describe('statistichePerLivello', () => {
   it('al livello base (o sotto) restituisce le statistiche base', () => {
