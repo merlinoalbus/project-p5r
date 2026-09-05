@@ -24,7 +24,7 @@ const giorno: PercorsoGiornoDto = {
   ],
 };
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [],
-  spilli: [{ id: 7, mappaChiave: chiave, tipo: 'confidente', tipoNome: 'Confidente', colore: '#ec4899', nome: 'Cortile della Shujin', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, immagini: [], updatedAt: '' }] });
+  spilli: [{ id: 7, mappaChiave: chiave, tipo: 'confidente', tipoNome: 'Confidente', colore: '#ec4899', nome: 'Cortile della Shujin', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' }] });
 
 describe('OggiPartita', () => {
   beforeEach(() => {
