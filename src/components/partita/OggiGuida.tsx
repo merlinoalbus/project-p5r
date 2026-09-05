@@ -46,7 +46,7 @@ export function OggiGuida({ oggi, riempi }: Props) {
         <PulsanteVisivo tono="secondario" compatto attivo={oggi.fascia === 'sera'} icona={<IconaFascia fascia="sera" />} titolo="Sera" dettaglio="dopo il tramonto" disabled={oggi.occupato} onClick={() => void oggi.impostaFascia('sera')} />
       </div>
       <div className={riempi ? 'md:min-h-0 md:overflow-y-auto md:pr-1' : ''}>
-        <GiornoGuida g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto />
+        <GiornoGuida g={g} partitaId={oggi.partitaId} onAggiorna={oggi.aggiornaAzione} onSullaMappa={oggi.sullaMappa} azioneEvidenziata={oggi.mappa.azione} compatto fasciaCorrente={g.dataCorrente === g.giorno ? oggi.fascia : null} />
       </div>
     </div>
   );

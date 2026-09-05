@@ -65,7 +65,7 @@ export function PercorsoPage() {
             {partitaId && g.dataCorrente !== g.giorno && <button type="button" className="btn btn-primary btn-sm touch ml-auto" disabled={occupatoGiorno} onClick={() => void segnaCorrente()}>Segna come giorno corrente</button>}
             {partitaId && g.dataCorrente === g.giorno && <span className="chip chip--attivo ml-auto">Oggi nella partita</span>}
           </div>
-          <GiornoGuida g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={(a) => { if (a.mappa) navigate(`/guida/mappe/${encodeURIComponent(a.mappa.chiave)}${a.mappa.spilloId ? `?spillo=${a.mappa.spilloId}` : ''}`); }} />
+          <GiornoGuida g={g} partitaId={partitaId} onAggiorna={aggiorna} onSullaMappa={(a) => { if (a.mappa) navigate(`/guida/mappe/${encodeURIComponent(a.mappa.chiave)}${a.mappa.spilloId ? `?spillo=${a.mappa.spilloId}` : ''}`); }} fasciaCorrente={partitaId && g.dataCorrente === g.giorno ? attiva?.fasciaGioco ?? 'giorno' : null} />
         </div>
       )}
     </PageState>
