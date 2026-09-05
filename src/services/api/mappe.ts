@@ -9,7 +9,8 @@ import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
-export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string }
+/** `passaggio`/`ritorno` valgono solo alla creazione con un genitore: spillo «passaggio» nel genitore verso la nuova mappa e viceversa (15.24). */
+export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
 export interface DatiSpilloApi { tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; mappa?: string; condizioni?: RequisitoSpillo[] | null }
 
 /** Albero completo (riassunti piatti con genitore). */
@@ -38,6 +39,8 @@ export async function caricaImmagineMappa(chiave: string, file: File): Promise<M
 }
 
 export const creaSpillo = (mappa: string, dati: DatiSpilloApi & { tipo: TipoSpillo; nome: string; x: number; y: number }): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/spilli`, dati);
+/** Spillo «passaggio» da `mappa` verso `destinazione` in un punto libero scelto dal server (al centro; in basso se la destinazione è il genitore): poi si trascina. 409 se esiste già. */
+export const creaPassaggio = (mappa: string, destinazione: string): Promise<SpilloDto> => apiPost(`/mappe/${encodeURIComponent(mappa)}/passaggi`, { destinazione });
 export const aggiornaSpillo = (id: number, dati: DatiSpilloApi): Promise<SpilloDto> => apiPut(`/mappe/spilli/${id}`, dati);
 export const eliminaSpillo = (id: number): Promise<void> => apiDelete(`/mappe/spilli/${id}`);
 

@@ -12,7 +12,7 @@ import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 const api = vi.hoisted(() => ({
   getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
-  aggiornaMappa: vi.fn(), creaMappa: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPianta: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
+  aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPianta: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
   esportaPacchettoRepository: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
@@ -179,5 +179,55 @@ describe('EditorMappaPage', () => {
     // quartiere collegato alla guida: è offerto «Scarica dalla guida»; l'esportazione del luogo produce lo ZIP per il repository
     expect(await screen.findByRole('button', { name: 'Scarica dalla guida' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Esporta questo luogo/ })).toBeInTheDocument();
+  });
+
+  it('albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato', async () => {
+    const figliaRaggiunta = riassunto({ chiave: 'luogo-a', nome: 'Luogo A', tipo: 'luogo', genitore: 'citta-shibuya' });
+    const figliaOrfana = riassunto({ chiave: 'luogo-b', nome: 'Luogo B', tipo: 'luogo', genitore: 'citta-shibuya' });
+    const versoA: SpilloDto = { ...nota, id: 21, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Luogo A', riferimento: { tipo: 'mappa', chiave: 'luogo-a' } };
+    api.getMappa.mockResolvedValue({ ...base, figli: [figliaRaggiunta, figliaOrfana], spilli: [versoA] });
+    const creato: SpilloDto = { ...versoA, id: 22, nome: 'Luogo B', riferimento: { tipo: 'mappa', chiave: 'luogo-b' } };
+    api.creaPassaggio.mockResolvedValue(creato);
+    monta();
+    const albero = within(await screen.findByRole('region', { name: 'Albero delle mappe' }));
+    // «Luogo A» è raggiunto da uno spillo: nessuna riga di avviso; «Luogo B» no
+    expect(albero.getAllByText('Senza passaggio da questa mappa.')).toHaveLength(1);
+    expect(albero.queryByRole('button', { name: 'Crea passaggio verso Luogo A' })).toBeNull();
+    // nessuno spillo punta al genitore Tokyo: c'è il ritorno da creare
+    expect(albero.getByText(/Nessun passaggio di ritorno verso «Tokyo»/)).toBeInTheDocument();
+    api.getMappa.mockResolvedValue({ ...base, figli: [figliaRaggiunta, figliaOrfana], spilli: [versoA, creato] });
+    fireEvent.click(albero.getByRole('button', { name: 'Crea passaggio verso Luogo B' }));
+    await waitFor(() => expect(api.creaPassaggio).toHaveBeenCalledWith('citta-shibuya', 'luogo-b'));
+    // lo spillo creato è selezionato nel pannello e la riga di avviso di «Luogo B» sparisce
+    expect(await screen.findByRole('region', { name: 'Proprietà dello spillo: Luogo B' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Senza passaggio da questa mappa.')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'Crea passaggio di ritorno' }));
+    await waitFor(() => expect(api.creaPassaggio).toHaveBeenLastCalledWith('citta-shibuya', 'tokyo'));
+  });
+
+  it('«Nuova mappa» (15.24): chiede il passaggio sul genitore (preselezionato) e il ritorno (a scelta) e li passa all’API', async () => {
+    api.creaMappa.mockResolvedValue({ ...base, chiave: 'bar-nuovo', nome: 'Bar nuovo', genitore: 'citta-shibuya' });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
+    const finestra = within(await screen.findByRole('dialog'));
+    fireEvent.change(finestra.getByLabelText('Nome'), { target: { value: 'Bar nuovo' } });
+    const passaggio = finestra.getByRole('checkbox', { name: /Crea il passaggio su «Shibuya»/ }) as HTMLInputElement;
+    const ritorno = finestra.getByRole('checkbox', { name: /passaggio di ritorno verso «Shibuya»/ }) as HTMLInputElement;
+    expect(passaggio.checked).toBe(true);
+    expect(ritorno.checked).toBe(false);
+    fireEvent.click(ritorno);
+    fireEvent.click(finestra.getByRole('button', { name: 'Crea' }));
+    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ chiave: 'bar-nuovo', nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, passaggio: true, ritorno: true }));
+  });
+
+  it('la palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Altro) con i nuovi tipi e «Bevande» al posto di «Distributore»', async () => {
+    monta();
+    expect(await screen.findByText('Modifica')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Aggiungi/ }));
+    const palette = within(screen.getByRole('group', { name: 'Tipo del nuovo spillo' }));
+    for (const g of ['Spostamenti', 'Città', 'Persone', 'Palazzi e Mementos', 'Altro']) expect(palette.getByText(g)).toBeInTheDocument();
+    expect(palette.getAllByRole('button')).toHaveLength(34);
+    for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
+    expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
   });
 });
