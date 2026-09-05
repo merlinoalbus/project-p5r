@@ -774,3 +774,6 @@ Alias localizzato aggiuntivo richiesto dall'utente: `public/asset/persona/wakiny
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/iweleth.png` — 512×512 (§13.3)
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/maruki.png` — 512×512 (§13.3)
 - [x] **COMPLETATO — approvato dall'utente** — `public/asset/palazzi/mementos.png` — 512×512 (§13.3)
+
+### Chiusura grafica 2026-09-06
+Consegnati e approvati da galaxy_task_validator: azione-copia, azione-incolla; spillo-sigarette, cercalavoro, lavoro, terme, lavanderia, cinema, biblioteca, culto, sala-giochi, casa, timbro, meccanismo, rampino, porta (prefisso spillo- su tutti). Tutti in public/asset/ui, PNG RGBA 128×128. Generazione nativa image_gen, riduzione proporzionale, nessuno scontorno o sostituzione di asset preesistenti. Verificate trasparenza, immagini su tre sfondi, caricamento HTTP e palette dell’editor. Prompt conservati nelle sezioni 17.1 e 18.1.

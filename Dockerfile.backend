@@ -48,6 +48,9 @@ COPY --from=deps  /app/node_modules ./node_modules
 COPY --from=build /app/server  ./server
 COPY --from=build /app/shared  ./shared
 COPY data/seed/ ./data/seed/
+# Immagini già distribuite con la webapp, necessarie per gli ZIP delle mappe.
+COPY public/asset/mappe/ ./public/asset/mappe/
+COPY public/asset/palazzi/ ./public/asset/palazzi/
 COPY package.json tsconfig.json tsconfig.server.json NOTICE ./
 ENV NODE_ENV=production \
     DATA_DIR=/data \

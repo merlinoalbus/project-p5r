@@ -1,3 +1,4 @@
+import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 // ============================================================
 // sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
 // ============================================================
@@ -110,5 +111,6 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       spilli++;
     });
   }
+  sincronizzaPercorsiMappe(db);
   return { mappe, spilli, riclassificati };
 }

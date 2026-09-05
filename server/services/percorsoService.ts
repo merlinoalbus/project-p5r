@@ -195,7 +195,7 @@ function applicaEffetti(partitaId: number, a: AzioneSeed, opz: OpzioniSpunta): E
   return doti.length || confidente ? { doti, confidente } : null;
 }
 
-function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
+export function annullaEffetti(partitaId: number, e: EffettiAzioneDto): void {
   for (const d of e.doti) aggiornaDote(partitaId, d.chiave, { delta: -d.delta });
   if (e.confidente) aggiornaConfidente(partitaId, e.confidente.chiave, { deltaPunti: -e.confidente.punti });
 }

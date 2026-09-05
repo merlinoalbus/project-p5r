@@ -9,7 +9,7 @@
 
 import { useState } from 'react';
 import type { CondizioneSpilloDto, DisponibilitaDto, SemaforoRequisitoDto } from '../../types';
-import { DOTI_CONDIZIONE, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, SCELTE_CONDIZIONE, STAGIONI, dataSbloccoQuartiere, dataValida, descriviRequisitoSpillo, ordineGioco, type RequisitoSpillo, type SceltaCondizione } from '../../../shared/condizioniSpillo';
+import { DOTI_CONDIZIONE, GIORNI_NEL_MESE, GIORNI_SETTIMANA, MESI_GIOCO, PALAZZI_CONDIZIONE, SCELTE_CONDIZIONE, STAGIONI, dataValida, descriviRequisitoSpillo, ordineGioco, type RequisitoSpillo, type SceltaCondizione } from '../../../shared/condizioniSpillo';
 import { nomiDaElenchi, type ElenchiCondizioni } from '../../utils/condizioniSpillo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
@@ -63,6 +63,7 @@ function SelettoreData({ etichetta, valore, onCambia }: { etichetta: string; val
 }
 
 interface PropsEditor {
+  soloAggiunta?: boolean;
   condizioni: RequisitoSpillo[];
   onCambia: (condizioni: RequisitoSpillo[]) => void;
   elenchi: ElenchiCondizioni;
@@ -70,7 +71,7 @@ interface PropsEditor {
 }
 
 /** Costruttore delle condizioni nell'editor: elenco con rimozione e aggiunta guidata per tipo. */
-export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabilitato }: PropsEditor) {
+export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabilitato, soloAggiunta }: PropsEditor) {
   const [scelta, setScelta] = useState<SceltaCondizione>('data');
   const [dal, setDal] = useState('04-18');
   const [al, setAl] = useState('04-18');
@@ -86,7 +87,7 @@ export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabili
   const nomi = nomiDaElenchi(elenchi);
   const palazzi = elenchi.dungeon.filter((d) => d.tipo === 'palazzo');
   // solo i quartieri con una data di sblocco nella Guida: gli altri (Confidenti, libri) l'app non saprebbe valutarli
-  const quartieriDatati = elenchi.quartieri.filter((q) => dataSbloccoQuartiere(q.sblocco) !== null);
+  const quartieriDatati = elenchi.quartieri.filter((q) => q.sbloccoData != null);
   const confidenteScelto = confidente || elenchi.confidenti[0]?.chiave || '';
   const richiestaScelta = richiesta || elenchi.richieste[0]?.chiave || '';
   const quartiereScelto = quartieriDatati.some((q) => q.chiave === quartiere) ? quartiere : quartieriDatati[0]?.chiave || '';
@@ -117,7 +118,7 @@ export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabili
   return (
     <fieldset className="m-0 p-0 border-0 flex flex-col gap-1.5" disabled={disabilitato}>
       <legend className="text-[12px] text-text-secondary">Condizioni di visibilità</legend>
-      {condizioni.length === 0
+      {!soloAggiunta && (condizioni.length === 0
         ? <span className="text-[12px] text-text-muted">Nessuna condizione: lo spillo è sempre visibile.</span>
         : (
           <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Condizioni dello spillo">
@@ -128,7 +129,8 @@ export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabili
               </li>
             ))}
           </ul>
-        )}
+        )
+      )}
       <div className="flex flex-col gap-1 editor-mappa__condizione">
         <label className="editor-mappa__campo">Nuova condizione
           <select className="form-input" value={scelta} onChange={(e) => setScelta(e.target.value as SceltaCondizione)}>
@@ -184,7 +186,7 @@ export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabili
         )}
         {scelta === 'quartiere' && (
           <select className="form-input" value={quartiereScelto} onChange={(e) => setQuartiere(e.target.value)} aria-label="Quartiere">
-            {quartieriDatati.map((q) => <option key={q.chiave} value={q.chiave}>{q.nome} · {descriviRequisitoSpillo({ tipo: 'data', dal: dataSbloccoQuartiere(q.sblocco)! })}</option>)}
+            {quartieriDatati.map((q) => <option key={q.chiave} value={q.chiave}>{q.nome} · {descriviRequisitoSpillo({ tipo: 'data', dal: q.sbloccoData! })}</option>)}
           </select>
         )}
         <div className="flex items-center gap-2 flex-wrap">

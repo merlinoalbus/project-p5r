@@ -4,7 +4,8 @@
 
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { getNegozio } from '../services/api';
+import { getElementoCatalogo, getNegozio } from '../services/api';
+import { notifica } from '../stores/notificationStore';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -13,6 +14,10 @@ import { IconChevronLeft } from '../components/shared/icons';
 import { NOME_CATEGORIA_ARTICOLO, NOME_TIPO_NEGOZIO } from '../utils/negozi';
 import { ArticoliTabella } from '../components/guida/ArticoliTabella';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
+import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
+import type { ElementoCatalogoDto } from '../types';
 
 export function NegozioPage() {
   const { chiave = '' } = useParams();
@@ -26,6 +31,10 @@ export function NegozioPage() {
   useDocumentTitle(n?.nome ?? 'Negozio');
   const [categoria, setCategoria] = useState('');
   const [per, setPer] = useState('');
+  // aggiunte dell'utente al catalogo: nuovo articolo di questo negozio, o correzione del negozio stesso (16.1)
+  const [modulo, setModulo] = useState<'articolo' | 'negozio' | null>(null);
+  const [elementoArticolo, setElementoArticolo] = useState<ElementoCatalogoDto | null>(null);
+  const [elementoNegozio, setElementoNegozio] = useState<ElementoCatalogoDto | null>(null);
   const [nascondiAcquistati, setNascondiAcquistati] = useState(false);
   // con una partita attiva l'elenco mostra solo ciò che è raggiungibile alla data corrente; i bloccati si possono riaprire
   const [soloDisponibili, setSoloDisponibili] = useState(true);
@@ -45,14 +54,23 @@ export function NegozioPage() {
               {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
               <ChipDisponibilita disponibilita={n.disponibilita} />
             </div>
+            <details className="catalogo-informazioni"><summary className="touch">Informazioni sul negozio{n.quartiereNome ? ` · ${n.quartiereNome}` : ''}</summary>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-text-secondary">
               {n.luogo && <span><strong className="text-text">Dove:</strong> {n.luogoChiave ? <Link to={`/guida/citta/${n.luogoChiave}`}>{n.luogo}</Link> : n.luogo}</span>}
               {n.gestore && <span><strong className="text-text">Gestore:</strong> {n.gestore}</span>}
               {n.orari && <span><strong className="text-text">Orari:</strong> {n.orari}</span>}
-              {n.sblocco && <span><strong className="text-text">Sblocco:</strong> {n.sblocco}</span>}
+              {!n.condizioni && n.sblocco && <span><strong className="text-text">Sblocco:</strong> {n.sblocco}</span>}
             </div>
+            {n.condizioni && n.condizioni.length>0&&<ul>{n.condizioni.map((r,i)=><li key={i}>{r.testo}{n.disponibilita?.requisiti[i]&&` — ${n.disponibilita.requisiti[i].dettaglio}`}</li>)}</ul>}
             {n.note && <p className="m-0 text-[13px] text-text-secondary">{n.note}</p>}
             {n.fonte && <a href={n.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
+            </details>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Aggiungi un articolo" dettaglio="a questo negozio" onClick={() => { setElementoArticolo(null); setModulo('articolo'); }} />
+              <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="modifica" dimensione={20} />} titolo="Correggi il negozio" onClick={() => { void getElementoCatalogo('negozio', chiave).then((e) => { setElementoNegozio(e); setModulo('negozio'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} />
+            </div>
+            {modulo === 'articolo' && <ModuloCatalogo tipo="articolo" elemento={elementoArticolo} negozioChiave={chiave} onChiudi={() => setModulo(null)} onSalvato={() => { setModulo(null); void dati.ricarica(); }} />}
+            {modulo === 'negozio' && elementoNegozio && <ModuloCatalogo tipo="negozio" elemento={elementoNegozio} onChiudi={() => setModulo(null)} onSalvato={() => { setModulo(null); void dati.ricarica(); }} />}
             <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </div>
           {n.articoliElenco.length > 0 && (
@@ -74,7 +92,7 @@ export function NegozioPage() {
             </div>
           )}
           {n.articoliElenco.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
-            : <ArticoliTabella articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} />}
+            : <ArticoliTabella onModifica={(a) => { void getElementoCatalogo('articolo', a.chiave).then((e) => { setElementoArticolo(e); setModulo('articolo'); }).catch((err: unknown) => notifica('error', err instanceof Error ? err.message : 'Caricamento fallito.')); }} articoli={visibili} partitaId={partitaId} onCambiato={(a) => dati.imposta({ ...n, articoliElenco: n.articoliElenco.map((x) => (x.chiave === a.chiave ? a : x)), acquistati: n.articoliElenco.filter((x) => (x.chiave === a.chiave ? a.acquistato : x.acquistato)).length })} />}
         </div>
       )}
     </PageState>
