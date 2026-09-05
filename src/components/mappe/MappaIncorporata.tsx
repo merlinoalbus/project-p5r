@@ -16,6 +16,8 @@ import { Spinner } from '../shared/PageState';
 
 interface Props {
   chiave: string;
+  puntoIniziale?: {x:number;y:number;zoom:number}|null;
+  onNaviga?: (chiave:string)=>void;
   /** Cambia per forzare un nuovo caricamento (es. dopo un'azione della pagina ospite). */
   versione?: string | number;
   /** Avvisa la pagina ospite dopo un'azione salvata dal visore (raccolto, punto della Guida, acquisto). */
@@ -29,7 +31,7 @@ interface Props {
   partitaId?: number | null;
 }
 
-export function MappaIncorporata({ chiave, versione, onCambiato, altezza, className, spilloIniziale, partitaId: partitaEsplicita }: Props) {
+export function MappaIncorporata({ chiave, versione, onCambiato, altezza, className, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -54,12 +56,13 @@ export function MappaIncorporata({ chiave, versione, onCambiato, altezza, classN
   return (
     <div className={className} style={altezza !== undefined ? { height: altezza } : className ? undefined : { height: 560 }}>
       <VisoreMappa
-        key={`${mappa.chiave}-${spilloIniziale ?? ''}`}
+        key={`${mappa.chiave}-${spilloIniziale ?? ''}-${puntoIniziale?.x ?? ''}-${puntoIniziale?.y ?? ''}-${puntoIniziale?.zoom ?? ''}`}
+        puntoIniziale={puntoIniziale}
         mappa={mappa}
         partitaId={partitaId}
         selezioneIniziale={spilloIniziale ?? null}
         incorporato={!intero}
-        onNaviga={(k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`)}
+        onNaviga={onNaviga ?? ((k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`))}
         onRaccolto={raccolto}
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}

@@ -12,7 +12,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ getAgenda: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
@@ -29,6 +29,7 @@ const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo:
 describe('OggiPartita', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) if ('mockReset' in f) f.mockReset();
+    api.getAgenda.mockResolvedValue({ giorno: '04-12', eventi: [], azioni: [] });
     api.getPercorsoIndice.mockResolvedValue(indice);
     api.getPercorsoGiorno.mockResolvedValue(giorno);
     api.getImmagini.mockResolvedValue([]);

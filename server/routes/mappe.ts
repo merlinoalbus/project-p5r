@@ -18,6 +18,7 @@ const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.nu
 const bodyMarcatore = z.object({ punto: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
 const router = Router();
 
+
 /** Fissa (x, y in percentuale) o rimuove (x/y null) lo spillo del punto sulla mappa della sua area. */
 router.put('/marcatori', validate({ body: bodyMarcatore }), (req, res) => {
   const b = req.body as { punto: string; x: number | null; y: number | null };
@@ -83,7 +84,7 @@ router.get('/entita/:tipo/:chiave', validate({ params: z.object({ tipo: z.string
 });
 
 router.post('/', validate({ body: bodyCreaMappa }), (req, res) => {
-  const { chiave, ...dati } = req.body as { chiave: string } & DatiMappa & { nome: string; tipo: DatiMappa['tipo'] & string };
+  const { chiave, ...dati } = req.body as { chiave?: string } & DatiMappa & { nome: string; tipo: DatiMappa['tipo'] & string };
   res.status(201).json(creaMappa(chiave, dati as DatiMappa & { nome: string; tipo: NonNullable<DatiMappa['tipo']> }));
 });
 router.get('/:chiave', validate({ params: paramsMappa, query: queryMappa }), (req, res) => {

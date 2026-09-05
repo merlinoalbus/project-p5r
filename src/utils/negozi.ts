@@ -10,7 +10,7 @@ export const NOME_TIPO_NEGOZIO: Record<string, string> = {
   regali: 'Regali',
   abiti: 'Abiti',
   cibo: 'Cibo',
-  online: 'Online',
+  ambulante: 'Ambulante', online: 'Online',
   distributore: 'Distributori',
   materiali: 'Materiali',
   misto: 'Misto',

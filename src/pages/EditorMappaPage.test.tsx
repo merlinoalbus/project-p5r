@@ -16,6 +16,7 @@ const api = vi.hoisted(() => ({
   esportaPacchettoRepository: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
 }));
+vi.mock('../services/api/condizioni', () => ({ getElenchiRegole: vi.fn().mockResolvedValue({stati:[],articoli:[],letture:[],arcani:[],persone:[],abilita:[]}),creaStato:vi.fn() }));
 vi.mock('../services/api', () => api);
 
 const riassunto = (extra: Partial<MappaRiassuntoDto> & { chiave: string; nome: string; tipo: MappaRiassuntoDto['tipo'] }): MappaRiassuntoDto => ({ genitore: null, ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 0, numeroFigli: 0, updatedAt: '', ...extra });
@@ -39,7 +40,7 @@ describe('EditorMappaPage', () => {
     api.getMappa.mockResolvedValue(base);
     // elenchi della Guida per le condizioni di visibilità
     api.getConfidenti.mockResolvedValue([{ chiave: 'sojiro', nome: 'Sojiro Sakura' }, { chiave: 'ann', nome: 'Ann Takamaki' }]);
-    api.getQuartieri.mockResolvedValue([{ chiave: 'akihabara', nome: 'Akihabara', sblocco: '31 agosto (evento di trama)' }, { chiave: 'ueno', nome: 'Ueno', sblocco: 'Confidente Emperor (Yusuke) Rango 3' }]);
+    api.getQuartieri.mockResolvedValue([{ chiave: 'akihabara', sbloccoData:'08-31', nome: 'Akihabara', sblocco: '31 agosto (evento di trama)' }, { chiave: 'ueno', nome: 'Ueno', sblocco: 'Confidente Emperor (Yusuke) Rango 3' }]);
     api.getRichieste.mockResolvedValue({ richieste: [{ chiave: 'zio-ingordo', nome: 'Lo zio ingordo' }], jose: null, completate: 0, totale: 1 });
     api.getDungeons.mockResolvedValue([{ chiave: 'kamoshida', nome: 'Palazzo di Kamoshida', tipo: 'palazzo', ordine: 1 }, { chiave: 'madarame', nome: 'Palazzo di Madarame', tipo: 'palazzo', ordine: 2 }]);
   });
@@ -120,21 +121,22 @@ describe('EditorMappaPage', () => {
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
-    expect(form.getByText('Nessuna condizione: lo spillo è sempre visibile.')).toBeInTheDocument();
+    expect(await form.findByText('Nessuna condizione: sempre disponibile.')).toBeInTheDocument();
+    fireEvent.click(form.getByText('Aggiungi una condizione'));
     const scelta = form.getByLabelText('Nuova condizione') as HTMLSelectElement;
     expect([...scelta.options].map((o) => o.value)).toEqual(['data', 'intervallo', 'palazzo', 'dote', 'confidente', 'richiesta', 'piove', 'non-piove', 'fascia-giorno', 'fascia-sera', 'giorno-settimana', 'stagione', 'quartiere']);
     // Palazzo scelto dall'elenco della Guida
     fireEvent.change(scelta, { target: { value: 'palazzo' } });
     fireEvent.change(await form.findByLabelText('Palazzo'), { target: { value: 'madarame' } });
     fireEvent.click(form.getByRole('button', { name: /Aggiungi condizione/ }));
-    const elenco = () => within(form.getByRole('list', { name: 'Condizioni dello spillo' }));
-    expect(elenco().getByText('dopo il Palazzo di Madarame')).toBeInTheDocument();
+    const elenco = () => form;
+    expect(elenco().getByText('dopo il Palazzo di Madarame', { selector: 'p' })).toBeInTheDocument();
     // Confidente con rango, nomi dall'elenco
     fireEvent.change(scelta, { target: { value: 'confidente' } });
     fireEvent.change(form.getByLabelText('Confidente'), { target: { value: 'sojiro' } });
     fireEvent.change(form.getByLabelText('Rango del Confidente'), { target: { value: '4' } });
     fireEvent.click(form.getByRole('button', { name: /Aggiungi condizione/ }));
-    expect(elenco().getByText('Rango Confidente Sojiro Sakura 4')).toBeInTheDocument();
+    expect(elenco().getByText('Rango Confidente Sojiro Sakura 4', { selector: 'p' })).toBeInTheDocument();
     // quartieri: solo quelli con una data di sblocco nella Guida (Ueno dipende da un Confidente: non calcolabile, non offerto)
     fireEvent.change(scelta, { target: { value: 'quartiere' } });
     expect([...(await form.findByLabelText('Quartiere') as HTMLSelectElement).options].map((o) => o.value)).toEqual(['akihabara']);
@@ -143,7 +145,7 @@ describe('EditorMappaPage', () => {
     expect(form.getByText('Condizione già presente.')).toBeInTheDocument();
     expect(form.getByRole('button', { name: /Aggiungi condizione/ })).toBeDisabled();
     fireEvent.click(form.getByRole('button', { name: 'Togli la condizione: dopo il Palazzo di Madarame' }));
-    expect(elenco().queryByText('dopo il Palazzo di Madarame')).toBeNull();
+    expect(elenco().queryByText('dopo il Palazzo di Madarame', { selector: 'p' })).toBeNull();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
     await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', collezionabile: false, riferimento: null, condizioni: [{ tipo: 'confidente', confidente: 'sojiro', rango: 4 }] }));
   });
@@ -153,7 +155,8 @@ describe('EditorMappaPage', () => {
     monta();
     fireEvent.click(await screen.findByRole('button', { name: 'Nota: Nota' }));
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
-    fireEvent.change(form.getByLabelText('Nuova condizione'), { target: { value: 'intervallo' } });
+    fireEvent.click(await form.findByText('Aggiungi una condizione'));
+    fireEvent.change(await form.findByLabelText('Nuova condizione'), { target: { value: 'intervallo' } });
     fireEvent.change(await form.findByLabelText('Dal: mese'), { target: { value: '08' } });
     fireEvent.change(form.getByLabelText('Al: mese'), { target: { value: '06' } });
     expect(form.getByText(/La data di fine precede quella di inizio/)).toBeInTheDocument();
@@ -169,15 +172,16 @@ describe('EditorMappaPage', () => {
   it('le proprietà della mappa si salvano (nome, genitore, asset); il genitore proposto esclude la mappa stessa', async () => {
     api.aggiornaMappa.mockResolvedValue(base);
     monta();
+    fireEvent.click(await screen.findByRole('button', {name:'Mappa'}));
     const form = within(await screen.findByRole('region', { name: 'Proprietà della mappa' }));
     const genitore = form.getByLabelText('Mappa genitore') as HTMLSelectElement;
     expect([...genitore.options].map((o) => o.value)).toEqual(['', 'tokyo']);
     fireEvent.change(form.getByLabelText('Nome'), { target: { value: 'Shibuya centro' } });
-    fireEvent.change(form.getByLabelText(/Asset del repository/), { target: { value: 'mappe/citta-shibuya' } });
     fireEvent.click(form.getByRole('button', { name: 'Salva mappa' }));
-    await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, asset: 'mappe/citta-shibuya', note: '' }));
+    await waitFor(() => expect(api.aggiornaMappa).toHaveBeenCalledWith('citta-shibuya', { nome: 'Shibuya centro', tipo: 'quartiere', genitore: 'tokyo', ordine: 0, note: '' }));
     // quartiere collegato alla guida: è offerto «Scarica dalla guida»; l'esportazione del luogo produce lo ZIP per il repository
     expect(await screen.findByRole('button', { name: 'Scarica dalla guida' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button',{name:'File'}));
     expect(screen.getByRole('button', { name: /Esporta questo luogo/ })).toBeInTheDocument();
   });
 
@@ -189,6 +193,7 @@ describe('EditorMappaPage', () => {
     const creato: SpilloDto = { ...versoA, id: 22, nome: 'Luogo B', riferimento: { tipo: 'mappa', chiave: 'luogo-b' } };
     api.creaPassaggio.mockResolvedValue(creato);
     monta();
+    fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
     const albero = within(await screen.findByRole('region', { name: 'Albero delle mappe' }));
     // «Luogo A» è raggiunto da uno spillo: nessuna riga di avviso; «Luogo B» no
     expect(albero.getAllByText('Senza passaggio da questa mappa.')).toHaveLength(1);
@@ -201,6 +206,7 @@ describe('EditorMappaPage', () => {
     // lo spillo creato è selezionato nel pannello e la riga di avviso di «Luogo B» sparisce
     expect(await screen.findByRole('region', { name: 'Proprietà dello spillo: Luogo B' })).toBeInTheDocument();
     await waitFor(() => expect(screen.queryByText('Senza passaggio da questa mappa.')).toBeNull());
+    fireEvent.click(screen.getByRole('button',{name:'Collegamenti'}));
     fireEvent.click(screen.getByRole('button', { name: 'Crea passaggio di ritorno' }));
     await waitFor(() => expect(api.creaPassaggio).toHaveBeenLastCalledWith('citta-shibuya', 'tokyo'));
   });
@@ -208,6 +214,7 @@ describe('EditorMappaPage', () => {
   it('«Nuova mappa» (15.24): chiede il passaggio sul genitore (preselezionato) e il ritorno (a scelta) e li passa all’API', async () => {
     api.creaMappa.mockResolvedValue({ ...base, chiave: 'bar-nuovo', nome: 'Bar nuovo', genitore: 'citta-shibuya' });
     monta();
+    fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
     fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
     const finestra = within(await screen.findByRole('dialog'));
     fireEvent.change(finestra.getByLabelText('Nome'), { target: { value: 'Bar nuovo' } });
@@ -215,38 +222,27 @@ describe('EditorMappaPage', () => {
     const ritorno = finestra.getByRole('checkbox', { name: /passaggio di ritorno verso «Shibuya»/ }) as HTMLInputElement;
     expect(passaggio.checked).toBe(true);
     expect(ritorno.checked).toBe(false);
-    // l'asset del repository segue la chiave proposta («mappe/<chiave>», 15.25)
-    const asset = finestra.getByLabelText('Asset del repository') as HTMLInputElement;
-    expect(asset.value).toBe('mappe/bar-nuovo');
-    fireEvent.change(finestra.getByLabelText(/Chiave/), { target: { value: 'bar-centrale' } });
-    expect(asset.value).toBe('mappe/bar-centrale');
+    expect(finestra.queryByLabelText(/Chiave/)).toBeNull();
+    expect(finestra.queryByLabelText('Asset del repository')).toBeNull();
     fireEvent.click(ritorno);
     fireEvent.click(finestra.getByRole('button', { name: 'Crea' }));
-    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ chiave: 'bar-centrale', nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, asset: 'mappe/bar-centrale', passaggio: true, ritorno: true }));
+    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, passaggio: true, ritorno: true }));
     // riaperta, la finestra parte pulita (nome, chiave, asset e caselle ai valori iniziali)
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     // la pagina passa alla mappa appena creata e la ricarica: si attende il pannello
+    fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
     fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
     const riaperta = within(await screen.findByRole('dialog'));
     expect((riaperta.getByLabelText('Nome') as HTMLInputElement).value).toBe('');
-    expect((riaperta.getByLabelText('Asset del repository') as HTMLInputElement).value).toBe('');
+    expect(riaperta.queryByLabelText('Asset del repository')).toBeNull();
     expect((riaperta.getByRole('checkbox', { name: /passaggio di ritorno/ }) as HTMLInputElement).checked).toBe(false);
   });
 
-  it('nella finestra «Nuova mappa» l’asset si può cambiare o svuotare: vuoto = nessun asset (null)', async () => {
-    api.creaMappa.mockResolvedValue({ ...base, chiave: 'vicolo', nome: 'Vicolo', genitore: 'citta-shibuya' });
-    monta();
-    fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
-    const finestra = within(await screen.findByRole('dialog'));
-    fireEvent.change(finestra.getByLabelText('Nome'), { target: { value: 'Vicolo' } });
-    const asset = finestra.getByLabelText('Asset del repository') as HTMLInputElement;
-    fireEvent.change(asset, { target: { value: 'palazzi/vicolo-mio' } });
-    // una volta toccato, l'asset non segue più la chiave
-    fireEvent.change(finestra.getByLabelText(/Chiave/), { target: { value: 'vicolo-2' } });
-    expect(asset.value).toBe('palazzi/vicolo-mio');
-    fireEvent.change(asset, { target: { value: '' } });
-    fireEvent.click(finestra.getByRole('button', { name: 'Crea' }));
-    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'vicolo-2', asset: null })));
+  it('nomi uguali nella stessa mappa impediscono la creazione, senza una chiave da inserire',async()=>{
+    api.getAlberoMappe.mockResolvedValue([riassunto({chiave:'citta-shibuya-vicolo',nome:'Vicolo',tipo:'luogo',genitore:'citta-shibuya'})]);
+    monta();fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));fireEvent.click(await screen.findByRole('button',{name:/Nuova mappa/}));
+    const f=within(await screen.findByRole('dialog'));fireEvent.change(f.getByLabelText('Nome'),{target:{value:'Vicolo'}});
+    expect(f.getByRole('button',{name:'Crea'})).toBeDisabled();
   });
 
   it('la palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Altro) con i nuovi tipi e «Bevande» al posto di «Distributore»', async () => {
@@ -259,4 +255,15 @@ describe('EditorMappaPage', () => {
     for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
     expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
   });
+});
+
+it('conserva i campi non salvati cambiando sezione e riapre Spilli quando si seleziona un pin',async()=>{
+ api.getMappa.mockResolvedValue({...base,spilli:[nota]});monta();
+ fireEvent.click(await screen.findByRole('button',{name:'Nota: Nota'}));
+ const form=within(screen.getByRole('region',{name:'Proprietà dello spillo: Nota'}));
+ fireEvent.change(form.getByLabelText('Nome'),{target:{value:'Bozza conservata'}});
+ fireEvent.click(screen.getByRole('button',{name:'File'}));
+ expect(screen.queryByRole('region',{name:'Proprietà dello spillo: Nota'})).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Spilli'}));
+ expect(form.getByLabelText('Nome')).toHaveValue('Bozza conservata');
 });

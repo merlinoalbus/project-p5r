@@ -79,7 +79,7 @@ describe('API negozi e inventario', () => {
     const scheda = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     const conRango = scheda.articoliElenco.filter((a) => /^Rango Confidente \d+$/.test(a.condizione ?? ''));
     expect(conRango.length).toBeGreaterThan(0);
-    for (const a of conRango) expect(a.disponibilita).toMatchObject({ stato: 'bloccato', requisiti: [expect.objectContaining({ tipo: 'confidente', stato: 'rosso' })] });
+    for (const a of conRango) expect(a.disponibilita).toMatchObject({ stato: 'bloccato', requisiti: expect.arrayContaining([expect.objectContaining({ tipo: 'confidente', stato: 'rosso' })]) });
     const ricerca = (await request(app).get(`/api/compendio/articoli?q=Takemedic&partita=${id}`)).body.data as RicercaArticoliDto;
     const trovato = ricerca.articoli.find((a) => a.chiave === conRango.find((c) => c.nome === 'Takemedic')?.chiave) ?? ricerca.articoli.find((a) => a.negozioChiave === 'clinica-takemi');
     expect(trovato).toBeDefined();

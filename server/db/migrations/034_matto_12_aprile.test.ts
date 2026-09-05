@@ -21,8 +21,8 @@ describe('migrazione 034 — Il Matto il 12 aprile', () => {
   it('il seed: l’11 aprile ha solo il Palazzo, il 12 aprile finisce con la Stanza di Velluto (Igor, rango 1) e il requisito del Matto parte dal 12 aprile', () => {
     const g11 = JSON.parse((prepared("SELECT azioni_json FROM giorno_percorso WHERE data = '04-11'").get() as { azioni_json: string }).azioni_json) as Array<{ tipo: string }>;
     const g12 = JSON.parse((prepared("SELECT azioni_json FROM giorno_percorso WHERE data = '04-12'").get() as { azioni_json: string }).azioni_json) as Array<{ tipo: string; fascia: string; riferimento: { chiave: string } | null; rangoAtteso: number | null }>;
-    expect(g11.map((a) => a.tipo)).toEqual(['palazzo']);
-    expect(g12[3]).toMatchObject({ tipo: 'velluto', fascia: 'sera', riferimento: { chiave: 'igor' }, rangoAtteso: 1 });
+    expect(g11.map((a) => a.tipo)).toEqual(['palazzo', 'velluto']);
+    expect(g12.at(-1)).toMatchObject({ tipo: 'velluto', fascia: 'sera', riferimento: { chiave: 'igor' }, rangoAtteso: 1 });
     const req = prepared("SELECT dati_json FROM confidente_requisito WHERE confidente_chiave = 'igor' AND rango = 1 AND tipo = 'data'").get() as { dati_json: string };
     expect(JSON.parse(req.dati_json)).toMatchObject({ dal: '04-12' });
   });

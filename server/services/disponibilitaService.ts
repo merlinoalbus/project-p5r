@@ -16,7 +16,7 @@ import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
-import { dataSbloccoQuartiere, ordineGioco } from '../../shared/condizioniSpillo.js';
+import { descriviRequisitoSpillo, type RequisitoSpillo, dataSbloccoQuartiere, ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
 const MESI: Record<string, number> = { gennaio: 1, febbraio: 2, marzo: 3, aprile: 4, maggio: 5, giugno: 6, luglio: 7, agosto: 8, settembre: 9, ottobre: 10, novembre: 11, dicembre: 12 };
@@ -65,7 +65,7 @@ type RequisitoLocale =
   | { tipo: 'fascia'; fascia: 'giorno' | 'sera'; testo: string }
   | { tipo: 'ignoto'; testo: string };
 
-export type RequisitoDisponibilita = RequisitoSeed | RequisitoLocale;
+export type RequisitoDisponibilita = RequisitoSeed | RequisitoLocale | (RequisitoSpillo & {testo:string});
 
 export interface ContestoTesto {
   /** Confidente che gestisce il negozio: «Rango Confidente 3» senza nome si riferisce a lui. */
@@ -181,14 +181,18 @@ export function requisitiDaTesto(testo: string | null | undefined, ctx: Contesto
 /** Stato della partita per la disponibilità: lo stesso dei semafori dei Confidenti più il giorno della settimana corrente. */
 export interface SbloccoQuartiere { nome: string; dal: string | null }
 export interface StatoDisponibilita extends StatoPartitaSemafori {
+  partitaId?: number;
+  fatti?: Map<string, { nome:string; valore:number | null }>;
+  articoliOttenuti?: Set<string>;
+  letture?: Set<string>;
   giornoSettimana: string | null;
   /** Quartieri della Guida con la data di sblocco («MM-GG») quando il testo dello sblocco comincia con una data. */
   sbloccoQuartieri: Map<string, SbloccoQuartiere>;
 }
 
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
-  const righe = prepared('SELECT chiave, nome, sblocco FROM quartiere').all() as Array<{ chiave: string; nome: string; sblocco: string | null }>;
-  return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: dataSbloccoQuartiere(q.sblocco) }]));
+  const righe = prepared('SELECT chiave, nome, sblocco_data FROM quartiere').all() as Array<{ chiave: string; nome: string; sblocco_data: string | null }>;
+  return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: q.sblocco_data }]));
 }
 
 export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita {
@@ -196,13 +200,30 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
-  return { ...st, giornoSettimana: giorno ? piatto(giorno) : null, sbloccoQuartieri: sbloccoQuartieri() };
+  return { ...st, partitaId,
+    fatti: new Map((prepared('SELECT f.chiave,f.nome,p.valore FROM fatto_gioco f LEFT JOIN fatto_partita p ON p.fatto_chiave=f.chiave AND p.partita_id=?').all(partitaId) as Array<{chiave:string;nome:string;valore:number|null}>).map(f=>[f.chiave,f])),
+    articoliOttenuti: new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id=?').all(partitaId) as Array<{articolo_chiave:string}>).map(a=>a.articolo_chiave)),
+    letture: new Set((prepared('SELECT tipo,chiave FROM lettura_partita WHERE partita_id=?').all(partitaId) as Array<{tipo:string;chiave:string}>).map(a=>a.tipo+'/'+a.chiave)),
+    giornoSettimana: giorno ? piatto(giorno) : null, sbloccoQuartieri: sbloccoQuartieri() };
 }
 
 /** Valuta un requisito: quelli dei Confidenti col valutatore dei semafori, quelli locali qui. */
 function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDisponibilita): SemaforoRequisitoDto {
   const base = { indice, testo: r.testo, confermato: false } as const;
   switch (r.tipo) {
+    case 'gruppo': {
+      const esiti=r.condizioni.map((c,i)=>valutaRequisito({...c,testo:descriviRequisitoSpillo(c)},i,st));
+      const stato = r.modo === 'tutte'
+        ? (esiti.some(e=>e.stato==='rosso') ? 'rosso' : esiti.some(e=>e.stato==='grigio') ? 'grigio' : 'verde')
+        : (esiti.some(e=>e.stato==='verde') ? 'verde' : esiti.some(e=>e.stato==='grigio') ? 'grigio' : 'rosso');
+      return {...base,tipo:'manuale',stato,manuale:false,dettaglio:esiti.map(e=>e.testo+': '+e.dettaglio).join(' · ')};
+    }
+    case 'non': {const esito=valutaRequisito({...r.condizione,testo:descriviRequisitoSpillo(r.condizione)},indice,st);return {...base,tipo:esito.tipo,stato:esito.stato==='verde'?'rosso':esito.stato==='rosso'?'verde':'grigio',manuale:false,dettaglio:'Blocco: '+esito.dettaglio};}
+    case 'da-configurare': return {...base,tipo:'manuale',stato:'grigio',manuale:false,dettaglio:'Configura questa condizione nell’editor: '+r.nota};
+    case 'stato': { const f=st.fatti?.get(r.chiave);const v=f?.valore;const ok=v != null && (r.confronto==='almeno'?v>=r.valore:r.confronto==='massimo'?v<=r.valore:v===r.valore);return {...base,tipo:'manuale',stato:v==null?'grigio':ok?'verde':'rosso',manuale:false,testo:(f?.nome??r.chiave)+' '+r.confronto+' '+r.valore,dettaglio:v==null?'Registra lo stato in Impostazioni → Stati della partita':'Valore attuale: '+v};}
+    case 'articolo': return {...base,tipo:'manuale',stato:st.articoliOttenuti?.has(r.articolo)?'verde':'rosso',manuale:false,dettaglio:st.articoliOttenuti?.has(r.articolo)?'Articolo segnato come ottenuto':'Segna l’articolo come acquistato/ottenuto nel catalogo'};
+    case 'lettura': return {...base,tipo:'manuale',stato:st.letture?.has(r.categoria+'/'+r.chiave)?'verde':'rosso',manuale:false,dettaglio:st.letture?.has(r.categoria+'/'+r.chiave)?'Completato nella partita':'Ancora da completare nella Guida'};
+
     case 'intervallo': {
       if (!st.dataGioco) return { ...base, tipo: 'data', stato: 'grigio', dettaglio: 'Imposta il giorno corrente della partita', manuale: false };
       const oggi = ordineGioco(st.dataGioco);
@@ -233,7 +254,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
     case 'quartiere': {
       const q = st.sbloccoQuartieri.get(r.quartiere);
       const nome = q?.nome ?? r.quartiere;
-      if (!q?.dal) return { ...base, tipo: 'data', stato: 'grigio', dettaglio: `${nome}: la Guida non indica una data di sblocco`, manuale: true };
+      if (!q?.dal) return { ...base, tipo: 'data', stato: 'grigio', dettaglio: `${nome}: la Guida non indica una data di sblocco`, manuale: false };
       // stessa valutazione (e stesso testo) di una data della guida
       const esito = valutaRequisito({ tipo: 'data', dal: q.dal, testo: r.testo }, indice, st);
       return { ...esito, dettaglio: `${nome}: ${esito.dettaglio}` };
@@ -242,6 +263,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       return { ...base, tipo: 'manuale', stato: 'grigio', dettaglio: 'Condizione non verificabile dai dati della partita', manuale: true };
     default: {
       const { tipo, testo, ...dati } = r as RequisitoSeed & Record<string, unknown>;
+      if (tipo === 'richiesta') dati.richiesta = (prepared('SELECT nome FROM richiesta WHERE chiave=?').get(String(dati.richiesta)) as {nome:string}|undefined)?.nome ?? dati.richiesta;
       const riga: RigaRequisito = { confidente_chiave: '', rango: 0, indice, tipo, dati_json: JSON.stringify(dati), testo };
       const esito = valuta(riga, st);
       // Palazzo non completato e richiesta non conclusa sono fatti che l'app registra (boss segnato, richiesta completata): per la
@@ -249,7 +271,7 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
       if ((tipo === 'palazzo' || tipo === 'richiesta') && esito.stato === 'grigio') {
         return { ...esito, stato: 'rosso', manuale: false, dettaglio: esito.dettaglio.replace(/\s*(?:—\s*)?(?:o|oppure) conferma qui\s*$/, '') };
       }
-      return esito;
+      return { ...esito, manuale: false };
     }
   }
 }

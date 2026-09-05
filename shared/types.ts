@@ -1038,12 +1038,13 @@ export interface PercorsoGiornoDto {
 // ---- Negozi e inventario (Fase 8.2) ----
 
 export interface NegozioRiassuntoDto {
+  condizioni?: CondizioneSpilloDto[];
   chiave: string;
   nome: string;
   luogo: string;
   luogoChiave: string | null;
   quartiereNome: string | null;
-  tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'distributore' | 'materiali' | 'misto' | 'altro';
+  tipo: 'armi' | 'protezioni' | 'accessori' | 'oggetti' | 'regali' | 'abiti' | 'cibo' | 'online' | 'ambulante' | 'distributore' | 'materiali' | 'misto' | 'altro';
   gestore: string | null;
   confidente: { chiave: string; nome: string } | null;
   orari: string | null;
@@ -1061,6 +1062,7 @@ export interface DisponibilitaDto {
 }
 
 export interface ArticoloDto {
+  condizioni?: CondizioneSpilloDto[];
   chiave: string;
   negozioChiave: string;
   negozioNome: string;
@@ -1118,7 +1120,11 @@ export interface CruciverbaTuttiDto {
 
 export type DoteChiave = 'conoscenza' | 'fascino' | 'coraggio' | 'gentilezza' | 'perizia';
 
+export interface IngressoQuartiereDto { mappa:string; nome:string; x:number; y:number; zoom:number }
 export interface QuartiereRiassuntoDto {
+  mappaChiave?:string;
+  ingresso?:IngressoQuartiereDto|null;
+  sbloccoData?:string|null;
   chiave: string;
   nome: string;
   sblocco: string | null;
@@ -1149,6 +1155,9 @@ export interface LuogoDto {
 }
 
 export interface QuartiereDettaglioDto {
+  mappaChiave?:string;
+  ingresso?:IngressoQuartiereDto|null;
+  sbloccoData?:string|null;
   chiave: string;
   nome: string;
   sblocco: string | null;
@@ -1440,6 +1449,8 @@ export interface ImmagineDto {
 // ---- Mappe a livelli e spilli (Fase 13) ----
 
 export interface MappaRiassuntoDto {
+  nomeCompleto?: string;
+  assetOriginale?: string|null;
   chiave: string;
   nome: string;
   tipo: TipoMappa;
@@ -1520,9 +1531,12 @@ export interface MappaDto extends MappaRiassuntoDto {
 
 /** Pacchetto di esportazione/importazione (versione 1); il seed `mappe-editor.json` usa lo stesso formato senza `immagini`. */
 export interface EsportazioneMappeDto {
+  ingressi?:Array<{quartiere:string;mappa:string;x:number;y:number;zoom:number}>;
+  stati?: Array<{chiave:string;nome:string;categoria:string;unita:string}>;
   versione: 1;
   esportato?: string;
   mappe: Array<{
+    assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
     spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
@@ -1554,4 +1568,65 @@ export interface EsitoRipristinoDto {
   caratteri: number;
   copiaDiSicurezza: string;
   stato: StatoIstanzaDto;
+}
+
+// ---- Catalogo estensibile dall'utente (16.1) ----
+
+/** Tipi di riga del catalogo che l'utente può aggiungere o correggere. */
+export type TipoCatalogo = 'negozio' | 'articolo';
+
+/** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */
+export interface ElementoCatalogoDto {
+  tipo: TipoCatalogo;
+  chiave: string;
+  nome: string;
+  origine: 'seed' | 'utente';
+  /** Riga del seed corretta dall'utente: «Ripristina» la riporta com'era. */
+  modificata: boolean;
+  nascosta: boolean;
+  aggiornata: string | null;
+  /** Campi editabili, con i nomi delle colonne. */
+  dati: Record<string, unknown>;
+}
+
+export interface RiepilogoCatalogoDto {
+  perTipo: Array<{ tipo: TipoCatalogo; creati: number; modificati: number; nascosti: number; totale: number }>;
+}
+
+// ---- Agenda del giorno: eventi e cose da fare dell'utente (16.1) ----
+
+/** Evento aggiunto dall'utente a una data del calendario; senza `partita` vale per tutte le partite. */
+export interface EventoUtenteDto {
+  id: number;
+  partitaId: number | null;
+  /** Giorno del calendario di gioco ('MM-GG'). Si chiama «giorno» e non «data» perché l'envelope `{ data }` delle risposte lascia intatti gli oggetti che hanno già una chiave `data`. */
+  giorno: string;
+  tipo: 'evento' | 'scadenza' | 'promemoria';
+  titolo: string;
+  dettaglio: string;
+  riferimento: { tipo: string; chiave: string } | null;
+  ordine: number;
+}
+
+/** Cosa da fare aggiunta dall'utente a una data e fascia; si spunta come le azioni della guida. */
+export interface AzioneUtenteDto {
+  id: number;
+  partitaId: number | null;
+  /** Giorno del calendario di gioco ('MM-GG'); vedi la nota su EventoUtenteDto. */
+  giorno: string;
+  fascia: FasciaGioco;
+  tipo: string;
+  azione: string;
+  riferimento: { tipo: string; chiave: string } | null;
+  rangoAtteso: number | null;
+  note: string | null;
+  ordine: number;
+  /** Spuntata nella partita indicata. */
+  fatta: boolean;
+}
+
+export interface AgendaGiornoDto {
+  giorno: string;
+  eventi: EventoUtenteDto[];
+  azioni: AzioneUtenteDto[];
 }

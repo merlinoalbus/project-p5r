@@ -901,3 +901,67 @@
    Regola fuori da ogni @layer: vince sull'utility di Tailwind senza !important.
    ============================================================ */
 .sr-only { top: 0; left: 0; }
+
+/* Il contenuto decide il formato anche con la sidebar aperta. */
+.catalogo-prodotti { container-type: inline-size; min-width: 0; }
+.catalogo-prodotti > ul { margin:0; padding:0; list-style:none; display:grid; gap:10px; }
+.catalogo-prodotto { background:#131419; border:1px solid #3c3d46; padding:16px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 16px; font-size:14px; line-height:1.5; }
+.catalogo-prodotto__nome { display:flex; flex-direction:column; min-width:0; overflow-wrap:anywhere; }
+.catalogo-prodotto__nome > strong { font-size:16px; color:#fff; }
+.catalogo-prodotto__meta { color:#bfc1cc; }
+.catalogo-prodotto__prezzo { display:flex; flex-direction:column; align-items:flex-end; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.catalogo-prodotto__etichetta { font-size:11px; color:#bfc1cc; text-transform:uppercase; }
+.catalogo-prodotto__disponibilita { grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; overflow-wrap:anywhere; }
+.catalogo-prodotto__azioni { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.catalogo-prodotto__dettagli { grid-column:1/-1; border-top:1px solid #34353f; min-width:0; }
+.catalogo-prodotto__dettagli summary { cursor:pointer; align-content:center; color:#d4d5df; }
+.catalogo-prodotto__dettagli dl { margin:0; display:grid; grid-template-columns:1fr; gap:4px; }
+.catalogo-prodotto__dettagli dt { color:#bfc1cc; font-weight:600; }
+.catalogo-prodotto__dettagli dd { margin:0 0 8px; overflow-wrap:anywhere; }
+.catalogo-prodotto--acquistato { border-left:3px solid #6ab38c; }
+.catalogo-risultati-negozi { display:flex; flex-wrap:wrap; gap:8px; }
+.catalogo-risultati-negozi h2 { flex-basis:100%; font-size:16px; margin:0; }
+@container (min-width:620px) {
+  .catalogo-prodotti > ul { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@container (min-width:1050px) {
+  .catalogo-prodotti > ul { grid-template-columns:1fr; gap:0; }
+  .catalogo-prodotto { grid-template-columns:minmax(250px,2fr) minmax(110px,.7fr) minmax(200px,1.5fr) auto; border-bottom:0; }
+  .catalogo-prodotto:last-child { border-bottom:1px solid #3c3d46; }
+  .catalogo-prodotto__disponibilita, .catalogo-prodotto__azioni { grid-column:auto; }
+  .catalogo-prodotto__azioni { justify-content:flex-end; }
+  .catalogo-prodotto__dettagli dl { grid-template-columns:120px minmax(0,1fr); }
+}
+
+.catalogo-informazioni { background:#131419; border:1px solid #3c3d46; padding:0 12px; font-size:14px; }
+.catalogo-informazioni summary { cursor:pointer; align-content:center; }
+.catalogo-informazioni[open] { padding-bottom:12px; }
+
+.regole-editor { border:1px solid #3c3d46; padding:12px; min-width:0; background:#131419; }
+.regole-editor legend { font-weight:600; }
+.regole-gruppo { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.regole-riga { border-left:2px solid #777987; padding:8px; min-width:0; overflow-wrap:anywhere; }
+.regole-riga p { margin:0; }
+.regole-aggiunta { background:#202127; padding:0 8px 8px; }
+.regole-aggiunta summary { cursor:pointer; align-content:center; }
+.regole-editor .form-input { max-width:100%; min-width:0; }
+
+/* Editor: una sezione alla volta, campi conservati al cambio pannello. */
+.editor-mappa__sezioni { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; position:sticky; top:-10px; z-index:5; background:#131419; padding:8px 0; }
+.editor-mappa__sezioni button { min-height:44px; border:1px solid var(--color-border); background:#1b1c20; color:var(--color-text); font:inherit; font-size:13px; cursor:pointer; }
+.editor-mappa__sezioni button[aria-pressed="true"] { background:var(--color-primary); color:var(--color-text-on-primary); border-color:var(--color-primary); }
+.editor-mappa__sezioni button:focus-visible { outline:2px solid white; outline-offset:2px; }
+.editor-mappa__contenuto { display:flex; flex-direction:column; gap:12px; min-width:0; }
+.editor-mappa__contenuto[hidden] { display:none; }
+.editor-mappa__aiuto { margin:0; padding:12px; background:#1b1c20; font-size:14px; line-height:1.5; color:var(--color-text-secondary); }
+.editor-mappa__ricerca { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
+.editor-mappa__ricerca select { grid-column:1/-1; }
+.editor-mappa__ricerca input { min-width:0; }
+.visore-mappa--editor .editor-mappa__campo .form-input, .visore-mappa--editor .editor-mappa__risultato { min-height:44px; font-size:14px; }
+.visore-mappa--editor .visore-mappa__pannello { background:#131419; }
+@media (max-width:860px) { .editor-mappa__sezioni { grid-template-columns:repeat(4,minmax(0,1fr)); } .editor-mappa__sezioni button { font-size:12px; padding:4px 2px; } }
+
+.ingresso-quartiere__immagine { position:relative; width:min(100%,720px); align-self:center; cursor:crosshair; overflow:hidden; line-height:0; }
+.ingresso-quartiere__immagine img { width:100%; height:auto; display:block; }
+.ingresso-quartiere__immagine:focus-visible {outline:3px solid var(--color-primary);}
+.ingresso-quartiere__punto { position:absolute; transform:translate(-50%,-50%); width:32px; height:32px; border:2px solid white; background:#e52325; border-radius:50%; color:white; font:700 24px/28px sans-serif; text-align:center; box-shadow:0 0 0 2px #000; pointer-events:none; }

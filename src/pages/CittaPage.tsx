@@ -2,7 +2,7 @@
 // CittaPage — la città: mappa globale di Tokyo navigabile (quartieri come passaggi) e piastrelle dei quartieri (Fase 8.1, mappe 13.4)
 // ============================================================
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getQuartieri } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -15,6 +15,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 
 export function CittaPage() {
+  const navigate=useNavigate();
   const sugg = useSuggerimenti();
   useDocumentTitle('La città');
   const dati = useCarica(() => getQuartieri(), []);
@@ -24,7 +25,7 @@ export function CittaPage() {
       {q && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i quartieri come passaggi: tocca un quartiere per aprirne la mappa con negozi, ristoranti, attività e Confidenti. Sotto, le schede dei quartieri con luoghi, orari e sblocchi." />
-          <MappaIncorporata chiave="tokyo" altezza="max(520px, calc(100vh - 260px))" />
+          <MappaIncorporata onNaviga={k=>{const quartiere=q.find(v=>v.mappaChiave===k||`citta-${v.chiave}`===k);navigate(quartiere?`/guida/citta/${quartiere.chiave}`:`/guida/mappe/${encodeURIComponent(k)}`);}} chiave="tokyo" altezza="max(520px, calc(100vh - 260px))" />
           <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
             {q.map((x) => (
               <li key={x.chiave}>

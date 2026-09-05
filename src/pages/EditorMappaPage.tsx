@@ -1,3 +1,4 @@
+import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 // ============================================================
 // EditorMappaPage — editor di una mappa a livelli (Fase 13.3): strumenti seleziona/sposta e aggiungi, proprietà dello spillo con
 // riferimento cercato fra le entità della guida, immagine di base, proprietà e albero delle mappe, esportazione/importazione
@@ -19,10 +20,10 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
-import { CondizioniSpilloEditor } from '../components/mappe/CondizioniSpillo';
+
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
-import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo';
+import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
@@ -58,6 +59,8 @@ export function EditorMappaPage() {
   const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
   const [selezionatoId, setSelezionatoId] = useState<number | null>(null);
+  const [sezione, setSezione] = useState('spilli');
+  const seleziona = (id:number|null) => { setSelezionatoId(id); if(id!==null)setSezione('spilli'); };
   const [occupato, setOccupato] = useState(false);
   const [confermaEliminaMappa, setConfermaEliminaMappa] = useState(false);
   const [nuovaMappaAperta, setNuovaMappaAperta] = useState(false);
@@ -80,20 +83,20 @@ export function EditorMappaPage() {
   const editor: StrumentiEditor = {
     strumento,
     selezionatoId,
-    onSeleziona: setSelezionatoId,
+    onSeleziona: seleziona,
     onClickMappa: (x, y) => {
       if (strumento === 'incolla') {
         if (!appunti) { setStrumento('seleziona'); return; }
         void esegui(async () => {
           const s = await creaSpillo(chiave, { ...appunti, x, y });
-          setSelezionatoId(s.id);
+          seleziona(s.id);
           setStrumento('seleziona');
         }, `Spillo «${appunti.nome}» incollato: stesso tipo, descrizione, riferimento e condizioni di visibilità dell'originale.`);
         return;
       }
       void esegui(async () => {
         const s = await creaSpillo(chiave, { tipo: tipoNuovo, nome: DEFINIZIONI_SPILLO[tipoNuovo].nome, x, y });
-        setSelezionatoId(s.id);
+        seleziona(s.id);
         setStrumento('seleziona');
       }, `Spillo «${DEFINIZIONI_SPILLO[tipoNuovo].nome}» aggiunto: completa nome e riferimento nel pannello.`);
     },
@@ -122,7 +125,7 @@ export function EditorMappaPage() {
           pannello={
             <PannelloEditor
               mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}
-              onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={setSelezionatoId} onCopia={copia}
+              onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={seleziona} sezione={sezione} onSezione={setSezione} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={(id) => esegui(async () => { await eliminaSpillo(id); setSelezionatoId(null); }, 'Spillo eliminato.')}
               onAggiungiImmagine={(id, file, didascalia) => esegui(() => aggiungiImmagineSpillo(id, file, didascalia), 'Schermata aggiunta allo spillo (resta nella tua istanza).')}
@@ -136,14 +139,11 @@ export function EditorMappaPage() {
                 setTimeout(() => URL.revokeObjectURL(url), 1000);
               }, `Pacchetto «${chiave}» pronto: estrailo nella radice del repository (data/seed/mappe/ e public/asset/).`)}
               onCreaMappaCollegata={(s) => esegui(async () => {
-                const base = slug(s.nome) || `mappa-${s.id}`;
-                let chiaveNuova = base;
-                for (let i = 2; (albero.dati ?? []).some((m) => m.chiave === chiaveNuova); i++) chiaveNuova = `${base}-${i}`;
-                await creaMappa({ chiave: chiaveNuova, nome: s.nome, tipo: dati.tipo === 'palazzo' || dati.tipo === 'dedalo' || dati.tipo === 'area' ? 'area' : 'luogo', genitore: dati.chiave, ordine: dati.figli.length });
-                await aggiornaSpillo(s.id, { tipo: 'passaggio', riferimento: { tipo: 'mappa', chiave: chiaveNuova } });
+                const nuova=await creaMappa({ nome:s.nome, tipo:dati.tipo==='palazzo'||dati.tipo==='dedalo'||dati.tipo==='area'?'area':'luogo', genitore:dati.chiave, ordine:dati.figli.length });
+                await aggiornaSpillo(s.id,{tipo:'passaggio',riferimento:{tipo:'mappa',chiave:nuova.chiave}});
                 await albero.ricarica();
               }, 'Mappa collegata creata: lo spillo ora è un passaggio verso di lei.')}
-              onSalvaMappa={(d) => esegui(() => aggiornaMappa(chiave, d), 'Mappa salvata.')}
+              onSalvaMappa={(d) => esegui(async()=>{const aggiornata=await aggiornaMappa(chiave,d);await albero.ricarica();if(aggiornata.chiave!==chiave)vai(aggiornata.chiave);}, 'Mappa salvata.')}
               onImmagine={(file) => esegui(() => caricaImmagineMappa(chiave, file), 'Immagine di base caricata (resta nella tua istanza).')}
               onScaricaDallaGuida={() => esegui(async () => {
                 if (dati.entita?.tipo === 'area') await scaricaPianta(dati.entita.chiave);
@@ -153,7 +153,7 @@ export function EditorMappaPage() {
               onNuovaMappa={() => setNuovaMappaAperta(true)}
               onCreaPassaggio={(destinazione) => esegui(async () => {
                 const s = await creaPassaggio(chiave, destinazione);
-                setSelezionatoId(s.id); setStrumento('seleziona');
+                seleziona(s.id); setStrumento('seleziona');
               }, destinazione === dati.genitore ? `Passaggio di ritorno verso «${dati.genitoreNome ?? destinazione}» creato in basso al centro: trascinalo dove sta l'uscita.` : 'Passaggio creato al centro della mappa: trascinalo dove sta l\'ingresso.')}
               onEsporta={() => void esegui(async () => {
                 const pacchetto = await esportaMappe();
@@ -191,6 +191,7 @@ export function EditorMappaPage() {
 }
 
 interface PropsPannello {
+  sezione:string; onSezione:(s:string)=>void;
   mappa: MappaDto;
   albero: MappaRiassuntoDto[];
   strumento: StrumentoEditor;
@@ -228,13 +229,20 @@ function PannelloEditor(p: PropsPannello) {
   const inputImmagine = useRef<HTMLInputElement | null>(null);
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
+  const {sezione,onSezione:setSezione} = p;
   const scaricabile = mappa.entita?.tipo === 'area' || mappa.entita?.tipo === 'quartiere';
   // l'asset del repository è un puntatore: consegnato solo se sta nel manifest degli asset
-  const assetConsegnato = useAsset(mappa.asset);
+  const assetAttuale = useAsset(mappa.asset);
+  const assetOriginale = useAsset(mappa.assetOriginale);
+  const assetConsegnato = assetAttuale ?? assetOriginale;
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
   const raggiunge = (destinazione: string) => mappa.spilli.some((s) => s.riferimento?.tipo === 'mappa' && s.riferimento.chiave === destinazione);
   return (
     <>
+      <nav className="editor-mappa__sezioni" aria-label="Sezioni dell’editor">
+        {[['spilli','Spilli'],['mappa','Mappa'],['collegamenti','Collegamenti'],['file','File']].map(([id,nome]) => <button key={id} type="button" aria-pressed={sezione === id} onClick={() => setSezione(id)}>{nome}</button>)}
+      </nav>
+      <div hidden={sezione !== 'spilli'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Strumenti">
         <h3 className="visore-mappa__intestazione">Strumenti</h3>
         <div className="editor-mappa__strumenti" role="group" aria-label="Strumento attivo">
@@ -266,6 +274,9 @@ function PannelloEditor(p: PropsPannello) {
         <FormSpillo key={selezionato.id} spillo={selezionato} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
       )}
 
+      {!selezionato && strumento === 'seleziona' && <p className="editor-mappa__aiuto">Seleziona un punto sulla mappa per modificarne nome, collegamento e condizioni, oppure scegli Aggiungi.</p>}
+      </div>
+      <div hidden={sezione !== 'mappa'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
         <h3 className="visore-mappa__intestazione">Immagine di base</h3>
         <p className="m-0 text-[12px] text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (assetConsegnato ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
@@ -278,6 +289,8 @@ function PannelloEditor(p: PropsPannello) {
 
       <FormMappa key={mappa.chiave + mappa.updatedAt} mappa={mappa} albero={p.albero} occupato={occupato} onSalva={p.onSalvaMappa} onElimina={p.onEliminaMappa} />
 
+      </div>
+      <div hidden={sezione !== 'collegamenti'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Albero delle mappe">
         <h3 className="visore-mappa__intestazione">Albero</h3>
         <p className="m-0 text-[12px] text-text-muted">L'albero dice chi contiene chi; sulla mappa ci si sposta con gli spilli «passaggio». Una figlia «senza passaggio» si raggiunge solo da qui.</p>
@@ -314,6 +327,8 @@ function PannelloEditor(p: PropsPannello) {
         <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${mappa.nome}`} disabled={occupato} onClick={p.onNuovaMappa} />
       </section>
 
+      </div>
+      <div hidden={sezione !== 'file'} className="editor-mappa__contenuto">
       <section className="visore-mappa__sezione" aria-label="Esportazione e importazione">
         <h3 className="visore-mappa__intestazione">Repository</h3>
         <p className="m-0 text-[12px] text-text-muted">«Esporta questo luogo» produce uno ZIP completo (questa mappa con le discendenti, gli spilli, le immagini di base e le schermate degli spilli, puntate come asset) da consegnare per il repository: estratto nella radice diventa dato preimpostato dell'app (`data/seed/mappe/{mappa.chiave}.json` + `public/asset/`).</p>
@@ -328,6 +343,7 @@ function PannelloEditor(p: PropsPannello) {
           <label className="flex items-center gap-1 text-[12px]"><input type="checkbox" checked={sovrascrivi} onChange={(e) => setSovrascrivi(e.target.checked)} /> Sovrascrivi le mappe esistenti</label>
         </div>
       </section>
+      </div>
     </>
   );
 }
@@ -363,6 +379,7 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
   };
   const salva = (e: FormEvent) => {
     e.preventDefault();
+    if (!condizioni.every(c=>normalizzaRequisitoSpillo(c)!==null)) { notifica('error','Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
     void onSalva({ nome: nome.trim() || s.nome, tipo, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni });
   };
   return (
@@ -394,11 +411,11 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
               {riferimento.tipo === 'mappa' && <button type="button" className="visore-mappa__azione-testo" onClick={() => onVai(riferimento.chiave)}>Apri</button>}
             </div>
           ) : <span className="text-[12px] text-text-muted">Nessuna entità collegata.</span>}
-          <div className="flex gap-1">
+          <div className="editor-mappa__ricerca">
             <select className="form-input" value={tipoRicerca} onChange={(e) => setTipoRicerca(e.target.value as TipoRiferimento)} aria-label="Tipo di entità da cercare">
               {TIPI_RIFERIMENTO.map((t) => <option key={t} value={t}>{NOME_RIFERIMENTO[t]}</option>)}
             </select>
-            <input className="form-input" value={testoRicerca} onChange={(e) => setTestoRicerca(e.target.value)} placeholder="Cerca per nome…" aria-label="Testo da cercare" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void cerca(e); } }} />
+            <input className="form-input" value={testoRicerca} onChange={(e) => setTestoRicerca(e.target.value)} placeholder="Nome, area o quartiere…" aria-label="Testo da cercare" onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void cerca(e); } }} />
             <button type="button" className="visore-mappa__azione-testo" onClick={(e) => void cerca(e)} disabled={cercando}>Cerca</button>
           </div>
           {risultati && (
@@ -407,7 +424,7 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
               {risultati.map((r) => (
                 <li key={`${r.tipo}:${r.chiave}`}>
                   <button type="button" className="editor-mappa__risultato" onClick={() => { setRiferimento({ tipo: r.tipo, chiave: r.chiave, nome: r.nome }); setRisultati(null); if (r.tipo === 'mappa' && tipo === 'nota') setTipo('passaggio'); }}>
-                    <span className="flex-1 min-w-0 truncate">{r.nome}</span>
+                    <span className="flex-1 min-w-0 break-words">{r.nome}</span>
                     <span className="text-text-muted">{r.dettaglio}</span>
                   </button>
                 </li>
@@ -416,7 +433,7 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
           )}
         </fieldset>
 
-        <CondizioniSpilloEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} />
+        <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} />
 
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
@@ -458,7 +475,6 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
   const [tipo, setTipo] = useState<TipoMappa>(mappa.tipo);
   const [genitore, setGenitore] = useState<string>(mappa.genitore ?? '');
   const [ordine, setOrdine] = useState(String(mappa.ordine));
-  const [asset, setAsset] = useState(mappa.asset ?? '');
   const [note, setNote] = useState(mappa.note);
   // un discendente non può diventare genitore
   const discendenti = useMemo(() => {
@@ -467,11 +483,11 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
     while (aggiunti) { aggiunti = false; for (const m of albero) if (m.genitore && out.has(m.genitore) && !out.has(m.chiave)) { out.add(m.chiave); aggiunti = true; } }
     return out;
   }, [albero, mappa.chiave]);
-  const modificata = nome !== mappa.nome || tipo !== mappa.tipo || genitore !== (mappa.genitore ?? '') || Number(ordine) !== mappa.ordine || asset !== (mappa.asset ?? '') || note !== mappa.note;
+  const modificata = nome !== mappa.nome || tipo !== mappa.tipo || genitore !== (mappa.genitore ?? '') || Number(ordine) !== mappa.ordine || note !== mappa.note;
   return (
     <section className="visore-mappa__sezione" aria-label="Proprietà della mappa">
       <h3 className="visore-mappa__intestazione">Mappa</h3>
-      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, tipo, genitore: genitore || null, ordine: Math.max(0, Math.round(Number(ordine) || 0)), asset: asset.trim() || null, note }); }}>
+      <form className="flex flex-col gap-2" onSubmit={(e) => { e.preventDefault(); void onSalva({ nome: nome.trim() || mappa.nome, tipo, genitore: genitore || null, ordine: Math.max(0, Math.round(Number(ordine) || 0)), note }); }}>
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} required maxLength={120} /></label>
         <div className="grid grid-cols-2 gap-2">
           <label className="editor-mappa__campo">Tipo
@@ -482,10 +498,9 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
         <label className="editor-mappa__campo">Mappa genitore
           <select className="form-input" value={genitore} onChange={(e) => setGenitore(e.target.value)}>
             <option value="">— nessuna (radice) —</option>
-            {albero.filter((m) => !discendenti.has(m.chiave)).map((m) => <option key={m.chiave} value={m.chiave}>{m.nome} ({NOME_TIPO_MAPPA[m.tipo]})</option>)}
+            {albero.filter((m) => !discendenti.has(m.chiave)).map((m) => <option key={m.chiave} value={m.chiave}>{m.nomeCompleto ?? m.nome} ({NOME_TIPO_MAPPA[m.tipo]})</option>)}
           </select>
         </label>
-        <label className="editor-mappa__campo">Asset del repository (es. mappe/citta-shibuya; vuoto = nessun asset)<input className="form-input" value={asset} onChange={(e) => setAsset(e.target.value)} placeholder={assetPredefinitoMappa(mappa.chiave)} maxLength={200} /></label>
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} /></label>
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" disabled={occupato || !modificata} />
@@ -502,30 +517,24 @@ interface PropsNuova { aperta: boolean; genitore: MappaDto; albero: MappaRiassun
 function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea }: PropsNuova) {
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'palazzo' || genitore.tipo === 'dedalo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
-  const [chiave, setChiave] = useState('');
   const [passaggio, setPassaggio] = useState(true);
   const [ritorno, setRitorno] = useState(false);
   // asset del repository: segue la chiave («mappe/<chiave>») finché l'utente non lo tocca; vuoto = nessun asset (15.25)
-  const [asset, setAsset] = useState<string | null>(null);
-  const chiaveEffettiva = (chiave || slug(nome)).slice(0, 80);
-  const assetEffettivo = asset ?? (chiaveEffettiva ? assetPredefinitoMappa(chiaveEffettiva) : '');
+  const chiaveEffettiva = (genitore.tipo==='citta'?'':genitore.chiave+'-')+slug(nome);
   const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
-  const valida = /^[a-z0-9][a-z0-9-]{1,79}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;
+  const valida = /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;
   return (
     <Modal titolo="Nuova mappa" aperta={aperta} onChiudi={onChiudi}
       azioni={<>
         <button type="button" className="btn btn-secondary btn-sm" onClick={onChiudi}>Annulla</button>
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ chiave: chiaveEffettiva, nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, asset: assetEffettivo.trim() || null, passaggio, ritorno })} />
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, passaggio, ritorno })} />
       </>}>
       <div className="flex flex-col gap-2">
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} autoFocus /></label>
         <label className="editor-mappa__campo">Tipo
           <select className="form-input" value={tipo} onChange={(e) => setTipo(e.target.value as TipoMappa)}>{TIPI_MAPPA.map((t) => <option key={t} value={t}>{NOME_TIPO_MAPPA[t]}</option>)}</select>
         </label>
-        <label className="editor-mappa__campo">Chiave (minuscole, cifre, trattini)<input className="form-input" value={chiave} onChange={(e) => setChiave(e.target.value)} placeholder={slug(nome) || 'proposta dal nome'} maxLength={80} /></label>
-        <p className="m-0 text-[12px] text-text-muted">Genitore: {genitore.nome}. {esiste ? <span className="editor-mappa__avviso">Esiste già una mappa con questa chiave.</span> : chiaveEffettiva ? `Chiave: ${chiaveEffettiva}` : ''}</p>
-        <label className="editor-mappa__campo">Asset del repository<input className="form-input" value={assetEffettivo} onChange={(e) => setAsset(e.target.value)} placeholder="mappe/<chiave>" maxLength={200} /></label>
-        <p className="m-0 text-[12px] text-text-muted">Percorso in public/asset senza estensione, proposto come «mappe/chiave» (lo stesso che usa «Esporta questo luogo»): quando il file verrà consegnato la mappa lo userà da sola; finché manca, si usa l'immagine caricata o, in sua assenza, la griglia. Lascia vuoto per nessun asset.</p>
+        <p className="m-0 text-[12px] text-text-muted">Genitore: {genitore.nome}. {esiste ? <span className="editor-mappa__avviso">Esiste già una mappa con questa chiave.</span> : 'Nomi e file seguiranno automaticamente questo percorso.'}</p>
         <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={passaggio} onChange={(e) => setPassaggio(e.target.checked)} /> <span>Crea il passaggio su «{genitore.nome}» verso la nuova mappa <span className="text-text-muted">(al centro, in un punto libero: poi lo trascini dove sta l'ingresso)</span></span></label>
         <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={ritorno} onChange={(e) => setRitorno(e.target.checked)} /> <span>Crea anche il passaggio di ritorno verso «{genitore.nome}» nella nuova mappa <span className="text-text-muted">(in basso al centro)</span></span></label>
       </div>

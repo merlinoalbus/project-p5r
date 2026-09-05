@@ -1,3 +1,4 @@
+import { StatiPartita } from '../components/impostazioni/StatiPartita';
 // ============================================================
 // ImpostazioniPage — partite, traduzioni, immagini degli Arcani, informazioni
 // ============================================================
@@ -10,6 +11,7 @@ import { TraduzioniEditor } from '../components/impostazioni/TraduzioniEditor';
 import { CaratteriEditor } from '../components/impostazioni/CaratteriEditor';
 import { ImmaginiCaricate } from '../components/impostazioni/ImmaginiCaricate';
 import { BackupIstanza } from '../components/impostazioni/BackupIstanza';
+import { MieiDati } from '../components/impostazioni/MieiDati';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
@@ -60,6 +62,8 @@ export function ImpostazioniPage() {
       </section>
       <ImmaginiCaricate />
       <TraduzioniEditor />
+      <MieiDati />
+      <StatiPartita />
       <BackupIstanza />
       <section className="card text-[13px] text-text-secondary">
         <h2 className="m-0 mb-1 text-[15px] font-semibold text-text">Informazioni</h2>

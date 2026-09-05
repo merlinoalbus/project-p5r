@@ -1,3 +1,5 @@
+import { sincronizzaDateQuartieri } from '../../db/migrations/037_sblocco_quartieri.js';
+import { sincronizzaCondizioniCatalogo } from '../../db/migrations/036_condizioni_procedurali.js';
 // ============================================================
 // caricaSeed — carica il compendio Royal da data/seed nel DB (idempotente)
 // ============================================================
@@ -17,6 +19,7 @@
 //   - traduzione: le righe con fonte='utente' non vengono MAI sovrascritte.
 // ============================================================
 
+import { riallineaPercorso } from './riallineaPercorso.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -452,13 +455,15 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const r of db.prepare('SELECT data FROM cruciverba').all() as Array<{ data: string }>) if (!dateCruciverba.has(r.data)) db.prepare('DELETE FROM cruciverba WHERE data = ?').run(r.data);
 
     // ---- Negozi e articoli (Fase 8.2): upsert per chiave stabile, rimozione orfani; gli acquisti per partita restano ----
-    const insN = db.prepare(`INSERT INTO negozio (chiave, ordine, nome, luogo, luogo_chiave, tipo, gestore, confidente_chiave, orari, sblocco, note, fonte)
-      VALUES (@chiave, @ordine, @nome, @luogo, @luogo_chiave, @tipo, @gestore, @confidente_chiave, @orari, @sblocco, @note, @fonte)
-      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, tipo = excluded.tipo, gestore = excluded.gestore, confidente_chiave = excluded.confidente_chiave, orari = excluded.orari, sblocco = excluded.sblocco, note = excluded.note, fonte = excluded.fonte`);
-    const insArt = db.prepare(`INSERT INTO articolo (chiave, negozio_chiave, ordine, nome, nome_it, categoria, per, prezzo, effetto, statistiche, disponibile_dal, condizione, nota, fonte, verificato)
-      VALUES (@chiave, @negozio_chiave, @ordine, @nome, @nome_it, @categoria, @per, @prezzo, @effetto, @statistiche, @disponibile_dal, @condizione, @nota, @fonte, @verificato)
+    const insN = db.prepare(`INSERT INTO negozio (chiave, ordine, nome, luogo, luogo_chiave, tipo, gestore, confidente_chiave, orari, sblocco, note, fonte, origine)
+      VALUES (@chiave, @ordine, @nome, @luogo, @luogo_chiave, @tipo, @gestore, @confidente_chiave, @orari, @sblocco, @note, @fonte, 'seed')
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, tipo = excluded.tipo, gestore = excluded.gestore, confidente_chiave = excluded.confidente_chiave, orari = excluded.orari, sblocco = excluded.sblocco, note = excluded.note, fonte = excluded.fonte
+      WHERE negozio.origine = 'seed'`);
+    const insArt = db.prepare(`INSERT INTO articolo (chiave, negozio_chiave, ordine, nome, nome_it, categoria, per, prezzo, effetto, statistiche, disponibile_dal, condizione, nota, fonte, verificato, origine)
+      VALUES (@chiave, @negozio_chiave, @ordine, @nome, @nome_it, @categoria, @per, @prezzo, @effetto, @statistiche, @disponibile_dal, @condizione, @nota, @fonte, @verificato, 'seed')
       ON CONFLICT(chiave) DO UPDATE SET negozio_chiave = excluded.negozio_chiave, ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, categoria = excluded.categoria, per = excluded.per, prezzo = excluded.prezzo, effetto = excluded.effetto,
-        statistiche = excluded.statistiche, disponibile_dal = excluded.disponibile_dal, condizione = excluded.condizione, nota = excluded.nota, fonte = excluded.fonte, verificato = excluded.verificato`);
+        statistiche = excluded.statistiche, disponibile_dal = excluded.disponibile_dal, condizione = excluded.condizione, nota = excluded.nota, fonte = excluded.fonte, verificato = excluded.verificato
+      WHERE articolo.origine = 'seed'`);
     const chiaviNegozi = new Set<string>(); const chiaviArticoli = new Set<string>();
     for (const n of seed.negozi.negozi) {
       if (n.luogoChiave !== null && !chiaviQuartieri.has(n.luogoChiave)) throw new Error(`Seed negozi: quartiere sconosciuto '${n.luogoChiave}' per '${n.chiave}'.`);
@@ -470,10 +475,12 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
         insArt.run({ chiave: a.chiave, negozio_chiave: n.chiave, ordine: a.ordine, nome: a.nome, nome_it: a.nomeIt, categoria: a.categoria, per: a.per, prezzo: a.prezzo, effetto: a.effetto, statistiche: a.statistiche, disponibile_dal: a.disponibileDal, condizione: a.condizione, nota: a.nota, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
       }
     }
-    for (const r of db.prepare('SELECT chiave FROM articolo').all() as Array<{ chiave: string }>) if (!chiaviArticoli.has(r.chiave)) db.prepare('DELETE FROM articolo WHERE chiave = ?').run(r.chiave);
-    for (const r of db.prepare('SELECT chiave FROM negozio').all() as Array<{ chiave: string }>) if (!chiaviNegozi.has(r.chiave)) db.prepare('DELETE FROM negozio WHERE chiave = ?').run(r.chiave);
+    // orfani: solo le righe del seed. Quelle create o modificate dall'utente (origine 'utente') restano, anche quando il seed cambia (16.1)
+    for (const r of db.prepare("SELECT chiave FROM articolo WHERE origine = 'seed' AND nascosto = 0 AND seed_json IS NULL AND NOT EXISTS (SELECT 1 FROM acquisto_partita p WHERE p.articolo_chiave = articolo.chiave)").all() as Array<{ chiave: string }>) if (!chiaviArticoli.has(r.chiave)) db.prepare('DELETE FROM articolo WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare("SELECT chiave FROM negozio WHERE origine = 'seed' AND nascosto = 0 AND seed_json IS NULL AND NOT EXISTS (SELECT 1 FROM articolo a WHERE a.negozio_chiave = negozio.chiave)").all() as Array<{ chiave: string }>) if (!chiaviNegozi.has(r.chiave)) db.prepare('DELETE FROM negozio WHERE chiave = ?').run(r.chiave);
 
     // ---- Percorso giorno per giorno (Fase 7.5b): upsert per data, rimozione orfani; le azioni fatte per partita restano ----
+    riallineaPercorso(db, seed.percorso);
     const insG = db.prepare(`INSERT INTO giorno_percorso (data, ordine, giorno_settimana, fase, trama, vincoli_json, meteo, azioni_json, avvisi_json, fonte, coperto)
       VALUES (@data, @ordine, @giorno_settimana, @fase, @trama, @vincoli_json, @meteo, @azioni_json, @avvisi_json, @fonte, @coperto)
       ON CONFLICT(data) DO UPDATE SET ordine = excluded.ordine, giorno_settimana = excluded.giorno_settimana, fase = excluded.fase, trama = excluded.trama, vincoli_json = excluded.vincoli_json, meteo = excluded.meteo, azioni_json = excluded.azioni_json, avvisi_json = excluded.avvisi_json, fonte = excluded.fonte, coperto = excluded.coperto`);
@@ -583,6 +590,8 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const [k, v] of Object.entries(t.oggetti ?? {})) tr('oggetto', k, v);
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
+    sincronizzaCondizioniCatalogo(db);
+    sincronizzaDateQuartieri(db);
     // ---- Meta ----
     // ---- Requisiti per rango dei Confidenti (Fase 12.3): ricaricati integralmente dal seed ----
     db.prepare('DELETE FROM confidente_requisito').run();

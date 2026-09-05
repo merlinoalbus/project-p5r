@@ -47,15 +47,15 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
     const palazzi = albero.filter((m) => m.tipo === 'palazzo');
     expect(palazzi.length).toBeGreaterThan(3);
-    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'dungeon-mementos')).toBe(true);
+    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'mementos-i-dedali')).toBe(true);
     const aree = albero.filter((m) => m.tipo === 'area');
     expect(aree.length).toBeGreaterThan(10);
     // le aree dei Palazzi/Dedali vengono dalla guida (entità «area»); i pacchetti dell'utente possono aggiungere aree anche sotto Tokyo o un quartiere
-    const areeDungeon = aree.filter((a) => a.genitore?.startsWith('dungeon-'));
+    const areeDungeon = aree.filter((a) => a.entita?.tipo === 'area');
     expect(areeDungeon.length).toBeGreaterThan(10);
     expect(areeDungeon.every((a) => a.entita?.tipo === 'area')).toBe(true);
     // ogni chiave è instradabile (minuscole, cifre, trattini)
-    for (const m of albero) expect(m.chiave).toMatch(/^[a-z0-9][a-z0-9-]{1,79}$/);
+    for (const m of albero) expect(m.chiave).toMatch(/^[a-z0-9][a-z0-9-]{0,179}$/);
     // i marcatori del seed sono diventati spilli (punti nelle aree, luoghi nei quartieri)
     expect(aree.reduce((n, a) => n + a.numeroSpilli, 0)).toBeGreaterThan(0);
     expect(quartieri.reduce((n, q) => n + q.numeroSpilli, 0)).toBeGreaterThan(0);
@@ -71,7 +71,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(kamoshida.spilli.length).toBe(kamoshida.figli.length);
     expect(kamoshida.spilli.every((s) => s.tipo === 'passaggio' && s.dettaglio?.tipo === 'mappa' && s.x >= 0 && s.x <= 100)).toBe(true);
     // Tokyo: posizioni stimate dalla mappa ufficiale (Shibuya al centro-sinistra); Mementos: discesa verticale in ordine
-    expect(tokyoDett.spilli.find((s) => s.riferimento?.chiave === 'citta-shibuya')).toMatchObject({ x: 34.5, y: 49.5 });
+    expect(tokyoDett.spilli.find((s) => s.riferimento?.chiave === 'shibuya')).toMatchObject({ x: 34.5, y: 49.5 });
     const mementos = (await request(app).get('/api/mappe/dungeon-mementos')).body.data as MappaDto;
     const y = mementos.spilli.map((s) => s.y);
     expect(y).toEqual([...y].sort((a, b) => a - b));
@@ -88,7 +88,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(dettaglio.spilli.length).toBe(area.numeroSpilli);
     const spilloPunto = dettaglio.spilli.find((s) => s.riferimento?.tipo === 'punto')!;
     expect(spilloPunto.dettaglio?.tipo).toBe('punto');
-    expect(spilloPunto.dettaglio?.punto?.area).toBe(area.chiave);
+    expect(spilloPunto.dettaglio?.punto?.area).toBe(area.entita?.chiave);
     expect(spilloPunto.raccolto).toBe(false);
     expect(spilloPunto.x).toBeGreaterThanOrEqual(0);
     expect(spilloPunto.x).toBeLessThanOrEqual(100);
@@ -109,17 +109,17 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   it('editor: crea, aggiorna ed elimina mappe e spilli con validazione (coordinate, tipo, genitore ciclico)', async () => {
     const creata = await request(app).post('/api/mappe').send({ chiave: 'prova-negozio', nome: 'Prova negozio', tipo: 'luogo', genitore: 'citta-shibuya', note: 'interno' });
     expect(creata.status).toBe(201);
-    expect((creata.body.data as MappaDto)).toMatchObject({ chiave: 'prova-negozio', genitore: 'citta-shibuya', origine: 'utente', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: expect.any(String) }, { chiave: 'prova-negozio', nome: 'Prova negozio' }] });
+    expect((creata.body.data as MappaDto)).toMatchObject({ chiave: 'shibuya-prova-negozio', genitore: 'shibuya', origine: 'utente', percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'shibuya', nome: expect.any(String) }, { chiave: 'shibuya-prova-negozio', nome: 'Prova negozio' }] });
     expect((await request(app).post('/api/mappe').send({ chiave: 'prova-negozio', nome: 'Doppione', tipo: 'luogo' })).status).toBe(409);
     expect((await request(app).post('/api/mappe').send({ chiave: 'Chiave Non Valida', nome: 'x', tipo: 'luogo' })).status).toBe(400);
     expect((await request(app).post('/api/mappe').send({ chiave: 'tipo-errato', nome: 'x', tipo: 'castello' })).status).toBe(400);
     // il genitore non può essere un discendente
     expect((await request(app).put('/api/mappe/citta-shibuya').send({ genitore: 'prova-negozio' })).status).toBe(400);
     const rinominata = (await request(app).put('/api/mappe/prova-negozio').send({ nome: 'Negozio di prova', ordine: 3 })).body.data as MappaDto;
-    expect(rinominata).toMatchObject({ nome: 'Negozio di prova', ordine: 3, genitore: 'citta-shibuya' });
+    expect(rinominata).toMatchObject({ nome: 'Negozio di prova', ordine: 3, genitore: 'shibuya' });
     // la mappa compare fra i figli del quartiere
     const shibuya = (await request(app).get('/api/mappe/citta-shibuya')).body.data as MappaDto;
-    expect(shibuya.figli.some((f) => f.chiave === 'prova-negozio')).toBe(true);
+    expect(shibuya.figli.some((f) => f.chiave === 'shibuya-negozio-di-prova')).toBe(true);
 
     const spillo = await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'forziere', nome: 'Forziere di prova', x: 12.5, y: 80 });
     expect(spillo.status).toBe(201);
@@ -137,7 +137,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Verso il nulla', x: 1, y: 1, riferimento: { tipo: 'mappa', chiave: 'non-esiste' } })).status).toBe(404);
     expect((await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'negozio', nome: 'Negozio fantasma', x: 1, y: 1, riferimento: { tipo: 'negozio', chiave: 'non-esiste' } })).status).toBe(404);
     const passaggio = (await request(app).post('/api/mappe/prova-negozio/spilli').send({ tipo: 'passaggio', nome: 'Torna a Shibuya', x: 50, y: 95, riferimento: { tipo: 'mappa', chiave: 'citta-shibuya' } })).body.data as SpilloDto;
-    expect(passaggio.dettaglio).toMatchObject({ tipo: 'mappa', mappa: { chiave: 'citta-shibuya' } });
+    expect(passaggio.dettaglio).toMatchObject({ tipo: 'mappa', mappa: { chiave: 'shibuya' } });
     expect(passaggio.collezionabile).toBe(false);
     const spostato = (await request(app).put(`/api/mappe/spilli/${s.id}`).send({ x: 20, y: 70, nome: 'Forziere spostato', collezionabile: false })).body.data as SpilloDto;
     expect(spostato).toMatchObject({ x: 20, y: 70, nome: 'Forziere spostato', collezionabile: false });
@@ -170,36 +170,36 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const conImmagine = await request(app).put('/api/mappe/prova-negozio/immagine').set('Content-Type', 'image/png').send(PNG_2x3);
     expect(conImmagine.status).toBe(200);
     expect(conImmagine.body.data).toMatchObject({ larghezza: 2, altezza: 3 });
-    expect((conImmagine.body.data as MappaDto).immagineUrl).toContain('/api/immagini/mappa/prova-negozio/file');
-    expect((await request(app).get('/api/immagini/mappa/prova-negozio/file')).status).toBe(200);
+    expect((conImmagine.body.data as MappaDto).immagineUrl).toContain('/api/immagini/mappa/shibuya-prova-negozio/file');
+    expect((await request(app).get('/api/immagini/mappa/shibuya-prova-negozio/file')).status).toBe(200);
     expect((await request(app).put('/api/mappe/prova-negozio/immagine').set('Content-Type', 'text/plain').send('no')).status).toBe(400);
 
     const pacchetto = (await request(app).get('/api/mappe/esporta')).body.data as EsportazioneMappeDto;
     expect(pacchetto.versione).toBe(1);
-    const mia = pacchetto.mappe.find((m) => m.chiave === 'prova-negozio')!;
-    expect(mia).toMatchObject({ nome: 'Negozio di prova', genitore: 'citta-shibuya', immagine: 'prova-negozio', larghezza: 2, altezza: 3 });
+    const mia = pacchetto.mappe.find((m) => m.chiave === 'shibuya-negozio-di-prova')!;
+    expect(mia).toMatchObject({ nome: 'Negozio di prova', genitore: 'shibuya', immagine: 'shibuya-prova-negozio', larghezza: 2, altezza: 3 });
     expect(mia.spilli).toHaveLength(1);
-    expect(pacchetto.immagini?.['prova-negozio']).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
+    expect(pacchetto.immagini?.['shibuya-prova-negozio']).toMatchObject({ mime: 'image/png', base64: PNG_2x3.toString('base64') });
     // le mappe strutturali del seed non portano immagini dell'istanza finché l'utente non le carica
     expect(pacchetto.mappe.find((m) => m.chiave === 'tokyo')!.immagine).toBeNull();
 
     // importazione: la stessa chiave senza «sovrascrivi» viene saltata; con «sovrascrivi» sostituisce spilli e nome
     const copia: EsportazioneMappeDto = { versione: 1, mappe: [{ ...mia, nome: 'Importata', spilli: [...mia.spilli, { tipo: 'nota', nome: 'Nota importata', descrizione: '', x: 5, y: 5, riferimento: null, collezionabile: false, ordine: 1 }] }], immagini: {} };
     const saltata = (await request(app).post('/api/mappe/importa').send({ pacchetto: copia })).body.data as { mappe: number; saltate: string[] };
-    expect(saltata).toMatchObject({ mappe: 0, saltate: ['prova-negozio'] });
+    expect(saltata).toMatchObject({ mappe: 0, saltate: ['shibuya-prova-negozio'] });
     const sovrascritta = (await request(app).post('/api/mappe/importa').send({ pacchetto: copia, sovrascrivi: true })).body.data as { mappe: number; spilli: number; saltate: string[] };
     expect(sovrascritta).toMatchObject({ mappe: 1, spilli: 2, saltate: [] });
     const dopo = (await request(app).get('/api/mappe/prova-negozio')).body.data as MappaDto;
     expect(dopo.nome).toBe('Importata');
     expect(dopo.spilli.map((s) => s.nome)).toEqual(['Forziere spostato', 'Nota importata']);
-    expect(dopo.immagineUrl).toContain('/api/immagini/mappa/prova-negozio/file');
+    expect(dopo.immagineUrl).toContain('/api/immagini/mappa/shibuya-prova-negozio/file');
     // una mappa nuova con immagine in base64 e genitore dichiarato dopo di lei
     const nuova: EsportazioneMappeDto = { versione: 1, mappe: [
       { chiave: 'figlia-nuova', nome: 'Figlia', tipo: 'generica', genitore: 'madre-nuova', ordine: 0, immagine: 'figlia-nuova', asset: null, larghezza: null, altezza: null, entita: null, note: '', spilli: [] },
       { chiave: 'madre-nuova', nome: 'Madre', tipo: 'generica', genitore: null, ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '', spilli: [] },
     ], immagini: { 'figlia-nuova': { mime: 'image/png', base64: PNG_2x3.toString('base64') } } };
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: nuova })).body.data).toMatchObject({ mappe: 2, immagini: 1, saltate: [] });
-    expect(((await request(app).get('/api/mappe/figlia-nuova')).body.data as MappaDto).percorso.map((p) => p.chiave)).toEqual(['madre-nuova', 'figlia-nuova']);
+    expect(((await request(app).get('/api/mappe/figlia-nuova')).body.data as MappaDto).percorso.map((p) => p.chiave)).toEqual(['madre', 'madre-figlia']);
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { versione: 2, mappe: [] } })).status).toBe(400);
     // chiave o tipo non validi → la mappa finisce in «saltate» senza far fallire il resto
     const mista: EsportazioneMappeDto = { versione: 1, mappe: [
@@ -273,14 +273,14 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('schermate degli spilli: caricamento, didascalia, eliminazione; esportazione per luogo (JSON e ZIP per il repository) e reimportazione', async () => {
-    const luogo = (await request(app).post('/api/mappe').send({ chiave: 'luogo-zip', nome: 'Luogo ZIP', tipo: 'luogo', genitore: 'citta-shibuya' })).body.data as MappaDto;
-    expect(luogo.percorso.map((p) => p.chiave)).toEqual(['tokyo', 'citta-shibuya', 'luogo-zip']);
-    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'luogo-zip-interno', nome: 'Interno', tipo: 'generica', genitore: 'luogo-zip' })).body.data as MappaDto;
-    expect((await request(app).put('/api/mappe/luogo-zip/immagine').set('Content-Type', 'image/png').send(PNG_2x3)).status).toBe(200);
-    const spillo = (await request(app).post('/api/mappe/luogo-zip/spilli').send({ tipo: 'passaggio', nome: 'Scala', x: 10, y: 10, riferimento: { tipo: 'mappa', chiave: figlia.chiave } })).body.data as SpilloDto;
+    const luogo = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip', nome: 'Luogo ZIP', tipo: 'luogo', genitore: 'citta-shibuya' })).body.data as MappaDto;
+    expect(luogo.percorso.map((p) => p.chiave)).toEqual(['tokyo', 'shibuya', 'shibuya-luogo-zip']);
+    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'shibuya-luogo-zip-interno', nome: 'Interno', tipo: 'generica', genitore: 'shibuya-luogo-zip' })).body.data as MappaDto;
+    expect((await request(app).put('/api/mappe/shibuya-luogo-zip/immagine').set('Content-Type', 'image/png').send(PNG_2x3)).status).toBe(200);
+    const spillo = (await request(app).post('/api/mappe/shibuya-luogo-zip/spilli').send({ tipo: 'passaggio', nome: 'Scala', x: 10, y: 10, riferimento: { tipo: 'mappa', chiave: figlia.chiave } })).body.data as SpilloDto;
     expect(spillo.immagini).toEqual([]);
     // la figlia è nata senza `asset` indicato: ha quello predefinito «mappe/<chiave>» (15.25), ancora senza file né immagine dell'istanza
-    expect(spillo.dettaglio?.immagine).toEqual({ url: null, asset: 'mappe/luogo-zip-interno' });
+    expect(spillo.dettaglio?.immagine).toEqual({ url: null, asset: 'mappe/shibuya-luogo-zip-interno' });
     // schermate
     const conImmagine = await request(app).post(`/api/mappe/spilli/${spillo.id}/immagini?didascalia=Vista%20dalla%20scala`).set('Content-Type', 'image/png').send(PNG_2x3);
     expect(conImmagine.status).toBe(201);
@@ -295,40 +295,40 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(rinominata.immagini.find((i) => i.didascalia === 'Seconda')).toMatchObject({ ordine: 0 });
     expect((await request(app).post(`/api/mappe/spilli/${spillo.id}/immagini`).set('Content-Type', 'text/plain').send('no')).status).toBe(400);
     // il Confidente collegato espone l'immagine (asset del ritratto)
-    const conf = (await request(app).post('/api/mappe/luogo-zip/spilli').send({ tipo: 'confidente', nome: 'Ryuji', x: 20, y: 20, riferimento: { tipo: 'confidente', chiave: 'ryuji' } })).body.data as SpilloDto;
+    const conf = (await request(app).post('/api/mappe/shibuya-luogo-zip/spilli').send({ tipo: 'confidente', nome: 'Ryuji', x: 20, y: 20, riferimento: { tipo: 'confidente', chiave: 'ryuji' } })).body.data as SpilloDto;
     expect(conf.dettaglio?.immagine).toEqual({ url: null, asset: 'confidenti/ryuji-fedele' });
 
     // esportazione per luogo: solo il sottoalbero, sempre con le schermate degli spilli
-    const pacchettoLuogo = (await request(app).get('/api/mappe/esporta?radice=luogo-zip')).body.data as EsportazioneMappeDto;
-    expect(pacchettoLuogo.mappe.map((m) => m.chiave)).toEqual(['luogo-zip', 'luogo-zip-interno']);
+    const pacchettoLuogo = (await request(app).get('/api/mappe/esporta?radice=shibuya-luogo-zip')).body.data as EsportazioneMappeDto;
+    expect(pacchettoLuogo.mappe.map((m) => m.chiave)).toEqual(['shibuya-luogo-zip', 'shibuya-luogo-zip-interno']);
     expect(pacchettoLuogo.mappe[0].spilli[0].immagini).toHaveLength(2);
     expect(pacchettoLuogo.mappe[0].spilli[0].immagini!.map((i) => i.didascalia).sort()).toEqual(['Seconda', 'Vista dalla scala']);
     expect(pacchettoLuogo.mappe[0].spilli[0].immagini![0].mime).toBe('image/png');
     expect((await request(app).get('/api/mappe/esporta?radice=non-esiste')).status).toBe(404);
 
     // ZIP per il repository: LEGGIMI, seed del luogo con asset, immagini come file
-    const zip = await request(app).get('/api/mappe/esporta.zip?radice=luogo-zip').buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
+    const zip = await request(app).get('/api/mappe/esporta.zip?radice=shibuya-luogo-zip').buffer(true).parse((res, cb) => { const parti: Buffer[] = []; res.on('data', (c: Buffer) => parti.push(c)); res.on('end', () => cb(null, Buffer.concat(parti))); });
     expect(zip.status).toBe(200);
     expect(zip.headers['content-type']).toContain('application/zip');
     const voci = leggiZip(zip.body as Buffer);
-    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', 'data/seed/mappe/luogo-zip.json', 'public/asset/mappe/luogo-zip.png', 'public/asset/spilli/luogo-zip/1-1.png', 'public/asset/spilli/luogo-zip/1-2.png']);
+    expect(voci.map((v) => v.nome)).toEqual(['LEGGIMI.txt', 'data/seed/mappe/shibuya-luogo-zip.json', 'public/asset/mappe/shibuya-luogo-zip.png', 'public/asset/spilli/shibuya-luogo-zip/1-1.png', 'public/asset/spilli/shibuya-luogo-zip/1-2.png']);
     const seedLuogo = JSON.parse(voci[1].contenuto.toString('utf-8')) as EsportazioneMappeDto;
     expect(seedLuogo.immagini).toBeUndefined();
-    expect(seedLuogo.mappe[0]).toMatchObject({ chiave: 'luogo-zip', asset: 'mappe/luogo-zip', immagine: null });
-    expect(seedLuogo.mappe[0].spilli[0].immagini!.map((i) => i.asset)).toEqual(['spilli/luogo-zip/1-1', 'spilli/luogo-zip/1-2']);
+    expect(seedLuogo.mappe[0]).toMatchObject({ chiave: 'shibuya-luogo-zip', asset: 'mappe/shibuya-luogo-zip', immagine: null });
+    expect(seedLuogo.mappe[0].spilli[0].immagini!.map((i) => i.asset)).toEqual(['spilli/shibuya-luogo-zip/1-1', 'spilli/shibuya-luogo-zip/1-2']);
     expect(seedLuogo.mappe[0].spilli[0].immagini!.map((i) => i.didascalia).sort()).toEqual(['Seconda', 'Vista dalla scala']);
     expect(Buffer.compare(voci[2].contenuto, PNG_2x3)).toBe(0);
     expect((await request(app).get('/api/mappe/esporta.zip')).status).toBe(400);
 
     // reimportazione del seed del luogo in una chiave nuova: gli asset delle schermate diventano righe senza file
-    const clonato: EsportazioneMappeDto = { ...seedLuogo, mappe: seedLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-copia`, genitore: m.genitore === 'luogo-zip' ? 'luogo-zip-copia' : m.genitore })) };
+    const clonato: EsportazioneMappeDto = { ...seedLuogo, mappe: seedLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-copia`, nome:m.chiave==='shibuya-luogo-zip'?'Luogo ZIP copia':m.nome, genitore: m.genitore === 'shibuya-luogo-zip' ? 'shibuya-luogo-zip-copia' : m.genitore })) };
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto: clonato })).body.data).toMatchObject({ mappe: 2, spilli: 2, immagini: 0, saltate: [] });
-    const copia = (await request(app).get('/api/mappe/luogo-zip-copia')).body.data as MappaDto;
-    expect(copia.asset).toBe('mappe/luogo-zip');
-    expect(copia.spilli[0].immagini.map((i) => ({ asset: i.asset, url: i.url }))).toEqual([{ asset: 'spilli/luogo-zip/1-1', url: null }, { asset: 'spilli/luogo-zip/1-2', url: null }]);
+    const copia = (await request(app).get('/api/mappe/shibuya-luogo-zip-copia')).body.data as MappaDto;
+    expect(copia.asset).toBe('mappe/shibuya-luogo-zip-copia');
+    expect(copia.spilli[0].immagini.map((i) => ({ asset: i.asset, url: i.url }))).toEqual([{ asset: 'spilli/shibuya-luogo-zip/1-1', url: null }, { asset: 'spilli/shibuya-luogo-zip/1-2', url: null }]);
     // reimportazione con schermate in base64: file creati nell'istanza
-    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { ...pacchettoLuogo, mappe: pacchettoLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-b64`, genitore: m.genitore === 'luogo-zip' ? 'luogo-zip-b64' : m.genitore })) } })).body.data).toMatchObject({ mappe: 2, immagini: 3 });
-    const b64 = (await request(app).get('/api/mappe/luogo-zip-b64')).body.data as MappaDto;
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto: { ...pacchettoLuogo, mappe: pacchettoLuogo.mappe.map((m) => ({ ...m, chiave: `${m.chiave}-b64`, nome:m.chiave==='shibuya-luogo-zip'?'Luogo ZIP b64':m.nome, genitore: m.genitore === 'shibuya-luogo-zip' ? 'shibuya-luogo-zip-b64' : m.genitore })) } })).body.data).toMatchObject({ mappe: 2, immagini: 3 });
+    const b64 = (await request(app).get('/api/mappe/shibuya-luogo-zip-b64')).body.data as MappaDto;
     expect(b64.spilli[0].immagini.every((i) => i.url?.includes('/api/immagini/spillo/'))).toBe(true);
 
     // eliminazione della schermata: sparisce anche il file; eliminando lo spillo spariscono le righe
@@ -337,7 +337,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).get(rinominata.immagini[0].url!)).status).toBe(404);
     expect((await request(app).delete(`/api/mappe/spilli/immagini/${rinominata.immagini[0].id}`)).status).toBe(404);
     expect((await request(app).delete(`/api/mappe/spilli/${spillo.id}`)).status).toBe(204);
-    for (const k of ['luogo-zip', 'luogo-zip-copia', 'luogo-zip-b64']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
+    for(const m of (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[])if(m.nome==='Interno'&&m.chiave.includes('luogo-zip'))expect((await request(app).delete('/api/mappe/'+m.chiave)).status).toBe(204);
+    for (const k of ['shibuya-luogo-zip', 'shibuya-luogo-zip-copia', 'shibuya-luogo-zip-b64']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
   });
 
   it('condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate', async () => {
@@ -398,10 +399,11 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     const pacchetto = (await request(app).get('/api/mappe/esporta?radice=prova-condizioni')).body.data as EsportazioneMappeDto;
     expect(pacchetto.mappe[0].spilli[0].condizioni).toEqual([{ tipo: 'stagione', stagione: 'estate' }]);
     pacchetto.mappe[0].chiave = 'prova-condizioni-copia';
+    pacchetto.mappe[0].nome = 'Prova condizioni copia';
     (pacchetto.mappe[0].spilli[0].condizioni as unknown[]).push({ tipo: 'manuale', testo: 'scartata' });
     expect((await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true })).status).toBe(200);
     const copia = (await request(app).get('/api/mappe/prova-condizioni-copia')).body.data as MappaDto;
-    expect(copia.spilli[0].condizioni).toEqual([{ tipo: 'stagione', stagione: 'estate', testo: 'solo in estate' }]);
+    expect(copia.spilli[0].condizioni).toEqual([expect.objectContaining({tipo:'stagione'}),expect.objectContaining({tipo:'da-configurare'})]);
     expect((await request(app).delete('/api/mappe/prova-condizioni-copia')).status).toBe(204);
     expect((await request(app).delete('/api/mappe/prova-condizioni')).status).toBe(204);
   });
@@ -461,65 +463,67 @@ describe('API mappe a livelli (Fase 13.1)', () => {
       spilli: [{ tipo: 'nota', nome: 'Spillo importato', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0, condizioni: [{ tipo: 'confidente', confidente: 'nessuno', rango: 1 }, { tipo: 'palazzo', dungeon: 'kamoshida' }, { tipo: 'intervallo', dal: '08-20', al: '06-01' }, { tipo: 'quartiere', quartiere: 'ueno' }] }] }] };
     const esito = (await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true })).body.data as { spilli: number; condizioniScartate: number };
     expect(esito.spilli).toBe(1);
-    expect(esito.condizioniScartate).toBe(2);
+    expect(esito.condizioniScartate).toBe(3);
     const mappa = (await request(app).get(`/api/mappe/prova-import-condizioni?partita=${partitaId}`)).body.data as MappaDto;
     // resta solo la condizione valida (il periodo invertito è scartato dalla normalizzazione; Confidente sconosciuto e quartiere senza data dal controllo sulla Guida)
-    expect(mappa.spilli[0].condizioni).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida', testo: 'dopo il Palazzo di Kamoshida' }]);
-    expect(mappa.spilli[0].disponibilita?.requisiti).toHaveLength(1);
+    expect(mappa.spilli[0].condizioni.filter(c=>c.tipo==='da-configurare')).toHaveLength(3);
+    expect(mappa.spilli[0].condizioni).toContainEqual({ tipo: 'palazzo', dungeon: 'kamoshida', testo: 'dopo il Palazzo di Kamoshida' });
+    expect(mappa.spilli[0].disponibilita?.requisiti).toHaveLength(4);
     expect((await request(app).delete('/api/mappe/prova-import-condizioni')).status).toBe(204);
   });
 
   it('passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404', async () => {
     // radice dell'utente, così i conteggi delle mappe della guida non cambiano; senza `asset` la mappa nasce con «mappe/<chiave>» (15.25)
-    const radiceCreata = await request(app).post('/api/mappe').send({ chiave: 'prova-radice', nome: 'Radice di prova', tipo: 'generica' });
+    const radiceCreata = await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova', nome: 'Radice di prova', tipo: 'generica' });
     expect(radiceCreata.status).toBe(201);
-    expect((radiceCreata.body.data as MappaDto).asset).toBe('mappe/prova-radice');
+    expect((radiceCreata.body.data as MappaDto).asset).toBe('mappe/radice-di-prova');
     // figlia con passaggio e ritorno: nel genitore uno spillo «passaggio» al centro col nome della figlia; nella figlia uno in basso verso il genitore
-    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-a', nome: 'Stanza A', tipo: 'generica', genitore: 'prova-radice', passaggio: true, ritorno: true, asset: null })).body.data as MappaDto;
+    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova-stanza-a', nome: 'Stanza A', tipo: 'generica', genitore: 'radice-di-prova', passaggio: true, ritorno: true, asset: null })).body.data as MappaDto;
     // `asset: null` esplicito resta «nessun asset»; un valore esplicito viene conservato
-    expect(figlia.asset).toBeNull();
+    expect(figlia.asset).toBe('mappe/radice-di-prova-stanza-a');
     expect(figlia.spilli).toHaveLength(1);
-    expect(figlia.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Radice di prova', x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'prova-radice' }, origine: 'utente' });
-    let radice = (await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto;
+    expect(figlia.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Radice di prova', x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'radice-di-prova' }, origine: 'utente' });
+    let radice = (await request(app).get('/api/mappe/radice-di-prova')).body.data as MappaDto;
     expect(radice.spilli).toHaveLength(1);
-    expect(radice.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Stanza A', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'prova-radice-a' } });
+    expect(radice.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Stanza A', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'radice-di-prova-stanza-a' } });
     // seconda figlia con solo il passaggio: il centro è occupato, il nuovo spillo si sposta su un punto libero (almeno 5 punti di distanza)
-    const figliaB = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-b', nome: 'Stanza B', tipo: 'generica', genitore: 'prova-radice', passaggio: true, asset: 'palazzi/prova-b' })).body.data as MappaDto;
-    expect(figliaB.asset).toBe('palazzi/prova-b');
+    const figliaB = (await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova-stanza-b', nome: 'Stanza B', tipo: 'generica', genitore: 'radice-di-prova', passaggio: true, asset: 'palazzi/prova-b' })).body.data as MappaDto;
+    expect(figliaB.asset).toBe('mappe/radice-di-prova-stanza-b');
+    expect(figliaB.assetOriginale).toBe('palazzi/prova-b');
     expect(figliaB.spilli).toHaveLength(0);
-    radice = (await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto;
-    const versoB = radice.spilli.find((s) => s.riferimento?.chiave === 'prova-radice-b')!;
+    radice = (await request(app).get('/api/mappe/radice-di-prova')).body.data as MappaDto;
+    const versoB = radice.spilli.find((s) => s.riferimento?.chiave === 'radice-di-prova-stanza-b')!;
     expect(versoB).toMatchObject({ tipo: 'passaggio', nome: 'Stanza B' });
     expect(Math.abs(versoB.x - 50) >= 5 || Math.abs(versoB.y - 50) >= 5).toBe(true);
     // terza figlia senza passaggio: il genitore non cambia; il passaggio si crea poi dall'albero
-    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-radice-c', nome: 'Stanza C', tipo: 'generica', genitore: 'prova-radice', passaggio: false })).status).toBe(201);
-    expect(((await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto).spilli).toHaveLength(2);
-    const creato = await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'prova-radice-c' });
+    expect((await request(app).post('/api/mappe').send({ chiave: 'radice-di-prova-stanza-c', nome: 'Stanza C', tipo: 'generica', genitore: 'radice-di-prova', passaggio: false })).status).toBe(201);
+    expect(((await request(app).get('/api/mappe/radice-di-prova')).body.data as MappaDto).spilli).toHaveLength(2);
+    const creato = await request(app).post('/api/mappe/radice-di-prova/passaggi').send({ destinazione: 'radice-di-prova-stanza-c' });
     expect(creato.status).toBe(201);
-    expect(creato.body.data as SpilloDto).toMatchObject({ tipo: 'passaggio', nome: 'Stanza C', mappaChiave: 'prova-radice', riferimento: { tipo: 'mappa', chiave: 'prova-radice-c' }, collezionabile: false });
+    expect(creato.body.data as SpilloDto).toMatchObject({ tipo: 'passaggio', nome: 'Stanza C', mappaChiave: 'radice-di-prova', riferimento: { tipo: 'mappa', chiave: 'radice-di-prova-stanza-c' }, collezionabile: false });
     // ritorno dalla figlia C verso il genitore: in basso al centro
-    const ritorno = (await request(app).post('/api/mappe/prova-radice-c/passaggi').send({ destinazione: 'prova-radice' })).body.data as SpilloDto;
-    expect(ritorno).toMatchObject({ x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'prova-radice' } });
+    const ritorno = (await request(app).post('/api/mappe/radice-di-prova-stanza-c/passaggi').send({ destinazione: 'radice-di-prova' })).body.data as SpilloDto;
+    expect(ritorno).toMatchObject({ x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'radice-di-prova' } });
     // un secondo passaggio verso la stessa destinazione è rifiutato; verso sé stessa e verso una mappa inesistente pure
-    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'prova-radice-c' })).status).toBe(409);
-    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'prova-radice' })).status).toBe(400);
-    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'mappa-che-non-esiste' })).status).toBe(404);
-    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'Chiave Non Valida' })).status).toBe(400);
+    expect((await request(app).post('/api/mappe/radice-di-prova/passaggi').send({ destinazione: 'radice-di-prova-stanza-c' })).status).toBe(409);
+    expect((await request(app).post('/api/mappe/radice-di-prova/passaggi').send({ destinazione: 'radice-di-prova' })).status).toBe(400);
+    expect((await request(app).post('/api/mappe/radice-di-prova/passaggi').send({ destinazione: 'mappa-che-non-esiste' })).status).toBe(404);
+    expect((await request(app).post('/api/mappe/radice-di-prova/passaggi').send({ destinazione: 'Chiave Non Valida' })).status).toBe(400);
     // «passaggio»/«ritorno» valgono solo alla creazione: in aggiornamento vengono ignorati (nessun nuovo spillo nel genitore, che ne ha tre)
-    expect((await request(app).put('/api/mappe/prova-radice-c').send({ passaggio: true, ritorno: true, nome: 'Stanza C bis' })).status).toBe(200);
-    expect(((await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto).spilli).toHaveLength(3);
-    expect(((await request(app).get('/api/mappe/prova-radice-c')).body.data as MappaDto).spilli).toHaveLength(1);
+    expect((await request(app).put('/api/mappe/radice-di-prova-stanza-c').send({ passaggio: true, ritorno: true, nome: 'Stanza C bis' })).status).toBe(200);
+    expect(((await request(app).get('/api/mappe/radice-di-prova')).body.data as MappaDto).spilli).toHaveLength(3);
+    expect(((await request(app).get('/api/mappe/radice-di-prova-stanza-c')).body.data as MappaDto).spilli).toHaveLength(1);
     // i 14 nuovi tipi del registro sono accettati dall'API con nome e colore del registro; «distributore» si presenta come «Bevande»
     const nuovi = ['sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'timbro', 'meccanismo', 'rampino', 'porta'];
     for (const [i, tipo] of nuovi.entries()) {
-      const r = await request(app).post('/api/mappe/prova-radice-b/spilli').send({ tipo, nome: `Spillo ${tipo}`, x: 5 + i * 6, y: 20 });
+      const r = await request(app).post('/api/mappe/radice-di-prova-stanza-b/spilli').send({ tipo, nome: `Spillo ${tipo}`, x: 5 + i * 6, y: 20 });
       expect(r.status).toBe(201);
       expect(r.body.data as SpilloDto).toMatchObject({ tipo, tipoNome: expect.any(String), collezionabile: tipo === 'timbro', colore: expect.stringMatching(/^#[0-9a-f]{6}$/) });
     }
-    const bevande = (await request(app).post('/api/mappe/prova-radice-b/spilli').send({ tipo: 'distributore', nome: 'Distributore del cortile', x: 90, y: 90 })).body.data as SpilloDto;
+    const bevande = (await request(app).post('/api/mappe/radice-di-prova-stanza-b/spilli').send({ tipo: 'distributore', nome: 'Distributore del cortile', x: 90, y: 90 })).body.data as SpilloDto;
     expect(bevande.tipoNome).toBe('Bevande');
     // pulizia: le mappe di prova non devono influire sui test che seguono
-    for (const k of ['prova-radice-a', 'prova-radice-b', 'prova-radice-c', 'prova-radice']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
+    for (const k of ['radice-di-prova-stanza-a', 'radice-di-prova-stanza-b', 'radice-di-prova-stanza-c', 'radice-di-prova']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
   });
 
   it('dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP', () => {

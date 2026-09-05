@@ -1,3 +1,4 @@
+import condizioniRouter from './routes/condizioni.js';
 // ============================================================
 // Factory dell'app Express + catena middleware
 // ============================================================
@@ -29,6 +30,7 @@ import fusioneRouter from './routes/fusione.js';
 import mappeRouter from './routes/mappe.js';
 import fontRouter from './routes/font.js';
 import impostazioniRouter from './routes/impostazioni.js';
+import catalogoRouter from './routes/catalogo.js';
 
 // Messaggi di validazione zod in italiano (details.issues[].message).
 z.config(z.locales.it());
@@ -53,6 +55,8 @@ export function createApp(): Express {
   app.use('/api/mappe', mappeRouter);
   app.use('/api/font', fontRouter);
   app.use('/api/impostazioni', impostazioniRouter);
+  app.use('/api/catalogo', catalogoRouter);
+  app.use('/api/condizioni', condizioniRouter);
 
   // ---- Health ----
   app.get('/api/health', (_req, res) => {

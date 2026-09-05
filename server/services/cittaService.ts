@@ -1,3 +1,5 @@
+import { chiaveMappa, idMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import type { IngressoQuartiereDto } from '../../shared/types.js';
 // ============================================================
 // cittaService — quartieri di Tokyo e luoghi con ciò che offrono (Fase 8.1)
 // ============================================================
@@ -14,7 +16,7 @@ interface RigaPiantaQ { quartiere_chiave: string; url: string; pagina: string | 
 /** Chiave dell'immagine (ambito «mappa») della mappa di un quartiere. */
 export const chiaveImmagineQuartiere = (quartiere: string): string => `citta-${quartiere}`;
 
-interface RigaQuartiere { chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string }
+interface RigaQuartiere { sblocco_data:string|null; chiave: string; ordine: number; nome: string; sblocco: string | null; descrizione: string; fonte: string }
 interface RigaLuogo { chiave: string; quartiere_chiave: string; ordine: number; tipo: string; nome: string; cosa_offre: string; quando: string | null; giorni: string | null; sblocco: string | null; confidenti_json: string; attivita_json: string; negozio: string | null; piatti_json: string | null; note: string | null; fonte: string; verificato: number }
 
 function luogoDto(r: RigaLuogo, nomiConfidenti: Map<string, string>, marcatori: Map<string, { x: number; y: number }> = new Map()): LuogoDto {
@@ -34,7 +36,7 @@ function nomiConfidenti(): Map<string, string> {
 export function elencaQuartieri(): QuartiereRiassuntoDto[] {
   const righe = prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.verificato = 1) AS verificati
     FROM quartiere q ORDER BY q.ordine`).all() as Array<RigaQuartiere & { luoghi: number; verificati: number }>;
-  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati }));
+  return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData:q.sblocco_data, mappaChiave:chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso:ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati }));
 }
 
 /** Scheda di un quartiere con i luoghi. */
@@ -48,7 +50,7 @@ export function dettaglioQuartiere(chiave: string): QuartiereDettaglioDto {
   const pianta: PiantaAreaDto | null = p ? { url: p.url, pagina: p.pagina, fonte: p.fonte, licenza: p.licenza, larghezza: p.larghezza, altezza: p.altezza, copertura: 'quartiere', note: p.note, alternative: [] } : null;
   const assenti = datiGuida<Record<string, string>>('mappe-citta-assenti') ?? {};
   const mappa = !!prepared("SELECT 1 FROM immagine WHERE ambito = 'mappa' AND chiave = ?").get(chiaveImmagineQuartiere(chiave));
-  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null) };
+  return { chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData:q.sblocco_data, mappaChiave:chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso:ingressoQuartiere(q.chiave), descrizione: q.descrizione, fonte: q.fonte, luoghi, mappa, pianta, piantaAssente: pianta ? null : (assenti[chiave] ?? null) };
 }
 
 /** Posiziona (o rimuove con null) lo spillo di un luogo sulla mappa del suo quartiere (coordinate in percentuale). */
@@ -69,4 +71,17 @@ export async function scaricaPiantaQuartiere(quartiere: string): Promise<{ quart
   if (!p) throw httpErrors.notFound('pianta-non-disponibile', `Nessuna mappa collegata per il quartiere '${quartiere}'.`);
   const img = await importaImmagineDaUrl('mappa', chiaveImmagineQuartiere(quartiere), p.url);
   return { quartiere, mime: img.mime, byte: img.byte, fonte: p.fonte, url: p.url };
+}
+
+export function ingressoQuartiere(quartiere:string):IngressoQuartiereDto|null {
+ const i=prepared('SELECT * FROM quartiere_ingresso WHERE quartiere_chiave=?').get(quartiere) as {mappa_chiave:string;x:number;y:number;zoom:number}|undefined;
+ return i?{mappa:chiaveMappa(i.mappa_chiave),nome:nomePercorso(i.mappa_chiave),x:i.x,y:i.y,zoom:i.zoom}:null;
+}
+export function impostaIngressoQuartiere(quartiere:string,dati:{mappa:string;x:number;y:number;zoom:number}|null):IngressoQuartiereDto|null {
+ if(!prepared('SELECT 1 FROM quartiere WHERE chiave=?').get(quartiere))throw httpErrors.notFound('quartiere-non-trovato','Quartiere inesistente.');
+ if(dati===null){prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(quartiere);return null;}
+ const id=idMappa(dati.mappa);
+ if(!prepared('SELECT 1 FROM mappa WHERE chiave=?').get(id))throw httpErrors.notFound('mappa-non-trovata','Mappa inesistente.');
+ prepared('INSERT INTO quartiere_ingresso VALUES(?,?,?,?,?) ON CONFLICT(quartiere_chiave) DO UPDATE SET mappa_chiave=excluded.mappa_chiave,x=excluded.x,y=excluded.y,zoom=excluded.zoom').run(quartiere,id,dati.x,dati.y,dati.zoom);
+ return ingressoQuartiere(quartiere);
 }

@@ -1,3 +1,6 @@
+import path from 'node:path';
+import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
+import { slug } from '../../../shared/slug.js';
 // ============================================================
 // mappeService — albero delle mappe, spilli con stato per partita, editor, esportazione/importazione (Fase 13.1)
 // ============================================================
@@ -7,8 +10,9 @@ import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
-import { dataSbloccoQuartiere, statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from '../disponibilitaService.js';
-import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from '../disponibilitaService.js';
+import { z } from 'zod';
+import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { DEFINIZIONI_SPILLO, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 import fs from 'node:fs';
@@ -19,7 +23,7 @@ interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; im
 interface RigaSpillo { id: number; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null }
 
 function rigaMappa(chiave: string): RigaMappa {
-  const r = prepared('SELECT * FROM mappa WHERE chiave = ?').get(chiave) as RigaMappa | undefined;
+  const r = prepared('SELECT * FROM mappa WHERE chiave = ?').get(idMappa(chiave)) as RigaMappa | undefined;
   if (!r) throw httpErrors.notFound('mappa-non-trovata', `La mappa '${chiave}' non esiste.`);
   return r;
 }
@@ -34,7 +38,7 @@ function conteggi(chiave: string): { spilli: number; figli: number } {
 /** Chiave dell'immagine di base nell'istanza: quella registrata, altrimenti un'immagine dell'ambito «mappa» con la chiave della mappa
  * (le piante scaricate dalla guida per aree e quartieri usano proprio quella chiave). */
 function immagineDi(r: RigaMappa): { chiave: string; createdAt: string } | null {
-  for (const chiave of [r.immagine_chiave, r.chiave]) {
+  for (const chiave of [r.immagine_chiave, chiaveMappa(r.chiave), r.chiave]) {
     if (!chiave) continue;
     const img = leggiImmagine('mappa', chiave);
     if (img) return { chiave, createdAt: img.createdAt };
@@ -46,9 +50,9 @@ function riassunto(r: RigaMappa): MappaRiassuntoDto {
   const c = conteggi(r.chiave);
   const img = immagineDi(r);
   return {
-    chiave: r.chiave, nome: r.nome, tipo: r.tipo, genitore: r.genitore_chiave, ordine: r.ordine,
+    chiave: chiaveMappa(r.chiave), nome: r.nome, nomeCompleto:nomePercorso(r.chiave), tipo: r.tipo, genitore: r.genitore_chiave?chiaveMappa(r.genitore_chiave):null, ordine: r.ordine,
     immagineUrl: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null,
-    asset: r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
+    asset: assetPredefinitoMappa(chiaveMappa(r.chiave)), assetOriginale:r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
     origine: r.origine, numeroSpilli: c.spilli, numeroFigli: c.figli, updatedAt: r.updated_at,
   };
 }
@@ -77,7 +81,7 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const m = prepared('SELECT * FROM mappa WHERE chiave = ?').get(chiave) as RigaMappa | undefined;
       if (!m) return null;
       const img = immagineDi(m);
-      return { tipo: 'mappa', mappa: { chiave: m.chiave, nome: m.nome, tipo: m.tipo }, immagine: { url: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null, asset: m.asset } };
+      return { tipo: 'mappa', mappa: { chiave: chiaveMappa(m.chiave), nome: m.nome, tipo: m.tipo }, immagine: { url: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null, asset: m.asset } };
     }
     case 'punto': {
       const p = prepared('SELECT p.chiave, p.tipo, p.nome, p.descrizione, p.esauribile, a.dungeon_chiave, a.chiave AS area_chiave FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE p.chiave = ?').get(chiave) as { chiave: string; tipo: string; nome: string; descrizione: string; esauribile: number; dungeon_chiave: string; area_chiave: string } | undefined;
@@ -134,6 +138,7 @@ interface ContestoSpilli { partitaId?: number; raccolti?: Set<number>; st?: Stat
 function nomiCondizioni(): NomiCondizioni {
   const mappa = (sql: string) => Object.fromEntries((prepared(sql).all() as Array<{ chiave: string; nome: string }>).map((r) => [r.chiave, r.nome]));
   return {
+    stati: mappa('SELECT chiave, nome FROM fatto_gioco'), articoli: mappa('SELECT chiave, nome FROM articolo'), letture: mappa('SELECT chiave, nome FROM libro UNION ALL SELECT chiave, nome FROM film'),
     confidenti: mappa('SELECT chiave, nome FROM confidente'), quartieri: mappa('SELECT chiave, nome FROM quartiere'),
     richieste: mappa('SELECT chiave, nome FROM richiesta'), dungeon: mappa('SELECT chiave, nome FROM dungeon'),
   };
@@ -147,8 +152,7 @@ function contestoSpilli(partitaId?: number): ContestoSpilli {
 
 /** Condizioni salvate nello spillo (JSON) → elenco normalizzato; un JSON rovinato vale come nessuna condizione. */
 export function condizioniDiRiga(json: string | null): RequisitoSpillo[] {
-  if (!json) return [];
-  try { return normalizzaCondizioniSpillo(JSON.parse(json)); } catch { return []; }
+  return leggiCondizioniSalvate(json);
 }
 
 function jsonCondizioni(condizioni: RequisitoSpillo[] | null | undefined): string | null {
@@ -173,9 +177,9 @@ function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
   const disponibilita = ctx.st ? valutaRequisiti(perValutazione, ctx.st) : undefined;
   return {
-    id: r.id, mappaChiave: r.mappa_chiave, tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
+    id: r.id, mappaChiave: chiaveMappa(r.mappa_chiave), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
     nome: r.nome, descrizione: r.descrizione, x: r.x, y: r.y,
-    riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave } : null,
+    riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
     collezionabile: r.collezionabile === 1, condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
 }
@@ -183,6 +187,7 @@ function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
 /** Mappa con percorso, figli, spilli (con stato della partita e dettagli delle entità collegate). */
 export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   const r = rigaMappa(chiave);
+  chiave = r.chiave;
   const figli = (prepared('SELECT * FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(chiave) as RigaMappa[]).map(riassunto);
   const ctx = contestoSpilli(partitaId);
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
@@ -190,7 +195,7 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   return {
     ...riassunto(r), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
-    percorso: percorsoDi(r), figli, spilli,
+    percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli,
     genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? null : null,
   };
 }
@@ -206,10 +211,14 @@ export function mappaPerEntita(tipo: string, chiave: string): MappaRiassuntoDto 
 /** `passaggio`/`ritorno` (15.24) valgono solo alla creazione con un genitore: passaggio nel genitore verso la nuova mappa e viceversa. */
 export interface DatiMappa { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string; passaggio?: boolean; ritorno?: boolean }
 
-const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{1,79}$/.test(chiave);
+const chiaveValida = (chiave: string): boolean => /^[a-z0-9][a-z0-9-]{0,179}$/.test(chiave);
 
-export function creaMappa(chiave: string, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
-  if (!chiaveValida(chiave)) throw httpErrors.badRequest('chiave-non-valida', 'La chiave della mappa ammette solo minuscole, cifre e trattini (2–80 caratteri).');
+export function creaMappa(chiave: string | undefined, dati: DatiMappa & { nome: string; tipo: TipoMappa }): MappaDto {
+  if(dati.genitore)dati={...dati,genitore:rigaMappa(dati.genitore).chiave};
+  const richiesta=chiave;
+  if(richiesta && prepared('SELECT 1 FROM mappa WHERE chiave=?').get(idMappa(richiesta)))throw httpErrors.conflict('mappa-esistente','La chiave indicata appartiene già a una mappa.');
+  chiave=(dati.genitore && rigaMappa(dati.genitore).tipo!=='citta'?chiaveMappa(dati.genitore)+'-':'')+slug(dati.nome);
+  if (!chiaveValida(chiave)) throw httpErrors.badRequest('chiave-non-valida', 'La chiave della mappa ammette solo minuscole, cifre e trattini (1–180 caratteri).');
   if (prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(chiave)) throw httpErrors.conflict('mappa-esistente', `Esiste già una mappa con chiave '${chiave}'.`);
   if (!(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
   if (dati.genitore) rigaMappa(dati.genitore);
@@ -221,6 +230,8 @@ export function creaMappa(chiave: string, dati: DatiMappa & { nome: string; tipo
   getDb().transaction(() => {
     prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at)
       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(chiave, dati.nome, dati.tipo, dati.genitore ?? null, dati.ordine ?? 0, asset, dati.larghezza ?? null, dati.altezza ?? null, dati.entita?.tipo ?? null, dati.entita?.chiave ?? null, dati.note ?? '', adesso);
+    sincronizzaPercorsiMappe(getDb());
+    if(richiesta&&richiesta!==chiave&&!getDb().prepare('SELECT 1 FROM mappa_alias WHERE chiave=?').get(richiesta))prepared('INSERT INTO mappa_alias VALUES(?,?)').run(richiesta,chiave);
     // 15.24: la nuova mappa nasce già raggiungibile dal genitore (e, se richiesto, con la via del ritorno); una chiave riusata dopo una
     // cancellazione può avere ancora un vecchio passaggio verso di sé: in quel caso non se ne crea un secondo.
     if (dati.genitore && dati.passaggio && !passaggioEsistente(dati.genitore, chiave)) creaPassaggio(dati.genitore, chiave);
@@ -258,6 +269,7 @@ function posizioneLibera(mappa: string, preferita: [number, number]): [number, n
 export function creaPassaggio(mappa: string, destinazione: string): SpilloDto {
   const r = rigaMappa(mappa);
   const dest = rigaMappa(destinazione);
+  mappa=r.chiave;destinazione=dest.chiave;
   if (mappa === destinazione) throw httpErrors.badRequest('passaggio-non-valido', 'Una mappa non può avere un passaggio verso sé stessa.');
   if (passaggioEsistente(mappa, destinazione)) throw httpErrors.conflict('passaggio-esistente', `«${r.nome}» ha già uno spillo verso «${dest.nome}».`);
   const [x, y] = posizioneLibera(mappa, destinazione === r.genitore_chiave ? [50, 92] : [50, 50]);
@@ -266,30 +278,36 @@ export function creaPassaggio(mappa: string, destinazione: string): SpilloDto {
 
 export function aggiornaMappa(chiave: string, dati: DatiMappa): MappaDto {
   const r = rigaMappa(chiave);
+  chiave=r.chiave;
+  if(dati.genitore)dati={...dati,genitore:rigaMappa(dati.genitore).chiave};
   if (dati.genitore) {
     if (dati.genitore === chiave) throw httpErrors.badRequest('genitore-non-valido', 'Una mappa non può essere genitore di sé stessa.');
     const g = rigaMappa(dati.genitore);
     if (percorsoDi(g).some((p) => p.chiave === chiave)) throw httpErrors.badRequest('genitore-non-valido', 'Il genitore scelto è un discendente di questa mappa.');
   }
   if (dati.tipo && !(TIPI_MAPPA as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di mappa non ammesso.');
+  getDb().transaction(()=>{
   prepared(`UPDATE mappa SET nome = ?, tipo = ?, genitore_chiave = ?, ordine = ?, asset = ?, larghezza = ?, altezza = ?, entita_tipo = ?, entita_chiave = ?, note = ?, origine = 'utente', updated_at = ? WHERE chiave = ?`).run(
     dati.nome ?? r.nome, dati.tipo ?? r.tipo, dati.genitore === undefined ? r.genitore_chiave : dati.genitore, dati.ordine ?? r.ordine, dati.asset === undefined ? r.asset : dati.asset,
     dati.larghezza === undefined ? r.larghezza : dati.larghezza, dati.altezza === undefined ? r.altezza : dati.altezza,
     dati.entita === undefined ? r.entita_tipo : dati.entita?.tipo ?? null, dati.entita === undefined ? r.entita_chiave : dati.entita?.chiave ?? null, dati.note ?? r.note, nowIso(), chiave);
+  sincronizzaPercorsiMappe(getDb());
+  })();
   return dettaglioMappa(chiave);
 }
 
 export function eliminaMappa(chiave: string): void {
-  rigaMappa(chiave);
+  chiave=rigaMappa(chiave).chiave;
   getDb().transaction(() => {
     prepared('UPDATE mappa SET genitore_chiave = NULL WHERE genitore_chiave = ?').run(chiave);
     prepared('DELETE FROM mappa WHERE chiave = ?').run(chiave);
+    sincronizzaPercorsiMappe(getDb());
   })();
 }
 
 /** Immagine di base nell'istanza (ambito «mappa», chiave = chiave della mappa); dimensioni lette dall'intestazione PNG/JPEG/WEBP/GIF quando possibile. */
 export function impostaImmagineMappa(chiave: string, mime: string, contenuto: Buffer): MappaDto {
-  rigaMappa(chiave);
+  chiave=rigaMappa(chiave).chiave;
   salvaImmagine('mappa', chiave, mime, contenuto);
   const dim = dimensioniImmagine(contenuto);
   prepared("UPDATE mappa SET immagine_chiave = ?, larghezza = ?, altezza = ?, origine = 'utente', updated_at = ? WHERE chiave = ?").run(chiave, dim?.larghezza ?? null, dim?.altezza ?? null, nowIso(), chiave);
@@ -331,23 +349,37 @@ export interface DatiSpillo { tipo?: TipoSpillo; nome?: string; descrizione?: st
 function condizioniConChiaviEsistenti(condizioni: RequisitoSpillo[] | null | undefined): { valide: RequisitoSpillo[]; scartate: Array<{ cosa: string; chiave: string }> } {
   const valide: RequisitoSpillo[] = [];
   const scartate: Array<{ cosa: string; chiave: string }> = [];
-  for (const c of normalizzaCondizioniSpillo(condizioni ?? [])) {
+  const sorgente = condizioni == null ? [] : Array.isArray(condizioni) ? condizioni : [null];
+  if(sorgente.length>20)return {valide:[{tipo:'da-configurare',nota:'Il pacchetto supera il limite di 20 condizioni: ricontrollare tutti i vincoli prima di salvare.'}],scartate:[{cosa:'Condizioni',chiave:'limite superato'}]};
+  for (const originale of sorgente) {
+    const c = normalizzaRequisitoSpillo(originale);
+    if (!c) { scartate.push({cosa:'Condizione',chiave:'non valida'}); valide.push({tipo:'da-configurare',nota:'Condizione importata non valida: ricontrollare il pacchetto originale.'}); continue; }
+    if (c.tipo === 'gruppo' || c.tipo === 'non') {
+      const figli=condizioniConChiaviEsistenti(c.tipo === 'gruppo' ? c.condizioni : [c.condizione]);
+      if (figli.scartate.length) { scartate.push(...figli.scartate); valide.push({tipo:'da-configurare',nota:'Gruppo con riferimenti mancanti: '+figli.scartate.map(f=>f.chiave).join(', ')}); } else valide.push(c);
+      continue;
+    }
     let ok = true; let cosa = ''; let chiave = '';
-    if (c.tipo === 'palazzo') { cosa = 'Palazzo'; chiave = c.dungeon; ok = !!prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(c.dungeon); }
+    if(c.tipo==='stato'){cosa='Stato';chiave=c.chiave;ok=!!prepared('SELECT 1 FROM fatto_gioco WHERE chiave=?').get(chiave);}
+    else if(c.tipo==='articolo'){cosa='Articolo';chiave=c.articolo;ok=!!prepared('SELECT 1 FROM articolo WHERE chiave=?').get(chiave);}
+    else if(c.tipo==='lettura'){cosa=c.categoria;chiave=c.chiave;ok=!!prepared('SELECT 1 FROM '+c.categoria+' WHERE chiave=?').get(chiave);}
+    else if(c.tipo==='persona-arcano'){cosa='Arcano';chiave=c.arcano;ok=!!prepared('SELECT 1 FROM persona WHERE arcana=?').get(chiave);}
+    else if(c.tipo==='persona-abilita'){cosa='Persona o abilità';chiave=c.persona;ok=!!prepared('SELECT 1 FROM persona WHERE nome=?').get(c.persona)&&!!prepared('SELECT 1 FROM skill WHERE nome=?').get(c.abilita);}
+    else if (c.tipo === 'palazzo') { cosa = 'Palazzo'; chiave = c.dungeon; ok = !!prepared("SELECT 1 FROM dungeon WHERE chiave = ? AND tipo = 'palazzo'").get(c.dungeon); }
     else if (c.tipo === 'confidente') { cosa = 'Confidente'; chiave = c.confidente; ok = !!prepared('SELECT 1 FROM confidente WHERE chiave = ?').get(c.confidente); }
     else if (c.tipo === 'richiesta') { cosa = 'Richiesta'; chiave = c.richiesta; ok = !!prepared('SELECT 1 FROM richiesta WHERE chiave = ?').get(c.richiesta); }
     else if (c.tipo === 'quartiere') {
       cosa = 'Quartiere con data di sblocco'; chiave = c.quartiere;
-      const q = prepared('SELECT sblocco FROM quartiere WHERE chiave = ?').get(c.quartiere) as { sblocco: string | null } | undefined;
-      ok = !!q && dataSbloccoQuartiere(q.sblocco) !== null;
+      const q = prepared('SELECT sblocco_data FROM quartiere WHERE chiave = ?').get(c.quartiere) as { sblocco_data: string | null } | undefined;
+      ok = !!q && q.sblocco_data !== null;
     }
-    if (ok) valide.push(c); else scartate.push({ cosa, chiave });
+    if (ok) valide.push(c); else { scartate.push({ cosa, chiave }); valide.push({tipo:'da-configurare',nota:cosa+' non trovato: '+chiave}); }
   }
   return { valide, scartate };
 }
 
 /** Editor (API): una chiave sconosciuta è un errore 404, non uno scarto silenzioso. */
-function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefined): void {
+export function verificaCondizioni(condizioni: RequisitoSpillo[] | null | undefined): void {
   const { scartate } = condizioniConChiaviEsistenti(condizioni);
   if (scartate.length > 0) throw httpErrors.notFound('condizione-non-trovata', `${scartate[0].cosa} '${scartate[0].chiave}' non trovato nella Guida.`);
 }
@@ -360,8 +392,9 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
 }
 
 export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoSpillo; nome: string; x: number; y: number }): SpilloDto {
-  rigaMappa(mappaChiave);
+  mappaChiave=rigaMappa(mappaChiave).chiave;
   if (!(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
+  if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento);
   verificaCondizioni(dati.condizioni);
   const adesso = nowIso();
@@ -376,7 +409,8 @@ export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
   if (dati.tipo && !(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
-  if (dati.mappa) rigaMappa(dati.mappa);
+  if (dati.mappa) dati={...dati,mappa:rigaMappa(dati.mappa).chiave};
+  if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento);
   verificaCondizioni(dati.condizioni);
   // uno spillo del seed modificato diventa dell'utente: si ricorda com'era, così il reseed non ne reinserisce una copia
@@ -465,6 +499,11 @@ const RICERCHE: Record<TipoRiferimento, string> = {
 /** Entità collegabili a uno spillo, per tipo e testo (nome o chiave), al massimo `limite` risultati. */
 export function cercaRiferimenti(tipo: TipoRiferimento, q: string, limite = 30): RiferimentoTrovato[] {
   if (!(TIPI_RIFERIMENTO as readonly string[]).includes(tipo)) throw httpErrors.badRequest('riferimento-non-valido', 'Tipo di riferimento non ammesso.');
+  if(tipo==='mappa'){
+    const normalizza=(v:string)=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const parole=normalizza(q).split(/\s+/).filter(Boolean);
+    return elencaMappe().filter(m=>parole.every(p=>normalizza((m.nomeCompleto??m.nome)+' '+m.chiave).includes(p))).slice(0,limite).map(m=>({tipo,chiave:m.chiave,nome:m.nomeCompleto??m.nome,dettaglio:m.tipo}));
+  }
   const testo = `%${q.trim().toLowerCase()}%`;
   return (prepared(RICERCHE[tipo]).all(testo, testo, limite) as Array<{ chiave: string; nome: string; dettaglio: string | null }>).map((r) => ({
     tipo, chiave: r.chiave, nome: r.nome, dettaglio: tipo === 'confidente' && r.dettaglio ? t('arcana', r.dettaglio) : r.dettaglio ?? '',
@@ -496,9 +535,10 @@ function base64Immagine(ambito: string, chiave: string): { mime: string; base64:
 /** Pacchetto JSON con mappe, spilli (con schermate in base64) e immagini di base dell'istanza (base64): stesso formato del seed
  * `mappe-editor.json`. Con `radice` esporta solo quella mappa e le sue discendenti (un «luogo» completo). */
 export function esportaMappe(radice?: string): EsportazioneMappeDto {
+  if(radice)radice=rigaMappa(radice).chiave;
   const ammesse = radice ? new Set(discendentiDi(radice)) : null;
   const mappe: EsportazioneMappeDto['mappe'] = (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[]).filter((m) => !ammesse || ammesse.has(m.chiave)).map((m) => ({
-    chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, larghezza: m.larghezza, altezza: m.altezza,
+    chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, collezionabile: s.collezionabile === 1, ordine: s.ordine,
@@ -519,10 +559,10 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   for (const m of mappe) {
     // immagine registrata, oppure quella dell'istanza con la chiave della mappa: sempre inclusa (pacchetto completo, decisione dell'utente
     // del 2026-09-04); la provenienza delle immagini scaricate dalle guide resta annotata a titolo informativo
-    const chiaveImg = m.immagine ?? (leggiImmagine('mappa', m.chiave) ? m.chiave : null);
+    const chiaveImg = m.immagine ?? immagineDi(rigaMappa(m.chiave))?.chiave ?? null;
     if (!chiaveImg) continue;
     const img = leggiImmagine('mappa', chiaveImg);
-    if (img?.origineUrl) provenienze.push({ mappa: m.chiave, origineUrl: img.origineUrl });
+    if (img?.origineUrl) provenienze.push({ mappa: chiaveMappa(m.chiave), origineUrl: img.origineUrl });
     m.immagine = chiaveImg;
     try {
       const f = fileImmagine('mappa', chiaveImg);
@@ -531,7 +571,13 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
       // immagine registrata ma file assente: esportata senza immagine
     }
   }
-  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(provenienze.length > 0 ? { provenienze } : {}) };
+  const usati=new Set<string>();
+  const visita=(r:RequisitoSpillo):void=>{if(r.tipo==='stato')usati.add(r.chiave);else if(r.tipo==='gruppo')r.condizioni.forEach(visita);else if(r.tipo==='non')visita(r.condizione);};
+  mappe.forEach(m=>m.spilli.forEach(s=>s.condizioni?.forEach(visita)));
+  const stati=(prepared('SELECT chiave,nome,categoria,unita FROM fatto_gioco').all() as NonNullable<EsportazioneMappeDto['stati']>).filter(f=>usati.has(f.chiave));
+  for(const m of mappe){m.chiave=chiaveMappa(m.chiave);if(m.genitore)m.genitore=chiaveMappa(m.genitore);m.asset=assetPredefinitoMappa(m.chiave);for(const s of m.spilli)if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=chiaveMappa(s.riferimento.chiave);}
+  const ingressi=(prepared('SELECT quartiere_chiave AS quartiere,mappa_chiave AS mappa,x,y,zoom FROM quartiere_ingresso').all() as NonNullable<EsportazioneMappeDto['ingressi']>).filter(i=>!ammesse||ammesse.has(i.mappa)).map(i=>({...i,mappa:chiaveMappa(i.mappa)}));
+  return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(stati.length?{stati}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
 export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number }
@@ -540,10 +586,20 @@ export interface EsitoImportazione { mappe: number; spilli: number; immagini: nu
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
 export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi?: boolean; origine?: 'seed' | 'utente' } = {}): EsitoImportazione {
   if (!pacchetto || pacchetto.versione !== 1 || !Array.isArray(pacchetto.mappe)) throw httpErrors.badRequest('pacchetto-non-valido', 'Pacchetto delle mappe non riconosciuto (versione 1 attesa).');
+  pacchetto=structuredClone(pacchetto);
+  for(const m of pacchetto.mappe){m.chiave=idMappa(m.chiave);if(m.assetOriginale)m.asset=m.assetOriginale;if(m.genitore)m.genitore=idMappa(m.genitore);for(const s of m.spilli??[])if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=idMappa(s.riferimento.chiave);}
   const origine = opz.origine ?? 'utente';
   const esito: EsitoImportazione = { mappe: 0, spilli: 0, immagini: 0, saltate: [], condizioniScartate: 0 };
   getDb().transaction(() => {
     const adesso = nowIso();
+    const statiSchema=z.array(z.object({chiave:z.string().regex(/^[a-z0-9-]{1,120}$/),nome:z.string().min(1).max(160),categoria:z.enum(['evento','attivita','oggetto','grado','contatore','quartiere']),unita:z.string().max(40)})).max(10000);
+    const letti=statiSchema.safeParse(pacchetto.stati??[]);
+    if(!letti.success)throw httpErrors.badRequest('stati-non-validi','Definizioni degli stati non valide nel pacchetto.');
+    for(const f of letti.data){
+      const attuale=prepared('SELECT nome,categoria,unita FROM fatto_gioco WHERE chiave=?').get(f.chiave) as {nome:string;categoria:string;unita:string}|undefined;
+      if(attuale&&(attuale.nome!==f.nome||attuale.categoria!==f.categoria||attuale.unita!==f.unita))throw httpErrors.conflict('stato-in-conflitto','Lo stato '+f.chiave+' ha una definizione diversa: importazione annullata.');
+      if(!attuale)prepared('INSERT INTO fatto_gioco VALUES(?,?,?,?,?)').run(f.chiave,f.nome,f.categoria,f.unita,adesso);
+    }
     // prima le mappe (in ordine di dipendenza: i genitori possono arrivare dopo → secondo passaggio per i genitori)
     for (const m of pacchetto.mappe) {
       if (!chiaveValida(m.chiave) || !(TIPI_MAPPA as readonly string[]).includes(m.tipo)) { esito.saltate.push(m.chiave); continue; }
@@ -591,6 +647,17 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     for (const m of pacchetto.mappe) {
       if (m.genitore && !esito.saltate.includes(m.chiave) && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(m.genitore)) prepared('UPDATE mappa SET genitore_chiave = ? WHERE chiave = ?').run(m.genitore, m.chiave);
     }
+    sincronizzaPercorsiMappe(getDb());
+    if(pacchetto.ingressi?.length && prepared("SELECT 1 FROM sqlite_master WHERE name='quartiere_ingresso'").get()) {
+      const ingressi=z.array(z.object({quartiere:z.string().min(1).max(80),mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6)})).max(1000).safeParse(pacchetto.ingressi);
+      if(!ingressi.success)throw httpErrors.badRequest('ingressi-non-validi','Ingressi dei quartieri non validi nel pacchetto.');
+      for(const i of ingressi.data){
+        const mappa=idMappa(i.mappa);
+        if(!prepared('SELECT 1 FROM quartiere WHERE chiave=?').get(i.quartiere)||!prepared('SELECT 1 FROM mappa WHERE chiave=?').get(mappa))throw httpErrors.badRequest('ingresso-non-trovato','Un ingresso cita un quartiere o una mappa inesistente.');
+        if(opz.sovrascrivi&&origine!=='seed')prepared('DELETE FROM quartiere_ingresso WHERE quartiere_chiave=?').run(i.quartiere);
+        prepared('INSERT OR IGNORE INTO quartiere_ingresso VALUES(?,?,?,?,?)').run(i.quartiere,mappa,i.x,i.y,i.zoom);
+      }
+    }
     for (const [chiave, img] of Object.entries(pacchetto.immagini ?? {})) {
       if (!img?.base64 || !img.mime) continue;
       if (!pacchetto.mappe.some((m) => m.immagine === chiave && !esito.saltate.includes(m.chiave))) continue;
@@ -608,6 +675,7 @@ const ESTENSIONE: Record<string, string> = { 'image/png': 'png', 'image/jpeg': '
 /** ZIP con `data/seed/mappe/<radice>.json` (formato del seed: immagini di base come asset `mappe/<chiave>`, schermate degli spilli come
  * asset `spilli/<mappa>/<n>-<m>`) e i file in `public/asset/…`, pronto da estrarre nella radice del repository: diventa dato preimpostato dell'app. */
 export function creaPacchettoRepository(radice: string): { nomeFile: string; contenuto: Buffer } {
+  radice=chiaveMappa(rigaMappa(radice).chiave);
   const pacchetto = esportaMappe(radice);
   const voci: VoceZip[] = [];
   const adesso = new Date();
@@ -621,6 +689,17 @@ export function creaPacchettoRepository(radice: string): { nomeFile: string; con
       }
       m.immagine = null;
     }
+    if(!voci.some(v=>v.nome.startsWith('public/asset/mappe/'+m.chiave+'.'))){
+      const source=m.assetOriginale??m.asset;
+      if(source && /^[a-z0-9/-]+$/.test(source)){
+        const base=path.resolve(import.meta.dirname,'../../../public/asset');
+        for(const est of ['png','webp','jpg','jpeg','gif','svg']){
+          const file=path.join(base,source+'.'+est);
+          if(fs.existsSync(file)){voci.push({nome:'public/asset/mappe/'+m.chiave+'.'+est,contenuto:fs.readFileSync(file),data:adesso});break;}
+        }
+      }
+    }
+    delete m.assetOriginale;
     m.spilli.forEach((s, n) => {
       s.immagini = (s.immagini ?? []).flatMap((i, k) => {
         if (i.asset) return [{ asset: i.asset, didascalia: i.didascalia }];

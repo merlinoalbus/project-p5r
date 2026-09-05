@@ -36,7 +36,7 @@ describe('API percorso giorno per giorno', () => {
     expect(g.azioni.length).toBeGreaterThanOrEqual(3);
     expect(g.azioni.map((a) => a.indice)).toEqual(g.azioni.map((_, k) => k));
     expect(g.azioni.find((a) => a.tipo === 'palazzo')?.riferimento).toEqual({ tipo: 'dungeon', chiave: 'kamoshida' });
-    expect(g.azioni.find((a) => a.fascia === 'sera' && a.tipo === 'confidente')?.riferimento).toEqual({ tipo: 'confidente', chiave: 'ryuji' });
+    expect(g.azioni.find((a) => a.fascia === 'giorno' && a.tipo === 'confidente')?.riferimento).toEqual({ tipo: 'confidente', chiave: 'ryuji' });
     expect(g.avvisi.length).toBeGreaterThan(0);
     expect(g.fonte.startsWith('https://www.allgamestaff.it/')).toBe(true);
     expect((await request(app).get('/api/compendio/percorso/13-40')).status).toBe(404);
