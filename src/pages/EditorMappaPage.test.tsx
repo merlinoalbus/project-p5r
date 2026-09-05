@@ -122,7 +122,7 @@ describe('EditorMappaPage', () => {
     const form = within(await screen.findByRole('region', { name: 'Proprietà dello spillo: Nota' }));
     expect(form.getByText('Nessuna condizione: lo spillo è sempre visibile.')).toBeInTheDocument();
     const scelta = form.getByLabelText('Nuova condizione') as HTMLSelectElement;
-    expect([...scelta.options].map((o) => o.value)).toEqual(['data', 'intervallo', 'palazzo', 'dote', 'confidente', 'richiesta', 'piove', 'non-piove', 'giorno-settimana', 'stagione', 'quartiere']);
+    expect([...scelta.options].map((o) => o.value)).toEqual(['data', 'intervallo', 'palazzo', 'dote', 'confidente', 'richiesta', 'piove', 'non-piove', 'fascia-giorno', 'fascia-sera', 'giorno-settimana', 'stagione', 'quartiere']);
     // Palazzo scelto dall'elenco della Guida
     fireEvent.change(scelta, { target: { value: 'palazzo' } });
     fireEvent.change(await form.findByLabelText('Palazzo'), { target: { value: 'madarame' } });

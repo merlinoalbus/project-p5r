@@ -13,16 +13,18 @@ import { semaforiConfidente, statoPartitaSemafori, type StatoPartitaSemafori } f
 import type {
   CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, PersonaPossedutaDto, RangoDoteDto,
   SemaforiRangoDto,
+  FasciaGioco,
 } from '../../shared/types.js';
 
 interface RigaPartita {
-  id: number; nome: string; note: string; attiva: number; livello_protagonista: number; data_gioco: string | null; difficolta: Difficolta;
+  id: number; nome: string; note: string; attiva: number; livello_protagonista: number; data_gioco: string | null; fascia_gioco: FasciaGioco; difficolta: Difficolta;
   nuova_partita_plus: number; dlc_posseduti_json: string; allarme_attivo: number; created_at: string; updated_at: string;
 }
 
 function partitaDto(r: RigaPartita): PartitaDto {
   return {
     id: r.id, nome: r.nome, note: r.note, attiva: r.attiva === 1, livelloProtagonista: r.livello_protagonista, dataGioco: r.data_gioco,
+    fasciaGioco: r.fascia_gioco === 'sera' ? 'sera' : 'giorno',
     difficolta: r.difficolta, nuovaPartitaPlus: r.nuova_partita_plus === 1, dlcPosseduti: JSON.parse(r.dlc_posseduti_json) as number[],
     allarmeAttivo: r.allarme_attivo === 1, createdAt: r.created_at, updatedAt: r.updated_at,
   };
@@ -55,6 +57,8 @@ export interface DatiPartita {
   note?: string;
   livelloProtagonista?: number;
   dataGioco?: string | null;
+  /** Momento della giornata corrente («giorno» o «sera»): condizioni «solo di sera» di spilli, articoli e negozi. */
+  fasciaGioco?: FasciaGioco;
   difficolta?: Difficolta;
   nuovaPartitaPlus?: boolean;
   dlcPosseduti?: number[];
@@ -74,9 +78,9 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
     const nessuna = (prepared('SELECT COUNT(*) AS n FROM partita').get() as { n: number }).n === 0;
     const attiva = dati.attiva || nessuna;
     if (attiva) prepared('UPDATE partita SET attiva = 0 WHERE attiva = 1').run();
-    const info = prepared(`INSERT INTO partita (nome, note, attiva, livello_protagonista, data_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
-      dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.difficolta ?? 'normale',
+    const info = prepared(`INSERT INTO partita (nome, note, attiva, livello_protagonista, data_gioco, fascia_gioco, difficolta, nuova_partita_plus, dlc_posseduti_json, allarme_attivo, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+      dati.nome, dati.note ?? '', attiva ? 1 : 0, dati.livelloProtagonista ?? 1, dati.dataGioco ?? primoGiornoDelGioco(), dati.fasciaGioco ?? 'giorno', dati.difficolta ?? 'normale',
       dati.nuovaPartitaPlus ? 1 : 0, JSON.stringify(dati.dlcPosseduti ?? []), dati.allarmeAttivo ? 1 : 0, adesso, adesso,
     );
     const id = Number(info.lastInsertRowid);
@@ -95,9 +99,9 @@ export function creaPartita(dati: DatiPartita & { nome: string; attiva?: boolean
 export function aggiornaPartita(id: number, dati: DatiPartita): PartitaDto {
   const r = rigaPartita(id);
   return getDb().transaction(() => {
-    prepared(`UPDATE partita SET nome = ?, note = ?, livello_protagonista = ?, data_gioco = ?, difficolta = ?, nuova_partita_plus = ?, dlc_posseduti_json = ?, allarme_attivo = ?, updated_at = ? WHERE id = ?`).run(
+    prepared(`UPDATE partita SET nome = ?, note = ?, livello_protagonista = ?, data_gioco = ?, fascia_gioco = ?, difficolta = ?, nuova_partita_plus = ?, dlc_posseduti_json = ?, allarme_attivo = ?, updated_at = ? WHERE id = ?`).run(
       dati.nome ?? r.nome, dati.note ?? r.note, dati.livelloProtagonista ?? r.livello_protagonista,
-      dati.dataGioco === undefined ? r.data_gioco : dati.dataGioco, dati.difficolta ?? r.difficolta,
+      dati.dataGioco === undefined ? r.data_gioco : dati.dataGioco, dati.fasciaGioco ?? r.fascia_gioco, dati.difficolta ?? r.difficolta,
       dati.nuovaPartitaPlus === undefined ? r.nuova_partita_plus : dati.nuovaPartitaPlus ? 1 : 0,
       dati.dlcPosseduti ? JSON.stringify(dati.dlcPosseduti) : r.dlc_posseduti_json,
       dati.allarmeAttivo === undefined ? r.allarme_attivo : dati.allarmeAttivo ? 1 : 0, nowIso(), id,

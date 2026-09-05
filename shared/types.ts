@@ -408,6 +408,8 @@ export interface TraduzioneDto {
 // ---- Partite ----
 
 export type Difficolta = 'sicura' | 'facile' | 'normale' | 'difficile' | 'spietata';
+/** Momento della giornata nella partita, le due fasce della guida: «giorno» (mattina, pranzo, pomeriggio, dopo scuola) e «sera». */
+export type FasciaGioco = 'giorno' | 'sera';
 
 export interface PartitaDto {
   id: number;
@@ -416,6 +418,8 @@ export interface PartitaDto {
   attiva: boolean;
   livelloProtagonista: number;
   dataGioco: string | null;
+  /** Momento corrente della giornata (scheda «Oggi»); torna a «giorno» quando cambia il giorno corrente. */
+  fasciaGioco: FasciaGioco;
   difficolta: Difficolta;
   nuovaPartitaPlus: boolean;
   dlcPosseduti: number[];
@@ -461,7 +465,7 @@ export interface ModificaDote {
 /** Semaforo di un requisito per un rango (Fase 12.3): verde soddisfatto, rosso non soddisfatto, grigio non verificabile (conferma manuale). */
 export interface SemaforoRequisitoDto {
   indice: number;
-  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale' | 'giorno-settimana' | 'stagione';
+  tipo: 'dote' | 'persona-arcano' | 'persona-abilita' | 'palazzo' | 'richiesta' | 'confidente' | 'data' | 'meteo' | 'manuale' | 'giorno-settimana' | 'stagione' | 'fascia';
   testo: string;
   stato: 'verde' | 'rosso' | 'grigio';
   /** Spiegazione breve dello stato (es. «Coraggio rango 2 di 3»). */

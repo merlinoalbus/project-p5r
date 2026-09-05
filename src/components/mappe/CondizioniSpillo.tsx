@@ -103,6 +103,8 @@ export function CondizioniSpilloEditor({ condizioni, onCambia, elenchi, disabili
       case 'richiesta': return richiestaScelta ? { tipo: 'richiesta', richiesta: richiestaScelta } : null;
       case 'piove': return { tipo: 'piove' };
       case 'non-piove': return { tipo: 'meteo', condizione: 'non-piove' };
+      case 'fascia-giorno': return { tipo: 'fascia', fascia: 'giorno' };
+      case 'fascia-sera': return { tipo: 'fascia', fascia: 'sera' };
       case 'giorno-settimana': return giorni.length > 0 && giorni.length < 7 ? { tipo: 'giorno-settimana', giorni: GIORNI_SETTIMANA.map((g) => g.chiave).filter((g) => giorni.includes(g)) } : null;
       case 'stagione': return { tipo: 'stagione', stagione };
       case 'quartiere': return quartiereScelto ? { tipo: 'quartiere', quartiere: quartiereScelto } : null;

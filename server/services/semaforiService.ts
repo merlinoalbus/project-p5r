@@ -29,6 +29,8 @@ export interface StatoPartitaSemafori {
   richiesteCompletate: Set<string>;
   ranghiConfidenti: Map<string, number>;
   dataGioco: string | null;
+  /** Momento della giornata corrente della partita (scheda «Oggi»): «giorno» o «sera». */
+  fasciaGioco: 'giorno' | 'sera' | null;
   meteoOggi: string | null;
   conferme: Set<string>;
 }
@@ -41,11 +43,12 @@ export function statoPartitaSemafori(partitaId: number, ranghiConfidenti: Map<st
   const boss = new Set((prepared(`SELECT DISTINCT a.dungeon_chiave FROM punto_partita sp JOIN punto_interesse pi ON pi.chiave = sp.punto_chiave JOIN dungeon_area a ON a.chiave = pi.area_chiave
     WHERE sp.partita_id = ? AND pi.tipo = 'boss'`).all(partitaId) as Array<{ dungeon_chiave: string }>).map((r) => r.dungeon_chiave));
   const richieste = new Set((prepared("SELECT rp.richiesta_chiave, r.nome FROM richiesta_partita rp JOIN richiesta r ON r.chiave = rp.richiesta_chiave WHERE rp.partita_id = ? AND rp.stato = 'completata'").all(partitaId) as Array<{ richiesta_chiave: string; nome: string }>).flatMap((r) => [r.richiesta_chiave, r.nome.toLowerCase()]));
-  const partita = prepared('SELECT data_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null } | undefined;
+  const partita = prepared('SELECT data_gioco, fascia_gioco FROM partita WHERE id = ?').get(partitaId) as { data_gioco: string | null; fascia_gioco: string | null } | undefined;
   const dataGioco = partita?.data_gioco ?? null;
+  const fasciaGioco = partita ? (partita.fascia_gioco === 'sera' ? 'sera' : 'giorno') : null;
   const meteo = dataGioco ? (prepared('SELECT meteo FROM giorno_calendario WHERE data = ?').get(dataGioco) as { meteo: string | null } | undefined)?.meteo ?? null : null;
   const conferme = new Set((prepared('SELECT confidente_chiave, rango, indice FROM requisito_partita WHERE partita_id = ? AND confermato = 1').all(partitaId) as Array<{ confidente_chiave: string; rango: number; indice: number }>).map((r) => `${r.confidente_chiave}/${r.rango}/${r.indice}`));
-  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, dataGioco, meteoOggi: meteo, conferme };
+  return { doti, arcaniInScorta: arcani, personeConAbilita: abilita, bossGestiti: boss, richiesteCompletate: richieste, ranghiConfidenti, dataGioco, fasciaGioco, meteoOggi: meteo, conferme };
 }
 
 function confrontaDate(a: string, b: string): number {

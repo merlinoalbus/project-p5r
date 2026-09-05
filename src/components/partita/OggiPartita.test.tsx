@@ -12,7 +12,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
@@ -58,6 +58,26 @@ describe('OggiPartita', () => {
     expect(within(screen.getByRole('list', { name: 'Azioni di giorno' })).getByRole('listitem')).toHaveAttribute('aria-current', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Torna a Tokyo' }));
     expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
+  });
+
+  it('«Giorno»/«Sera» cambiano il momento della giornata della partita: la PUT aggiorna lo store e la mappa incorporata si ricarica', async () => {
+    const partita = { id: 4, nome: 'Prova', dataGioco: '04-12', fasciaGioco: 'giorno', updatedAt: '2026-09-05T10:00:00.000Z' } as PartitaDto;
+    usePartitaStore.setState({ partite: [partita], attiva: partita });
+    useSuggerimentiStore.setState({ partitaId: 4, dati: null, caricamento: false });
+    api.impostaFasciaGioco.mockImplementation(async (_id: number, fascia: 'giorno' | 'sera') => ({ ...partita, fasciaGioco: fascia, updatedAt: '2026-09-05T11:00:00.000Z' }));
+    api.getSuggerimenti.mockResolvedValue({ giorno: '04-12', motivi: [] });
+    render(<MemoryRouter><OggiPartita partita={partita} /></MemoryRouter>);
+    const gruppo = within(await screen.findByRole('group', { name: 'Momento della giornata nella partita' }));
+    expect(gruppo.getByRole('button', { name: /Giorno/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(gruppo.getByRole('button', { name: /Sera/ })).toHaveAttribute('aria-pressed', 'false');
+    await screen.findByRole('application', { name: 'Mappa: Tokyo' });
+    const caricamentiMappa = api.getMappa.mock.calls.length;
+    fireEvent.click(gruppo.getByRole('button', { name: /Sera/ }));
+    await waitFor(() => expect(api.impostaFasciaGioco).toHaveBeenCalledWith(4, 'sera'));
+    await waitFor(() => expect(usePartitaStore.getState().attiva?.fasciaGioco).toBe('sera'));
+    expect(gruppo.getByRole('button', { name: /Sera/ })).toHaveAttribute('aria-pressed', 'true');
+    // la disponibilità degli spilli dipende dalla fascia: la mappa viene ricaricata
+    await waitFor(() => expect(api.getMappa.mock.calls.length).toBeGreaterThan(caricamentiMappa));
   });
 
   it('«Segna come giorno corrente» allinea la data di gioco della partita nello store (chip, Riepilogo, ScuolaOggi) e rinfresca i suggerimenti del giorno', async () => {

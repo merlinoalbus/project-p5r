@@ -210,6 +210,7 @@ function descriviEffetti(e: EffettiAzioneDto): string {
 export function impostaGiornoCorrente(partitaId: number, data: string): GiornoCorrenteDto {
   partitaEsiste(partitaId);
   if (!prepared('SELECT 1 FROM giorno_percorso WHERE data = ?').get(data)) throw httpErrors.notFound('giorno-non-trovato', `Nessun giorno del percorso il ${data}.`);
-  prepared('UPDATE partita SET data_gioco = ?, updated_at = ? WHERE id = ?').run(data, nowIso(), partitaId);
+  // un giorno nuovo comincia di mattina: la fascia torna a «giorno»; rimarcare lo stesso giorno non la tocca
+  prepared("UPDATE partita SET data_gioco = ?, fascia_gioco = CASE WHEN data_gioco IS ? THEN fascia_gioco ELSE 'giorno' END, updated_at = ? WHERE id = ?").run(data, data, nowIso(), partitaId);
   return { dataCorrente: data, partita: leggiPartita(partitaId) };
 }

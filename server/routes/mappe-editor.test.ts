@@ -429,6 +429,32 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(((await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto).spilli.filter((s) => s.nome === 'Poliziotto Dialogo')).toHaveLength(1);
   });
 
+  it('condizione «solo di sera»: segue il momento della giornata della partita, che torna a «giorno» quando cambia il giorno corrente', async () => {
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-fascia', nome: 'Prova fascia', tipo: 'luogo', genitore: 'citta-shibuya' })).status).toBe(201);
+    const s = (await request(app).post('/api/mappe/prova-fascia/spilli').send({ tipo: 'attivita', nome: 'Bancarella serale', x: 5, y: 5, condizioni: [{ tipo: 'fascia', fascia: 'sera' }] })).body.data as SpilloDto;
+    expect(s.condizioni).toEqual([{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }]);
+    expect((await request(app).post('/api/mappe/prova-fascia/spilli').send({ tipo: 'nota', nome: 'x', x: 1, y: 1, condizioni: [{ tipo: 'fascia', fascia: 'notte' }] })).status).toBe(400);
+    // una partita nuova è di giorno: lo spillo serale è bloccato
+    const spillo = async () => ((await request(app).get(`/api/mappe/prova-fascia?partita=${partitaId}`)).body.data as MappaDto).spilli.find((x) => x.id === s.id)!;
+    expect((await request(app).get(`/api/partite/${partitaId}`)).body.data.fasciaGioco).toBe('giorno');
+    expect((await spillo()).disponibilita).toMatchObject({ stato: 'bloccato', requisiti: [{ tipo: 'fascia', stato: 'rosso', dettaglio: 'Solo di sera: ora è giorno' }] });
+    // di sera è disponibile; valori fuori elenco rifiutati
+    expect((await request(app).put(`/api/partite/${partitaId}`).send({ fasciaGioco: 'notte' })).status).toBe(400);
+    expect(((await request(app).put(`/api/partite/${partitaId}`).send({ fasciaGioco: 'sera' })).body.data as { fasciaGioco: string }).fasciaGioco).toBe('sera');
+    expect((await spillo()).disponibilita).toMatchObject({ stato: 'disponibile', requisiti: [{ tipo: 'fascia', stato: 'verde', dettaglio: 'Ora è sera' }] });
+    // rimarcare lo stesso giorno non cambia la fascia; un giorno nuovo comincia di mattina
+    const oggi = ((await request(app).get(`/api/partite/${partitaId}`)).body.data as { dataGioco: string }).dataGioco;
+    expect(((await request(app).put(`/api/partite/${partitaId}/giorno`).send({ data: oggi })).body.data as { partita: { fasciaGioco: string } }).partita.fasciaGioco).toBe('sera');
+    const domani = oggi === '04-12' ? '04-13' : '04-12';
+    expect(((await request(app).put(`/api/partite/${partitaId}/giorno`).send({ data: domani })).body.data as { partita: { fasciaGioco: string } }).partita.fasciaGioco).toBe('giorno');
+    await request(app).put(`/api/partite/${partitaId}/giorno`).send({ data: oggi });
+    // una partita creata già di sera parte di sera; senza indicazione parte di giorno
+    const serale = (await request(app).post('/api/partite').send({ nome: 'Serale', fasciaGioco: 'sera' })).body.data as { id: number; fasciaGioco: string };
+    expect(serale.fasciaGioco).toBe('sera');
+    expect(((await request(app).post('/api/partite').send({ nome: 'Diurna' })).body.data as { fasciaGioco: string }).fasciaGioco).toBe('giorno');
+    expect((await request(app).delete('/api/mappe/prova-fascia')).status).toBe(204);
+  });
+
   it('l’importazione scarta e conta le condizioni con chiavi assenti dalla Guida invece di nascondere lo spillo per sempre', async () => {
     const pacchetto: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: 'prova-import-condizioni', nome: 'Prova import', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '',
       spilli: [{ tipo: 'nota', nome: 'Spillo importato', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0, condizioni: [{ tipo: 'confidente', confidente: 'nessuno', rango: 1 }, { tipo: 'palazzo', dungeon: 'kamoshida' }, { tipo: 'intervallo', dal: '08-20', al: '06-01' }, { tipo: 'quartiere', quartiere: 'ueno' }] }] }] };

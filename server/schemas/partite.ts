@@ -12,6 +12,7 @@ const campiPartita = {
   note: z.string().max(2000),
   livelloProtagonista: livello,
   dataGioco: z.string().regex(/^\d{2}-\d{2}$/, 'Formato atteso MM-GG').nullable(),
+  fasciaGioco: z.enum(['giorno', 'sera']),
   difficolta,
   nuovaPartitaPlus: z.boolean(),
   dlcPosseduti: z.array(z.number().int().min(1).max(50)).max(50),
