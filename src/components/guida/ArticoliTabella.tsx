@@ -8,6 +8,7 @@ import { impostaAcquisto } from '../../services/api';
 import { notifica } from '../../stores/notificationStore';
 import { NOME_CATEGORIA_ARTICOLO } from '../../utils/negozi';
 import type { ArticoloDto } from '../../types';
+import { ChipDisponibilita } from './ChipDisponibilita';
 
 interface Props {
   articoli: ArticoloDto[];
@@ -48,7 +49,7 @@ export function ArticoliTabella({ articoli, partitaId, mostraNegozio = false, on
               <td data-etichetta="Per">{a.per ?? '—'}</td>
               <td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{a.prezzo !== null ? `${a.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td>
               <td data-etichetta="Effetto">{a.effetto ?? '—'}{a.condizione && <div className="text-text-muted">{a.condizione}</div>}</td>
-              <td data-etichetta="Disponibile">{a.disponibileDal ?? '—'}</td>
+              <td data-etichetta="Disponibile"><div className="flex flex-col gap-1 items-start"><ChipDisponibilita disponibilita={a.disponibilita} compatto /><span>{a.disponibileDal ?? '—'}</span></div></td>
             </tr>
           ))}
         </tbody>

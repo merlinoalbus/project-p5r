@@ -29,6 +29,7 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   sicura: (d) => <svg {...base(d)}><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5 4.5-5" /></svg>,
   scorciatoia: (d) => <svg {...base(d)}><path d="M4 18L20 6" /><path d="M14 6h6v6" /><path d="M4 6l16 12" /><path d="M14 18h6v-6" /></svg>,
   confidente: (d) => <svg {...base(d)}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0 1 13 0" /><path d="M16 5a3 3 0 0 1 0 6" /><path d="M17.5 14.5a5.5 5.5 0 0 1 4 5.5" /></svg>,
+  dialogo: (d) => <svg {...base(d)}><path d="M4 5h16v11h-8l-5 4v-4H4z" /><path d="M8 10.5h.01M12 10.5h.01M16 10.5h.01" /></svg>,
   attivita: (d) => <svg {...base(d)}><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" /></svg>,
   ristorante: (d) => <svg {...base(d)}><path d="M4 9h12v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" /><path d="M16 11h2a2.5 2.5 0 0 1 0 5h-2" /><path d="M8 3v3M11 3v3" /></svg>,
   distributore: (d) => <svg {...base(d)}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 6h5v7H8z" /><path d="M15 7h1M15 10h1" /><path d="M8 17h8" /></svg>,

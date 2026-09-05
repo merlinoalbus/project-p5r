@@ -1,0 +1,247 @@
+{
+ "versione": 1,
+ "mappe": [
+  {
+   "chiave": "citta-yongen-jaya",
+   "nome": "Yongen-Jaya",
+   "tipo": "quartiere",
+   "genitore": "tokyo",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/citta-yongen-jaya",
+   "larghezza": 344,
+   "altezza": 290,
+   "entita": {
+    "tipo": "quartiere",
+    "chiave": "yongen-jaya"
+   },
+   "note": "",
+   "spilli": [
+    {
+     "tipo": "attivita",
+     "nome": "Café Leblanc",
+     "descrizione": "Caffetteria e curry gestita da Sojiro Sakura; soffitta al piano superiore è la stanza del protagonista (studio, fabbricazione strumenti, videogiochi, DVD, dormire, acquisti online da Tanaka). Dopo la pulizia della soffitta si sbloccano libri in vendita (\"Il pensiero sociale\", \"Esplorando Yoncha 4\").",
+     "x": 62,
+     "y": 52,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/leblanc"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Yongen-Java Banchina della metropolitana",
+     "descrizione": "Sottopasso verso Yongen-Java Banchina della metropolitana",
+     "x": 88.3,
+     "y": 6.8,
+     "riferimento": {
+      "tipo": "mappa",
+      "chiave": "yongen-java-banchina-della-metropolitana"
+     },
+     "collezionabile": false,
+     "ordine": 0,
+     "immagini": [
+      {
+       "asset": "spilli/citta-yongen-jaya/2-1",
+       "didascalia": ""
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Yongen-Java Banchina della metropolitana",
+     "descrizione": "Vicolo verso Yongen-Java Banchina della metropolitana",
+     "x": 76.8,
+     "y": 83.4,
+     "riferimento": {
+      "tipo": "mappa",
+      "chiave": "yongen-java-banchina-della-metropolitana"
+     },
+     "collezionabile": false,
+     "ordine": 0,
+     "immagini": [
+      {
+       "asset": "spilli/citta-yongen-jaya/3-1",
+       "didascalia": ""
+      }
+     ]
+    },
+    {
+     "tipo": "dialogo",
+     "nome": "Poliziotto Dialogo",
+     "descrizione": "Un poliziotto appena arrivi a Tongen-Java prima di andare al Caffè Le Blanc",
+     "x": 43.6,
+     "y": 65.2,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0,
+     "immagini": [
+      {
+       "asset": "spilli/citta-yongen-jaya/4-1",
+       "didascalia": ""
+      }
+     ]
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore",
+     "descrizione": "",
+     "x": 84.2,
+     "y": 63.9,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/distributore-tabaccaio"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Uomo indisposto",
+     "descrizione": "Dialogo uomo triste per il cinema chiuso.",
+     "x": 35.9,
+     "y": 65.6,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Ascolta",
+     "descrizione": "Dialogo tra bambina e adulta su animale scomparso",
+     "x": 18.3,
+     "y": 35.7,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0
+    },
+    {
+     "tipo": "punto-sensibile",
+     "nome": "Casa di Sojiro Sakura",
+     "descrizione": "",
+     "x": 20.6,
+     "y": 12.5,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Ascolta",
+     "descrizione": "Ascolta il corriere. Attenzione Appare dopo aver interagito con la casa di Sojiro.",
+     "x": 31,
+     "y": 14.7,
+     "riferimento": null,
+     "collezionabile": true,
+     "ordine": 0
+    },
+    {
+     "tipo": "confidente",
+     "nome": "Clinica Medica Takemi",
+     "descrizione": "Medicine e oggetti medici per HP/cura alterazioni/rianimazione; sconto 50% con Confidente al massimo. Confidente di Tae Takemi (Morte).",
+     "x": 46,
+     "y": 90.4,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/clinica-takemi"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Bagno pubblico (Terme Yongen-Jaya)",
+     "descrizione": "Aumenta la dote Fascino, in particolare nei giorni di pioggia.",
+     "x": 87.2,
+     "y": 60.6,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/bagno-pubblico"
+     },
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Negozio di articoli usati Yumenoshima",
+     "descrizione": "Materiali e articoli usati; secondo fonte secondaria (samurai-gamers) tratta anche materiali per strumenti ed elettronica di seconda mano (TV, lettore DVD, laptop, videogiochi retrò).",
+     "x": 53,
+     "y": 79.7,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/negozio-usato-yumenoshima"
+     },
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Supermercato Muramasa",
+     "descrizione": "Snack e specialità stagionali.",
+     "x": 43,
+     "y": 48.3,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/super-muramasa"
+     },
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore automatico (Tabaccaio)",
+     "descrizione": "Bevande: Nastea, 1UP, Starvicks (130¥ ciascuna).",
+     "x": 55.1,
+     "y": 62.4,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/distributore-tabaccaio"
+     },
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Gabbie di Battuta",
+     "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
+     "x": 50.6,
+     "y": 54.9,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/batting-cage-yongen"
+     },
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Cinema di Yongen-Jaya",
+     "descrizione": "Visione film con incremento doti sociali.",
+     "x": 21.2,
+     "y": 66.6,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/cinema-yongen"
+     },
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Lavanderia",
+     "descrizione": "Pulizia/valutazione di armature sporche recuperate nei Palazzi/Memento.",
+     "x": 78.4,
+     "y": 65.3,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/lavanderia-yongen"
+     },
+     "collezionabile": false,
+     "ordine": 9
+    }
+   ]
+  }
+ ]
+}

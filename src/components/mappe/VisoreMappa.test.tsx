@@ -20,7 +20,7 @@ const mappa: MappaDto = {
   percorso: [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave: 'citta-shibuya', nome: 'Shibuya' }],
   figli: [{ chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'utente', numeroSpilli: 0, numeroFigli: 0, updatedAt: '' }],
   spilli: [
-    spillo({ id: 1, nome: 'Untouchable', tipo: 'negozio', tipoNome: 'Negozio', x: 20, y: 20, riferimento: { tipo: 'luogo', chiave: 'shibuya/untouchable' }, dettaglio: { tipo: 'luogo', luogo: { chiave: 'shibuya/untouchable', quartiere: 'shibuya', tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi e munizioni', quando: null }, negozio: { chiave: 'untouchable', nome: 'Untouchable', tipo: 'armi', articoli: [{ chiave: 'a1', nome: 'Pistola modello Tkachev', categoria: 'arma', prezzo: 12000, disponibileDal: null, comprato: false }] } } }),
+    spillo({ id: 1, nome: 'Untouchable', tipo: 'negozio', tipoNome: 'Negozio', x: 20, y: 20, riferimento: { tipo: 'luogo', chiave: 'shibuya/untouchable' }, dettaglio: { tipo: 'luogo', luogo: { chiave: 'shibuya/untouchable', quartiere: 'shibuya', tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi e munizioni', quando: null }, negozio: { chiave: 'untouchable', nome: 'Untouchable', tipo: 'armi', disponibilita: { stato: 'disponibile', requisiti: [] }, articoli: [{ chiave: 'a1', nome: 'Pistola modello Tkachev', categoria: 'arma', prezzo: 12000, disponibileDal: null, comprato: false, disponibilita: { stato: 'disponibile', requisiti: [] } }, { chiave: 'a2', nome: 'Fucile a pompa Governor', categoria: 'arma', prezzo: 48000, disponibileDal: 'dal 18 giugno', comprato: false, disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 giugno', dettaglio: 'oggi è il 20 aprile', manuale: false, confermato: false }] } }, { chiave: 'a3', nome: 'Proiettili perforanti', categoria: 'munizioni', prezzo: 3000, disponibileDal: null, comprato: false, disponibilita: { stato: 'ignoto', requisiti: [{ indice: 0, tipo: 'manuale', stato: 'grigio', testo: 'rango cliente Oscuro', dettaglio: 'Condizione non verificabile dai dati della partita', manuale: true, confermato: false }] } }] } } }),
     spillo({ id: 2, nome: 'Scrigno raccolto', tipo: 'forziere', tipoNome: 'Forziere', x: 80, y: 80, collezionabile: true, raccolto: true }),
     spillo({ id: 3, nome: 'Verso il centro', tipo: 'passaggio', tipoNome: 'Passaggio', x: 10, y: 90, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: '/api/immagini/mappa/shibuya-centro/file', asset: null } }, immagini: [{ id: 31, url: '/api/immagini/spillo/3-a/file', asset: null, didascalia: 'La scala', ordine: 0 }, { id: 32, url: null, asset: 'spilli/citta-shibuya/3-2', didascalia: '', ordine: 1 }] }),
     spillo({ id: 4, nome: 'Scrigno da aprire', tipo: 'forziere', tipoNome: 'Forziere', x: 90, y: 10, collezionabile: true, descrizione: 'Contiene un Panino a mezzaluna.' }),
@@ -89,6 +89,17 @@ describe('VisoreMappa', () => {
     expect(scheda.getByText('Pistola modello Tkachev')).toBeInTheDocument();
     expect(scheda.getByText('12.000 ¥')).toBeInTheDocument();
     expect(scheda.getByRole('link', { name: 'scheda del negozio' })).toHaveAttribute('href', '/guida/negozi/untouchable');
+    // l'articolo non ancora disponibile alla data corrente è nascosto e conteggiato; quello «da verificare» resta con il chip
+    expect(scheda.getByText(/Untouchable · 2 articoli/)).toBeInTheDocument();
+    expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
+    expect(scheda.getByText('Proiettili perforanti')).toBeInTheDocument();
+    expect(scheda.getByText('Da verificare')).toHaveAttribute('title', 'rango cliente Oscuro — Condizione non verificabile dai dati della partita');
+    fireEvent.click(scheda.getByRole('button', { name: 'Mostra anche l’articolo non ancora disponibile' }));
+    expect(scheda.getByText('Fucile a pompa Governor')).toBeInTheDocument();
+    expect(scheda.getByText('Non ancora')).toHaveAttribute('title', 'dal 18 giugno — oggi è il 20 aprile');
+    expect(scheda.getByText(/Untouchable · 3 articoli/)).toBeInTheDocument();
+    fireEvent.click(scheda.getByRole('button', { name: 'Nascondi l’articolo non ancora disponibile' }));
+    expect(scheda.queryByText('Fucile a pompa Governor')).not.toBeInTheDocument();
   });
 
   it('percorso, mappa genitore e mappe figlie navigano; senza partita il collezionabile non è segnabile', () => {

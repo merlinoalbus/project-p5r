@@ -3,7 +3,7 @@
 // ============================================================
 
 import type {
-  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto } from '../../types';
+  CompendioPartitaDto, ConfidentePartitaDto, Difficolta, DoteSocialePartitaDto, ModificaConfidente, ModificaDote, PartitaDto, AnteprimaFusioneDto, CicloSalvatoDto, DomandeDto, EsitoForcaDto, EsitoFusioneScortaDto, EsitoIsolamentoDto, ObiettivoDto, PersonaPossedutaDto, ArticoloDto, AzionePercorsoDto, CruciverbaDto, FilmDto, GiornoCorrenteDto, LibroDto, PuntoInteresseDto, RichiestaDto, TipoLettura, StatoPunto, StatoRichiesta, TrofeoDto, PianoFusioneDto, PianoSalvatoDto, StatisticheDto, StatoObiettivo, StoricoDto, SuggerimentoIsolamentoDto, SuggerimentiOggiDto } from '../../types';
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut, queryString } from './_helpers';
 
 /** Campi modificabili di una partita. */
@@ -56,8 +56,8 @@ export const impostaTrofeo = (id: number, trofeo: string, ottenuto: boolean): Pr
 export const confermaRequisitoConfidente = (id: number, chiave: string, rango: number, indice: number, confermato: boolean): Promise<ConfidentePartitaDto> =>
   apiPut(`/partite/${id}/confidenti/${chiave}/requisiti`, { rango, indice, confermato });
 export const impostaAzionePercorso = (id: number, data: string, indice: number, fatta: boolean, noteRisposta?: 1 | 2 | 3): Promise<AzionePercorsoDto> => apiPut(`/partite/${id}/percorso`, { data, indice, fatta, ...(noteRisposta ? { noteRisposta } : {}) });
-/** Giorno corrente della partita (calendario di gioco). */
-export const impostaGiornoCorrente = (id: number, data: string): Promise<{ dataCorrente: string }> => apiPut(`/partite/${id}/giorno`, { data });
+/** Giorno corrente della partita (calendario di gioco); la risposta porta anche la partita aggiornata da riportare nello store. */
+export const impostaGiornoCorrente = (id: number, data: string): Promise<GiornoCorrenteDto> => apiPut(`/partite/${id}/giorno`, { data });
 
 /** Chiavi da evidenziare in oro: entità coinvolte nelle azioni ancora da fare del giorno corrente. */
 export const getSuggerimenti = (id: number): Promise<SuggerimentiOggiDto> => apiGet(`/partite/${id}/suggerimenti`);
