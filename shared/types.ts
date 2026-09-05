@@ -1531,3 +1531,27 @@ export interface EsportazioneMappeDto {
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */
   provenienze?: Array<{ mappa: string; origineUrl: string }>;
 }
+
+// ---- Impostazioni: backup e ripristino dell'istanza (15.29) ----
+
+/** Stato dell'istanza locale: versioni, dimensioni su disco, conteggi. */
+export interface StatoIstanzaDto {
+  versioneSchema: number;
+  versioneApp: string;
+  seed: { versione: string | null; hash: string | null; caricatoIl: string | null };
+  database: { nome: string; byte: number; inMemoria: boolean };
+  immagini: { file: number; byte: number };
+  caratteri: { file: number; byte: number };
+  partite: number;
+  copieDiSicurezza: number;
+}
+
+/** Esito di un ripristino da file: che cosa è stato sostituito e dove sta la copia di sicurezza. */
+export interface EsitoRipristinoDto {
+  formato: 'database' | 'istanza';
+  database: boolean;
+  immagini: number;
+  caratteri: number;
+  copiaDiSicurezza: string;
+  stato: StatoIstanzaDto;
+}

@@ -9,6 +9,7 @@ import { GestionePartite } from '../components/impostazioni/GestionePartite';
 import { TraduzioniEditor } from '../components/impostazioni/TraduzioniEditor';
 import { CaratteriEditor } from '../components/impostazioni/CaratteriEditor';
 import { ImmaginiCaricate } from '../components/impostazioni/ImmaginiCaricate';
+import { BackupIstanza } from '../components/impostazioni/BackupIstanza';
 import { ImmagineEntita } from '../components/shared/ImmagineEntita';
 import { usePreferenzeStore } from '../stores/preferenzeStore';
 import { useAssetStore } from '../stores/assetStore';
@@ -25,7 +26,7 @@ export function ImpostazioniPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini e traduzioni della tua istanza." />
+      <IntestazionePagina titolo="Impostazioni" sottotitolo="Partite, grafica predefinita, caratteri, immagini, traduzioni e backup della tua istanza." />
       <GestionePartite />
       <section className="card flex flex-col gap-3">
         <h2 className="m-0 text-[15px] font-semibold">Grafica</h2>
@@ -59,6 +60,7 @@ export function ImpostazioniPage() {
       </section>
       <ImmaginiCaricate />
       <TraduzioniEditor />
+      <BackupIstanza />
       <section className="card text-[13px] text-text-secondary">
         <h2 className="m-0 mb-1 text-[15px] font-semibold text-text">Informazioni</h2>
         <div>Versione app {config?.appVersion} — {config?.gioco}</div>
