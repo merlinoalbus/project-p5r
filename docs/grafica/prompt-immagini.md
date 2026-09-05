@@ -153,6 +153,27 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-copia.png` | Copia lo spillo selezionato negli appunti dell'editor delle mappe (2026-09-05) | due fogli sovrapposti, quello davanti con l'angolo piegato |
 | `azione-incolla.png` | Incolla lo spillo copiato in un punto della mappa (strumento dell'editor, 2026-09-05) | tavoletta con la molletta e un foglio che vi entra |
 
+### 17.1 Specifiche e prompt completi delle 2 icone da consegnare (richieste il 2026-09-05, 15.20)
+
+Specifiche comuni, ricavate dalle icone delle azioni già consegnate e approvate (`azione-registra.png`: libro con spunta; `azione-elimina.png`: cestino), da rispettare per entrambi i file:
+- PNG 128×128, RGBA con alfa reale (niente scacchiera finta, niente fondo); generare più grande e ridurre con lo stesso fattore sui due assi.
+- Soggetto centrato che occupa circa l'80% del quadrato, forme piatte riempite di bianco `#ececf1` con contorno nero `#0b0b0e` spesso e uniforme, angoli leggermente tagliati in diagonale; **ombra rossa `#e5352b` sfalsata** in basso a destra come un secondo strato di carta, senza sfumature né trasparenze parziali.
+- Deve leggersi a 14 px (chip dei filtri) e a 28–48 px dentro i pulsanti a tassello, su fondo rosso (pulsante acceso), bianco e nero: il contorno nero e il riempimento bianco non vanno invertiti.
+- Nessun testo, nessun numero, nessun marchio; nessuna icona di sistema riconoscibile (niente logo di appunti di Windows o macOS).
+- Distinte fra loro e dalle icone consegnate: la copia mostra DUE fogli, l'incolla UNA tavoletta con molletta; niente libro (registra), niente foglietto con matita (note), niente freccia curva (annulla l'ultimo incremento).
+- Prompt negativo comune del §0 in coda a ogni prompt.
+
+Prompt pronti (anteporre il blocco di stile del §0):
+
+```
+[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: due fogli rettangolari sovrapposti e leggermente sfalsati, quello davanti con l'angolo in alto a destra piegato e due righe corte (barre) al centro, quello dietro visibile solo lungo due lati. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio. → azione-copia.png
+```
+```
+[blocco di stile] Icona di azione per l'interfaccia di Persona 5 Royal, PNG 128×128 con sfondo trasparente: una tavoletta portablocco verticale con la molletta metallica in alto e un foglio che vi entra dall'alto a sinistra, inclinato, con l'angolo che sporge oltre il bordo; due righe corte (barre) sul foglio. Forme piatte bianche #ececf1 con contorno nero #0b0b0e spesso, angoli tagliati in diagonale, ombra rossa #e5352b sfalsata in basso a destra. Nessun testo, nessun marchio. → azione-incolla.png
+```
+
+Verifica di consegna: 128×128 esatti, alfa nativo, leggibilità a 14 px e a 40 px su fondo rosso, bianco e nero, nome del file identico alla chiave dell'azione (`ui/azione-copia.png`, `ui/azione-incolla.png`).
+
 ## 18. Spilli delle mappe (34) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13), `spillo-dialogo` aggiunto il 2026-09-05, 14 nuovi il 2026-09-05 (15.24)
 Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo
 (passaggio blu, negozio verde, forziere oro, tesoro viola, boss rosso, miniboss arancio, sicura azzurro, scorciatoia grigio, Confidente rosa,
@@ -198,6 +219,63 @@ rampino magenta scuro `#a21caf`, porta rosso scuro `#b91c1c`. Ogni soggetto deve
 | `spillo-meccanismo.png` | meccanismo da azionare (leva, interruttore, pannello, quadro) | leva verticale con pomello rotondo su una base a semicerchio |
 | `spillo-rampino.png` | punto di aggancio del rampino (Royal) | rampino a tre punte con un tratto di corda che sale, distinto dalla chiave dell'oggetto chiave |
 | `spillo-porta.png` | porta chiusa o serratura | porta a battente con buco della serratura a goccia; niente chiave (che identifica l'oggetto chiave) |
+
+### 18.1 Specifiche e prompt completi dei 14 spilli da consegnare (richiesti il 2026-09-05, 15.24)
+
+Specifiche comuni, ricavate dagli spilli già consegnati e approvati (`spillo-negozio.png`, `spillo-dialogo.png`…), da rispettare per ognuno dei 14 file:
+- PNG 128×128, RGBA con alfa reale (niente scacchiera finta, niente fondo opaco); generare più grande e ridurre con lo stesso fattore sui due assi.
+- Forma: goccia da mappa con la punta in basso al centro, che occupa l'85–90% dell'altezza come negli spilli consegnati; riempimento **pieno** del colore del tipo (esadecimale sotto); contorno nero netto (`#0b0b0e`) di spessore uniforme; **ombra rossa `#e5352b` sfalsata** in basso a destra, come un secondo strato di carta, senza sfumature.
+- Simbolo al centro della parte tonda: bianco `#ececf1` con contorno nero, forme piatte, tratto spesso, riconoscibile a 20 px (nell'app lo spillo è alto 40 px sulla mappa e 12–20 px nei pallini di legenda); niente dettagli sottili, niente prospettiva, niente sfumature.
+- Nessun testo, nessun numero, nessun marchio, nessun personaggio; simboli religiosi espliciti esclusi (per `culto` basta il torii).
+- Ogni soggetto deve restare distinto dagli spilli già consegnati (borsa = negozio, chiave = oggetto chiave, tazza = ristorante, lattina in distributore = Bevande, fumetto = dialogo, foglietto = nota, stella = attività).
+- Prompt negativo comune del §0 in coda a ogni prompt.
+
+Prompt pronti (anteporre il blocco di stile del §0):
+
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno grigio caldo #78716c, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una sigaretta accesa vista di lato con un filo di fumo a due volute, appoggiata davanti a un piccolo distributore automatico a colonna stilizzato. Nessun testo, nessun marchio. → spillo-sigarette.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno ambra scura #d97706, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una rivista aperta con tre righe di annunci (barre) e una lente d'ingrandimento appoggiata sull'angolo in basso a destra. Nessun testo leggibile, solo barre. → spillo-cercalavoro.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno verde petrolio #0d9488, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una valigetta da lavoro rettangolare con manico ad arco e una targhetta vuota al centro; distinta dalla borsa della spesa del negozio (niente manici morbidi). Nessun testo. → spillo-lavoro.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno ciano chiaro #67e8f9, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una vasca da bagno pubblico vista di lato con tre volute di vapore che salgono (il segno giapponese delle terme, senza caratteri). Nessun testo. → spillo-terme.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno lavanda #c4b5fd, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una lavatrice frontale con oblò rotondo grande e due manopole in alto. Nessun testo. → spillo-lavanderia.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno blu notte #1e3a8a, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: un ciak da regista aperto, con l'asta a strisce diagonali bianche e nere e la tavoletta sotto. Nessun testo. → spillo-cinema.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno bruno #7c2d12, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: tre libri, due in piedi e uno inclinato appoggiato agli altri, con i dorsi visibili e una riga per dorso. Nessun testo. → spillo-biblioteca.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno viola scuro #4c1d95, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: un portale torii con due traverse orizzontali e due pilastri, la traversa superiore leggermente incurvata. Nessuna croce, nessun altro simbolo religioso, nessun testo. → spillo-culto.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno lime #84cc16, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: un joypad orizzontale con croce direzionale a sinistra e due pulsanti rotondi a destra. Nessun testo. → spillo-sala-giochi.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno pesca #fdba74, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una casetta con tetto a due falde, una porta rettangolare al centro e un piccolo camino. Nessun testo. → spillo-casa.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno rosa lilla #f0abfc, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: un timbro a mano con impugnatura tonda e base larga, sopra una riga d'inchiostro orizzontale. Nessun testo, nessuna lettera sulla base. → spillo-timbro.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno ardesia #64748b, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una leva verticale con pomello rotondo in cima, innestata su una base a semicerchio. Nessun testo. → spillo-meccanismo.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno magenta scuro #a21caf, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: un rampino a tre punte ricurve con un tratto di corda che sale verso l'alto; distinto dalla chiave antica dell'oggetto chiave. Nessun testo. → spillo-rampino.png
+```
+```
+[blocco di stile] Spillo da mappa per Persona 5 Royal, PNG 128×128 con sfondo trasparente: goccia con la punta in basso, riempimento pieno rosso scuro #b91c1c, contorno nero netto, ombra rossa #e5352b sfalsata in basso a destra. Al centro un simbolo bianco #ececf1 con contorno nero, piatto e spesso: una porta a battente chiusa, vista frontale, con il buco della serratura a goccia; nessuna chiave. Nessun testo. → spillo-porta.png
+```
+
+Verifica di consegna (come per gli spilli precedenti): 128×128 esatti, alfa nativo, punta della goccia al centro del bordo inferiore, leggibilità a 20 px su fondo chiaro e scuro, nome del file identico alla chiave del tipo (`ui/spillo-<tipo>.png`).
 
 ## 19. Mappe di base della città (25) — `mappe/<chiave>.png` (2048×1536, opache) — richieste il 2026-09-04 (Fase 13)
 Piante ILLUSTRATE originali in stile guida strategica (vista dall'alto leggermente prospettica, sagome nere degli edifici, strade chiare,
