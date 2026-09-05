@@ -105,12 +105,15 @@ interface Props {
   azioneEvidenziata?: number | null;
   /** Nella scheda «Oggi»: intestazione più compatta. */
   compatto?: boolean;
+  /** Momento della giornata della partita per QUESTO giorno (solo se è il giorno corrente): la sezione «Di giorno» o «Di sera» viene evidenziata con «Adesso» (15.27). */
+  fasciaCorrente?: 'giorno' | 'sera' | null;
 }
 
 /** Scheda del giorno e azioni di giorno e di sera. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onSullaMappa, azioneEvidenziata, compatto }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente }: Props) {
   const azioniGiorno = g.azioni.filter((a) => a.fascia === 'giorno');
   const azioniSera = g.azioni.filter((a) => a.fascia === 'sera');
+  const classeSezione = (fascia: 'giorno' | 'sera') => `card flex flex-col gap-1 ${fasciaCorrente === fascia ? 'card--adesso' : ''}`;
   const consigliate = g.azioni.filter((a) => !a.fatta && a.stato?.tipo === 'consigliata').length;
   const bloccate = g.azioni.filter((a) => !a.fatta && a.stato?.tipo === 'bloccata').length;
   return (
@@ -131,14 +134,14 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onSullaMappa, azioneEvid
         {g.fonte && <a href={g.fonte} target="_blank" rel="noreferrer" className="credito self-start">fonte</a>}
       </section>
       {azioniGiorno.length > 0 && (
-        <section className="card flex flex-col gap-1">
-          <FasciaGiornata fascia="giorno" dettaglio={partitaId ? `${azioniGiorno.filter((a) => a.fatta).length} su ${azioniGiorno.length}` : undefined} />
+        <section className={classeSezione('giorno')} aria-current={fasciaCorrente === 'giorno' ? 'true' : undefined}>
+          <FasciaGiornata fascia="giorno" attiva={fasciaCorrente === 'giorno'} dettaglio={partitaId ? `${azioniGiorno.filter((a) => a.fatta).length} su ${azioniGiorno.length}` : undefined} />
           <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Azioni di giorno">{azioniGiorno.map((a) => <Azione key={a.indice} a={a} data={g.giorno} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === a.indice} />)}</ul>
         </section>
       )}
       {azioniSera.length > 0 && (
-        <section className="card flex flex-col gap-1">
-          <FasciaGiornata fascia="sera" dettaglio={partitaId ? `${azioniSera.filter((a) => a.fatta).length} su ${azioniSera.length}` : undefined} />
+        <section className={classeSezione('sera')} aria-current={fasciaCorrente === 'sera' ? 'true' : undefined}>
+          <FasciaGiornata fascia="sera" attiva={fasciaCorrente === 'sera'} dettaglio={partitaId ? `${azioniSera.filter((a) => a.fatta).length} su ${azioniSera.length}` : undefined} />
           <ul className="m-0 p-0 list-none divide-y divide-border-light" aria-label="Azioni di sera">{azioniSera.map((a) => <Azione key={a.indice} a={a} data={g.giorno} partitaId={partitaId} onCambiata={onAggiorna} onSullaMappa={onSullaMappa} evidenziata={azioneEvidenziata === a.indice} />)}</ul>
         </section>
       )}
