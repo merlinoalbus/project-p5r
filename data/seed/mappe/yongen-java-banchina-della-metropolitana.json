@@ -1,0 +1,46 @@
+{
+ "versione": 1,
+ "mappe": [
+  {
+   "chiave": "yongen-java-banchina-della-metropolitana",
+   "nome": "Yongen-Java - Banchina della metropolitana",
+   "tipo": "area",
+   "genitore": "tokyo",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/yongen-java-banchina-della-metropolitana",
+   "larghezza": 750,
+   "altezza": 625,
+   "entita": null,
+   "note": "Banchina Metropolitana di Yongen",
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Yongen-Java Vicoli",
+     "descrizione": "Scale mobili verso Yongen-Java Vicoli",
+     "x": 75.2,
+     "y": 22.1,
+     "riferimento": {
+      "tipo": "mappa",
+      "chiave": "citta-yongen-jaya"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Yongen-Java Vicoli",
+     "descrizione": "Sottopasso verso Yongen-Java Vicoli",
+     "x": 80.8,
+     "y": 28.5,
+     "riferimento": {
+      "tipo": "mappa",
+      "chiave": "citta-yongen-jaya"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
+  }
+ ]
+}
