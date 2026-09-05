@@ -3,13 +3,14 @@
 // ============================================================
 
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../types';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo';
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from '../../../shared/spilli';
 import { API_BASE_URL } from '../../utils/constants';
 import { httpFetch } from './_httpClient';
 import { ApiError, apiDelete, apiGet, apiPost, apiPut, queryString } from './_helpers';
 
 export interface DatiMappaApi { nome?: string; tipo?: TipoMappa; genitore?: string | null; ordine?: number; asset?: string | null; larghezza?: number | null; altezza?: number | null; entita?: { tipo: string; chiave: string } | null; note?: string }
-export interface DatiSpilloApi { tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; mappa?: string }
+export interface DatiSpilloApi { tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; mappa?: string; condizioni?: RequisitoSpillo[] | null }
 
 /** Albero completo (riassunti piatti con genitore). */
 export const getAlberoMappe = (): Promise<MappaRiassuntoDto[]> => apiGet('/mappe/albero');
@@ -69,4 +70,4 @@ export async function aggiungiImmagineSpillo(spilloId: number, file: File, didas
 }
 export const aggiornaImmagineSpillo = (id: number, dati: { didascalia?: string; ordine?: number }): Promise<SpilloDto> => apiPut(`/mappe/spilli/immagini/${id}`, dati);
 export const eliminaImmagineSpillo = (id: number): Promise<SpilloDto> => apiDelete(`/mappe/spilli/immagini/${id}`);
-export const importaMappe = (pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[] }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });
+export const importaMappe = (pacchetto: EsportazioneMappeDto, sovrascrivi: boolean): Promise<{ mappe: number; spilli: number; immagini: number; saltate: string[]; condizioniScartate: number }> => apiPost('/mappe/importa', { pacchetto, sovrascrivi }, { timeoutMs: 120_000 });

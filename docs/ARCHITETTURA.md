@@ -430,7 +430,16 @@ mappa, fine trascinamento) e con `pannello`/`intestazione` propri. Ogni modifica
 senza smontare il visore (`isLoading` solo senza dati: zoom e posizione restano). Riferimenti cercati con `GET /api/mappe/riferimenti`
 (`cercaRiferimenti`: LIKE su nome/chiave per tipo). Schermate degli spilli: migrazione 028 `spillo_immagine` (immagine dell'istanza
 nell'ambito «spillo» oppure `asset` del repository, didascalia, ordine), rotte `POST /api/mappe/spilli/:id/immagini` (corpo `image/*`),
-`PUT/DELETE /api/mappe/spilli/immagini/:id`; `SpilloDto.immagini` e `GalleriaSpillo` nel visore. `sincronizzaMappe` crea anche i passaggi
+`PUT/DELETE /api/mappe/spilli/immagini/:id`; `SpilloDto.immagini` e `GalleriaSpillo` nel visore. Condizioni di visibilità (15.22): migrazione 029
+`spillo.condizioni_json` (elenco di `RequisitoSpillo`, `shared/condizioniSpillo.ts`: data, intervallo, palazzo, dote, confidente, richiesta, piove,
+meteo non-piove, giorno-settimana, stagione, quartiere — solo condizioni calcolabili, validate da `condizioneSpillo` in `server/schemas/mappe.ts` e
+dall'esistenza delle chiavi nella Guida); `spilloDto` restituisce `condizioni` con il testo in italiano (`descriviRequisitoSpillo` con i nomi dal DB)
+e, con `?partita=`, `disponibilita` calcolata da `disponibilitaService.valutaRequisiti` sullo stesso stato dei semafori; il visore nasconde gli spilli
+`bloccato` (interruttore «Mostra anche i non ancora disponibili»; la selezione iniziale da «Sulla mappa» o `?spillo=` riaccende il filtro se
+serve), l'editor le costruisce da selettori (`CondizioniSpilloEditor`: date esistenti nel calendario di gioco, periodi con fine ≥ inizio), pacchetti ed
+esportazione le trasportano nel campo `condizioni` dello spillo (all'importazione le voci con chiavi assenti dalla Guida sono scartate e contate in
+`EsitoImportazione.condizioniScartate`). Uno spillo del seed modificato dall'utente diventa `utente` e conserva la propria identità di allora in
+`spillo.seed_identita_json` (migrazione 030): il reseed non lo reinserisce (niente doppioni, condizioni e modifiche conservate). `sincronizzaMappe` crea anche i passaggi
 verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da trascinare nell'editor: la mappa globale di Tokyo
 e la mappa verticale dei Mementos sono immagini dell'utente nell'istanza (mai nel repository) con i quartieri e i Dedali come passaggi;
 gli accessi ai Palazzi e ai Mementos sono passaggi dentro le mappe dei luoghi (es. la stazione di Shibuya). Esportazione: `esportaMappe(radice)`

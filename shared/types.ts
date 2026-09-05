@@ -1,4 +1,5 @@
 import type { TipoMappa, TipoRiferimento, TipoSpillo } from './spilli.js';
+import type { RequisitoSpillo } from './condizioniSpillo.js';
 // ============================================================
 // Tipi condivisi FE/BE — dominio Persona 5 Royal (DTO delle API)
 // ============================================================
@@ -1450,6 +1451,9 @@ export interface DettaglioSpilloDto {
   richiesta?: { chiave: string; nome: string; stato: string | null };
 }
 
+/** Condizione di visibilità con il testo in italiano pronto per la scheda. */
+export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
+
 export interface SpilloDto {
   id: number;
   mappaChiave: string;
@@ -1463,6 +1467,10 @@ export interface SpilloDto {
   y: number;
   riferimento: { tipo: TipoRiferimento; chiave: string } | null;
   collezionabile: boolean;
+  /** Condizioni di visibilità (vuoto = sempre visibile), con testo descrittivo. */
+  condizioni: CondizioneSpilloDto[];
+  /** Con la partita: esito delle condizioni alla data corrente (bloccato = nascosto sulla mappa). */
+  disponibilita?: DisponibilitaDto;
   ordine: number;
   origine: 'seed' | 'utente';
   /** Raccolto nella partita (o punto già gestito nella Guida). */
@@ -1500,7 +1508,7 @@ export interface EsportazioneMappeDto {
   mappe: Array<{
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */

@@ -339,6 +339,109 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     for (const k of ['luogo-zip', 'luogo-zip-copia', 'luogo-zip-b64']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
   });
 
+  it('condizioni di visibilità degli spilli: solo quelle calcolabili, validate sulla Guida, valutate con la partita, esportate e reimportate', async () => {
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-condizioni', nome: 'Prova condizioni', tipo: 'luogo', genitore: 'citta-shibuya' })).status).toBe(201);
+    const condizioni = [{ tipo: 'data', dal: '06-18' }, { tipo: 'palazzo', dungeon: 'kamoshida' }, { tipo: 'confidente', confidente: 'sojiro', rango: 3 }, { tipo: 'giorno-settimana', giorni: ['domenica'] }];
+    const creato = await request(app).post('/api/mappe/prova-condizioni/spilli').send({ tipo: 'nota', nome: 'Evento estivo', x: 10, y: 10, condizioni });
+    expect(creato.status).toBe(201);
+    const s = creato.body.data as SpilloDto;
+    // ogni condizione torna con il testo in italiano (nomi dalla Guida); senza partita nessuna valutazione
+    expect(s.condizioni.map((c) => c.testo)).toEqual(['dal 18 giugno', 'dopo il Palazzo di Kamoshida', 'Rango Confidente Sojiro Sakura 3', 'solo domenica']);
+    expect(s.disponibilita).toBeUndefined();
+    // gli spilli esistenti restano tutti senza condizioni
+    const yongen = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
+    expect(yongen.spilli.every((x) => x.condizioni.length === 0)).toBe(true);
+    // validazione: condizioni non calcolabili o malformate → 400; chiavi assenti dalla Guida → 404
+    const invia = (c: unknown) => request(app).post('/api/mappe/prova-condizioni/spilli').send({ tipo: 'nota', nome: 'x', x: 1, y: 1, condizioni: [c] });
+    expect((await invia({ tipo: 'manuale', testo: 'dopo aver pescato' })).status).toBe(400);
+    expect((await invia({ tipo: 'dote', dote: 'coraggio', rango: 7 })).status).toBe(400);
+    expect((await invia({ tipo: 'data', dal: '18 giugno' })).status).toBe(400);
+    expect((await invia({ tipo: 'giorno-settimana', giorni: ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'] })).status).toBe(400);
+    expect((await invia({ tipo: 'confidente', confidente: 'nessuno', rango: 1 })).status).toBe(404);
+    expect((await invia({ tipo: 'quartiere', quartiere: 'atlantide' })).status).toBe(404);
+    // un quartiere esiste ma senza data di sblocco nella Guida (Ueno: Confidente di Yusuke Rango 3) → non calcolabile → 404; Akihabara (31 agosto) → accettato
+    expect((await invia({ tipo: 'quartiere', quartiere: 'ueno' })).status).toBe(404);
+    const akihabara = await invia({ tipo: 'quartiere', quartiere: 'akihabara' });
+    expect(akihabara.status).toBe(201);
+    expect((akihabara.body.data as SpilloDto).condizioni[0].testo).toBe('da quando si sblocca Akihabara');
+    expect((await request(app).delete(`/api/mappe/spilli/${(akihabara.body.data as SpilloDto).id}`)).status).toBe(204);
+    expect((await invia({ tipo: 'richiesta', richiesta: 'richiesta-inesistente' })).status).toBe(404);
+    // la richiesta si salva con la chiave ma testo e dettaglio del semaforo usano il nome della Guida
+    const primaRichiesta = ((await request(app).get('/api/compendio/richieste')).body.data as { richieste: Array<{ chiave: string; nome: string }> }).richieste[0];
+    const conRichiesta = (await invia({ tipo: 'richiesta', richiesta: primaRichiesta.chiave })).body.data as SpilloDto;
+    expect(conRichiesta.condizioni[0]).toEqual({ tipo: 'richiesta', richiesta: primaRichiesta.chiave, testo: `richiesta «${primaRichiesta.nome}» completata` });
+    const valutata = ((await request(app).get(`/api/mappe/prova-condizioni?partita=${partitaId}`)).body.data as MappaDto).spilli.find((x) => x.id === conRichiesta.id)!;
+    expect(valutata.disponibilita?.requisiti[0]).toMatchObject({ tipo: 'richiesta', stato: 'rosso' });
+    expect(valutata.disponibilita?.requisiti[0].dettaglio).toContain(primaRichiesta.nome);
+    expect(valutata.disponibilita?.requisiti[0].dettaglio).not.toContain(`«${primaRichiesta.chiave}»`);
+    expect((await request(app).delete(`/api/mappe/spilli/${conRichiesta.id}`)).status).toBe(204);
+    // con la partita: il Palazzo di Kamoshida non è completato → condizione rossa → spillo bloccato (nascosto sulla mappa)
+    const con = (await request(app).get(`/api/mappe/prova-condizioni?partita=${partitaId}`)).body.data as MappaDto;
+    const conSpillo = con.spilli.find((x) => x.id === s.id)!;
+    expect(conSpillo.disponibilita?.stato).toBe('bloccato');
+    expect(conSpillo.disponibilita?.requisiti).toHaveLength(4);
+    expect(conSpillo.disponibilita?.requisiti[1]).toMatchObject({ tipo: 'palazzo', stato: 'rosso', testo: 'dopo il Palazzo di Kamoshida', dettaglio: 'Palazzo di Kamoshida: segna il boss come sconfitto nella Guida', manuale: false });
+    expect(conSpillo.disponibilita?.requisiti[2]).toMatchObject({ tipo: 'confidente', stato: 'rosso' });
+    // aggiornamento: solo la pioggia → una condizione meteo; senza condizioni → disponibile
+    const pioggia = (await request(app).put(`/api/mappe/spilli/${s.id}`).send({ condizioni: [{ tipo: 'piove' }] })).body.data as SpilloDto;
+    expect(pioggia.condizioni).toEqual([{ tipo: 'piove', testo: 'solo nei giorni di pioggia' }]);
+    const conPioggia = ((await request(app).get(`/api/mappe/prova-condizioni?partita=${partitaId}`)).body.data as MappaDto).spilli.find((x) => x.id === s.id)!;
+    expect(conPioggia.disponibilita?.requisiti[0]).toMatchObject({ tipo: 'meteo' });
+    const senza = (await request(app).put(`/api/mappe/spilli/${s.id}`).send({ condizioni: [] })).body.data as SpilloDto;
+    expect(senza.condizioni).toEqual([]);
+    expect(((await request(app).get(`/api/mappe/prova-condizioni?partita=${partitaId}`)).body.data as MappaDto).spilli.find((x) => x.id === s.id)!.disponibilita).toEqual({ stato: 'disponibile', requisiti: [] });
+    // le condizioni restano quando il corpo non le nomina
+    await request(app).put(`/api/mappe/spilli/${s.id}`).send({ condizioni: [{ tipo: 'stagione', stagione: 'estate' }] });
+    expect(((await request(app).put(`/api/mappe/spilli/${s.id}`).send({ nome: 'Evento rinominato' })).body.data as SpilloDto).condizioni).toEqual([{ tipo: 'stagione', stagione: 'estate', testo: 'solo in estate' }]);
+    // esportazione e reimportazione conservano le condizioni; una voce non calcolabile nel pacchetto viene scartata
+    const pacchetto = (await request(app).get('/api/mappe/esporta?radice=prova-condizioni')).body.data as EsportazioneMappeDto;
+    expect(pacchetto.mappe[0].spilli[0].condizioni).toEqual([{ tipo: 'stagione', stagione: 'estate' }]);
+    pacchetto.mappe[0].chiave = 'prova-condizioni-copia';
+    (pacchetto.mappe[0].spilli[0].condizioni as unknown[]).push({ tipo: 'manuale', testo: 'scartata' });
+    expect((await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true })).status).toBe(200);
+    const copia = (await request(app).get('/api/mappe/prova-condizioni-copia')).body.data as MappaDto;
+    expect(copia.spilli[0].condizioni).toEqual([{ tipo: 'stagione', stagione: 'estate', testo: 'solo in estate' }]);
+    expect((await request(app).delete('/api/mappe/prova-condizioni-copia')).status).toBe(204);
+    expect((await request(app).delete('/api/mappe/prova-condizioni')).status).toBe(204);
+  });
+
+  it('uno spillo del seed a cui l’utente aggiunge condizioni sopravvive al reseed senza doppioni; date e periodi impossibili sono rifiutati', async () => {
+    // date inesistenti nel calendario di gioco e periodi con la fine prima dell'inizio → 400
+    const invia = (c: unknown) => request(app).post('/api/mappe/citta-yongen-jaya/spilli').send({ tipo: 'nota', nome: 'x', x: 1, y: 1, condizioni: [c] });
+    expect((await invia({ tipo: 'data', dal: '04-31' })).status).toBe(400);
+    expect((await invia({ tipo: 'intervallo', dal: '08-20', al: '06-01' })).status).toBe(400);
+    expect((await invia({ tipo: 'palazzo', dungeon: 'mementos' })).status).toBe(404);
+    // lo spillo del seed «Poliziotto Dialogo» riceve una condizione: diventa dell'utente ma ricorda com'era
+    const yongen = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
+    const poliziotto = yongen.spilli.find((s) => s.nome === 'Poliziotto Dialogo')!;
+    expect(poliziotto.origine).toBe('seed');
+    const modificato = (await request(app).put(`/api/mappe/spilli/${poliziotto.id}`).send({ condizioni: [{ tipo: 'data', dal: '06-18' }] })).body.data as SpilloDto;
+    expect(modificato).toMatchObject({ origine: 'utente', condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }] });
+    // reseed forzato (cambio di hash): il pacchetto non reinserisce l'originale, la condizione resta, nessun doppione
+    caricaSeed(getDb(), DIR_SEED, true);
+    const dopo = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
+    expect(dopo.spilli).toHaveLength(yongen.spilli.length);
+    expect(dopo.spilli.filter((s) => s.nome === 'Poliziotto Dialogo')).toHaveLength(1);
+    expect(dopo.spilli.find((s) => s.nome === 'Poliziotto Dialogo')).toMatchObject({ id: poliziotto.id, origine: 'utente', condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }] });
+    // riportato senza condizioni resta dell'utente e il reseed continua a non duplicarlo
+    await request(app).put(`/api/mappe/spilli/${poliziotto.id}`).send({ condizioni: [] });
+    caricaSeed(getDb(), DIR_SEED, true);
+    expect(((await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto).spilli.filter((s) => s.nome === 'Poliziotto Dialogo')).toHaveLength(1);
+  });
+
+  it('l’importazione scarta e conta le condizioni con chiavi assenti dalla Guida invece di nascondere lo spillo per sempre', async () => {
+    const pacchetto: EsportazioneMappeDto = { versione: 1, mappe: [{ chiave: 'prova-import-condizioni', nome: 'Prova import', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, immagine: null, asset: null, larghezza: null, altezza: null, entita: null, note: '',
+      spilli: [{ tipo: 'nota', nome: 'Spillo importato', descrizione: '', x: 10, y: 10, riferimento: null, collezionabile: false, ordine: 0, condizioni: [{ tipo: 'confidente', confidente: 'nessuno', rango: 1 }, { tipo: 'palazzo', dungeon: 'kamoshida' }, { tipo: 'intervallo', dal: '08-20', al: '06-01' }, { tipo: 'quartiere', quartiere: 'ueno' }] }] }] };
+    const esito = (await request(app).post('/api/mappe/importa').send({ pacchetto, sovrascrivi: true })).body.data as { spilli: number; condizioniScartate: number };
+    expect(esito.spilli).toBe(1);
+    expect(esito.condizioniScartate).toBe(2);
+    const mappa = (await request(app).get(`/api/mappe/prova-import-condizioni?partita=${partitaId}`)).body.data as MappaDto;
+    // resta solo la condizione valida (il periodo invertito è scartato dalla normalizzazione; Confidente sconosciuto e quartiere senza data dal controllo sulla Guida)
+    expect(mappa.spilli[0].condizioni).toEqual([{ tipo: 'palazzo', dungeon: 'kamoshida', testo: 'dopo il Palazzo di Kamoshida' }]);
+    expect(mappa.spilli[0].disponibilita?.requisiti).toHaveLength(1);
+    expect((await request(app).delete('/api/mappe/prova-import-condizioni')).status).toBe(204);
+  });
+
   it('dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP', () => {
     expect(dimensioniImmagine(PNG_2x3)).toEqual({ larghezza: 2, altezza: 3 });
     expect(dimensioniImmagine(Buffer.concat([Buffer.from('GIF89a'), Buffer.from([0x10, 0x00, 0x20, 0x00, 0, 0, 0, 0])]))).toEqual({ larghezza: 16, altezza: 32 });
