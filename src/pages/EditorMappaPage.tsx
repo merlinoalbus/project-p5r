@@ -12,6 +12,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
 import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere, type RiferimentoTrovatoApi } from '../services/api';
 import { notifica } from '../stores/notificationStore';
+import { useAsset } from '../stores/assetStore';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
@@ -21,7 +22,7 @@ import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { CondizioniSpilloEditor } from '../components/mappe/CondizioniSpillo';
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
@@ -182,7 +183,7 @@ export function EditorMappaPage() {
           <p className="m-0 text-[13px]">Gli spilli della mappa vengono eliminati; le mappe figlie ({dati.figli.length}) restano senza genitore. L'immagine di base resta fra le immagini caricate.</p>
         </Modal>
       )}
-      {dati && <NuovaMappaModal aperta={nuovaMappaAperta} genitore={dati} albero={albero.dati ?? []} occupato={occupato} onChiudi={() => setNuovaMappaAperta(false)}
+      {dati && <NuovaMappaModal key={nuovaMappaAperta ? 'aperta' : 'chiusa'} aperta={nuovaMappaAperta} genitore={dati} albero={albero.dati ?? []} occupato={occupato} onChiudi={() => setNuovaMappaAperta(false)}
         onCrea={(d) => esegui(async () => { const m = await creaMappa(d); setNuovaMappaAperta(false); await albero.ricarica(); vai(m.chiave); },
           d.passaggio ? `Mappa creata. Il passaggio verso «${d.nome}» è al centro di «${dati.nome}»: torna «Su» e trascinalo dove sta l'ingresso.${d.ritorno ? ' Qui in basso c\'è il passaggio di ritorno.' : ''}` : 'Mappa creata (senza passaggio: si aggiunge dall\'albero con «Crea passaggio»).')} />}
     </PageState>
@@ -228,6 +229,8 @@ function PannelloEditor(p: PropsPannello) {
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
   const scaricabile = mappa.entita?.tipo === 'area' || mappa.entita?.tipo === 'quartiere';
+  // l'asset del repository è un puntatore: consegnato solo se sta nel manifest degli asset
+  const assetConsegnato = useAsset(mappa.asset);
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
   const raggiunge = (destinazione: string) => mappa.spilli.some((s) => s.riferimento?.tipo === 'mappa' && s.riferimento.chiave === destinazione);
   return (
@@ -265,7 +268,7 @@ function PannelloEditor(p: PropsPannello) {
 
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
         <h3 className="visore-mappa__intestazione">Immagine di base</h3>
-        <p className="m-0 text-[12px] text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? `Asset del repository «${mappa.asset}» (se consegnato)` : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
+        <p className="m-0 text-[12px] text-text-muted">{mappa.immagineUrl ? `Immagine dell'istanza${mappa.larghezza && mappa.altezza ? ` · ${mappa.larghezza}×${mappa.altezza}` : ''}` : mappa.asset ? (assetConsegnato ? `Asset del repository «${mappa.asset}».` : `Asset del repository «${mappa.asset}» non ancora consegnato: gli spilli stanno su una griglia.`) : 'Nessuna immagine: gli spilli stanno su una griglia.'} Cambiare immagine mantiene gli spilli (coordinate in percentuale).</p>
         <input ref={inputImmagine} type="file" accept="image/*" className="sr-only" aria-label="File dell'immagine di base" onChange={(e: ChangeEvent<HTMLInputElement>) => { const f = e.target.files?.[0]; if (f) void p.onImmagine(f); e.target.value = ''; }} />
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica" dimensione={20} />} titolo={mappa.immagineUrl ? 'Sostituisci immagine' : 'Carica immagine'} disabled={occupato} onClick={() => inputImmagine.current?.click()} />
@@ -482,7 +485,7 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
             {albero.filter((m) => !discendenti.has(m.chiave)).map((m) => <option key={m.chiave} value={m.chiave}>{m.nome} ({NOME_TIPO_MAPPA[m.tipo]})</option>)}
           </select>
         </label>
-        <label className="editor-mappa__campo">Asset del repository (es. mappe/citta-shibuya)<input className="form-input" value={asset} onChange={(e) => setAsset(e.target.value)} maxLength={200} /></label>
+        <label className="editor-mappa__campo">Asset del repository (es. mappe/citta-shibuya; vuoto = nessun asset)<input className="form-input" value={asset} onChange={(e) => setAsset(e.target.value)} placeholder={assetPredefinitoMappa(mappa.chiave)} maxLength={200} /></label>
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} /></label>
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva mappa" disabled={occupato || !modificata} />
@@ -502,14 +505,17 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
   const [chiave, setChiave] = useState('');
   const [passaggio, setPassaggio] = useState(true);
   const [ritorno, setRitorno] = useState(false);
+  // asset del repository: segue la chiave («mappe/<chiave>») finché l'utente non lo tocca; vuoto = nessun asset (15.25)
+  const [asset, setAsset] = useState<string | null>(null);
   const chiaveEffettiva = (chiave || slug(nome)).slice(0, 80);
+  const assetEffettivo = asset ?? (chiaveEffettiva ? assetPredefinitoMappa(chiaveEffettiva) : '');
   const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
   const valida = /^[a-z0-9][a-z0-9-]{1,79}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;
   return (
     <Modal titolo="Nuova mappa" aperta={aperta} onChiudi={onChiudi}
       azioni={<>
         <button type="button" className="btn btn-secondary btn-sm" onClick={onChiudi}>Annulla</button>
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ chiave: chiaveEffettiva, nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, passaggio, ritorno })} />
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ chiave: chiaveEffettiva, nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, asset: assetEffettivo.trim() || null, passaggio, ritorno })} />
       </>}>
       <div className="flex flex-col gap-2">
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} autoFocus /></label>
@@ -518,6 +524,8 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
         </label>
         <label className="editor-mappa__campo">Chiave (minuscole, cifre, trattini)<input className="form-input" value={chiave} onChange={(e) => setChiave(e.target.value)} placeholder={slug(nome) || 'proposta dal nome'} maxLength={80} /></label>
         <p className="m-0 text-[12px] text-text-muted">Genitore: {genitore.nome}. {esiste ? <span className="editor-mappa__avviso">Esiste già una mappa con questa chiave.</span> : chiaveEffettiva ? `Chiave: ${chiaveEffettiva}` : ''}</p>
+        <label className="editor-mappa__campo">Asset del repository<input className="form-input" value={assetEffettivo} onChange={(e) => setAsset(e.target.value)} placeholder="mappe/<chiave>" maxLength={200} /></label>
+        <p className="m-0 text-[12px] text-text-muted">Percorso in public/asset senza estensione, proposto come «mappe/chiave» (lo stesso che usa «Esporta questo luogo»): quando il file verrà consegnato la mappa lo userà da sola; finché manca, si usa l'immagine caricata o, in sua assenza, la griglia. Lascia vuoto per nessun asset.</p>
         <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={passaggio} onChange={(e) => setPassaggio(e.target.checked)} /> <span>Crea il passaggio su «{genitore.nome}» verso la nuova mappa <span className="text-text-muted">(al centro, in un punto libero: poi lo trascini dove sta l'ingresso)</span></span></label>
         <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={ritorno} onChange={(e) => setRitorno(e.target.checked)} /> <span>Crea anche il passaggio di ritorno verso «{genitore.nome}» nella nuova mappa <span className="text-text-muted">(in basso al centro)</span></span></label>
       </div>
