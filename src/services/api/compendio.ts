@@ -5,7 +5,7 @@
 import type {
   ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
-import { apiGet, queryString } from './_helpers';
+import { apiDelete, apiPut, apiGet, queryString } from './_helpers';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
 export interface FiltriPersona {
@@ -69,3 +69,5 @@ export const getCalendario = (partita?: number, mese?: string): Promise<Calendar
 export const getDomande = (partita?: number): Promise<DomandeDto> => apiGet(`/compendio/domande${queryString({ partita })}`);
 export const getConfidenteDettaglio = (chiave: string): Promise<ConfidenteDettaglioDto> => apiGet(`/compendio/confidenti/${encodeURIComponent(chiave)}`);
 export const getConfidenti = (): Promise<ConfidenteDto[]> => apiGet('/compendio/confidenti');
+
+export const salvaIngressoQuartiere=(chiave:string,dati:{mappa:string;x:number;y:number;zoom:number}|null):Promise<import('../../../shared/types').IngressoQuartiereDto|null>=>dati===null?apiDelete('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso').then(()=>null):apiPut('/compendio/citta/'+encodeURIComponent(chiave)+'/ingresso',dati);

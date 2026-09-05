@@ -1,3 +1,4 @@
+import { idMappa } from './mappe/percorsiMappe.js';
 // ============================================================
 // immaginiService — immagini caricate dall'utente (arcani, Confidenti, Persona…)
 // ============================================================
@@ -51,12 +52,14 @@ export function elencaImmagini(ambito?: string): ImmagineDto[] {
 
 /** Metadati di una immagine, o null. */
 export function leggiImmagine(ambito: string, chiave: string): ImmagineDto | null {
+  if(ambito==='mappa')chiave=idMappa(chiave);
   const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
   return r ? dto(r) : null;
 }
 
 /** Percorso su disco e mime del file di una immagine (per l'invio). */
 export function fileImmagine(ambito: string, chiave: string): { percorso: string; mime: string } {
+  if(ambito==='mappa')chiave=idMappa(chiave);
   const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
   if (!r) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
   const percorso = path.join(dirImmagini(r.ambito), r.nome_file);
@@ -66,6 +69,7 @@ export function fileImmagine(ambito: string, chiave: string): { percorso: string
 
 /** Salva (o sostituisce) l'immagine di un'entità; `origineUrl` è l'indirizzo da cui è stata scaricata (null per i file caricati). */
 export function salvaImmagine(ambito: AmbitoImmagine, chiave: string, mime: string, contenuto: Buffer, origineUrl: string | null = null): ImmagineDto {
+  if(ambito==='mappa')chiave=idMappa(chiave);
   const estensione = ESTENSIONE_PER_MIME[mime];
   if (!estensione) throw httpErrors.badRequest('formato-non-ammesso', `Formato '${mime}' non ammesso: usa PNG, JPEG, WEBP, GIF o SVG.`);
   if (contenuto.length === 0) throw httpErrors.badRequest('immagine-vuota', 'Il contenuto dell\'immagine è vuoto.');
@@ -131,6 +135,7 @@ export function eliminaImmaginiAmbito(ambito?: string): number {
 }
 
 export function eliminaImmagine(ambito: string, chiave: string): void {
+  if(ambito==='mappa')chiave=idMappa(chiave);
   const r = prepared('SELECT * FROM immagine WHERE ambito = ? AND chiave = ?').get(ambito, chiave) as RigaImmagine | undefined;
   if (!r) throw httpErrors.notFound('immagine-non-trovata', `Nessuna immagine per ${ambito}/${chiave}.`);
   prepared('DELETE FROM immagine WHERE id = ?').run(r.id);

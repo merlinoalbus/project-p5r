@@ -15,6 +15,7 @@ import type { AzionePercorsoDto, PercorsoGiornoDto } from '../../types';
 import { DataP5 } from '../shared/DataP5';
 import { MeteoIcona } from './MeteoIcona';
 import { FasciaGiornata } from './FasciaGiornata';
+import { AgendaGiorno } from './AgendaGiorno';
 import { IconaCategoria } from './IconaCategoria';
 import { EmblemaDungeon } from './EmblemaDungeon';
 import { ImmagineEntita } from '../shared/ImmagineEntita';
@@ -101,6 +102,7 @@ interface Props {
   g: PercorsoGiornoDto;
   partitaId: number | null;
   onAggiorna: (a: AzionePercorsoDto) => void;
+  onAgendaAggiornata?: () => void;
   onSullaMappa?: (a: AzionePercorsoDto) => void;
   azioneEvidenziata?: number | null;
   /** Nella scheda «Oggi»: intestazione più compatta. */
@@ -110,7 +112,7 @@ interface Props {
 }
 
 /** Scheda del giorno e azioni di giorno e di sera. */
-export function GiornoGuida({ g, partitaId, onAggiorna, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente }: Props) {
+export function GiornoGuida({ g, partitaId, onAggiorna, onAgendaAggiornata, onSullaMappa, azioneEvidenziata, compatto, fasciaCorrente }: Props) {
   const azioniGiorno = g.azioni.filter((a) => a.fascia === 'giorno');
   const azioniSera = g.azioni.filter((a) => a.fascia === 'sera');
   const classeSezione = (fascia: 'giorno' | 'sera') => `card flex flex-col gap-1 ${fasciaCorrente === fascia ? 'card--adesso' : ''}`;
@@ -146,6 +148,7 @@ export function GiornoGuida({ g, partitaId, onAggiorna, onSullaMappa, azioneEvid
         </section>
       )}
       {partitaId && g.azioni.length > 0 && <p className="m-0 text-[12px] text-text-muted">{g.fatte} azioni fatte su {g.azioni.length}.</p>}
+      <AgendaGiorno onAggiorna={onAgendaAggiornata} key={`${g.giorno}/${partitaId}`} giorno={g.giorno} partitaId={partitaId} compatto={compatto} />
     </div>
   );
 }

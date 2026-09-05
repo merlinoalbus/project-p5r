@@ -217,10 +217,19 @@ Confronto automatico di tutte le 900 azioni di `data/seed/percorso.json` con le 
 
 - Domande in classe da riconciliare con la pagina «Interrogazioni ed esami» di allgamestaff fornita dall'utente il 2026-09-05 (date, professori, risposte, esami con date e criteri, ricompense degli esami, tempo libero con Kawakami, giorni del gesso di Ushimaru): lotto dedicato in coda (es. 6 maggio nel percorso contro 7 maggio «femme fatale» nella pagina; 7 luglio Via Lattea/Somen assente da `domande.json`).
 - Risposte dell'utente attese: registrazione delle note alla spunta di un'azione Confidente (A: chiede «quante note?» con 2 preselezionato; B: assume 3; C: nessun automatismo — consigliata A); semafori non verificabili con conferma manuale; conferma della Fase 13 e delle sue due decisioni; conferma di 12.7; `concurrency` per ramo nel workflow CI (`cancel-in-progress: false`).
-- Asset da consegnare (Codex): personaggi §14 (5), schede §16 (9), azioni §17 (48 censite, 2 da consegnare: azione-copia e azione-incolla), Persona dei personaggi §15 (27), spilli §18 (34 censiti, 20 consegnati, **14 da consegnare** dal 15.24: spillo-sigarette, spillo-cercalavoro, spillo-lavoro, spillo-terme, spillo-lavanderia, spillo-cinema, spillo-biblioteca, spillo-culto, spillo-sala-giochi, spillo-casa, spillo-timbro, spillo-meccanismo, spillo-rampino, spillo-porta — soggetti e colori nel §18, elenco «DA CONSEGNARE» in `stato-generazione-asset.md`), mappe di base §19 (25). Prompt tutti censiti in `docs/grafica/prompt-immagini.md`.
+- Grafica richiesta: completata e approvata il 2026-09-06, incluse le ultime 2 icone di azione e i 14 spilli. Registro: `docs/grafica/stato-generazione-asset.md` (684/684).
 
 ## Requisiti trasversali (sempre validi)
 - Tutto in italiano; nomi Persona originali; skill con chiave canonica + resa IT modificabile.
 - Tablet-first ma **anche mobile** (375px) e desktop.
 - Partite multiple con partita attiva selezionabile.
 - Dati di gioco e dati utente separati; seed nell'immagine Docker, DB sul volume.
+
+## Integrazione autorizzata 2026-09-05
+- Completato e validato: catalogo personale, agenda e conservazione delle spunte durante il reseed (379 test iniziali).
+- Completato e validato: quartiere selezionabile, negozi ricercabili senza prodotti, prodotti responsive e dettagli espandibili.
+- Completato e validato: condizioni procedurali condivise, naming mappe gerarchico, editor in quattro sezioni, ingresso quartieri con mappa/punto/zoom.
+- Completati e validati: 16 asset mancanti, PNG 128×128 RGBA; test applicativi 400/400 prima dell’integrazione parallela dell’atlante. Runtime verificato su istanza isolata.
+
+
+L’atlante unico è in lavorazione separata; non è incluso in questa consegna.
