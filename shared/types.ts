@@ -537,10 +537,17 @@ export interface CompendioPartitaDto {
   livelloRegistrato: number | null;
   /** Istantanea presa alla registrazione (Fase 12.2): l'evocazione dal Registro la ripristina. */
   bonus: StatisticheDto;
+  /** Valori reali registrati nell'istantanea (15.26), null se non registrati. */
+  osservate: OsservazioneStatisticheDto | null;
   skill: SkillRiassuntoDto[];
   tratto: SkillRiassuntoDto | null;
   carica: boolean;
   updatedAt: string;
+}
+
+/** Valori reali letti nella scheda della Persona nel gioco a un livello (15.26): da lì in su la stima riparte da questi. */
+export interface OsservazioneStatisticheDto extends StatisticheDto {
+  livello: number;
 }
 
 export interface PersonaPossedutaDto {
@@ -561,6 +568,12 @@ export interface PersonaPossedutaDto {
   bonus: StatisticheDto;
   /** true se nessun bonus è registrato: `statistiche` coincide con la stima. */
   statisticheBase: boolean;
+  /** Valori reali registrati dall'utente (livello e cinque statistiche), null se mai registrati (15.26). */
+  osservate: OsservazioneStatisticheDto | null;
+  /** Da dove parte la stima: dalla base del dataset oppure dai valori reali registrati (quando il livello è almeno quello registrato). */
+  origineStima: 'base' | 'osservate';
+  /** true quando le statistiche mostrate sono esattamente i valori reali registrati: stesso livello e nessun bonus. */
+  statisticheConfermate: boolean;
   /** Statistiche base della Persona al suo livello base (per il confronto). */
   statisticheBaseLivello: StatisticheDto;
   tratto: SkillRiassuntoDto | null;

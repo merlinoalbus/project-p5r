@@ -69,9 +69,17 @@ const bonusStatistiche = z.object({
   agilita: z.number().int().min(-99).max(99), fortuna: z.number().int().min(-99).max(99),
 });
 
+/** Valori reali letti nel gioco a un livello (15.26): statistiche 1–99, livello 1–99; null = dimentica quelli registrati. */
+const osservazioneStatistiche = z.object({
+  livello,
+  forza: z.number().int().min(1).max(99), magia: z.number().int().min(1).max(99), resistenza: z.number().int().min(1).max(99),
+  agilita: z.number().int().min(1).max(99), fortuna: z.number().int().min(1).max(99),
+});
+
 const campiPosseduta = {
   livello: livello.optional(),
   bonus: bonusStatistiche.nullable().optional(),
+  osservate: osservazioneStatistiche.nullable().optional(),
   trattoSkillId: z.number().int().positive().nullable().optional(),
   inSquadra: z.boolean().optional(),
   carica: z.boolean().optional(),

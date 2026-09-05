@@ -4,7 +4,7 @@
 
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
-import { CHIAVI_STATISTICHE, statistichePerLivello, type Statistiche } from '../../shared/statistiche.js';
+import { CHIAVI_STATISTICHE, origineStima, statisticheStimate, type Osservazione, type Statistiche } from '../../shared/statistiche.js';
 import { t } from './traduzioniService.js';
 import { skillDto } from './compendioService.js';
 import { registraEvento } from './storicoService.js';
@@ -313,12 +313,17 @@ export function aggiornaConfidente(partitaId: number, chiave: string, dati: Modi
 
 // ---- Compendio personale ----
 
-interface RigaCompendio {
+/** Colonne dei valori reali osservati (migrazione 032), presenti su `persona_posseduta` e `compendio_partita`. */
+interface ColonneOsservate {
+  osservate_livello: number | null; osservate_forza: number | null; osservate_magia: number | null; osservate_resistenza: number | null; osservate_agilita: number | null; osservate_fortuna: number | null;
+}
+interface RigaCompendio extends ColonneOsservate {
   persona_id: number; nome: string; arcana: string; livello: number; registrata: number; livello_registrato: number | null; updated_at: string;
   bonus_forza: number; bonus_magia: number; bonus_resistenza: number; bonus_agilita: number; bonus_fortuna: number; skill_ids_json: string | null; tratto_skill_id: number | null; carica: number;
 }
 const SQL_COMPENDIO = `SELECT cp.persona_id, p.nome, p.arcana, p.livello, cp.registrata, cp.livello_registrato, cp.updated_at, cp.bonus_forza, cp.bonus_magia, cp.bonus_resistenza,
-  cp.bonus_agilita, cp.bonus_fortuna, cp.skill_ids_json, cp.tratto_skill_id, cp.carica FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id`;
+  cp.bonus_agilita, cp.bonus_fortuna, cp.skill_ids_json, cp.tratto_skill_id, cp.carica, cp.osservate_livello, cp.osservate_forza, cp.osservate_magia, cp.osservate_resistenza,
+  cp.osservate_agilita, cp.osservate_fortuna FROM compendio_partita cp JOIN persona p ON p.id = cp.persona_id`;
 const BONUS_ZERO: Statistiche = { forza: 0, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 };
 const SIGLE: Record<keyof Statistiche, string> = { forza: 'FR', magia: 'MA', resistenza: 'RS', agilita: 'AG', fortuna: 'FO' };
 
@@ -328,11 +333,29 @@ function sommaBonus(stima: Statistiche, bonus: Statistiche): Statistiche {
   return out;
 }
 
+/** Valori reali osservati dalla riga (null se mai registrati: livello o una statistica mancanti). */
+function osservateDaRiga(r: ColonneOsservate): Osservazione | null {
+  if (r.osservate_livello === null || CHIAVI_STATISTICHE.some((k) => r[`osservate_${k}`] === null)) return null;
+  return { livello: r.osservate_livello, forza: r.osservate_forza!, magia: r.osservate_magia!, resistenza: r.osservate_resistenza!, agilita: r.osservate_agilita!, fortuna: r.osservate_fortuna! };
+}
+/** I sei valori da scrivere nelle colonne `osservate_*` (tutti NULL quando non registrati). */
+function colonneOsservate(o: Osservazione | null): Array<number | null> {
+  return o ? [o.livello, o.forza, o.magia, o.resistenza, o.agilita, o.fortuna] : [null, null, null, null, null, null];
+}
+function descriviOsservate(o: Osservazione): string {
+  return `livello ${o.livello}: ${CHIAVI_STATISTICHE.map((k) => `${SIGLE[k]} ${o[k]}`).join(' · ')}`;
+}
+function stesseOsservazioni(a: Osservazione | null, b: Osservazione | null): boolean {
+  if (a === null || b === null) return a === b;
+  return a.livello === b.livello && CHIAVI_STATISTICHE.every((k) => a[k] === b[k]);
+}
+
 function compendioDto(r: RigaCompendio): CompendioPartitaDto {
   const skillIds = r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : [];
   return {
     personaId: r.persona_id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livello: r.livello, registrata: r.registrata === 1, livelloRegistrato: r.livello_registrato,
     bonus: { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna },
+    osservate: osservateDaRiga(r),
     skill: skillIds.map((id) => skillDto(id)).filter((x): x is NonNullable<typeof x> => x !== null),
     tratto: r.tratto_skill_id ? skillDto(r.tratto_skill_id) : null, carica: r.carica === 1, updatedAt: r.updated_at,
   };
@@ -343,7 +366,7 @@ export function compendioPartita(partitaId: number): CompendioPartitaDto[] {
   return (prepared(`${SQL_COMPENDIO} WHERE cp.partita_id = ? ORDER BY p.livello, p.nome`).all(partitaId) as RigaCompendio[]).map(compendioDto);
 }
 
-interface Istantanea { livello: number; bonus: Statistiche; skillIds: number[]; trattoSkillId: number | null; carica: boolean }
+interface Istantanea { livello: number; bonus: Statistiche; osservate: Osservazione | null; skillIds: number[]; trattoSkillId: number | null; carica: boolean }
 
 /** Istantanea registrata nel compendio (null se la Persona non è registrata o non ha livello). */
 function istantaneaCompendio(partitaId: number, personaId: number): Istantanea | null {
@@ -351,17 +374,21 @@ function istantaneaCompendio(partitaId: number, personaId: number): Istantanea |
   if (!r || r.livello_registrato === null) return null;
   return {
     livello: r.livello_registrato, bonus: { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna },
+    osservate: osservateDaRiga(r),
     skillIds: r.skill_ids_json ? (JSON.parse(r.skill_ids_json) as number[]) : [], trattoSkillId: r.tratto_skill_id, carica: r.carica === 1,
   };
 }
 
 function scriviIstantanea(partitaId: number, personaId: number, i: Istantanea, adesso: string): void {
-  prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, skill_ids_json, tratto_skill_id, carica, updated_at)
-    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  prepared(`INSERT INTO compendio_partita (partita_id, persona_id, registrata, livello_registrato, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, skill_ids_json, tratto_skill_id, carica,
+      osservate_livello, osservate_forza, osservate_magia, osservate_resistenza, osservate_agilita, osservate_fortuna, updated_at)
+    VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(partita_id, persona_id) DO UPDATE SET registrata = 1, livello_registrato = excluded.livello_registrato, bonus_forza = excluded.bonus_forza, bonus_magia = excluded.bonus_magia,
       bonus_resistenza = excluded.bonus_resistenza, bonus_agilita = excluded.bonus_agilita, bonus_fortuna = excluded.bonus_fortuna, skill_ids_json = excluded.skill_ids_json,
-      tratto_skill_id = excluded.tratto_skill_id, carica = excluded.carica, updated_at = excluded.updated_at`)
-    .run(partitaId, personaId, i.livello, i.bonus.forza, i.bonus.magia, i.bonus.resistenza, i.bonus.agilita, i.bonus.fortuna, JSON.stringify(i.skillIds), i.trattoSkillId, i.carica ? 1 : 0, adesso);
+      tratto_skill_id = excluded.tratto_skill_id, carica = excluded.carica, osservate_livello = excluded.osservate_livello, osservate_forza = excluded.osservate_forza,
+      osservate_magia = excluded.osservate_magia, osservate_resistenza = excluded.osservate_resistenza, osservate_agilita = excluded.osservate_agilita, osservate_fortuna = excluded.osservate_fortuna,
+      updated_at = excluded.updated_at`)
+    .run(partitaId, personaId, i.livello, i.bonus.forza, i.bonus.magia, i.bonus.resistenza, i.bonus.agilita, i.bonus.fortuna, JSON.stringify(i.skillIds), i.trattoSkillId, i.carica ? 1 : 0, ...colonneOsservate(i.osservate), adesso);
 }
 
 export function aggiornaCompendio(partitaId: number, personaId: number, dati: { registrata: boolean; livelloRegistrato?: number | null }): CompendioPartitaDto[] {
@@ -386,7 +413,7 @@ export function aggiornaCompendio(partitaId: number, personaId: number, dati: { 
 
 // ---- Persona possedute ----
 
-interface RigaPosseduta {
+interface RigaPosseduta extends ColonneOsservate {
   id: number; partita_id: number; persona_id: number; livello: number; forza: number | null; magia: number | null; resistenza: number | null;
   agilita: number | null; fortuna: number | null; bonus_forza: number; bonus_magia: number; bonus_resistenza: number; bonus_agilita: number; bonus_fortuna: number;
   tratto_skill_id: number | null; in_squadra: number; carica: number; note: string; created_at: string; updated_at: string;
@@ -403,13 +430,18 @@ function possedutaDto(r: RigaPosseduta): PersonaPossedutaDto {
   const bonus = { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna };
   const statisticheBase = CHIAVI_STATISTICHE.every((k) => bonus[k] === 0);
   const base = { forza: r.b_forza, magia: r.b_magia, resistenza: r.b_resistenza, agilita: r.b_agilita, fortuna: r.b_fortuna };
-  const stimate = statistichePerLivello(base, r.livello_base, r.livello);
+  // 15.26: la stima riparte dai valori reali registrati quando il livello è almeno quello registrato, altrimenti dalla base del dataset
+  const osservate = osservateDaRiga(r);
+  const stimate = statisticheStimate(base, r.livello_base, osservate, r.livello);
   return {
     id: r.id, personaId: r.persona_id, nome: r.nome, nomeIt: t('persona', r.nome), arcana: r.arcana, arcanaNome: t('arcana', r.arcana), livelloBase: r.livello_base, livello: r.livello,
     statistiche: sommaBonus(stimate, bonus),
     statisticheStimate: stimate,
     bonus,
     statisticheBase,
+    osservate,
+    origineStima: origineStima(osservate, r.livello),
+    statisticheConfermate: osservate !== null && osservate.livello === r.livello && statisticheBase,
     statisticheBaseLivello: base, tratto: trattoId ? skillDto(trattoId) : null, inSquadra: r.in_squadra === 1, carica: r.carica === 1, note: r.note, skill, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
@@ -424,7 +456,9 @@ export interface DatiPosseduta {
   livello?: number;
   /** Bonus per statistica (null = azzera). */
   bonus?: Statistiche | null;
-  /** Evocazione dal Registro: livello, bonus, skill, tratto e carica non indicati vengono dall'istantanea del compendio. */
+  /** Valori reali letti nel gioco a un livello (15.26); null = dimentica quelli registrati. Registrarli azzera i bonus, salvo bonus esplicito. */
+  osservate?: Osservazione | null;
+  /** Evocazione dal Registro: livello, bonus, valori reali, skill, tratto e carica non indicati vengono dall'istantanea del compendio. */
   daRegistro?: boolean;
   trattoSkillId?: number | null;
   inSquadra?: boolean;
@@ -458,13 +492,15 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
   const ist = dati.daRegistro ? istantaneaCompendio(partitaId, personaId) : null;
   if (dati.daRegistro && !ist) throw httpErrors.badRequest('non-registrata', `${t('persona', p.nome)} non è registrata nel compendio di questa partita: non si può evocare dal Registro.`);
   const livello = dati.livello ?? ist?.livello ?? p.livello;
+  const osservate = dati.osservate === undefined ? ist?.osservate ?? null : dati.osservate;
   const bonus = dati.bonus ?? ist?.bonus ?? BONUS_ZERO;
   const trattoSkillId = dati.trattoSkillId === undefined ? ist?.trattoSkillId ?? null : dati.trattoSkillId;
   const carica = dati.carica ?? ist?.carica ?? false;
   return getDb().transaction(() => {
-    const info = prepared(`INSERT INTO persona_posseduta (partita_id, persona_id, livello, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, tratto_skill_id, in_squadra, carica, note, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, personaId, livello, bonus.forza, bonus.magia, bonus.resistenza, bonus.agilita, bonus.fortuna,
-      trattoSkillId, dati.inSquadra === false ? 0 : 1, carica ? 1 : 0, dati.note ?? '', adesso, adesso);
+    const info = prepared(`INSERT INTO persona_posseduta (partita_id, persona_id, livello, bonus_forza, bonus_magia, bonus_resistenza, bonus_agilita, bonus_fortuna, tratto_skill_id, in_squadra, carica, note,
+        osservate_livello, osservate_forza, osservate_magia, osservate_resistenza, osservate_agilita, osservate_fortuna, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(partitaId, personaId, livello, bonus.forza, bonus.magia, bonus.resistenza, bonus.agilita, bonus.fortuna,
+      trattoSkillId, dati.inSquadra === false ? 0 : 1, carica ? 1 : 0, dati.note ?? '', ...colonneOsservate(osservate), adesso, adesso);
     const id = Number(info.lastInsertRowid);
     const skillIds = dati.skillIds ?? ist?.skillIds ?? skillInnateFinoAlLivello(personaId, livello);
     skillIds.forEach((sid, i) => prepared('INSERT INTO persona_posseduta_skill (posseduta_id, slot, skill_id) VALUES (?, ?, ?)').run(id, i + 1, sid));
@@ -474,7 +510,7 @@ export function aggiungiPosseduta(partitaId: number, personaId: number, dati: Da
     // L'evocazione dal Registro non tocca l'istantanea (ne è la copia).
     if (!dati.daRegistro) {
       if (!giaRegistrata) registraEvento(partitaId, 'compendio-registrata', `${t('persona', p.nome)} registrata nel compendio`, `Al livello ${livello}.`, { livello }, personaId);
-      scriviIstantanea(partitaId, personaId, { livello, bonus, skillIds, trattoSkillId, carica }, adesso);
+      scriviIstantanea(partitaId, personaId, { livello, bonus, osservate, skillIds, trattoSkillId, carica }, adesso);
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     verificaObiettivi(partitaId, personaId);
@@ -492,7 +528,7 @@ export function registraPossedutaNelCompendio(partitaId: number, possedutaId: nu
     const skillIds = (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(r.id) as Array<{ skill_id: number }>).map((x) => x.skill_id);
     const bonus = { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna };
     const prima = istantaneaCompendio(partitaId, r.persona_id);
-    scriviIstantanea(partitaId, r.persona_id, { livello: r.livello, bonus, skillIds, trattoSkillId: r.tratto_skill_id, carica: r.carica === 1 }, adesso);
+    scriviIstantanea(partitaId, r.persona_id, { livello: r.livello, bonus, osservate: osservateDaRiga(r), skillIds, trattoSkillId: r.tratto_skill_id, carica: r.carica === 1 }, adesso);
     registraEvento(partitaId, 'compendio-registrata', `${t('persona', r.nome)} ${prima ? 'aggiornata' : 'registrata'} nel compendio`, `Al livello ${r.livello}${CHIAVI_STATISTICHE.some((k) => bonus[k] !== 0) ? ` con bonus ${CHIAVI_STATISTICHE.filter((k) => bonus[k] !== 0).map((k) => `${SIGLE[k]} ${bonus[k] > 0 ? '+' : ''}${bonus[k]}`).join(' ')}` : ''}.`, { livello: r.livello, bonus, skillIds, possedutaId: r.id }, r.persona_id);
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
     return compendioPartita(partitaId);
@@ -514,11 +550,15 @@ export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: 
   const adesso = nowIso();
   return getDb().transaction(() => {
     const prima = { forza: r.bonus_forza, magia: r.bonus_magia, resistenza: r.bonus_resistenza, agilita: r.bonus_agilita, fortuna: r.bonus_fortuna };
-    const b = dati.bonus === undefined ? prima : dati.bonus ?? BONUS_ZERO;
-    prepared(`UPDATE persona_posseduta SET livello = ?, bonus_forza = ?, bonus_magia = ?, bonus_resistenza = ?, bonus_agilita = ?, bonus_fortuna = ?, tratto_skill_id = ?, in_squadra = ?, carica = ?, note = ?, updated_at = ? WHERE id = ?`).run(
+    const ossPrima = osservateDaRiga(r);
+    const oss = dati.osservate === undefined ? ossPrima : dati.osservate;
+    // registrare i valori reali azzera i bonus (li comprendono già), a meno che la richiesta non porti bonus espliciti
+    const b = dati.bonus === undefined ? (dati.osservate ? BONUS_ZERO : prima) : dati.bonus ?? BONUS_ZERO;
+    prepared(`UPDATE persona_posseduta SET livello = ?, bonus_forza = ?, bonus_magia = ?, bonus_resistenza = ?, bonus_agilita = ?, bonus_fortuna = ?, tratto_skill_id = ?, in_squadra = ?, carica = ?, note = ?,
+        osservate_livello = ?, osservate_forza = ?, osservate_magia = ?, osservate_resistenza = ?, osservate_agilita = ?, osservate_fortuna = ?, updated_at = ? WHERE id = ?`).run(
       dati.livello ?? r.livello, b.forza, b.magia, b.resistenza, b.agilita, b.fortuna,
       dati.trattoSkillId === undefined ? r.tratto_skill_id : dati.trattoSkillId, dati.inSquadra === undefined ? r.in_squadra : dati.inSquadra ? 1 : 0,
-      dati.carica === undefined ? r.carica : dati.carica ? 1 : 0, dati.note ?? r.note, adesso, possedutaId,
+      dati.carica === undefined ? r.carica : dati.carica ? 1 : 0, dati.note ?? r.note, ...colonneOsservate(oss), adesso, possedutaId,
     );
     const skillPrima = (prepared('SELECT skill_id FROM persona_posseduta_skill WHERE posseduta_id = ? ORDER BY slot').all(possedutaId) as Array<{ skill_id: number }>).map((x) => x.skill_id);
     if (dati.skillIds) {
@@ -535,7 +575,11 @@ export function aggiornaPosseduta(partitaId: number, possedutaId: number, dati: 
       const parti = [nuove.length ? `Apprese: ${nuove.join(', ')}` : '', perse.length ? `Dimenticate: ${perse.join(', ')}` : ''].filter(Boolean);
       registraEvento(partitaId, 'persona-skill', `${nomeIt}: skill aggiornate`, parti.length ? `${parti.join(' · ')}.` : 'Ordine degli slot cambiato.', { da: skillPrima, a: dati.skillIds, possedutaId }, r.persona_id);
     }
-    if (dati.bonus !== undefined && CHIAVI_STATISTICHE.some((k) => b[k] !== prima[k])) {
+    if (dati.osservate !== undefined && !stesseOsservazioni(oss, ossPrima)) {
+      registraEvento(partitaId, 'persona-statistiche', `${nomeIt}: valori reali ${oss ? 'registrati' : 'dimenticati'}`,
+        oss ? `Letti nel gioco al ${descriviOsservate(oss)}. Da qui in su la stima riparte da questi valori${CHIAVI_STATISTICHE.every((k) => b[k] === 0) ? ' e i bonus ripartono da zero' : ''}.` : 'Statistiche di nuovo stimate dalla base del dataset.',
+        { da: ossPrima, a: oss, possedutaId }, r.persona_id);
+    } else if (dati.bonus !== undefined && CHIAVI_STATISTICHE.some((k) => b[k] !== prima[k])) {
       const senzaBonus = CHIAVI_STATISTICHE.every((k) => b[k] === 0);
       registraEvento(partitaId, 'persona-statistiche', `${nomeIt}: bonus ${senzaBonus ? 'azzerati' : 'aggiornati'}`,
         senzaBonus ? 'Statistiche riportate alla stima del livello.' : `${CHIAVI_STATISTICHE.map((k) => `${SIGLE[k]} ${b[k] > 0 ? '+' : ''}${b[k]}`).join(' · ')}.`, { da: prima, a: b, possedutaId }, r.persona_id);

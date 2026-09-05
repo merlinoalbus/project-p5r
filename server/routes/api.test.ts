@@ -289,6 +289,50 @@ describe('API', () => {
     expect((await request(app).get(`/api/partite/${id}/doti`)).status).toBe(404);
   });
 
+  it('statistiche reali delle Persona (15.26): registrate a un livello, ribasano la stima, azzerano i bonus, viaggiano con l’istantanea del compendio', async () => {
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Valori reali' })).body.data as { id: number }).id;
+    const pixie = ((await request(app).get('/api/compendio/persona?q=Pixie')).body.data as PersonaRiassuntoDto[]).find((p) => p.nome === 'Pixie')!;
+    const poss = (await request(app).post(`/api/partite/${id}/persona`).send({ personaId: pixie.id, livello: 3 })).body.data as PersonaPossedutaDto;
+    expect(poss).toMatchObject({ osservate: null, origineStima: 'base', statisticheConfermate: false });
+    // l'utente registra ciò che legge nel gioco al livello 3 mentre ha un bonus attivo: le statistiche mostrate diventano i valori reali e i bonus ripartono da zero
+    expect((await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ bonus: { forza: 2, magia: 0, resistenza: 0, agilita: 0, fortuna: 0 } })).status).toBe(200);
+    const reali = { livello: 3, forza: poss.statisticheStimate.forza + 2, magia: poss.statisticheStimate.magia - 1, resistenza: poss.statisticheStimate.resistenza, agilita: poss.statisticheStimate.agilita + 1, fortuna: Math.max(1, poss.statisticheStimate.fortuna) };
+    const conReali = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ osservate: reali })).body.data as PersonaPossedutaDto;
+    expect(conReali).toMatchObject({ osservate: reali, origineStima: 'osservate', statisticheConfermate: true, statisticheBase: true, bonus: { forza: 0 } });
+    const { livello: _l, ...valoriReali } = reali;
+    expect(conReali.statistiche).toEqual(valoriReali);
+    expect(conReali.statisticheStimate).toEqual(valoriReali);
+    // un bonus successivo (Potenziamento) si somma ai valori reali
+    const conBonus = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ bonus: { forza: 0, magia: 1, resistenza: 0, agilita: 0, fortuna: 0 } })).body.data as PersonaPossedutaDto;
+    expect(conBonus).toMatchObject({ statisticheConfermate: false, origineStima: 'osservate' });
+    expect(conBonus.statistiche.magia).toBe(valoriReali.magia + 1);
+    // al livello 4 la stima riparte dai valori reali (+3 punti in totale, bonus a parte)
+    const liv4 = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 4 })).body.data as PersonaPossedutaDto;
+    expect(liv4.origineStima).toBe('osservate');
+    const somma = (s: object) => Object.values(s as Record<string, number>).reduce((a, b) => a + b, 0);
+    expect(somma(liv4.statisticheStimate) - somma(valoriReali)).toBe(3);
+    // sotto il livello registrato si torna alla base del dataset
+    const liv2 = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 2 })).body.data as PersonaPossedutaDto;
+    expect(liv2).toMatchObject({ origineStima: 'base', osservate: reali });
+    // valori fuori intervallo rifiutati
+    expect((await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ osservate: { ...reali, forza: 0 } })).status).toBe(400);
+    // l'istantanea del compendio conserva i valori reali e l'evocazione dal Registro li ripristina
+    const liv3 = (await request(app).put(`/api/partite/${id}/persona/${poss.id}`).send({ livello: 3 })).body.data as PersonaPossedutaDto;
+    expect(liv3.statisticheConfermate).toBe(false); // il bonus MA +1 è ancora attivo
+    const reg = (await request(app).post(`/api/partite/${id}/persona/${poss.id}/registra`)).body.data as Array<{ nome: string; osservate: unknown; livelloRegistrato: number }>;
+    expect(reg.find((c) => c.nome === 'Pixie')).toMatchObject({ livelloRegistrato: 3, osservate: reali });
+    expect((await request(app).delete(`/api/partite/${id}/persona/${poss.id}`)).status).toBe(204);
+    const evocata = (await request(app).post(`/api/partite/${id}/persona`).send({ personaId: pixie.id, daRegistro: true })).body.data as PersonaPossedutaDto;
+    expect(evocata).toMatchObject({ livello: 3, osservate: reali, origineStima: 'osservate', bonus: { magia: 1 } });
+    // «dimentica»: osservate null → si torna alla stima dalla base
+    const dimenticata = (await request(app).put(`/api/partite/${id}/persona/${evocata.id}`).send({ osservate: null })).body.data as PersonaPossedutaDto;
+    expect(dimenticata).toMatchObject({ osservate: null, origineStima: 'base' });
+    const storico = (await request(app).get(`/api/partite/${id}/storico?tipi=persona-statistiche`)).body.data as { eventi: Array<{ titolo: string }> };
+    expect(storico.eventi.some((e) => /valori reali registrati/.test(e.titolo))).toBe(true);
+    expect(storico.eventi.some((e) => /valori reali dimenticati/.test(e.titolo))).toBe(true);
+    expect((await request(app).delete(`/api/partite/${id}`)).status).toBe(204);
+  });
+
   // ---- Immagini ----
   it('immagini: caricamento grezzo, lettura file, sostituzione, eliminazione', async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'p5r-img-'));
