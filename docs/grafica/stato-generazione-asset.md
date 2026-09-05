@@ -214,3 +214,6 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/jose-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
 - [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/lavenza.png` — 768×1024 (§14)
 - [x] **COMPLETATO — approvato dall'utente; galaxy_task_validator PASS** — `public/asset/personaggi/lavenza-fedele.png` — 768×1024 (§14, variante fedele richiesta dall'utente)
+
+## Aggiunta del 2026-09-05 — spillo dialoghi
+- [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-dialoghi.png` — 128×128 PNG RGBA; spillo completo a goccia gialla con fumetto bianco, contorno nero e accento rosso (correzione confermata dall’utente), alfa nativo Imagegen preservato con ridimensionamento proporzionale. Verificati dimensioni, alfa 0–255, bordi totalmente trasparenti e resa visiva. Aggiunta ai 667 asset del registro precedente: 668 consegne registrate; nessuna rivalidazione delle altre categorie in questo intervento.
