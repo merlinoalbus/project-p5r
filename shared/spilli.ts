@@ -125,3 +125,12 @@ export function spilloPerLuogo(tipoLuogo: string): TipoSpillo {
 export const TIPI_MAPPA = ['citta', 'quartiere', 'luogo', 'palazzo', 'area', 'dedalo', 'generica'] as const;
 export type TipoMappa = (typeof TIPI_MAPPA)[number];
 export const NOME_TIPO_MAPPA: Record<TipoMappa, string> = { citta: 'Città', quartiere: 'Quartiere', luogo: 'Luogo', palazzo: 'Palazzo', area: 'Area', dedalo: 'Dedalo', generica: 'Mappa' };
+
+/**
+ * Asset del repository proposto per l'immagine di base di una mappa (15.25): `mappe/<chiave>`, cioè il percorso in `public/asset/`
+ * (senza estensione) che «Esporta questo luogo» dà all'immagine e che il seed della città usa per i quartieri. È solo un puntatore:
+ * finché il file non è consegnato la mappa usa l'immagine dell'istanza o la griglia.
+ */
+export function assetPredefinitoMappa(chiave: string): string {
+  return `mappe/${chiave}`;
+}

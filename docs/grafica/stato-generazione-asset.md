@@ -105,20 +105,20 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro-palazzo.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-dialogo.png` — 128×128 PNG RGBA (§18): spillo completo a goccia gialla con fumetto bianco, contorno nero e accento rosso, alfa nativo; consegnato da Codex come `spillo-dialoghi.png` e rinominato al merge del 2026-09-05 perché l'app cerca `ui/spillo-dialogo`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sigarette.png` — 128×128 (§18, 15.24): sigaretta con fumo e distributore a colonna, goccia grigio caldo `#78716c`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-cercalavoro.png` — 128×128 (§18, 15.24): rivista di annunci con lente, goccia ambra scura `#d97706`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-lavoro.png` — 128×128 (§18, 15.24): valigetta da lavoro, goccia verde petrolio `#0d9488`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-terme.png` — 128×128 (§18, 15.24): vasca con tre volute di vapore, goccia ciano chiaro `#67e8f9`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-lavanderia.png` — 128×128 (§18, 15.24): lavatrice con oblò, goccia lavanda `#c4b5fd`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-cinema.png` — 128×128 (§18, 15.24): ciak da regista, goccia blu notte `#1e3a8a`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-biblioteca.png` — 128×128 (§18, 15.24): tre libri, goccia bruna `#7c2d12`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-culto.png` — 128×128 (§18, 15.24): torii a due traverse, goccia viola scuro `#4c1d95`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sala-giochi.png` — 128×128 (§18, 15.24): joypad, goccia lime `#84cc16`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-casa.png` — 128×128 (§18, 15.24): casetta con tetto a due falde, goccia pesca `#fdba74`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-timbro.png` — 128×128 (§18, 15.24): timbro a mano sopra una riga d'inchiostro, goccia rosa lilla `#f0abfc`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-meccanismo.png` — 128×128 (§18, 15.24): leva con pomello su base a semicerchio, goccia ardesia `#64748b`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-rampino.png` — 128×128 (§18, 15.24): rampino a tre punte con corda, goccia magenta scuro `#a21caf`
-- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-porta.png` — 128×128 (§18, 15.24): porta con buco della serratura, goccia rosso scuro `#b91c1c`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sigarette.png` — 128×128 (§18, prompt completo in §18.1, 15.24): sigaretta con fumo e distributore a colonna, goccia grigio caldo `#78716c`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-cercalavoro.png` — 128×128 (§18, prompt completo in §18.1, 15.24): rivista di annunci con lente, goccia ambra scura `#d97706`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-lavoro.png` — 128×128 (§18, prompt completo in §18.1, 15.24): valigetta da lavoro, goccia verde petrolio `#0d9488`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-terme.png` — 128×128 (§18, prompt completo in §18.1, 15.24): vasca con tre volute di vapore, goccia ciano chiaro `#67e8f9`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-lavanderia.png` — 128×128 (§18, prompt completo in §18.1, 15.24): lavatrice con oblò, goccia lavanda `#c4b5fd`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-cinema.png` — 128×128 (§18, prompt completo in §18.1, 15.24): ciak da regista, goccia blu notte `#1e3a8a`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-biblioteca.png` — 128×128 (§18, prompt completo in §18.1, 15.24): tre libri, goccia bruna `#7c2d12`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-culto.png` — 128×128 (§18, prompt completo in §18.1, 15.24): torii a due traverse, goccia viola scuro `#4c1d95`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sala-giochi.png` — 128×128 (§18, prompt completo in §18.1, 15.24): joypad, goccia lime `#84cc16`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-casa.png` — 128×128 (§18, prompt completo in §18.1, 15.24): casetta con tetto a due falde, goccia pesca `#fdba74`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-timbro.png` — 128×128 (§18, prompt completo in §18.1, 15.24): timbro a mano sopra una riga d'inchiostro, goccia rosa lilla `#f0abfc`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-meccanismo.png` — 128×128 (§18, prompt completo in §18.1, 15.24): leva con pomello su base a semicerchio, goccia ardesia `#64748b`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-rampino.png` — 128×128 (§18, prompt completo in §18.1, 15.24): rampino a tre punte con corda, goccia magenta scuro `#a21caf`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-porta.png` — 128×128 (§18, prompt completo in §18.1, 15.24): porta con buco della serratura, goccia rosso scuro `#b91c1c`
 
 ### mappe (§19)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)
@@ -197,8 +197,8 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-accettata.png` — 128×128 (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-negozio.png` — 128×128 (§17)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/azione-filtri.png` — 128×128 (§17)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-copia.png` — 128×128 (§17)
-- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-incolla.png` — 128×128 (§17)
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-copia.png` — 128×128 (§17, prompt completo in §17.1): due fogli sovrapposti, quello davanti con l'angolo piegato
+- [ ] **DA CONSEGNARE** — `public/asset/ui/azione-incolla.png` — 128×128 (§17, prompt completo in §17.1): tavoletta con molletta e foglio che vi entra
 
 ### ui — schede della Partita (§16)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/scheda-doti.png` — 128×128 (§16)

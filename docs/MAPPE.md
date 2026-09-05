@@ -43,7 +43,10 @@ mappa
   genitore_chiave  TEXT NULL → mappa(chiave)   livello superiore (Tokyo → quartiere → luogo; Palazzo → area)
   ordine           INTEGER NOT NULL DEFAULT 0
   immagine_chiave  TEXT NULL         chiave dell'immagine nell'ambito «mappa» dell'istanza (caricata dall'editor) …
-  asset            TEXT NULL         … oppure asset del repository (es. 'mappe/citta-shibuya'); precedenza all'immagine dell'istanza
+  asset            TEXT NULL         … oppure asset del repository (es. 'mappe/citta-shibuya'); precedenza all'immagine dell'istanza.
+                                     Alla creazione dall'editor o dall'API vale 'mappe/<chiave>' se non indicato (15.25, `assetPredefinitoMappa`):
+                                     è il percorso che «Esporta questo luogo» dà all'immagine; `null` esplicito = nessun asset. Se il file
+                                     non è nel manifest degli asset il puntatore è innocuo: si usa l'immagine dell'istanza o la griglia
   larghezza, altezza INTEGER NULL    dimensioni dell'immagine di base (per l'adattamento dello zoom)
   entita_tipo      TEXT NULL         'quartiere' | 'luogo' | 'dungeon' | 'area'   collegamento all'entità esistente
   entita_chiave    TEXT NULL
@@ -208,7 +211,8 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - **Albero e passaggi** (15.24). L'albero dice chi contiene chi (percorso, «Su», elenco «Mappe figlie», esportazione per luogo); sulla mappa ci si
   sposta con gli spilli «passaggio» (riferimento a un'altra mappa), che sono porte disegnate sull'immagine. Le due cose restano distinte ma l'editor
   le tiene allineate: (1) «Nuova mappa» chiede se creare il passaggio sulla mappa genitore verso la nuova (preselezionato) e il passaggio di ritorno
-  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
+  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; la stessa finestra propone l'asset del repository «mappe/chiave»
+  (segue la chiave finché non lo si tocca; vuoto = nessun asset, 15.25); (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
   questa mappa raggiunge porta la riga «Senza passaggio da questa mappa» con il pulsante «Crea passaggio»; (3) sotto «Su: <genitore>», se nessuno
   spillo punta al genitore, «Crea passaggio di ritorno». Entrambi i pulsanti chiamano `POST /api/mappe/:chiave/passaggi` `{ destinazione }`: il
   server crea lo spillo «passaggio» col nome della destinazione nel punto libero più vicino al centro (o in basso al centro, 50/92, quando la

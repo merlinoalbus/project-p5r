@@ -279,7 +279,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).put('/api/mappe/luogo-zip/immagine').set('Content-Type', 'image/png').send(PNG_2x3)).status).toBe(200);
     const spillo = (await request(app).post('/api/mappe/luogo-zip/spilli').send({ tipo: 'passaggio', nome: 'Scala', x: 10, y: 10, riferimento: { tipo: 'mappa', chiave: figlia.chiave } })).body.data as SpilloDto;
     expect(spillo.immagini).toEqual([]);
-    expect(spillo.dettaglio?.immagine).toEqual({ url: null, asset: null });
+    // la figlia è nata senza `asset` indicato: ha quello predefinito «mappe/<chiave>» (15.25), ancora senza file né immagine dell'istanza
+    expect(spillo.dettaglio?.immagine).toEqual({ url: null, asset: 'mappe/luogo-zip-interno' });
     // schermate
     const conImmagine = await request(app).post(`/api/mappe/spilli/${spillo.id}/immagini?didascalia=Vista%20dalla%20scala`).set('Content-Type', 'image/png').send(PNG_2x3);
     expect(conImmagine.status).toBe(201);
@@ -469,17 +470,22 @@ describe('API mappe a livelli (Fase 13.1)', () => {
   });
 
   it('passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404', async () => {
-    // radice dell'utente, così i conteggi delle mappe della guida non cambiano
-    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-radice', nome: 'Radice di prova', tipo: 'generica' })).status).toBe(201);
+    // radice dell'utente, così i conteggi delle mappe della guida non cambiano; senza `asset` la mappa nasce con «mappe/<chiave>» (15.25)
+    const radiceCreata = await request(app).post('/api/mappe').send({ chiave: 'prova-radice', nome: 'Radice di prova', tipo: 'generica' });
+    expect(radiceCreata.status).toBe(201);
+    expect((radiceCreata.body.data as MappaDto).asset).toBe('mappe/prova-radice');
     // figlia con passaggio e ritorno: nel genitore uno spillo «passaggio» al centro col nome della figlia; nella figlia uno in basso verso il genitore
-    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-a', nome: 'Stanza A', tipo: 'generica', genitore: 'prova-radice', passaggio: true, ritorno: true })).body.data as MappaDto;
+    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-a', nome: 'Stanza A', tipo: 'generica', genitore: 'prova-radice', passaggio: true, ritorno: true, asset: null })).body.data as MappaDto;
+    // `asset: null` esplicito resta «nessun asset»; un valore esplicito viene conservato
+    expect(figlia.asset).toBeNull();
     expect(figlia.spilli).toHaveLength(1);
     expect(figlia.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Radice di prova', x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'prova-radice' }, origine: 'utente' });
     let radice = (await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto;
     expect(radice.spilli).toHaveLength(1);
     expect(radice.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Stanza A', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'prova-radice-a' } });
     // seconda figlia con solo il passaggio: il centro è occupato, il nuovo spillo si sposta su un punto libero (almeno 5 punti di distanza)
-    const figliaB = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-b', nome: 'Stanza B', tipo: 'generica', genitore: 'prova-radice', passaggio: true })).body.data as MappaDto;
+    const figliaB = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-b', nome: 'Stanza B', tipo: 'generica', genitore: 'prova-radice', passaggio: true, asset: 'palazzi/prova-b' })).body.data as MappaDto;
+    expect(figliaB.asset).toBe('palazzi/prova-b');
     expect(figliaB.spilli).toHaveLength(0);
     radice = (await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto;
     const versoB = radice.spilli.find((s) => s.riferimento?.chiave === 'prova-radice-b')!;
