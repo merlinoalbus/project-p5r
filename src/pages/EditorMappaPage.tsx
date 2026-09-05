@@ -10,7 +10,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere, type RiferimentoTrovatoApi } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaPassaggio, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere, type RiferimentoTrovatoApi } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
@@ -21,7 +21,7 @@ import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
 import { CondizioniSpilloEditor } from '../components/mappe/CondizioniSpillo';
 import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
 import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
-import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
+import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
@@ -150,6 +150,10 @@ export function EditorMappaPage() {
               }, 'Pianta scaricata dalla guida nella tua istanza.')}
               onEliminaMappa={() => setConfermaEliminaMappa(true)}
               onNuovaMappa={() => setNuovaMappaAperta(true)}
+              onCreaPassaggio={(destinazione) => esegui(async () => {
+                const s = await creaPassaggio(chiave, destinazione);
+                setSelezionatoId(s.id); setStrumento('seleziona');
+              }, destinazione === dati.genitore ? `Passaggio di ritorno verso «${dati.genitoreNome ?? destinazione}» creato in basso al centro: trascinalo dove sta l'uscita.` : 'Passaggio creato al centro della mappa: trascinalo dove sta l\'ingresso.')}
               onEsporta={() => void esegui(async () => {
                 const pacchetto = await esportaMappe();
                 const blob = new Blob([JSON.stringify(pacchetto, null, 1)], { type: 'application/json' });
@@ -179,7 +183,8 @@ export function EditorMappaPage() {
         </Modal>
       )}
       {dati && <NuovaMappaModal aperta={nuovaMappaAperta} genitore={dati} albero={albero.dati ?? []} occupato={occupato} onChiudi={() => setNuovaMappaAperta(false)}
-        onCrea={(d) => esegui(async () => { const m = await creaMappa(d); setNuovaMappaAperta(false); await albero.ricarica(); vai(m.chiave); }, 'Mappa creata.')} />}
+        onCrea={(d) => esegui(async () => { const m = await creaMappa(d); setNuovaMappaAperta(false); await albero.ricarica(); vai(m.chiave); },
+          d.passaggio ? `Mappa creata. Il passaggio verso «${d.nome}» è al centro di «${dati.nome}»: torna «Su» e trascinalo dove sta l'ingresso.${d.ritorno ? ' Qui in basso c\'è il passaggio di ritorno.' : ''}` : 'Mappa creata (senza passaggio: si aggiunge dall\'albero con «Crea passaggio»).')} />}
     </PageState>
   );
 }
@@ -209,6 +214,8 @@ interface PropsPannello {
   onScaricaDallaGuida: () => Promise<void>;
   onEliminaMappa: () => void;
   onNuovaMappa: () => void;
+  /** Passaggio da questa mappa verso `destinazione` (figlia senza passaggio o genitore per il ritorno), 15.24. */
+  onCreaPassaggio: (destinazione: string) => Promise<void>;
   onEsporta: () => void;
   onImporta: (file: File, sovrascrivi: boolean) => Promise<void>;
   onVai: (chiave: string) => void;
@@ -221,6 +228,8 @@ function PannelloEditor(p: PropsPannello) {
   const inputImporta = useRef<HTMLInputElement | null>(null);
   const [sovrascrivi, setSovrascrivi] = useState(false);
   const scaricabile = mappa.entita?.tipo === 'area' || mappa.entita?.tipo === 'quartiere';
+  // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
+  const raggiunge = (destinazione: string) => mappa.spilli.some((s) => s.riferimento?.tipo === 'mappa' && s.riferimento.chiave === destinazione);
   return (
     <>
       <section className="visore-mappa__sezione" aria-label="Strumenti">
@@ -231,12 +240,19 @@ function PannelloEditor(p: PropsPannello) {
           <PulsanteVisivo tono="secondario" compatto attivo={strumento === 'incolla'} icona={<IconaAzione chiave="incolla" dimensione={20} />} titolo="Incolla" dettaglio={appunti ? `«${appunti.nome}»` : 'copia prima uno spillo'} disabled={!appunti} onClick={() => p.onStrumento('incolla')} />
         </div>
         {strumento === 'aggiungi' && (
-          <div className="editor-mappa__palette" role="group" aria-label="Tipo del nuovo spillo">
-            {TIPI_SPILLO.map((t) => (
-              <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} onClick={() => p.onTipoNuovo(t)}>
-                <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
-                <span className="truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
-              </button>
+          <div className="flex flex-col gap-1.5" role="group" aria-label="Tipo del nuovo spillo">
+            {GRUPPI_SPILLO.map((g) => (
+              <div key={g.nome} className="flex flex-col gap-0.5">
+                <span className="editor-mappa__gruppo">{g.nome}</span>
+                <div className="editor-mappa__palette">
+                  {g.tipi.map((t) => (
+                    <button key={t} type="button" className={`editor-mappa__tipo ${t === tipoNuovo ? 'editor-mappa__tipo--attivo' : ''}`} aria-pressed={t === tipoNuovo} onClick={() => p.onTipoNuovo(t)}>
+                      <PuntoSpillo tipo={t} colore={DEFINIZIONI_SPILLO[t].colore} />
+                      <span className="truncate">{DEFINIZIONI_SPILLO[t].nome}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -261,16 +277,33 @@ function PannelloEditor(p: PropsPannello) {
 
       <section className="visore-mappa__sezione" aria-label="Albero delle mappe">
         <h3 className="visore-mappa__intestazione">Albero</h3>
-        {mappa.genitore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={`Su: ${mappa.genitoreNome ?? mappa.genitore}`} onClick={() => p.onVai(mappa.genitore!)} />}
+        <p className="m-0 text-[12px] text-text-muted">L'albero dice chi contiene chi; sulla mappa ci si sposta con gli spilli «passaggio». Una figlia «senza passaggio» si raggiunge solo da qui.</p>
+        {mappa.genitore && (
+          <div className="flex flex-col gap-1">
+            <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={`Su: ${mappa.genitoreNome ?? mappa.genitore}`} onClick={() => p.onVai(mappa.genitore!)} />
+            {!raggiunge(mappa.genitore) && (
+              <div className="editor-mappa__senza-passaggio">
+                <span className="flex-1 min-w-0">Nessun passaggio di ritorno verso «{mappa.genitoreNome ?? mappa.genitore}».</span>
+                <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => void p.onCreaPassaggio(mappa.genitore!)}>Crea passaggio di ritorno</button>
+              </div>
+            )}
+          </div>
+        )}
         {mappa.figli.length > 0 && (
           <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Mappe figlie">
             {mappa.figli.map((f) => (
-              <li key={f.chiave}>
+              <li key={f.chiave} className="flex flex-col">
                 <button type="button" className="visore-mappa__figlia" onClick={() => p.onVai(f.chiave)}>
                   <IconaSpillo tipo="passaggio" dimensione={18} />
                   <span className="flex-1 min-w-0 truncate">{f.nome}</span>
                   <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[f.tipo]}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
                 </button>
+                {!raggiunge(f.chiave) && (
+                  <div className="editor-mappa__senza-passaggio">
+                    <span className="flex-1 min-w-0">Senza passaggio da questa mappa.</span>
+                    <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => void p.onCreaPassaggio(f.chiave)} aria-label={`Crea passaggio verso ${f.nome}`}>Crea passaggio</button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -462,11 +495,13 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
 
 interface PropsNuova { aperta: boolean; genitore: MappaDto; albero: MappaRiassuntoDto[]; occupato: boolean; onChiudi: () => void; onCrea: (dati: Parameters<typeof creaMappa>[0]) => Promise<void> }
 
-/** Finestra «Nuova mappa»: chiave proposta dal nome, tipo coerente col genitore. */
+/** Finestra «Nuova mappa»: chiave proposta dal nome, tipo coerente col genitore; passaggio dal genitore (predefinito) e di ritorno (a scelta), 15.24. */
 function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea }: PropsNuova) {
   const [nome, setNome] = useState('');
   const [tipo, setTipo] = useState<TipoMappa>(genitore.tipo === 'palazzo' || genitore.tipo === 'dedalo' || genitore.tipo === 'area' ? 'area' : genitore.tipo === 'citta' ? 'quartiere' : 'luogo');
   const [chiave, setChiave] = useState('');
+  const [passaggio, setPassaggio] = useState(true);
+  const [ritorno, setRitorno] = useState(false);
   const chiaveEffettiva = (chiave || slug(nome)).slice(0, 80);
   const esiste = albero.some((m) => m.chiave === chiaveEffettiva);
   const valida = /^[a-z0-9][a-z0-9-]{1,79}$/.test(chiaveEffettiva) && !esiste && nome.trim().length > 0;
@@ -474,7 +509,7 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
     <Modal titolo="Nuova mappa" aperta={aperta} onChiudi={onChiudi}
       azioni={<>
         <button type="button" className="btn btn-secondary btn-sm" onClick={onChiudi}>Annulla</button>
-        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ chiave: chiaveEffettiva, nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length })} />
+        <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Crea" disabled={occupato || !valida} onClick={() => void onCrea({ chiave: chiaveEffettiva, nome: nome.trim(), tipo, genitore: genitore.chiave, ordine: genitore.figli.length, passaggio, ritorno })} />
       </>}>
       <div className="flex flex-col gap-2">
         <label className="editor-mappa__campo">Nome<input className="form-input" value={nome} onChange={(e) => setNome(e.target.value)} maxLength={120} autoFocus /></label>
@@ -483,6 +518,8 @@ function NuovaMappaModal({ aperta, genitore, albero, occupato, onChiudi, onCrea 
         </label>
         <label className="editor-mappa__campo">Chiave (minuscole, cifre, trattini)<input className="form-input" value={chiave} onChange={(e) => setChiave(e.target.value)} placeholder={slug(nome) || 'proposta dal nome'} maxLength={80} /></label>
         <p className="m-0 text-[12px] text-text-muted">Genitore: {genitore.nome}. {esiste ? <span className="editor-mappa__avviso">Esiste già una mappa con questa chiave.</span> : chiaveEffettiva ? `Chiave: ${chiaveEffettiva}` : ''}</p>
+        <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={passaggio} onChange={(e) => setPassaggio(e.target.checked)} /> <span>Crea il passaggio su «{genitore.nome}» verso la nuova mappa <span className="text-text-muted">(al centro, in un punto libero: poi lo trascini dove sta l'ingresso)</span></span></label>
+        <label className="flex items-start gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5 mt-0.5 shrink-0" checked={ritorno} onChange={(e) => setRitorno(e.target.checked)} /> <span>Crea anche il passaggio di ritorno verso «{genitore.nome}» nella nuova mappa <span className="text-text-muted">(in basso al centro)</span></span></label>
       </div>
     </Modal>
   );

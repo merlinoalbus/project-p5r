@@ -2,7 +2,7 @@
 
 Registro richiesto dall’utente il 2026-09-03. Fonte: `prompt-immagini.md`, `riferimenti-visivi.md` e `data/seed/persona.json`.
 
-**670 file richiesti: 668 completati e approvati, 2 ancora da consegnare.** Tutte le categorie sono complete e validate, salvo le due icone dell'editor delle mappe `azione-copia.png` e `azione-incolla.png` (§17, richieste il 2026-09-05).
+**684 file richiesti: 668 completati e approvati, 16 ancora da consegnare.** Tutte le categorie sono complete e validate, salvo le due icone dell'editor delle mappe `azione-copia.png` e `azione-incolla.png` (§17, richieste il 2026-09-05) e i 14 nuovi spilli delle mappe del §18 (15.24, richiesti il 2026-09-05: sigarette, cercalavoro, lavoro, terme, lavanderia, cinema, biblioteca, culto, sala-giochi, casa, timbro, meccanismo, rampino, porta). `spillo-distributore.png` resta com'è: nella palette si chiama «Bevande».
 
 Le voci degli asset consegnati e approvati sono in `archivio-grafico.md`.
 
@@ -49,7 +49,7 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 | ui (azioni, §17) | 48 | 46 | 2 |
 | ui (schede Partita e Fusione, §16) | 18 | 18 | 0 |
 | persona-gruppo (§15) | 27 | 27 | 0 |
-| ui (spilli, §18) | 20 | 20 | 0 |
+| ui (spilli, §18) | 34 | 20 | 14 |
 | mappe (§19) | 25 | 25 | 0 |
 | guida (sezione Mappe, §20) | 1 | 1 | 0 |
 
@@ -105,6 +105,20 @@ Nessuna. La coppia Appeso è stata consegnata dall’utente come PNG RGBA con al
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-tesoro-palazzo.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-seme-bramosia.png` — 128×128 (§18)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/ui/spillo-dialogo.png` — 128×128 PNG RGBA (§18): spillo completo a goccia gialla con fumetto bianco, contorno nero e accento rosso, alfa nativo; consegnato da Codex come `spillo-dialoghi.png` e rinominato al merge del 2026-09-05 perché l'app cerca `ui/spillo-dialogo`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sigarette.png` — 128×128 (§18, 15.24): sigaretta con fumo e distributore a colonna, goccia grigio caldo `#78716c`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-cercalavoro.png` — 128×128 (§18, 15.24): rivista di annunci con lente, goccia ambra scura `#d97706`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-lavoro.png` — 128×128 (§18, 15.24): valigetta da lavoro, goccia verde petrolio `#0d9488`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-terme.png` — 128×128 (§18, 15.24): vasca con tre volute di vapore, goccia ciano chiaro `#67e8f9`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-lavanderia.png` — 128×128 (§18, 15.24): lavatrice con oblò, goccia lavanda `#c4b5fd`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-cinema.png` — 128×128 (§18, 15.24): ciak da regista, goccia blu notte `#1e3a8a`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-biblioteca.png` — 128×128 (§18, 15.24): tre libri, goccia bruna `#7c2d12`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-culto.png` — 128×128 (§18, 15.24): torii a due traverse, goccia viola scuro `#4c1d95`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-sala-giochi.png` — 128×128 (§18, 15.24): joypad, goccia lime `#84cc16`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-casa.png` — 128×128 (§18, 15.24): casetta con tetto a due falde, goccia pesca `#fdba74`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-timbro.png` — 128×128 (§18, 15.24): timbro a mano sopra una riga d'inchiostro, goccia rosa lilla `#f0abfc`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-meccanismo.png` — 128×128 (§18, 15.24): leva con pomello su base a semicerchio, goccia ardesia `#64748b`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-rampino.png` — 128×128 (§18, 15.24): rampino a tre punte con corda, goccia magenta scuro `#a21caf`
+- [ ] **DA CONSEGNARE** — `public/asset/ui/spillo-porta.png` — 128×128 (§18, 15.24): porta con buco della serratura, goccia rosso scuro `#b91c1c`
 
 ### mappe (§19)
 - [x] **COMPLETATO — galaxy_task_validator PASS** — `public/asset/mappe/tokyo.png` — 2048×1536 (§19)

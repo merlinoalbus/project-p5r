@@ -118,7 +118,7 @@
      "ordine": 0
     },
     {
-     "tipo": "punto-sensibile",
+     "tipo": "casa",
      "nome": "Casa di Sojiro Sakura",
      "descrizione": "",
      "x": 20.6,
@@ -151,7 +151,7 @@
      "ordine": 1
     },
     {
-     "tipo": "attivita",
+     "tipo": "terme",
      "nome": "Bagno pubblico (Terme Yongen-Jaya)",
      "descrizione": "Aumenta la dote Fascino, in particolare nei giorni di pioggia.",
      "x": 87.2,
@@ -216,7 +216,7 @@
      "ordine": 7
     },
     {
-     "tipo": "attivita",
+     "tipo": "cinema",
      "nome": "Cinema di Yongen-Jaya",
      "descrizione": "Visione film con incremento doti sociali.",
      "x": 21.2,
@@ -229,7 +229,7 @@
      "ordine": 8
     },
     {
-     "tipo": "attivita",
+     "tipo": "lavanderia",
      "nome": "Lavanderia",
      "descrizione": "Pulizia/valutazione di armature sporche recuperate nei Palazzi/Memento.",
      "x": 78.4,
