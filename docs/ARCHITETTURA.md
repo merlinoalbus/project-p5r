@@ -392,7 +392,7 @@ Ogni risposta porta le chiavi canoniche più i campi `*Nome` in italiano risolti
 ### Mappe a livelli e spilli dell'editor (Fase 13.1)
 Studio in `docs/MAPPE.md`. Migrazione 027: `mappa` (albero con `genitore_chiave`, `immagine_chiave` nell'ambito «mappa» dell'istanza oppure
 `asset` del repository, `larghezza`/`altezza`, `entita_tipo`/`entita_chiave` verso quartiere/dungeon/area, `origine` seed|utente, `note`),
-`spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts`, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
+`spillo` (x/y in percentuale dell'immagine, `tipo` del registro `shared/spilli.ts` — 34 tipi in cinque gruppi dal 15.24, tabella in MAPPE §4 —, riferimento tipizzato mappa|negozio|punto|luogo|confidente|
 richiesta|attivita, `collezionabile`), `spillo_partita` (raccolto per partita). `server/services/mappe/sincronizzaMappe.ts` è idempotente:
 crea `tokyo` → `citta-<quartiere>` e `dungeon-<chiave>` → `<area>` dalle tabelle della guida e trasforma `marcatore_mappa`/`marcatore_luogo` in
 spilli (riferimento `punto`/`luogo`, stessa origine); gira nella migrazione (istanze esistenti) e alla fine di `caricaSeed`, seguita
@@ -402,7 +402,7 @@ dall'importazione del seed `data/seed/mappe-editor.json` (origine «seed», mai 
 raccolto; `impostaRaccolto` aggiorna anche `punto_partita`), editor (CRUD con validazione dei riferimenti e dei cicli genitore), immagine di
 base (`impostaImmagineMappa`, corpo grezzo `image/*`, dimensioni da `dimensioniImmagine` PNG/GIF/JPEG/WEBP), `esportaMappe`/`importaMappe`
 (pacchetto JSON versione 1 con immagini in base64; nessuna dipendenza ZIP disponibile). Rotte in `server/routes/mappe.ts` (`/albero`,
-`/esporta`, `/importa`, `/entita/:tipo/:chiave`, `/:chiave`, `/:chiave/immagine`, `/:chiave/spilli`, `/spilli/:id`) e
+`/esporta`, `/importa`, `/entita/:tipo/:chiave`, `/:chiave`, `/:chiave/immagine`, `/:chiave/spilli`, `/:chiave/passaggi` (15.24: passaggio verso un'altra mappa nel punto libero più vicino al centro, o in basso per il ritorno al genitore; `creaMappa` accetta `passaggio`/`ritorno`), `/spilli/:id`) e
 `PUT /api/partite/:id/spilli/:spilloId`; schemi zod in `server/schemas/mappe.ts`; client `src/services/api/mappe.ts`. Le vecchie rotte
 dei marcatori e delle piante restano per le pagine attuali finché 13.4 non le sostituisce.
 `importaMappe` senza «sovrascrivi» rimpiazza solo gli spilli della stessa origine del pacchetto: il seed aggiorna i propri spilli e conserva

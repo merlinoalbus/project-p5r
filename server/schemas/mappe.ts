@@ -40,8 +40,12 @@ export const queryMappa = z.object({ partita: z.coerce.number().int().positive()
 export const bodyCreaMappa = z.object({
   chiave: chiaveMappa, nome: z.string().min(1).max(120), tipo: z.enum(TIPI_MAPPA), genitore: chiaveMappa.nullable().optional(), ordine: z.number().int().min(0).max(9999).optional(),
   asset: z.string().max(200).nullable().optional(), larghezza: z.number().int().positive().nullable().optional(), altezza: z.number().int().positive().nullable().optional(), entita: entita.optional(), note: z.string().max(2000).optional(),
+  // 15.24: con un genitore, `passaggio` crea anche lo spillo «passaggio» nella mappa genitore e `ritorno` quello verso il genitore nella nuova mappa
+  passaggio: z.boolean().optional(), ritorno: z.boolean().optional(),
 });
-export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true }).partial();
+export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true, passaggio: true, ritorno: true }).partial();
+/** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. */
+export const bodyCreaPassaggio = z.object({ destinazione: chiaveMappa });
 export const bodyCreaSpillo = z.object({
   tipo: z.enum(TIPI_SPILLO), nome: z.string().min(1).max(160), descrizione: z.string().max(2000).optional(), x: z.number().min(0).max(100), y: z.number().min(0).max(100),
   riferimento: riferimento.optional(), collezionabile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(), condizioni,

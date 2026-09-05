@@ -86,27 +86,56 @@ Regole:
 
 ## 4. Registro dei tipi di spillo (condiviso, `shared/spilli.ts`)
 
-| tipo | icona (asset §18, riserva SVG) | colore | collezionabile per default | riferimento tipico |
-|---|---|---|---|---|
-| passaggio | spillo-passaggio | blu | no | mappa |
-| negozio | spillo-negozio | verde | no | negozio |
-| forziere | spillo-forziere | oro | sì | punto |
-| tesoro | spillo-tesoro | viola | sì | punto |
-| tesoro-palazzo | spillo-tesoro-palazzo | fucsia | sì | punto (Tesoro del Palazzo) |
-| seme-bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
-| oggetto-chiave | spillo-oggetto-chiave | ambra | sì | punto |
-| nemico | spillo-nemico | grigio-azzurro | no (sì se il punto è esauribile) | punto (Ombra della Sciagura) |
-| punto-sensibile | spillo-punto-sensibile | verde acqua | no | punto (enigma) |
-| boss / miniboss | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
-| sicura | spillo-sicura | azzurro | no | punto |
-| scorciatoia | spillo-scorciatoia | grigio | no | punto |
-| confidente | spillo-confidente | rosa | no | confidente |
-| dialogo | spillo-dialogo | indaco | sì (conversazione fatta) | — (personaggio non Confidente; luogo scelto a mano se utile) |
-| attivita | spillo-attivita | giallo | no | attivita / luogo |
-| ristorante | spillo-ristorante | marrone | no | luogo |
-| distributore | spillo-distributore | ciano | no | luogo |
-| treno | spillo-treno | verde scuro | no | mappa (quartiere) |
-| nota | spillo-nota | bianco | no | — |
+34 tipi (15.24) in cinque gruppi, che sono anche i gruppi della palette dell'editor (`GRUPPI_SPILLO`). I tipi della città seguono le etichette
+che la mappa del gioco dà ai punti di interesse: quando il giocatore vede «Bevande», «Sigarette» o «Cercalavoro» sulla mappa di Yongen-Jaya o
+del Sottopasso trova lo stesso nome nella palette. Analisi dei punti di interesse (2026-09-05): città = negozi, ristoranti, distributori di
+bevande, distributori di sigarette/tabaccaio, espositori del Cercalavoro, posti dei lavori part-time, bagno pubblico, lavanderia, cinema,
+biblioteca, chiese e templi, sale giochi, abitazioni, altre attività, stazioni; Palazzi e Mementos = forzieri, tesori, Tesoro del Palazzo, Semi
+della Bramosia, oggetti, Timbri dei Mementos, boss, miniboss, nemici, punti sensibili, meccanismi (leve, interruttori, pannelli), punti del
+rampino, porte chiuse, stanze sicure, scorciatoie. Restano senza tipo proprio, perché coperti da un tipo esistente: chioschi e bancarelle (negozio
+o Confidente), laghetto di pesca, gabbie di battuta, palestra e punti di studio (attività), Jose (negozio), bersagli delle richieste (boss/miniboss
+con riferimento alla richiesta), fiori dei Mementos (compaiono a caso, non si possono spillare).
+
+| gruppo | tipo | nome nella palette | icona (asset §18, riserva SVG) | colore | collezionabile per default | riferimento tipico |
+|---|---|---|---|---|---|---|
+| Spostamenti | passaggio | Passaggio | spillo-passaggio | blu | no | mappa |
+| Spostamenti | treno | Stazione | spillo-treno | verde scuro | no | mappa (quartiere) |
+| Città | negozio | Negozio | spillo-negozio | verde | no | negozio |
+| Città | ristorante | Ristorante | spillo-ristorante | marrone | no | luogo |
+| Città | distributore | Bevande (etichetta del gioco; prima «Distributore») | spillo-distributore | ciano | no | luogo |
+| Città | sigarette | Sigarette (distributore di sigarette / tabaccaio) | spillo-sigarette | grigio caldo | no | luogo |
+| Città | cercalavoro | Cercalavoro (riviste di annunci di lavoro) | spillo-cercalavoro | ambra scura | no | luogo |
+| Città | lavoro | Lavoro part-time (dove si lavora) | spillo-lavoro | verde petrolio | no | attivita |
+| Città | terme | Bagno pubblico | spillo-terme | ciano chiaro | no | luogo |
+| Città | lavanderia | Lavanderia | spillo-lavanderia | lavanda | no | luogo |
+| Città | cinema | Cinema | spillo-cinema | blu notte | no | luogo |
+| Città | biblioteca | Biblioteca | spillo-biblioteca | bruno | no | luogo |
+| Città | culto | Chiesa o tempio | spillo-culto | viola scuro | no | luogo |
+| Città | sala-giochi | Sala giochi | spillo-sala-giochi | lime | no | luogo |
+| Città | casa | Casa (abitazione) | spillo-casa | pesca | no | luogo |
+| Città | attivita | Attività | spillo-attivita | giallo | no | attivita / luogo |
+| Persone | confidente | Confidente | spillo-confidente | rosa | no | confidente |
+| Persone | dialogo | Dialogo | spillo-dialogo | indaco | sì (conversazione fatta) | — (personaggio non Confidente; luogo scelto a mano se utile) |
+| Palazzi e Mementos | forziere | Forziere | spillo-forziere | oro | sì | punto |
+| Palazzi e Mementos | tesoro | Tesoro | spillo-tesoro | viola | sì | punto |
+| Palazzi e Mementos | tesoro-palazzo | Tesoro del Palazzo | spillo-tesoro-palazzo | fucsia | sì | punto (Tesoro del Palazzo) |
+| Palazzi e Mementos | seme-bramosia | Seme della bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
+| Palazzi e Mementos | oggetto-chiave | Oggetto chiave | spillo-oggetto-chiave | ambra | sì | punto |
+| Palazzi e Mementos | timbro | Timbro dei Mementos (postazione fissa per piano) | spillo-timbro | rosa lilla | sì (timbrato) | — |
+| Palazzi e Mementos | boss / miniboss | Boss / Miniboss | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
+| Palazzi e Mementos | nemico | Nemico | spillo-nemico | grigio-azzurro | no (sì se il punto è esauribile) | punto (Ombra della Sciagura) |
+| Palazzi e Mementos | punto-sensibile | Punto sensibile | spillo-punto-sensibile | verde acqua | no | punto (enigma) |
+| Palazzi e Mementos | meccanismo | Meccanismo (leva, interruttore, pannello) | spillo-meccanismo | ardesia | no | punto |
+| Palazzi e Mementos | rampino | Punto del rampino (Royal) | spillo-rampino | magenta scuro | no | — |
+| Palazzi e Mementos | porta | Porta chiusa (chiave, tessera, dall'altro lato) | spillo-porta | rosso scuro | no | punto |
+| Palazzi e Mementos | sicura | Stanza sicura | spillo-sicura | azzurro | no | punto |
+| Palazzi e Mementos | scorciatoia | Scorciatoia | spillo-scorciatoia | grigio | no | punto |
+| Altro | nota | Nota | spillo-nota | bianco | no | — |
+
+Le corrispondenze automatiche dalla guida (`spilloPerPunto`, `spilloPerLuogo`) non usano i tipi nuovi: i luoghi «servizio» restano attività e i
+punti «puzzle» punti sensibili; i tipi nuovi si scelgono nell'editor. Il pacchetto `citta-yongen-jaya.json` riclassifica bagno pubblico, cinema,
+lavanderia e la casa di Sojiro Sakura (prima «punto sensibile», tipo da Palazzo) con i tipi dedicati (reseed automatico via hash). I pulsanti della
+palette sono alti 44 px (bersaglio touch).
 
 I 12 tipi dei punti di dungeon esistenti (`utils/dungeon.ts`) si mappano su questi (persona → nota con riferimento al punto, puzzle → punto-sensibile,
 volontà → seme-bramosia, tesoro → tesoro-palazzo, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave). Quando la corrispondenza cambia,
@@ -176,7 +205,19 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).
 - Gestione dell'albero: crea mappa (tipo, nome, genitore), rinomina, sposta, elimina; anteprima delle miniature.
-- Esporta (ZIP per luogo, JSON di tutto) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); passaggi automatici verso le mappe figlie da trascinare; nessuno stato «non salvato»: ogni modifica è salvata subito.
+- **Albero e passaggi** (15.24). L'albero dice chi contiene chi (percorso, «Su», elenco «Mappe figlie», esportazione per luogo); sulla mappa ci si
+  sposta con gli spilli «passaggio» (riferimento a un'altra mappa), che sono porte disegnate sull'immagine. Le due cose restano distinte ma l'editor
+  le tiene allineate: (1) «Nuova mappa» chiede se creare il passaggio sulla mappa genitore verso la nuova (preselezionato) e il passaggio di ritorno
+  nella nuova mappa (a scelta) — `POST /api/mappe` con `passaggio`/`ritorno`; (2) nell'elenco «Mappe figlie» ogni figlia che nessuno spillo di
+  questa mappa raggiunge porta la riga «Senza passaggio da questa mappa» con il pulsante «Crea passaggio»; (3) sotto «Su: <genitore>», se nessuno
+  spillo punta al genitore, «Crea passaggio di ritorno». Entrambi i pulsanti chiamano `POST /api/mappe/:chiave/passaggi` `{ destinazione }`: il
+  server crea lo spillo «passaggio» col nome della destinazione nel punto libero più vicino al centro (o in basso al centro, 50/92, quando la
+  destinazione è il genitore), dove «libero» vuol dire nessuno spillo entro 5 punti percentuali su entrambi gli assi (griglia a passo 8 in ordine
+  di distanza); lo spillo viene selezionato e si trascina dove sta davvero l'ingresso. 409 se la mappa ha già uno spillo verso quella
+  destinazione, 400 verso sé stessa, 404 se la destinazione non esiste. I passaggi automatici del seed (radici Città/Palazzo/Dedalo, `sincronizzaMappe`)
+  non cambiano.
+- La palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Altro — `GRUPPI_SPILLO`), con i 34 tipi del registro (§4).
+- Esporta (ZIP per luogo, JSON di tutto) e Importa dalla stessa schermata; schermate di riferimento per spillo (una o più, con didascalia); nessuno stato «non salvato»: ogni modifica è salvata subito.
 
 ## 9. Integrazione (13.4) — sostituzione ordinata di Città, Palazzi e Dedali (punti 6, 7, 8)
 
