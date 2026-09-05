@@ -215,9 +215,38 @@ describe('EditorMappaPage', () => {
     const ritorno = finestra.getByRole('checkbox', { name: /passaggio di ritorno verso «Shibuya»/ }) as HTMLInputElement;
     expect(passaggio.checked).toBe(true);
     expect(ritorno.checked).toBe(false);
+    // l'asset del repository segue la chiave proposta («mappe/<chiave>», 15.25)
+    const asset = finestra.getByLabelText('Asset del repository') as HTMLInputElement;
+    expect(asset.value).toBe('mappe/bar-nuovo');
+    fireEvent.change(finestra.getByLabelText(/Chiave/), { target: { value: 'bar-centrale' } });
+    expect(asset.value).toBe('mappe/bar-centrale');
     fireEvent.click(ritorno);
     fireEvent.click(finestra.getByRole('button', { name: 'Crea' }));
-    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ chiave: 'bar-nuovo', nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, passaggio: true, ritorno: true }));
+    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith({ chiave: 'bar-centrale', nome: 'Bar nuovo', tipo: 'luogo', genitore: 'citta-shibuya', ordine: 0, asset: 'mappe/bar-centrale', passaggio: true, ritorno: true }));
+    // riaperta, la finestra parte pulita (nome, chiave, asset e caselle ai valori iniziali)
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    // la pagina passa alla mappa appena creata e la ricarica: si attende il pannello
+    fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
+    const riaperta = within(await screen.findByRole('dialog'));
+    expect((riaperta.getByLabelText('Nome') as HTMLInputElement).value).toBe('');
+    expect((riaperta.getByLabelText('Asset del repository') as HTMLInputElement).value).toBe('');
+    expect((riaperta.getByRole('checkbox', { name: /passaggio di ritorno/ }) as HTMLInputElement).checked).toBe(false);
+  });
+
+  it('nella finestra «Nuova mappa» l’asset si può cambiare o svuotare: vuoto = nessun asset (null)', async () => {
+    api.creaMappa.mockResolvedValue({ ...base, chiave: 'vicolo', nome: 'Vicolo', genitore: 'citta-shibuya' });
+    monta();
+    fireEvent.click(await screen.findByRole('button', { name: /Nuova mappa/ }));
+    const finestra = within(await screen.findByRole('dialog'));
+    fireEvent.change(finestra.getByLabelText('Nome'), { target: { value: 'Vicolo' } });
+    const asset = finestra.getByLabelText('Asset del repository') as HTMLInputElement;
+    fireEvent.change(asset, { target: { value: 'palazzi/vicolo-mio' } });
+    // una volta toccato, l'asset non segue più la chiave
+    fireEvent.change(finestra.getByLabelText(/Chiave/), { target: { value: 'vicolo-2' } });
+    expect(asset.value).toBe('palazzi/vicolo-mio');
+    fireEvent.change(asset, { target: { value: '' } });
+    fireEvent.click(finestra.getByRole('button', { name: 'Crea' }));
+    await waitFor(() => expect(api.creaMappa).toHaveBeenCalledWith(expect.objectContaining({ chiave: 'vicolo-2', asset: null })));
   });
 
   it('la palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Altro) con i nuovi tipi e «Bevande» al posto di «Distributore»', async () => {
