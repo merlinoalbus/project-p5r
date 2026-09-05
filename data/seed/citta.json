@@ -164,7 +164,7 @@
      "chiave": "yongen-jaya/batting-cage-yongen",
      "ordine": 7,
      "tipo": "attivita",
-     "nome": "Batting Cage",
+     "nome": "Gabbie di Battuta",
      "cosaOffre": "Minigioco di battuta per aumentare la dote Perizia.",
      "quando": null,
      "giorni": null,
@@ -818,7 +818,7 @@
    "chiave": "kichijoji",
    "ordine": 3,
    "nome": "Kichijoji",
-   "sblocco": "esclusivo Persona 5 Royal, disponibile dopo l'introduzione narrativa nella prima parte del gioco",
+   "sblocco": "5 giugno (Domenica 6/05, scena di trama con Ryuji Sakamoto subito dopo la confessione di Madarame); esclusivo Persona 5 Royal",
    "descrizione": "Quartiere esclusivo di Royal, pieno di locali e negozi specializzati. Base d'incontro per Kasumi/Sumire Yoshizawa e Goro Akechi.",
    "fonte": "https://www.allgamestaff.it/persona-5-royal/jazz-club/",
    "luoghi": [

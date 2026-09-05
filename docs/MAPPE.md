@@ -87,18 +87,25 @@ Regole:
 | negozio | spillo-negozio | verde | no | negozio |
 | forziere | spillo-forziere | oro | sì | punto |
 | tesoro | spillo-tesoro | viola | sì | punto |
+| tesoro-palazzo | spillo-tesoro-palazzo | fucsia | sì | punto (Tesoro del Palazzo) |
+| seme-bramosia | spillo-seme-bramosia | viola chiaro | sì | punto (Seme della bramosia) |
+| oggetto-chiave | spillo-oggetto-chiave | ambra | sì | punto |
+| nemico | spillo-nemico | grigio-azzurro | no (sì se il punto è esauribile) | punto (Ombra della Sciagura) |
+| punto-sensibile | spillo-punto-sensibile | verde acqua | no | punto (enigma) |
 | boss / miniboss | spillo-boss / spillo-miniboss | rosso / arancio | sì (sconfitto) | punto |
 | sicura | spillo-sicura | azzurro | no | punto |
 | scorciatoia | spillo-scorciatoia | grigio | no | punto |
 | confidente | spillo-confidente | rosa | no | confidente |
+| dialogo | spillo-dialogo | indaco | sì (conversazione fatta) | — (personaggio non Confidente; luogo scelto a mano se utile) |
 | attivita | spillo-attivita | giallo | no | attivita / luogo |
 | ristorante | spillo-ristorante | marrone | no | luogo |
 | distributore | spillo-distributore | ciano | no | luogo |
 | treno | spillo-treno | verde scuro | no | mappa (quartiere) |
 | nota | spillo-nota | bianco | no | — |
 
-I 12 tipi dei punti di dungeon esistenti (`utils/dungeon.ts`) si mappano su questi (persona → nota con riferimento al punto, puzzle → nota,
-volontà → tesoro, ombra-sciagura → miniboss, forziere-chiuso → forziere, oggetto → tesoro).
+I 12 tipi dei punti di dungeon esistenti (`utils/dungeon.ts`) si mappano su questi (persona → nota con riferimento al punto, puzzle → punto-sensibile,
+volontà → seme-bramosia, tesoro → tesoro-palazzo, ombra-sciagura → nemico, forziere-chiuso → forziere, oggetto → oggetto-chiave). Quando la corrispondenza cambia,
+`sincronizzaMappe` riclassifica a ogni avvio gli spilli di origine `seed` (tipo e collezionabilità), senza toccare quelli dell'utente né gli stati per partita.
 
 ## 5. API (`/api/mappe`, sostituisce le rotte attuali mantenendo `scarica` come sorgente opzionale dell'immagine)
 
@@ -145,7 +152,7 @@ nell'istanza: la copia modificata diventa `utente` e prevale sulla `seed` con la
 
 - Stessa superficie del visore in modalità dedicata (barra rossa «Modifica: <mappa>» sempre visibile, uscita con conferma se ci sono
   modifiche non salvate). Strumenti: **Seleziona/sposta** (trascina uno spillo), **Aggiungi** (palette dei tipi; click sulla mappa crea lo
-  spillo nel punto); **Elimina** è un pulsante nel pannello dello spillo selezionato (non uno strumento a parte); pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
+  spillo nel punto), **Incolla** (attivo dopo «Copia»: un tocco sulla mappa crea lo spillo copiato — stesso tipo, nome, descrizione, collezionabile e riferimento — nel punto toccato, poi si torna a Seleziona; gli appunti vivono in `sessionStorage` e restano per altre copie, anche su altre mappe); **Copia** ed **Elimina** sono pulsanti nel pannello dello spillo selezionato (non strumenti a parte); il tipo dello spillo si cambia dal pannello senza ricrearlo; pannello proprietà dello spillo selezionato: tipo, nome, descrizione, collezionabile, riferimento con ricerca
   fra negozi, punti di dungeon, luoghi, Confidenti, richieste, mappe; «Crea mappa collegata» (crea la mappa figlia e collega lo spillo).
 - Immagine di base: caricamento o sostituzione (trascina il file o scegli), oppure «Scarica dalla guida» dove esiste il vecchio
   collegamento (`pianta_*`), oppure asset del repository (§19). Cambiare immagine mantiene gli spilli (percentuali).

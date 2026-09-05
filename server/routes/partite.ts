@@ -22,6 +22,7 @@ import { impostaCruciverba } from '../services/cruciverbaService.js';
 import { impostaAcquisto } from '../services/negoziService.js';
 import { confermaRequisito } from '../services/semaforiService.js';
 import { impostaRaccolto } from '../services/mappe/mappeService.js';
+import { suggerimentiOggi } from '../services/suggerimentiService.js';
 import { bodyRaccolto } from '../schemas/mappe.js';
 import { impostaAzione, impostaGiornoCorrente } from '../services/percorsoService.js';
 import { impostaTrofeo } from '../services/completamentoService.js';
@@ -131,6 +132,11 @@ router.get('/:id/compendio', validate({ params: paramsPartita }), (req, res) => 
 });
 router.put('/:id/compendio/:personaId', validate({ params: paramsPartitaPersona, body: bodyCompendio }), (req, res) => {
   res.json(aggiornaCompendio(Number(req.params.id), Number(req.params.personaId), req.body));
+});
+
+/** Chiavi da evidenziare per le azioni ancora da fare del giorno corrente (alone dorato dei suggerimenti). */
+router.get('/:id/suggerimenti', validate({ params: paramsPartita }), (req, res) => {
+  res.json(suggerimentiOggi(Number(req.params.id)));
 });
 
 /** Stato «raccolto» di uno spillo della mappa nella partita (Fase 13). */

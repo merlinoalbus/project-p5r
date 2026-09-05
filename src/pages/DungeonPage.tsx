@@ -14,11 +14,15 @@ import { EmblemaDungeon } from '../components/guida/EmblemaDungeon';
 import { dataBreve, sintesi } from '../utils/testoBreve';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 export function DungeonPage() {
   useDocumentTitle('Palazzi e Dedali');
   const attiva = usePartitaStore((s) => s.attiva);
   const dati = useCarica(() => getDungeons(attiva?.id), [attiva?.id]);
+  const sugg = useSuggerimenti();
   return (
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
@@ -29,7 +33,7 @@ export function DungeonPage() {
               const quota = d.gestiti !== null && d.punti > 0 ? d.gestiti / d.punti : null;
               return (
                 <li key={d.chiave}>
-                  <Link to={`/guida/dungeon/${d.chiave}`} className="card card--cliccabile piastrella no-underline text-text flex gap-4 h-full" aria-label={`${d.nome}${d.sovrano ? `, ${d.sovrano}` : ''}`}>
+                  <Link to={`/guida/dungeon/${d.chiave}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-4 h-full ${classiSuggerito(sugg.evidenziato('dungeon', d.chiave))}`} aria-label={`${d.nome}${d.sovrano ? `, ${d.sovrano}` : ''}`}>
                     <div className="flex flex-col items-center gap-2 shrink-0">
                       <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={84} />
                       {quota !== null && (
@@ -41,6 +45,7 @@ export function DungeonPage() {
                     <div className="flex-1 min-w-0 flex flex-col gap-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-display uppercase text-[21px] leading-none">{d.nome}</span>
+                        {sugg.evidenziato('dungeon', d.chiave) && <TargaSuggerito motivo={sugg.motivo('dungeon', d.chiave)} compatta />}
                         {d.arcanaSovranoNome && <span className="chip">{d.arcanaSovranoNome}</span>}
                       </div>
                       {d.sovrano && <span className="text-[13px] text-text-secondary">{d.sovrano}</span>}

@@ -1298,7 +1298,10 @@
      "fascia": "giorno",
      "azione": "Cinema: Il cameriere oscuro",
      "tipo": "dote",
-     "riferimento": null,
+     "riferimento": {
+      "tipo": "film",
+      "chiave": "cinema-the-cake-knight-rises"
+     },
      "riferimentoTesto": null,
      "rangoAtteso": null,
      "note": "Gentilezza +3"
@@ -4714,7 +4717,10 @@
      "fascia": "giorno",
      "azione": "Cinema: L'amore chissa",
      "tipo": "dote",
-     "riferimento": null,
+     "riferimento": {
+      "tipo": "film",
+      "chiave": "cinema-l-amore-chissa"
+     },
      "riferimentoTesto": null,
      "rangoAtteso": null,
      "note": "Fascino +3"
@@ -5856,7 +5862,10 @@
      "fascia": "giorno",
      "azione": "Cinema",
      "tipo": "dote",
-     "riferimento": null,
+     "riferimento": {
+      "tipo": "film",
+      "chiave": "cinema-l-amore-chissa"
+     },
      "riferimentoTesto": null,
      "rangoAtteso": null,
      "note": "Fascino +1"

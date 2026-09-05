@@ -10,6 +10,7 @@ import { aggiornaPartita, getPersone, getPossedute, getRegoleFusione, getVelluto
 import { useGlossarioStore } from '../stores/glossarioStore';
 import { usePartitaStore } from '../stores/partitaStore';
 import { PageState } from '../components/shared/PageState';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { Calcolatore } from '../components/fusione/Calcolatore';
 import { RicettePersona } from '../components/fusione/RicettePersona';
 import { PianiFusione } from '../components/fusione/PianiFusione';
@@ -86,11 +87,11 @@ export function FusionePage() {
     <div className="flex flex-col gap-4">
       <IntestazionePagina titolo="Fusione" sottotitolo={<>Fondi due Persona, scopri come ottenerne una o cosa produce con le altre; i contenuti scaricabili considerati sono quelli della partita attiva{attiva ? ` («${attiva.nome}», protagonista al livello ${attiva.livelloProtagonista})` : ' (nessuna: solo contenuti base)'}. Le Persona nella scorta sono evidenziate.</>} />
       <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
-      <div className="flex gap-1.5 flex-wrap">
+      <FilaScorrevole role="tablist" aria-label="Sezioni della fusione">
         {visteMostrate.map(([k, l, icona]) => (
           <button key={k} type="button" className={`chip chip--icona touch ${vista === k ? 'chip--attivo' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k}><IconaScheda chiave={icona} dimensione={16} />{l}</button>
         ))}
-      </div>
+      </FilaScorrevole>
 
       <PageState isLoading={caricamento || persone.caricamento} error={errore ?? persone.errore} onRetry={() => { void ricarica(); void persone.ricarica(); }}>
         {persone.dati && vista === 'calcolatore' && (

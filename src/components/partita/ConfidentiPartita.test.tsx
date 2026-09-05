@@ -114,8 +114,8 @@ describe('ConfidentiPartita', () => {
     expect(within(cards[2]).getByText('Rango massimo raggiunto.')).toBeInTheDocument();
     expect(within(cards[2]).getByText('MAX')).toBeInTheDocument();
     expect(within(cards[2]).getByLabelText('Rango di Morgana più uno')).toBeDisabled();
-    // rango > 0 → l'interruttore «Sbloccato» non è modificabile; a rango 0 lo è
+    // rango > 0 → l'interruttore «Sbloccato» non è modificabile; a rango 0 senza requisiti mancanti resta «Da sbloccare»
     expect(within(cards[0]).getByRole('button', { name: /: sbloccato$/ })).toBeDisabled();
-    expect(within(cards[1]).getByRole('button', { name: /: bloccato$/ })).toBeEnabled();
+    expect(within(cards[1]).getByRole('button', { name: /: da sbloccare quando lo incontri$/ })).toBeEnabled();
   });
 });

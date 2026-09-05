@@ -43,4 +43,33 @@ describe('NegozioPage', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: 'Nascondi acquistati' }));
     expect(screen.queryByText('Kogatana nera')).toBeNull();
   });
+
+  it('con la partita «Solo disponibili ora» nasconde gli articoli non ancora disponibili (riapribili), il chip spiega il motivo', async () => {
+    usePartitaStore.setState({ attiva: { id: 9, nome: 'Prova' } as PartitaDto });
+    const bloccato = { ...art('untouchable/kukri', 'Kukri', 'arma', 'Joker', 3800), disponibileDal: "a partire dall'arco del Palazzo di Madarame", disponibilita: { stato: 'bloccato' as const, requisiti: [{ indice: 0, tipo: 'palazzo' as const, stato: 'rosso' as const, testo: "a partire dall'arco del Palazzo di Madarame", dettaglio: 'Palazzo di Kamoshida: segna il boss come sconfitto nella Guida', manuale: false, confermato: false }] } };
+    const dubbio = { ...art('untouchable/veste', 'Veste', 'protezione', 'tutti', 500), condizione: 'grado Nero (spendere oltre 10.000 yen)', disponibilita: { stato: 'ignoto' as const, requisiti: [{ indice: 0, tipo: 'manuale' as const, stato: 'grigio' as const, testo: 'grado Nero (spendere oltre 10.000 yen)', dettaglio: 'Condizione non verificabile dai dati della partita', manuale: true, confermato: false }] } };
+    getNegozio.mockResolvedValue({ ...negozio, disponibilita: { stato: 'disponibile', requisiti: [] }, articoliElenco: [{ ...negozio.articoliElenco[0], disponibilita: { stato: 'disponibile', requisiti: [] } }, bloccato, dubbio] });
+    render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Untouchable' })).toBeInTheDocument();
+    // predefinito acceso: il bloccato è nascosto, il dubbio resta con il chip «Da verificare»
+    const interruttore = screen.getByRole('checkbox', { name: /Solo disponibili ora/ });
+    expect(interruttore).toBeChecked();
+    expect(screen.getByText(/1 non ancora/)).toBeInTheDocument();
+    expect(screen.queryByText('Kukri')).toBeNull();
+    expect(screen.getByText('Veste')).toBeInTheDocument();
+    expect(screen.getByText('Da verificare')).toHaveAttribute('title', 'grado Nero (spendere oltre 10.000 yen) — Condizione non verificabile dai dati della partita');
+    fireEvent.click(interruttore);
+    expect(screen.getByText('Kukri')).toBeInTheDocument();
+    expect(screen.getByText('Non ancora')).toHaveAttribute('title', "a partire dall'arco del Palazzo di Madarame — Palazzo di Kamoshida: segna il boss come sconfitto nella Guida");
+  });
+
+  it('senza partita non c\'è interruttore e tutti gli articoli sono elencati', async () => {
+    usePartitaStore.setState({ attiva: null });
+    getNegozio.mockResolvedValue(negozio);
+    render(<MemoryRouter initialEntries={['/guida/negozi/untouchable']}><Routes><Route path="/guida/negozi/:chiave" element={<NegozioPage />} /></Routes></MemoryRouter>);
+    expect(await screen.findByRole('heading', { name: 'Untouchable' })).toBeInTheDocument();
+    expect(getNegozio).toHaveBeenCalledWith('untouchable', undefined);
+    expect(screen.queryByRole('checkbox', { name: /Solo disponibili ora/ })).toBeNull();
+    expect(screen.getAllByRole('row')).toHaveLength(4);
+  });
 });

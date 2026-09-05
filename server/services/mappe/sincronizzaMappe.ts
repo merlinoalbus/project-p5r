@@ -33,9 +33,9 @@ function posizionePassaggio(radice: string, figlia: string, i: number, n: number
   return [10 + (80 * (i % colonne)) / Math.max(1, colonne - 1), 10 + (80 * Math.floor(i / colonne)) / Math.max(1, righe - 1)];
 }
 
-export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number } {
+export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number; riclassificati: number } {
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-  if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0 };
+  if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0, riclassificati: 0 };
   const immaginiMappa = new Set(tabelle.has('immagine') ? (db.prepare("SELECT chiave FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string }>).map((r) => r.chiave) : []);
   const insMappa = db.prepare(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, entita_tipo, entita_chiave, origine, updated_at)
     VALUES (@chiave, @nome, @tipo, @genitore, @ordine, @immagine, @asset, @entitaTipo, @entitaChiave, 'seed', @adesso)
@@ -67,6 +67,7 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const mappaEsiste = db.prepare('SELECT 1 FROM mappa WHERE chiave = ?');
   let spilli = 0;
+  let riclassificati = 0;
   if (tabelle.has('marcatore_mappa') && tabelle.has('punto_interesse')) {
     const righe = db.prepare(`SELECT m.punto_chiave, m.x, m.y, m.origine, p.area_chiave, p.tipo, p.nome, p.descrizione, p.ordine, p.esauribile
       FROM marcatore_mappa m JOIN punto_interesse p ON p.chiave = m.punto_chiave`).all() as Array<{ punto_chiave: string; x: number; y: number; origine: string; area_chiave: string; tipo: string; nome: string; descrizione: string; ordine: number; esauribile: number }>;
@@ -76,6 +77,16 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       const collezionabile = r.esauribile === 1 || DEFINIZIONI_SPILLO[tipo].collezionabile ? 1 : 0;
       insSpillo.run(r.area_chiave, tipo, r.nome, r.descrizione, r.x, r.y, 'punto', r.punto_chiave, collezionabile, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
       spilli++;
+    }
+    // ---- Riclassificazione degli spilli di seed già esistenti: quando la corrispondenza `spilloPerPunto` cambia (per esempio con
+    // i tipi nemico, oggetto-chiave, punto-sensibile, tesoro-palazzo, seme-bramosia) tipo e collezionabilità seguono il registro.
+    // Non tocca gli spilli creati dall'utente né gli stati per partita (`spillo_partita` è legata all'id, che non cambia). ----
+    const aggSpillo = db.prepare(`UPDATE spillo SET tipo = ?, collezionabile = ?, updated_at = ?
+      WHERE riferimento_tipo = 'punto' AND riferimento_chiave = ? AND origine = 'seed' AND (tipo <> ? OR collezionabile <> ?)`);
+    for (const r of righe) {
+      const tipo = spilloPerPunto(r.tipo);
+      const collezionabile = r.esauribile === 1 || DEFINIZIONI_SPILLO[tipo].collezionabile ? 1 : 0;
+      riclassificati += aggSpillo.run(tipo, collezionabile, t, r.punto_chiave, tipo, collezionabile).changes;
     }
   }
   if (tabelle.has('marcatore_luogo') && tabelle.has('luogo')) {
@@ -99,5 +110,5 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       spilli++;
     });
   }
-  return { mappe, spilli };
+  return { mappe, spilli, riclassificati };
 }

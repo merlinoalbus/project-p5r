@@ -21,6 +21,7 @@ import { ImmagineEntita } from '../shared/ImmagineEntita';
 import { PulsanteVisivo } from '../shared/PulsanteVisivo';
 import { IconaAzione } from '../shared/IconaAzione';
 import { IconaSpillo } from '../mappe/IconaSpillo';
+import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 
 interface PropsAzione {
   a: AzionePercorsoDto;
@@ -46,6 +47,8 @@ export function Azione({ a, data, partitaId, onCambiata, onSullaMappa, evidenzia
     try {
       const agg = await impostaAzionePercorso(partitaId, data, a.indice, fatta, noteRisposta);
       onCambiata(agg);
+      // spuntando (o riaprendo) un'azione cambia cosa il giorno suggerisce: l'alone dorato si aggiorna da solo
+      useSuggerimentiStore.getState().invalida();
       if (fatta && agg.effetti) notifica('success', descriviEffetti(agg.effetti));
     } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };

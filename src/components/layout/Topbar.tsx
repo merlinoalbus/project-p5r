@@ -15,12 +15,12 @@ export function Topbar() {
   const sezione = VOCI_NAV.find((v) => location.pathname.startsWith(v.to));
 
   return (
-    <header className="flex items-center gap-3 px-4 lg:px-5 h-[60px] lg:h-[68px] bg-bg-secondary border-b border-border shrink-0">
+    <header className="flex items-center gap-2 lg:gap-3 px-3 lg:px-5 h-[60px] lg:h-[68px] bg-bg-secondary border-b border-border shrink-0">
       <Link to="/home" className="flex items-center gap-2 no-underline text-text shrink-0" aria-label={`${APP_NAME} — Home`}>
         <AssetImg
           nome="identita/logo-orizzontale"
           alt={APP_NAME}
-          className="h-10 lg:h-12 w-auto max-w-[220px] lg:max-w-[300px] object-contain"
+          className="h-9 sm:h-10 lg:h-12 w-auto max-w-[104px] sm:max-w-[180px] lg:max-w-[300px] object-contain"
           fallback={
             <>
               <AssetImg nome="identita/logo" alt={APP_NAME} className="w-8 h-8 object-contain" fallback={<span className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white font-black text-[14px] tracking-tight">P5</span>} />
@@ -35,7 +35,7 @@ export function Topbar() {
           {sezione.label}
         </span>
       )}
-      <div className="flex-1" />
+      <div className="flex-1 min-w-0" />
       <PartitaSelettore />
       <Link
         to="/guida"

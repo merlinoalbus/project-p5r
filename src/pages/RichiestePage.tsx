@@ -13,11 +13,15 @@ import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { useSuggerimenti } from '../stores/suggerimentiStore';
+import { classiSuggerito } from '../utils/suggerimenti';
+import { TargaSuggerito } from '../components/shared/Suggerito';
 
 type Filtro = 'tutte' | 'da-fare' | 'accettate' | 'completate';
 
 function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: number | null; onCambiata: (r: RichiestaDto) => void }) {
   const [aperta, setAperta] = useState(false);
+  const sugg = useSuggerimenti();
   const [occupato, setOccupato] = useState(false);
   const cambia = async (stato: StatoRichiesta | null) => {
     if (!partitaId) return;
@@ -25,10 +29,11 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
     try { onCambiata(await impostaStatoRichiesta(partitaId, r.chiave, stato)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
   };
   return (
-    <li className={`card flex flex-col gap-1 ${r.stato === 'completata' ? 'opacity-70' : ''}`}>
+    <li className={`card flex flex-col gap-1 ${r.stato === 'completata' ? 'opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
       <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((a) => !a)} aria-expanded={aperta}>
         <strong className="text-[15px]">{r.nome}</strong>
         {r.stato && <span className="chip chip--attivo">{r.stato}</span>}
+        {sugg.evidenziato('richieste', r.chiave) && <TargaSuggerito motivo={sugg.motivo('richieste', r.chiave)} compatta />}
         <span className="text-[12px] text-text-muted">{r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
         {r.confidente && <span className="chip">{r.confidente.nome}{r.confidente.rango ? ` rango ${r.confidente.rango}` : ''}</span>}
       </button>
