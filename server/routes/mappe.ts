@@ -9,8 +9,8 @@ import { impostaMarcatore, scaricaPianta } from '../services/dungeonService.js';
 import { impostaMarcatoreLuogo, scaricaPiantaQuartiere } from '../services/cittaService.js';
 import express from 'express';
 import { MAX_BYTE_IMMAGINE } from '../services/immaginiService.js';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPacchettoRepository, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
-import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, cercaRiferimenti, creaMappa, creaPacchettoRepository, creaPassaggio, creaSpillo, dettaglioMappa, elencaMappe, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, importaMappe, impostaImmagineMappa, mappaPerEntita, type DatiMappa, type DatiSpillo } from '../services/mappe/mappeService.js';
+import { bodyAggiornaMappa, bodyAggiornaSpillo, bodyCreaMappa, bodyCreaPassaggio, bodyCreaSpillo, bodyImmagineSpillo, bodyImporta, paramsMappa, paramsSpillo, queryDidascalia, queryEsporta, queryMappa, queryRiferimenti } from '../schemas/mappe.js';
 import { httpErrors } from '../utils/httpError.js';
 
 const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
@@ -105,6 +105,10 @@ router.put('/:chiave/immagine', validate({ params: paramsMappa }), express.raw({
 });
 router.post('/:chiave/spilli', validate({ params: paramsMappa, body: bodyCreaSpillo }), (req, res) => {
   res.status(201).json(creaSpillo(String(req.params.chiave), req.body as DatiSpillo & { tipo: NonNullable<DatiSpillo['tipo']>; nome: string; x: number; y: number }));
+});
+/** Passaggio verso un'altra mappa in un punto libero scelto dal server (albero dell'editor, 15.24); 409 se esiste già. */
+router.post('/:chiave/passaggi', validate({ params: paramsMappa, body: bodyCreaPassaggio }), (req, res) => {
+  res.status(201).json(creaPassaggio(String(req.params.chiave), (req.body as { destinazione: string }).destinazione));
 });
 router.put('/spilli/:id', validate({ params: paramsSpillo, body: bodyAggiornaSpillo }), (req, res) => {
   res.json(aggiornaSpillo(Number(req.params.id), req.body as DatiSpillo & { mappa?: string }));

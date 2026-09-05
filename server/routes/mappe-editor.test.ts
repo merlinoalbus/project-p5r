@@ -468,6 +468,54 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect((await request(app).delete('/api/mappe/prova-import-condizioni')).status).toBe(204);
   });
 
+  it('passaggi dall’albero (15.24): «Nuova mappa» crea il passaggio nel genitore (e il ritorno a scelta) in un punto libero; POST /passaggi con 409/400/404', async () => {
+    // radice dell'utente, così i conteggi delle mappe della guida non cambiano
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-radice', nome: 'Radice di prova', tipo: 'generica' })).status).toBe(201);
+    // figlia con passaggio e ritorno: nel genitore uno spillo «passaggio» al centro col nome della figlia; nella figlia uno in basso verso il genitore
+    const figlia = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-a', nome: 'Stanza A', tipo: 'generica', genitore: 'prova-radice', passaggio: true, ritorno: true })).body.data as MappaDto;
+    expect(figlia.spilli).toHaveLength(1);
+    expect(figlia.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Radice di prova', x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'prova-radice' }, origine: 'utente' });
+    let radice = (await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto;
+    expect(radice.spilli).toHaveLength(1);
+    expect(radice.spilli[0]).toMatchObject({ tipo: 'passaggio', nome: 'Stanza A', x: 50, y: 50, riferimento: { tipo: 'mappa', chiave: 'prova-radice-a' } });
+    // seconda figlia con solo il passaggio: il centro è occupato, il nuovo spillo si sposta su un punto libero (almeno 5 punti di distanza)
+    const figliaB = (await request(app).post('/api/mappe').send({ chiave: 'prova-radice-b', nome: 'Stanza B', tipo: 'generica', genitore: 'prova-radice', passaggio: true })).body.data as MappaDto;
+    expect(figliaB.spilli).toHaveLength(0);
+    radice = (await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto;
+    const versoB = radice.spilli.find((s) => s.riferimento?.chiave === 'prova-radice-b')!;
+    expect(versoB).toMatchObject({ tipo: 'passaggio', nome: 'Stanza B' });
+    expect(Math.abs(versoB.x - 50) >= 5 || Math.abs(versoB.y - 50) >= 5).toBe(true);
+    // terza figlia senza passaggio: il genitore non cambia; il passaggio si crea poi dall'albero
+    expect((await request(app).post('/api/mappe').send({ chiave: 'prova-radice-c', nome: 'Stanza C', tipo: 'generica', genitore: 'prova-radice', passaggio: false })).status).toBe(201);
+    expect(((await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto).spilli).toHaveLength(2);
+    const creato = await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'prova-radice-c' });
+    expect(creato.status).toBe(201);
+    expect(creato.body.data as SpilloDto).toMatchObject({ tipo: 'passaggio', nome: 'Stanza C', mappaChiave: 'prova-radice', riferimento: { tipo: 'mappa', chiave: 'prova-radice-c' }, collezionabile: false });
+    // ritorno dalla figlia C verso il genitore: in basso al centro
+    const ritorno = (await request(app).post('/api/mappe/prova-radice-c/passaggi').send({ destinazione: 'prova-radice' })).body.data as SpilloDto;
+    expect(ritorno).toMatchObject({ x: 50, y: 92, riferimento: { tipo: 'mappa', chiave: 'prova-radice' } });
+    // un secondo passaggio verso la stessa destinazione è rifiutato; verso sé stessa e verso una mappa inesistente pure
+    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'prova-radice-c' })).status).toBe(409);
+    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'prova-radice' })).status).toBe(400);
+    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'mappa-che-non-esiste' })).status).toBe(404);
+    expect((await request(app).post('/api/mappe/prova-radice/passaggi').send({ destinazione: 'Chiave Non Valida' })).status).toBe(400);
+    // «passaggio»/«ritorno» valgono solo alla creazione: in aggiornamento vengono ignorati (nessun nuovo spillo nel genitore, che ne ha tre)
+    expect((await request(app).put('/api/mappe/prova-radice-c').send({ passaggio: true, ritorno: true, nome: 'Stanza C bis' })).status).toBe(200);
+    expect(((await request(app).get('/api/mappe/prova-radice')).body.data as MappaDto).spilli).toHaveLength(3);
+    expect(((await request(app).get('/api/mappe/prova-radice-c')).body.data as MappaDto).spilli).toHaveLength(1);
+    // i 14 nuovi tipi del registro sono accettati dall'API con nome e colore del registro; «distributore» si presenta come «Bevande»
+    const nuovi = ['sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'timbro', 'meccanismo', 'rampino', 'porta'];
+    for (const [i, tipo] of nuovi.entries()) {
+      const r = await request(app).post('/api/mappe/prova-radice-b/spilli').send({ tipo, nome: `Spillo ${tipo}`, x: 5 + i * 6, y: 20 });
+      expect(r.status).toBe(201);
+      expect(r.body.data as SpilloDto).toMatchObject({ tipo, tipoNome: expect.any(String), collezionabile: tipo === 'timbro', colore: expect.stringMatching(/^#[0-9a-f]{6}$/) });
+    }
+    const bevande = (await request(app).post('/api/mappe/prova-radice-b/spilli').send({ tipo: 'distributore', nome: 'Distributore del cortile', x: 90, y: 90 })).body.data as SpilloDto;
+    expect(bevande.tipoNome).toBe('Bevande');
+    // pulizia: le mappe di prova non devono influire sui test che seguono
+    for (const k of ['prova-radice-a', 'prova-radice-b', 'prova-radice-c', 'prova-radice']) expect((await request(app).delete(`/api/mappe/${k}`)).status).toBe(204);
+  });
+
   it('dimensioniImmagine legge le intestazioni PNG, GIF, JPEG e WEBP', () => {
     expect(dimensioniImmagine(PNG_2x3)).toEqual({ larghezza: 2, altezza: 3 });
     expect(dimensioniImmagine(Buffer.concat([Buffer.from('GIF89a'), Buffer.from([0x10, 0x00, 0x20, 0x00, 0, 0, 0, 0])]))).toEqual({ larghezza: 16, altezza: 32 });

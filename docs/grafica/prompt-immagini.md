@@ -153,11 +153,15 @@ con contorno nero deve leggersi su entrambi) e a 14 px nei chip dei filtri; senz
 | `azione-copia.png` | Copia lo spillo selezionato negli appunti dell'editor delle mappe (2026-09-05) | due fogli sovrapposti, quello davanti con l'angolo piegato |
 | `azione-incolla.png` | Incolla lo spillo copiato in un punto della mappa (strumento dell'editor, 2026-09-05) | tavoletta con la molletta e un foglio che vi entra |
 
-## 18. Spilli delle mappe (20) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13), `spillo-dialogo` aggiunto il 2026-09-05
+## 18. Spilli delle mappe (34) — `ui/spillo-<tipo>.png` (128×128, trasparente) — richiesti il 2026-09-04 (Fase 13), `spillo-dialogo` aggiunto il 2026-09-05, 14 nuovi il 2026-09-05 (15.24)
 Stile delle icone di navigazione §7.1: simbolo bianco con contorno nero dentro una goccia da mappa (punta in basso) di colore pieno per tipo
 (passaggio blu, negozio verde, forziere oro, tesoro viola, boss rosso, miniboss arancio, sicura azzurro, scorciatoia grigio, Confidente rosa,
 attività giallo, ristorante marrone, distributore ciano, treno verde scuro, nota bianco, nemico bordeaux, oggetto chiave blu,
 punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia magenta, dialogo indaco). Senza testo. L'app usa un SVG in codice se manca il file.
+Colori dei 14 nuovi (goccia piena, stessi esadecimali del registro `shared/spilli.ts`): sigarette grigio caldo `#78716c`, cercalavoro ambra scura `#d97706`,
+lavoro verde petrolio `#0d9488`, terme ciano chiaro `#67e8f9`, lavanderia lavanda `#c4b5fd`, cinema blu notte `#1e3a8a`, biblioteca bruno `#7c2d12`,
+culto viola scuro `#4c1d95`, sala giochi lime `#84cc16`, casa pesca `#fdba74`, timbro rosa lilla `#f0abfc`, meccanismo ardesia `#64748b`,
+rampino magenta scuro `#a21caf`, porta rosso scuro `#b91c1c`. Ogni soggetto deve restare riconoscibile a 20 px e distinto dagli spilli già consegnati.
 | File | Tipo di spillo | Soggetto |
 |---|---|---|
 | `spillo-passaggio.png` | ingresso/passaggio verso un'altra mappa | porta ad arco con freccia |
@@ -171,7 +175,7 @@ punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia ma
 | `spillo-confidente.png` | Confidente | due volti di profilo |
 | `spillo-attivita.png` | attività | stella a cinque punte |
 | `spillo-ristorante.png` | ristorante o caffè | tazza fumante |
-| `spillo-distributore.png` | distributore automatico | distributore con lattina |
+| `spillo-distributore.png` | distributore automatico di bevande (nella palette «Bevande», etichetta della mappa del gioco; file già consegnato, invariato) | distributore con lattina |
 | `spillo-treno.png` | stazione della metropolitana | vagone stilizzato |
 | `spillo-nota.png` | nota generica | foglietto con puntina |
 | `spillo-nemico.png` | nemico | maschera d'Ombra minacciosa, distinta dai teschi di boss e miniboss |
@@ -180,6 +184,20 @@ punto sensibile arancio vivo, tesoro del Palazzo cremisi, Seme della Bramosia ma
 | `spillo-tesoro-palazzo.png` | tesoro principale del Palazzo | corona-reliquia radiante su piedistallo, distinta dalla gemma di tesoro |
 | `spillo-seme-bramosia.png` | Seme della Bramosia | pietra-teschio crepata con viticci e richiami alle tre varianti rossa, verde e blu |
 | `spillo-dialogo.png` | dialogo con un personaggio che non è un Confidente | fumetto di dialogo con tre puntini, distinto dal foglietto con puntina della nota e dai due volti del Confidente |
+| `spillo-sigarette.png` | distributore di sigarette / tabaccaio («Sigarette» sulla mappa del gioco) | sigaretta accesa con un filo di fumo davanti a un piccolo distributore a colonna; niente marchi, niente testo |
+| `spillo-cercalavoro.png` | espositore delle riviste di annunci di lavoro («Cercalavoro») | rivista aperta con righe di annunci e una lente d'ingrandimento sull'angolo |
+| `spillo-lavoro.png` | posto di un lavoro part-time (fioraio, gyudon, konbini, bar) | valigetta da lavoro con targhetta vuota, distinta dalla borsa della spesa del negozio |
+| `spillo-terme.png` | bagno pubblico (terme) | vasca vista di lato con tre volute di vapore (il simbolo giapponese delle terme, senza caratteri) |
+| `spillo-lavanderia.png` | lavanderia a gettoni | lavatrice frontale con oblò rotondo e due manopole |
+| `spillo-cinema.png` | cinema | ciak da regista aperto (asta a strisce e tavoletta) |
+| `spillo-biblioteca.png` | biblioteca | tre libri, due in piedi e uno inclinato, con dorsi visibili |
+| `spillo-culto.png` | chiesa o tempio (Chiesa di Kanda, tempio di Kichijoji, santuario) | torii a due traverse; niente croci né simboli religiosi espliciti oltre il portale |
+| `spillo-sala-giochi.png` | sala giochi | joypad con croce direzionale a sinistra e due pulsanti a destra |
+| `spillo-casa.png` | abitazione (casa di Sojiro, soffitta del Leblanc, case dei Confidenti) | casetta con tetto a due falde e porta al centro |
+| `spillo-timbro.png` | Timbro dei Mementos (postazione fissa per piano, Royal) | timbro a mano con impugnatura e base larga sopra una riga d'inchiostro |
+| `spillo-meccanismo.png` | meccanismo da azionare (leva, interruttore, pannello, quadro) | leva verticale con pomello rotondo su una base a semicerchio |
+| `spillo-rampino.png` | punto di aggancio del rampino (Royal) | rampino a tre punte con un tratto di corda che sale, distinto dalla chiave dell'oggetto chiave |
+| `spillo-porta.png` | porta chiusa o serratura | porta a battente con buco della serratura a goccia; niente chiave (che identifica l'oggetto chiave) |
 
 ## 19. Mappe di base della città (25) — `mappe/<chiave>.png` (2048×1536, opache) — richieste il 2026-09-04 (Fase 13)
 Piante ILLUSTRATE originali in stile guida strategica (vista dall'alto leggermente prospettica, sagome nere degli edifici, strade chiare,
