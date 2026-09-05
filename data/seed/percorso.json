@@ -367,23 +367,9 @@
      "riferimentoTesto": "Palazzo di Kamoshida",
      "rangoAtteso": null,
      "note": null
-    },
-    {
-     "fascia": "sera",
-     "azione": "Risveglio nella Stanza di Velluto: sblocco del Confidente Il Matto (Igor)",
-     "tipo": "velluto",
-     "riferimento": {
-      "tipo": "confidente",
-      "chiave": "igor"
-     },
-     "riferimentoTesto": "Igor - Il Matto",
-     "rangoAtteso": 1,
-     "note": null
     }
    ],
-   "avvisi": [
-    "Confidente sbloccato: Il Matto (Igor) rango 1"
-   ],
+   "avvisi": [],
    "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/",
    "coperto": true
   },
@@ -428,10 +414,22 @@
      "riferimentoTesto": "Ryuji Sakamoto - Carro",
      "rangoAtteso": 1,
      "note": null
+    },
+    {
+     "fascia": "sera",
+     "azione": "Tornati a casa, sogno nella Stanza di Velluto: Igor parla della riabilitazione e si avvia il Confidente Il Matto (Signore della Prigione) al rango 1",
+     "tipo": "velluto",
+     "riferimento": {
+      "tipo": "confidente",
+      "chiave": "igor"
+     },
+     "riferimentoTesto": "Igor - Il Matto",
+     "rangoAtteso": 1,
+     "note": null
     }
    ],
    "avvisi": [
-    "Confidenti sbloccati: Ryuji Sakamoto (Carro) rango 1, Morgana (Mago) rango 1"
+    "Confidenti sbloccati: Ryuji Sakamoto (Carro) rango 1, Morgana (Mago) rango 1, Il Matto (Igor) rango 1 (sogno nella Stanza di Velluto la sera)"
    ],
    "fonte": "https://www.allgamestaff.it/persona-5-royal/soluzione-settimana-1/",
    "coperto": true
