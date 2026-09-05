@@ -381,6 +381,8 @@
   .visore-mappa__pannello { display: flex; flex-direction: column; gap: 12px; padding: 10px; overflow-y: auto; border-right: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-bg-secondary) 94%, transparent); min-height: 0; }
   .visore-mappa__azione-testo { background: none; border: 1px solid var(--color-border); color: var(--color-text-secondary); font: inherit; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 4px 8px; cursor: pointer; min-height: 30px; }
   .visore-mappa__azione-testo:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-text); }
+  /* con `.touch` il bersaglio resta di 44 px anche se la regola qui sopra ne fissa 30 (stesso layer, dichiarata dopo `.touch`) */
+  .visore-mappa__azione-testo.touch { min-height: 44px; min-width: 44px; }
   .visore-mappa__azione-testo:disabled { opacity: .45; cursor: default; }
   .visore-mappa__categorie { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
   .visore-mappa__categoria { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 1px solid transparent; padding: 4px 6px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 34px; text-align: left; }
@@ -472,6 +474,8 @@
   .editor-mappa__campo { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--color-text-secondary); }
   .editor-mappa__campo .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
   .editor-mappa__risultati { max-height: 180px; overflow-y: auto; border: 1px solid var(--color-border); }
+  .editor-mappa__condizione { border: 1px dashed var(--color-border); padding: 6px; }
+  .editor-mappa__condizione .form-input { min-height: 36px; padding: 4px 8px; font-size: 13px; }
   .editor-mappa__risultato { display: flex; gap: 6px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--color-border); padding: 6px 8px; color: var(--color-text); font: inherit; font-size: 12px; cursor: pointer; min-height: 36px; }
   .editor-mappa__risultato:hover { background: var(--color-surface); }
   .editor-mappa__avviso { font-size: 12px; color: var(--color-warning, #f5c542); }

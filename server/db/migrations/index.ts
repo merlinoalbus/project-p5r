@@ -35,6 +35,8 @@ import { migration025 } from './025_effetti_azione.js';
 import { migration026 } from './026_requisiti_confidenti.js';
 import { migration027 } from './027_mappe.js';
 import { migration028 } from './028_immagini_spilli.js';
+import { migration029 } from './029_condizioni_spilli.js';
+import { migration030 } from './030_identita_seed_spilli.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028];
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028, migration029, migration030];

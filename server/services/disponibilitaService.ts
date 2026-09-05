@@ -16,6 +16,7 @@ import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
+import { dataSbloccoQuartiere, ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
 
 const MESI: Record<string, number> = { gennaio: 1, febbraio: 2, marzo: 3, aprile: 4, maggio: 5, giugno: 6, luglio: 7, agosto: 8, settembre: 9, ottobre: 10, novembre: 11, dicembre: 12 };
@@ -48,11 +49,9 @@ function dataDaTesto(giorno: string, mese: string): string | null {
   return `${String(m).padStart(2, '0')}-${String(g).padStart(2, '0')}`;
 }
 
-/** Ordine del calendario di gioco: da aprile (04) a marzo (03) dell'anno dopo. */
-export function ordineGioco(d: string): number {
-  const [m, g] = d.split('-').map(Number);
-  return ((m + 8) % 12) * 100 + g;
-}
+// l'ordine del calendario di gioco (aprile → marzo) e la lettura della data di sblocco dei quartieri sono nel modulo condiviso con le
+// condizioni degli spilli (l'editor offre solo i quartieri datati)
+export { ordineGioco, dataSbloccoQuartiere };
 
 /** Requisito locale non previsto dai semafori dei Confidenti (intervallo di date, pioggia richiesta, giorno della settimana, stagione). */
 type RequisitoLocale =
@@ -177,13 +176,6 @@ export interface StatoDisponibilita extends StatoPartitaSemafori {
   sbloccoQuartieri: Map<string, SbloccoQuartiere>;
 }
 
-/** «18 giugno (evento di trama)» → «06-18»; testi che non cominciano con una data (Confidenti, libri) → null. */
-export function dataSbloccoQuartiere(sblocco: string | null | undefined): string | null {
-  if (!sblocco) return null;
-  const m = /^(\d{1,2}|primo|1°)\s+([a-z]+)/.exec(piatto(sblocco).replace(/^1°/, 'primo'));
-  return m ? dataDaTesto(m[1], m[2]) : null;
-}
-
 export function sbloccoQuartieri(): Map<string, SbloccoQuartiere> {
   const righe = prepared('SELECT chiave, nome, sblocco FROM quartiere').all() as Array<{ chiave: string; nome: string; sblocco: string | null }>;
   return new Map(righe.map((q) => [q.chiave, { nome: q.nome, dal: dataSbloccoQuartiere(q.sblocco) }]));
@@ -252,7 +244,12 @@ function valutaRequisito(r: RequisitoDisponibilita, indice: number, st: StatoDis
  * c'è del grigio (non verificabile o dato mancante), «disponibile» altrimenti (anche senza requisiti).
  */
 export function valutaDisponibilita(testi: Array<string | null | undefined>, st: StatoDisponibilita, ctx: ContestoTesto = {}): DisponibilitaDto {
-  const requisiti = testi.flatMap((t) => requisitiDaTesto(t, ctx)).map((r, i) => valutaRequisito(r, i, st));
+  return valutaRequisiti(testi.flatMap((t) => requisitiDaTesto(t, ctx)), st);
+}
+
+/** Stessa regola per requisiti già strutturati (condizioni di visibilità degli spilli). */
+export function valutaRequisiti(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
+  const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
   const stato = requisiti.some((q) => q.stato === 'rosso') ? 'bloccato' : requisiti.some((q) => q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };
 }

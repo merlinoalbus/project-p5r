@@ -11,7 +11,7 @@ import { VisoreMappa } from './VisoreMappa';
 import type { MappaDto, SpilloDto } from '../../types';
 
 function spillo(extra: Partial<SpilloDto> & { id: number; nome: string; tipo: SpilloDto['tipo'] }): SpilloDto {
-  return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
+  return { mappaChiave: 'citta-shibuya', tipoNome: extra.tipo, colore: '#abc', descrizione: '', x: 50, y: 50, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '2026-09-04T00:00:00.000Z', ...extra };
 }
 
 const mappa: MappaDto = {
@@ -25,6 +25,8 @@ const mappa: MappaDto = {
     spillo({ id: 3, nome: 'Verso il centro', tipo: 'passaggio', tipoNome: 'Passaggio', x: 10, y: 90, riferimento: { tipo: 'mappa', chiave: 'shibuya-centro' }, dettaglio: { tipo: 'mappa', mappa: { chiave: 'shibuya-centro', nome: 'Shibuya centro', tipo: 'luogo' }, immagine: { url: '/api/immagini/mappa/shibuya-centro/file', asset: null } }, immagini: [{ id: 31, url: '/api/immagini/spillo/3-a/file', asset: null, didascalia: 'La scala', ordine: 0 }, { id: 32, url: null, asset: 'spilli/citta-shibuya/3-2', didascalia: '', ordine: 1 }] }),
     spillo({ id: 4, nome: 'Scrigno da aprire', tipo: 'forziere', tipoNome: 'Forziere', x: 90, y: 10, collezionabile: true, descrizione: 'Contiene un Panino a mezzaluna.' }),
     spillo({ id: 5, nome: 'Forziere del corridoio', tipo: 'forziere', tipoNome: 'Forziere', x: 40, y: 60, collezionabile: true, riferimento: { tipo: 'punto', chiave: 'kamoshida-02/3' }, dettaglio: { tipo: 'punto', punto: { chiave: 'kamoshida-02/3', tipo: 'forziere', nome: 'Forziere del corridoio', descrizione: '', esauribile: true, dungeon: 'kamoshida', area: 'kamoshida-02', stato: null } } }),
+    // spillo con una condizione non soddisfatta alla data corrente della partita: nascosto finché non si chiede di vederlo
+    spillo({ id: 6, nome: 'Bancarella estiva', tipo: 'attivita', tipoNome: 'Attività', x: 60, y: 30, condizioni: [{ tipo: 'data', dal: '06-18', testo: 'dal 18 giugno' }], disponibilita: { stato: 'bloccato', requisiti: [{ indice: 0, tipo: 'data', stato: 'rosso', testo: 'dal 18 giugno', dettaglio: 'Disponibile dal 18 giugno, oggi è il 20 aprile', manuale: false, confermato: false }] } }),
   ],
 };
 
@@ -138,5 +140,41 @@ describe('VisoreMappa', () => {
     expect(riduci).not.toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Adatta alla finestra' }));
     expect(riduci).toBeDisabled();
+  });
+
+  it('con la partita lo spillo con condizioni non soddisfatte è nascosto; «Mostra anche i non ancora disponibili» lo riporta con i semafori', () => {
+    monta();
+    expect(screen.queryByRole('button', { name: 'Attività: Bancarella estiva' })).toBeNull();
+    const interruttore = screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ });
+    expect(interruttore).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(interruttore);
+    fireEvent.click(screen.getByRole('button', { name: 'Attività: Bancarella estiva' }));
+    const popup = within(screen.getByRole('dialog', { name: 'Bancarella estiva' }));
+    expect(popup.getByText('Non ancora')).toHaveAttribute('title', 'dal 18 giugno — Disponibile dal 18 giugno, oggi è il 20 aprile');
+    const condizioni = within(popup.getByRole('group', { name: 'Condizioni di visibilità' }));
+    expect(condizioni.getByText('dal 18 giugno')).toBeInTheDocument();
+    expect(condizioni.getByRole('img', { name: 'Condizione non soddisfatta' })).toBeInTheDocument();
+    fireEvent.click(interruttore);
+    expect(screen.queryByRole('button', { name: 'Attività: Bancarella estiva' })).toBeNull();
+  });
+
+  it('la selezione iniziale su uno spillo non ancora disponibile lo rende visibile con il popup, invece di centrare la mappa sul vuoto', async () => {
+    const misura = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 800, height: 600, top: 0, left: 0, right: 800, bottom: 600, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    try {
+      monta({ selezioneIniziale: 6 });
+      expect(await screen.findByRole('button', { name: 'Attività: Bancarella estiva' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Mostra anche i non ancora disponibili \(1\)/ })).toHaveAttribute('aria-pressed', 'true');
+      expect(await screen.findByRole('dialog', { name: 'Bancarella estiva' })).toBeInTheDocument();
+    } finally {
+      misura.mockRestore();
+    }
+  });
+
+  it('senza partita le condizioni non nascondono nulla e si leggono come testo', () => {
+    monta({ partitaId: null });
+    expect(screen.queryByRole('button', { name: /Mostra anche i non ancora disponibili/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Attività: Bancarella estiva' }));
+    const popup = within(screen.getByRole('dialog', { name: 'Bancarella estiva' }));
+    expect(within(popup.getByRole('group', { name: 'Condizioni di visibilità' })).getByText('dal 18 giugno')).toBeInTheDocument();
   });
 });

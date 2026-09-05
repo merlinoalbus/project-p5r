@@ -20,6 +20,7 @@ import { IconMappa } from '../shared/iconeGuida';
 import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
+import { CondizioniSpilloElenco } from './CondizioniSpillo';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
@@ -129,6 +130,8 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const [panEsplicito, setPanEsplicito] = useState<Punto | null>(null);
   const [tipiNascosti, setTipiNascosti] = useState<Set<TipoSpillo>>(new Set());
   const [mostraRaccolti, setMostraRaccolti] = useState(false);
+  // con la partita gli spilli con condizioni non soddisfatte sono nascosti (l'editor li mostra sempre)
+  const [mostraNonDisponibili, setMostraNonDisponibili] = useState(false);
   const [ricerca, setRicerca] = useState('');
   const [selezionatoUso, setSelezionatoUso] = useState<number | null>(selezioneIniziale ?? null);
   // Incorporato in una pagina lo spazio è poco: il pannello è chiuso finché l'utente non lo apre; a schermo intero è aperto.
@@ -204,6 +207,9 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     const s = mappa.spilli.find((x) => x.id === selezioneIniziale);
     if (!s) return;
     const id = setTimeout(() => {
+      // uno spillo nascosto dai filtri (raccolto, o non ancora disponibile nella partita) va reso visibile: altrimenti la mappa si centra sul vuoto
+      if (s.collezionabile && s.raccolto) setMostraRaccolti(true);
+      if (partitaId && !editor && s.disponibilita?.stato === 'bloccato') setMostraNonDisponibili(true);
       const z = Math.max(stato.current.zoomMin * 2.5, stato.current.zoomMin);
       setSelezionatoUso(s.id);
       setZoomEsplicito(z);
@@ -290,8 +296,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   // Spilli visibili: filtri per tipo, raccolti nascosti, ricerca.
   const tipiPresenti = useMemo(() => TIPI_SPILLO.filter((t) => mappa.spilli.some((s) => s.tipo === t)), [mappa.spilli]);
   const raccoltiNascosti = useMemo(() => mappa.spilli.filter((s) => s.collezionabile && s.raccolto).length, [mappa.spilli]);
+  const filtraBloccati = Boolean(partitaId) && !editor;
+  const bloccatiNascosti = useMemo(() => (filtraBloccati ? mappa.spilli.filter((s) => s.disponibilita?.stato === 'bloccato').length : 0), [mappa.spilli, filtraBloccati]);
   const ricercaNorm = ricerca.trim().toLowerCase();
-  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
+  const visibili = mappa.spilli.filter((s) => !tipiNascosti.has(s.tipo) && (mostraRaccolti || !(s.collezionabile && s.raccolto)) && (!filtraBloccati || mostraNonDisponibili || s.disponibilita?.stato !== 'bloccato') && (!ricercaNorm || s.nome.toLowerCase().includes(ricercaNorm)));
   const selezionato = mappa.spilli.find((s) => s.id === selezionatoId) ?? null;
   // Popup sopra allo spillo; sotto quando nella tela (overflow nascosto) non c'è spazio sopra: il popup più alto misura ~215 px più i 42 px della punta.
   const popupSotto = selezionato !== null && pan.y + (selezionato.y / 100) * nat.h * zoom < 260;
@@ -419,6 +427,11 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                 <IconaAzione chiave="raggiunto" dimensione={14} />Mostra anche i raccolti ({raccoltiNascosti})
               </button>
             )}
+            {(bloccatiNascosti > 0 || (filtraBloccati && mostraNonDisponibili)) && (
+              <button type="button" className={`chip chip--icona touch text-[11px] self-start ${mostraNonDisponibili ? 'chip--attivo' : ''}`} aria-pressed={mostraNonDisponibili} onClick={() => setMostraNonDisponibili((v) => !v)}>
+                <IconaAzione chiave="bloccato" dimensione={14} />Mostra anche i non ancora disponibili ({bloccatiNascosti})
+              </button>
+            )}
             <label className="flex flex-col gap-1 text-[12px]">
               <span className="sr-only">Cerca uno spillo per nome</span>
               <input type="search" className="form-input" placeholder="Cerca uno spillo…" value={ricerca} onChange={(e) => setRicerca(e.target.value)} />
@@ -503,10 +516,12 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   <div className="flex-1 min-w-0">
                     <strong className="block text-[13px] leading-tight">{selezionato.nome}</strong>
                     <span className="block text-[11px] text-text-muted">{selezionato.tipoNome}{selezionato.raccolto ? ' · raccolto' : ''}</span>
+                    {selezionato.disponibilita && <ChipDisponibilita disponibilita={selezionato.disponibilita} compatto />}
                   </div>
                   <button type="button" className="spillo-popup__chiudi" onClick={() => seleziona(null)} aria-label="Chiudi il popup">×</button>
                 </div>
                 {selezionato.descrizione && <p className="m-0 text-[12px] text-text-secondary spillo-popup__testo">{selezionato.descrizione}</p>}
+                <CondizioniSpilloElenco condizioni={selezionato.condizioni} disponibilita={selezionato.disponibilita} compatto />
                 {(selezionato.immagini.length > 0 || selezionato.dettaglio?.immagine) && (
                   <div className="flex flex-wrap gap-1 items-start">
                     <ImmagineRiferimento immagine={selezionato.dettaglio?.immagine} nome={selezionato.nome} dimensione={48} />
@@ -604,10 +619,12 @@ export function SchedaSpillo({ ref, spillo: s, partitaId, occupato, onNaviga, on
         <div className="flex-1 min-w-0">
           <h3 className="m-0 font-display text-[19px] leading-tight break-words">{s.nome}</h3>
           <p className="m-0 text-[11px] uppercase tracking-wide text-text-muted">{s.tipoNome}{s.collezionabile ? ' · collezionabile' : ''}{s.raccolto ? ' · raccolto' : ''}</p>
+          {s.disponibilita && <ChipDisponibilita disponibilita={s.disponibilita} compatto />}
         </div>
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi la scheda">×</button>
       </div>
       {s.descrizione && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-line">{s.descrizione}</p>}
+      <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
       <GalleriaSpillo immagini={s.immagini} nome={s.nome} />
 
       {d?.tipo === 'mappa' && d.mappa && <PulsanteVisivo tono="primario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo={`Apri: ${d.mappa.nome}`} dettaglio={NOME_TIPO_MAPPA[d.mappa.tipo]} onClick={() => onNaviga(d.mappa!.chiave)} />}

@@ -10,7 +10,7 @@ import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'rea
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useCarica } from '../hooks/useCarica';
-import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getMappa, importaMappe, scaricaPianta, scaricaPiantaQuartiere, type RiferimentoTrovatoApi } from '../services/api';
+import { aggiornaImmagineSpillo, aggiornaMappa, aggiornaSpillo, aggiungiImmagineSpillo, caricaImmagineMappa, cercaRiferimenti, creaMappa, creaSpillo, eliminaImmagineSpillo, eliminaMappa, eliminaSpillo, esportaMappe, esportaPacchettoRepository, getAlberoMappe, getConfidenti, getDungeons, getMappa, getQuartieri, getRichieste, importaMappe, scaricaPianta, scaricaPiantaQuartiere, type RiferimentoTrovatoApi } from '../services/api';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { Modal } from '../components/shared/Modal';
@@ -18,6 +18,9 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { VisoreMappa, GalleriaSpillo, type StrumentiEditor, type StrumentoEditor } from '../components/mappe/VisoreMappa';
 import { IconaSpillo, PuntoSpillo } from '../components/mappe/IconaSpillo';
+import { CondizioniSpilloEditor } from '../components/mappe/CondizioniSpillo';
+import { ELENCHI_VUOTI, type ElenchiCondizioni } from '../utils/condizioniSpillo';
+import type { RequisitoSpillo } from '../../shared/condizioniSpillo';
 import { DEFINIZIONI_SPILLO, NOME_TIPO_MAPPA, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../shared/spilli';
 import { slug } from '../../shared/slug';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
@@ -27,7 +30,11 @@ const NOME_RIFERIMENTO: Record<TipoRiferimento, string> = { mappa: 'Altra mappa'
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
-export interface AppuntiSpillo { tipo: TipoSpillo; nome: string; descrizione: string; collezionabile: boolean; riferimento: { tipo: TipoRiferimento; chiave: string } | null }
+export interface AppuntiSpillo { tipo: TipoSpillo; nome: string; descrizione: string; collezionabile: boolean; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
+/** Le condizioni dello spillo senza il testo descrittivo del server (è il server a ricalcolarlo). */
+function condizioniNude(s: SpilloDto): RequisitoSpillo[] {
+  return s.condizioni.map((c) => { const copia: Record<string, unknown> = { ...c }; delete copia.testo; return copia as unknown as RequisitoSpillo; });
+}
 const CHIAVE_APPUNTI = 'p5r.editor.appunti-spillo';
 function leggiAppunti(): AppuntiSpillo | null {
   try { const raw = sessionStorage.getItem(CHIAVE_APPUNTI); return raw ? (JSON.parse(raw) as AppuntiSpillo) : null; } catch { return null; }
@@ -41,6 +48,11 @@ export function EditorMappaPage() {
   const navigate = useNavigate();
   const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave), [chiave]);
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
+  // elenchi per le condizioni di visibilità (Confidenti, quartieri, richieste, Palazzi): una volta per pagina
+  const elenchi = useCarica<ElenchiCondizioni>(async () => {
+    const [confidenti, quartieri, richieste, dungeon] = await Promise.all([getConfidenti(), getQuartieri(), getRichieste(), getDungeons()]);
+    return { confidenti, quartieri, richieste: richieste.richieste, dungeon };
+  }, []);
   const [strumento, setStrumento] = useState<StrumentoEditor>('seleziona');
   const [appunti, setAppunti] = useState<AppuntiSpillo | null>(leggiAppunti);
   const [tipoNuovo, setTipoNuovo] = useState<TipoSpillo>('nota');
@@ -75,7 +87,7 @@ export function EditorMappaPage() {
           const s = await creaSpillo(chiave, { ...appunti, x, y });
           setSelezionatoId(s.id);
           setStrumento('seleziona');
-        }, `Spillo «${appunti.nome}» incollato: stesso tipo, descrizione e riferimento dell'originale.`);
+        }, `Spillo «${appunti.nome}» incollato: stesso tipo, descrizione, riferimento e condizioni di visibilità dell'originale.`);
         return;
       }
       void esegui(async () => {
@@ -108,7 +120,7 @@ export function EditorMappaPage() {
           azioni={<PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Apri il visore" onClick={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)} />}
           pannello={
             <PannelloEditor
-              mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti}
+              mappa={dati} albero={albero.dati ?? []} strumento={strumento} tipoNuovo={tipoNuovo} selezionato={selezionato} occupato={occupato} appunti={appunti} elenchi={elenchi.dati ?? ELENCHI_VUOTI}
               onStrumento={setStrumento} onTipoNuovo={setTipoNuovo} onSeleziona={setSelezionatoId} onCopia={copia}
               onSalvaSpillo={(id, d) => esegui(() => aggiornaSpillo(id, d), 'Spillo salvato.')}
               onEliminaSpillo={(id) => esegui(async () => { await eliminaSpillo(id); setSelezionatoId(null); }, 'Spillo eliminato.')}
@@ -150,7 +162,7 @@ export function EditorMappaPage() {
                 const pacchetto = JSON.parse(await file.text()) as EsportazioneMappeDto;
                 const esito = await importaMappe(pacchetto, sovrascrivi);
                 await albero.ricarica();
-                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}.`);
+                notifica('info', `Importate ${esito.mappe} mappe, ${esito.spilli} spilli, ${esito.immagini} immagini${esito.saltate.length ? `; saltate: ${esito.saltate.join(', ')}` : ''}${esito.condizioniScartate ? `; ${esito.condizioniScartate} condizioni scartate perché citano chiavi assenti dalla Guida` : ''}.`);
               })}
               onVai={vai}
             />
@@ -180,6 +192,7 @@ interface PropsPannello {
   selezionato: SpilloDto | null;
   occupato: boolean;
   appunti: AppuntiSpillo | null;
+  elenchi: ElenchiCondizioni;
   onStrumento: (s: StrumentoEditor) => void;
   onCopia: (a: AppuntiSpillo) => void;
   onTipoNuovo: (t: TipoSpillo) => void;
@@ -227,11 +240,11 @@ function PannelloEditor(p: PropsPannello) {
             ))}
           </div>
         )}
-        <p className="m-0 text-[12px] text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione e riferimento; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio); il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
+        <p className="m-0 text-[12px] text-text-muted">{strumento === 'aggiungi' ? 'Tocca la mappa dove vuoi lo spillo: viene creato subito con il tipo scelto.' : strumento === 'incolla' ? `Tocca la mappa dove vuoi la copia di «${appunti?.nome ?? 'spillo'}»: stesso tipo, nome, descrizione, riferimento e condizioni di visibilità; gli appunti restano per altre copie, anche su altre mappe.` : 'Tocca uno spillo per modificarlo, trascinalo per spostarlo (posizione salvata al rilascio); il tipo si cambia dal pannello senza ricreare lo spillo.'}</p>
       </section>
 
       {selezionato && (
-        <FormSpillo key={selezionato.id} spillo={selezionato} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
+        <FormSpillo key={selezionato.id} spillo={selezionato} occupato={occupato} onSalva={(d) => p.onSalvaSpillo(selezionato.id, d)} onCopia={p.onCopia} onElimina={() => p.onEliminaSpillo(selezionato.id)} elenchi={p.elenchi} onCreaMappaCollegata={() => p.onCreaMappaCollegata(selezionato)} onChiudi={() => p.onSeleziona(null)} onVai={p.onVai} onAggiungiImmagine={(f, did) => p.onAggiungiImmagine(selezionato.id, f, did)} onDidascalia={p.onDidascalia} onEliminaImmagine={p.onEliminaImmagine} />
       )}
 
       <section className="visore-mappa__sezione" aria-label="Immagine di base">
@@ -283,10 +296,10 @@ function PannelloEditor(p: PropsPannello) {
   );
 }
 
-interface PropsFormSpillo { spillo: SpilloDto; occupato: boolean; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
+interface PropsFormSpillo { spillo: SpilloDto; occupato: boolean; elenchi: ElenchiCondizioni; onSalva: (dati: Parameters<typeof aggiornaSpillo>[1]) => Promise<void>; onCopia: (a: AppuntiSpillo) => void; onElimina: () => Promise<void>; onCreaMappaCollegata: () => Promise<void>; onChiudi: () => void; onVai: (chiave: string) => void; onAggiungiImmagine: (file: File, didascalia: string) => Promise<void>; onDidascalia: (immagineId: number, didascalia: string) => Promise<void>; onEliminaImmagine: (immagineId: number) => Promise<void> }
 
 /** Proprietà dello spillo selezionato con la ricerca dell'entità da collegare. */
-function FormSpillo({ spillo: s, occupato, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
+function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina, onCreaMappaCollegata, onChiudi, onVai, onAggiungiImmagine, onDidascalia, onEliminaImmagine }: PropsFormSpillo) {
   const inputSchermata = useRef<HTMLInputElement | null>(null);
   const [didascaliaNuova, setDidascaliaNuova] = useState('');
   const [nome, setNome] = useState(s.nome);
@@ -294,11 +307,12 @@ function FormSpillo({ spillo: s, occupato, onSalva, onCopia, onElimina, onCreaMa
   const [descrizione, setDescrizione] = useState(s.descrizione);
   const [collezionabile, setCollezionabile] = useState(s.collezionabile);
   const [riferimento, setRiferimento] = useState<{ tipo: TipoRiferimento; chiave: string; nome?: string } | null>(s.riferimento);
+  const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => condizioniNude(s));
   const [tipoRicerca, setTipoRicerca] = useState<TipoRiferimento>(s.riferimento?.tipo ?? DEFINIZIONI_SPILLO[s.tipo].riferimento ?? 'mappa');
   const [testoRicerca, setTestoRicerca] = useState('');
   const [risultati, setRisultati] = useState<RiferimentoTrovatoApi[] | null>(null);
   const [cercando, setCercando] = useState(false);
-  const modificato = nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione || collezionabile !== s.collezionabile || (riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null);
+  const modificato = nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione || collezionabile !== s.collezionabile || (riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null) || JSON.stringify(condizioni) !== JSON.stringify(condizioniNude(s));
   const nomeRiferimento = useMemo(() => {
     if (!riferimento) return null;
     if (riferimento.nome) return riferimento.nome;
@@ -313,7 +327,7 @@ function FormSpillo({ spillo: s, occupato, onSalva, onCopia, onElimina, onCreaMa
   };
   const salva = (e: FormEvent) => {
     e.preventDefault();
-    void onSalva({ nome: nome.trim() || s.nome, tipo, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null });
+    void onSalva({ nome: nome.trim() || s.nome, tipo, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni });
   };
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
@@ -366,9 +380,11 @@ function FormSpillo({ spillo: s, occupato, onSalva, onCopia, onElimina, onCreaMa
           )}
         </fieldset>
 
+        <CondizioniSpilloEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} />
+
         <div className="flex flex-wrap gap-1.5">
           <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: nome.trim() || s.nome, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null })} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: nome.trim() || s.nome, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni })} />
           {!riferimento && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>
