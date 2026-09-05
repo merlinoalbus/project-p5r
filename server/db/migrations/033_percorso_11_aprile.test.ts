@@ -18,12 +18,11 @@ describe('migrazione 033 — percorso dell’11 aprile', () => {
   });
   afterAll(() => closeDb());
 
-  it('il seed non ha più la domanda in classe dell’11 aprile: due azioni (Palazzo di giorno, Stanza di Velluto di sera)', () => {
+  it('il seed non ha più la domanda in classe dell’11 aprile (dal 15.28 resta solo il Palazzo di giorno: il Matto è al 12 aprile)', () => {
     const r = prepared('SELECT azioni_json FROM giorno_percorso WHERE data = ?').get(DATA_11_APRILE) as { azioni_json: string };
     const azioni = JSON.parse(r.azioni_json) as Array<{ fascia: string; tipo: string; azione: string }>;
-    expect(azioni).toHaveLength(2);
     expect(azioni.some((a) => a.tipo === 'esame')).toBe(false);
-    expect(azioni.map((a) => a.fascia)).toEqual(['giorno', 'sera']);
+    expect(azioni.map((a) => `${a.fascia}:${a.tipo}`)).toEqual(['giorno:palazzo']);
   });
 
   it('toglie la spunta dell’indice 0 e scala di uno le successive, in ogni partita, conservando gli effetti registrati e gli altri giorni', () => {
