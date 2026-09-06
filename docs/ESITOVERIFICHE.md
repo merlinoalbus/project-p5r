@@ -1336,3 +1336,20 @@ il campo morto; creare e riconciliare gli ingressi nel percorso ordinario preser
 contenuti utente; usare soltanto coordinate e provenienze certificate e rappresentare gli altri
 casi come destinazioni non collocate; aggiungere prove API, DOM e URL diretto prima/durante/dopo,
 più mutation test di backfill e conservazione. La Fase 2 resta **FAIL**.
+
+### Arbitrato dell'utente — 6 settembre 2026
+
+L'utente dispone che le coordinate in griglia degli ingressi e le rispettive provenienze puntuali
+non siano blocker: sono ancoraggi di navigazione autorizzati, non affermazioni di una coordinata
+2D nativa certificata. I rilievi 5 e 6 della sezione precedente non impediscono quindi la chiusura.
+
+L'utente dispone inoltre che il database iniziale venga formato una sola volta e rimanga immutabile:
+non è richiesto alcun backfill o riconciliazione a ogni avvio. Di conseguenza i requisiti di
+reseed periodico e di mutation test del backfill non sono parte del gate runtime; rimane necessario
+soltanto dimostrare la correttezza della creazione iniziale su database fresco.
+
+I «cancelli» citati nelle verifiche sono requisiti di gioco (porta, forziere, leva e simili),
+conservati in `cancelli-pin.json`; non sono trigger applicativi. La verifica della loro
+generazione, se eseguita, appartiene al solo processo esplicito di costruzione del seed e non deve
+essere invocata dall'applicazione a ogni avvio. Il rilievo sull'indipendenza di tale verificatore
+non è un blocker del runtime immutabile.
