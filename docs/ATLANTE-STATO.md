@@ -1093,3 +1093,35 @@ Chiuso anche il rilievo sull'indipendenza, che avevi poi dichiarato non bloccant
 L'oracolo ridichiara le proprie convenzioni invece di importarle dal produttore: importandole, una
 manomissione cambiava insieme il calcolo e il controllo — allargando `SCOPERTA` il verificatore
 restava verde, provato. Ora la stessa manomissione lo fa fallire.
+
+---
+
+## Debito dichiarato in coda al piano — Fase 2
+
+Tre cose restano aperte e le scrivo qui invece di lasciarle implicite.
+
+**1. Immutabilità su database storico e con seed cambiato** (rilievo 1 di Codex sul commit
+`14738b3`). Oggi un database senza il segno `mappeFormate` viene allineato una volta all'avvio, e
+un hash di seed diverso percorre l'upsert completo. Il contratto chiede che restino immutabili
+entrambi, con un `aggiornamento seed pendente` dichiarato nel secondo caso.
+
+L'ho implementato e l'ho annullato: `statoDelMondo()` con i tre esiti (`gia-formato`,
+`da-formare`, `aggiornamento-pendente`) fa cadere **una dozzina di test** che chiamano `caricaSeed`
+due volte aspettandosi che il mondo si ricostruisca — reseed di ingressi, rinomina di sottoalberi,
+conversione delle aree. Non è un difetto della modifica: è che il reseed è oggi il modo in cui
+quei comportamenti sono provati, e cambiarlo vuol dire riscrivere quei test perché usino la
+ricarica esplicita. È mezza giornata di lavoro fatto bene, e non un ritocco. Va fatto, non di
+corsa.
+
+**2. Matrice API e DOM dei dieci ingressi** (rilievo 2). `finestreDungeon.test.ts` prova il
+servizio e la leggibilità della scheda su tutte le date dell'anno; manca il visore montato con una
+partita prima, durante e fuori finestra.
+
+**3. Fasi 5, 6 e 7 a zero** — rifacimento delle pagine, elementi grafici, revisione incrociata.
+Valgono più di tutto il lavoro fatto finora sui pin.
+
+Bug trovati e chiusi in questa tornata, per memoria: il confine di parola `\b` nel pattern generico
+dell'oracolo dei cancelli era finito nel file come due caratteri U+0008 — Python interpreta `\b`
+come backspace dentro una stringa normale e non avverte. Trovato da Codex. Il pattern è corretto e
+`LETTURE_DI_PROVA` ora contiene un caso positivo `SWITCH` e uno negativo `SWITCHBOARD`, così che un
+pattern che non riconosce più niente non possa sparire in silenzio.

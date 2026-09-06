@@ -114,7 +114,7 @@ LETTURE_ATTESE = [
     (r'ELEVATOR\w*_SWITCH', 'dopo aver chiamato l’ascensore'),
     (r'GIM\d*_BUTTON', 'dopo aver premuto il pulsante'),
     (r'MOUSE_SWITCH', 'dopo aver azionato il meccanismo del topo'),
-    (r'SWITCH|_SWITCH', 'dopo aver azionato il meccanismo'),
+    (r'\bSWITCH\b|_SWITCH', 'dopo aver azionato il meccanismo'),
     (r'PASSWARD|PASSWORD', 'dopo aver trovato la parola d’ordine'),
     (r'SEEDicon', 'dopo aver trovato il seme della bramosia'),
     (r'MEME_LOCK_CLEAR', 'dopo aver rimosso il blocco nei Memento'),
@@ -130,6 +130,31 @@ def resa_attesa(nome):
         if re.search(schema, nome or '', re.I):
             return testo
     return None
+
+
+# Che le convenzioni dicano davvero quel che sembrano dire. Il controllo esiste per un motivo
+# preciso: il confine di parola `\b` era finito nel file come due caratteri U+0008 — Python
+# interpreta `\b` come backspace dentro una stringa normale, non avverte, e il pattern generico
+# smetteva di riconoscere una procedura chiamata `SWITCH`. L'oracolo restava verde perché quel ramo
+# non veniva mai imboccato: un pattern che non riconosce niente non fa fallire nulla, sparisce.
+LETTURE_DI_PROVA = [
+    ('SWITCH', 'dopo aver azionato il meccanismo'),
+    ('D01_SWITCH_A', 'dopo aver azionato il meccanismo'),
+    ('GIM_BLUE_SWITCH', 'dopo aver azionato la leva blu'),
+    ('ELEVATOR01_SWITCH', 'dopo aver chiamato l’ascensore'),
+    ('MOUSE_SWITCH', 'dopo aver azionato il meccanismo del topo'),
+    ('GIM3_BUTTON', 'dopo aver premuto il pulsante'),
+    ('N_TBOX_04', 'dopo aver aperto il forziere'),
+    ('SWITCHBOARD', None),          # non è un interruttore: il confine di parola deve escluderlo
+    ('UNA_PROCEDURA_QUALSIASI', None),
+]
+
+
+def controlla_le_letture():
+    sbagliate = [(nome, atteso, resa_attesa(nome))
+                 for nome, atteso in LETTURE_DI_PROVA if resa_attesa(nome) != atteso]
+    assert not sbagliate, ('le convenzioni di lettura non dicono quel che dichiarano:\n  '
+                           + '\n  '.join(f'{n}: atteso {a!r}, ottenuto {o!r}' for n, a, o in sbagliate))
 
 
 def oracolo_dei_cancelli(out):
@@ -241,6 +266,7 @@ def main(out, seed=None):
     # Confrontare il pacchetto con `cancelli-pin.json` non prova nulla se qualcuno li altera
     # insieme: la mutazione combinata passava, ed e' il caso che conta. Qui si rifa' il conto da
     # `connessioni.json` e si pretende che l'artefatto lo riproduca, prima ancora di usarlo.
+    controlla_le_letture()
     rifatti = {(r['mappa'], r['indicePin']): r for r in oracolo_dei_cancelli(out)}
     salvati = {(r['mappa'], r['indicePin']): r for r in json.loads(
         (out/'cancelli-pin.json').read_text(encoding='utf8'))['pin']}
