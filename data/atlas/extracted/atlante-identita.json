@@ -43,6 +43,13 @@
           "evidenze": [
             "F007_001_00"
           ],
+          "componenti": [
+            {
+              "testo": "Electric Town",
+              "indice": 85,
+              "offset": 4292
+            }
+          ],
           "offset": 4292,
           "indice": 85,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -104,8 +111,20 @@
           "F002_002_00",
           "F002_003_00"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Edificio principale 1P",
+            "indice": 21,
+            "offset": 2756
+          },
+          {
+            "testo": "Edificio laboratori 1P",
+            "indice": 24,
+            "offset": 2852
+          }
+        ],
+        "offset": 2756,
+        "indice": 21,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -157,8 +176,20 @@
           "F002_002_01",
           "F002_003_01"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Edificio principale 2P",
+            "indice": 22,
+            "offset": 2788
+          },
+          {
+            "testo": "Edificio laboratori 2P",
+            "indice": 25,
+            "offset": 2884
+          }
+        ],
+        "offset": 2788,
+        "indice": 22,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -210,8 +241,20 @@
           "F002_002_02",
           "F002_003_02"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Edificio principale 3P",
+            "indice": 23,
+            "offset": 2820
+          },
+          {
+            "testo": "Edificio laboratori 3P",
+            "indice": 26,
+            "offset": 2916
+          }
+        ],
+        "offset": 2820,
+        "indice": 23,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -254,6 +297,13 @@
           "fonte": "titolo-roadmap",
           "evidenze": [
             "F002_001_00"
+          ],
+          "componenti": [
+            {
+              "testo": "Cancello della scuola",
+              "indice": 20,
+              "offset": 2724
+            }
           ],
           "offset": 2724,
           "indice": 20,
@@ -318,6 +368,13 @@
           "evidenze": [
             "F002_005_00"
           ],
+          "componenti": [
+            {
+              "testo": "Tetto",
+              "indice": 29,
+              "offset": 2980
+            }
+          ],
           "offset": 2980,
           "indice": 29,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -367,6 +424,13 @@
         "grafiaDa": {
           "fonte": "titolo-roadmap",
           "evidenze": [],
+          "componenti": [
+            {
+              "testo": "Aula",
+              "indice": null,
+              "offset": null
+            }
+          ],
           "offset": null,
           "indice": null,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -416,6 +480,13 @@
         "grafiaDa": {
           "fonte": "titolo-roadmap",
           "evidenze": [],
+          "componenti": [
+            {
+              "testo": "Biblioteca",
+              "indice": null,
+              "offset": null
+            }
+          ],
           "offset": null,
           "indice": null,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -467,6 +538,13 @@
         "evidenze": [
           "F011_004_00"
         ],
+        "componenti": [
+          {
+            "testo": "Banchina della metropolitana",
+            "indice": 49,
+            "offset": 3396
+          }
+        ],
         "offset": 3396,
         "indice": 49,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -510,6 +588,13 @@
         "evidenze": [
           "F011_006_00"
         ],
+        "componenti": [
+          {
+            "testo": "Banchina della metropolitana",
+            "indice": 49,
+            "offset": 3396
+          }
+        ],
         "offset": 3396,
         "indice": 49,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -552,6 +637,13 @@
         "fonte": "titolo-roadmap",
         "evidenze": [
           "F010_004_00"
+        ],
+        "componenti": [
+          {
+            "testo": "Cappella",
+            "indice": 241,
+            "offset": 7844
+          }
         ],
         "offset": 7844,
         "indice": 241,
@@ -597,6 +689,13 @@
           "fonte": "titolo-roadmap",
           "evidenze": [
             "F005_001_00"
+          ],
+          "componenti": [
+            {
+              "testo": "Quartiere dello shopping",
+              "indice": 88,
+              "offset": 4356
+            }
           ],
           "offset": 4356,
           "indice": 88,
@@ -649,6 +748,13 @@
         "evidenze": [
           "F012_029_00"
         ],
+        "componenti": [
+          {
+            "testo": "Cantiere dello stadio",
+            "indice": 209,
+            "offset": 6932
+          }
+        ],
         "offset": 6932,
         "indice": 209,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -692,8 +798,15 @@
         "evidenze": [
           "F022_001_00"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Covo dei Ladri",
+            "indice": 208,
+            "offset": 6900
+          }
+        ],
+        "offset": 6900,
+        "indice": 208,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -735,8 +848,15 @@
         "evidenze": [
           "F022_001_00"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Covo dei Ladri",
+            "indice": 208,
+            "offset": 6900
+          }
+        ],
+        "offset": 6900,
+        "indice": 208,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -778,8 +898,15 @@
         "evidenze": [
           "F022_001_00"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Covo dei Ladri",
+            "indice": 208,
+            "offset": 6900
+          }
+        ],
+        "offset": 6900,
+        "indice": 208,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -821,8 +948,15 @@
         "evidenze": [
           "F022_001_00"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Covo dei Ladri",
+            "indice": 208,
+            "offset": 6900
+          }
+        ],
+        "offset": 6900,
+        "indice": 208,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -864,8 +998,15 @@
         "evidenze": [
           "F022_001_00"
         ],
-        "offset": null,
-        "indice": null,
+        "componenti": [
+          {
+            "testo": "Covo dei Ladri",
+            "indice": 208,
+            "offset": 6900
+          }
+        ],
+        "offset": 6900,
+        "indice": 208,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
         "sha256": "d1e198166c350b28db257a0f800e6a0aeded35c72d88195acb56399c77aeab44",
         "indiceLuoghi": {
@@ -15827,6 +15968,13 @@
           "evidenze": [
             "F001_001_00"
           ],
+          "componenti": [
+            {
+              "testo": "Piazza della stazione",
+              "indice": 55,
+              "offset": 3572
+            }
+          ],
           "offset": 3572,
           "indice": 55,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -15880,6 +16028,13 @@
           "evidenze": [
             "F001_002_00"
           ],
+          "componenti": [
+            {
+              "testo": "Sottopasso",
+              "indice": 56,
+              "offset": 3604
+            }
+          ],
           "offset": 3604,
           "indice": 56,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -15929,6 +16084,13 @@
         "grafiaDa": {
           "fonte": "titolo-roadmap",
           "evidenze": [],
+          "componenti": [
+            {
+              "testo": "Sottopasso",
+              "indice": null,
+              "offset": null
+            }
+          ],
           "offset": null,
           "indice": null,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -15984,6 +16146,13 @@
           "evidenze": [
             "F001_003_00"
           ],
+          "componenti": [
+            {
+              "testo": "Central Street",
+              "indice": 57,
+              "offset": 3620
+            }
+          ],
           "offset": 3620,
           "indice": 57,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -16036,6 +16205,13 @@
           "fonte": "titolo-roadmap",
           "evidenze": [
             "F001_004_00"
+          ],
+          "componenti": [
+            {
+              "testo": "Centro comm. sotterraneo",
+              "indice": 63,
+              "offset": 3812
+            }
           ],
           "offset": 3812,
           "indice": 63,
@@ -16091,6 +16267,13 @@
           "evidenze": [
             "F001_005_00"
           ],
+          "componenti": [
+            {
+              "testo": "Tornello della linea Ginza",
+              "indice": 60,
+              "offset": 3700
+            }
+          ],
           "offset": 3700,
           "indice": 60,
           "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -16142,6 +16325,13 @@
         "evidenze": [
           "F001_002_01"
         ],
+        "componenti": [
+          {
+            "testo": "Banchina della metropolitana",
+            "indice": 49,
+            "offset": 3396
+          }
+        ],
         "offset": 3396,
         "indice": 49,
         "file": "metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD",
@@ -16187,6 +16377,13 @@
           "fonte": "titolo-roadmap",
           "evidenze": [
             "F006_001_00"
+          ],
+          "componenti": [
+            {
+              "testo": "Quartiere a luci rosse",
+              "indice": 75,
+              "offset": 4100
+            }
           ],
           "offset": 4100,
           "indice": 75,
@@ -16243,6 +16440,13 @@
           "fonte": "titolo-roadmap",
           "evidenze": [
             "F009_002_00"
+          ],
+          "componenti": [
+            {
+              "testo": "Vicoli",
+              "indice": 46,
+              "offset": 3348
+            }
           ],
           "offset": 3348,
           "indice": 46,

@@ -58,6 +58,13 @@ def main(out):
             if a:
                 titoli_area[(r['major'], r['minor'], lv['layer'])].add((a['index'], a['text']))
     titolo_roadmap = {m['code']: m['title'] for m in metadati['maps']}
+    # posizione di ogni titolo nella tabella nativa dei luoghi, per certificare i titoli composti
+    titoli_luoghi = {}
+    for campo in metadati['fields']:
+        luogo = campo.get('place')
+        if luogo:
+            for v in luogo['floors'] + [luogo['group']]:
+                titoli_luoghi[v['offset']] = (v['index'], v['title'])
     nomi_indice = collections.defaultdict(set)
     for r in indice['tables']['dungeon']:
         if r['major'] is None:
@@ -76,7 +83,14 @@ def main(out):
         if f['fonte'] == 'titolo-area-texpack':
             assert (f['indice'], r['nome']) in titoli_area[chiave], f'titolo non nel texpack: {r["chiave"]}'
         elif f['fonte'] == 'titolo-roadmap':
-            assert titolo_roadmap[r['codice']].startswith(r['nome'][:12]), f'titolo roadmap diverso: {r["chiave"]}'
+            # il titolo può essere composto: ogni pezzo va ritrovato nella tabella dei luoghi,
+            # con l'indice e l'offset dichiarati, e i pezzi ricomposti devono dare il nome
+            componenti = f.get('componenti') or []
+            assert componenti, f'titolo roadmap senza componenti: {r["chiave"]}'
+            assert ' / '.join(c['testo'] for c in componenti) == r['nome'], f'nome non ricomponibile: {r["chiave"]}'
+            for c in componenti:
+                assert c['offset'] is not None and c['indice'] is not None, f'componente senza posizione: {r["chiave"]}'
+                assert titoli_luoghi.get(c['offset']) == (c['indice'], c['testo']), f'componente non alla sua posizione: {r["chiave"]}'
         elif f['fonte'] == 'indice-luoghi-dungeon':
             campo = next(c for c in metadati['fields'] if c['id'] == f['campo'])
             assert r['nome'] in nomi_indice[(campo['major'], campo['minor'])], f'nome non nell’indice: {r["chiave"]}'
@@ -88,8 +102,9 @@ def main(out):
             assert voce['nome'] == r['nome'] and voce['offset'] == f['offset'], f'grafia ufficiale diversa: {r["chiave"]}'
         else:
             raise AssertionError(f'fonte del nome sconosciuta: {f["fonte"]}')
-        # ogni nome deve dire da quale file viene e con quale impronta
+        # ogni nome deve dire da quale file viene, in quale posizione e con quale impronta
         assert f.get('file') and f.get('sha256'), f'provenienza incompleta su {r["chiave"]}'
+        assert f.get('offset') is not None, f'nome senza offset di provenienza su {r["chiave"]}'
         assert hashlib.sha256((out/f['file']).read_bytes()).hexdigest() == f['sha256'], f'sorgente cambiata: {f["file"]}'
         controllati += 1
 

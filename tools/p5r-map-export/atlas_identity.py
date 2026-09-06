@@ -150,12 +150,21 @@ def costruisci(out):
             nome, fonte = dai_campi[0]
             fonte = dict(fonte, file=sorgente_indice['file'], sha256=sorgente_indice['sha256'])
         elif titolo_meta:
-            nome = titolo_meta
+            # Il titolo roadmap può essere composto: la scuola unisce due edifici con «/», e per il
+            # Covo l'estrattore aveva aggiunto una numerazione. Ogni pezzo del nome deve poter
+            # essere ritrovato nella tabella dei luoghi, con il suo indice e il suo offset.
+            nome = LIVELLO_GRAFICO.sub('', titolo_meta).strip()
             luoghi_campo = [campi[f]['place'] for f in mappa['nameEvidence'] if campi.get(f, {}).get('place')]
-            piano = next((p for l in luoghi_campo for p in l['floors'] if p['title'] == titolo_meta), None)
+            voci = [v for l in luoghi_campo for v in (l['floors'] + [l['group']])]
+            componenti = []
+            for pezzo in [t.strip() for t in nome.split('/')]:
+                v = next((x for x in voci if x['title'] == pezzo), None)
+                componenti.append(dict(testo=pezzo, indice=v['index'] if v else None,
+                                       offset=v['offset'] if v else None))
             titoli = sorgente_titoli.get('FLDPLACENAME.FTD', {})
-            fonte = dict(fonte='titolo-roadmap', evidenze=mappa['nameEvidence'],
-                         offset=piano['offset'] if piano else None, indice=piano['index'] if piano else None,
+            primo = next((c for c in componenti if c['offset'] is not None), None)
+            fonte = dict(fonte='titolo-roadmap', evidenze=mappa['nameEvidence'], componenti=componenti,
+                         offset=primo['offset'] if primo else None, indice=primo['indice'] if primo else None,
                          file=titoli.get('file'), sha256=titoli.get('sha256'),
                          indiceLuoghi={k: sorgente_titoli['FLDPLACENO.FTD'][k] for k in ('file', 'sha256')}
                          if 'FLDPLACENO.FTD' in sorgente_titoli else None)
