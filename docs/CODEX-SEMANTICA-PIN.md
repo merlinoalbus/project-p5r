@@ -346,3 +346,65 @@ imporre che metà dei pin sia oltre il perimetro. Accetto quindi come soluzione 
 riformulazione in cui la quota fuori-tratto è soltanto descrittiva, a condizione che codice,
 artefatto, verificatore e stato non la chiamino più soglia di accettazione e non dichiarino che
 tutti i quattro tipi cadono prevalentemente fuori dal disegno.
+
+## Aggiornamento 6 — trovata la tabella nativa `nativeType` → sprite
+
+**Stato:** prova nel renderer con confidenza alta; nessuna nuova etichetta semantica assegnata
+
+La catena nativa è ora chiusa fino alla scelta dello sprite. La task `road map(FLD)` viene
+registrata a `0x14129f6b0` con update `0x1412a07c0`; la callback grafica `0x1412a2ca0` chiama il
+draw base `0x1412a2d10` → `0x151e00160` e poi `0x1412a3170`. Da qui il renderer dei record ICON
+è `0x1412a7500`.
+
+Nel renderer:
+
+1. `0x1412a7530` carica la lista ICON corrente da `[oggetto+0xc0]`;
+2. `0x1412a7657` controlla il separatore a `record+0x1c`, `0x1412a7663` legge `nativeType` come
+   word a `record+0`, e `0x1412a7c4e` avanza di `0x48`, la dimensione già provata del record;
+3. `0x1412a756c` carica la tabella a VA `0x1424575a0`, offset raw `0x24557a0` nel file;
+4. `0x1412a77d4` calcola `5 × nativeType`, poi l'indice viene scalato per quattro: ogni entry è
+   quindi di `0x14` byte;
+5. `0x1412a77e2` legge il primo `uint32` dell'entry e i call-site `0x1412a77f4`, `0x1412a7802`
+   e `0x1412a78d1` lo passano come `edx` agli helper di disegno.
+
+Il campo è un `partId` a base uno. La relazione usata dal gioco è dunque:
+
+```text
+spriteIndex = uint32(tabella + 0x14 * nativeType) - 1
+```
+
+Le controprove coincidono senza eccezioni con tutte le ancore già indipendentemente note:
+
+* tipo 4: valore 24 → sprite 23;
+* tipo 97: valore 108 → sprite 107;
+* tipi 46–96: valori 115–165 → sprite 114–164, cioè `nativeType + 68`;
+* tipi 98–103: valori 175–180 → sprite 174–179, cioè `nativeType + 76`.
+
+Questo spiega anche perché la ricerca di una sequenza contigua non trovava la tabella: i record
+sono larghi 20 byte e contengono un identificatore a base uno. È escluso che `0x1412ad850`
+realizzi il mapping: quella routine riordina o compatta i separatori di tipo/flag `-2`.
+
+### Valori utili fuori dai blocchi già risolti
+
+I seguenti valori sono `nativeType:spriteIndex`, con indice sprite a base zero:
+
+```text
+4:23 5:27 6:28 7:24 8:27 9:25 10:29 11:29 12:30 13:56 14:58 15:57 16:59
+17:26 18:0 19:48 20:53 21:54 22:55 23:60 24:61 25:61 26:26 27:0 28:11
+29:64 30:65 31:73 32:74 33:74 34:76 35:76 36:78 37:79 38:80 39:81 40:85
+41:0 42:0 43:93 44:105 45:106 97:107 104:180 105:167 106:165 107:168 108:166
+109:106 110:169 111:170 112:61 113:199 114:200 115:201 116:202 117:203 118:204
+119:205
+```
+
+### Passaggio operativo richiesto a Claude
+
+La prova chiude il mapping numerico ma non attribuisce da sola un significato testuale allo
+sprite. Nei file di sua proprietà Claude può ora aggiungere un estrattore riproducibile della
+tabella a `0x24557a0`, con un verificatore indipendente che ricontrolli offset, passo `0x14`,
+base uno e le quattro famiglie di ancore sopra. Il risultato va poi unito ai nomi o alle immagini
+del foglio SPD: solo quel join può assegnare nuove semantiche ai 35 tipi ancora aperti.
+
+Se occorre convalidare ulteriormente il contratto del draw, il prossimo punto preciso è
+`0x1412ae610`, chiamato a `0x1412a78d1` con `edx=partId`; per l'Atlante, però, il problema
+`nativeType` → sprite è già risolto e conviene proseguire con estrazione e join SPD.
