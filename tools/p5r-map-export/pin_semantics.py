@@ -173,15 +173,15 @@ def significato_dagli_script(out):
         v = voci[i]
         return v['text'] if v.get('status') == 'valido' and v['text'] not in ('NULL', '') else None
 
-    procedure_di_bandiera, etichette_di_procedura = collections.defaultdict(set), collections.defaultdict(set)
+    procedure_di_bandiera, etichette_di_procedura = collections.defaultdict(list), collections.defaultdict(list)
     for f in con['fields']:
         for i, p in enumerate(f['procedures']):
             for m in BIT_ACCESA.finditer(p['body'] or ''):
-                procedure_di_bandiera[(f['field'], 0x20000000 + int(m.group(1)))].add((i, p['name']))
+                procedure_di_bandiera[(f['field'], 0x20000000 + int(m.group(1)))].append((i, p['name']))
         for t in f['triggers']:
             e = etichetta(t)
             if e is not None and t.get('procedureIndex') is not None:
-                etichette_di_procedura[(f['field'], t['procedureIndex'])].add(e)
+                etichette_di_procedura[(f['field'], t['procedureIndex'])].append(e)
 
     prove = collections.defaultdict(lambda: dict(famiglie=collections.Counter(), procedure=collections.Counter(),
                                                  etichette=collections.Counter(), pin=0))
@@ -195,19 +195,20 @@ def significato_dagli_script(out):
                     continue
                 v = prove[p['nativeType']]
                 v['pin'] += 1
-                for indice, nome in trovate:
+                for indice, nome in sorted(set(trovate)):
                     v['procedure'][re.sub(r'\d+', '#', nome)] += 1
                     fam = famiglia_di(nome)
                     if fam:
                         v['famiglie'][fam[0]] += 1
-                    for e in etichette_di_procedura.get((campo, indice), ()):
+                    for e in sorted(set(etichette_di_procedura.get((campo, indice), ()))):
                         v['etichette'][e] += 1
                 break
 
     esito = {}
-    for tipo, v in prove.items():
+    for tipo in sorted(prove):
+        v = prove[tipo]
         riconosciute = sum(v['famiglie'].values())
-        migliore, quante = (v['famiglie'].most_common(1) or [(None, 0)])[0]
+        migliore, quante = (sorted(v['famiglie'].items(), key=lambda x: (-x[1], x[0])) or [(None, 0)])[0]
         _, tipo_spillo, etichetta_it = next(f for f in FAMIGLIE if f[0] == migliore) if migliore else (None, None, None)
         conferme = sum(n for testo, n in v['etichette'].items()
                        if any(par in testo.casefold() for par in CONFERME.get(tipo_spillo, [])))
@@ -217,7 +218,8 @@ def significato_dagli_script(out):
             pinConBandieraRisolta=v['pin'], procedureRiconosciute=riconosciute,
             famigliaDominante=migliore, casiDellaFamiglia=quante, confermeDaiTrigger=conferme,
             quota=round(quante/riconosciute, 3) if riconosciute else 0.0,
-            procedure=dict(v['procedure'].most_common(5)), etichetteDeiTrigger=dict(v['etichette'].most_common(5)),
+            procedure=dict(sorted(v['procedure'].items(), key=lambda x: (-x[1], x[0]))[:5]),
+            etichetteDeiTrigger=dict(sorted(v['etichette'].items(), key=lambda x: (-x[1], x[0]))[:5]),
             tipoSpillo=tipo_spillo if determinato else None,
             etichetta=etichetta_it if determinato else None,
             stato='determinato' if determinato else 'non-determinato')

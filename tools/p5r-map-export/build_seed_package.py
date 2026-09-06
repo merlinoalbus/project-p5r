@@ -149,7 +149,7 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                       else f'{len(candidati)} luoghi del quartiere corrispondono')
 
     per_chiave = {m['chiave']: m for m in mappe}
-    esiti, posati = collections.Counter(), 0
+    esiti, posati, condizionati = collections.Counter(), 0, [0]
     for mappa_nativa in meta['maps']:
         chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa_nativa['code'].split('_')[1:])
         voce, rif = per_chiave.get(chiave), riferimento.get(chiave)
@@ -166,20 +166,30 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                 continue
             luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
             nota = ['Pin nativo del gioco.']
-            if p['conditional']:
-                nota.append('Il gioco lo mostra a certe condizioni, che non sono ancora tradotte '
-                            f"(bandiera nativa {p['flag']}).")
-            if luogo is None and motivo:
+            # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
+            if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')
-            voce['spilli'].append(dict(
+            spillo = dict(
                 tipo=sem['tipoSpillo'], nome=luogo['nome'] if luogo else sem['etichetta'],
                 descrizione=' '.join(nota),
                 x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
                 riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
-                collezionabile=False, ordine=len(voce['spilli'])))
+                collezionabile=False, ordine=len(voce['spilli']))
+            # Il gioco mostra questo pin solo a certe condizioni, e la bandiera che le governa non è
+            # ancora tradotta nel vocabolario dell'applicazione. Entra allora come condizione da
+            # configurare, che l'interfaccia sa mostrare e l'editor sa correggere: trattarlo come
+            # incondizionato lo farebbe comparire sempre, che è falso.
+            if p['conditional']:
+                spillo['condizioni'] = [dict(tipo='da-configurare',
+                                             nota=f"Il gioco lo mostra alla bandiera nativa {p['flag']}, "
+                                                  'non ancora tradotta in una condizione della guida.')]
+                condizionati[0] += 1
+            voce['spilli'].append(spillo)
             esiti['posato con luogo collegato' if luogo else 'posato senza luogo collegato'] += 1
             posati += 1
-    return posati, dict(esiti)
+        # i pin che la certificazione del riferimento ha escluso uno per uno restano contati
+        esiti['escluso dalla certificazione del riferimento'] += rif['esclusi']
+    return posati, dict(esiti), condizionati[0]
 
 
 def costruisci(out, seed):
@@ -238,8 +248,8 @@ def costruisci(out, seed):
                                          texpack=c['gruppoTexpack'])
                                     for c in distinti]
             mappe.append(voce)
-    posati, esiti_pin = pin_delle_planimetrie(out, seed, mappe, luoghi)
-    return catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin
+    posati, esiti_pin, condizionati = pin_delle_planimetrie(out, seed, mappe, luoghi)
+    return catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin, condizionati
 
 
 # Testo da mostrare per cio' che il gioco non nomina. Non e' un nome del gioco e il catalogo non
@@ -275,7 +285,8 @@ def nota(luogo, immagine, etichetta):
 
 def main(out, seed, destinazione):
     out, seed, destinazione = Path(out), Path(seed), Path(destinazione)
-    catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin = costruisci(out, seed)
+    catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin, condizionati = costruisci(out, seed)
+    pin_nativi = sum(len(m['pins']) for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps'])
     pacchetto = dict(versione=1, mappe=mappe)
     destinazione.write_text(json.dumps(pacchetto, ensure_ascii=False, indent=1), encoding='utf8')
     aree_spaiate = [a['nome'] for v in aree_per_dungeon.values() for a in v if not a.get('preso')]
@@ -286,7 +297,10 @@ def main(out, seed, destinazione):
         conContesti=sum('contesti' in m for m in mappe),
         conEntita=sum(1 for m in mappe if m['entita']),
         spilliPosati=posati, spilliConLuogo=esiti_pin.get('posato con luogo collegato', 0),
-        pinNonPosati={k: v for k, v in esiti_pin.items() if not k.startswith('posato')},
+        spilliCondizionati=condizionati,
+        pinNonPosati={k: v for k, v in sorted(esiti_pin.items()) if not k.startswith('posato')},
+        # la somma deve chiudere su tutti i pin nativi: se non chiude, il rapporto lo dice
+        pinNativi=pin_nativi, pinContati=posati + sum(v for k, v in esiti_pin.items() if not k.startswith('posato')),
         abbinamentoAree=dict(abbinamenti),
         areeGuidaSenzaPlanimetria=len(aree_spaiate),
         perGenitore=dict(collections.Counter(m['genitore'] for m in mappe)))

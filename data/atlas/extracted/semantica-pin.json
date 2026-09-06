@@ -23,9 +23,9 @@
         "quota": 1.0,
         "procedure": {
           "D#_#_e#_#_START": 3,
-          "TUTO_WAITING_ROOM": 1,
           "D#_SAFETY_ROOM_#_SET": 1,
-          "IsUppeerOff": 1
+          "IsUppeerOff": 1,
+          "TUTO_WAITING_ROOM": 1
         },
         "etichetteDeiTrigger": {},
         "tipoSpillo": null,
@@ -56,14 +56,14 @@
         "procedure": {
           "D#_#_e#_#_START": 5,
           "D#_#_#_CONSOLE_ICON": 3,
-          "D#_BIG_SLOT_GAME_DEFAULT": 2,
           "D#_#_miniEV_point#": 2,
-          "StartBoardCheck": 1
+          "D#_BIG_SLOT_GAME_DEFAULT": 2,
+          "D#_#_check#_START": 1
         },
         "etichetteDeiTrigger": {
+          "Apri porta": 2,
           "Cinema": 2,
-          "Magazzino audiovisivi": 2,
-          "Apri porta": 2
+          "Magazzino audiovisivi": 2
         },
         "tipoSpillo": null,
         "etichetta": null,
@@ -94,15 +94,15 @@
           "D#_#_e#_#_START": 5,
           "CheckPasswardDoor": 4,
           "f#_#_DOOR_#_HIT": 3,
-          "FLD_D#_MONEY_DOOR_PROC": 2,
-          "IsUppeerOff": 2
+          "BchoDoorBack": 2,
+          "D#_#_e#_#_START____": 2
         },
         "etichetteDeiTrigger": {
           "Apri porta": 5,
           "Magazzino audiovisivi": 4,
           "Letto sporco": 3,
           "Vecchio divano": 2,
-          "Vaso due": 1
+          "Biglietteria automatica": 1
         },
         "tipoSpillo": "porta",
         "etichetta": "Porta",
@@ -131,17 +131,17 @@
         "quota": 0.983,
         "procedure": {
           "D#_GIM_BLUE_SWITCH#": 42,
-          "gate_green_chenge": 9,
           "D#_#_e#_#": 9,
+          "gate_green_chenge": 9,
           "D#_GIM_YELLOW_SWITCH": 5,
           "D#_#_#_map_HIT#": 2
         },
         "etichetteDeiTrigger": {
           "Tira leva": 47,
-          "Vecchio divano": 2,
           "Chiama ascensore": 2,
-          "Karaoke": 1,
-          "Apri porta": 1
+          "Vecchio divano": 2,
+          "Apri porta": 1,
+          "Karaoke": 1
         },
         "tipoSpillo": "meccanismo",
         "etichetta": "Meccanismo",
@@ -300,7 +300,7 @@
           "D#_#_#_N_TBOX_#": 7,
           "D#_#_#_N_BOX_#": 3,
           "D#_#_#_N_TBOX_SET_#": 2,
-          "D#_FLD_MAP_#_#_TBOX": 1
+          "D#_#_#_TBOX_minimap_#_#": 1
         },
         "etichetteDeiTrigger": {},
         "tipoSpillo": "forziere",
@@ -392,8 +392,8 @@
           "D#_#_#_R_TBOX_minimap_#": 27,
           "D#_#_#_R_TBOX_#": 3,
           "D#_#_#_RARE_TBOX_minimap_#": 2,
-          "IsUppeerOff": 1,
-          "D#_#_#_R_BOX_#": 1
+          "D#_#_#_R_BOX_#": 1,
+          "IsUppeerOff": 1
         },
         "etichetteDeiTrigger": {},
         "tipoSpillo": "forziere",
@@ -677,8 +677,8 @@
         "quota": 1.0,
         "procedure": {
           "D#_#_#_minimap_#": 38,
-          "D#_#_minimap_SWITCH": 1,
-          "D#_#_SWITCH_#": 1
+          "D#_#_SWITCH_#": 1,
+          "D#_#_minimap_SWITCH": 1
         },
         "etichetteDeiTrigger": {
           "Bagno dei ragazzi": 1

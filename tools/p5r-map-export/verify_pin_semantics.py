@@ -12,7 +12,12 @@ Quattro controlli:
    `shared/spilli.ts`, e ogni etichetta è scritta;
 4. **i pin nel pacchetto** — ognuno viene da un tipo determinato, sta su una planimetria che
    condivide il riferimento, ha le coordinate che si ottengono applicando il fattore dichiarato,
-   e se cita un luogo quel luogo esiste nel quartiere della sua mappa.
+   e se cita un luogo quel luogo esiste nel quartiere della sua mappa;
+5. **i condizionali restano condizionali** — un pin che il gioco mostra a una bandiera deve avere
+   una condizione strutturata `da-configurare`, non una frase nella descrizione: senza condizione
+   comparirebbe sempre, che è falso. E chi non è condizionale non deve averne;
+6. **la contabilità chiude** — posati più esclusi devono fare esattamente i pin nativi: nessuna
+   occorrenza può sparire dal riepilogo.
 """
 from pathlib import Path
 import collections
@@ -68,7 +73,7 @@ def main(out, seed=None):
     famiglie = [(f[0], f[1]) for f in __import__('pin_semantics').FAMIGLIE]
     import pin_semantics as ps
 
-    urbani = dagli_script_ok = 0
+    urbani = dagli_script_ok = con_condizione = 0
     per_tipo = {r['tipoNativo']: r for r in semantica['tipi']}
     assert len(per_tipo) == len(semantica['tipi']), 'tipi nativi ripetuti'
     assert {r['tipoNativo'] for r in icone['tipiNativi']} == set(per_tipo), 'censimento diverso da quello delle icone'
@@ -123,18 +128,36 @@ def main(out, seed=None):
             attese.add((v['tipoSpillo'], round(100*p['x']*fattore/larghezza, 3), round(100*p['y']*fattore/altezza, 3)))
         assert len(propri) == len(attese), f'numero di pin diverso su {m["chiave"]}'
         quartiere = m['genitore'].removeprefix('citta-') if (m['genitore'] or '').startswith('citta-') else None
+        condizionali = {(per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['tipoSpillo'],
+                         round(100*pin_nativi[m['chiave']][i]['x']*fattore/larghezza, 3),
+                         round(100*pin_nativi[m['chiave']][i]['y']*fattore/altezza, 3))
+                        for i in rif['collocabili'] if pin_nativi[m['chiave']][i]['conditional']
+                        and per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['stato'] == 'determinato'}
         for s in propri:
             assert (s['tipo'], s['x'], s['y']) in attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
             assert 0 <= s['x'] <= 100 and 0 <= s['y'] <= 100
+            atteso_condizionale = (s['tipo'], s['x'], s['y']) in condizionali
+            ha = bool(s.get('condizioni'))
+            assert ha == atteso_condizionale, f'condizione mancante o di troppo su {m["chiave"]}'
+            if ha:
+                assert all(c['tipo'] == 'da-configurare' and c.get('nota') for c in s['condizioni']),                     f'condizione senza forma valida su {m["chiave"]}'
+                con_condizione += 1
             if s['riferimento']:
                 assert s['riferimento']['tipo'] == 'luogo'
                 assert quartiere and s['riferimento']['chiave'] in quartieri[quartiere], \
                     f'luogo citato fuori dal quartiere della mappa: {s["riferimento"]["chiave"]}'
                 con_luogo += 1
             controllati += 1
+    # la contabilità del rapporto deve chiudere su tutte le occorrenze native
+    rapporto = json.loads((out/'pacchetto-seed-rapporto.json').read_text(encoding='utf8'))
+    nativi = sum(len(m['pins']) for m in meta['maps'])
+    assert rapporto['pinNativi'] == nativi, 'il rapporto non conta tutti i pin nativi'
+    assert rapporto['pinContati'] == nativi, f'contabilità aperta: {rapporto["pinContati"]} su {nativi}'
+    assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
     print('OK', determinati, f'tipi con significato dimostrato ({urbani} dallo sprite urbano,',
           f'{dagli_script_ok} dalle procedure degli script),', len(per_tipo)-determinati, 'lasciati senza;',
-          controllati, 'pin nel pacchetto ricontrollati,', con_luogo, 'collegati a un luogo del catalogo')
+          controllati, 'pin nel pacchetto ricontrollati,', con_luogo, 'collegati a un luogo del catalogo,',
+          con_condizione, 'con condizione da configurare; contabilità chiusa su', nativi, 'pin nativi')
 
 
 if __name__ == '__main__':
