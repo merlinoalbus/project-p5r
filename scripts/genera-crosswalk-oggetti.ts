@@ -27,7 +27,6 @@ import type { OggettiGuidaDto } from '../shared/types.js';
 interface Trascrizione {
   fonte: string;
   negozi: Record<string, string[]>;
-  ambigui?: Record<string, string>;
 }
 
 /** Confronto fra nomi: minuscole, accenti tolti, tutto ciò che non è lettera o cifra a spazio. */
@@ -67,7 +66,9 @@ for (const v of voci) {
   perNomeGuida.set(k, [...(perNomeGuida.get(k) ?? []), v.nome]);
 }
 
-type Abbinamento = { nome: string; articolo?: string; negozio: string; via: string };
+// Un oggetto può essere venduto in più posti, e la guida li elenca tutti: l'applicazione deve
+// mostrarli tutti, non sceglierne uno. Per questo il ponte tiene una lista, non una chiave sola.
+type Abbinamento = { nome: string; articolo?: string; negozi: string[]; via: string };
 const abbinamenti = new Map<string, Abbinamento>();
 const problemi: Record<string, string[]> = {
   'negozio trascritto che il catalogo non ha': [],
@@ -86,11 +87,10 @@ for (const v of voci) {
     continue;
   }
   abbinamenti.set(v.nome, { nome: v.nome, articolo: candidati[0].chiave,
-    negozio: candidati[0].negozio_chiave, via: 'nome dell’articolo' });
+    negozi: [candidati[0].negozio_chiave], via: 'nome dell’articolo' });
 }
 
 // ---- via trascritta: la guida dice chi lo vende ------------------------------------------------
-const ambigui = new Set(Object.keys(trascrizione.ambigui ?? {}));
 for (const [negozio, articoliDelNegozio] of Object.entries(trascrizione.negozi)) {
   if (!negoziEsistenti.has(negozio)) {
     problemi['negozio trascritto che il catalogo non ha'].push(negozio);
@@ -105,16 +105,20 @@ for (const [negozio, articoliDelNegozio] of Object.entries(trascrizione.negozi))
       problemi['articolo di un’altra sezione della guida (accessori, armi, libri, DVD…)'].push(`${negozio}: ${nome}`);
       continue;
     }
-    if (ambigui.has(nome)) continue;
     for (const nomeGuida of nomiGuida) {
-      if (abbinamenti.has(nomeGuida)) continue;
-      abbinamenti.set(nomeGuida, { nome: nomeGuida, negozio, via: 'trascritto dalla guida' });
+      const presente = abbinamenti.get(nomeGuida);
+      if (presente) {
+        // già trovato per un'altra via o in un altro negozio: si aggiunge il posto, non si scarta
+        if (!presente.negozi.includes(negozio)) presente.negozi.push(negozio);
+      } else {
+        abbinamenti.set(nomeGuida, { nome: nomeGuida, negozi: [negozio], via: 'trascritto dalla guida' });
+      }
     }
   }
 }
 
 for (const v of voci) {
-  if (!abbinamenti.has(v.nome) && !ambigui.has(v.nome)) {
+  if (!abbinamenti.has(v.nome)) {
     problemi['oggetto senza articolo e non trascritto in nessun negozio'].push(v.nome);
   }
 }
@@ -125,11 +129,12 @@ const esito = {
   cosaE: 'ponte fra gli oggetti della guida, che hanno solo un nome, e i negozi e gli articoli del catalogo, che hanno una chiave e arrivano alla mappa',
   fonti: { trascrizione: 'data/seed/oggetti-negozi.json', pagina: trascrizione.fonte },
   comeSiRigenera: 'npm run oggetti:crosswalk',
-  criterio: 'due vie: il nome dell’articolo quando coincide in modo univoco, e la trascrizione della pagina «Elenco dei negozi». Gli ambigui dichiarati restano fuori.',
+  criterio: 'due vie: il nome dell’articolo quando coincide in modo univoco, e la trascrizione della pagina «Elenco dei negozi». Un oggetto venduto in più posti li tiene tutti.',
   generato: new Date().toISOString().slice(0, 10),
   abbinamenti: elenco,
   summary: {
     vociGuida: voci.length, articoli: articoli.length, abbinati: elenco.length,
+    conPiuNegozi: elenco.filter((a) => a.negozi.length > 1).length,
     perVia: {
       'nome dell’articolo': elenco.filter((a) => a.via === 'nome dell’articolo').length,
       'trascritto dalla guida': elenco.filter((a) => a.via === 'trascritto dalla guida').length,

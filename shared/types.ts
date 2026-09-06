@@ -812,9 +812,9 @@ export interface DomandeDto {
 // ---- Oggetti della guida (Fase 10.2) ----
 
 export interface OggettiGuidaDto {
-  /** `articolo` e `negozio` ci sono solo dove il crosswalk versionato lega quel nome in modo univoco: sono le chiavi con cui la riga arriva alla mappa, la prima più precisa della seconda. */
-  consumabili: Array<{ nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozio?: string }>;
-  chiaveEMateriali: Array<{ nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozio?: string }>;
+  /** `articolo` e `negozi` vengono dal crosswalk versionato: sono le chiavi con cui la riga arriva alla mappa. Un oggetto venduto in più posti li elenca tutti, perché sceglierne uno vorrebbe dire mandare l'utente nel posto sbagliato più spesso che in quello giusto. */
+  consumabili: Array<{ nome: string; nomeEn: string | null; categoria: 'cura' | 'sp' | 'stato' | 'battaglia' | 'esplorazione' | 'altro'; effetto: string; dove: string; prezzo: number | null; fonte: string; verificato: boolean; articolo?: string; negozi?: string[] }>;
+  chiaveEMateriali: Array<{ nome: string; nomeEn: string | null; tipo: 'chiave' | 'materiale'; uso: string; dove: string; fonte: string; verificato: boolean; articolo?: string; negozi?: string[] }>;
   fabbricazione: { introduzione: string; sblocco: string; regole: string[]; fonte: string; ricette: Array<{ attrezzo: string; effetto: string; materiali: Array<{ nome: string; quantita: number | null }>; prodotti: number | null; sblocco: string | null; fonte: string; verificato: boolean }> };
   personalizzazioneArmi: { introduzione: string; requisiti: string; costi: string; effetti: Array<{ nome: string; effetto: string; costo: string | null }>; progressioneConfidente: unknown[]; note: string | null; fonte: string };
   abiti: { introduzione: string; elenco: Array<{ nome: string; per: string; dove: string; fonte: string }>; lavanderia: { dove: string; costo: string; regole: string[]; fonte: string } };
