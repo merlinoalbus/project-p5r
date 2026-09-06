@@ -9,7 +9,7 @@ export interface DestinazioneMondoDto {
   spillo: number | null;
   nomeSpillo: string | null;
   centro: { x: number; y: number; zoom: number } | null;
-  provenienze: Array<{ tipo: TipoAccessoMondo; chiave: string; criterio: 'mappa-diretta' | 'entita-mappa' | 'riferimento-spillo' | 'ingresso-quartiere' }>;
+  provenienze: Array<{ tipo: TipoAccessoMondo; chiave: string; criterio: 'mappa-diretta' | 'entita-mappa' | 'riferimento-spillo' | 'ingresso-quartiere' | 'posto-dichiarato' }>;
 }
 
 export interface AccessoMondoDto {

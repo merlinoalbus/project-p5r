@@ -41,20 +41,25 @@ const rapporto = argomento('--rapporto');
 const db = initDb(path.join(dati, 'project-p5r.db'));
 runMigrations(db);
 
-const perTipo: Record<string, { voci: number; conAccesso: number; conPunto: number; senzaAccesso: string[] }> = {};
-let voci = 0, conAccesso = 0, conPunto = 0;
+// Un'eccezione del risolutore non e' un'entita' senza associazione: e' un guasto, e confonderle
+// nasconderebbe un bug SQL dietro un numero che sembra normale. Vanno contate a parte, e la
+// misura non vale se ce n'e' anche una sola.
+const perTipo: Record<string, { voci: number; conAccesso: number; conPunto: number; senzaAccesso: string[]; errori: Array<{ chiave: string; errore: string }> }> = {};
+let voci = 0, conAccesso = 0, conPunto = 0, errori = 0;
 
 for (const tipo of TIPI_ACCESSO_MONDO) {
   const sql = SORGENTI[tipo];
   if (!sql) continue;
   const chiavi = (getDb().prepare(sql).all() as Array<{ chiave: string }>).map((r) => r.chiave);
-  const riga = { voci: chiavi.length, conAccesso: 0, conPunto: 0, senzaAccesso: [] as string[] };
+  const riga = { voci: chiavi.length, conAccesso: 0, conPunto: 0, senzaAccesso: [] as string[],
+    errori: [] as Array<{ chiave: string; errore: string }> };
   for (const chiave of chiavi) {
     let esito;
     try {
       esito = risolviAccessoMondo(tipo, chiave);
-    } catch {
-      riga.senzaAccesso.push(chiave);
+    } catch (e) {
+      riga.errori.push({ chiave, errore: e instanceof Error ? e.message : String(e) });
+      errori += 1;
       continue;
     }
     const destinazioni = esito.destinazioni ?? [];
@@ -76,7 +81,7 @@ const esito = {
   nota: 'inventario completo, nessun campione',
   perTipo,
   summary: {
-    voci, conAccesso, conPunto,
+    voci, conAccesso, conPunto, errori,
     quotaAccesso: voci ? Number((conAccesso / voci).toFixed(4)) : 0,
     quotaPunto: voci ? Number((conPunto / voci).toFixed(4)) : 0,
   },
@@ -87,8 +92,16 @@ console.log(JSON.stringify(esito.summary, null, 1));
 for (const [tipo, r] of Object.entries(perTipo)) {
   console.log(`  ${tipo.padEnd(11)} ${String(r.voci).padStart(4)} voci · ${String(r.conAccesso).padStart(4)} con accesso · ${String(r.conPunto).padStart(4)} con punto preciso`);
 }
+if (errori) {
+  console.error(`
+MISURA NON VALIDA: ${errori} entità hanno fatto fallire il risolutore.`);
+  for (const [tipo, r] of Object.entries(perTipo)) {
+    for (const e of r.errori.slice(0, 5)) console.error(`  ${tipo} ${e.chiave}: ${e.errore}`);
+  }
+}
 if (rapporto) {
   mkdirSync(path.dirname(rapporto), { recursive: true });
   writeFileSync(rapporto, JSON.stringify(esito, null, 2), 'utf8');
   console.log('rapporto in', rapporto);
 }
+process.exitCode = errori ? 1 : 0;
