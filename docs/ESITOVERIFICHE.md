@@ -1009,3 +1009,45 @@ filtro di presenza.
 **Decisione:** Fase 2 **FAIL**. Serve un nuovo commit stabile e pubblicato che chiuda tutti e sei
 i blocker; fino ad allora non si procede al gate formale della fase successiva e la PR cumulativa
 non può essere fusa.
+
+## Fase 2 — Riverifica ristretta del contratto di visibilità
+
+**Esito del rilievo 1: FAIL**  
+**Commit isolato:** `b223a8c66ffd7ab5dad39b6b9e4f913dc964d9ae`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+Il nuovo seed corregge la parte sostanziale: contiene 1.339 pin nativi e **zero condizioni di
+visibilità**. `cancelli-pin.json` censisce 75 pin con prerequisiti, 55 dei quali hanno una resa
+leggibile conservata in `nativo.cancelli`, `nativo.sbloccoLeggibile` e nella descrizione. La
+rigenerazione è semanticamente identica, l'artefatto dei cancelli è byte-identico, il verificatore
+respinge la reintroduzione di una condizione su porta/forziere e la suite esatta chiude con 134
+file e 547 test PASS. Data, fascia e meteo sono valutati correttamente sui casi temporanei già
+coperti.
+
+### Rilievi bloccanti del lotto
+
+1. **Il runtime non garantisce l'invariante.** API ed editor accettano ancora `condizioni` su
+   `porta`, `forziere`, `scala` e `passaggio`; una condizione non soddisfatta produce
+   `disponibilita=bloccato` e il visore nasconde il pin. Il seed corrente è corretto, ma una
+   modifica ordinaria può violare di nuovo il contratto.
+2. **Il canale separato dei prerequisiti non è verificato.** Eliminare da una fixture
+   `nativo.cancelli` e `nativo.sbloccoLeggibile`, oppure eliminare una riga di
+   `cancelli-pin.json`, lascia `verify_pin_semantics.py` verde. Il file viene caricato, ma il
+   confronto è irraggiungibile dopo `condizionali = set()`.
+3. **Manca la regressione specifica richiesta.** Le prove esistenti mostrano che un'entità
+   sintetica può sparire per data/meteo/fascia, ma non che porta e forziere restino nel DOM prima
+   e dopo progressione/raccolta, né che l'editor non possa renderli nascondibili.
+4. **Documentazione ancora contraddittoria.** Il docstring di `verify_pin_semantics.py` prescrive
+   ancora `da-configurare` sui pin condizionali; `ATLANTE-STATO.md` conserva la dichiarazione dei
+   324 pin condizionati. Entrambe descrivono il contratto ritirato.
+
+### Criterio di chiusura
+
+Separare nel modello runtime presenza e prerequisiti/stato; soltanto la presenza alimenta il
+filtro. Impedire via API/editor che apertura, raccolta o progressione nascondano elementi fissi;
+ricostruire e confrontare indipendentemente l'intera catena
+`cancelli-pin.json → nativo → descrizione`; aggiungere le controprove porta/forziere e un caso
+editoriale temporaneo nei due stati.
+
+Gli altri cinque blocker della verifica precedente sono fuori dallo scope di questo commit e
+restano invariati. La Fase 2 complessiva e la PR cumulativa rimangono **FAIL/non fondibili**.
