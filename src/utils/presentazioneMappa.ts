@@ -25,11 +25,16 @@ export function risolviContesto(mappa: IdentitaMappa, selezione?: string | null)
 export function titoloContesto(mappa: IdentitaMappa, selezione?: string | null): string | null {
   return risolviContesto(mappa, selezione).titolo;
 }
+/** Il nome con cui presentare una mappa: il titolo del contesto scelto, altrimenti il nome del
+ * luogo seguito da ciò che questa versione mostra. È la resa unica: titolo della pagina,
+ * breadcrumb del visore, mappa incorporata e selettori passano tutti di qui, così lo stesso
+ * luogo non compare con due nomi diversi a seconda della schermata. */
 export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string | null): string {
   const titolo = titoloContesto(mappa, selezione);
   if (titolo) return titolo;
   if (mappa.contesti?.some(c => c.nome === null)) return mappa.genitoreNome ? `${mappa.genitoreNome} — Planimetria` : 'Planimetria';
-  return alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
+  const base = alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
+  return nomeConVersione(mappa as MappaRiassuntoDto, base);
 }
 export function presentaMappa(mappa: MappaDto, selezione?: string | null): MappaDto {
   const nome = nomePresentazioneMappa(mappa, selezione);
@@ -39,6 +44,6 @@ export function presentaMappa(mappa: MappaDto, selezione?: string | null): Mappa
  * descrive la versione viene da `etichettaVersione`, la stessa che usano indice e albero. */
 export function etichettaPlanimetria(mappa: MappaRiassuntoDto): string {
   if (mappa.contesti?.some(c => c.nome === null)) return nomePresentazioneMappa(mappa);
-  const nome = nomeConVersione(mappa, mappa.gruppoImmagini?.nome ?? nomePresentazioneMappa(mappa));
+  const nome = nomePresentazioneMappa(mappa);
   return mappa.nomeCompleto?.endsWith(mappa.nome) ? mappa.nomeCompleto.slice(0, -mappa.nome.length) + nome : nome;
 }

@@ -18,6 +18,10 @@ it('i nomi uguali conservano ogni ID senza associare un campo arbitrario',()=>{
 it('le immagini del Covo condividono solo il nome verificato del luogo',()=>{
   expect(nomePresentazioneMappa({nome:'livello grafico 4',gruppoImmagini:{id:'covo',nome:'Covo dei Ladri',ordine:3}})).toBe('Covo dei Ladri');
 });
+it('quando la versione ha un’etichetta dimostrata il nome la porta, in ogni schermata',()=>{
+  const covo={nome:'Covo dei Ladri',gruppoImmagini:{id:'covo',nome:'Covo dei Ladri',ordine:0,etichetta:'settore d’ingresso'}} as never;
+  expect(nomePresentazioneMappa(covo)).toBe('Covo dei Ladri — settore d’ingresso');
+});
 
 const parziale: MappaRiassuntoDto = {chiave:'nativo-rmap-153-4-0',nome:'Area 4 — RMAP 153',tipo:'area',genitore:'palazzo-verificato',genitoreNome:'Palazzo di Madarame',nomeCompleto:'Altro genitore › Area 4 — RMAP 153',ordine:0,immagineUrl:null,asset:null,entita:null,origine:'seed',numeroSpilli:0,numeroFigli:0,updatedAt:'',contesti:[{id:'normale',nome:'Ripostiglio',campo:'F153_004_00',texpack:102},{id:'safe',nome:null,campo:'F153_051_00',texpack:103},{id:'altro-ignoto',nome:null,campo:'F153_052_00',texpack:104}]};
 it.each([
