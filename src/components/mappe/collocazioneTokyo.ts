@@ -32,12 +32,12 @@ export interface Collocazione {
   scala: number;
 }
 
-/** I quartieri che stanno sulla mappa di viaggio del gioco.
+/** I quartieri sulla mappa di viaggio.
  *
- * Shujin Academy non c'è, e non è una dimenticanza: nel gioco non è una destinazione del treno —
- * a scuola ci si arriva da Aoyama-Itchōme — e infatti nel foglio degli sprite non ha un disegno.
- * Metterla lo stesso voleva dire ripiegare sulla fotografia del quartiere, che in mezzo alle
- * sagome in bianco e nero è una macchia. */
+ * Shujin Academy è l'unica la cui sagoma **non viene dal gioco**: nel foglio degli sprite non c'è,
+ * perché nel gioco la scuola non è una destinazione del treno — ci si arriva da Aoyama-Itchōme. È
+ * stata disegnata apposta nello stesso stile (`docs/grafica/fabbisogno.md`, voce 1) perché senza
+ * di lei mancava dalla mappa il luogo dove si passa metà della partita. */
 export const QUARTIERI_TOKYO: Record<string, Collocazione> = {
   // ---- la corona della Yamanote, in senso orario da nord ----
   ikebukuro: { x: 51, y: 11, scala: 5.5 },
@@ -48,6 +48,8 @@ export const QUARTIERI_TOKYO: Record<string, Collocazione> = {
   shinagawa: { x: 41.5, y: 72, scala: 5.5 },
   shibuya: { x: 34, y: 50, scala: 7.5 },
   harajuku: { x: 33, y: 36, scala: 5.5 },
+  // l'unica sagoma non originale: vedi la nota qui sopra
+  'shujin-academy': { x: 40, y: 40, scala: 5.5 },
   shinjuku: { x: 38, y: 22, scala: 7.5 },
   // ---- la Chuo, che taglia da ovest a est sopra l'anello ----
   ogikubo: { x: 26, y: 5, scala: 5.5 },
@@ -103,6 +105,8 @@ export const LINEE_TOKYO: Linea[] = [
     fermate: ['shibuya', 'shinagawa', 'yokohama-chinatown', 'miura-kaigan'] },
   { nome: 'Hibiya', colore: '#94a3b8',
     fermate: ['roppongi', 'ginza', 'tsukishima'] },
+  { nome: 'Aoyama–Shujin', colore: '#64748b',
+    fermate: ['aoyama-itchome', 'shujin-academy'] },
   { nome: 'Chiyoda', colore: '#14b8a6',
     fermate: ['meiji-shrine', 'harajuku', 'nagatacho'] },
 ];
