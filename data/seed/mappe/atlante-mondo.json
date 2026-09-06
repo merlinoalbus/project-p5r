@@ -16,6 +16,16 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.824,
+     "y": 50.977,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
      "tipo": "negozio",
      "nome": "Negozio Otaku Tokobushiya",
      "descrizione": "Pin nativo del gioco.",
@@ -26,7 +36,7 @@
       "chiave": "akihabara/tokobushiya"
      },
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 1
     },
     {
      "tipo": "ristorante",
@@ -39,7 +49,7 @@
       "chiave": "akihabara/maid-cafe-akihabara"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 2
     },
     {
      "tipo": "negozio",
@@ -52,7 +62,7 @@
       "chiave": "akihabara/akindo"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 3
     },
     {
      "tipo": "negozio",
@@ -62,7 +72,7 @@
      "y": 24.609,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 4
     },
     {
      "tipo": "negozio",
@@ -72,7 +82,7 @@
      "y": 44.824,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 5
     },
     {
      "tipo": "negozio",
@@ -85,7 +95,7 @@
       "chiave": "akihabara/super-baron"
      },
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 6
     },
     {
      "tipo": "sala-giochi",
@@ -98,7 +108,7 @@
       "chiave": "akihabara/sala-giochi-akihabara"
      },
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 7
     },
     {
      "tipo": "distributore",
@@ -108,7 +118,7 @@
      "y": 29.883,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 8
     },
     {
      "tipo": "distributore",
@@ -118,7 +128,7 @@
      "y": 13.086,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 9
     },
     {
      "tipo": "distributore",
@@ -128,7 +138,7 @@
      "y": 32.129,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 9
+     "ordine": 10
     },
     {
      "tipo": "distributore",
@@ -138,7 +148,7 @@
      "y": 39.258,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 10
+     "ordine": 11
     }
    ]
   },
@@ -157,6 +167,56 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.062,
+     "y": 34.18,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.062,
+     "y": 50.586,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 60.059,
+     "y": 34.18,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 60.059,
+     "y": 50.879,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.883,
+     "y": 63.867,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
      "tipo": "distributore",
      "nome": "Distributore di bevande",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -164,7 +224,7 @@
      "y": 42.969,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 5
     },
     {
      "tipo": "distributore",
@@ -174,7 +234,7 @@
      "y": 30.957,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 6
     },
     {
      "tipo": "distributore",
@@ -184,7 +244,7 @@
      "y": 28.223,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 7
     },
     {
      "tipo": "negozio",
@@ -194,7 +254,7 @@
      "y": 45.898,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 8
     },
     {
      "tipo": "nota",
@@ -204,7 +264,7 @@
      "y": 60.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 9
     },
     {
      "tipo": "nota",
@@ -214,7 +274,7 @@
      "y": 60.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 10
     }
    ]
   },
@@ -233,6 +293,46 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.648,
+     "y": 33.301,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.648,
+     "y": 50.0,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 58.887,
+     "y": 33.301,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 58.887,
+     "y": 50.0,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
      "tipo": "nota",
      "nome": "Servizi igienici",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -240,7 +340,7 @@
      "y": 60.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 4
     },
     {
      "tipo": "nota",
@@ -250,7 +350,7 @@
      "y": 60.645,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 5
     },
     {
      "tipo": "attivita",
@@ -263,7 +363,7 @@
       "chiave": "shujin-academy/aula-shujin"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 6
     }
    ]
   },
@@ -282,6 +382,46 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.527,
+     "y": 48.535,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.527,
+     "y": 33.008,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 58.008,
+     "y": 48.535,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 58.008,
+     "y": 33.008,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
      "tipo": "nota",
      "nome": "Servizi igienici",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -289,7 +429,7 @@
      "y": 60.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 4
     },
     {
      "tipo": "nota",
@@ -299,7 +439,7 @@
      "y": 60.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 5
     },
     {
      "tipo": "negozio",
@@ -309,7 +449,7 @@
      "y": 45.215,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 6
     }
    ]
   },
@@ -328,6 +468,26 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.875,
+     "y": 33.789,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 7.324,
+     "y": 33.789,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
      "tipo": "distributore",
      "nome": "Distributore di bevande",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -335,7 +495,7 @@
      "y": 23.828,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 2
     }
    ]
   },
@@ -352,7 +512,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.648,
+     "y": 32.52,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874905, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-002-6-0",
@@ -556,6 +733,16 @@
      "riferimento": null,
      "collezionabile": false,
      "ordine": 8
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 4.883,
+     "y": 45.996,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 9
     }
    ]
   },
@@ -572,7 +759,28 @@
    "altezza": 256,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.484,
+     "y": 31.641,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.891,
+     "y": 15.039,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-022-1-0",
@@ -762,7 +970,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.711,
+     "y": 49.805,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-022-1-0",
     "nome": "Covo dei Ladri",
@@ -825,7 +1044,18 @@
    "altezza": 512,
    "entita": null,
    "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno minuto — la meno estesa» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 23.242,
+     "y": 19.141,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
@@ -1047,7 +1277,24 @@
     "chiave": "iweleth-08-piazza-stazione-shibuya-mondo-del-clifoto"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 63.965,
+     "y": 51.562,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874241, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-160-2-0",
@@ -1067,6 +1314,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.863,
+     "y": 63.574,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874241, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.473,
+     "y": 2.832,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874242, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1074,7 +1353,7 @@
      "y": 32.715,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1090,7 +1369,7 @@
      "y": 45.898,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1118,6 +1397,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.645,
+     "y": 45.947,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874242, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 36.035,
+     "y": 2.197,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874243, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1125,7 +1436,7 @@
      "y": 20.996,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1153,6 +1464,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 32.422,
+     "y": 60.205,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874243, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.891,
+     "y": 3.906,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874244, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1160,7 +1503,7 @@
      "y": 20.557,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1236,6 +1579,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.059,
+     "y": 41.406,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874244, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.449,
+     "y": 19.189,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874124, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1243,7 +1618,7 @@
      "y": 27.93,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1259,7 +1634,7 @@
      "y": 22.852,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1285,7 +1660,24 @@
     "chiave": "iweleth-07-santuario"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.156,
+     "y": 48.535,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874124, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-160-10-0",
@@ -1345,7 +1737,40 @@
     "chiave": "futaba-01-entrata-della-piramide"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 16.992,
+     "y": 9.57,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872441, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.213,
+     "y": 35.938,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872332, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-155-2-0",
@@ -1402,6 +1827,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 9.521,
+     "y": 52.881,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872615, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -1409,11 +1850,27 @@
      "y": 32.812,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.506,
+     "y": 32.959,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872551, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -1425,11 +1882,75 @@
      "y": 13.477,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 9.521,
+     "y": 12.598,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872614, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.592,
+     "y": 68.408,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872709, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.24,
+     "y": 48.438,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872710, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.592,
+     "y": 28.418,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872711, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -1645,7 +2166,40 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.098,
+     "y": 37.158,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872551, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 9.668,
+     "y": 40.82,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874116, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-155-4-0",
@@ -1662,6 +2216,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.982,
+     "y": 33.691,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872614, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -1669,7 +2239,7 @@
      "y": 20.654,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1685,7 +2255,7 @@
      "y": 33.984,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1695,13 +2265,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 38.818,
      "y": 5.371,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1717,7 +2287,7 @@
      "y": 20.898,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1742,6 +2312,38 @@
    "note": "Versione «variante grafica» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.287,
+     "y": 53.174,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874117, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.982,
+     "y": 33.691,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872614, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1749,7 +2351,7 @@
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1765,7 +2367,7 @@
      "y": 20.654,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1781,7 +2383,7 @@
      "y": 20.898,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1797,7 +2399,7 @@
      "y": 39.697,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1807,13 +2409,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 39.893,
      "y": 25.391,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1844,6 +2446,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.287,
+     "y": 53.174,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874117, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.982,
+     "y": 33.691,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872614, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1851,7 +2485,7 @@
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1867,7 +2501,7 @@
      "y": 20.654,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1883,7 +2517,7 @@
      "y": 20.898,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1899,7 +2533,7 @@
      "y": 39.697,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1909,13 +2543,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 39.893,
      "y": 25.391,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1946,6 +2580,22 @@
    "note": "Versione «inquadratura orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.072,
+     "y": 13.293,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874117, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco.",
@@ -1953,7 +2603,7 @@
      "y": 4.639,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2118,6 +2768,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.408,
+     "y": 39.502,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872615, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D04_155_07_SEEDicon_1».",
@@ -2125,7 +2791,7 @@
      "y": 25.488,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2150,6 +2816,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.248,
+     "y": 31.494,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874115, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.408,
+     "y": 39.502,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872615, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2157,7 +2855,7 @@
      "y": 8.789,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2173,7 +2871,7 @@
      "y": 24.17,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2189,7 +2887,7 @@
      "y": 24.902,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2363,6 +3061,22 @@
    "note": "Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 3.223,
+     "y": 14.941,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872704, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2370,7 +3084,7 @@
      "y": 21.631,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2420,7 +3134,40 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 3.027,
+     "y": 6.543,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872616, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.314,
+     "y": 21.094,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872332, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-11-2",
     "nome": "Passaggio sotterraneo 2F",
@@ -2441,7 +3188,40 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 3.027,
+     "y": 6.543,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872616, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.314,
+     "y": 21.094,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872332, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-11-2",
     "nome": "Passaggio sotterraneo 2F",
@@ -2524,6 +3304,22 @@
    "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto — la meno estesa» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.025,
+     "y": 25.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873599, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -2531,7 +3327,7 @@
      "y": 25.977,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2562,6 +3358,22 @@
    "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto — la più estesa» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.025,
+     "y": 25.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873599, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -2569,7 +3381,7 @@
      "y": 25.977,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2598,7 +3410,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.461,
+     "y": 8.105,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873597, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-1-0",
     "nome": "Cancello del castello",
@@ -2636,7 +3465,40 @@
     "chiave": "kamoshida-01-cancello-del-castello-ingresso"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.461,
+     "y": 8.105,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873597, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.43,
+     "y": 9.18,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873599, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-1-0",
     "nome": "Cancello del castello",
@@ -2675,6 +3537,54 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.848,
+     "y": 37.842,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873597, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.305,
+     "y": 27.344,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873598, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.758,
+     "y": 20.752,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871183, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2682,7 +3592,7 @@
      "y": 23.828,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2698,7 +3608,7 @@
      "y": 23.828,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2714,7 +3624,7 @@
      "y": 21.191,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2730,7 +3640,7 @@
      "y": 30.42,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2746,7 +3656,7 @@
      "y": 25.684,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2787,6 +3697,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.102,
+     "y": 37.598,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873600, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.758,
+     "y": 20.752,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871183, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2794,7 +3736,7 @@
      "y": 28.32,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2810,7 +3752,7 @@
      "y": 12.012,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2820,13 +3762,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 35.449,
      "y": 33.984,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2842,7 +3784,7 @@
      "y": 10.205,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2858,7 +3800,7 @@
      "y": 22.656,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2874,7 +3816,7 @@
      "y": 13.281,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2890,7 +3832,7 @@
      "y": 14.844,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 9,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2933,6 +3875,38 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.102,
+     "y": 37.598,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873600, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.758,
+     "y": 20.752,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871183, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -3008,7 +3982,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 84.375,
      "y": 2.051,
@@ -3107,6 +4081,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871289, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 87.402,
+     "y": 5.859,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871421, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -3180,7 +4170,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 42.578,
      "y": 11.377,
@@ -3397,6 +4387,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.41,
+     "y": 15.186,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871421, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -3419,7 +4425,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «settore d’ingresso» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.754,
+     "y": 12.988,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871421, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-6-0",
     "nome": "Tetto",
@@ -3481,7 +4504,24 @@
     "chiave": "kamoshida-13-tetto"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 13.477,
+     "y": 17.822,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871422, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-6-0",
     "nome": "Tetto",
@@ -3516,6 +4556,22 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871397, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 13.477,
+     "y": 17.822,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871422, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -3597,7 +4653,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 35.449,
      "y": 40.723,
@@ -3612,6 +4668,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.361,
+     "y": 33.984,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871422, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.93,
+     "y": 40.625,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871424, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -3619,7 +4707,7 @@
      "y": 28.32,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3674,6 +4762,38 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871398, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.996,
+     "y": 41.504,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871424, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.271,
+     "y": 41.504,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871425, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ]
   },
@@ -3692,6 +4812,22 @@
    "note": "Versione «inquadratura meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.066,
+     "y": 27.734,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871425, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -3699,7 +4835,7 @@
      "y": 20.215,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3715,7 +4851,7 @@
      "y": 31.543,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3731,7 +4867,7 @@
      "y": 39.258,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3808,6 +4944,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871393, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.871,
+     "y": 35.449,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871426, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -3848,6 +5000,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.271,
+     "y": 41.406,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871426, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -3855,7 +5023,7 @@
      "y": 58.789,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3916,6 +5084,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.271,
+     "y": 41.406,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871426, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_11_TBOX_minimap_16».",
@@ -3923,7 +5107,7 @@
      "y": 51.465,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3966,7 +5150,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.451,
+     "y": 47.949,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875561, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-151-16-0",
@@ -3984,7 +5185,40 @@
     "chiave": "kamoshida-02-sala-centrale"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.863,
+     "y": 74.902,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873597, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 71.68,
+     "y": 55.371,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873598, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-152-1-0",
@@ -4001,6 +5235,22 @@
    "note": "Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.025,
+     "y": 25.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873599, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -4008,7 +5258,7 @@
      "y": 25.977,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4024,7 +5274,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4040,7 +5290,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4085,6 +5335,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.025,
+     "y": 25.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873599, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -4092,11 +5358,27 @@
      "y": 25.977,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871271, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.545,
+     "y": 8.789,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873598, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -4212,6 +5494,32 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.066,
+     "y": 57.324,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.398,
+     "y": 40.039,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875560, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -4219,7 +5527,7 @@
      "y": 36.23,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4305,6 +5613,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871642, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.359,
+     "y": 3.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875684, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "contesti": [
@@ -4340,6 +5664,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.652,
+     "y": 43.457,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875684, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.484,
+     "y": 42.48,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -4347,7 +5703,7 @@
      "y": 38.086,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4363,7 +5719,7 @@
      "y": 30.322,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4379,7 +5735,7 @@
      "y": 41.26,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4395,7 +5751,7 @@
      "y": 36.426,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4411,7 +5767,7 @@
      "y": 26.27,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4427,7 +5783,7 @@
      "y": 26.27,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4443,7 +5799,7 @@
      "y": 10.889,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4459,7 +5815,7 @@
      "y": 10.889,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 9,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4475,7 +5831,7 @@
      "y": 14.111,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 8,
+     "ordine": 10,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4500,6 +5856,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.484,
+     "y": 42.48,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -4507,7 +5879,7 @@
      "y": 30.127,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4523,11 +5895,27 @@
      "y": 25.195,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536872245, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.652,
+     "y": 43.457,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875684, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -4548,6 +5936,22 @@
    "note": "Versione «settore d’ingresso» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.947,
+     "y": 4.395,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872219, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -4555,7 +5959,7 @@
      "y": 7.324,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4616,6 +6020,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.43,
+     "y": 32.373,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -4623,7 +6043,7 @@
      "y": 26.562,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4633,13 +6053,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 45.996,
      "y": 18.066,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4655,7 +6075,7 @@
      "y": 17.725,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4671,7 +6091,7 @@
      "y": 18.604,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4687,7 +6107,7 @@
      "y": 21.484,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4703,7 +6123,7 @@
      "y": 21.191,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4719,7 +6139,7 @@
      "y": 28.809,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4780,6 +6200,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.43,
+     "y": 32.373,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -4787,7 +6223,7 @@
      "y": 11.182,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4901,6 +6337,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.928,
+     "y": 56.934,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872215, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -4946,6 +6398,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 50.439,
+     "y": 4.395,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872215, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -4953,7 +6421,7 @@
      "y": 34.131,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4969,7 +6437,7 @@
      "y": 11.426,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4985,7 +6453,7 @@
      "y": 24.268,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5055,7 +6523,7 @@
    "spilli": [
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 41.846,
      "y": 13.477,
@@ -5179,7 +6647,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 38.818,
      "y": 30.518,
@@ -5339,6 +6807,22 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.254,
+     "y": 40.723,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872219, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_11_DOOR».",
@@ -5346,7 +6830,7 @@
      "y": 16.553,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5362,7 +6846,7 @@
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5426,7 +6910,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 33.936,
      "y": 10.986,
@@ -5676,7 +7160,24 @@
     "chiave": "madarame-01-entrata-del-museo"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 49.316,
+     "y": 19.775,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871825, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "contesti": [
     {
      "id": "texpack-23-elemento-20",
@@ -5740,7 +7241,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 8.643,
      "y": 39.551,
@@ -5787,6 +7288,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.98,
+     "y": 37.061,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871825, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.496,
+     "y": 0.244,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871826, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D02_153_002_DOOR_0642».",
@@ -5794,7 +7327,7 @@
      "y": 34.131,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5810,7 +7343,7 @@
      "y": 21.191,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5867,6 +7400,38 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.495,
+     "y": 9.265,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871825, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 2.124,
+     "y": 0.061,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871826, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -5941,6 +7506,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 23.096,
+     "y": 6.592,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871827, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.295,
+     "y": 47.412,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871826, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «DOOR_0C80».",
@@ -5948,7 +7545,7 @@
      "y": 36.035,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5964,7 +7561,7 @@
      "y": 16.016,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6021,6 +7618,38 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 23.096,
+     "y": 6.592,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871827, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.295,
+     "y": 47.412,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871826, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -6203,7 +7832,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 69.141,
      "y": 4.248,
@@ -6216,6 +7845,26 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871808, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 59.668,
+     "y": 19.922,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 81.641,
+     "y": 37.891,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
     }
    ]
   },
@@ -6249,6 +7898,38 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.625,
+     "y": 71.777,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871827, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.043,
+     "y": 2.539,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871828, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -6389,7 +8070,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 13.916,
      "y": 14.941,
@@ -6405,7 +8086,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 7.861,
      "y": 4.688,
@@ -6420,6 +8101,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.039,
+     "y": 46.582,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871828, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.039,
+     "y": 12.256,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871829, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -6427,7 +8140,7 @@
      "y": 14.795,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6489,6 +8202,38 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.039,
+     "y": 46.436,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871828, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.039,
+     "y": 12.256,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871829, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -6527,6 +8272,22 @@
    "note": "Versione «porzione occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.842,
+     "y": 3.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874118, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco.",
@@ -6534,7 +8295,7 @@
      "y": 22.559,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6568,6 +8329,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.842,
+     "y": 3.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874118, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -6575,7 +8352,7 @@
      "y": 13.916,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6591,7 +8368,7 @@
      "y": 19.434,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6622,6 +8399,22 @@
    "note": "Versione «inquadratura occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 3.027,
+     "y": 16.064,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871829, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0644».",
@@ -6629,7 +8422,7 @@
      "y": 22.07,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6823,6 +8616,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.078,
+     "y": 32.471,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871830, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0038».",
@@ -6830,7 +8639,7 @@
      "y": 14.795,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6895,7 +8704,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 41.016,
      "y": 14.551,
@@ -6926,6 +8735,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.078,
+     "y": 32.471,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871830, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco.",
@@ -6933,7 +8758,7 @@
      "y": 14.795,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6949,7 +8774,7 @@
      "y": 7.08,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6965,7 +8790,7 @@
      "y": 4.59,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7101,6 +8926,22 @@
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.643,
+     "y": 42.822,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875224, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -7108,7 +8949,7 @@
      "y": 51.758,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7124,7 +8965,7 @@
      "y": 42.871,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7140,7 +8981,7 @@
      "y": 47.852,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7174,6 +9015,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.643,
+     "y": 42.822,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875224, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -7181,7 +9038,7 @@
      "y": 30.078,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7197,7 +9054,7 @@
      "y": 4.932,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7240,6 +9097,22 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.568,
+     "y": 34.912,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875235, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -7298,6 +9171,54 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.82,
+     "y": 8.008,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875224, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.471,
+     "y": 24.707,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875240, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 10.352,
+     "y": 10.889,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875290, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -7305,7 +9226,7 @@
      "y": 12.061,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7339,6 +9260,70 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 16.602,
+     "y": 31.25,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875230, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.82,
+     "y": 8.008,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875224, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.471,
+     "y": 24.707,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875240, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 10.352,
+     "y": 10.889,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875290, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -7346,7 +9331,7 @@
      "y": 15.234,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7380,14 +9365,30 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.355,
+     "y": 17.749,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875235, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 6.836,
      "y": 10.425,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7478,6 +9479,38 @@
    "note": "Versione «porzione orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.743,
+     "y": 21.338,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875240, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.519,
+     "y": 20.996,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875230, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -7485,7 +9518,7 @@
      "y": 9.253,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7519,14 +9552,46 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.743,
+     "y": 21.338,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875240, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.519,
+     "y": 20.996,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875230, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 9.473,
      "y": 4.736,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7557,6 +9622,22 @@
    "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.146,
+     "y": 71.777,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875256, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -7564,7 +9645,7 @@
      "y": 62.402,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7580,7 +9661,7 @@
      "y": 66.699,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7611,6 +9692,22 @@
    "note": "Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.146,
+     "y": 71.777,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875256, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -7618,7 +9715,7 @@
      "y": 62.402,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7711,6 +9808,22 @@
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.725,
+     "y": 7.568,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875458, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -7718,11 +9831,27 @@
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536875383, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.621,
+     "y": 14.6,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875282, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -7734,7 +9863,7 @@
      "y": 18.115,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7823,7 +9952,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 9.521,
      "y": 17.773,
@@ -7930,14 +10059,30 @@
    "note": "Versione «porzione orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.955,
+     "y": 14.99,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875987, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 52.686,
      "y": 33.984,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7953,7 +10098,7 @@
      "y": 17.822,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7969,7 +10114,7 @@
      "y": 37.305,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7985,7 +10130,7 @@
      "y": 17.725,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8001,7 +10146,7 @@
      "y": 27.393,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8017,7 +10162,7 @@
      "y": 12.988,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8067,14 +10212,30 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.955,
+     "y": 14.99,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875987, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 33.008,
      "y": 6.006,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8090,7 +10251,7 @@
      "y": 16.113,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8106,7 +10267,7 @@
      "y": 8.887,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8158,6 +10319,22 @@
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.648,
+     "y": 30.078,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875290, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -8165,7 +10342,7 @@
      "y": 23.535,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8274,6 +10451,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.17,
+     "y": 51.27,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875458, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.234,
+     "y": 58.838,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875168, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -8281,7 +10490,7 @@
      "y": 9.766,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8331,6 +10540,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.17,
+     "y": 51.27,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875408, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.234,
+     "y": 58.838,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875409, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -8338,7 +10579,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8354,7 +10595,7 @@
      "y": 22.314,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8364,13 +10605,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 2.93,
      "y": 19.043,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8386,7 +10627,7 @@
      "y": 15.137,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8470,6 +10711,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.568,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875987, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -8477,7 +10734,7 @@
      "y": 22.119,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8543,6 +10800,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.568,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875987, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -8550,7 +10823,7 @@
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8581,6 +10854,22 @@
    "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.516,
+     "y": 19.092,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875256, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -8588,7 +10877,7 @@
      "y": 22.461,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8604,7 +10893,7 @@
      "y": 22.461,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8620,7 +10909,7 @@
      "y": 22.266,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8652,7 +10941,7 @@
    "spilli": [
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 37.402,
      "y": 14.16,
@@ -8667,6 +10956,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.516,
+     "y": 19.092,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875256, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta chiusa",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock04».",
@@ -8674,7 +10979,7 @@
      "y": 19.873,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8887,6 +11192,54 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.844,
+     "y": 4.932,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873482, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 4.98,
+     "y": 17.529,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873196, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.348,
+     "y": 36.914,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873483, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -8894,7 +11247,7 @@
      "y": 36.865,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8910,7 +11263,7 @@
      "y": 17.529,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8926,7 +11279,7 @@
      "y": 22.607,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8942,7 +11295,7 @@
      "y": 22.607,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8989,6 +11342,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 59.277,
+     "y": 39.551,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873483, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 59.277,
+     "y": 18.896,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873196, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -8996,7 +11381,7 @@
      "y": 35.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9012,7 +11397,7 @@
      "y": 32.08,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9028,7 +11413,7 @@
      "y": 41.162,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9044,7 +11429,7 @@
      "y": 41.309,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9060,7 +11445,7 @@
      "y": 16.748,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9076,7 +11461,7 @@
      "y": 9.961,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9092,7 +11477,7 @@
      "y": 8.35,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 9,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9164,6 +11549,38 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 38.477,
+     "y": 28.809,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873484, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 5.078,
+     "y": 28.516,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873486, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ]
   },
@@ -9185,6 +11602,54 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.361,
+     "y": 32.812,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873484, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 57.031,
+     "y": 12.793,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873485, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 69.775,
+     "y": 28.027,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873314, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -9192,7 +11657,7 @@
      "y": 50.293,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9208,7 +11673,7 @@
      "y": 19.922,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9276,14 +11741,46 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.203,
+     "y": 20.801,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873485, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.873,
+     "y": 27.783,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873314, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 7.324,
      "y": 9.326,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9299,7 +11796,7 @@
      "y": 37.012,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9315,7 +11812,7 @@
      "y": 38.672,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9419,6 +11916,38 @@
    "note": "Versione «porzione settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.75,
+     "y": 29.492,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873486, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 0.098,
+     "y": 27.441,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -9426,7 +11955,7 @@
      "y": 34.18,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9442,7 +11971,7 @@
      "y": 21.973,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9476,6 +12005,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.75,
+     "y": 29.492,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873486, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 0.098,
+     "y": 27.441,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -9483,7 +12044,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9499,7 +12060,7 @@
      "y": 38.574,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9515,7 +12076,7 @@
      "y": 26.367,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9544,7 +12105,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.32,
+     "y": 21.387,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-9-0",
     "nome": "Stanza slot machine",
@@ -9567,6 +12145,22 @@
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.32,
+     "y": 21.387,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -9574,7 +12168,7 @@
      "y": 24.512,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9605,6 +12199,38 @@
    "note": "Versione «porzione settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 48.047,
+     "y": 12.744,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873412, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 1.66,
+     "y": 12.744,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873500, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -9612,7 +12238,7 @@
      "y": 3.369,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9647,7 +12273,7 @@
    "spilli": [
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 32.129,
      "y": 23.291,
@@ -9662,6 +12288,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 48.047,
+     "y": 12.744,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873412, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 1.66,
+     "y": 12.744,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873500, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -9669,7 +12327,7 @@
      "y": 3.369,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9712,6 +12370,22 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536875958, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 12.305,
+     "y": 21.655,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873413, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -9757,14 +12431,46 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 68.994,
+     "y": 26.855,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873500, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.104,
+     "y": 26.562,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873501, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 16.65,
      "y": 26.855,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9780,7 +12486,7 @@
      "y": 11.719,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9796,7 +12502,7 @@
      "y": 43.262,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9812,7 +12518,7 @@
      "y": 28.613,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9828,7 +12534,7 @@
      "y": 23.438,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9844,7 +12550,7 @@
      "y": 38.672,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9946,6 +12652,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 1.025,
+     "y": 16.113,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873412, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ]
   },
@@ -9962,7 +12684,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.148,
+     "y": 3.711,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873413, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-16-0",
     "nome": "Direzione",
@@ -9986,7 +12725,24 @@
     "chiave": "niijima-14-direzione-sala-del-boss"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.148,
+     "y": 3.711,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873413, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-16-0",
     "nome": "Direzione",
@@ -10229,6 +12985,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.264,
+     "y": 6.592,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872835, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -10236,7 +13008,7 @@
      "y": 32.52,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10252,7 +13024,7 @@
      "y": 32.031,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10316,6 +13088,38 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 50.195,
+     "y": 47.168,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872835, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.42,
+     "y": 3.906,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872838, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -10323,7 +13127,7 @@
      "y": 18.604,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10339,7 +13143,7 @@
      "y": 34.277,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10951,14 +13755,30 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.238,
+     "y": 3.955,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872839, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 46.191,
      "y": 19.336,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11006,6 +13826,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.238,
+     "y": 3.955,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872839, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -11013,7 +13849,7 @@
      "y": 64.111,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11029,7 +13865,7 @@
      "y": 61.963,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11045,7 +13881,7 @@
      "y": 73.926,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11093,6 +13929,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.088,
+     "y": 54.102,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872839, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 3.76,
+     "y": 12.793,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872840, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -11100,7 +13968,7 @@
      "y": 44.727,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11141,14 +14009,30 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.494,
+     "y": 6.396,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872840, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 53.711,
      "y": 20.508,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11164,7 +14048,7 @@
      "y": 30.615,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11264,7 +14148,7 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 38.867,
      "y": 39.209,
@@ -11370,6 +14254,22 @@
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.711,
+     "y": 9.766,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872842, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -11377,7 +14277,7 @@
      "y": 35.449,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11393,7 +14293,7 @@
      "y": 15.234,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11445,6 +14345,22 @@
    "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.152,
+     "y": 43.359,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872842, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -11452,7 +14368,7 @@
      "y": 10.449,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11711,7 +14627,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 54.932,
+     "y": 31.055,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873844, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "contesti": [
     {
      "id": "texpack-84-elemento-120",
@@ -12203,6 +15136,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.074,
+     "y": 26.855,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873991, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -12245,7 +15194,7 @@
    "spilli": [
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 24.902,
      "y": 22.266,
@@ -12294,7 +15243,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.57,
+     "y": 26.562,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873847, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-6-0",
     "nome": "Sala intrattenimento 2P",
@@ -12347,6 +15313,22 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 12.598,
+     "y": 12.012,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873847, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -12354,7 +15336,7 @@
      "y": 26.855,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12402,6 +15384,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 12.598,
+     "y": 40.137,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873848, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -12409,7 +15407,7 @@
      "y": 46.582,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12606,14 +15604,30 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 48.535,
+     "y": 21.68,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873987, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 14.307,
      "y": 33.398,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12672,6 +15686,70 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.889,
+     "y": 22.803,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873846, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.496,
+     "y": 22.852,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873994, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.068,
+     "y": 21.045,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875921, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 59.863,
+     "y": 22.656,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873622, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -12726,14 +15804,78 @@
      ]
     },
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.889,
+     "y": 22.803,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873846, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.496,
+     "y": 22.852,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873994, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.068,
+     "y": 21.045,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875921, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 59.863,
+     "y": 22.656,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873622, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 17.725,
      "y": 26.66,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12851,6 +15993,16 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.186,
+     "y": 22.754,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -12858,7 +16010,7 @@
      "y": 22.021,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12874,7 +16026,7 @@
      "y": 4.199,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12890,7 +16042,7 @@
      "y": 9.912,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12942,6 +16094,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 54.199,
+     "y": 3.76,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875921, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.148,
+     "y": 1.758,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875904, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco.",
@@ -12949,7 +16133,7 @@
      "y": 37.402,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13223,6 +16407,22 @@
    "note": "Versione «porzione orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 69.629,
+     "y": 7.715,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873848, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -13230,7 +16430,7 @@
      "y": 23.34,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13246,7 +16446,7 @@
      "y": 36.035,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13262,7 +16462,7 @@
      "y": 17.871,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13278,7 +16478,7 @@
      "y": 10.693,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13294,7 +16494,7 @@
      "y": 26.367,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13310,7 +16510,7 @@
      "y": 17.871,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13326,7 +16526,7 @@
      "y": 34.131,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13342,7 +16542,7 @@
      "y": 26.367,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13358,7 +16558,7 @@
      "y": 35.645,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 8,
+     "ordine": 9,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13392,6 +16592,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 0.586,
+     "y": 17.725,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871325, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 69.629,
+     "y": 7.715,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873848, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -13399,7 +16631,7 @@
      "y": 20.312,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13409,13 +16641,13 @@
     },
     {
      "tipo": "forziere",
-     "nome": "Forziere raro",
+     "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
      "x": 49.072,
      "y": 4.346,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13446,6 +16678,38 @@
    "note": "Versione «inquadratura orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 60.547,
+     "y": 37.305,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871719, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.461,
+     "y": 54.98,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873846, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D7_30_Door_Lock_A».",
@@ -13453,7 +16717,7 @@
      "y": 42.09,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13469,7 +16733,7 @@
      "y": 27.246,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13485,7 +16749,7 @@
      "y": 36.963,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13501,7 +16765,7 @@
      "y": 42.871,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13535,6 +16799,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 60.498,
+     "y": 37.305,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871719, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.461,
+     "y": 54.834,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873846, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -13542,7 +16838,7 @@
      "y": 45.605,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13558,7 +16854,7 @@
      "y": 33.301,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13574,7 +16870,7 @@
      "y": 42.041,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13590,7 +16886,7 @@
      "y": 49.023,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13624,6 +16920,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.168,
+     "y": 65.674,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872080, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D7_35_Door_Lock_A».",
@@ -13631,7 +16943,7 @@
      "y": 53.027,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13647,7 +16959,7 @@
      "y": 56.396,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13663,7 +16975,7 @@
      "y": 40.137,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13691,6 +17003,16 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.398,
+     "y": 13.965,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -13698,7 +17020,7 @@
      "y": 41.797,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13723,6 +17045,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 20.215,
+     "y": 56.25,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874245, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.008,
+     "y": 0.293,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874246, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -13730,7 +17084,7 @@
      "y": 9.326,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13746,7 +17100,7 @@
      "y": 59.863,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13825,6 +17179,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 36.621,
+     "y": 42.578,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874246, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.307,
+     "y": 0.732,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874120, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -13832,7 +17218,7 @@
      "y": 18.555,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13926,6 +17312,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.238,
+     "y": 67.041,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874247, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.52,
+     "y": 12.109,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874248, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -13933,7 +17351,7 @@
      "y": 10.938,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -13958,6 +17376,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 67.383,
+     "y": 32.227,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874248, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.938,
+     "y": 1.416,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874121, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -13965,7 +17415,7 @@
      "y": 27.1,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -14035,6 +17485,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.473,
+     "y": 46.143,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874249, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.727,
+     "y": 0.83,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874250, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -14042,7 +17524,7 @@
      "y": 14.111,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -14058,7 +17540,7 @@
      "y": 21.582,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -14087,7 +17569,40 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.238,
+     "y": 35.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874250, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 2.539,
+     "y": 29.736,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874251, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-8-0",
     "nome": "Corridoio della prigione – Parte V",
@@ -14110,6 +17625,38 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.152,
+     "y": 61.914,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874251, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.32,
+     "y": 2.734,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536874122, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "sicura",
      "nome": "Stanza sicura",
      "descrizione": "Pin nativo del gioco.",
@@ -14117,7 +17664,7 @@
      "y": 41.748,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -14133,7 +17680,7 @@
      "y": 54.346,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -14179,6 +17726,66 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.336,
+     "y": 50.586,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.889,
+     "y": 50.586,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.477,
+     "y": 36.621,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.617,
+     "y": 35.156,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 31.885,
+     "y": 16.895,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 31.885,
+     "y": 13.965,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
      "tipo": "attivita",
      "nome": "Lotteria",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -14186,7 +17793,7 @@
      "y": 22.07,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 6
     }
    ]
   },
@@ -14205,6 +17812,96 @@
    "note": "Versione «inquadratura orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.57,
+     "y": 54.688,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.621,
+     "y": 39.16,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.971,
+     "y": 39.16,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 42.139,
+     "y": 5.859,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.545,
+     "y": 9.57,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.914,
+     "y": 11.035,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.213,
+     "y": 29.297,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.729,
+     "y": 38.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 50.098,
+     "y": 49.512,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
      "tipo": "distributore",
      "nome": "Chiosco dei succhi",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -14212,7 +17909,7 @@
      "y": 39.844,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 9
     },
     {
      "tipo": "negozio",
@@ -14225,7 +17922,7 @@
       "chiave": "shibuya/kiyasuku"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 10
     },
     {
      "tipo": "cercalavoro",
@@ -14235,7 +17932,7 @@
      "y": 41.504,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 11
     },
     {
      "tipo": "cercalavoro",
@@ -14245,7 +17942,7 @@
      "y": 34.961,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 12
     },
     {
      "tipo": "distributore",
@@ -14255,7 +17952,17 @@
      "y": 45.801,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 13
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 55.176,
+     "y": 41.797,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 14
     }
    ],
    "gruppoImmagini": {
@@ -14301,6 +18008,26 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.328,
+     "y": 65.039,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.883,
+     "y": 25.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
      "tipo": "sala-giochi",
      "nome": "Sala giochi (Central Street)",
      "descrizione": "Pin nativo del gioco.",
@@ -14311,7 +18038,7 @@
       "chiave": "shibuya/sala-giochi-shibuya"
      },
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 2
     },
     {
      "tipo": "ristorante",
@@ -14324,7 +18051,7 @@
       "chiave": "shibuya/ore-no-beko"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 3
     },
     {
      "tipo": "negozio",
@@ -14337,7 +18064,7 @@
       "chiave": "shibuya/untouchable"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 4
     },
     {
      "tipo": "attivita",
@@ -14350,7 +18077,7 @@
       "chiave": "shibuya/protein-lovers"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 5
     },
     {
      "tipo": "negozio",
@@ -14363,7 +18090,7 @@
       "chiave": "shibuya/scarlet"
      },
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 6
     },
     {
      "tipo": "negozio",
@@ -14376,7 +18103,7 @@
       "chiave": "shibuya/rocinante"
      },
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 7
     },
     {
      "tipo": "negozio",
@@ -14389,7 +18116,7 @@
       "chiave": "shibuya/aohige"
      },
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 8
     },
     {
      "tipo": "ristorante",
@@ -14402,7 +18129,7 @@
       "chiave": "shibuya/diner"
      },
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 9
     },
     {
      "tipo": "ristorante",
@@ -14415,7 +18142,7 @@
       "chiave": "shibuya/big-bang-burger"
      },
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 10
     },
     {
      "tipo": "negozio",
@@ -14428,7 +18155,7 @@
       "chiave": "shibuya/taiheido"
      },
      "collezionabile": false,
-     "ordine": 9
+     "ordine": 11
     },
     {
      "tipo": "negozio",
@@ -14441,7 +18168,7 @@
       "chiave": "shibuya/triple-seven"
      },
      "collezionabile": false,
-     "ordine": 10
+     "ordine": 12
     },
     {
      "tipo": "cinema",
@@ -14451,7 +18178,7 @@
      "y": 9.277,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 11
+     "ordine": 13
     },
     {
      "tipo": "distributore",
@@ -14461,7 +18188,7 @@
      "y": 53.906,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 12
+     "ordine": 14
     }
    ]
   },
@@ -14480,6 +18207,36 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.424,
+     "y": 5.176,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.086,
+     "y": 23.73,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.965,
+     "y": 34.277,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
      "tipo": "negozio",
      "nome": "Gioielleria",
      "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
@@ -14487,7 +18244,7 @@
      "y": 19.922,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 3
     },
     {
      "tipo": "negozio",
@@ -14500,7 +18257,7 @@
       "chiave": "shibuya/rafflesia"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 4
     },
     {
      "tipo": "negozio",
@@ -14510,7 +18267,7 @@
      "y": 22.559,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 5
     },
     {
      "tipo": "negozio",
@@ -14523,7 +18280,7 @@
       "chiave": "shibuya/body-chop"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 6
     },
     {
      "tipo": "negozio",
@@ -14533,7 +18290,7 @@
      "y": 19.824,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 7
     },
     {
      "tipo": "negozio",
@@ -14543,7 +18300,7 @@
      "y": 16.504,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 8
     },
     {
      "tipo": "negozio",
@@ -14553,7 +18310,7 @@
      "y": 22.363,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 9
     }
    ]
   },
@@ -14572,6 +18329,26 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 8.496,
+     "y": 42.578,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.945,
+     "y": 49.805,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
      "tipo": "negozio",
      "nome": "Panetteria Yon-Germain",
      "descrizione": "Pin nativo del gioco.",
@@ -14582,7 +18359,7 @@
       "chiave": "shibuya/yon-germain"
      },
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 2
     },
     {
      "tipo": "distributore",
@@ -14592,7 +18369,7 @@
      "y": 39.648,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 3
     },
     {
      "tipo": "distributore",
@@ -14602,7 +18379,7 @@
      "y": 50.781,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 4
     }
    ]
   },
@@ -14619,7 +18396,28 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.086,
+     "y": 38.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 45.41,
+     "y": 38.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-006-1-0",
@@ -14636,6 +18434,16 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.902,
+     "y": 56.445,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
      "tipo": "ristorante",
      "nome": "Bar Crossroads",
      "descrizione": "Pin nativo del gioco.",
@@ -14646,7 +18454,7 @@
       "chiave": "shinjuku/crossroads"
      },
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 1
     },
     {
      "tipo": "negozio",
@@ -14656,7 +18464,7 @@
      "y": 30.664,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 2
     },
     {
      "tipo": "negozio",
@@ -14666,7 +18474,7 @@
      "y": 27.051,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 3
     },
     {
      "tipo": "negozio",
@@ -14679,7 +18487,7 @@
       "chiave": "shinjuku/hinokuniya"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 4
     },
     {
      "tipo": "distributore",
@@ -14689,7 +18497,7 @@
      "y": 34.766,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 5
     },
     {
      "tipo": "distributore",
@@ -14699,7 +18507,7 @@
      "y": 31.25,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 6
     },
     {
      "tipo": "distributore",
@@ -14709,7 +18517,7 @@
      "y": 19.824,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 7
     },
     {
      "tipo": "cinema",
@@ -14722,7 +18530,7 @@
       "chiave": "shinjuku/cinema-cult9"
      },
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 8
     }
    ]
   },
@@ -14741,6 +18549,16 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 56.152,
+     "y": 2.246,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
      "tipo": "distributore",
      "nome": "Distributore automatico (Tabaccaio)",
      "descrizione": "Pin nativo del gioco.",
@@ -14751,7 +18569,7 @@
       "chiave": "yongen-jaya/distributore-tabaccaio"
      },
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 1
     },
     {
      "tipo": "distributore",
@@ -14764,7 +18582,7 @@
       "chiave": "yongen-jaya/distributore-tabaccaio"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 2
     },
     {
      "tipo": "lavanderia",
@@ -14777,7 +18595,7 @@
       "chiave": "yongen-jaya/lavanderia-yongen"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 3
     },
     {
      "tipo": "attivita",
@@ -14790,7 +18608,7 @@
       "chiave": "yongen-jaya/batting-cage-yongen"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 4
     },
     {
      "tipo": "casa",
@@ -14803,7 +18621,7 @@
       "chiave": "yongen-jaya/leblanc"
      },
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 5
     },
     {
      "tipo": "negozio",
@@ -14816,7 +18634,7 @@
       "chiave": "yongen-jaya/super-muramasa"
      },
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 6
     },
     {
      "tipo": "terme",
@@ -14829,7 +18647,7 @@
       "chiave": "yongen-jaya/bagno-pubblico"
      },
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 7
     },
     {
      "tipo": "negozio",
@@ -14842,7 +18660,7 @@
       "chiave": "yongen-jaya/negozio-usato-yumenoshima"
      },
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 8
     },
     {
      "tipo": "negozio",
@@ -14855,7 +18673,7 @@
       "chiave": "yongen-jaya/clinica-takemi"
      },
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 9
     },
     {
      "tipo": "cinema",
@@ -14868,7 +18686,7 @@
       "chiave": "yongen-jaya/cinema-yongen"
      },
      "collezionabile": false,
-     "ordine": 9
+     "ordine": 10
     }
    ]
   }
