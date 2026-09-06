@@ -1448,11 +1448,23 @@ export interface ImmagineDto {
 
 // ---- Mappe a livelli e spilli (Fase 13) ----
 
+/** Che cosa è l'immagine di una mappa. È un dato dichiarato, non una deduzione dal percorso
+ * dell'asset o dalle sue dimensioni, che frontend e backend leggevano in modo diverso.
+ *
+ *   planimetria-nativa        pianta estratta dal gioco
+ *   illustrazione-editoriale  mappa disegnata per l'applicazione: si consulta e porta spilli
+ *   emblema                   stemma del Palazzo: identifica il luogo, non lo rappresenta
+ *   nessuna                   la mappa non ha immagine propria
+ */
+export const RUOLI_IMMAGINE = ['planimetria-nativa', 'illustrazione-editoriale', 'emblema', 'nessuna'] as const;
+export type RuoloImmagine = (typeof RUOLI_IMMAGINE)[number];
+
 export interface MappaRiassuntoDto {
+  ruoloImmagine?: RuoloImmagine;
   /** Ordinale di una collezione presentativa di immagini omonime, mai numero di piano. */
   immagineCollezione?: {indice:number;totale:number;ambito:string};
   contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
-  gruppoImmagini?: {id:string;nome:string;ordine:number};
+  gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string};
   nomeCompleto?: string;
   genitoreNome?: string|null;
   assetOriginale?: string|null;
@@ -1548,8 +1560,9 @@ export interface EsportazioneMappeDto {
   versione: 1;
   esportato?: string;
   mappe: Array<{
+    ruoloImmagine?: RuoloImmagine;
     contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
-    gruppoImmagini?: {id:string;nome:string;ordine:number};
+    gruppoImmagini?: {id:string;nome:string;ordine:number;etichetta?:string};
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;

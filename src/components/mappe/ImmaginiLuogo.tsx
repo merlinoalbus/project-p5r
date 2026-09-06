@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
 import { useAsset } from '../../stores/assetStore';
+import { etichettaVersione } from '../../utils/etichettaVersione';
 
 interface Props {
   mappe: MappaRiassuntoDto[];
@@ -18,8 +19,8 @@ export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
 function Miniatura({ mappa, indice, totale, attuale, children }: { mappa: MappaRiassuntoDto; indice: number; totale: number; attuale?: string; children?: ReactNode }) {
   const asset = useAsset(mappa.asset), originale = useAsset(mappa.assetOriginale);
   const src = mappa.immagineUrl ?? asset ?? originale;
-  return <li><Link className="card flex flex-col items-center gap-2 no-underline text-text touch" aria-current={attuale === mappa.chiave ? 'page' : undefined} to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`}>
+  return <li><Link className="card flex flex-col items-center gap-2 no-underline text-text touch max-w-44" aria-current={attuale === mappa.chiave ? 'page' : undefined} to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`}>
     {src && <img src={src} alt="" className="w-28 h-24 object-contain bg-neutral-700 rounded" />}
-    <span>Immagine {indice} di {totale}</span>
+    <span className="text-[12px] text-center">{etichettaVersione(mappa, indice, totale)}</span>
   </Link>{children}</li>;
 }

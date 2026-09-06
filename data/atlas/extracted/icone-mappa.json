@@ -1,0 +1,5882 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "foglio": {
+      "file": "originali/IT/FIELD/PANEL/P5MINIMAP_01.SPD",
+      "bytes": 3549728,
+      "sha256": "1d4040276257772d5618c71b75f605fe8b0013b3813ebfc72c36d4d5f2de1c13"
+    },
+    "piazzamenti": {
+      "cartella": "originali/BASE/FIELD/PANEL/ROADMAP",
+      "file": 178
+    }
+  },
+  "texture": [
+    {
+      "id": 1,
+      "offset": 31008,
+      "bytes": 2470016,
+      "larghezza": 1536,
+      "altezza": 1608,
+      "nome": "p5minimap_01"
+    },
+    {
+      "id": 2,
+      "offset": 2501024,
+      "bytes": 1048704,
+      "larghezza": 1024,
+      "altezza": 1024,
+      "nome": "p5minimap_02"
+    }
+  ],
+  "sprite": [
+    {
+      "index": 0,
+      "id": 1,
+      "texturaId": 1,
+      "offset": 128,
+      "x": 2,
+      "y": 2,
+      "larghezza": 76,
+      "altezza": 76,
+      "resa": [
+        38,
+        38
+      ],
+      "nomeRawHex": "837d8362837696bc89ba926e",
+      "nome": "マップ名下地",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-000.png"
+    },
+    {
+      "index": 1,
+      "id": 2,
+      "texturaId": 1,
+      "offset": 288,
+      "x": 84,
+      "y": 2,
+      "larghezza": 38,
+      "altezza": 40,
+      "resa": [
+        19,
+        20
+      ],
+      "nomeRawHex": "837e836a837d8362837681468ea995aa97708341834383528393",
+      "nome": "ミニマップ：自分用アイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-001.png"
+    },
+    {
+      "index": 2,
+      "id": 3,
+      "texturaId": 1,
+      "offset": 448,
+      "x": 84,
+      "y": 48,
+      "larghezza": 26,
+      "altezza": 26,
+      "resa": [
+        13,
+        13
+      ],
+      "nomeRawHex": "837e836a837d83628376814693478141826d826f82628341834383528393",
+      "nome": "ミニマップ：敵、ＮＰＣアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-002.png"
+    },
+    {
+      "index": 3,
+      "id": 4,
+      "texturaId": 1,
+      "offset": 608,
+      "x": 642,
+      "y": 452,
+      "larghezza": 0,
+      "altezza": 64,
+      "resa": [
+        0,
+        32
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 4,
+      "id": 5,
+      "texturaId": 1,
+      "offset": 768,
+      "x": 632,
+      "y": 438,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "837e836a837d83628376814695f394a0",
+      "nome": "ミニマップ：宝箱",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 5,
+      "id": 6,
+      "texturaId": 1,
+      "offset": 928,
+      "x": 630,
+      "y": 450,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "837e836a837d83628376814696da9349926e",
+      "nome": "ミニマップ：目的地",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 6,
+      "id": 7,
+      "texturaId": 1,
+      "offset": 1088,
+      "x": 626,
+      "y": 438,
+      "larghezza": 0,
+      "altezza": 62,
+      "resa": [
+        0,
+        31
+      ],
+      "nomeRawHex": "837e836a837d8362837681468a4b9269",
+      "nome": "ミニマップ：階段",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 7,
+      "id": 8,
+      "texturaId": 1,
+      "offset": 1248,
+      "x": 644,
+      "y": 446,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "837e836a837d8362837681468f6f93fc8cfb",
+      "nome": "ミニマップ：出入口",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 8,
+      "id": 9,
+      "texturaId": 1,
+      "offset": 1408,
+      "x": 620,
+      "y": 450,
+      "larghezza": 0,
+      "altezza": 62,
+      "resa": [
+        0,
+        31
+      ],
+      "nomeRawHex": "837e836a837d8362837681468cae959489ae",
+      "nome": "ミニマップ：鍵部屋",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 9,
+      "id": 10,
+      "texturaId": 1,
+      "offset": 1568,
+      "x": 626,
+      "y": 450,
+      "larghezza": 66,
+      "altezza": 0,
+      "resa": [
+        33,
+        0
+      ],
+      "nomeRawHex": "837e836a837d836283768146906993fc957389c2",
+      "nome": "ミニマップ：進入不可",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 10,
+      "id": 11,
+      "texturaId": 1,
+      "offset": 1728,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 11,
+      "id": 12,
+      "texturaId": 1,
+      "offset": 1888,
+      "x": 174,
+      "y": 2,
+      "larghezza": 56,
+      "altezza": 78,
+      "resa": [
+        28,
+        39
+      ],
+      "nomeRawHex": "837e836a837d8362837681468ea995aa97708341834383528393",
+      "nome": "ミニマップ：自分用アイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-011.png"
+    },
+    {
+      "index": 12,
+      "id": 13,
+      "texturaId": 1,
+      "offset": 2048,
+      "x": 116,
+      "y": 48,
+      "larghezza": 34,
+      "altezza": 32,
+      "resa": [
+        17,
+        16
+      ],
+      "nomeRawHex": "837e836a837d83628376814693478141826d826f82628341834383528393",
+      "nome": "ミニマップ：敵、ＮＰＣアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-012.png"
+    },
+    {
+      "index": 13,
+      "id": 14,
+      "texturaId": 1,
+      "offset": 2208,
+      "x": 648,
+      "y": 468,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 14,
+      "id": 15,
+      "texturaId": 1,
+      "offset": 2368,
+      "x": 2,
+      "y": 512,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "837e836a837d836283768140837d836283769867",
+      "nome": "ミニマップ　マップ枠",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 15,
+      "id": 16,
+      "texturaId": 1,
+      "offset": 2528,
+      "x": 644,
+      "y": 468,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 16,
+      "id": 17,
+      "texturaId": 1,
+      "offset": 2688,
+      "x": 638,
+      "y": 480,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 17,
+      "id": 18,
+      "texturaId": 1,
+      "offset": 2848,
+      "x": 654,
+      "y": 458,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 18,
+      "id": 19,
+      "texturaId": 1,
+      "offset": 3008,
+      "x": 846,
+      "y": 512,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "82da82a982b5",
+      "nome": "ぼかし",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 19,
+      "id": 20,
+      "texturaId": 1,
+      "offset": 3168,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 20,
+      "id": 21,
+      "texturaId": 1,
+      "offset": 3328,
+      "x": 300,
+      "y": 134,
+      "larghezza": 36,
+      "altezza": 36,
+      "resa": [
+        18,
+        18
+      ],
+      "nomeRawHex": "837e836a837d8362837681468ea995aa91ab82a082c6",
+      "nome": "ミニマップ：自分足あと",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-020.png"
+    },
+    {
+      "index": 21,
+      "id": 22,
+      "texturaId": 1,
+      "offset": 3488,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 22,
+      "id": 23,
+      "texturaId": 1,
+      "offset": 3648,
+      "x": 402,
+      "y": 534,
+      "larghezza": 104,
+      "altezza": 128,
+      "resa": [
+        52,
+        64
+      ],
+      "nomeRawHex": "837e836a837d8362837681468f6f93fc82e88cfb8341834383528393",
+      "nome": "ミニマップ：出入り口アイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-022.png"
+    },
+    {
+      "index": 23,
+      "id": 24,
+      "texturaId": 1,
+      "offset": 3808,
+      "x": 2,
+      "y": 470,
+      "larghezza": 126,
+      "altezza": 120,
+      "resa": [
+        63,
+        60
+      ],
+      "nomeRawHex": "837e836a837d836283768146835a815b8374838b815b83808341834383528393",
+      "nome": "ミニマップ：セーフルームアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-023.png"
+    },
+    {
+      "index": 24,
+      "id": 25,
+      "texturaId": 1,
+      "offset": 3968,
+      "x": 134,
+      "y": 794,
+      "larghezza": 138,
+      "altezza": 112,
+      "resa": [
+        69,
+        56
+      ],
+      "nomeRawHex": "837e836a837d8362837681468367838c83578383815b837c8343839383678341",
+      "nome": "ミニマップ：トレジャーポイントア",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-024.png"
+    },
+    {
+      "index": 25,
+      "id": 26,
+      "texturaId": 1,
+      "offset": 4128,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "837e836a837d8362837681468382838b834b83698cae",
+      "nome": "ミニマップ：モルガナ鍵",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 26,
+      "id": 27,
+      "texturaId": 1,
+      "offset": 4288,
+      "x": 278,
+      "y": 794,
+      "larghezza": 108,
+      "altezza": 88,
+      "resa": [
+        54,
+        44
+      ],
+      "nomeRawHex": "837e836a837d83628376814695f394a0",
+      "nome": "ミニマップ：宝箱",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-026.png"
+    },
+    {
+      "index": 27,
+      "id": 28,
+      "texturaId": 1,
+      "offset": 4448,
+      "x": 2,
+      "y": 336,
+      "larghezza": 138,
+      "altezza": 132,
+      "resa": [
+        69,
+        66
+      ],
+      "nomeRawHex": "837e836a837d83628376814696da9349926e81459446926d838d8362834e837c",
+      "nome": "ミニマップ：目的地・認知ロックポ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-027.png"
+    },
+    {
+      "index": 28,
+      "id": 29,
+      "texturaId": 1,
+      "offset": 4608,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 98,
+      "resa": [
+        0,
+        49
+      ],
+      "nomeRawHex": "837e836a837d83628376814689f682b582a28fea8f8a8341834383528393",
+      "nome": "ミニマップ：怪しい場所アイコン",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 29,
+      "id": 30,
+      "texturaId": 1,
+      "offset": 4768,
+      "x": 218,
+      "y": 326,
+      "larghezza": 96,
+      "altezza": 84,
+      "resa": [
+        48,
+        42
+      ],
+      "nomeRawHex": "837e836a837d83628376814693c18eea8cae81458ba494c68ed2834e83478358",
+      "nome": "ミニマップ：特殊鍵・共犯者クエス",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-029.png"
+    },
+    {
+      "index": 30,
+      "id": 31,
+      "texturaId": 1,
+      "offset": 4928,
+      "x": 144,
+      "y": 336,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d8362837681468a4a82a982c882a294e0",
+      "nome": "ミニマップ：開かない扉",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-030.png"
+    },
+    {
+      "index": 31,
+      "id": 32,
+      "texturaId": 1,
+      "offset": 5088,
+      "x": 560,
+      "y": 764,
+      "larghezza": 40,
+      "altezza": 56,
+      "resa": [
+        20,
+        28
+      ],
+      "nomeRawHex": "837e836a837d8362837681468367838c83578383815b837c8343839383679770",
+      "nome": "ミニマップ：トレジャーポイント用",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-031.png"
+    },
+    {
+      "index": 32,
+      "id": 33,
+      "texturaId": 1,
+      "offset": 5248,
+      "x": 606,
+      "y": 764,
+      "larghezza": 38,
+      "altezza": 56,
+      "resa": [
+        19,
+        28
+      ],
+      "nomeRawHex": "837e836a837d8362837681468367838c83578383815b837c8343839383679770",
+      "nome": "ミニマップ：トレジャーポイント用",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-032.png"
+    },
+    {
+      "index": 33,
+      "id": 34,
+      "texturaId": 1,
+      "offset": 5408,
+      "x": 650,
+      "y": 764,
+      "larghezza": 40,
+      "altezza": 56,
+      "resa": [
+        20,
+        28
+      ],
+      "nomeRawHex": "837e836a837d8362837681468367838c83578383815b837c8343839383679770",
+      "nome": "ミニマップ：トレジャーポイント用",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-033.png"
+    },
+    {
+      "index": 34,
+      "id": 35,
+      "texturaId": 1,
+      "offset": 5568,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 35,
+      "id": 36,
+      "texturaId": 1,
+      "offset": 5728,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 36,
+      "id": 37,
+      "texturaId": 1,
+      "offset": 5888,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 37,
+      "id": 38,
+      "texturaId": 1,
+      "offset": 6048,
+      "x": 2,
+      "y": 84,
+      "larghezza": 202,
+      "altezza": 122,
+      "resa": [
+        101,
+        61
+      ],
+      "nomeRawHex": "838a83588367834a815b835c838b814081aa",
+      "nome": "リストカーソル　↑",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-037.png"
+    },
+    {
+      "index": 38,
+      "id": 39,
+      "texturaId": 1,
+      "offset": 6208,
+      "x": 2,
+      "y": 210,
+      "larghezza": 202,
+      "altezza": 122,
+      "resa": [
+        101,
+        61
+      ],
+      "nomeRawHex": "838a83588367834a815b835c838b814081ab",
+      "nome": "リストカーソル　↓",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-038.png"
+    },
+    {
+      "index": 39,
+      "id": 40,
+      "texturaId": 1,
+      "offset": 6368,
+      "x": 2,
+      "y": 2,
+      "larghezza": 4,
+      "altezza": 4,
+      "resa": [
+        2,
+        2
+      ],
+      "nomeRawHex": "838a83588367834a815b835c838b81408ea995aa82cc88ca9275",
+      "nome": "リストカーソル　自分の位置",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-039.png"
+    },
+    {
+      "index": 40,
+      "id": 41,
+      "texturaId": 1,
+      "offset": 6528,
+      "x": 570,
+      "y": 572,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "837e836a837d83628376837d8358834e94cd88cd",
+      "nome": "ミニマップマスク範囲",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 41,
+      "id": 42,
+      "texturaId": 1,
+      "offset": 6688,
+      "x": 206,
+      "y": 204,
+      "larghezza": 120,
+      "altezza": 120,
+      "resa": [
+        60,
+        60
+      ],
+      "nomeRawHex": "837e836a837d83628376837d8358834e8d7382ab90e68341834383528393",
+      "nome": "ミニマップマスク行き先アイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-041.png"
+    },
+    {
+      "index": 42,
+      "id": 43,
+      "texturaId": 1,
+      "offset": 6848,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "834c815b8377838b837681408358834e838d815b838b",
+      "nome": "キーヘルプ　スクロール",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 43,
+      "id": 44,
+      "texturaId": 1,
+      "offset": 7008,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "834c815b8377838b83768140984890fc907d82d6",
+      "nome": "キーヘルプ　路線図へ",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 44,
+      "id": 45,
+      "texturaId": 1,
+      "offset": 7168,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "834c815b8377838b837681408a6791e5955c8ea6",
+      "nome": "キーヘルプ　拡大表示",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 45,
+      "id": 46,
+      "texturaId": 1,
+      "offset": 7328,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 192,
+      "resa": [
+        0,
+        96
+      ],
+      "nomeRawHex": "834c815b8377838b837681408f6b8fac955c8ea6",
+      "nome": "キーヘルプ　縮小表示",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 46,
+      "id": 47,
+      "texturaId": 1,
+      "offset": 7488,
+      "x": 234,
+      "y": 2,
+      "larghezza": 56,
+      "altezza": 78,
+      "resa": [
+        28,
+        39
+      ],
+      "nomeRawHex": "837e836a837d8362837681468ea995aa9770834183438352839332",
+      "nome": "ミニマップ：自分用アイコン2",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-046.png"
+    },
+    {
+      "index": 47,
+      "id": 48,
+      "texturaId": 1,
+      "offset": 7648,
+      "x": 294,
+      "y": 2,
+      "larghezza": 56,
+      "altezza": 78,
+      "resa": [
+        28,
+        39
+      ],
+      "nomeRawHex": "837e836a837d8362837681468ea995aa9770834183438352839333",
+      "nome": "ミニマップ：自分用アイコン3",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-047.png"
+    },
+    {
+      "index": 48,
+      "id": 49,
+      "texturaId": 1,
+      "offset": 7808,
+      "x": 206,
+      "y": 84,
+      "larghezza": 90,
+      "altezza": 116,
+      "resa": [
+        45,
+        58
+      ],
+      "nomeRawHex": "837e836a837d83628376814688da93ae90e6834183438352839331",
+      "nome": "ミニマップ：移動先アイコン1",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-048.png"
+    },
+    {
+      "index": 49,
+      "id": 50,
+      "texturaId": 1,
+      "offset": 7968,
+      "x": 300,
+      "y": 84,
+      "larghezza": 48,
+      "altezza": 48,
+      "resa": [
+        24,
+        24
+      ],
+      "nomeRawHex": "837e836a837d83628376814688da93ae90e6834183438352839332",
+      "nome": "ミニマップ：移動先アイコン2",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-049.png"
+    },
+    {
+      "index": 50,
+      "id": 51,
+      "texturaId": 1,
+      "offset": 8128,
+      "x": 402,
+      "y": 2,
+      "larghezza": 1130,
+      "altezza": 370,
+      "resa": [
+        565,
+        185
+      ],
+      "nomeRawHex": "4e4f4e45204d4150",
+      "nome": "NONE MAP",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-050.png"
+    },
+    {
+      "index": 51,
+      "id": 52,
+      "texturaId": 1,
+      "offset": 8288,
+      "x": 128,
+      "y": 2,
+      "larghezza": 42,
+      "altezza": 42,
+      "resa": [
+        21,
+        21
+      ],
+      "nomeRawHex": "837e836a837d836283768146838d815b836892868341834383528393",
+      "nome": "ミニマップ：ロード中アイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-051.png"
+    },
+    {
+      "index": 52,
+      "id": 53,
+      "texturaId": 1,
+      "offset": 8448,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 53,
+      "id": 54,
+      "texturaId": 1,
+      "offset": 8608,
+      "x": 2,
+      "y": 594,
+      "larghezza": 126,
+      "altezza": 120,
+      "resa": [
+        63,
+        60
+      ],
+      "nomeRawHex": "837e836a837d8362837681468378838b837883628367",
+      "nome": "ミニマップ：ベルベット",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-053.png"
+    },
+    {
+      "index": 54,
+      "id": 55,
+      "texturaId": 1,
+      "offset": 8768,
+      "x": 2,
+      "y": 716,
+      "larghezza": 126,
+      "altezza": 120,
+      "resa": [
+        63,
+        60
+      ],
+      "nomeRawHex": "837e836a837d836283768146835a815b8375837c834383938367",
+      "nome": "ミニマップ：セーブポイント",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-054.png"
+    },
+    {
+      "index": 55,
+      "id": 56,
+      "texturaId": 1,
+      "offset": 8928,
+      "x": 2,
+      "y": 840,
+      "larghezza": 114,
+      "altezza": 90,
+      "resa": [
+        57,
+        45
+      ],
+      "nomeRawHex": "837e836a837d83628376814695f394a08a4a95958dcf82dd",
+      "nome": "ミニマップ：宝箱開封済み",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-055.png"
+    },
+    {
+      "index": 56,
+      "id": 57,
+      "texturaId": 1,
+      "offset": 9088,
+      "x": 144,
+      "y": 414,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "837e836a837d83628376814682e282b682e982b5814081aa",
+      "nome": "ミニマップ：やじるし　↑",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-056.png"
+    },
+    {
+      "index": 57,
+      "id": 58,
+      "texturaId": 1,
+      "offset": 9248,
+      "x": 144,
+      "y": 414,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "837e836a837d83628376814682e282b682e982b5814089ba",
+      "nome": "ミニマップ：やじるし　下",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-057.png"
+    },
+    {
+      "index": 58,
+      "id": 59,
+      "texturaId": 1,
+      "offset": 9408,
+      "x": 260,
+      "y": 414,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "837e836a837d83628376814682e282b682e982b581408945",
+      "nome": "ミニマップ：やじるし　右",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-058.png"
+    },
+    {
+      "index": 59,
+      "id": 60,
+      "texturaId": 1,
+      "offset": 9568,
+      "x": 260,
+      "y": 414,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "837e836a837d83628376814682e282b682e982b581408db6",
+      "nome": "ミニマップ：やじるし　左",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-059.png"
+    },
+    {
+      "index": 60,
+      "id": 61,
+      "texturaId": 1,
+      "offset": 9728,
+      "x": 134,
+      "y": 528,
+      "larghezza": 264,
+      "altezza": 264,
+      "resa": [
+        132,
+        132
+      ],
+      "nomeRawHex": "837e836a837d8362837681468349835e834a838983528341",
+      "nome": "ミニマップ：オタカラコア",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-060.png"
+    },
+    {
+      "index": 61,
+      "id": 62,
+      "texturaId": 1,
+      "offset": 9888,
+      "x": 512,
+      "y": 504,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d836283768146455849548140",
+      "nome": "ミニマップ：EXIT　",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-061.png"
+    },
+    {
+      "index": 62,
+      "id": 63,
+      "texturaId": 1,
+      "offset": 10048,
+      "x": 770,
+      "y": 504,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d836283768146455849548140949294c2",
+      "nome": "ミニマップ：EXIT　白板",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-062.png"
+    },
+    {
+      "index": 63,
+      "id": 64,
+      "texturaId": 1,
+      "offset": 10208,
+      "x": 354,
+      "y": 2,
+      "larghezza": 38,
+      "altezza": 336,
+      "resa": [
+        19,
+        168
+      ],
+      "nomeRawHex": "837e836a837d836283768146835e8343838490d5",
+      "nome": "ミニマップ：タイヤ跡",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-063.png"
+    },
+    {
+      "index": 64,
+      "id": 65,
+      "texturaId": 1,
+      "offset": 10368,
+      "x": 378,
+      "y": 414,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "837e836a837d8362837681468fe389ba88da93ae96ee88f381408fe3",
+      "nome": "ミニマップ：上下移動矢印　上",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-064.png"
+    },
+    {
+      "index": 65,
+      "id": 66,
+      "texturaId": 1,
+      "offset": 10528,
+      "x": 378,
+      "y": 414,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "837e836a837d8362837681468fe389ba88da93ae96ee88f3814089ba",
+      "nome": "ミニマップ：上下移動矢印　下",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-065.png"
+    },
+    {
+      "index": 66,
+      "id": 67,
+      "texturaId": 1,
+      "offset": 10688,
+      "x": 2,
+      "y": 936,
+      "larghezza": 334,
+      "altezza": 132,
+      "resa": [
+        167,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b837681408358834e838d815b838b",
+      "nome": "キーヘルプ　スクロール",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-066.png"
+    },
+    {
+      "index": 67,
+      "id": 68,
+      "texturaId": 1,
+      "offset": 10848,
+      "x": 2,
+      "y": 1070,
+      "larghezza": 306,
+      "altezza": 126,
+      "resa": [
+        153,
+        63
+      ],
+      "nomeRawHex": "834c815b8377838b837681408a6791e5",
+      "nome": "キーヘルプ　拡大",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-067.png"
+    },
+    {
+      "index": 68,
+      "id": 69,
+      "texturaId": 1,
+      "offset": 11008,
+      "x": 2,
+      "y": 1202,
+      "larghezza": 276,
+      "altezza": 132,
+      "resa": [
+        138,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b8376814095c282b682e9",
+      "nome": "キーヘルプ　閉じる",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-068.png"
+    },
+    {
+      "index": 69,
+      "id": 70,
+      "texturaId": 1,
+      "offset": 11168,
+      "x": 2,
+      "y": 1336,
+      "larghezza": 350,
+      "altezza": 132,
+      "resa": [
+        175,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b837681408c8892e8",
+      "nome": "キーヘルプ　決定",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-069.png"
+    },
+    {
+      "index": 70,
+      "id": 71,
+      "texturaId": 1,
+      "offset": 11328,
+      "x": 404,
+      "y": 668,
+      "larghezza": 154,
+      "altezza": 108,
+      "resa": [
+        77,
+        54
+      ],
+      "nomeRawHex": "834c815b8377838b837681404c31",
+      "nome": "キーヘルプ　L1",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-070.png"
+    },
+    {
+      "index": 71,
+      "id": 72,
+      "texturaId": 1,
+      "offset": 11488,
+      "x": 404,
+      "y": 780,
+      "larghezza": 154,
+      "altezza": 108,
+      "resa": [
+        77,
+        54
+      ],
+      "nomeRawHex": "834c815b8377838b837681405231",
+      "nome": "キーヘルプ　R1",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-071.png"
+    },
+    {
+      "index": 72,
+      "id": 73,
+      "texturaId": 1,
+      "offset": 11648,
+      "x": 346,
+      "y": 932,
+      "larghezza": 406,
+      "altezza": 136,
+      "resa": [
+        203,
+        68
+      ],
+      "nomeRawHex": "834c815b8377838b83768140837d8362837690d882e891d682a6",
+      "nome": "キーヘルプ　マップ切り替え",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-072.png"
+    },
+    {
+      "index": 73,
+      "id": 74,
+      "texturaId": 1,
+      "offset": 11808,
+      "x": 320,
+      "y": 338,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "9286837b8358",
+      "nome": "中ボス",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-073.png"
+    },
+    {
+      "index": 74,
+      "id": 75,
+      "texturaId": 1,
+      "offset": 11968,
+      "x": 494,
+      "y": 374,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d836283768146646f776e",
+      "nome": "ミニマップ：down",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-074.png"
+    },
+    {
+      "index": 75,
+      "id": 76,
+      "texturaId": 1,
+      "offset": 12128,
+      "x": 756,
+      "y": 374,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d836283768146646f776e949294c2",
+      "nome": "ミニマップ：down白板",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-075.png"
+    },
+    {
+      "index": 76,
+      "id": 77,
+      "texturaId": 1,
+      "offset": 12288,
+      "x": 1010,
+      "y": 374,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d836283768146757020",
+      "nome": "ミニマップ：up ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-076.png"
+    },
+    {
+      "index": 77,
+      "id": 78,
+      "texturaId": 1,
+      "offset": 12448,
+      "x": 1028,
+      "y": 504,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d836283768146757020949294c2",
+      "nome": "ミニマップ：up 白板",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-077.png"
+    },
+    {
+      "index": 78,
+      "id": 79,
+      "texturaId": 1,
+      "offset": 12608,
+      "x": 1064,
+      "y": 634,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "96ee88f38db68fe3",
+      "nome": "矢印左上",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-078.png"
+    },
+    {
+      "index": 79,
+      "id": 80,
+      "texturaId": 1,
+      "offset": 12768,
+      "x": 1182,
+      "y": 634,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "96ee88f389458fe3",
+      "nome": "矢印右上",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-079.png"
+    },
+    {
+      "index": 80,
+      "id": 81,
+      "texturaId": 1,
+      "offset": 12928,
+      "x": 1064,
+      "y": 746,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "96ee88f38db689ba",
+      "nome": "矢印左下",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-080.png"
+    },
+    {
+      "index": 81,
+      "id": 82,
+      "texturaId": 1,
+      "offset": 13088,
+      "x": 1182,
+      "y": 746,
+      "larghezza": 114,
+      "altezza": 108,
+      "resa": [
+        57,
+        54
+      ],
+      "nomeRawHex": "96ee88f3894589ba",
+      "nome": "矢印右下",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-081.png"
+    },
+    {
+      "index": 82,
+      "id": 83,
+      "texturaId": 1,
+      "offset": 13248,
+      "x": 894,
+      "y": 1186,
+      "larghezza": 284,
+      "altezza": 132,
+      "resa": [
+        142,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b837681408f6b8fac",
+      "nome": "キーヘルプ　縮小",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-082.png"
+    },
+    {
+      "index": 83,
+      "id": 84,
+      "texturaId": 1,
+      "offset": 13408,
+      "x": 1290,
+      "y": 374,
+      "larghezza": 242,
+      "altezza": 84,
+      "resa": [
+        121,
+        42
+      ],
+      "nomeRawHex": "83818381839383678358814095c78140",
+      "nome": "メメントス　壁　",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-083.png"
+    },
+    {
+      "index": 84,
+      "id": 85,
+      "texturaId": 1,
+      "offset": 13568,
+      "x": 1290,
+      "y": 462,
+      "larghezza": 242,
+      "altezza": 84,
+      "resa": [
+        121,
+        42
+      ],
+      "nomeRawHex": "838183818393836783588140836883418140",
+      "nome": "メメントス　ドア　",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-084.png"
+    },
+    {
+      "index": 85,
+      "id": 86,
+      "texturaId": 1,
+      "offset": 13728,
+      "x": 1298,
+      "y": 548,
+      "larghezza": 176,
+      "altezza": 226,
+      "resa": [
+        88,
+        113
+      ],
+      "nomeRawHex": "8349835e834a83898341834383528393",
+      "nome": "オタカラアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-085.png"
+    },
+    {
+      "index": 86,
+      "id": 87,
+      "texturaId": 1,
+      "offset": 13888,
+      "x": 818,
+      "y": 634,
+      "larghezza": 244,
+      "altezza": 84,
+      "resa": [
+        122,
+        42
+      ],
+      "nomeRawHex": "82b182ed82ea82e9834a8378",
+      "nome": "こわれるカベ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-086.png"
+    },
+    {
+      "index": 87,
+      "id": 88,
+      "texturaId": 1,
+      "offset": 14048,
+      "x": 696,
+      "y": 764,
+      "larghezza": 102,
+      "altezza": 132,
+      "resa": [
+        51,
+        66
+      ],
+      "nomeRawHex": "837e836a837d8362837681468382838b834b836982a9815b8341834383528393",
+      "nome": "ミニマップ：モルガナかーアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-087.png"
+    },
+    {
+      "index": 88,
+      "id": 89,
+      "texturaId": 1,
+      "offset": 14208,
+      "x": 802,
+      "y": 764,
+      "larghezza": 102,
+      "altezza": 132,
+      "resa": [
+        51,
+        66
+      ],
+      "nomeRawHex": "837e836a837d8362837681468382838b834b836982a9815b8341834383528393",
+      "nome": "ミニマップ：モルガナかーアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-088.png"
+    },
+    {
+      "index": 89,
+      "id": 90,
+      "texturaId": 1,
+      "offset": 14368,
+      "x": 906,
+      "y": 764,
+      "larghezza": 102,
+      "altezza": 132,
+      "resa": [
+        51,
+        66
+      ],
+      "nomeRawHex": "837e836a837d8362837681468382838b834b836982a9815b8341834383528393",
+      "nome": "ミニマップ：モルガナかーアイコン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-089.png"
+    },
+    {
+      "index": 90,
+      "id": 91,
+      "texturaId": 1,
+      "offset": 14528,
+      "x": 284,
+      "y": 1202,
+      "larghezza": 546,
+      "altezza": 132,
+      "resa": [
+        273,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b8376814052318381838183938367835891538c69",
+      "nome": "キーヘルプ　R1メメントス全景",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-090.png"
+    },
+    {
+      "index": 91,
+      "id": 92,
+      "texturaId": 1,
+      "offset": 14688,
+      "x": 378,
+      "y": 1340,
+      "larghezza": 454,
+      "altezza": 132,
+      "resa": [
+        227,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b837681405231984890fc907d",
+      "nome": "キーヘルプ　R1路線図",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-091.png"
+    },
+    {
+      "index": 92,
+      "id": 93,
+      "texturaId": 1,
+      "offset": 14848,
+      "x": 934,
+      "y": 1340,
+      "larghezza": 312,
+      "altezza": 132,
+      "resa": [
+        156,
+        66
+      ],
+      "nomeRawHex": "834c815b8377838b837681405896df82e9",
+      "nome": "キーヘルプ　X戻る",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-092.png"
+    },
+    {
+      "index": 93,
+      "id": 94,
+      "texturaId": 1,
+      "offset": 15008,
+      "x": 1356,
+      "y": 776,
+      "larghezza": 174,
+      "altezza": 174,
+      "resa": [
+        87,
+        87
+      ],
+      "nomeRawHex": "837e836a837d836283768146836083468362834e",
+      "nome": "ミニマップ：チェック",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-093.png"
+    },
+    {
+      "index": 94,
+      "id": 95,
+      "texturaId": 1,
+      "offset": 15168,
+      "x": 560,
+      "y": 634,
+      "larghezza": 256,
+      "altezza": 128,
+      "resa": [
+        128,
+        64
+      ],
+      "nomeRawHex": "837e836a837d8362837681468e4f8a70",
+      "nome": "ミニマップ：三角",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-094.png"
+    },
+    {
+      "index": 95,
+      "id": 96,
+      "texturaId": 1,
+      "offset": 15328,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "975c94f59867",
+      "nome": "予備枠",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 96,
+      "id": 97,
+      "texturaId": 1,
+      "offset": 15488,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "975c94f59867",
+      "nome": "予備枠",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 97,
+      "id": 98,
+      "texturaId": 1,
+      "offset": 15648,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "975c94f59867",
+      "nome": "予備枠",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 98,
+      "id": 99,
+      "texturaId": 1,
+      "offset": 15808,
+      "x": 1356,
+      "y": 776,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "975c94f59867",
+      "nome": "予備枠",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 99,
+      "id": 100,
+      "texturaId": 1,
+      "offset": 15968,
+      "x": 1356,
+      "y": 776,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "975c94f59867",
+      "nome": "予備枠",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 100,
+      "id": 101,
+      "texturaId": 1,
+      "offset": 16128,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 101,
+      "id": 102,
+      "texturaId": 1,
+      "offset": 16288,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 102,
+      "id": 103,
+      "texturaId": 1,
+      "offset": 16448,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 103,
+      "id": 104,
+      "texturaId": 1,
+      "offset": 16608,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "82b182b182a982e750355292c789c195aa",
+      "nome": "ここからP5R追加分",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 104,
+      "id": 105,
+      "texturaId": 1,
+      "offset": 16768,
+      "x": 560,
+      "y": 826,
+      "larghezza": 100,
+      "altezza": 100,
+      "resa": [
+        50,
+        50
+      ],
+      "nomeRawHex": "837e836a837d8362837681468352815b837c",
+      "nome": "ミニマップ：コーポ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-104.png"
+    },
+    {
+      "index": 105,
+      "id": 106,
+      "texturaId": 1,
+      "offset": 16928,
+      "x": 936,
+      "y": 898,
+      "larghezza": 200,
+      "altezza": 188,
+      "resa": [
+        100,
+        94
+      ],
+      "nomeRawHex": "837e836a837d836283768146838183818393836783588356838783628376",
+      "nome": "ミニマップ：メメントスショップ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-105.png"
+    },
+    {
+      "index": 106,
+      "id": 107,
+      "texturaId": 1,
+      "offset": 17088,
+      "x": 756,
+      "y": 898,
+      "larghezza": 172,
+      "altezza": 170,
+      "resa": [
+        86,
+        85
+      ],
+      "nomeRawHex": "8358835e83938376",
+      "nome": "スタンプ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-106.png"
+    },
+    {
+      "index": 107,
+      "id": 108,
+      "texturaId": 1,
+      "offset": 17248,
+      "x": 1334,
+      "y": 1346,
+      "larghezza": 200,
+      "altezza": 188,
+      "resa": [
+        100,
+        94
+      ],
+      "nomeRawHex": "8eed",
+      "nome": "種",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-107.png"
+    },
+    {
+      "index": 108,
+      "id": 109,
+      "texturaId": 1,
+      "offset": 17408,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 109,
+      "id": 110,
+      "texturaId": 1,
+      "offset": 17568,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 110,
+      "id": 111,
+      "texturaId": 1,
+      "offset": 17728,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 111,
+      "id": 112,
+      "texturaId": 1,
+      "offset": 17888,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 112,
+      "id": 113,
+      "texturaId": 1,
+      "offset": 18048,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 113,
+      "id": 114,
+      "texturaId": 1,
+      "offset": 18208,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 114,
+      "id": 115,
+      "texturaId": 2,
+      "offset": 18368,
+      "x": 774,
+      "y": 222,
+      "larghezza": 92,
+      "altezza": 112,
+      "resa": [
+        46,
+        56
+      ],
+      "nomeRawHex": "834183438352839381468ea994cc8b40",
+      "nome": "アイコン：自販機",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-114.png"
+    },
+    {
+      "index": 115,
+      "id": 116,
+      "texturaId": 2,
+      "offset": 18528,
+      "x": 2,
+      "y": 2,
+      "larghezza": 104,
+      "altezza": 100,
+      "resa": [
+        52,
+        50
+      ],
+      "nomeRawHex": "8341834383528393814695f382ad82b6",
+      "nome": "アイコン：宝くじ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-115.png"
+    },
+    {
+      "index": 116,
+      "id": 117,
+      "texturaId": 2,
+      "offset": 18688,
+      "x": 2,
+      "y": 288,
+      "larghezza": 108,
+      "altezza": 120,
+      "resa": [
+        54,
+        60
+      ],
+      "nomeRawHex": "83418343835283938146836f834383678fee95f1",
+      "nome": "アイコン：バイト情報",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-116.png"
+    },
+    {
+      "index": 117,
+      "id": 118,
+      "texturaId": 2,
+      "offset": 18848,
+      "x": 888,
+      "y": 312,
+      "larghezza": 84,
+      "altezza": 112,
+      "resa": [
+        42,
+        56
+      ],
+      "nomeRawHex": "8341834383528393814683578385815b8354815b836f815b",
+      "nome": "アイコン：ジューサーバー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-117.png"
+    },
+    {
+      "index": 118,
+      "id": 119,
+      "texturaId": 2,
+      "offset": 19008,
+      "x": 2,
+      "y": 104,
+      "larghezza": 104,
+      "altezza": 88,
+      "resa": [
+        52,
+        44
+      ],
+      "nomeRawHex": "83418343835283938146834c83888358834e",
+      "nome": "アイコン：キヨスク",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-118.png"
+    },
+    {
+      "index": 119,
+      "id": 120,
+      "texturaId": 2,
+      "offset": 19168,
+      "x": 96,
+      "y": 570,
+      "larghezza": 88,
+      "altezza": 96,
+      "resa": [
+        44,
+        48
+      ],
+      "nomeRawHex": "83418343835283938146967b89ae",
+      "nome": "アイコン：本屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-119.png"
+    },
+    {
+      "index": 120,
+      "id": 121,
+      "texturaId": 2,
+      "offset": 19328,
+      "x": 112,
+      "y": 386,
+      "larghezza": 92,
+      "altezza": 84,
+      "resa": [
+        46,
+        42
+      ],
+      "nomeRawHex": "83418343835283938146838c8393835e838b445644",
+      "nome": "アイコン：レンタルDVD",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-120.png"
+    },
+    {
+      "index": 121,
+      "id": 122,
+      "texturaId": 2,
+      "offset": 19488,
+      "x": 104,
+      "y": 472,
+      "larghezza": 96,
+      "altezza": 96,
+      "resa": [
+        48,
+        48
+      ],
+      "nomeRawHex": "8341834383528393814683748340837e838c8358",
+      "nome": "アイコン：ファミレス",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-121.png"
+    },
+    {
+      "index": 122,
+      "id": 123,
+      "texturaId": 2,
+      "offset": 19648,
+      "x": 88,
+      "y": 194,
+      "larghezza": 84,
+      "altezza": 92,
+      "resa": [
+        42,
+        46
+      ],
+      "nomeRawHex": "834183438352839381468b8d98a5",
+      "nome": "アイコン：牛丼",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-122.png"
+    },
+    {
+      "index": 123,
+      "id": 124,
+      "texturaId": 2,
+      "offset": 19808,
+      "x": 2,
+      "y": 410,
+      "larghezza": 100,
+      "altezza": 84,
+      "resa": [
+        50,
+        42
+      ],
+      "nomeRawHex": "83418343835283938146837e838a835e838a815b8356838783628376",
+      "nome": "アイコン：ミリタリーショップ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-123.png"
+    },
+    {
+      "index": 124,
+      "id": 125,
+      "texturaId": 2,
+      "offset": 19968,
+      "x": 108,
+      "y": 108,
+      "larghezza": 76,
+      "altezza": 84,
+      "resa": [
+        38,
+        42
+      ],
+      "nomeRawHex": "834183438352839381468351815b835a8393",
+      "nome": "アイコン：ゲーセン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-124.png"
+    },
+    {
+      "index": 125,
+      "id": 126,
+      "texturaId": 2,
+      "offset": 20128,
+      "x": 174,
+      "y": 194,
+      "larghezza": 88,
+      "altezza": 96,
+      "resa": [
+        44,
+        48
+      ],
+      "nomeRawHex": "83418343835283938146835283938372836a",
+      "nome": "アイコン：コンビニ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-125.png"
+    },
+    {
+      "index": 126,
+      "id": 127,
+      "texturaId": 2,
+      "offset": 20288,
+      "x": 2,
+      "y": 496,
+      "larghezza": 100,
+      "altezza": 72,
+      "resa": [
+        50,
+        36
+      ],
+      "nomeRawHex": "8341834383528393814683578380",
+      "nome": "アイコン：ジム",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-126.png"
+    },
+    {
+      "index": 127,
+      "id": 128,
+      "texturaId": 2,
+      "offset": 20448,
+      "x": 108,
+      "y": 2,
+      "larghezza": 104,
+      "altezza": 104,
+      "resa": [
+        52,
+        52
+      ],
+      "nomeRawHex": "8341834383528393814683728362834e836f8393836f815b834b815b",
+      "nome": "アイコン：ビックバンバーガー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-127.png"
+    },
+    {
+      "index": 128,
+      "id": 129,
+      "texturaId": 2,
+      "offset": 20608,
+      "x": 2,
+      "y": 570,
+      "larghezza": 92,
+      "altezza": 92,
+      "resa": [
+        46,
+        46
+      ],
+      "nomeRawHex": "83418343835283938146836883898362834f835883678341",
+      "nome": "アイコン：ドラッグストア",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-128.png"
+    },
+    {
+      "index": 129,
+      "id": 130,
+      "texturaId": 2,
+      "offset": 20768,
+      "x": 112,
+      "y": 292,
+      "larghezza": 92,
+      "altezza": 92,
+      "resa": [
+        46,
+        46
+      ],
+      "nomeRawHex": "8341834383528393814683688393834c",
+      "nome": "アイコン：ドンキ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-129.png"
+    },
+    {
+      "index": 130,
+      "id": 131,
+      "texturaId": 2,
+      "offset": 20928,
+      "x": 666,
+      "y": 2,
+      "larghezza": 112,
+      "altezza": 108,
+      "resa": [
+        56,
+        54
+      ],
+      "nomeRawHex": "83418343835283938146896689e68ad9",
+      "nome": "アイコン：映画館",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-130.png"
+    },
+    {
+      "index": 131,
+      "id": 132,
+      "texturaId": 2,
+      "offset": 21088,
+      "x": 186,
+      "y": 108,
+      "larghezza": 80,
+      "altezza": 84,
+      "resa": [
+        40,
+        42
+      ],
+      "nomeRawHex": "8341834383528393814689d489ae",
+      "nome": "アイコン：花屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-131.png"
+    },
+    {
+      "index": 132,
+      "id": 133,
+      "texturaId": 2,
+      "offset": 21248,
+      "x": 406,
+      "y": 296,
+      "larghezza": 104,
+      "altezza": 120,
+      "resa": [
+        52,
+        60
+      ],
+      "nomeRawHex": "834183438352839381468358815b8370815b",
+      "nome": "アイコン：スーパー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-132.png"
+    },
+    {
+      "index": 133,
+      "id": 134,
+      "texturaId": 2,
+      "offset": 21408,
+      "x": 206,
+      "y": 386,
+      "larghezza": 80,
+      "altezza": 88,
+      "resa": [
+        40,
+        44
+      ],
+      "nomeRawHex": "834183438352839381468358837c815b836397709569",
+      "nome": "アイコン：スポーツ用品",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-133.png"
+    },
+    {
+      "index": 134,
+      "id": 135,
+      "texturaId": 2,
+      "offset": 21568,
+      "x": 288,
+      "y": 418,
+      "larghezza": 80,
+      "altezza": 68,
+      "resa": [
+        40,
+        34
+      ],
+      "nomeRawHex": "83418343835283938146986195978e4789dd",
+      "nome": "アイコン：和風雑貨",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-134.png"
+    },
+    {
+      "index": 135,
+      "id": 136,
+      "texturaId": 2,
+      "offset": 21728,
+      "x": 202,
+      "y": 562,
+      "larghezza": 80,
+      "altezza": 80,
+      "resa": [
+        40,
+        40
+      ],
+      "nomeRawHex": "8341834383528393814695f390ce9358",
+      "nome": "アイコン：宝石店",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-135.png"
+    },
+    {
+      "index": 136,
+      "id": 137,
+      "texturaId": 2,
+      "offset": 21888,
+      "x": 206,
+      "y": 300,
+      "larghezza": 80,
+      "altezza": 84,
+      "resa": [
+        40,
+        42
+      ],
+      "nomeRawHex": "834183438352839381468341834e835a8354838a815b",
+      "nome": "アイコン：アクセサリー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-136.png"
+    },
+    {
+      "index": 137,
+      "id": 138,
+      "texturaId": 2,
+      "offset": 22048,
+      "x": 202,
+      "y": 476,
+      "larghezza": 80,
+      "altezza": 84,
+      "resa": [
+        40,
+        42
+      ],
+      "nomeRawHex": "83418343835283938146835283588381",
+      "nome": "アイコン：コスメ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-137.png"
+    },
+    {
+      "index": 138,
+      "id": 139,
+      "texturaId": 2,
+      "offset": 22208,
+      "x": 284,
+      "y": 488,
+      "larghezza": 84,
+      "altezza": 80,
+      "resa": [
+        42,
+        40
+      ],
+      "nomeRawHex": "834183438352839381468370839389ae",
+      "nome": "アイコン：パン屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-138.png"
+    },
+    {
+      "index": 139,
+      "id": 140,
+      "texturaId": 2,
+      "offset": 22368,
+      "x": 284,
+      "y": 570,
+      "larghezza": 96,
+      "altezza": 92,
+      "resa": [
+        48,
+        46
+      ],
+      "nomeRawHex": "8341834383528393814683678343838c",
+      "nome": "アイコン：トイレ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-139.png"
+    },
+    {
+      "index": 140,
+      "id": 141,
+      "texturaId": 2,
+      "offset": 22528,
+      "x": 268,
+      "y": 116,
+      "larghezza": 116,
+      "altezza": 84,
+      "resa": [
+        58,
+        42
+      ],
+      "nomeRawHex": "834183438352839381468bb38eba",
+      "nome": "アイコン：教室",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-140.png"
+    },
+    {
+      "index": 141,
+      "id": 142,
+      "texturaId": 2,
+      "offset": 22688,
+      "x": 370,
+      "y": 418,
+      "larghezza": 152,
+      "altezza": 148,
+      "resa": [
+        76,
+        74
+      ],
+      "nomeRawHex": "834183438352839381468efa906c8d828d5a",
+      "nome": "アイコン：囚人高校",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-141.png"
+    },
+    {
+      "index": 142,
+      "id": 143,
+      "texturaId": 2,
+      "offset": 22848,
+      "x": 480,
+      "y": 116,
+      "larghezza": 80,
+      "altezza": 84,
+      "resa": [
+        40,
+        42
+      ],
+      "nomeRawHex": "83418343835283938146836f815b",
+      "nome": "アイコン：バー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-142.png"
+    },
+    {
+      "index": 143,
+      "id": 144,
+      "texturaId": 2,
+      "offset": 23008,
+      "x": 626,
+      "y": 386,
+      "larghezza": 80,
+      "altezza": 84,
+      "resa": [
+        40,
+        42
+      ],
+      "nomeRawHex": "834183438352839381468e4789dd89ae",
+      "nome": "アイコン：雑貨屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-143.png"
+    },
+    {
+      "index": 144,
+      "id": 145,
+      "texturaId": 2,
+      "offset": 23168,
+      "x": 524,
+      "y": 410,
+      "larghezza": 96,
+      "altezza": 84,
+      "resa": [
+        48,
+        42
+      ],
+      "nomeRawHex": "83418343835283938146838c8367838d8351815b8380",
+      "nome": "アイコン：レトロゲーム",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-144.png"
+    },
+    {
+      "index": 145,
+      "id": 146,
+      "texturaId": 2,
+      "offset": 23328,
+      "x": 562,
+      "y": 112,
+      "larghezza": 112,
+      "altezza": 88,
+      "resa": [
+        56,
+        44
+      ],
+      "nomeRawHex": "83418343835283938146838183438368834a83748346",
+      "nome": "アイコン：メイドカフェ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-145.png"
+    },
+    {
+      "index": 146,
+      "id": 147,
+      "texturaId": 2,
+      "offset": 23488,
+      "x": 554,
+      "y": 202,
+      "larghezza": 104,
+      "altezza": 96,
+      "resa": [
+        52,
+        48
+      ],
+      "nomeRawHex": "83418343835283938146834a83608383834b83608383",
+      "nome": "アイコン：カチャガチャ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-146.png"
+    },
+    {
+      "index": 147,
+      "id": 148,
+      "texturaId": 2,
+      "offset": 23648,
+      "x": 660,
+      "y": 222,
+      "larghezza": 112,
+      "altezza": 80,
+      "resa": [
+        56,
+        40
+      ],
+      "nomeRawHex": "8341834383528393814689c6936497ca94cc9358",
+      "nome": "アイコン：家電量販店",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-147.png"
+    },
+    {
+      "index": 148,
+      "id": 149,
+      "texturaId": 2,
+      "offset": 23808,
+      "x": 512,
+      "y": 300,
+      "larghezza": 112,
+      "altezza": 108,
+      "resa": [
+        56,
+        54
+      ],
+      "nomeRawHex": "83418343835283938146834f836283598356838783628376",
+      "nome": "アイコン：グッズショップ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-148.png"
+    },
+    {
+      "index": 149,
+      "id": 150,
+      "texturaId": 2,
+      "offset": 23968,
+      "x": 626,
+      "y": 304,
+      "larghezza": 112,
+      "altezza": 80,
+      "resa": [
+        56,
+        40
+      ],
+      "nomeRawHex": "834183438352839381468d488bef9358",
+      "nome": "アイコン：工具店",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-149.png"
+    },
+    {
+      "index": 150,
+      "id": 151,
+      "texturaId": 2,
+      "offset": 24128,
+      "x": 770,
+      "y": 112,
+      "larghezza": 92,
+      "altezza": 108,
+      "resa": [
+        46,
+        54
+      ],
+      "nomeRawHex": "83418343835283938146914b9392",
+      "nome": "アイコン：銭湯",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-150.png"
+    },
+    {
+      "index": 151,
+      "id": 152,
+      "texturaId": 2,
+      "offset": 24288,
+      "x": 456,
+      "y": 202,
+      "larghezza": 96,
+      "altezza": 92,
+      "resa": [
+        48,
+        46
+      ],
+      "nomeRawHex": "83418343835283938146838b837583898393",
+      "nome": "アイコン：ルブラン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-151.png"
+    },
+    {
+      "index": 152,
+      "id": 153,
+      "texturaId": 2,
+      "offset": 24448,
+      "x": 382,
+      "y": 568,
+      "larghezza": 84,
+      "altezza": 100,
+      "resa": [
+        42,
+        50
+      ],
+      "nomeRawHex": "83418343835283938146835283438393838983938368838a815b",
+      "nome": "アイコン：コインランドリー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-152.png"
+    },
+    {
+      "index": 153,
+      "id": 154,
+      "texturaId": 2,
+      "offset": 24608,
+      "x": 468,
+      "y": 568,
+      "larghezza": 112,
+      "altezza": 104,
+      "resa": [
+        56,
+        52
+      ],
+      "nomeRawHex": "83418343835283938146836f8362836583428393834f",
+      "nome": "アイコン：バッティング",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-153.png"
+    },
+    {
+      "index": 154,
+      "id": 155,
+      "texturaId": 2,
+      "offset": 24768,
+      "x": 676,
+      "y": 112,
+      "larghezza": 92,
+      "altezza": 108,
+      "resa": [
+        46,
+        54
+      ],
+      "nomeRawHex": "83418343835283938146838a83548343834e838b8356838783628376",
+      "nome": "アイコン：リサイクルショップ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-154.png"
+    },
+    {
+      "index": 155,
+      "id": 156,
+      "texturaId": 2,
+      "offset": 24928,
+      "x": 780,
+      "y": 2,
+      "larghezza": 92,
+      "altezza": 108,
+      "resa": [
+        46,
+        54
+      ],
+      "nomeRawHex": "83418343835283938146906697c38f8a",
+      "nome": "アイコン：診療所",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-155.png"
+    },
+    {
+      "index": 156,
+      "id": 157,
+      "texturaId": 2,
+      "offset": 25088,
+      "x": 214,
+      "y": 2,
+      "larghezza": 100,
+      "altezza": 100,
+      "resa": [
+        50,
+        50
+      ],
+      "nomeRawHex": "8341834383528393814695b6965b8bef",
+      "nome": "アイコン：文房具",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-156.png"
+    },
+    {
+      "index": 157,
+      "id": 158,
+      "texturaId": 2,
+      "offset": 25248,
+      "x": 264,
+      "y": 202,
+      "larghezza": 96,
+      "altezza": 96,
+      "resa": [
+        48,
+        48
+      ],
+      "nomeRawHex": "834183438352839381468cc3928589ae",
+      "nome": "アイコン：古着屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-157.png"
+    },
+    {
+      "index": 158,
+      "id": 159,
+      "texturaId": 2,
+      "offset": 25408,
+      "x": 288,
+      "y": 300,
+      "larghezza": 116,
+      "altezza": 116,
+      "resa": [
+        58,
+        58
+      ],
+      "nomeRawHex": "8341834383528393814682a88e9b",
+      "nome": "アイコン：お寺",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-158.png"
+    },
+    {
+      "index": 159,
+      "id": 160,
+      "texturaId": 2,
+      "offset": 25568,
+      "x": 316,
+      "y": 2,
+      "larghezza": 124,
+      "altezza": 112,
+      "resa": [
+        62,
+        56
+      ],
+      "nomeRawHex": "83418343835283938146835783838359834e83898375",
+      "nome": "アイコン：ジャズクラブ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-159.png"
+    },
+    {
+      "index": 160,
+      "id": 161,
+      "texturaId": 2,
+      "offset": 25728,
+      "x": 362,
+      "y": 202,
+      "larghezza": 92,
+      "altezza": 92,
+      "resa": [
+        46,
+        46
+      ],
+      "nomeRawHex": "834183438352839381468370838f815b83588367815b8393",
+      "nome": "アイコン：パワーストーン",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-160.png"
+    },
+    {
+      "index": 161,
+      "id": 162,
+      "texturaId": 2,
+      "offset": 25888,
+      "x": 556,
+      "y": 2,
+      "larghezza": 108,
+      "altezza": 108,
+      "resa": [
+        54,
+        54
+      ],
+      "nomeRawHex": "83418343835283938146835f815b8363",
+      "nome": "アイコン：ダーツ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-161.png"
+    },
+    {
+      "index": 162,
+      "id": 163,
+      "texturaId": 2,
+      "offset": 26048,
+      "x": 442,
+      "y": 2,
+      "larghezza": 112,
+      "altezza": 112,
+      "resa": [
+        56,
+        56
+      ],
+      "nomeRawHex": "8341834383528393814682a88d81",
+      "nome": "アイコン：お香",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-162.png"
+    },
+    {
+      "index": 163,
+      "id": 164,
+      "texturaId": 2,
+      "offset": 26208,
+      "x": 386,
+      "y": 116,
+      "larghezza": 92,
+      "altezza": 84,
+      "resa": [
+        46,
+        42
+      ],
+      "nomeRawHex": "83418343835283938146976782b095a889ae",
+      "nome": "アイコン：揚げ物屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-163.png"
+    },
+    {
+      "index": 164,
+      "id": 165,
+      "texturaId": 2,
+      "offset": 26368,
+      "x": 708,
+      "y": 386,
+      "larghezza": 80,
+      "altezza": 92,
+      "resa": [
+        40,
+        46
+      ],
+      "nomeRawHex": "8358815b8370815b81698fac816a",
+      "nome": "スーパー（小）",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-164.png"
+    },
+    {
+      "index": 165,
+      "id": 166,
+      "texturaId": 2,
+      "offset": 26528,
+      "x": 874,
+      "y": 2,
+      "larghezza": 100,
+      "altezza": 80,
+      "resa": [
+        50,
+        40
+      ],
+      "nomeRawHex": "928689d8837d839389ae",
+      "nome": "中華マン屋",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-165.png"
+    },
+    {
+      "index": 166,
+      "id": 167,
+      "texturaId": 2,
+      "offset": 26688,
+      "x": 874,
+      "y": 84,
+      "larghezza": 124,
+      "altezza": 124,
+      "resa": [
+        62,
+        62
+      ],
+      "nomeRawHex": "83578387835b",
+      "nome": "ジョゼ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-166.png"
+    },
+    {
+      "index": 167,
+      "id": 168,
+      "texturaId": 2,
+      "offset": 26848,
+      "x": 868,
+      "y": 210,
+      "larghezza": 100,
+      "altezza": 100,
+      "resa": [
+        50,
+        50
+      ],
+      "nomeRawHex": "8268826d8265826e",
+      "nome": "ＩＮＦＯ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-167.png"
+    },
+    {
+      "index": 168,
+      "id": 169,
+      "texturaId": 2,
+      "offset": 27008,
+      "x": 790,
+      "y": 336,
+      "larghezza": 96,
+      "altezza": 108,
+      "resa": [
+        48,
+        54
+      ],
+      "nomeRawHex": "974193fc90489569",
+      "nome": "輸入食品",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-168.png"
+    },
+    {
+      "index": 169,
+      "id": 170,
+      "texturaId": 2,
+      "offset": 27168,
+      "x": 790,
+      "y": 446,
+      "larghezza": 96,
+      "altezza": 108,
+      "resa": [
+        48,
+        54
+      ],
+      "nomeRawHex": "8bb389ef",
+      "nome": "教会",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-169.png"
+    },
+    {
+      "index": 170,
+      "id": 171,
+      "texturaId": 2,
+      "offset": 27328,
+      "x": 888,
+      "y": 426,
+      "larghezza": 80,
+      "altezza": 84,
+      "resa": [
+        40,
+        42
+      ],
+      "nomeRawHex": "9848926e8341834e835a8354838a815b948482e8",
+      "nome": "路地アクセサリー売り",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-170.png"
+    },
+    {
+      "index": 171,
+      "id": 172,
+      "texturaId": 2,
+      "offset": 27488,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 172,
+      "id": 173,
+      "texturaId": 2,
+      "offset": 27648,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 173,
+      "id": 174,
+      "texturaId": 2,
+      "offset": 27808,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "81ab837d83438370838c83585f8341834383528393",
+      "nome": "↓マイパレス_アイコン",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 174,
+      "id": 175,
+      "texturaId": 2,
+      "offset": 27968,
+      "x": 2,
+      "y": 668,
+      "larghezza": 108,
+      "altezza": 108,
+      "resa": [
+        54,
+        54
+      ],
+      "nomeRawHex": "837d83438370838c83585f8381815b834a815b",
+      "nome": "マイパレス_メーカー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-174.png"
+    },
+    {
+      "index": 175,
+      "id": 176,
+      "texturaId": 2,
+      "offset": 28128,
+      "x": 312,
+      "y": 670,
+      "larghezza": 152,
+      "altezza": 132,
+      "resa": [
+        76,
+        66
+      ],
+      "nomeRawHex": "837d83438370838c83585f837e8385815b83578362834e",
+      "nome": "マイパレス_ミュージック",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-175.png"
+    },
+    {
+      "index": 176,
+      "id": 177,
+      "texturaId": 2,
+      "offset": 28288,
+      "x": 466,
+      "y": 674,
+      "larghezza": 112,
+      "altezza": 88,
+      "resa": [
+        56,
+        44
+      ],
+      "nomeRawHex": "837d83438370838c83585f8365838c8372",
+      "nome": "マイパレス_テレビ",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-176.png"
+    },
+    {
+      "index": 177,
+      "id": 178,
+      "texturaId": 2,
+      "offset": 28448,
+      "x": 112,
+      "y": 668,
+      "larghezza": 112,
+      "altezza": 88,
+      "resa": [
+        56,
+        44
+      ],
+      "nomeRawHex": "837d83438370838c83585f834d83838389838a815b",
+      "nome": "マイパレス_ギャラリー",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-177.png"
+    },
+    {
+      "index": 178,
+      "id": 179,
+      "texturaId": 2,
+      "offset": 28608,
+      "x": 2,
+      "y": 778,
+      "larghezza": 120,
+      "altezza": 120,
+      "resa": [
+        60,
+        60
+      ],
+      "nomeRawHex": "837d83438370838c83585f8376838c83438347838a8341",
+      "nome": "マイパレス_プレイエリア",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-178.png"
+    },
+    {
+      "index": 179,
+      "id": 180,
+      "texturaId": 2,
+      "offset": 28768,
+      "x": 226,
+      "y": 664,
+      "larghezza": 84,
+      "altezza": 96,
+      "resa": [
+        42,
+        48
+      ],
+      "nomeRawHex": "837d83438370838c83585f8341838f815b8368",
+      "nome": "マイパレス_アワード",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-179.png"
+    },
+    {
+      "index": 180,
+      "id": 181,
+      "texturaId": 2,
+      "offset": 28928,
+      "x": 124,
+      "y": 758,
+      "larghezza": 116,
+      "altezza": 116,
+      "resa": [
+        58,
+        58
+      ],
+      "nomeRawHex": "837d83438370838c83585f8341834383658380947a927582b582bd82c682ab82",
+      "nome": "837d83438370838c83585f8341834383658380947a927582b582bd82c682ab82",
+      "codifica": "non-decodificato",
+      "vuoto": false,
+      "png": "sprite-180.png"
+    },
+    {
+      "index": 181,
+      "id": 182,
+      "texturaId": 2,
+      "offset": 29088,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 182,
+      "id": 183,
+      "texturaId": 2,
+      "offset": 29248,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 183,
+      "id": 184,
+      "texturaId": 2,
+      "offset": 29408,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 184,
+      "id": 185,
+      "texturaId": 2,
+      "offset": 29568,
+      "x": 0,
+      "y": 0,
+      "larghezza": 0,
+      "altezza": 0,
+      "resa": [
+        0,
+        0
+      ],
+      "nomeRawHex": "",
+      "nome": "",
+      "codifica": "shift-jis",
+      "vuoto": true,
+      "png": null
+    },
+    {
+      "index": 185,
+      "id": 200,
+      "texturaId": 1,
+      "offset": 29728,
+      "x": 0,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d83628376814652",
+      "nome": "ミニマップ：R",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-185.png"
+    },
+    {
+      "index": 186,
+      "id": 201,
+      "texturaId": 1,
+      "offset": 29888,
+      "x": 72,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d83628376814647",
+      "nome": "ミニマップ：G",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-186.png"
+    },
+    {
+      "index": 187,
+      "id": 202,
+      "texturaId": 1,
+      "offset": 30048,
+      "x": 144,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d83628376814642",
+      "nome": "ミニマップ：B",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-187.png"
+    },
+    {
+      "index": 188,
+      "id": 203,
+      "texturaId": 1,
+      "offset": 30208,
+      "x": 216,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d83628376814659",
+      "nome": "ミニマップ：Y",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-188.png"
+    },
+    {
+      "index": 189,
+      "id": 204,
+      "texturaId": 1,
+      "offset": 30368,
+      "x": 288,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d83628376814643",
+      "nome": "ミニマップ：C",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-189.png"
+    },
+    {
+      "index": 190,
+      "id": 205,
+      "texturaId": 1,
+      "offset": 30528,
+      "x": 360,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d8362837681464d",
+      "nome": "ミニマップ：M",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-190.png"
+    },
+    {
+      "index": 191,
+      "id": 206,
+      "texturaId": 1,
+      "offset": 30688,
+      "x": 432,
+      "y": 1536,
+      "larghezza": 72,
+      "altezza": 72,
+      "resa": [
+        36,
+        36
+      ],
+      "nomeRawHex": "837e836a837d83628376814657",
+      "nome": "ミニマップ：W",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-191.png"
+    },
+    {
+      "index": 192,
+      "id": 207,
+      "texturaId": 1,
+      "offset": 30848,
+      "x": 508,
+      "y": 1476,
+      "larghezza": 574,
+      "altezza": 132,
+      "resa": [
+        287,
+        66
+      ],
+      "nomeRawHex": "90468fee95f1",
+      "nome": "色情報",
+      "codifica": "shift-jis",
+      "vuoto": false,
+      "png": "sprite-192.png"
+    }
+  ],
+  "tipiNativi": [
+    {
+      "tipoNativo": 4,
+      "occorrenze": 104,
+      "mappe": [
+        "ICON_151_11.BIN",
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_7.BIN",
+        "ICON_152_1.BIN",
+        "ICON_152_11.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_4.BIN",
+        "ICON_153_5.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_2.BIN",
+        "ICON_155_4.BIN",
+        "ICON_155_6.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_4.BIN",
+        "ICON_156_6.BIN",
+        "ICON_156_7.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_13.BIN",
+        "ICON_157_15.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_6.BIN",
+        "ICON_157_8.BIN",
+        "ICON_159_10.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_6.BIN",
+        "ICON_159_7.BIN",
+        "ICON_159_9.BIN",
+        "ICON_161_10.BIN",
+        "ICON_161_3.BIN",
+        "ICON_161_6.BIN",
+        "ICON_161_8.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_9.BIN",
+        "ICON_190_51.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 57,
+      "condizionali": 104,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 5,
+      "occorrenze": 79,
+      "mappe": [
+        "ICON_001_1.BIN",
+        "ICON_001_12.BIN",
+        "ICON_001_2.BIN",
+        "ICON_001_3.BIN",
+        "ICON_002_0.BIN",
+        "ICON_005_1.BIN",
+        "ICON_009_2.BIN",
+        "ICON_011_6.BIN",
+        "ICON_151_2.BIN",
+        "ICON_152_1.BIN",
+        "ICON_152_11.BIN",
+        "ICON_153_12.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_5.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_2.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_7.BIN",
+        "ICON_154_8.BIN",
+        "ICON_154_9.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_5.BIN",
+        "ICON_156_6.BIN",
+        "ICON_157_10.BIN",
+        "ICON_157_7.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_9.BIN",
+        "ICON_160_6.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_7.BIN",
+        "ICON_190_3.BIN"
+      ],
+      "mappeUrbane": 8,
+      "mappeDungeon": 26,
+      "condizionali": 79,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 10,
+      "occorrenze": 81,
+      "mappe": [
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_7.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_11.BIN",
+        "ICON_154_2.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_7.BIN",
+        "ICON_154_8.BIN",
+        "ICON_154_9.BIN",
+        "ICON_155_3.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_3.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_7.BIN",
+        "ICON_157_8.BIN",
+        "ICON_157_9.BIN",
+        "ICON_159_13.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_30.BIN",
+        "ICON_159_35.BIN",
+        "ICON_159_9.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_3.BIN",
+        "ICON_190_2.BIN",
+        "ICON_190_3.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 40,
+      "condizionali": 81,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 12,
+      "occorrenze": 68,
+      "mappe": [
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_6.BIN",
+        "ICON_152_1.BIN",
+        "ICON_152_2.BIN",
+        "ICON_152_4.BIN",
+        "ICON_153_7.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_1.BIN",
+        "ICON_154_11.BIN",
+        "ICON_154_2.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_2.BIN",
+        "ICON_156_5.BIN",
+        "ICON_156_6.BIN",
+        "ICON_157_1.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_7.BIN",
+        "ICON_159_11.BIN",
+        "ICON_161_1.BIN",
+        "ICON_161_2.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_7.BIN",
+        "ICON_162_9.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 26,
+      "condizionali": 67,
+      "effettoZero": 12,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 13,
+      "occorrenze": 72,
+      "mappe": [
+        "ICON_001_2.BIN",
+        "ICON_001_3.BIN",
+        "ICON_001_4.BIN",
+        "ICON_009_2.BIN",
+        "ICON_011_4.BIN",
+        "ICON_151_1.BIN",
+        "ICON_151_10.BIN",
+        "ICON_151_11.BIN",
+        "ICON_151_16.BIN",
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_152_1.BIN",
+        "ICON_152_11.BIN",
+        "ICON_152_6.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_5.BIN",
+        "ICON_153_7.BIN",
+        "ICON_154_1.BIN",
+        "ICON_154_3.BIN",
+        "ICON_155_1.BIN",
+        "ICON_155_13.BIN",
+        "ICON_155_8.BIN",
+        "ICON_156_4.BIN",
+        "ICON_156_7.BIN",
+        "ICON_157_16.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_13.BIN",
+        "ICON_160_2.BIN",
+        "ICON_160_3.BIN",
+        "ICON_160_4.BIN",
+        "ICON_160_5.BIN",
+        "ICON_161_1.BIN",
+        "ICON_161_10.BIN",
+        "ICON_161_2.BIN",
+        "ICON_161_3.BIN",
+        "ICON_161_6.BIN",
+        "ICON_161_8.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_9.BIN",
+        "ICON_190_1.BIN",
+        "ICON_192_62.BIN"
+      ],
+      "mappeUrbane": 5,
+      "mappeDungeon": 39,
+      "condizionali": 58,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 14,
+      "occorrenze": 80,
+      "mappe": [
+        "ICON_001_12.BIN",
+        "ICON_001_2.BIN",
+        "ICON_001_4.BIN",
+        "ICON_001_5.BIN",
+        "ICON_002_0.BIN",
+        "ICON_002_1.BIN",
+        "ICON_007_1.BIN",
+        "ICON_011_6.BIN",
+        "ICON_012_29.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_7.BIN",
+        "ICON_152_1.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_4.BIN",
+        "ICON_153_6.BIN",
+        "ICON_154_7.BIN",
+        "ICON_155_1.BIN",
+        "ICON_155_11.BIN",
+        "ICON_155_2.BIN",
+        "ICON_155_4.BIN",
+        "ICON_155_5.BIN",
+        "ICON_155_6.BIN",
+        "ICON_155_7.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_4.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_10.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_13.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_6.BIN",
+        "ICON_157_7.BIN",
+        "ICON_157_9.BIN",
+        "ICON_159_1.BIN",
+        "ICON_159_10.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_30.BIN",
+        "ICON_159_6.BIN",
+        "ICON_160_1.BIN",
+        "ICON_161_10.BIN",
+        "ICON_161_4.BIN",
+        "ICON_161_6.BIN",
+        "ICON_161_7.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_4.BIN"
+      ],
+      "mappeUrbane": 9,
+      "mappeDungeon": 40,
+      "condizionali": 62,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 15,
+      "occorrenze": 84,
+      "mappe": [
+        "ICON_001_1.BIN",
+        "ICON_001_2.BIN",
+        "ICON_001_3.BIN",
+        "ICON_002_0.BIN",
+        "ICON_006_1.BIN",
+        "ICON_012_29.BIN",
+        "ICON_022_1.BIN",
+        "ICON_150_3.BIN",
+        "ICON_151_10.BIN",
+        "ICON_151_13.BIN",
+        "ICON_151_16.BIN",
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_7.BIN",
+        "ICON_151_9.BIN",
+        "ICON_152_4.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_4.BIN",
+        "ICON_153_5.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_11.BIN",
+        "ICON_154_2.BIN",
+        "ICON_154_3.BIN",
+        "ICON_155_12.BIN",
+        "ICON_155_2.BIN",
+        "ICON_155_8.BIN",
+        "ICON_156_8.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_3.BIN",
+        "ICON_159_30.BIN",
+        "ICON_159_35.BIN",
+        "ICON_159_8.BIN",
+        "ICON_160_10.BIN",
+        "ICON_160_2.BIN",
+        "ICON_160_3.BIN",
+        "ICON_160_4.BIN",
+        "ICON_160_5.BIN",
+        "ICON_160_6.BIN",
+        "ICON_161_11.BIN",
+        "ICON_161_3.BIN",
+        "ICON_161_4.BIN",
+        "ICON_161_5.BIN",
+        "ICON_161_7.BIN",
+        "ICON_161_8.BIN",
+        "ICON_161_9.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_7.BIN",
+        "ICON_162_9.BIN",
+        "ICON_190_61.BIN",
+        "ICON_190_62.BIN",
+        "ICON_192_62.BIN"
+      ],
+      "mappeUrbane": 7,
+      "mappeDungeon": 47,
+      "condizionali": 59,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 16,
+      "occorrenze": 65,
+      "mappe": [
+        "ICON_001_1.BIN",
+        "ICON_001_12.BIN",
+        "ICON_001_2.BIN",
+        "ICON_001_4.BIN",
+        "ICON_001_5.BIN",
+        "ICON_002_0.BIN",
+        "ICON_002_1.BIN",
+        "ICON_002_5.BIN",
+        "ICON_005_1.BIN",
+        "ICON_012_29.BIN",
+        "ICON_151_6.BIN",
+        "ICON_153_1.BIN",
+        "ICON_153_7.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_11.BIN",
+        "ICON_155_2.BIN",
+        "ICON_155_3.BIN",
+        "ICON_156_11.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_8.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_15.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_6.BIN",
+        "ICON_157_7.BIN",
+        "ICON_157_8.BIN",
+        "ICON_157_9.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_6.BIN",
+        "ICON_159_7.BIN",
+        "ICON_161_2.BIN",
+        "ICON_161_5.BIN",
+        "ICON_161_9.BIN",
+        "ICON_162_14.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_2.BIN"
+      ],
+      "mappeUrbane": 10,
+      "mappeDungeon": 28,
+      "condizionali": 49,
+      "effettoZero": 1,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 17,
+      "occorrenze": 141,
+      "mappe": [
+        "ICON_151_10.BIN",
+        "ICON_151_11.BIN",
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_6.BIN",
+        "ICON_151_9.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_4.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_7.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_11.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_2.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_7.BIN",
+        "ICON_154_8.BIN",
+        "ICON_154_9.BIN",
+        "ICON_155_11.BIN",
+        "ICON_155_3.BIN",
+        "ICON_155_4.BIN",
+        "ICON_155_5.BIN",
+        "ICON_155_6.BIN",
+        "ICON_155_7.BIN",
+        "ICON_155_9.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_11.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_2.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_4.BIN",
+        "ICON_156_6.BIN",
+        "ICON_156_7.BIN",
+        "ICON_156_8.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_10.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_8.BIN",
+        "ICON_157_9.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_30.BIN",
+        "ICON_159_35.BIN",
+        "ICON_159_7.BIN",
+        "ICON_159_9.BIN",
+        "ICON_160_2.BIN",
+        "ICON_160_3.BIN",
+        "ICON_160_4.BIN",
+        "ICON_160_5.BIN",
+        "ICON_161_10.BIN",
+        "ICON_161_2.BIN",
+        "ICON_161_5.BIN",
+        "ICON_161_8.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_14.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_9.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 70,
+      "condizionali": 141,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 19,
+      "occorrenze": 165,
+      "mappe": [
+        "ICON_001_1.BIN",
+        "ICON_001_12.BIN",
+        "ICON_001_2.BIN",
+        "ICON_001_3.BIN",
+        "ICON_001_4.BIN",
+        "ICON_001_5.BIN",
+        "ICON_002_0.BIN",
+        "ICON_002_1.BIN",
+        "ICON_002_5.BIN",
+        "ICON_002_6.BIN",
+        "ICON_002_8.BIN",
+        "ICON_006_1.BIN",
+        "ICON_007_1.BIN",
+        "ICON_009_2.BIN",
+        "ICON_010_4.BIN",
+        "ICON_011_4.BIN",
+        "ICON_012_29.BIN",
+        "ICON_151_1.BIN",
+        "ICON_151_11.BIN",
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_7.BIN",
+        "ICON_152_1.BIN",
+        "ICON_152_11.BIN",
+        "ICON_153_1.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_5.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_1.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_1.BIN",
+        "ICON_155_2.BIN",
+        "ICON_155_4.BIN",
+        "ICON_155_6.BIN",
+        "ICON_156_1.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_4.BIN",
+        "ICON_156_6.BIN",
+        "ICON_156_7.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_1.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_13.BIN",
+        "ICON_157_15.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_6.BIN",
+        "ICON_157_8.BIN",
+        "ICON_159_1.BIN",
+        "ICON_159_10.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_6.BIN",
+        "ICON_159_7.BIN",
+        "ICON_159_9.BIN",
+        "ICON_160_1.BIN",
+        "ICON_160_6.BIN",
+        "ICON_161_1.BIN",
+        "ICON_161_10.BIN",
+        "ICON_161_3.BIN",
+        "ICON_161_6.BIN",
+        "ICON_161_8.BIN",
+        "ICON_162_1.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_9.BIN"
+      ],
+      "mappeUrbane": 17,
+      "mappeDungeon": 66,
+      "condizionali": 165,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 20,
+      "occorrenze": 15,
+      "mappe": [
+        "ICON_001_3.BIN",
+        "ICON_005_1.BIN",
+        "ICON_006_1.BIN",
+        "ICON_007_1.BIN",
+        "ICON_151_1.BIN",
+        "ICON_153_1.BIN",
+        "ICON_154_1.BIN",
+        "ICON_155_1.BIN",
+        "ICON_156_1.BIN",
+        "ICON_157_1.BIN",
+        "ICON_159_1.BIN",
+        "ICON_160_1.BIN",
+        "ICON_161_1.BIN",
+        "ICON_162_1.BIN",
+        "ICON_190_1.BIN"
+      ],
+      "mappeUrbane": 4,
+      "mappeDungeon": 11,
+      "condizionali": 12,
+      "effettoZero": 5,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 24,
+      "occorrenze": 7,
+      "mappe": [
+        "ICON_022_1.BIN",
+        "ICON_153_1.BIN",
+        "ICON_154_1.BIN",
+        "ICON_155_1.BIN",
+        "ICON_156_1.BIN",
+        "ICON_157_1.BIN",
+        "ICON_190_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 6,
+      "condizionali": 5,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 25,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_151_1.BIN",
+        "ICON_159_1.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 2,
+      "condizionali": 2,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 26,
+      "occorrenze": 38,
+      "mappe": [
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_7.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_4.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_8.BIN",
+        "ICON_154_9.BIN",
+        "ICON_155_4.BIN",
+        "ICON_155_6.BIN",
+        "ICON_155_7.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_7.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_13.BIN",
+        "ICON_157_8.BIN",
+        "ICON_159_10.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_6.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_4.BIN",
+        "ICON_162_7.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 33,
+      "condizionali": 38,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 28,
+      "occorrenze": 91,
+      "mappe": [
+        "ICON_001_3.BIN",
+        "ICON_002_0.BIN",
+        "ICON_002_5.BIN",
+        "ICON_002_6.BIN",
+        "ICON_006_1.BIN",
+        "ICON_007_1.BIN",
+        "ICON_009_2.BIN",
+        "ICON_010_4.BIN",
+        "ICON_012_29.BIN",
+        "ICON_151_11.BIN",
+        "ICON_151_2.BIN",
+        "ICON_151_3.BIN",
+        "ICON_151_4.BIN",
+        "ICON_151_5.BIN",
+        "ICON_151_7.BIN",
+        "ICON_152_1.BIN",
+        "ICON_152_11.BIN",
+        "ICON_153_2.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_5.BIN",
+        "ICON_153_6.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_2.BIN",
+        "ICON_155_4.BIN",
+        "ICON_155_6.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_4.BIN",
+        "ICON_156_6.BIN",
+        "ICON_156_7.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_12.BIN",
+        "ICON_157_13.BIN",
+        "ICON_157_15.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_6.BIN",
+        "ICON_157_8.BIN",
+        "ICON_159_10.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_6.BIN",
+        "ICON_159_7.BIN",
+        "ICON_159_9.BIN",
+        "ICON_161_10.BIN",
+        "ICON_161_3.BIN",
+        "ICON_161_6.BIN",
+        "ICON_161_8.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_15.BIN",
+        "ICON_162_16.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_3.BIN",
+        "ICON_162_9.BIN"
+      ],
+      "mappeUrbane": 9,
+      "mappeDungeon": 55,
+      "condizionali": 91,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 29,
+      "occorrenze": 41,
+      "mappe": [
+        "ICON_151_13.BIN",
+        "ICON_152_5.BIN",
+        "ICON_154_10.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_2.BIN",
+        "ICON_156_10.BIN",
+        "ICON_156_11.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_2.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_5.BIN",
+        "ICON_156_7.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_16.BIN",
+        "ICON_157_4.BIN",
+        "ICON_157_6.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_35.BIN",
+        "ICON_159_9.BIN",
+        "ICON_162_1.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_14.BIN",
+        "ICON_162_15.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 26,
+      "condizionali": 41,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 30,
+      "occorrenze": 38,
+      "mappe": [
+        "ICON_151_13.BIN",
+        "ICON_151_7.BIN",
+        "ICON_154_1.BIN",
+        "ICON_154_11.BIN",
+        "ICON_154_14.BIN",
+        "ICON_154_2.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_9.BIN",
+        "ICON_156_1.BIN",
+        "ICON_156_11.BIN",
+        "ICON_156_12.BIN",
+        "ICON_156_13.BIN",
+        "ICON_156_2.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_5.BIN",
+        "ICON_156_6.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_6.BIN",
+        "ICON_159_10.BIN",
+        "ICON_159_12.BIN",
+        "ICON_159_2.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_3.BIN",
+        "ICON_159_9.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_2.BIN",
+        "ICON_162_5.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 28,
+      "condizionali": 38,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 32,
+      "occorrenze": 3,
+      "mappe": [
+        "ICON_190_2.BIN",
+        "ICON_190_51.BIN",
+        "ICON_195_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 3,
+      "condizionali": 2,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 33,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_190_3.BIN",
+        "ICON_190_51.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 2,
+      "condizionali": 2,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 34,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_190_3.BIN",
+        "ICON_190_51.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 2,
+      "condizionali": 1,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 35,
+      "occorrenze": 4,
+      "mappe": [
+        "ICON_190_2.BIN",
+        "ICON_190_51.BIN",
+        "ICON_190_61.BIN",
+        "ICON_190_62.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 4,
+      "condizionali": 1,
+      "effettoZero": 1,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 36,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_154_5.BIN",
+        "ICON_161_1.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 2,
+      "condizionali": 2,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 37,
+      "occorrenze": 4,
+      "mappe": [
+        "ICON_022_1.BIN",
+        "ICON_154_5.BIN",
+        "ICON_157_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 2,
+      "condizionali": 2,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 38,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_022_1.BIN",
+        "ICON_154_9.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 1,
+      "condizionali": 1,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 39,
+      "occorrenze": 4,
+      "mappe": [
+        "ICON_009_2.BIN",
+        "ICON_154_8.BIN",
+        "ICON_155_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 2,
+      "condizionali": 3,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 40,
+      "occorrenze": 7,
+      "mappe": [
+        "ICON_151_11.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_10.BIN",
+        "ICON_155_9.BIN",
+        "ICON_156_10.BIN",
+        "ICON_157_16.BIN",
+        "ICON_159_12.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 7,
+      "condizionali": 2,
+      "effettoZero": 2,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 43,
+      "occorrenze": 43,
+      "mappe": [
+        "ICON_151_10.BIN",
+        "ICON_153_3.BIN",
+        "ICON_156_5.BIN",
+        "ICON_156_6.BIN",
+        "ICON_156_8.BIN",
+        "ICON_156_9.BIN",
+        "ICON_157_9.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_25.BIN",
+        "ICON_159_30.BIN",
+        "ICON_159_35.BIN",
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 12,
+      "condizionali": 43,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 45,
+      "occorrenze": 3,
+      "mappe": [
+        "ICON_190_2.BIN",
+        "ICON_190_3.BIN",
+        "ICON_190_51.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 3,
+      "condizionali": 3,
+      "effettoZero": 2,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 46,
+      "occorrenze": 18,
+      "mappe": [
+        "ICON_001_2.BIN",
+        "ICON_001_3.BIN",
+        "ICON_001_5.BIN",
+        "ICON_002_0.BIN",
+        "ICON_002_1.BIN",
+        "ICON_005_1.BIN",
+        "ICON_006_1.BIN",
+        "ICON_007_1.BIN",
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 9,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 114,
+      "nomeNativo": "アイコン：自販機",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 47,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 115,
+      "nomeNativo": "アイコン：宝くじ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 48,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_001_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 116,
+      "nomeNativo": "アイコン：バイト情報",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 49,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 117,
+      "nomeNativo": "アイコン：ジューサーバー",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 50,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 118,
+      "nomeNativo": "アイコン：キヨスク",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 51,
+      "occorrenze": 3,
+      "mappe": [
+        "ICON_001_3.BIN",
+        "ICON_002_0.BIN",
+        "ICON_006_1.BIN"
+      ],
+      "mappeUrbane": 3,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 119,
+      "nomeNativo": "アイコン：本屋",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 52,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 120,
+      "nomeNativo": "アイコン：レンタルDVD",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 53,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 121,
+      "nomeNativo": "アイコン：ファミレス",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 54,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 122,
+      "nomeNativo": "アイコン：牛丼",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 55,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 123,
+      "nomeNativo": "アイコン：ミリタリーショップ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 56,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_001_3.BIN",
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 2,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 124,
+      "nomeNativo": "アイコン：ゲーセン",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 57,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 125,
+      "nomeNativo": "アイコン：コンビニ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 58,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 126,
+      "nomeNativo": "アイコン：ジム",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 59,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 127,
+      "nomeNativo": "アイコン：ビックバンバーガー",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 60,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 128,
+      "nomeNativo": "アイコン：ドラッグストア",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 61,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 129,
+      "nomeNativo": "アイコン：ドンキ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 62,
+      "occorrenze": 3,
+      "mappe": [
+        "ICON_001_3.BIN",
+        "ICON_006_1.BIN",
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 3,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 130,
+      "nomeNativo": "アイコン：映画館",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 63,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_001_4.BIN",
+        "ICON_006_1.BIN"
+      ],
+      "mappeUrbane": 2,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 131,
+      "nomeNativo": "アイコン：花屋",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 64,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 132,
+      "nomeNativo": "アイコン：スーパー",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 65,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 133,
+      "nomeNativo": "アイコン：スポーツ用品",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 66,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 134,
+      "nomeNativo": "アイコン：和風雑貨",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 67,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 135,
+      "nomeNativo": "アイコン：宝石店",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 68,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 136,
+      "nomeNativo": "アイコン：アクセサリー",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 69,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 137,
+      "nomeNativo": "アイコン：コスメ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 70,
+      "occorrenze": 2,
+      "mappe": [
+        "ICON_001_5.BIN",
+        "ICON_002_0.BIN"
+      ],
+      "mappeUrbane": 2,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 138,
+      "nomeNativo": "アイコン：パン屋",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 71,
+      "occorrenze": 6,
+      "mappe": [
+        "ICON_002_0.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 139,
+      "nomeNativo": "アイコン：トイレ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 72,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_002_0.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 140,
+      "nomeNativo": "アイコン：教室",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 73,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_002_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 141,
+      "nomeNativo": "アイコン：囚人高校",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 74,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_006_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 142,
+      "nomeNativo": "アイコン：バー",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 75,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_006_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 143,
+      "nomeNativo": "アイコン：雑貨屋",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 76,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 144,
+      "nomeNativo": "アイコン：レトロゲーム",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 77,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 145,
+      "nomeNativo": "アイコン：メイドカフェ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 78,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 146,
+      "nomeNativo": "アイコン：カチャガチャ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 79,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 147,
+      "nomeNativo": "アイコン：家電量販店",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 80,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 148,
+      "nomeNativo": "アイコン：グッズショップ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 81,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_007_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 149,
+      "nomeNativo": "アイコン：工具店",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 82,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 150,
+      "nomeNativo": "アイコン：銭湯",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 83,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 151,
+      "nomeNativo": "アイコン：ルブラン",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 84,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 152,
+      "nomeNativo": "アイコン：コインランドリー",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 85,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 153,
+      "nomeNativo": "アイコン：バッティング",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 86,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 154,
+      "nomeNativo": "アイコン：リサイクルショップ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 87,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_009_2.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 155,
+      "nomeNativo": "アイコン：診療所",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 88,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 156,
+      "nomeNativo": "アイコン：文房具",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 89,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 157,
+      "nomeNativo": "アイコン：古着屋",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 90,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 158,
+      "nomeNativo": "アイコン：お寺",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 91,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 159,
+      "nomeNativo": "アイコン：ジャズクラブ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 92,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 160,
+      "nomeNativo": "アイコン：パワーストーン",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 93,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 161,
+      "nomeNativo": "アイコン：ダーツ",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 94,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 162,
+      "nomeNativo": "アイコン：お香",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 95,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 163,
+      "nomeNativo": "アイコン：揚げ物屋",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 96,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": 164,
+      "nomeNativo": "スーパー（小）",
+      "associazione": "blocco-urbano-dimostrato"
+    },
+    {
+      "tipoNativo": 97,
+      "occorrenze": 23,
+      "mappe": [
+        "ICON_151_6.BIN",
+        "ICON_152_5.BIN",
+        "ICON_153_3.BIN",
+        "ICON_153_7.BIN",
+        "ICON_153_9.BIN",
+        "ICON_154_11.BIN",
+        "ICON_154_3.BIN",
+        "ICON_154_5.BIN",
+        "ICON_155_3.BIN",
+        "ICON_155_6.BIN",
+        "ICON_155_7.BIN",
+        "ICON_156_3.BIN",
+        "ICON_156_5.BIN",
+        "ICON_156_7.BIN",
+        "ICON_157_11.BIN",
+        "ICON_157_5.BIN",
+        "ICON_157_9.BIN",
+        "ICON_159_11.BIN",
+        "ICON_159_20.BIN",
+        "ICON_159_30.BIN",
+        "ICON_162_11.BIN",
+        "ICON_162_12.BIN",
+        "ICON_162_16.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 23,
+      "condizionali": 23,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 98,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 99,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 100,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 101,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 102,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 103,
+      "occorrenze": 4,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 104,
+      "occorrenze": 12,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 12,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 105,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 106,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 107,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_005_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 108,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_022_1.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 109,
+      "occorrenze": 3,
+      "mappe": [
+        "ICON_190_2.BIN",
+        "ICON_190_3.BIN",
+        "ICON_190_51.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 3,
+      "condizionali": 3,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 110,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_010_4.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 1,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 111,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_001_3.BIN"
+      ],
+      "mappeUrbane": 1,
+      "mappeDungeon": 0,
+      "condizionali": 1,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "urbano-non-dimostrato"
+    },
+    {
+      "tipoNativo": 112,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_162_1.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 1,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 113,
+      "occorrenze": 9,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 114,
+      "occorrenze": 10,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 115,
+      "occorrenze": 14,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 116,
+      "occorrenze": 6,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 117,
+      "occorrenze": 4,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 118,
+      "occorrenze": 3,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    },
+    {
+      "tipoNativo": 119,
+      "occorrenze": 1,
+      "mappe": [
+        "ICON_162_11.BIN"
+      ],
+      "mappeUrbane": 0,
+      "mappeDungeon": 1,
+      "condizionali": 0,
+      "effettoZero": 0,
+      "sprite": null,
+      "nomeNativo": null,
+      "associazione": "fuori-dal-blocco-urbano"
+    }
+  ],
+  "associazioneUrbana": {
+    "scarto": 68,
+    "blocco": [
+      46,
+      96
+    ],
+    "prova": "I negozi ottenuti coincidono con le destinazioni ufficiali della stessa mappa in nomi-mappe-ufficiali.json (Leblanc, lavanderia e gabbie di battuta a Yongen-Jaya; softair, Big Bang Burger e palestra a Shibuya; i negozi di Akihabara)."
+  },
+  "summary": {
+    "sprite": 193,
+    "spriteNonVuoti": 144,
+    "pngSalvati": 144,
+    "tipiNativi": 102,
+    "tipiAssociati": 51,
+    "pinTotali": 1429,
+    "pinAssociati": 81,
+    "associazioniPerEsito": {
+      "fuori-dal-blocco-urbano": 38,
+      "blocco-urbano-dimostrato": 51,
+      "urbano-non-dimostrato": 13
+    }
+  },
+  "limits": [
+    "Fuori dal blocco urbano il tipo nativo non ha ancora un significato dimostrato.",
+    "I ritagli sono materiale di riconoscimento, non asset dell’applicazione.",
+    "I pin condizionali restano condizionali: la bandiera non è tradotta qui."
+  ]
+}

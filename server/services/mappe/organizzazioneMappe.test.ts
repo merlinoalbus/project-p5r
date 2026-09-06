@@ -26,7 +26,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   const ids=db.prepare('SELECT id FROM spillo ORDER BY id').all();
   const stati=db.prepare('SELECT * FROM spillo_partita').all(),immagini=db.prepare('SELECT * FROM spillo_immagine').all(),dest=db.prepare('SELECT * FROM spillo_destinazione').all();
   runMigrations(db);
-  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area'").get()).toEqual({n:0});
+  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
   expect(db.prepare('SELECT id FROM spillo ORDER BY id').all()).toEqual(ids);
   expect(db.prepare('SELECT * FROM spillo_partita').all()).toEqual(stati);expect(db.prepare('SELECT * FROM spillo_immagine').all()).toEqual(immagini);expect(db.prepare('SELECT * FROM spillo_destinazione').all()).toEqual(dest);
   expect(db.pragma('foreign_key_check')).toEqual([]);
@@ -36,7 +36,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   expect(a.nome).toBe('Nome personale');expect(a.note).toBe('Note personali');expect(a.punti.some(p=>p.id===s.id)).toBe(true);expect(a.punti.every(p=>!('x' in p)&&!('y' in p))).toBe(true);
   expect(risolviAccessoMondo('area',area.chiave).guide?.[0].area).toBe(area.chiave);
   caricaSeed(db,seed);
-  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area'").get()).toEqual({n:0});
+  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
   expect(db.prepare('SELECT * FROM spillo_partita').all()).toEqual(stati);
   expect(contenutiMappa(r.mappaPalazzo).aree.find(a=>a.chiave===area.chiave)?.nome).toBe('Nome personale');
   expect(riconciliaAreeGuida(db).convertite).toEqual([]);
@@ -56,7 +56,7 @@ describe('organizzazione geografica e contenuti guida',()=>{
   const db=initDb(':memory:');runMigrations(db);caricaSeed(db,seed);
   const n=db.prepare('SELECT count(*) n FROM dungeon_area').get();
   expect(db.prepare('SELECT count(*) n FROM guida_mappa').get()).toEqual(n);
-  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area'").get()).toEqual({n:0});
+  expect(db.prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
   expect(db.prepare('SELECT count(*) n FROM spillo WHERE area_guida_chiave IS NOT NULL').get()).toEqual({n:187});
   const d=db.prepare('SELECT chiave FROM dungeon').all() as Array<{chiave:string}>;
   expect(d.reduce((n,d)=>n+contenutiMappa('dungeon-'+d.chiave).aree.reduce((n,a)=>n+a.punti.length,0),0)).toBe(688);
@@ -88,7 +88,9 @@ describe('organizzazione geografica e contenuti guida',()=>{
   db.prepare('INSERT INTO mappa_entita VALUES(?,?,?,?)').run('tokyo','area',a,'{"fixture":true}');
   db.prepare('INSERT INTO mappa_entita VALUES(?,?,?,?)').run(nodo.chiave,'area',a,'{"fixture":true}');
   expect(mappaPerEntita('area',a)).toBeNull();
-  expect(risolviAccessoMondo('area',a).destinazioni).toHaveLength(2);
+  // l'area puo' essere rappresentata anche dalle planimetrie native: qui contano le due associazioni della fixture
+  expect(risolviAccessoMondo('area',a).destinazioni.map(d=>d.mappa)).toEqual(expect.arrayContaining(['tokyo',nodo.chiave]));
+  expect(mappaPerEntita('area',a)).toBeNull();
   expect(()=>importaMappe({versione:1,mappe:[{...nodo,contesti:[nodo.contesti[0],nodo.contesti[0]]}]},{sovrascrivi:true})).toThrow();
   expect(dettaglioMappa(nodo.chiave).contesti).toEqual(nodo.contesti);
  });
