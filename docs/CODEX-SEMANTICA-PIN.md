@@ -1125,3 +1125,28 @@ migrazione è orfana e non chiude il blocker.
 Prima del commit servono quindi coordinate dimostrate o una destinazione dichiaratamente non
 puntuale; nessun uso della griglia come dato reale. Il gate deve inoltre provare che gli accessi
 diretti al Palazzo non aggirino la finestra applicata soltanto al pin di ingresso.
+
+### Proposta Codex per una riconciliazione non distruttiva
+
+La soluzione più robusta è non mescolare dati di provenienza diversa nello stesso
+`condizioni_json`. Un campo separato, per esempio `presenza_json`, può essere di proprietà
+esclusiva della riconciliazione; `condizioni_json` resta invece l'albero editoriale dei
+prerequisiti e delle condizioni manuali. In questo modo ogni esecuzione può:
+
+1. ricalcolare la presenza dall'entità esatta;
+2. scrivere il nuovo `presenza_json`, oppure `NULL` quando la fonte non dichiara più presenza;
+3. lasciare byte per byte intatti prerequisiti e condizioni manuali;
+4. produrre lo stesso stato a ogni avvio, importazione e reseed ordinario.
+
+La valutazione della visibilità deve leggere il solo canale di presenza; la scheda può mostrare
+separatamente presenza e prerequisiti. Strutturali e consumabili non ricevono presenza derivata:
+i primi restano sempre visibili, i secondi spariscono soltanto tramite `raccolto`. Un tipo ignoto
+come `nota` non diventa strutturale per difetto: in assenza di una presenza certificata resta
+visibile, ma una futura associazione esatta può governarlo senza essere neutralizzata.
+
+Per le radici dei Palazzi lo stesso campo su `mappa` consente di filtrare elenco, dettaglio e
+risolutore prima/dentro/dopo la finestra. Il legame con una mappa cittadina può restare una
+destinazione non puntuale finché manca una coordinata certificata. Per le attività serve invece
+un riferimento `attivita` uno-a-uno: `attivita.luogo_chiave` indica oggi il quartiere e non basta
+a identificare uno dei pin nativi; i casi non collegabili devono restare esplicitamente censiti,
+non abbinati per somiglianza.
