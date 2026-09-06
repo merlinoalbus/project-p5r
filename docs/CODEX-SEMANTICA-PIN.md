@@ -537,6 +537,13 @@ dall'eseguibile e da `icone-mappa.json` e il contatore va inizializzato e confro
 atteso; altrimenti `verify_pin_semantics.py` termina con `NameError` al primo tipo provato dalla
 tabella.
 
+La prima esecuzione reale si ferma ancora prima, sull'asserzione del vecchio contratto che pretende
+`tipoSpillo is None` per un tipo aperto. Il verificatore deve invece pretendere `nota`, l'etichetta
+`Da identificare`, il blocco di riferimenti completo e il join alla tabella quando disponibile.
+Anche la ricostruzione dei pin attesi nel pacchetto deve includere questi tipi come `nota`, anziché
+scartarli con `stato != determinato`: altrimenti il controllo respinge proprio l'importazione
+autorizzata dall'utente.
+
 ## Correzione concreta della regressione nelle evidenze dei collegamenti
 
 La sesta verifica della Fase 2 ha individuato la perdita di tutti gli script e di tutte le
