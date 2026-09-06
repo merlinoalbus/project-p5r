@@ -84,73 +84,21 @@ per originale.
 
 ---
 
-## 2. I nove grappoli dei dedali dei Memento
+## 2 e 3 — RITIRATE: i pezzi dei Memento c'erano già
 
-| | |
-|---|---|
-| **file** | `public/asset/mappe/lmap/memento/dedalo-1.png` … `dedalo-9.png` |
-| **misura** | 900 × 700 px ciascuno |
-| **sfondo** | trasparente, **alfa reale** |
-| **stato** | `da verificare` — prompt di Claude, verifica a Codex |
-| **serve a** | `src/components/mappe/MappaMemento.tsx` |
+Avevo scritto due prompt per Codex — nove grappoli di città divelta e le catene del cratere — e
+**erano sbagliati da chiedere**: quelle immagini stanno già negli originali estratti, in
+`IT/FIELD/PANEL/MEMENTOS/MEMENTOS.SPD`, e hanno pure i nomi.
 
-**Perché servono.** I Memento nel gioco sono un imbuto che sprofonda sotto Tokyo, e ogni dedalo è
-un **grappolo di edifici** aggrovigliati che scende lungo la spirale, legato al successivo da un
-filo rosso. Il cratere, le crepe, lo skyline e il filo sono già disegnati; al posto dei grappoli
-oggi c'è la sola targa col nome, e senza di essi la mappa è una struttura senza corpo.
+Gli otto `第N層` — «strato N» — sono i grappoli che compongono l'imbuto scendendo, l'ultimo con la
+punta a trivella del fondo. `街並み` è il profilo della città sopra il pozzo, `鎖` sono le catene,
+i `血管` («vasi sanguigni») sono le venature rosse che solcano il cratere, e il terzo semestre ha i
+suoi dieci strati a parte perché lì il pozzo cambia. In tutto **73 elementi**, estratti da
+`lmap_sprites.py` in `public/asset/mappe/lmap/memento/`.
 
-Nel foglio degli sprite non ci sono: `P5_MAPDATA.SPD` contiene solo i livelli dell'effetto animato
-dell'ingresso — una nuvola, dei nastri, degli aloni — che nella mappa fanno l'atmosfera.
-
-**Prompt** (uno per dedalo, variando come detto sotto)
-
-> Grappolo di edifici aggrovigliati in stile Persona 5 Royal, visto **dall'alto e di sbieco**, come
-> un pezzo di città strappato e sospeso nel vuoto. Palazzi, scale, tubature e passerelle
-> incastrati fra loro senza logica, che si avvitano verso il basso; sotto, il grappolo si assottiglia
-> e sfrangia in tralicci e detriti, come se fosse stato divelto dal terreno.
->
-> Resa a **due soli valori**: bianco sporco per le facciate illuminate e nero pieno per le ombre e i
-> fianchi, con un contorno nero spesso e irregolare tutto attorno. Nessun grigio intermedio, nessuna
-> sfumatura, nessun colore. Il taglio è da xilografia: linee dritte, angoli netti, prospettiva
-> forzata e volutamente instabile.
->
-> Nessuna cornice, nessun riquadro, nessun testo, nessuna scritta. Fondo trasparente.
->
-> Il grappolo occupa quasi tutta la tela, più largo in alto e più stretto in basso.
-
-**Come variarli.** Devono somigliarsi come nove pezzi dello stesso crollo, non essere nove disegni
-diversi. Scendendo dal primo al nono: sempre più **piccoli e fitti**, sempre più **contorti**, e con
-sempre meno finestre illuminate — il nono è quasi tutto nero, con qualche taglio bianco. Il primo è
-il più largo e riconoscibile come città; l'ultimo è quasi solo struttura.
-
-**Come si verifica quando arrivano**
-
-1. alfa reale: canale 0..255, angolo trasparente;
-2. messi in fila dal primo al nono si legge una progressione, non nove disegni scollegati;
-3. sulla mappa, alle misure con cui vengono disegnati — dal 20% al 11% della larghezza scendendo —
-   la sagoma resta leggibile e non diventa una macchia.
-
----
-
-## 3. Le catene del cratere dei Memento
-
-| | |
-|---|---|
-| **file** | `public/asset/mappe/lmap/memento/catena.png` |
-| **misura** | 1200 × 200 px, pensata per essere ripetuta e ruotata |
-| **sfondo** | trasparente, **alfa reale** |
-| **stato** | `da verificare` — prompt di Claude, verifica a Codex |
-| **serve a** | `src/components/mappe/MappaMemento.tsx` |
-
-**Prompt**
-
-> Una catena a maglie grosse, vista di lato, che attraversa l'immagine da sinistra a destra
-> seguendo una curva molto ampia e appena ondulata. Maglie ovali spesse, disegnate come **sagoma
-> nera piatta** con un taglio bianco sottile a suggerire il volume di ciascuna: nessun grigio,
-> nessuna sfumatura, nessun colore.
->
-> Il tratto è irregolare, da xilografia, con il contorno che ispessisce e si assottiglia. Le maglie
-> non sono tutte identiche: qualcuna più stretta, qualcuna più aperta.
->
-> La catena entra da un bordo ed esce dall'altro, senza estremi visibili. Fondo trasparente,
-> nessuna cornice, nessun testo.
+**La lezione, scritta perché non si ripeta:** prima di scrivere un prompt si guarda se la cosa
+esiste già fra gli originali. Un asset generato al posto di uno del gioco non è solo lavoro
+sprecato — è una differenza di tratto che si vede, ed è un pezzo di mappa che smette di essere
+autentico. La sagoma di Shujin (voce 1) resta legittima perché quella nel gioco **non c'è**: la
+scuola non è una destinazione del treno, e l'ho verificato nel foglio degli sprite prima di
+chiedere il disegno.
