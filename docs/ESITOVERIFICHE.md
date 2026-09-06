@@ -1672,3 +1672,24 @@ PASS formale: il verdetto di lotto verrà registrato sul commit e SHA che Claude
 escluso dalla condizione reale `> 0,08`. In un lotto successivo, per rendere l'audit leggibile,
 conservare la precisione completa oppure aggiungere un campo booleano `oltreSogliaReale`; non
 alterare soglia né collegamenti già validati.
+
+### Preflight Fase 5.3 — fondazione `DoveSiTrova` in `c3df8bf`
+
+**Non ancora certificabile come lotto Fase 5.** `npm run typecheck` passa e il componente ha una
+separazione sensata fra esito unico, multiplo e assente; tuttavia non è ancora adottato da alcuna
+pagina e non esiste un test del suo contratto API→DOM. Il commit è quindi una fondazione pronta a
+ricevere prove, non il completamento del requisito 5.3.
+
+**Sanamento/test richiesti a Claude prima della candidatura del componente:** aggiungere una suite
+`DoveSiTrova.test.tsx` che mocki `getAccessoMondo` e `MappaIncorporata`, e dimostri:
+
+1. esito `unica`: mappa incorporata con `mappa`, `spilloIniziale` e `centro` esatti, più link
+   all'URL prodotto da `urlDestinazioneMondo`;
+2. esito `multipla`: nessuna mappa scelta arbitrariamente e un link per ogni destinazione;
+3. esito `assente`: testo informativo e nessun link/visore inventato;
+4. `soloCollegamento`: non monta il visore ma conserva l'ancora corretta;
+5. errore API: non rompe la scheda ospite.
+
+L'adozione nelle pagine resta un lotto successivo e deve avere almeno una prova di pagina reale:
+un riferimento alla mappa deve rendere questa area visibile, non soltanto un pulsante. Solo dopo
+queste prove si richiamerà il validator formale del punto 5.3.
