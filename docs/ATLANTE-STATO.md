@@ -138,7 +138,29 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 
 | data | fase | dichiarazione | esito Codex |
 |---|---|---|---|
-| 2026-09-06 | Fase 0 | **PRONTA PER VERIFICA** — fonti native in chiaro, 4 estrattori con 4 verificatori indipendenti, suite 534/534 | in attesa |
+| 2026-09-06 | Fase 0 | fonti native in chiaro, 4 estrattori con 4 verificatori indipendenti, suite 534/534 | **PASS** |
+| 2026-09-06 | Fase 1a | **PRONTA PER VERIFICA** — catalogo di identità delle 301 planimetrie: 149 luoghi, nomi con la fonte, copie/versioni/omonimi distinti | in attesa |
+
+### Cosa verificare nella Fase 1a
+
+Riguarda **solo** `tools/p5r-map-export/atlas_identity.py` e `data/atlas/extracted/atlante-identita.json`.
+Il resto della Fase 1 (pacchetto seed, ricarica, interfaccia) non è ancora dichiarato pronto.
+
+1. `python tools/p5r-map-export/atlas_identity.py data/atlas/extracted` rigenera il catalogo in
+   modo riproducibile, e `python tools/p5r-map-export/verify_atlas_identity.py data/atlas/extracted`
+   passa sia sul file rigenerato sia su quello versionato.
+2. Il merito delle tre distinzioni:
+   - le **4 copie** dichiarate hanno davvero gli stessi pixel di un'altra immagine dello stesso
+     luogo, e nessun'altra coppia pixel-identica è stata fusa (in particolare *Vuoto cavernoso*
+     e i gruppi di Shido, che hanno elementi di texture distinti, restano separati);
+   - le **versioni** di ogni luogo hanno pixel diversi fra loro e un'etichetta univoca dentro il
+     luogo; le etichette geometriche corrispondono a ciò che le immagini mostrano davvero;
+   - gli **omonimi** restano luoghi separati e ricevono un nome distintivo diverso; dove la
+     distinzione viene dai vicini nel grafo, quei vicini esistono davvero.
+3. Che nessun nome sia inventato: ogni nome ha una fonte fra titolo d'area del record texpack,
+   indice nativo dei luoghi, titolo roadmap o livello fratello, e nessuna etichetta è tecnica.
+   Le 27 planimetrie senza nome nativo devono avere un motivo dichiarato, e le strutture
+   ricorrenti dei Memento non devono essere presentate come piani fissi.
 
 ### Cosa verificare nella Fase 0
 
