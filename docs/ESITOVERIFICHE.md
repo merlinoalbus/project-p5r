@@ -1744,3 +1744,11 @@ nuova autorizzazione elemento-per-elemento.
 palette, soggetto, prompt positivo/negativo e vincoli `RGBA`, sfondo trasparente, **sola figura**.
 Codex genererà quel lotto; Claude verificherà soggetto, assenza della sagoma di pin e integrazione.
 Gli altri asset restano soggetti al censimento-delta della Fase 6.2.
+
+### Preflight della suite `DoveSiTrova` non ancora pubblicata
+
+La nuova `src/components/mappe/DoveSiTrova.test.tsx` passa con
+`npx vitest run src/components/mappe/DoveSiTrova.test.tsx`: **1 file, 5 test PASS**. Copre tutti i
+cinque requisiti richiesti da Codex (unica con pin/centro/URL, multipla senza scelta, assente,
+`soloCollegamento`, errore API non distruttivo). Dopo commit più tag candidato, il punto 5.3
+fondazione passa al validator formale; questa nota non è ancora un PASS di lotto.
