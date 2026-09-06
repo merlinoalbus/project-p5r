@@ -35,9 +35,18 @@ import {
 
 const BASE = '/asset/mappe/lmap/tokyo';
 
-/** Il contorno bianco che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa. */
-const CONTORNO = 'drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) '
-  + 'drop-shadow(0 -1px 0 #fff) drop-shadow(0 2px 3px rgba(0,0,0,0.5))';
+/** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
+ *
+ * Bianco a riposo, oro quando ci passi sopra. L'oro non e' decorazione: su una mappa fatta di
+ * sagome accostate serve capire **quale** si sta per aprire, e un semplice ingrandimento non
+ * basta quando due cartellini si sfiorano. */
+function contorno(colore: string, spessore = 1) {
+  const o = [`${spessore}px 0`, `-${spessore}px 0`, `0 ${spessore}px`, `0 -${spessore}px`];
+  return o.map((d) => `drop-shadow(${d} 0 ${colore})`).join(' ') + ' drop-shadow(0 2px 3px rgba(0,0,0,0.5))';
+}
+
+const CONTORNO = contorno('#fff');
+const CONTORNO_ORO = contorno('#ffd23f', 2) + ' brightness(1.05)';
 
 interface Props {
   quartieri: QuartiereRiassuntoDto[];
@@ -76,10 +85,13 @@ function Cartellino({ s }: { s: Segno }) {
         im.dataset.ripiego = '1';
         im.src = s.ripiego;
       }}
-      className="w-full object-contain transition-transform group-hover:scale-110"
-      style={{ filter: CONTORNO }} />
+      className="w-full object-contain transition-transform duration-150 group-hover:scale-[1.18]"
+      style={{ filter: CONTORNO }}
+      onMouseEnter={(e) => { if (s.href) e.currentTarget.style.filter = CONTORNO_ORO; }}
+      onMouseLeave={(e) => { e.currentTarget.style.filter = CONTORNO; }} />
     <span className={`-mt-[8%] whitespace-nowrap rounded-[2px] border border-white px-[0.45em] py-[0.05em] font-display text-[8px] uppercase leading-tight tracking-[0.04em] text-white shadow-[0_1px_4px_rgba(0,0,0,0.6)] sm:text-[10px] ${
-      s.palazzo ? 'bg-[#8b0000]' : 'bg-black'}`}>{s.nome}</span>
+      s.palazzo ? 'bg-[#8b0000]' : 'bg-black'} ${
+      s.href ? 'group-hover:border-[#ffd23f] group-hover:text-[#ffd23f]' : ''}`}>{s.nome}</span>
   </>;
   const classe = 'group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline';
   const stile = { left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` };
@@ -136,7 +148,11 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
       segni.push({
         chiave: q.chiave, nome: q.nome, png: `${q.chiave}.png`,
         ripiego: `/asset/mappe/citta-${q.chiave}.png`, dove, palazzo: false,
-        href: `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
+        // Si entra **nella mappa** del quartiere, non nella sua scheda: da una mappa si passa a
+        // una mappa. Il risolutore resta il ripiego per i pochi che non hanno un nodo proprio.
+        href: q.mappaChiave
+          ? `/guida/mappe/${encodeURIComponent(q.mappaChiave)}`
+          : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
         presente: !dataGioco || !q.sbloccoData || dentro(dataGioco, q.sbloccoData, null),
         quando: q.sbloccoData ? `dal ${q.sbloccoData}` : null,
       });
