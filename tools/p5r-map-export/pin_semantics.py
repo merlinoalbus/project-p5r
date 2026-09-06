@@ -87,6 +87,13 @@ SIGNIFICATO = {
     'アイコン：お香': ('negozio', 'Incensi'),
     'アイコン：揚げ物屋': ('ristorante', 'Fritti'),
     'スーパー（小）': ('negozio', 'Supermercato'),
+    # Covo dei Ladri, blocco con scarto 76 (vedi `map_icons.BLOCCO_MY_PALACE`)
+    'マイパレス_メーカー': ('attivita', 'Creatore del Palazzo'),
+    'マイパレス_ミュージック': ('attivita', 'Musica'),
+    'マイパレス_テレビ': ('attivita', 'Televisione'),
+    'マイパレス_ギャラリー': ('attivita', 'Galleria'),
+    'マイパレス_プレイエリア': ('attivita', 'Area giochi'),
+    'マイパレス_アワード': ('attivita', 'Premi'),
 }
 
 # Nomi di procedura che dicono che cosa il pin rappresenta, con il tipo di segnalino e l'etichetta.
@@ -116,6 +123,37 @@ CONFERME = {
     'sicura': ['safe room', 'stanza sicura', 'punto di ritorno'],
     'seme-bramosia': ['seme'],
 }
+
+# Terza strada, e la piu' diretta dove la proiezione regge. Sotto ogni pin c'e' un punto del campo:
+# se e' un **ingresso**, quel pin segna per definizione un punto di transito; se e' un **trigger**,
+# si sa quale procedura chiama, e il nome di quella procedura dice che cosa vi si fa (`DUCT_…INOUT`
+# un condotto, `AC_GOTO_…` uno spostamento, `CheckStair_…` una scala, `DUNGEON_EXIT` l'uscita,
+# `MyPalace_…` una voce del Covo).
+#
+# A differenza della strada delle bandiere, qui il legame e' geometrico: il trigger sta sotto il
+# pin perche' la proiezione ce lo mette. Per questo si contano solo le procedure il cui nome dice
+# davvero qualcosa — le `*_minimap_*` accendono l'icona senza dire di che icona si tratta, e
+# restano fuori dal conto — e si chiede una dominanza netta su un numero di casi non piccolo.
+FAMIGLIE_SOTTO = [
+    (r'^MyPalace_|Leave_MyPalace', 'attivita', 'Voce del Covo dei Ladri'),
+    (r'DUNGEON_EXIT', 'uscita', 'Uscita'),
+    (r'CheckStair|Stairs_|_STAIRS', 'scala', 'Scala'),
+    (r'Shortcut|SUBERIDAI|SUBERITDAI|WIRE_ON|_ROPE', 'scorciatoia', 'Scorciatoia'),
+    (r'(R_TBOX|RARE_TBOX)', 'forziere', 'Forziere raro'),
+    (r'TBOX', 'forziere', 'Forziere'),
+    (r'SEEDicon', 'seme-bramosia', 'Seme della bramosia'),
+    (r'(GIM_\w*SWITCH|_SWITCH|LEVER)', 'meccanismo', 'Meccanismo'),
+    (r'(DUCT_|INOUT|^GOTO_|AC_GOTO|_GOTO_|CALL_FIELD|ELEVATOR)', 'passaggio', 'Passaggio'),
+    (r'SHOP', 'negozio', 'Negozio'),
+    (r'(Izakaya|Udon|Ramen|Diner)', 'ristorante', 'Ristorante'),
+]
+# Un ingresso del campo e' esso stesso la prova di un transito, e vale come tale.
+FAMIGLIA_INGRESSO = ('passaggio', 'Passaggio')
+DOMINANZA_SOTTO = 0.7
+MINIME_SOTTO = 8
+# Con meno casi il tipo passa lo stesso se la dominanza e' piu' netta: sotto questa soglia, no.
+DOMINANZA_SOTTO_RIDOTTA = 0.75
+MINIME_SOTTO_RIDOTTE = 4
 
 # Secondo grado di prova, per i tipi che le procedure non nominano. Quando la proiezione e'
 # certificata si sa quale trigger o quale ingresso del campo sta sotto ogni pin, e da li':
@@ -248,6 +286,132 @@ def significato_dagli_script(out):
     return esito
 
 
+def famiglia_sotto(nome):
+    for schema, tipo, etichetta in FAMIGLIE_SOTTO:
+        if re.search(schema, nome):
+            return tipo, etichetta
+    return None
+
+
+def significato_dalle_procedure_sotto(out):
+    """Che cosa si fa nel punto che ogni pin segna, dove la proiezione e' certificata.
+
+    Per ogni tipo si contano le procedure riconoscibili dei trigger che gli cadono sotto, piu' gli
+    ingressi del campo, che valgono come transito. Se una famiglia domina su un numero di casi non
+    piccolo, il tipo e' determinato; altrimenti il conteggio resta agli atti e basta.
+    """
+    percorso = out/'proiezioni-mappa.json'
+    if not percorso.exists():
+        return {}
+    meta = {m['code']: m for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']}
+    con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
+    campi = {f['field']: f for f in con['fields']}
+    proiezioni = json.loads(percorso.read_text(encoding='utf8'))
+
+    conteggi = collections.defaultdict(lambda: dict(coppie=0, ingressi=0, famiglie=collections.Counter(),
+                                                    procedure=collections.Counter(), mute=0))
+    for r in proiezioni['mappe']:
+        if r['esito'] != 'certificata':
+            continue
+        mappa, p = meta[r['codice']], r['proiezione']
+        campo = campi[p['campo']]
+        nomi = [q['name'] for q in campo['procedures']]
+        punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
+        punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
+        for i_pin, i_punto in p['accoppiamenti']:
+            tipo = mappa['pins'][r['pinCollocabili'][i_pin]]['nativeType']
+            genere, voce = punti[i_punto]
+            v = conteggi[tipo]
+            v['coppie'] += 1
+            if genere == 'ingresso':
+                v['ingressi'] += 1
+                v['famiglie'][FAMIGLIA_INGRESSO] += 1
+                continue
+            i = voce.get('procedureIndex')
+            nome = nomi[i] if isinstance(i, int) and 0 <= i < len(nomi) else None
+            if not nome:
+                v['mute'] += 1
+                continue
+            v['procedure'][nome] += 1
+            famiglia = famiglia_sotto(nome)
+            if famiglia:
+                v['famiglie'][famiglia] += 1
+            else:
+                v['mute'] += 1
+
+    esito = {}
+    for tipo in sorted(conteggi):
+        v = conteggi[tipo]
+        riconosciute = sum(v['famiglie'].values())
+        proposta = None
+        if riconosciute:
+            (spillo, etichetta), quante = sorted(v['famiglie'].items(), key=lambda x: (-x[1], x[0][0]))[0]
+            quota = quante/riconosciute
+            basta = (riconosciute >= MINIME_SOTTO and quota >= DOMINANZA_SOTTO) or \
+                    (riconosciute >= MINIME_SOTTO_RIDOTTE and quota >= DOMINANZA_SOTTO_RIDOTTA)
+            if basta:
+                proposta = dict(tipoSpillo=spillo, etichetta=etichetta, casi=quante, riconosciute=riconosciute,
+                                quota=round(quota, 3),
+                                motivo=f'{quante} punti su {riconosciute} riconosciuti dicono «{etichetta.lower()}»'
+                                       + (f', di cui {v["ingressi"]} ingressi del campo' if v['ingressi'] else ''))
+        esito[tipo] = dict(coppie=v['coppie'], ingressi=v['ingressi'], senzaNome=v['mute'],
+                           famiglie={f'{t}|{e}': n for (t, e), n in
+                                     sorted(v['famiglie'].items(), key=lambda x: (-x[1], x[0][0]))},
+                           procedure=dict(sorted(v['procedure'].items(), key=lambda x: (-x[1], x[0]))[:6]),
+                           proposta=proposta)
+    return esito
+
+
+def significato_puntuale(out, determinati):
+    """Il significato dei singoli pin, dove il tipo non basta ma il punto sotto di loro parla.
+
+    Un tipo con tre pin in tutto non potra' mai avere una dominanza che valga come prova, e per
+    quella strada resterebbe muto per sempre. Ma la prova non deve per forza riguardare il tipo:
+    se **quel** pin cade su un trigger la cui procedura si chiama `DUNGEON_EXIT`, quel pin e' una
+    uscita, e lo e' indipendentemente da che cosa siano i suoi omologhi altrove.
+
+    Qui si risolvono uno per uno i pin dei tipi rimasti senza significato, usando la stessa
+    lettura dei nomi di procedura gia' impiegata per i tipi. Un ingresso del campo non basta da
+    solo: dice che li' si transita, ma non distingue il pin dal fondo, e a livello di singolo pin
+    non e' una prova sufficiente.
+    """
+    percorso = out/'proiezioni-mappa.json'
+    if not percorso.exists():
+        return []
+    meta = {m['code']: m for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']}
+    con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
+    campi = {f['field']: f for f in con['fields']}
+    proiezioni = json.loads(percorso.read_text(encoding='utf8'))
+    righe = []
+    for r in proiezioni['mappe']:
+        if r['esito'] != 'certificata':
+            continue
+        mappa, p = meta[r['codice']], r['proiezione']
+        campo = campi[p['campo']]
+        nomi = [q['name'] for q in campo['procedures']]
+        punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
+        punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
+        for i_pin, i_punto in p['accoppiamenti']:
+            indice = r['pinCollocabili'][i_pin]
+            tipo = mappa['pins'][indice]['nativeType']
+            if tipo in determinati:
+                continue
+            genere, voce = punti[i_punto]
+            if genere != 'trigger':
+                continue
+            i = voce.get('procedureIndex')
+            nome = nomi[i] if isinstance(i, int) and 0 <= i < len(nomi) else None
+            famiglia = famiglia_sotto(nome) if nome else None
+            if not famiglia:
+                continue
+            righe.append(dict(chiave=r['chiave'], indicePin=indice, tipoNativo=tipo,
+                              tipoSpillo=famiglia[0], etichetta=famiglia[1], campo=p['campo'],
+                              procedura=nome,
+                              prova=f'il trigger sotto questo pin chiama «{nome}»'))
+    righe.sort(key=lambda x: (x['chiave'], x['indicePin']))
+    return righe
+
+
 def famiglia_etichetta(testo):
     t = (testo or '').casefold()
     for tipo, etichetta, parole in ETICHETTE:
@@ -336,6 +500,7 @@ def main(out):
     out = Path(out)
     icone = json.loads((out/'icone-mappa.json').read_text(encoding='utf8'))
     dagli_script = significato_dagli_script(out)
+    dalle_procedure_sotto = significato_dalle_procedure_sotto(out)
     dalla_proiezione = significato_dalla_proiezione(out)
     righe = []
     for r in icone['tipiNativi']:
@@ -347,16 +512,25 @@ def main(out):
         script = dagli_script.get(r['tipoNativo'])
         proiezione = dalla_proiezione.get(r['tipoNativo'])
         voce['script'] = script
+        sotto = dalle_procedure_sotto.get(r['tipoNativo'])
         voce['proiezione'] = proiezione
-        if r['associazione'] == 'blocco-urbano-dimostrato' and significato:
+        voce['sottoIlPin'] = sotto
+        if r['associazione'] in ('blocco-urbano-dimostrato', 'blocco-covo-dimostrato') and significato:
             voce.update(tipoSpillo=significato[0], etichetta=significato[1], stato='determinato',
-                        prova='nome interno dello sprite del blocco urbano dimostrato')
+                        prova='nome interno dello sprite del '
+                              + ('blocco urbano dimostrato' if r['associazione'].startswith('blocco-urbano')
+                                 else 'blocco del Covo dei Ladri dimostrato'))
         elif script and script['stato'] == 'determinato':
             voce.update(tipoSpillo=script['tipoSpillo'], etichetta=script['etichetta'], stato='determinato',
                         prova=f"procedura che accende la bandiera del pin: {script['famigliaDominante']} "
                               f"in {script['casiDellaFamiglia']} casi su {script['procedureRiconosciute']} riconosciuti"
                               + (f", con {script['confermeDaiTrigger']} conferme dalle etichette dei trigger"
                                  if script['confermeDaiTrigger'] else ''))
+        elif sotto and sotto['proposta']:
+            voce.update(tipoSpillo=sotto['proposta']['tipoSpillo'], etichetta=sotto['proposta']['etichetta'],
+                        stato='determinato',
+                        prova='procedura del trigger che sta sotto il pin: '
+                              + sotto['proposta']['motivo'])
         elif proiezione and proiezione['proposta']:
             voce.update(tipoSpillo=proiezione['proposta']['tipoSpillo'], etichetta=proiezione['proposta']['etichetta'],
                         stato='ipotesi',
@@ -365,17 +539,25 @@ def main(out):
             voce.update(tipoSpillo=None, etichetta=None, stato='non-determinato',
                         motivo=('nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera'
                                 if script and script['procedureRiconosciute']
-                                else 'né lo sprite né le procedure che accendono la sua bandiera lo dicono'))
+                                else ('nessuna famiglia domina fra le procedure che gli cadono sotto'
+                                      if sotto and sotto['coppie']
+                                      else 'né lo sprite, né le procedure che accendono la sua bandiera, '
+                                           'né un punto del campo sotto di lui lo dicono')))
         righe.append(voce)
+    pin_per_prova = collections.Counter()
+    for r in righe:
+        if r['stato'] == 'determinato':
+            pin_per_prova[(r['prova'] or '').split(':')[0]] += r['occorrenze']
     determinati = [r for r in righe if r['stato'] == 'determinato']
     ipotesi = [r for r in righe if r['stato'] == 'ipotesi']
     senza = [r for r in righe if r['stato'] == 'non-determinato']
+    puntuali = significato_puntuale(out, {r['tipoNativo'] for r in determinati})
     mancanti = sorted(set(SIGNIFICATO) - {r['nomeNativo'] for r in righe})
     if mancanti:
         raise ValueError(f'Traduzioni dichiarate per sprite che nessun pin usa: {mancanti}')
     risultato = dict(
         schemaVersion=1, sources=dict(icone='icone-mappa.json', registro='shared/spilli.ts'),
-        tipi=righe, provePalazzi=PROVE_PALAZZI,
+        tipi=righe, provePalazzi=PROVE_PALAZZI, pinPuntuali=puntuali,
         summary=dict(tipi=len(righe), determinati=len(determinati), ipotesi=len(ipotesi), nonDeterminati=len(senza),
                      pinConIpotesi=sum(r['occorrenze'] for r in ipotesi),
                      perTipoIpotesi=dict(collections.Counter(r['tipoSpillo'] for r in ipotesi)),
@@ -383,6 +565,10 @@ def main(out):
                      pinNonDeterminati=sum(r['occorrenze'] for r in senza),
                      perTipoSpillo=dict(collections.Counter(r['tipoSpillo'] for r in determinati)),
                      perProva=dict(collections.Counter((r.get('prova') or '').split(':')[0] for r in determinati)),
+                     pinPerProva=dict(sorted(pin_per_prova.items(), key=lambda x: (-x[1], x[0]))),
+                     pinPuntuali=len(puntuali),
+                     perTipoPuntuale=dict(sorted(collections.Counter(
+                         r['tipoSpillo'] for r in puntuali).items(), key=lambda x: (-x[1], x[0]))),
                      motiviNonDeterminati=dict(collections.Counter(r.get('motivo') for r in senza))),
         limits=['I tipi non determinati non vanno importati: un pin senza significato è peggio di un pin assente.',
                 'Le icone native servono a riconoscere, non a disegnare: l’applicazione usa i propri segnalini.'])

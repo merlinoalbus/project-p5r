@@ -132,7 +132,11 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
     from pin_luoghi import PAROLE
     meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
     riferimento = {r['chiave']: r for r in json.loads((out/'riferimento-pin.json').read_text(encoding='utf8'))['mappe']}
-    semantica = {r['tipoNativo']: r for r in json.loads((out/'semantica-pin.json').read_text(encoding='utf8'))['tipi']}
+    _sem = json.loads((out/'semantica-pin.json').read_text(encoding='utf8'))
+    semantica = {r['tipoNativo']: r for r in _sem['tipi']}
+    # Dove il tipo resta muto perche' i suoi pin sono troppo pochi per una dominanza, il singolo pin
+    # puo' comunque avere la sua prova: il trigger che gli sta sotto. Quella vale per quel pin solo.
+    puntuali = {(r['chiave'], r['indicePin']): r for r in _sem.get('pinPuntuali') or []}
     quartieri = json.loads((seed/'citta.json').read_text(encoding='utf8'))['quartieri']
     luoghi_per_quartiere = {q['chiave']: q.get('luoghi', []) for q in quartieri}
 
@@ -161,19 +165,27 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
         for indice in rif['collocabili']:
             p = mappa_nativa['pins'][indice]
             sem = semantica.get(p['nativeType'])
-            if not sem or sem['stato'] not in ('determinato', 'ipotesi'):
+            puntuale = puntuali.get((chiave, indice))
+            if not sem or (sem['stato'] not in ('determinato', 'ipotesi') and not puntuale):
                 esiti['tipo nativo senza significato'] += 1
                 continue
             luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
             nota = ['Pin nativo del gioco.']
-            if sem['stato'] == 'ipotesi':
-                # dichiarato per quello che e': un indizio forte, non una dimostrazione
-                nota.append('Che cosa sia e’ un’ipotesi, non una certezza: ' + sem['prova'] + '.')
+            # La prova puntuale riguarda proprio questo pin, quindi conta piu' di un'ipotesi sul suo
+            # tipo; dove il tipo e' dimostrato, invece, non c'e' nulla da aggiungere.
+            if puntuale and sem['stato'] != 'determinato':
+                tipo_spillo, etichetta = puntuale['tipoSpillo'], puntuale['etichetta']
+                nota.append('Riconosciuto singolarmente: ' + puntuale['prova'] + '.')
+            else:
+                tipo_spillo, etichetta = sem['tipoSpillo'], sem['etichetta']
+                if sem['stato'] == 'ipotesi':
+                    # dichiarato per quello che e': un indizio forte, non una dimostrazione
+                    nota.append('Che cosa sia e’ un’ipotesi, non una certezza: ' + sem['prova'] + '.')
             # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
             if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')
             spillo = dict(
-                tipo=sem['tipoSpillo'], nome=luogo['nome'] if luogo else sem['etichetta'],
+                tipo=tipo_spillo, nome=luogo['nome'] if luogo else etichetta,
                 descrizione=' '.join(nota),
                 x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
                 riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,

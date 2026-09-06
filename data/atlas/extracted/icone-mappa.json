@@ -5551,9 +5551,9 @@
       "mappeDungeon": 0,
       "condizionali": 0,
       "effettoZero": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato"
+      "sprite": 174,
+      "nomeNativo": "マイパレス_メーカー",
+      "associazione": "blocco-covo-dimostrato"
     },
     {
       "tipoNativo": 99,
@@ -5565,9 +5565,9 @@
       "mappeDungeon": 0,
       "condizionali": 0,
       "effettoZero": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato"
+      "sprite": 175,
+      "nomeNativo": "マイパレス_ミュージック",
+      "associazione": "blocco-covo-dimostrato"
     },
     {
       "tipoNativo": 100,
@@ -5579,9 +5579,9 @@
       "mappeDungeon": 0,
       "condizionali": 0,
       "effettoZero": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato"
+      "sprite": 176,
+      "nomeNativo": "マイパレス_テレビ",
+      "associazione": "blocco-covo-dimostrato"
     },
     {
       "tipoNativo": 101,
@@ -5593,9 +5593,9 @@
       "mappeDungeon": 0,
       "condizionali": 0,
       "effettoZero": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato"
+      "sprite": 177,
+      "nomeNativo": "マイパレス_ギャラリー",
+      "associazione": "blocco-covo-dimostrato"
     },
     {
       "tipoNativo": 102,
@@ -5607,9 +5607,9 @@
       "mappeDungeon": 0,
       "condizionali": 0,
       "effettoZero": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato"
+      "sprite": 178,
+      "nomeNativo": "マイパレス_プレイエリア",
+      "associazione": "blocco-covo-dimostrato"
     },
     {
       "tipoNativo": 103,
@@ -5621,9 +5621,9 @@
       "mappeDungeon": 0,
       "condizionali": 0,
       "effettoZero": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato"
+      "sprite": 179,
+      "nomeNativo": "マイパレス_アワード",
+      "associazione": "blocco-covo-dimostrato"
     },
     {
       "tipoNativo": 104,
@@ -5871,7 +5871,8 @@
     "associazioniPerEsito": {
       "fuori-dal-blocco-urbano": 38,
       "blocco-urbano-dimostrato": 51,
-      "urbano-non-dimostrato": 13
+      "blocco-covo-dimostrato": 6,
+      "urbano-non-dimostrato": 7
     }
   },
   "limits": [

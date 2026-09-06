@@ -40,10 +40,25 @@ VICINO = 0.02
 LONTANO = 0.06
 # Quota minima di pin collocabili perché la mappa valga: sotto, non è un pin fuori posto ma un
 # riferimento diverso.
-QUOTA_COLLOCABILI = 0.75
+QUOTA_COLLOCABILI = 0.5
+# Con un solo pin la quota non dice nulla e la prova sta tutta nella distanza: quel pin deve
+# stare praticamente sul tratto, non soltanto vicino.
+VICINO_PIN_SOLO = VICINO/2
 # Alcune planimetrie hanno i pin in un'altra risoluzione: si prova solo con potenze di due, e si
 # accetta il cambio solo se migliora la mediana di almeno questo fattore.
 FATTORI = [1.0, 0.5, 2.0, 0.25, 4.0]
+# Oltre alle potenze di due si prova il fattore che i dati stessi suggeriscono: il rapporto fra
+# l'estensione del disegno e l'estensione dei pin. Se i pin sono in un'altra risoluzione ma non in
+# rapporto binario, e' questo a trovarla — e passa solo se supera le stesse prove degli altri.
+def fattore_suggerito(pin, riquadro):
+    x0, y0, x1, y1 = riquadro
+    xs = [p['x'] for p in pin]
+    ys = [p['y'] for p in pin]
+    ampiezza_x, ampiezza_y = max(xs) - min(xs), max(ys) - min(ys)
+    if ampiezza_x <= 0 or ampiezza_y <= 0:
+        return None
+    f = ((x1 - x0)/ampiezza_x + (y1 - y0)/ampiezza_y) / 2
+    return round(f, 4) if 0.05 <= f <= 20 else None
 MIGLIORAMENTO = 5
 
 
@@ -77,10 +92,12 @@ def prova_mappa(mappa, immagine, maschera):
     # Alcune planimetrie hanno i pin in una risoluzione diversa dalla propria. Il fattore si accetta
     # solo se è una potenza di due, se migliora la mediana di molto e se il risultato è ottimo:
     # altrimenti si resta a uno, che è il caso normale.
-    misure = {f: distanze_con(f) for f in FATTORI}
+    suggerito = fattore_suggerito(pin, (x0, y0, x1, y1))
+    prove = list(FATTORI) + ([suggerito] if suggerito and suggerito not in FATTORI else [])
+    misure = {f: distanze_con(f) for f in prove}
     base = mediana(misure[1.0])
     fattore, distanze = 1.0, misure[1.0]
-    migliore = min((f for f in FATTORI if f != 1.0), key=lambda f: mediana(misure[f]))
+    migliore = min((f for f in prove if f != 1.0), key=lambda f: mediana(misure[f]))
     # se la scala uno va già bene non si cambia: un fattore diverso sposterebbe i pin senza motivo
     if base > VICINO/4 and mediana(misure[migliore]) <= VICINO/4 and mediana(misure[migliore]) * MIGLIORAMENTO <= base:
         fattore, distanze = migliore, misure[migliore]
@@ -100,13 +117,18 @@ def prova_mappa(mappa, immagine, maschera):
     if med > VICINO:
         esito, motivo = 'non-condiviso', f'i pin distano in media il {round(med*100, 1)}% della tela dal tratto'
     elif quota < QUOTA_COLLOCABILI:
-        esito, motivo = 'non-condiviso', f'solo il {round(quota*100)}% dei pin è appoggiato al disegno'
+        esito, motivo = 'non-condiviso', (f'solo {len(collocabili)} pin su {len(pin)} '
+                                          f'({round(quota*100)}%) sono appoggiati al disegno')
+    elif len(collocabili) == 1 and med > VICINO_PIN_SOLO:
+        esito, motivo = 'non-condiviso', (f'un solo pin appoggiato, e dista il {round(med*100, 1)}% '
+                                          'della tela dal tratto: troppo per farne una prova')
     return dict(esito=esito, motivo=motivo, pin=len(pin), fattoreScala=fattore,
                 collocabili=collocabili if esito == 'condiviso' else [],
                 numeroCollocabili=len(collocabili) if esito == 'condiviso' else 0,
                 esclusi=len(pin) - len(collocabili),
                 fuoriDallaTela=sum(not v for v in dentro_tela),
                 fuoriDalDisegno=sum(not v for v in dentro_disegno),
+                fattoreSuggerito=suggerito,
                 quotaCollocabili=round(quota, 4), distanzaMediana=round(med, 4),
                 distanzaMedianaScalaUno=round(base, 4),
                 dimensione=[larghezza, altezza], riquadroContenuto=[x0, y0, x1, y1],
@@ -145,6 +167,8 @@ def main(out):
         criterio=dict(sistemaCoordinate=meta['coordinateSystem'], margineTela=MARGINE_TELA,
                       vicino=VICINO, lontano=LONTANO, quotaCollocabili=QUOTA_COLLOCABILI,
                       fattori=FATTORI, miglioramento=MIGLIORAMENTO,
+                      vicinoPinSolo=VICINO_PIN_SOLO,
+                      fattoreSuggerito='rapporto fra estensione del disegno ed estensione dei pin',
                       conversione='x% = 100·x·fattoreScala/larghezza, y% = 100·y·fattoreScala/altezza, '
                                   'solo per gli indici elencati in «collocabili» delle mappe condivise'),
         mappe=righe,

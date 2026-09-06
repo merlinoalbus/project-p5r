@@ -36,6 +36,13 @@ SEPARATORE = 2
 # Blocco urbano dimostrato: il tipo nativo 46 è la prima icona negozio del foglio (indice 114).
 SCARTO_CITTA = 68
 BLOCCO_CITTA = (46, 96)
+# Secondo blocco con scarto dimostrato: le voci del Covo dei Ladri. Lo scarto 76 porta i tipi
+# 98..103 sugli sprite «マイパレス_…» e cinque di quei sei tipi cadono, dove la proiezione e'
+# certificata, su procedure `MyPalace_*` che dicono la stessa cosa dello sprite (Maker sul
+# creatore, Sound sulla musica, Image sulla galleria, Daifugou sull'area giochi, Award sui
+# premi). Nessuna smentita: lo scarto e' provato, non supposto.
+SCARTO_MY_PALACE = 76
+BLOCCO_MY_PALACE = (98, 103)
 
 
 def sprite_del_foglio(data):
@@ -137,6 +144,12 @@ def associa(righe, voci):
             r['sprite'] = None if sprite is None or sprite['vuoto'] else sprite['index']
             r['nomeNativo'] = None if r['sprite'] is None else sprite['nome']
             r['associazione'] = 'blocco-urbano-dimostrato' if r['sprite'] is not None else 'sprite-vuoto'
+        elif BLOCCO_MY_PALACE[0] <= tipo <= BLOCCO_MY_PALACE[1] and r['mappeDungeon'] == 0:
+            i = tipo + SCARTO_MY_PALACE
+            sprite = voci[i] if i < len(voci) else None
+            r['sprite'] = None if sprite is None or sprite['vuoto'] else sprite['index']
+            r['nomeNativo'] = None if r['sprite'] is None else sprite['nome']
+            r['associazione'] = 'blocco-covo-dimostrato' if r['sprite'] is not None else 'sprite-vuoto'
         else:
             r['sprite'] = None
             r['nomeNativo'] = None

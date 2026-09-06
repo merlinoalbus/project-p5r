@@ -18,6 +18,7 @@ from pathlib import Path
 import collections
 import itertools
 import json
+import math
 import sys
 
 # Scarto massimo, in frazione della diagonale della tela, perché la proiezione valga.
@@ -27,6 +28,9 @@ COPPIE_MINIME = 4
 # Una coppia entra nella stima solo se il punto 3D è il più vicino a quel pin entro questa
 # distanza, sempre in frazione della diagonale.
 VICINANZA = 0.08
+# Quota dei pin di un livello che deve cadere sulla trasformazione ricevuta da un livello
+# gemello perche' valga anche per lui: sotto, quella proiezione non descrive quel livello.
+QUOTA_EREDITA = 0.5
 
 
 def punti_del_campo(campo):
@@ -97,6 +101,7 @@ def main(out):
     con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
     riferimento = {r['chiave']: r for r in json.loads((out/'riferimento-pin.json').read_text(encoding='utf8'))['mappe']}
     campi = {f['field']: f for f in con['fields']}
+    per_codice = {m['code']: m for m in meta['maps']}
 
     righe = []
     for mappa in meta['maps']:
@@ -126,7 +131,8 @@ def main(out):
                                       generi=dict(collections.Counter(v['genere'] for v in voci))))
         if not candidati:
             righe.append(dict(chiave=chiave, codice=mappa['code'], esito='non-certificata',
-                              motivo='nessun campo offre abbastanza punti accoppiabili'))
+                              motivo='nessun campo offre abbastanza punti accoppiabili',
+                              pinCollocabili=indici, dimensione=[larghezza, altezza], fattoreScala=fattore))
             continue
         migliore = min(candidati, key=lambda c: c['scarto'])
         certificata = migliore['scarto'] <= SCARTO and migliore['coppie'] >= COPPIE_MINIME
@@ -135,6 +141,132 @@ def main(out):
                           motivo=None if certificata else f"scarto {round(migliore['scarto']*100, 1)}% della tela",
                           pinCollocabili=indici, dimensione=[larghezza, altezza], fattoreScala=fattore,
                           proiezione=migliore, alternative=len(candidati)))
+
+    # I livelli grafici della stessa risorsa (`ICON_<maggiore>_<minore>.BIN`, sezioni separate dal
+    # record di tipo 2) disegnano pin sulla **stessa tela**: la trasformazione che porta il mondo
+    # sui pixel e' per forza la stessa per tutti. Due conseguenze, entrambe sfruttate qui:
+    #
+    #   * i pin dei livelli si possono **stimare insieme**, e cosi' un gruppo in cui nessun livello
+    #     da solo raggiunge le quattro coppie ce la fa lo stesso;
+    #   * una proiezione certificata su un livello si puo' **provare** sugli altri, e vale per
+    #     quelli i cui pin ci cadono davvero sopra.
+    #
+    # Non e' una scorciatoia: la trasformazione ricevuta viene rimisurata sui pin del livello che
+    # la riceve, e se lo scarto non regge o troppi pin restano lontani, quel livello resta senza.
+    per_risorsa = collections.defaultdict(list)
+    for r in righe:
+        maggiore, minore, _ = (int(v) for v in r['codice'].split('_')[1:])
+        per_risorsa[(maggiore, minore)].append(r)
+
+    def pin_di(r):
+        mappa = per_codice[r['codice']]
+        f = r['fattoreScala']
+        return numpy.array([[mappa['pins'][i]['x']*f, mappa['pins'][i]['y']*f]
+                            for i in r['pinCollocabili']], dtype=float)
+
+    def prova(r, p, campo):
+        """Rimisura la trasformazione `p` sui pin di `r`: quanti ci cadono sopra e con che scarto."""
+        voci = punti_del_campo(campo)
+        if not voci:
+            return None
+        larghezza, altezza = r['dimensione']
+        diagonale = (larghezza**2 + altezza**2) ** 0.5
+        pin = pin_di(r)
+        w = numpy.array([[v['xyz'][0], v['xyz'][2]] for v in voci], dtype=float)
+        if p['scambiaAssi']:
+            w = w[:, ::-1].copy()
+        w[:, 0] *= p['segnoX']
+        w[:, 1] *= p['segnoY']
+        proiettati = w*p['scala'] + numpy.array(p['traslazione'], dtype=float)
+        distanze = numpy.hypot(proiettati[:, None, 0] - pin[None, :, 0],
+                               proiettati[:, None, 1] - pin[None, :, 1])
+        vicino, minime = distanze.argmin(0), distanze.min(0)
+        buone = minime <= VICINANZA*diagonale
+        if buone.sum() < max(1, math.ceil(QUOTA_EREDITA*len(pin))):
+            return None
+        scarto = float(minime[buone].mean()/diagonale)
+        if scarto > SCARTO:
+            return None
+        return dict(p, coppie=int(buone.sum()), scarto=round(scarto, 5),
+                    accoppiamenti=[[int(i), int(vicino[i])] for i in range(len(pin)) if buone[i]])
+
+    campi_del_maggiore = collections.defaultdict(list)
+    for m in meta['maps']:
+        maggiore = int(m['code'].split('_')[1])
+        for nome in m['fields']:
+            if nome not in campi_del_maggiore[maggiore]:
+                campi_del_maggiore[maggiore].append(nome)
+
+    def cerca_campi(nomi, pin, diagonale):
+        trovati = []
+        for nome in nomi:
+            campo = campi.get(nome)
+            if not campo:
+                continue
+            voci = punti_del_campo(campo)
+            if len(voci) < COPPIE_MINIME:
+                continue
+            mondo = numpy.array([[v['xyz'][0], v['xyz'][2]] for v in voci], dtype=float)
+            esito = stima(mondo, pin, diagonale)
+            if esito and esito['scarto'] <= SCARTO:
+                trovati.append(dict(esito, campo=nome))
+        return trovati
+
+    aggregate = ereditate = 0
+    for chiave_risorsa in sorted(per_risorsa):
+        gruppo = per_risorsa[chiave_risorsa]
+        membri = [r for r in gruppo if 'pinCollocabili' in r]
+        if not membri:
+            continue
+        sorgenti = [r for r in membri if r['esito'] == 'certificata']
+        origine = None
+        if sorgenti:
+            migliore = min(sorgenti, key=lambda r: r['proiezione']['scarto'])
+            origine = dict(proiezione=migliore['proiezione'], da=migliore['chiave'], modo='livello-gemello')
+        elif len({tuple(r['dimensione']) for r in membri}) == 1:
+            # nessun livello ce la fa da solo: si tenta la stima sui pin di tutti insieme
+            larghezza, altezza = membri[0]['dimensione']
+            diagonale = (larghezza**2 + altezza**2) ** 0.5
+            uniti = numpy.vstack([pin_di(r) for r in membri])
+            nomi_campo = []
+            for r in membri:
+                for nome in per_codice[r['codice']]['fields']:
+                    if nome not in nomi_campo:
+                        nomi_campo.append(nome)
+            candidati = cerca_campi(nomi_campo, uniti, diagonale)
+            if not candidati:
+                # nessun campo dichiarato regge: si prova con tutti i campi del Palazzo
+                allargati = [n for n in campi_del_maggiore.get(chiave_risorsa[0], []) if n not in nomi_campo]
+                candidati = cerca_campi(allargati, uniti, diagonale)
+                for c in candidati:
+                    c['campoAllargato'] = True
+            if candidati:
+                migliore = min(candidati, key=lambda c: c['scarto'])
+                origine = dict(proiezione=migliore, da=None, modo='livelli-uniti',
+                               pinUniti=int(len(uniti)), livelli=len(membri))
+        if not origine:
+            continue
+        campo = campi.get(origine['proiezione']['campo'])
+        if not campo:
+            continue
+        for r in membri:
+            if r['esito'] == 'certificata':
+                continue
+            misura = prova(r, origine['proiezione'], campo)
+            if not misura:
+                continue
+            misura['stimataSu'] = origine['modo']
+            if origine['da']:
+                misura['ereditataDa'] = origine['da']
+            if origine.get('pinUniti'):
+                misura['pinUniti'] = origine['pinUniti']
+                misura['livelliUniti'] = origine['livelli']
+            r.update(esito='certificata', motivo=None, alternative=r.get('alternative', 0),
+                     proiezione=misura)
+            if origine['modo'] == 'livelli-uniti':
+                aggregate += 1
+            else:
+                ereditate += 1
 
     certificate = [r for r in righe if r['esito'] == 'certificata']
     risultato = dict(
@@ -145,7 +277,9 @@ def main(out):
                       forma='similitudine ad assi allineati: scala uniforme, scambio e ribaltamento degli assi, traslazione',
                       applicazione='pixel = mondo(x,z) trasformato; vale solo per le mappe certificate'),
         mappe=righe,
-        summary=dict(mappe=len(righe), certificate=len(certificate),
+        summary=dict(mappe=len(righe), certificate=len(certificate), daLivelliUniti=aggregate,
+                     conCampoAllargato=sum(1 for r in certificate
+                                          if r['proiezione'].get('campoAllargato')), ereditate=ereditate,
                      coppie=sum(r['proiezione']['coppie'] for r in certificate),
                      scartoMediano=sorted(r['proiezione']['scarto'] for r in certificate)[len(certificate)//2] if certificate else None,
                      perEsito=dict(collections.Counter(r['esito'] for r in righe))),

@@ -33,24 +33,51 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 84,
-        "ingressi": 33,
-        "quotaIngressi": 0.393,
-        "scartoDallaMedia": 0.78,
-        "mediaIngressi": 0.352,
+        "coppie": 98,
+        "ingressi": 40,
+        "quotaIngressi": 0.408,
+        "scartoDallaMedia": 1.23,
+        "mediaIngressi": 0.349,
         "etichette": {
-          "Riemergi": 2,
-          "Striscia": 2,
-          "Barista": 1,
-          "Corridoio mezzavia tribordo": 1,
-          "Corsi privati": 1
+          "Striscia": 3,
+          "Barista": 2,
+          "Il mio posto": 2,
+          "Prigione sotterranea": 2,
+          "Riemergi": 2
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "sottoIlPin": {
+        "coppie": 98,
+        "ingressi": 40,
+        "senzaNome": 44,
+        "famiglie": {
+          "passaggio|Passaggio": 50,
+          "forziere|Forziere": 2,
+          "scala|Scala": 1,
+          "seme-bramosia|Seme della bramosia": 1
+        },
+        "procedure": {
+          "D07_159_04_minimap_02": 2,
+          "D10_162_16_EX_GUIDE": 2,
+          "D151_04_miniEV06_START": 2,
+          "D159_07_NPC_04_START": 2,
+          "DUCT_153_009_04_INOUT": 2,
+          "DUCT_156_007_B_INOUT": 2
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 50,
+          "riconosciute": 54,
+          "quota": 0.926,
+          "motivo": "50 punti su 54 riconosciuti dicono «passaggio», di cui 40 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 50 punti su 54 riconosciuti dicono «passaggio», di cui 40 ingressi del campo"
     },
     {
       "tipoNativo": 5,
@@ -85,24 +112,49 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 62,
-        "ingressi": 22,
-        "quotaIngressi": 0.355,
-        "scartoDallaMedia": 0.04,
-        "mediaIngressi": 0.352,
+        "coppie": 72,
+        "ingressi": 24,
+        "quotaIngressi": 0.333,
+        "scartoDallaMedia": -0.28,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Libri": 3,
+          "Agenzia investigativa": 2,
           "Aula studio": 2,
           "Central Street": 2,
-          "Corsi privati": 2,
-          "Sottopasso": 2
+          "Corsi privati": 2
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 72,
+        "ingressi": 24,
+        "senzaNome": 40,
+        "famiglie": {
+          "passaggio|Passaggio": 31,
+          "forziere|Forziere": 1
+        },
+        "procedure": {
+          "CHK_STUDYROOM_S": 2,
+          "D01_02_miniEV_02": 2,
+          "MAIN_MY_Bed": 2,
+          "AC_CENTER_HIKARIE_BUTTON": 1,
+          "AC_GOTO_CENTER_HACHI": 1,
+          "AC_GOTO_CENTER_YAMA": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 31,
+          "riconosciute": 32,
+          "quota": 0.969,
+          "motivo": "31 punti su 32 riconosciuti dicono «passaggio», di cui 24 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 31 punti su 32 riconosciuti dicono «passaggio», di cui 24 ingressi del campo"
     },
     {
       "tipoNativo": 10,
@@ -139,22 +191,44 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 62,
-        "ingressi": 12,
-        "quotaIngressi": 0.194,
-        "scartoDallaMedia": -2.62,
-        "mediaIngressi": 0.352,
+        "coppie": 70,
+        "ingressi": 15,
+        "quotaIngressi": 0.214,
+        "scartoDallaMedia": -2.36,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Striscia": 4,
           "Apri porta": 3,
+          "Edificio stazione 2P": 2,
           "Riemergi": 2,
-          "Edificio stazione 2P": 1,
           "Guarda galleria": 1
         },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 70,
+        "ingressi": 15,
+        "senzaNome": 46,
+        "famiglie": {
+          "passaggio|Passaggio": 21,
+          "meccanismo|Meccanismo": 2,
+          "forziere|Forziere": 1
+        },
+        "procedure": {
+          "D05_02_e341_035_START": 2,
+          "D07_159_20_minimap_05": 2,
+          "CAGE_159_030_H_OUT": 1,
+          "D01_151_05_WIRE_OBJ_OFF": 1,
+          "D01_151_15_minimap_03": 1,
+          "D02_153_02_minimap_003": 1
+        },
         "proposta": {
-          "tipoSpillo": "scorciatoia",
-          "etichetta": "Scorciatoia",
-          "motivo": "6 etichette su 15 dicono «scorciatoia»"
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 21,
+          "riconosciute": 24,
+          "quota": 0.875,
+          "motivo": "21 punti su 24 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
         }
       },
       "tipoSpillo": "porta",
@@ -197,19 +271,44 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 57,
+        "coppie": 61,
         "ingressi": 7,
-        "quotaIngressi": 0.123,
-        "scartoDallaMedia": -3.63,
-        "mediaIngressi": 0.352,
+        "quotaIngressi": 0.115,
+        "scartoDallaMedia": -3.84,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Sala trasmissioni": 29,
+          "Striscia": 3,
           "Apri porta": 1,
           "Corridoio della prigione": 1,
-          "Guarda galleria": 1,
-          "Scendi con l'ascensore": 1
+          "Guarda galleria": 1
         },
         "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 61,
+        "ingressi": 7,
+        "senzaNome": 52,
+        "famiglie": {
+          "passaggio|Passaggio": 8,
+          "forziere|Forziere": 1
+        },
+        "procedure": {
+          "D03_154_02_minimap_03": 2,
+          "D03_BlockLeftRoot": 2,
+          "D03_MoveInOffice_ex": 2,
+          "zero_G_move_05_to_04": 2,
+          "zero_G_move_14_to_15": 2,
+          "zero_G_move_17_to_16": 2
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 8,
+          "riconosciute": 9,
+          "quota": 0.889,
+          "motivo": "8 punti su 9 riconosciuti dicono «passaggio», di cui 7 ingressi del campo"
+        }
       },
       "tipoSpillo": "meccanismo",
       "etichetta": "Meccanismo",
@@ -244,28 +343,50 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 37,
+        "coppie": 43,
         "ingressi": 20,
-        "quotaIngressi": 0.541,
-        "scartoDallaMedia": 2.4,
-        "mediaIngressi": 0.352,
+        "quotaIngressi": 0.465,
+        "scartoDallaMedia": 1.6,
+        "mediaIngressi": 0.349,
         "etichette": {
+          "Tavolo": 2,
           "Allenati": 1,
           "Clinica": 1,
           "Pavimento ricoperto di rifiuti": 1,
-          "Piazza della stazione": 1,
-          "Riemergi": 1
+          "Piazza della stazione": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 43,
+        "ingressi": 20,
+        "senzaNome": 16,
+        "famiglie": {
+          "passaggio|Passaggio": 25,
+          "meccanismo|Meccanismo": 1,
+          "uscita|Uscita": 1
+        },
+        "procedure": {
+          "D01_02_GUN_RELOADPRAC": 2,
+          "D02_153_007_EX_GUIDE": 2,
+          "GOTO_151_02_09": 2,
+          "AC_SIBUTIKA_08_BUTTON": 1,
+          "AC_YAMANOTE_BUTTON": 1,
+          "ChangeTo15": 1
         },
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "motivo": "cade su un ingresso del campo nel 54% dei casi, contro il 35% medio (+2.4 deviazioni)"
+          "casi": 25,
+          "riconosciute": 27,
+          "quota": 0.926,
+          "motivo": "25 punti su 27 riconosciuti dicono «passaggio», di cui 20 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
-      "stato": "ipotesi",
-      "prova": "cio' che la proiezione trova sotto il pin: cade su un ingresso del campo nel 54% dei casi, contro il 35% medio (+2.4 deviazioni)"
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 25 punti su 27 riconosciuti dicono «passaggio», di cui 20 ingressi del campo"
     },
     {
       "tipoNativo": 14,
@@ -296,24 +417,50 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 35,
-        "ingressi": 14,
-        "quotaIngressi": 0.4,
-        "scartoDallaMedia": 0.59,
-        "mediaIngressi": 0.352,
+        "coppie": 41,
+        "ingressi": 15,
+        "quotaIngressi": 0.366,
+        "scartoDallaMedia": 0.23,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Aspetta il treno": 1,
           "Calcia": 1,
+          "Cercalavoro": 1,
           "Cristalloterapia": 1,
-          "Sala d'ingresso": 1,
-          "Sala giochi": 1
+          "Panetteria": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 41,
+        "ingressi": 15,
+        "senzaNome": 21,
+        "famiglie": {
+          "passaggio|Passaggio": 17,
+          "forziere|Forziere": 2,
+          "forziere|Forziere raro": 1
+        },
+        "procedure": {
+          "D04_155_11_TBOX_minimap_04": 2,
+          "D10_162_03_minimap_00": 2,
+          "AC_GOTO_AOYAMA": 1,
+          "AC_SIBUTIKA_07_BUTTON": 1,
+          "D02_01_e195_113_START": 1,
+          "D02_153_02_e195_102_PICTURE_01": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 17,
+          "riconosciute": 20,
+          "quota": 0.85,
+          "motivo": "17 punti su 20 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 17 punti su 20 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
     },
     {
       "tipoNativo": 15,
@@ -344,11 +491,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 41,
-        "ingressi": 15,
-        "quotaIngressi": 0.366,
-        "scartoDallaMedia": 0.18,
-        "mediaIngressi": 0.352,
+        "coppie": 48,
+        "ingressi": 18,
+        "quotaIngressi": 0.375,
+        "scartoDallaMedia": 0.38,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Central Street": 3,
           "Sottopasso": 2,
@@ -358,10 +505,36 @@
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 48,
+        "ingressi": 18,
+        "senzaNome": 21,
+        "famiglie": {
+          "passaggio|Passaggio": 25,
+          "attivita|Voce del Covo dei Ladri": 1,
+          "meccanismo|Meccanismo": 1
+        },
+        "procedure": {
+          "D02_153_09_minimap_00": 2,
+          "AC_CENTER_106_BUTTON": 1,
+          "AC_GOTO_CENTER_HACHI": 1,
+          "AC_GOTO_CENTER_YAMA": 1,
+          "AC_GOTO_UNDER_YAMA": 1,
+          "AC_UNDER_CENTER": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 25,
+          "riconosciute": 27,
+          "quota": 0.926,
+          "motivo": "25 punti su 27 riconosciuti dicono «passaggio», di cui 18 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 25 punti su 27 riconosciuti dicono «passaggio», di cui 18 ingressi del campo"
     },
     {
       "tipoNativo": 16,
@@ -388,11 +561,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 41,
-        "ingressi": 17,
-        "quotaIngressi": 0.415,
-        "scartoDallaMedia": 0.84,
-        "mediaIngressi": 0.352,
+        "coppie": 53,
+        "ingressi": 25,
+        "quotaIngressi": 0.472,
+        "scartoDallaMedia": 1.88,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Sottopasso": 3,
           "Libri": 2,
@@ -402,10 +575,35 @@
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 53,
+        "ingressi": 25,
+        "senzaNome": 21,
+        "famiglie": {
+          "passaggio|Passaggio": 31,
+          "forziere|Forziere raro": 1
+        },
+        "procedure": {
+          "AC_GOTO_2F_N_AUTO": 2,
+          "AC_GOTO_UNDER_TOKYU": 2,
+          "D01_151_06_minimap_06": 2,
+          "AC_GOTO_AOYAMA02": 1,
+          "AC_SIBUTIKA_06_BUTTON": 1,
+          "CHK_BOOK_SHELF_05": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 31,
+          "riconosciute": 32,
+          "quota": 0.969,
+          "motivo": "31 punti su 32 riconosciuti dicono «passaggio», di cui 25 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 31 punti su 32 riconosciuti dicono «passaggio», di cui 25 ingressi del campo"
     },
     {
       "tipoNativo": 17,
@@ -436,17 +634,39 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 97,
-        "ingressi": 22,
-        "quotaIngressi": 0.227,
-        "scartoDallaMedia": -2.59,
-        "mediaIngressi": 0.352,
+        "coppie": 115,
+        "ingressi": 25,
+        "quotaIngressi": 0.217,
+        "scartoDallaMedia": -2.96,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Chiama ascensore": 2,
+          "Il mio posto": 2,
+          "Agenzia investigativa": 1,
           "Barista": 1,
-          "Cristalloterapia": 1,
-          "Guarda premi": 1,
-          "Il mio posto": 1
+          "Cristalloterapia": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 115,
+        "ingressi": 25,
+        "senzaNome": 62,
+        "famiglie": {
+          "passaggio|Passaggio": 27,
+          "forziere|Forziere": 20,
+          "meccanismo|Meccanismo": 2,
+          "seme-bramosia|Seme della bramosia": 2,
+          "forziere|Forziere raro": 1,
+          "scala|Scala": 1
+        },
+        "procedure": {
+          "D01_151_10_TBOX_minimap_07": 2,
+          "D01_151_10_icon_00": 2,
+          "D10_162_14_minimap_27": 2,
+          "BreakGlass": 1,
+          "CAGE_159_030_F_IN": 1,
+          "CheckStair_green": 1
         },
         "proposta": null
       },
@@ -466,28 +686,57 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": {
-        "coppie": 142,
-        "ingressi": 71,
-        "quotaIngressi": 0.5,
-        "scartoDallaMedia": 3.69,
-        "mediaIngressi": 0.352,
+        "coppie": 147,
+        "ingressi": 73,
+        "quotaIngressi": 0.497,
+        "scartoDallaMedia": 3.76,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Cortile": 3,
           "Libri": 3,
           "Angolo studio": 2,
           "Aula di Fisica": 2,
-          "Riemergi": 2
+          "Prigione sotterranea": 2
         },
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "motivo": "cade su un ingresso del campo nel 50% dei casi, contro il 35% medio (+3.7 deviazioni)"
+          "motivo": "cade su un ingresso del campo nel 50% dei casi, contro il 35% medio (+3.8 deviazioni)"
+        }
+      },
+      "sottoIlPin": {
+        "coppie": 147,
+        "ingressi": 73,
+        "senzaNome": 51,
+        "famiglie": {
+          "passaggio|Passaggio": 87,
+          "negozio|Negozio": 3,
+          "forziere|Forziere": 2,
+          "uscita|Uscita": 2,
+          "scala|Scala": 1,
+          "seme-bramosia|Seme della bramosia": 1
+        },
+        "procedure": {
+          "AC_GOTO_COURT": 3,
+          "CHK_BOOK_SHELF_06": 2,
+          "CHK_BUTURI_N": 2,
+          "DUCT_156_007_B_INOUT": 2,
+          "DUNGEON_EXIT": 2,
+          "GOTO_152_01_01": 2
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 87,
+          "riconosciute": 96,
+          "quota": 0.906,
+          "motivo": "87 punti su 96 riconosciuti dicono «passaggio», di cui 73 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
-      "stato": "ipotesi",
-      "prova": "cio' che la proiezione trova sotto il pin: cade su un ingresso del campo nel 50% dei casi, contro il 35% medio (+3.7 deviazioni)"
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 87 punti su 96 riconosciuti dicono «passaggio», di cui 73 ingressi del campo"
     },
     {
       "tipoNativo": 20,
@@ -500,26 +749,50 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": {
-        "coppie": 12,
+        "coppie": 13,
         "ingressi": 8,
-        "quotaIngressi": 0.667,
-        "scartoDallaMedia": 2.28,
-        "mediaIngressi": 0.352,
+        "quotaIngressi": 0.615,
+        "scartoDallaMedia": 2.02,
+        "mediaIngressi": 0.349,
         "etichette": {
-          "Vicolo cieco": 2,
+          "Vicolo cieco": 3,
           "Negozio di udon": 1,
           "Ramen bar": 1
         },
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "motivo": "cade su un ingresso del campo nel 67% dei casi, contro il 35% medio (+2.3 deviazioni)"
+          "motivo": "cade su un ingresso del campo nel 62% dei casi, contro il 35% medio (+2.0 deviazioni)"
+        }
+      },
+      "sottoIlPin": {
+        "coppie": 13,
+        "ingressi": 8,
+        "senzaNome": 4,
+        "famiglie": {
+          "passaggio|Passaggio": 8,
+          "ristorante|Ristorante": 1
+        },
+        "procedure": {
+          "CHK_NOODLE02": 1,
+          "D06_VELVET_HIT": 1,
+          "D07_VELVET_HIT": 1,
+          "D08_VELVET_HIT": 1,
+          "Main_Udon_1": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 8,
+          "riconosciute": 9,
+          "quota": 0.889,
+          "motivo": "8 punti su 9 riconosciuti dicono «passaggio», di cui 8 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
-      "stato": "ipotesi",
-      "prova": "cio' che la proiezione trova sotto il pin: cade su un ingresso del campo nel 67% dei casi, contro il 35% medio (+2.3 deviazioni)"
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 8 punti su 9 riconosciuti dicono «passaggio», di cui 8 ingressi del campo"
     },
     {
       "tipoNativo": 24,
@@ -532,20 +805,35 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": {
-        "coppie": 5,
+        "coppie": 6,
         "ingressi": 1,
-        "quotaIngressi": 0.2,
-        "scartoDallaMedia": -0.71,
-        "mediaIngressi": 0.352,
+        "quotaIngressi": 0.167,
+        "scartoDallaMedia": -0.94,
+        "mediaIngressi": 0.349,
         "etichette": {
-          "Sali sul treno": 3
+          "Sali sul treno": 4
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 6,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "uscita|Uscita": 4,
+          "attivita|Voce del Covo dei Ladri": 1,
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "DUNGEON_EXIT": 4,
+          "Leave_MyPalace": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 25,
@@ -561,17 +849,30 @@
         "coppie": 2,
         "ingressi": 1,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 0.44,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 0.45,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Sali sul treno": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1,
+          "uscita|Uscita": 1
+        },
+        "procedure": {
+          "DUNGEON_EXIT": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 26,
@@ -602,11 +903,11 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 28,
-        "ingressi": 7,
-        "quotaIngressi": 0.25,
-        "scartoDallaMedia": -1.13,
-        "mediaIngressi": 0.352,
+        "coppie": 32,
+        "ingressi": 10,
+        "quotaIngressi": 0.312,
+        "scartoDallaMedia": -0.43,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Barista": 1,
           "Clinica di agopuntura": 1,
@@ -615,6 +916,31 @@
           "Mappa dell'area": 1
         },
         "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 32,
+        "ingressi": 10,
+        "senzaNome": 19,
+        "famiglie": {
+          "passaggio|Passaggio": 11,
+          "forziere|Forziere raro": 2
+        },
+        "procedure": {
+          "CheckMarukiNote01": 1,
+          "D01_03_e160_041_START": 1,
+          "D02_153_06_R_TBOX_minimap_04": 1,
+          "D02_153_09_minimap_15": 1,
+          "D02_SAFETY_ROOM_09_SET": 1,
+          "D03_08_CAMERA_OFF_02": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 11,
+          "riconosciute": 13,
+          "quota": 0.846,
+          "motivo": "11 punti su 13 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
+        }
       },
       "tipoSpillo": "forziere",
       "etichetta": "Forziere raro",
@@ -632,24 +958,51 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": {
-        "coppie": 84,
-        "ingressi": 34,
-        "quotaIngressi": 0.405,
-        "scartoDallaMedia": 1.01,
-        "mediaIngressi": 0.352,
+        "coppie": 87,
+        "ingressi": 35,
+        "quotaIngressi": 0.402,
+        "scartoDallaMedia": 1.05,
+        "mediaIngressi": 0.349,
         "etichette": {
+          "Prigione sotterranea": 2,
           "Riemergi": 2,
           "Striscia": 2,
           "Barista": 1,
-          "Calligrafia": 1,
-          "Cinema": 1
+          "Calligrafia": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 87,
+        "ingressi": 35,
+        "senzaNome": 38,
+        "famiglie": {
+          "passaggio|Passaggio": 45,
+          "forziere|Forziere": 2,
+          "scala|Scala": 1,
+          "seme-bramosia|Seme della bramosia": 1
+        },
+        "procedure": {
+          "DUCT_156_007_B_INOUT": 2,
+          "GOTO_152_01_01": 2,
+          "AC_GOTO_WEST_3F": 1,
+          "CHK_BOOK_SHELF_04": 1,
+          "CHK_KARAOKE": 1,
+          "CheckStair_blue": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 45,
+          "riconosciute": 49,
+          "quota": 0.918,
+          "motivo": "45 punti su 49 riconosciuti dicono «passaggio», di cui 35 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 45 punti su 49 riconosciuti dicono «passaggio», di cui 35 ingressi del campo"
     },
     {
       "tipoNativo": 29,
@@ -680,11 +1033,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 27,
-        "ingressi": 8,
-        "quotaIngressi": 0.296,
-        "scartoDallaMedia": -0.61,
-        "mediaIngressi": 0.352,
+        "coppie": 31,
+        "ingressi": 10,
+        "quotaIngressi": 0.323,
+        "scartoDallaMedia": -0.31,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Vetrina dei trofei": 3,
           "Dintorni del complesso": 2,
@@ -694,10 +1047,35 @@
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 31,
+        "ingressi": 10,
+        "senzaNome": 16,
+        "famiglie": {
+          "passaggio|Passaggio": 13,
+          "meccanismo|Meccanismo": 2
+        },
+        "procedure": {
+          "D10_162_14_minimap_03": 2,
+          "GOTO_156_04_01": 2,
+          "D03_154_014_Go_154_013": 1,
+          "D04_155_002_GOTO": 1,
+          "D05_SAFETY_ROOM_06_SET": 1,
+          "D07_159_02_minimap_03": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 13,
+          "riconosciute": 15,
+          "quota": 0.867,
+          "motivo": "13 punti su 15 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 13 punti su 15 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
     },
     {
       "tipoNativo": 30,
@@ -724,24 +1102,48 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 29,
+        "coppie": 33,
         "ingressi": 9,
-        "quotaIngressi": 0.31,
-        "scartoDallaMedia": -0.47,
-        "mediaIngressi": 0.352,
+        "quotaIngressi": 0.273,
+        "scartoDallaMedia": -0.92,
+        "mediaIngressi": 0.349,
         "etichette": {
-          "Vetrina dei trofei": 2,
+          "Vetrina dei trofei": 3,
+          "Guarda galleria": 2,
           "Aspetta il treno": 1,
           "Beef Bowl Shop": 1,
-          "Chiama ascensore": 1,
-          "Corridoio mezzavia tribordo": 1
+          "Chiama ascensore": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 33,
+        "ingressi": 9,
+        "senzaNome": 16,
+        "famiglie": {
+          "passaggio|Passaggio": 17
+        },
+        "procedure": {
+          "D10_CHECK_POSTER_SESSION_TYPE_A": 2,
+          "D159_04_Block_R02_START": 2,
+          "D010_CALL_ELEVATOR_ENTRANCE": 1,
+          "D010_CALL_ELEVATOR_FAILURE": 1,
+          "D03_154_014_Go_154_005": 1,
+          "D03_154_05_minimap_01": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 17,
+          "riconosciute": 17,
+          "quota": 1.0,
+          "motivo": "17 punti su 17 riconosciuti dicono «passaggio», di cui 9 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 17 punti su 17 riconosciuti dicono «passaggio», di cui 9 ingressi del campo"
     },
     {
       "tipoNativo": 32,
@@ -753,11 +1155,29 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "proiezione": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
+        "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "GO_TO_NEXT_SECTION": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 33,
@@ -783,11 +1203,29 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
-      "proiezione": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.04,
+        "mediaIngressi": 0.349,
+        "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 0,
+        "senzaNome": 2,
+        "famiglie": {},
+        "procedure": {
+          "GO_TO_PREV_SECTION": 2
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 34,
@@ -799,11 +1237,29 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "proiezione": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.04,
+        "mediaIngressi": 0.349,
+        "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 0,
+        "senzaNome": 2,
+        "famiglie": {},
+        "procedure": {
+          "GO_TO_NEXT_SECTION": 2
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 35,
@@ -815,11 +1271,29 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "proiezione": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
+        "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "GO_TO_PREV_SECTION": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 36,
@@ -836,17 +1310,28 @@
         "ingressi": 0,
         "quotaIngressi": 0.0,
         "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.352,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Corridoio della prigione": 1,
           "Libreria Taiheido": 1
         },
         "proposta": null
       },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 0,
+        "senzaNome": 2,
+        "famiglie": {},
+        "procedure": {
+          "D03_05_KINKO_MOVE02": 1,
+          "PALACE_IN_CHECK": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 37,
@@ -859,18 +1344,38 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": {
-        "coppie": 3,
-        "ingressi": 2,
-        "quotaIngressi": 0.667,
-        "scartoDallaMedia": 1.14,
-        "mediaIngressi": 0.352,
+        "coppie": 4,
+        "ingressi": 3,
+        "quotaIngressi": 0.75,
+        "scartoDallaMedia": 1.68,
+        "mediaIngressi": 0.349,
         "etichette": {},
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 4,
+        "ingressi": 3,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 3,
+          "scala|Scala": 1
+        },
+        "procedure": {
+          "Stairs_Shortcut_1": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 3,
+          "riconosciute": 4,
+          "quota": 0.75,
+          "motivo": "3 punti su 4 riconosciuti dicono «passaggio», di cui 3 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 3 punti su 4 riconosciuti dicono «passaggio», di cui 3 ingressi del campo"
     },
     {
       "tipoNativo": 38,
@@ -901,14 +1406,28 @@
         "ingressi": 0,
         "quotaIngressi": 0.0,
         "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.352,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "scala|Scala": 1,
+          "scorciatoia|Scorciatoia": 1
+        },
+        "procedure": {
+          "D03_009_WIRE_ON": 1,
+          "Stairs_Shortcut_4": 1
+        },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 39,
@@ -935,21 +1454,36 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 3,
+        "coppie": 4,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.28,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -1.46,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Scaffale": 1,
           "Scivola giù": 1
         },
         "proposta": null
       },
+      "sottoIlPin": {
+        "coppie": 4,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {
+          "forziere|Forziere": 2,
+          "scorciatoia|Scorciatoia": 1
+        },
+        "procedure": {
+          "D03_154_08_TBOX_minimap_12": 2,
+          "D04_SUBERITDAI_01": 1,
+          "MAIN_MY_Bed": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 40,
@@ -965,15 +1499,25 @@
         "coppie": 2,
         "ingressi": 2,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.92,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.93,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 2,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 2
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 43,
@@ -1007,8 +1551,8 @@
         "coppie": 43,
         "ingressi": 6,
         "quotaIngressi": 0.14,
-        "scartoDallaMedia": -2.92,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -2.88,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Tira leva": 8,
           "Magazzino audiovisivi": 6,
@@ -1021,6 +1565,25 @@
           "etichetta": "Meccanismo",
           "motivo": "13 etichette su 28 dicono «meccanismo»"
         }
+      },
+      "sottoIlPin": {
+        "coppie": 43,
+        "ingressi": 6,
+        "senzaNome": 25,
+        "famiglie": {
+          "meccanismo|Meccanismo": 11,
+          "passaggio|Passaggio": 6,
+          "scala|Scala": 1
+        },
+        "procedure": {
+          "D05_GIM_BLUE_SWITCH01": 2,
+          "D05_GIM_BLUE_SWITCH02": 2,
+          "D05_GIM_BLUE_SWITCH03": 2,
+          "D05_GIM_YELLOW_SWITCH": 2,
+          "MOUSE_SWITCH": 2,
+          "CheckGate_lightblue": 1
+        },
+        "proposta": null
       },
       "tipoSpillo": "meccanismo",
       "etichetta": "Meccanismo",
@@ -1038,10 +1601,11 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": null,
+      "sottoIlPin": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
     },
     {
       "tipoNativo": 46,
@@ -1057,8 +1621,8 @@
         "coppie": 18,
         "ingressi": 9,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 1.31,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.35,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Distributore automatico": 2,
           "Angolo studio": 1,
@@ -1067,6 +1631,31 @@
           "Macchina fototessere": 1
         },
         "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 18,
+        "ingressi": 9,
+        "senzaNome": 8,
+        "famiglie": {
+          "passaggio|Passaggio": 9,
+          "ristorante|Ristorante": 1
+        },
+        "procedure": {
+          "CHK_AUTO_MACHINE02": 1,
+          "CHK_AUTO_MACHINE03": 1,
+          "CHK_BOOK_SHELF_09": 1,
+          "CHK_DEADEND_01": 1,
+          "CHK_PHOTO_MACHINE02": 1,
+          "CHK_STUDY_DESK_RIGHT": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 9,
+          "riconosciute": 10,
+          "quota": 0.9,
+          "motivo": "9 punti su 10 riconosciuti dicono «passaggio», di cui 9 ingressi del campo"
+        }
       },
       "tipoSpillo": "distributore",
       "etichetta": "Distributore di bevande",
@@ -1087,9 +1676,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "attivita",
@@ -1111,9 +1710,19 @@
         "coppie": 2,
         "ingressi": 2,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.92,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.93,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 2,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 2
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "cercalavoro",
@@ -1135,9 +1744,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "distributore",
@@ -1159,10 +1778,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Centro comm. sotterraneo": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "AC_SIBUTIKA_07_BUTTON": 1
         },
         "proposta": null
       },
@@ -1185,10 +1814,22 @@
         "coppie": 3,
         "ingressi": 2,
         "quotaIngressi": 0.667,
-        "scartoDallaMedia": 1.14,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.15,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Centro della movida": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 3,
+        "ingressi": 2,
+        "senzaNome": 1,
+        "famiglie": {
+          "passaggio|Passaggio": 2
+        },
+        "procedure": {
+          "CHK_FREE_INFO_SPACE02": 1
         },
         "proposta": null
       },
@@ -1211,10 +1852,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Negozio di videonoleggio": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_TSUTAYA": 1
         },
         "proposta": null
       },
@@ -1237,10 +1888,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Diner": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_FAMILY_RESTAURANT": 1
         },
         "proposta": null
       },
@@ -1263,10 +1924,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Beef Bowl Shop": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_BEEFDON": 1
         },
         "proposta": null
       },
@@ -1289,9 +1960,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1313,10 +1994,22 @@
         "coppie": 2,
         "ingressi": 1,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 0.44,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 0.45,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Karaoke": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 1,
+        "senzaNome": 1,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CHK_KARAOKE": 1
         },
         "proposta": null
       },
@@ -1339,10 +2032,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Sala giochi": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_GAME_CENTER": 1
         },
         "proposta": null
       },
@@ -1365,9 +2068,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "attivita",
@@ -1389,9 +2102,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "ristorante",
@@ -1413,9 +2136,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1437,10 +2170,22 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Sottopasso": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "AC_GOTO_UNDER_CROSS": 1
         },
         "proposta": null
       },
@@ -1463,10 +2208,22 @@
         "coppie": 3,
         "ingressi": 2,
         "quotaIngressi": 0.667,
-        "scartoDallaMedia": 1.14,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.15,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Clinica di agopuntura": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 3,
+        "ingressi": 2,
+        "senzaNome": 1,
+        "famiglie": {
+          "passaggio|Passaggio": 2
+        },
+        "procedure": {
+          "Main_Shop_HARI": 1
         },
         "proposta": null
       },
@@ -1489,10 +2246,22 @@
         "coppie": 2,
         "ingressi": 1,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 0.44,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 0.45,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Stanza di Velluto": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 1,
+        "senzaNome": 1,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CHK_VELVET_DOOR": 1
         },
         "proposta": null
       },
@@ -1515,10 +2284,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Tavolo": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "Main_Table_HitEx": 1
         },
         "proposta": null
       },
@@ -1541,9 +2320,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1565,10 +2354,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Negozio d'articoli locali": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_ORIENTAL": 1
         },
         "proposta": null
       },
@@ -1591,10 +2390,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Gioielleria": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_JEWELRY": 1
         },
         "proposta": null
       },
@@ -1617,10 +2426,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Negozio di accessori": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "CHK_ACCESSORIES": 1
         },
         "proposta": null
       },
@@ -1643,10 +2462,22 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Negozio di cosmetici": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "negozio|Negozio": 1
+        },
+        "procedure": {
+          "CHK_COSME_SHOP": 1
         },
         "proposta": null
       },
@@ -1670,10 +2501,23 @@
         "ingressi": 0,
         "quotaIngressi": 0.0,
         "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.352,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Libri": 1,
           "Piazza della stazione": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 2,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CHK_BOOK_SHELF_04": 1,
+          "GOTO_SIBUYA_EKIMAE": 1
         },
         "proposta": null
       },
@@ -1696,12 +2540,24 @@
         "coppie": 3,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.28,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -1.27,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Aula computer": 1,
           "Aula di Cucito": 1,
           "Libri": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 3,
+        "ingressi": 0,
+        "senzaNome": 3,
+        "famiglie": {},
+        "procedure": {
+          "CHK_BOOK_SHELF_10": 1,
+          "CHK_HIHUKU_S": 1,
+          "CHK_PCROOM_S": 1
         },
         "proposta": null
       },
@@ -1724,10 +2580,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Calligrafia": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "Main_Callig02": 1
         },
         "proposta": null
       },
@@ -1747,6 +2613,7 @@
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
       "proiezione": null,
+      "sottoIlPin": null,
       "tipoSpillo": "attivita",
       "etichetta": "Scuola",
       "stato": "determinato",
@@ -1766,10 +2633,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Cinema": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "MAIN_CINEMA": 1
         },
         "proposta": null
       },
@@ -1792,10 +2669,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Cartello": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "MAIN_HostClubBoard": 1
         },
         "proposta": null
       },
@@ -1818,9 +2705,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1842,9 +2739,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "ristorante",
@@ -1866,10 +2773,22 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Mensola articoli": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "negozio|Negozio": 1
+        },
+        "procedure": {
+          "CHK_TOOL_SHOP_SHELF02": 1
         },
         "proposta": null
       },
@@ -1892,9 +2811,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1916,9 +2845,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1940,9 +2879,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -1964,10 +2913,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Pianta d'appartamento": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "Main_FloorObj": 1
         },
         "proposta": null
       },
@@ -1990,9 +2949,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "casa",
@@ -2014,10 +2983,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Mensola": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "MAIN_MY_Shelf": 1
         },
         "proposta": null
       },
@@ -2040,9 +3019,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "attivita",
@@ -2064,9 +3053,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -2088,9 +3087,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -2112,10 +3121,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Negozio di telefonia": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "Main_TelephoneShop": 1
         },
         "proposta": null
       },
@@ -2138,9 +3157,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -2162,9 +3191,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "culto",
@@ -2183,6 +3222,7 @@
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
       "proiezione": null,
+      "sottoIlPin": null,
       "tipoSpillo": "attivita",
       "etichetta": "Jazz club",
       "stato": "determinato",
@@ -2202,9 +3242,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -2226,10 +3276,20 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Ottico": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 1,
+        "famiglie": {},
+        "procedure": {
+          "Main_Shop_Megane": 1
         },
         "proposta": null
       },
@@ -2252,10 +3312,22 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Bar": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "ristorante|Ristorante": 1
+        },
+        "procedure": {
+          "Main_Izakaya16": 1
         },
         "proposta": null
       },
@@ -2278,9 +3350,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "ristorante",
@@ -2302,9 +3384,19 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": "negozio",
@@ -2339,13 +3431,42 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 13,
-        "ingressi": 8,
-        "quotaIngressi": 0.615,
-        "scartoDallaMedia": 1.99,
-        "mediaIngressi": 0.352,
+        "coppie": 17,
+        "ingressi": 10,
+        "quotaIngressi": 0.588,
+        "scartoDallaMedia": 2.07,
+        "mediaIngressi": 0.349,
         "etichette": {},
-        "proposta": null
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "motivo": "cade su un ingresso del campo nel 59% dei casi, contro il 35% medio (+2.1 deviazioni)"
+        }
+      },
+      "sottoIlPin": {
+        "coppie": 17,
+        "ingressi": 10,
+        "senzaNome": 6,
+        "famiglie": {
+          "passaggio|Passaggio": 10,
+          "forziere|Forziere": 1
+        },
+        "procedure": {
+          "D01_151_06_minimap_06": 1,
+          "D03_154_03_minimap_02": 1,
+          "D04_155_007_GO_TO_155_002_05": 1,
+          "D06_157_05_minimap_00": 1,
+          "D07_159_20_minimap_19": 1,
+          "D07_159_30_minimap_15": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "casi": 10,
+          "riconosciute": 11,
+          "quota": 0.909,
+          "motivo": "10 punti su 11 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
+        }
       },
       "tipoSpillo": "seme-bramosia",
       "etichetta": "Seme della bramosia",
@@ -2358,25 +3479,37 @@
       "mappeUrbane": 1,
       "mappeDungeon": 0,
       "condizionali": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato",
+      "sprite": 174,
+      "nomeNativo": "マイパレス_メーカー",
+      "associazione": "blocco-covo-dimostrato",
       "script": null,
       "proiezione": {
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Avvia Personalizza Covo": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "attivita|Voce del Covo dei Ladri": 1
+        },
+        "procedure": {
+          "MyPalace_Palace_Maker": 1
+        },
+        "proposta": null
+      },
+      "tipoSpillo": "attivita",
+      "etichetta": "Creatore del Palazzo",
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco del Covo dei Ladri dimostrato"
     },
     {
       "tipoNativo": 99,
@@ -2384,25 +3517,37 @@
       "mappeUrbane": 1,
       "mappeDungeon": 0,
       "condizionali": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato",
+      "sprite": 175,
+      "nomeNativo": "マイパレス_ミュージック",
+      "associazione": "blocco-covo-dimostrato",
       "script": null,
       "proiezione": {
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Avvia lettore musicale": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "attivita|Voce del Covo dei Ladri": 1
+        },
+        "procedure": {
+          "MyPalace_Sound": 1
+        },
+        "proposta": null
+      },
+      "tipoSpillo": "attivita",
+      "etichetta": "Musica",
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco del Covo dei Ladri dimostrato"
     },
     {
       "tipoNativo": 100,
@@ -2410,23 +3555,33 @@
       "mappeUrbane": 1,
       "mappeDungeon": 0,
       "condizionali": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato",
+      "sprite": 176,
+      "nomeNativo": "マイパレス_テレビ",
+      "associazione": "blocco-covo-dimostrato",
       "script": null,
       "proiezione": {
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
+        "proposta": null
+      },
+      "tipoSpillo": "attivita",
+      "etichetta": "Televisione",
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco del Covo dei Ladri dimostrato"
     },
     {
       "tipoNativo": 101,
@@ -2434,25 +3589,37 @@
       "mappeUrbane": 1,
       "mappeDungeon": 0,
       "condizionali": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato",
+      "sprite": 177,
+      "nomeNativo": "マイパレス_ギャラリー",
+      "associazione": "blocco-covo-dimostrato",
       "script": null,
       "proiezione": {
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda galleria": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "attivita|Voce del Covo dei Ladri": 1
+        },
+        "procedure": {
+          "MyPalace_Image": 1
+        },
+        "proposta": null
+      },
+      "tipoSpillo": "attivita",
+      "etichetta": "Galleria",
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco del Covo dei Ladri dimostrato"
     },
     {
       "tipoNativo": 102,
@@ -2460,25 +3627,37 @@
       "mappeUrbane": 1,
       "mappeDungeon": 0,
       "condizionali": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato",
+      "sprite": 178,
+      "nomeNativo": "マイパレス_プレイエリア",
+      "associazione": "blocco-covo-dimostrato",
       "script": null,
       "proiezione": {
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Gioca a Magnate": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "attivita|Voce del Covo dei Ladri": 1
+        },
+        "procedure": {
+          "MyPalace_Daifugou": 1
+        },
+        "proposta": null
+      },
+      "tipoSpillo": "attivita",
+      "etichetta": "Area giochi",
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco del Covo dei Ladri dimostrato"
     },
     {
       "tipoNativo": 103,
@@ -2486,25 +3665,47 @@
       "mappeUrbane": 1,
       "mappeDungeon": 0,
       "condizionali": 0,
-      "sprite": null,
-      "nomeNativo": null,
-      "associazione": "urbano-non-dimostrato",
+      "sprite": 179,
+      "nomeNativo": "マイパレス_アワード",
+      "associazione": "blocco-covo-dimostrato",
       "script": null,
       "proiezione": {
         "coppie": 4,
         "ingressi": 1,
         "quotaIngressi": 0.25,
-        "scartoDallaMedia": -0.43,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.41,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 2
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 4,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "attivita|Voce del Covo dei Ladri": 3,
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "MyPalace_Award_Battle": 1,
+          "MyPalace_Award_School": 1,
+          "MyPalace_Chara_Change_MAKOTO": 1
+        },
+        "proposta": {
+          "tipoSpillo": "attivita",
+          "etichetta": "Voce del Covo dei Ladri",
+          "casi": 3,
+          "riconosciute": 4,
+          "quota": 0.75,
+          "motivo": "3 punti su 4 riconosciuti dicono «voce del covo dei ladri», di cui 1 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "attivita",
+      "etichetta": "Premi",
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco del Covo dei Ladri dimostrato"
     },
     {
       "tipoNativo": 104,
@@ -2517,20 +3718,36 @@
       "associazione": "urbano-non-dimostrato",
       "script": null,
       "proiezione": {
-        "coppie": 5,
-        "ingressi": 4,
-        "quotaIngressi": 0.8,
-        "scartoDallaMedia": 2.1,
-        "mediaIngressi": 0.352,
+        "coppie": 8,
+        "ingressi": 5,
+        "quotaIngressi": 0.625,
+        "scartoDallaMedia": 1.64,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda galleria": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 8,
+        "ingressi": 5,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 5,
+          "attivita|Voce del Covo dei Ladri": 2,
+          "scala|Scala": 1
+        },
+        "procedure": {
+          "MyPalace_Chara_Change_YOSIZAWA": 1,
+          "MyPalace_Image": 1,
+          "Stairs_Shortcut_4": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 105,
@@ -2546,15 +3763,25 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 106,
@@ -2570,17 +3797,29 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Bar": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "ristorante|Ristorante": 1
+        },
+        "procedure": {
+          "Main_Izakaya03": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 107,
@@ -2596,17 +3835,29 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Bar": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "ristorante|Ristorante": 1
+        },
+        "procedure": {
+          "Main_Izakaya08": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 108,
@@ -2622,15 +3873,25 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 109,
@@ -2643,10 +3904,11 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": null,
+      "sottoIlPin": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
     },
     {
       "tipoNativo": 110,
@@ -2659,10 +3921,11 @@
       "associazione": "urbano-non-dimostrato",
       "script": null,
       "proiezione": null,
+      "sottoIlPin": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
     },
     {
       "tipoNativo": 111,
@@ -2678,17 +3941,29 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Negozio d'abbigliamento": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "negozio|Negozio": 1
+        },
+        "procedure": {
+          "CHK_CLOTHES_SHOP": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 112,
@@ -2704,17 +3979,29 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.74,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.73,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Sali sul treno": 1
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "uscita|Uscita": 1
+        },
+        "procedure": {
+          "DUNGEON_EXIT_01": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 113,
@@ -2730,18 +4017,42 @@
         "coppie": 9,
         "ingressi": 1,
         "quotaIngressi": 0.111,
-        "scartoDallaMedia": -1.51,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -1.5,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 6,
           "Divano elegante": 1
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 9,
+        "ingressi": 1,
+        "senzaNome": 2,
+        "famiglie": {
+          "scala|Scala": 6,
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CheckStair_red": 4,
+          "CheckMarukiNote06": 1,
+          "CheckStair_blue": 1,
+          "CheckStair_green": 1,
+          "D10_162_11_minimap_03": 1
+        },
+        "proposta": {
+          "tipoSpillo": "scala",
+          "etichetta": "Scala",
+          "casi": 6,
+          "riconosciute": 7,
+          "quota": 0.857,
+          "motivo": "6 punti su 7 riconosciuti dicono «scala», di cui 1 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 6 punti su 7 riconosciuti dicono «scala», di cui 1 ingressi del campo"
     },
     {
       "tipoNativo": 114,
@@ -2757,8 +4068,8 @@
         "coppie": 10,
         "ingressi": 3,
         "quotaIngressi": 0.3,
-        "scartoDallaMedia": -0.35,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.32,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 4,
           "Modello psi-cognitivo Eden": 1
@@ -2768,6 +4079,23 @@
           "etichetta": "Da guardare",
           "motivo": "4 etichette su 5 dicono «da guardare»"
         }
+      },
+      "sottoIlPin": {
+        "coppie": 10,
+        "ingressi": 3,
+        "senzaNome": 2,
+        "famiglie": {
+          "passaggio|Passaggio": 4,
+          "scala|Scala": 4
+        },
+        "procedure": {
+          "CheckStair_green": 3,
+          "CheckStair_blue": 1,
+          "D010_CALL_ELEVATOR_EXIT": 1,
+          "D10_162_11_minimap_02": 1,
+          "D10_162_11_minimap_11": 1
+        },
+        "proposta": null
       },
       "tipoSpillo": "nota",
       "etichetta": "Da guardare",
@@ -2788,8 +4116,8 @@
         "coppie": 14,
         "ingressi": 1,
         "quotaIngressi": 0.071,
-        "scartoDallaMedia": -2.2,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -2.18,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 8,
           "Divano elegante": 1
@@ -2800,10 +4128,35 @@
           "motivo": "8 etichette su 9 dicono «da guardare»"
         }
       },
-      "tipoSpillo": "nota",
-      "etichetta": "Da guardare",
-      "stato": "ipotesi",
-      "prova": "cio' che la proiezione trova sotto il pin: 8 etichette su 9 dicono «da guardare»"
+      "sottoIlPin": {
+        "coppie": 14,
+        "ingressi": 1,
+        "senzaNome": 5,
+        "famiglie": {
+          "scala|Scala": 8,
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CheckStair_blue": 5,
+          "CheckMarukiNote05": 1,
+          "CheckStair_green": 1,
+          "CheckStair_pink": 1,
+          "CheckStair_red": 1,
+          "D10_162_11_minimap_00": 1
+        },
+        "proposta": {
+          "tipoSpillo": "scala",
+          "etichetta": "Scala",
+          "casi": 8,
+          "riconosciute": 9,
+          "quota": 0.889,
+          "motivo": "8 punti su 9 riconosciuti dicono «scala», di cui 1 ingressi del campo"
+        }
+      },
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 8 punti su 9 riconosciuti dicono «scala», di cui 1 ingressi del campo"
     },
     {
       "tipoNativo": 116,
@@ -2819,17 +4172,38 @@
         "coppie": 6,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.81,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -1.79,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 6
         },
         "proposta": null
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "sottoIlPin": {
+        "coppie": 6,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "scala|Scala": 6
+        },
+        "procedure": {
+          "CheckStair_yellow": 4,
+          "CheckStair_lightblue": 1,
+          "CheckStair_red": 1
+        },
+        "proposta": {
+          "tipoSpillo": "scala",
+          "etichetta": "Scala",
+          "casi": 6,
+          "riconosciute": 6,
+          "quota": 1.0,
+          "motivo": "6 punti su 6 riconosciuti dicono «scala»"
+        }
+      },
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "stato": "determinato",
+      "prova": "procedura del trigger che sta sotto il pin: 6 punti su 6 riconosciuti dicono «scala»"
     },
     {
       "tipoNativo": 117,
@@ -2845,17 +4219,32 @@
         "coppie": 4,
         "ingressi": 1,
         "quotaIngressi": 0.25,
-        "scartoDallaMedia": -0.43,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -0.41,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 2
+        },
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 4,
+        "ingressi": 1,
+        "senzaNome": 1,
+        "famiglie": {
+          "scala|Scala": 2,
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CheckStair_blue": 1,
+          "CheckStair_lightblue": 1,
+          "D10_162_11_minimap_23": 1
         },
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 118,
@@ -2871,18 +4260,33 @@
         "coppie": 3,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.28,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": -1.27,
+        "mediaIngressi": 0.349,
         "etichette": {
           "Guarda premi": 2,
           "Modello psi-cognitivo Eden": 1
         },
         "proposta": null
       },
+      "sottoIlPin": {
+        "coppie": 3,
+        "ingressi": 0,
+        "senzaNome": 0,
+        "famiglie": {
+          "scala|Scala": 2,
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {
+          "CheckStair_green": 1,
+          "CheckStair_pink": 1,
+          "D010_CALL_ELEVATOR_EXIT": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     },
     {
       "tipoNativo": 119,
@@ -2898,15 +4302,25 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.36,
-        "mediaIngressi": 0.352,
+        "scartoDallaMedia": 1.37,
+        "mediaIngressi": 0.349,
         "etichette": {},
+        "proposta": null
+      },
+      "sottoIlPin": {
+        "coppie": 1,
+        "ingressi": 1,
+        "senzaNome": 0,
+        "famiglie": {
+          "passaggio|Passaggio": 1
+        },
+        "procedure": {},
         "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
     }
   ],
   "provePalazzi": [
@@ -2936,25 +4350,427 @@
       "dettaglio": "seconda strada indipendente: per il tipo delle leve dice «Tira leva» 47 volte su 53, per quello delle porte «Apri porta». Conferma la prima senza sostituirla."
     }
   ],
+  "pinPuntuali": [
+    {
+      "chiave": "nativo-rmap-001-3-0",
+      "indicePin": 33,
+      "tipoNativo": 111,
+      "tipoSpillo": "negozio",
+      "etichetta": "Negozio",
+      "campo": "F001_003_00",
+      "procedura": "CHK_CLOTHES_SHOP",
+      "prova": "il trigger sotto questo pin chiama «CHK_CLOTHES_SHOP»"
+    },
+    {
+      "chiave": "nativo-rmap-005-1-0",
+      "indicePin": 10,
+      "tipoNativo": 106,
+      "tipoSpillo": "ristorante",
+      "etichetta": "Ristorante",
+      "campo": "F005_001_00",
+      "procedura": "Main_Izakaya03",
+      "prova": "il trigger sotto questo pin chiama «Main_Izakaya03»"
+    },
+    {
+      "chiave": "nativo-rmap-005-1-0",
+      "indicePin": 13,
+      "tipoNativo": 107,
+      "tipoSpillo": "ristorante",
+      "etichetta": "Ristorante",
+      "campo": "F005_001_00",
+      "procedura": "Main_Izakaya08",
+      "prova": "il trigger sotto questo pin chiama «Main_Izakaya08»"
+    },
+    {
+      "chiave": "nativo-rmap-022-1-1",
+      "indicePin": 0,
+      "tipoNativo": 24,
+      "tipoSpillo": "attivita",
+      "etichetta": "Voce del Covo dei Ladri",
+      "campo": "F022_001_00",
+      "procedura": "Leave_MyPalace",
+      "prova": "il trigger sotto questo pin chiama «Leave_MyPalace»"
+    },
+    {
+      "chiave": "nativo-rmap-022-1-1",
+      "indicePin": 12,
+      "tipoNativo": 38,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F022_001_00",
+      "procedura": "Stairs_Shortcut_4",
+      "prova": "il trigger sotto questo pin chiama «Stairs_Shortcut_4»"
+    },
+    {
+      "chiave": "nativo-rmap-022-1-2",
+      "indicePin": 1,
+      "tipoNativo": 104,
+      "tipoSpillo": "attivita",
+      "etichetta": "Voce del Covo dei Ladri",
+      "campo": "F022_001_00",
+      "procedura": "MyPalace_Chara_Change_YOSIZAWA",
+      "prova": "il trigger sotto questo pin chiama «MyPalace_Chara_Change_YOSIZAWA»"
+    },
+    {
+      "chiave": "nativo-rmap-022-1-2",
+      "indicePin": 2,
+      "tipoNativo": 104,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F022_001_00",
+      "procedura": "Stairs_Shortcut_4",
+      "prova": "il trigger sotto questo pin chiama «Stairs_Shortcut_4»"
+    },
+    {
+      "chiave": "nativo-rmap-022-1-4",
+      "indicePin": 1,
+      "tipoNativo": 104,
+      "tipoSpillo": "attivita",
+      "etichetta": "Voce del Covo dei Ladri",
+      "campo": "F022_001_00",
+      "procedura": "MyPalace_Image",
+      "prova": "il trigger sotto questo pin chiama «MyPalace_Image»"
+    },
+    {
+      "chiave": "nativo-rmap-153-1-0",
+      "indicePin": 0,
+      "tipoNativo": 24,
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "campo": "F153_001_00",
+      "procedura": "DUNGEON_EXIT",
+      "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-154-1-0",
+      "indicePin": 0,
+      "tipoNativo": 24,
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "campo": "F154_001_00",
+      "procedura": "DUNGEON_EXIT",
+      "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-154-8-0",
+      "indicePin": 0,
+      "tipoNativo": 39,
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere",
+      "campo": "F154_008_00",
+      "procedura": "D03_154_08_TBOX_minimap_12",
+      "prova": "il trigger sotto questo pin chiama «D03_154_08_TBOX_minimap_12»"
+    },
+    {
+      "chiave": "nativo-rmap-154-8-1",
+      "indicePin": 1,
+      "tipoNativo": 39,
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere",
+      "campo": "F154_008_00",
+      "procedura": "D03_154_08_TBOX_minimap_12",
+      "prova": "il trigger sotto questo pin chiama «D03_154_08_TBOX_minimap_12»"
+    },
+    {
+      "chiave": "nativo-rmap-154-9-1",
+      "indicePin": 0,
+      "tipoNativo": 38,
+      "tipoSpillo": "scorciatoia",
+      "etichetta": "Scorciatoia",
+      "campo": "F154_009_00",
+      "procedura": "D03_009_WIRE_ON",
+      "prova": "il trigger sotto questo pin chiama «D03_009_WIRE_ON»"
+    },
+    {
+      "chiave": "nativo-rmap-155-1-0",
+      "indicePin": 0,
+      "tipoNativo": 24,
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "campo": "F155_001_00",
+      "procedura": "DUNGEON_EXIT",
+      "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-155-1-0",
+      "indicePin": 5,
+      "tipoNativo": 39,
+      "tipoSpillo": "scorciatoia",
+      "etichetta": "Scorciatoia",
+      "campo": "F155_001_00",
+      "procedura": "D04_SUBERITDAI_01",
+      "prova": "il trigger sotto questo pin chiama «D04_SUBERITDAI_01»"
+    },
+    {
+      "chiave": "nativo-rmap-156-5-0",
+      "indicePin": 0,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_005_00",
+      "procedura": "D05_GIM_BLUE_SWITCH01",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH01»"
+    },
+    {
+      "chiave": "nativo-rmap-156-5-0",
+      "indicePin": 1,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_005_00",
+      "procedura": "D05_GIM_YELLOW_SWITCH",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_YELLOW_SWITCH»"
+    },
+    {
+      "chiave": "nativo-rmap-156-5-0",
+      "indicePin": 2,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_005_00",
+      "procedura": "D05_GIM_BLUE_SWITCH02",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH02»"
+    },
+    {
+      "chiave": "nativo-rmap-156-5-0",
+      "indicePin": 3,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_005_00",
+      "procedura": "D05_GIM_BLUE_SWITCH03",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH03»"
+    },
+    {
+      "chiave": "nativo-rmap-156-6-0",
+      "indicePin": 3,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_006_00",
+      "procedura": "D05_GIM_BLUE_SWITCH01",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH01»"
+    },
+    {
+      "chiave": "nativo-rmap-156-6-0",
+      "indicePin": 4,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_006_00",
+      "procedura": "D05_GIM_BLUE_SWITCH02",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH02»"
+    },
+    {
+      "chiave": "nativo-rmap-156-6-0",
+      "indicePin": 5,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_006_00",
+      "procedura": "D05_GIM_BLUE_SWITCH03",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH03»"
+    },
+    {
+      "chiave": "nativo-rmap-156-6-0",
+      "indicePin": 6,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F156_006_00",
+      "procedura": "D05_GIM_YELLOW_SWITCH",
+      "prova": "il trigger sotto questo pin chiama «D05_GIM_YELLOW_SWITCH»"
+    },
+    {
+      "chiave": "nativo-rmap-157-1-0",
+      "indicePin": 0,
+      "tipoNativo": 24,
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "campo": "F157_001_00",
+      "procedura": "DUNGEON_EXIT",
+      "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-159-1-0",
+      "indicePin": 0,
+      "tipoNativo": 25,
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "campo": "F159_001_00",
+      "procedura": "DUNGEON_EXIT",
+      "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-159-20-0",
+      "indicePin": 0,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F159_020_00",
+      "procedura": "MOUSE_SWITCH",
+      "prova": "il trigger sotto questo pin chiama «MOUSE_SWITCH»"
+    },
+    {
+      "chiave": "nativo-rmap-159-30-1",
+      "indicePin": 2,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F159_030_00",
+      "procedura": "MOUSE_SWITCH_A",
+      "prova": "il trigger sotto questo pin chiama «MOUSE_SWITCH_A»"
+    },
+    {
+      "chiave": "nativo-rmap-159-35-0",
+      "indicePin": 5,
+      "tipoNativo": 43,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "campo": "F159_035_00",
+      "procedura": "MOUSE_SWITCH",
+      "prova": "il trigger sotto questo pin chiama «MOUSE_SWITCH»"
+    },
+    {
+      "chiave": "nativo-rmap-162-1-0",
+      "indicePin": 0,
+      "tipoNativo": 112,
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "campo": "F162_001_00",
+      "procedura": "DUNGEON_EXIT_01",
+      "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT_01»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-0",
+      "indicePin": 8,
+      "tipoNativo": 114,
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "campo": "F162_011_00",
+      "procedura": "D010_CALL_ELEVATOR_EXIT",
+      "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-0",
+      "indicePin": 9,
+      "tipoNativo": 118,
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "campo": "F162_011_00",
+      "procedura": "D010_CALL_ELEVATOR_EXIT",
+      "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR_EXIT»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-0",
+      "indicePin": 14,
+      "tipoNativo": 114,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_blue",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_blue»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 4,
+      "tipoNativo": 43,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_blue",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_blue»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 12,
+      "tipoNativo": 114,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_green",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_green»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 13,
+      "tipoNativo": 118,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_green",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_green»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 17,
+      "tipoNativo": 114,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_green",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_green»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 19,
+      "tipoNativo": 117,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_blue",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_blue»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 24,
+      "tipoNativo": 117,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_lightblue",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_lightblue»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 30,
+      "tipoNativo": 114,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_green",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_green»"
+    },
+    {
+      "chiave": "nativo-rmap-162-11-1",
+      "indicePin": 32,
+      "tipoNativo": 118,
+      "tipoSpillo": "scala",
+      "etichetta": "Scala",
+      "campo": "F162_011_00",
+      "procedura": "CheckStair_pink",
+      "prova": "il trigger sotto questo pin chiama «CheckStair_pink»"
+    }
+  ],
   "summary": {
     "tipi": 102,
-    "determinati": 56,
-    "ipotesi": 6,
-    "nonDeterminati": 40,
-    "pinConIpotesi": 319,
+    "determinati": 77,
+    "ipotesi": 2,
+    "nonDeterminati": 23,
+    "pinConIpotesi": 53,
     "perTipoIpotesi": {
-      "passaggio": 3,
       "meccanismo": 1,
-      "nota": 2
+      "nota": 1
     },
-    "pinDeterminati": 432,
-    "pinNonDeterminati": 678,
+    "pinDeterminati": 1308,
+    "pinNonDeterminati": 68,
     "perTipoSpillo": {
+      "passaggio": 12,
       "porta": 1,
       "meccanismo": 1,
       "forziere": 2,
       "distributore": 2,
-      "attivita": 7,
+      "attivita": 13,
       "cercalavoro": 1,
       "negozio": 28,
       "ristorante": 6,
@@ -2965,15 +4781,36 @@
       "casa": 1,
       "lavanderia": 1,
       "culto": 1,
-      "seme-bramosia": 1
+      "seme-bramosia": 1,
+      "scala": 3
     },
     "perProva": {
+      "procedura del trigger che sta sotto il pin": 15,
       "procedura che accende la bandiera del pin": 5,
-      "nome interno dello sprite del blocco urbano dimostrato": 51
+      "nome interno dello sprite del blocco urbano dimostrato": 51,
+      "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 6
+    },
+    "pinPerProva": {
+      "procedura del trigger che sta sotto il pin": 867,
+      "procedura che accende la bandiera del pin": 351,
+      "nome interno dello sprite del blocco urbano dimostrato": 81,
+      "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 9
+    },
+    "pinPuntuali": 40,
+    "perTipoPuntuale": {
+      "meccanismo": 11,
+      "scala": 11,
+      "uscita": 6,
+      "attivita": 3,
+      "forziere": 2,
+      "passaggio": 2,
+      "ristorante": 2,
+      "scorciatoia": 2,
+      "negozio": 1
     },
     "motiviNonDeterminati": {
-      "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 1,
-      "né lo sprite né le procedure che accendono la sua bandiera lo dicono": 39
+      "nessuna famiglia domina fra le procedure che gli cadono sotto": 20,
+      "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono": 3
     }
   },
   "limits": [

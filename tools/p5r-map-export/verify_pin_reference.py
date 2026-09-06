@@ -18,6 +18,9 @@ import re
 import sys
 
 
+import pin_reference as pr
+
+
 def main(out):
     import numpy
     from PIL import Image
@@ -64,7 +67,11 @@ def main(out):
             return sorted(v)[len(v)//2] if v else 1.0
 
         fattore = r.get('fattoreScala', 1.0)
-        assert fattore in criterio['fattori'], f'fattore fuori dall’elenco su {chiave}'
+        # oltre alle potenze di due e' ammesso il fattore suggerito dai dati, che va pero'
+        # ricalcolato qui e ritrovato uguale
+        suggerito = pr.fattore_suggerito(pin, (x0, y0, x1, y1))
+        assert r.get('fattoreSuggerito') == suggerito, f'fattore suggerito diverso su {chiave}'
+        assert fattore in criterio['fattori'] or fattore == suggerito,             f'fattore fuori dall’elenco e diverso da quello suggerito su {chiave}'
         base = mediana(distanze(1.0))
         if fattore != 1.0:
             scelto = mediana(distanze(fattore))
@@ -77,7 +84,8 @@ def main(out):
                   and y0 - margine <= p['y']*fattore <= y1 + margine and d[i] <= lontano]
         med = mediana([d[i] for i in dentro])
         quota = len(dentro)/len(pin)
-        atteso_esito = 'condiviso' if med <= vicino and quota >= quota_minima else 'non-condiviso'
+        atteso_esito = 'condiviso' if (med <= vicino and quota >= quota_minima
+                                       and not (len(dentro) == 1 and med > criterio['vicinoPinSolo']))             else 'non-condiviso'
         assert r['esito'] == atteso_esito, f'esito diverso su {chiave}: {r["esito"]} invece di {atteso_esito}'
         if atteso_esito == 'condiviso':
             assert r['collocabili'] == dentro, f'elenco dei pin collocabili diverso su {chiave}'
@@ -87,7 +95,7 @@ def main(out):
                 assert d[i] <= lontano, f'pin collocabile lontano dal tratto su {chiave}'
             collocati += len(dentro)
         else:
-            assert med > vicino or quota < quota_minima, f'mappa scartata senza motivo: {chiave}'
+            assert med > vicino or quota < quota_minima                 or (len(dentro) == 1 and med > criterio['vicinoPinSolo']),                 f'mappa scartata senza motivo: {chiave}'
             assert not r['collocabili'], f'mappa non condivisa con pin collocabili: {chiave}'
         controllati += 1
 
