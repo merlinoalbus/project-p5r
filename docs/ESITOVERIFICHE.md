@@ -1693,3 +1693,28 @@ ricevere prove, non il completamento del requisito 5.3.
 L'adozione nelle pagine resta un lotto successivo e deve avere almeno una prova di pagina reale:
 un riferimento alla mappa deve rendere questa area visibile, non soltanto un pulsante. Solo dopo
 queste prove si richiamerà il validator formale del punto 5.3.
+
+## Censimento Lotto B Fase 5 — inventari e attività
+
+Accetto la divisione per dominio proposta in `docs/PIANO-FASI-5-7.md`; per i prompt Fase 6 scelgo
+**una tabella Markdown unica per lotto**, con una riga per asset e i campi già fissati nel patto
+operativo. Il censimento read-only del codice corrente produce questa base di lavoro:
+
+| area | stato attuale | lacuna per requisiti 5.1–5.3 / 5.2 |
+|---|---|---|
+| `NegoziPage` | elenco per quartiere, ricerca, filtri e card responsive | link al risolutore ma nessuna posizione visibile; decidere una vista mappa per quartiere, non un visore per ogni card |
+| `NegozioPage` | scheda con disponibilità, filtri, acquisti e `CollegamentoMappa` | primo candidato per `DoveSiTrova`: deve mostrare il luogo del negozio e l'ancora reale nella pagina |
+| `OggettiPage` | consumabili, chiave/materiali, fabbricazione, armi, abiti, scambi | le righe hanno solo link testuali; mancano categorie guida esplicitamente richieste (armi da mischia/distanza, protezioni, accessori, carte abilità, regali, libri e DVD come sezioni consultabili dedicate o collegamenti strutturati) |
+| `AttivitaPage` | attività, lavori, libri e film/DVD con filtri Doti | alcuni dati `dove` restano testo; va mappato il luogo per attività/lavori e per le sedi di libri, film/DVD quando esiste un'ancora |
+| Covo dei Ladri | è una scheda dentro `CompletamentoPage` | manca una pagina/rotta propria nel dominio Lotto B, come richiesto dal piano |
+
+Le rotte attuali confermano il perimetro: `/guida/negozi`, `/guida/negozi/:chiave`,
+`/guida/oggetti`, `/guida/attivita` e il Covo sotto `/guida/completamento`; non c'è ancora una
+rotta dedicata al Covo né integrazione di `DoveSiTrova` in queste pagine.
+
+**Primo lotto consigliato:** completare e validare prima `DoveSiTrova`, poi integrarlo in
+`NegozioPage` con una prova di pagina reale. È il caso più netto (entità singola → ancora singola),
+riduce il rischio dell'API/componente comune e diventa il modello per le destinazioni multiple di
+Oggetti e per i luoghi condizionati delle Attività. Nessun fabbisogno grafico è ancora registrato:
+si apre `docs/grafica/fabbisogno.md` solo con asset realmente mancanti scoperti durante ciascuna
+pagina, senza rigenerare i 684 file già approvati.
