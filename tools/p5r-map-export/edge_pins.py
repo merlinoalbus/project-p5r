@@ -4,12 +4,17 @@ Su una mappa d'insieme i punti in cui si passa a un'altra area sono disegnati co
 bordo del disegno, una per direzione. Non serve sapere quale sprite il gioco usi per riconoscerli:
 basta guardare **dove cadono**.
 
-La misura è netta e si regge sul contrasto. Quattro tipi nativi — 13, 14, 15, 16 — cadono fuori
-dal tratto nel 90% dei casi e, di quelle volte, ciascuno si accosta a un lato **diverso**: 13 in alto,
-14 a destra, 15 in basso, 16 a sinistra, con quote fra il 65% e l'80%. Tutti gli altri tipi, quelli
-che stanno dentro le stanze, non superano il 47% sul proprio lato più frequente e si spargono sui
-quattro. Che quattro tipi si dividano i quattro lati in modo esclusivo non è una coincidenza che
-capita: è il modo in cui il gioco disegna le uscite.
+La misura è netta e si regge su un contrasto, non su una soglia. Quattro tipi nativi — 13, 14, 15,
+16 — si accostano ciascuno a un lato **diverso** del disegno: 13 in alto nel 65,2% dei casi, 14 a
+destra nel 70,4%, 15 in basso nel 75,8%, 16 a sinistra nel 79,7%. Tutti gli altri tipi, quelli che
+stanno dentro le stanze, non superano il 48,5% sul proprio lato più frequente e si spargono sui
+quattro. Che quattro tipi si dividano i quattro lati in modo esclusivo, con quel divario dai tipi
+interni, non è una coincidenza che capita: è il modo in cui il gioco disegna le uscite.
+
+Quanto spesso cadano *oltre* il perimetro del tratto — 57,6%, 56,3%, 47,0% e 59,3% — è un dato che
+descrive, non la prova: un'uscita disegnata sul bordo interno resta un'uscita, e infatti il tipo 15
+sta fuori meno di una volta su due. Chi legge questo file non trovi qui una soglia che il codice
+non applica.
 
 Questo dà il significato — sono passaggi — e da che parte del disegno si esce. Non dà la
 destinazione: le planimetrie non sono tessere affiancate, e sapere che si esce a destra non dice

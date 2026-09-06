@@ -648,6 +648,38 @@ lint puliti.
 | 2026-09-06 | Fase 1d (2ª) | **PRONTA PER VERIFICA** — nessuna etichetta tecnica nel DOM espanso, etichetta di versione da un'unica funzione condivisa | in attesa |
 | 2026-09-06 | Fase 2 (2ª) | **PRONTA PER VERIFICA** — 324 pin condizionali con condizione strutturata, artefatto semantico deterministico, contabilità chiusa su 1429 | in attesa |
 | 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
+| 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
+
+### Risposta ai due rilievi della quinta verifica
+
+| rilievo di Codex | correzione |
+|---|---|
+| il docstring di `edge_pins.py` dichiarava ancora «fuori dal tratto nel 90% dei casi», cifra falsa | riscritto sulla prova effettiva: dominanza laterale 65,2% / 70,4% / 75,8% / 79,7% contro un massimo interno del 48,5%. Le quote fuori dal tratto (57,6%, 56,3%, 47,0%, 59,3%) restano scritte **come dato che descrive**, con detto a chiare lettere che il codice non applica alcuna soglia su di esse. |
+| il verificatore non copriva le 28 assegnazioni da trigger: cambiando a mano un arrivo il controllo passava lo stesso | `controlla_collegamenti` non conta più: **ricostruisce da capo** l'insieme atteso dalle sorgenti native e lo confronta riga per riga. Per ogni trigger riproietta la posizione, misura la distanza da **tutti** i pin di passaggio (l'argmin è verificato, non assunto), applica la soglia dell'8%, risolve i pin contesi con la distanza minore, e confronta `partenza`, `indicePin`, `arrivo`, `ingresso`, `distanza`, `modo` e `punto` d'arrivo. I modi ammessi sono due e sono elencati; una meta forzata deve avere distanza assente, un trigger deve averla entro soglia. |
+
+**Unicità sulla destinazione completa.** Il generatore chiedeva che fosse unica la *mappa* di
+arrivo e poi prendeva la prima riga dell'elenco: se due chiamate portavano alla stessa mappa da
+entrate diverse, l'entrata veniva scelta di fatto a caso, e l'entrata è ciò che decide in che
+punto si arriva. Ora la funzione `meta_unica` pretende l'unicità della coppia **mappa + entrata**.
+Quando le entrate sono più d'una ma la mappa è una sola il collegamento resta — la meta è certa —
+ma senza entrata e senza punto d'arrivo, con il motivo scritto nella riga; quando le mappe sono
+più d'una non si collega niente. Sui dati correnti il caso ambiguo **non si presenta**: le 71
+righe sono rimaste identiche byte per byte, e l'unica differenza nell'artefatto è una voce in più
+nel riepilogo. Vale come rete per il futuro, non come correzione di un errore in atto.
+
+**Prova che il controllo morde.** Manomettendo una riga per volta nell'artefatto e rilanciando il
+verificatore: arrivo cambiato → uscita 1; entrata → 1; distanza → 1; modo → 1; punto d'arrivo → 1;
+artefatto integro → 0. È esattamente lo scenario che Codex indicava come non coperto.
+
+**Riproduzione:**
+```bash
+python tools/p5r-map-export/map_links.py data/atlas/extracted
+cd tools/p5r-map-export && for v in verify_*.py; do python "$v" ../../data/atlas/extracted ../..; done
+npm run typecheck && npm run lint && npm test
+```
+Misurato: 25 verificatori su 25 verdi, suite **539/539**, typecheck e lint puliti,
+71 collegamenti (28 da trigger proiettato, 43 da meta unica) e 191 pin di passaggio dichiarati
+senza destinazione, contabilità chiusa su 262.
 
 ### Risposta ai tre rilievi sulla Fase 2
 
