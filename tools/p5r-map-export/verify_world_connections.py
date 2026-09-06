@@ -9,7 +9,7 @@ import sys
 from world_connections import blocks, hits, procedures, main
 
 
-def verify(out, scripts):
+def verify(out, scripts, bf=None):
     out=Path(out)
     ast.parse(Path(__file__).with_name('world_connections.py').read_text(encoding='utf8'))
     data=json.loads((out/'mondo_connessioni_evidenze.json').read_text(encoding='utf8'))
@@ -46,9 +46,27 @@ def verify(out, scripts):
         try: blocks(b)
         except ValueError: pass
         else: raise AssertionError('Input malformato accettato')
+    # Determinismo, ma **fuori** dalla cartella ufficiale. Prima si rigenerava dentro `out` e si
+    # confrontava dopo: se il comando riceveva una cartella sbagliata, l'artefatto completo era
+    # gia' stato sostituito con uno formalmente valido e privo di prove, e l'assert scattava sulle
+    # macerie. E' successo davvero, e sono andate perse 148.576 righe di evidenze. Ora si rigenera
+    # in una cartella temporanea e l'originale non viene toccato nemmeno quando il controllo cade.
+    import shutil
+    import tempfile
     before=(out/'mondo_connessioni_evidenze.json').read_bytes()
-    main(out,scripts)
-    assert before==(out/'mondo_connessioni_evidenze.json').read_bytes()
+    with tempfile.TemporaryDirectory(prefix='verifica-connessioni-') as tmp:
+        prova=Path(tmp)
+        shutil.copy2(out/'mondo_metadati.json',prova/'mondo_metadati.json')
+        ftd='metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD'
+        (prova/ftd).parent.mkdir(parents=True,exist_ok=True)
+        shutil.copy2(out/ftd,prova/ftd)
+        main(prova,scripts,bf)
+        rifatto=(prova/'mondo_connessioni_evidenze.json').read_bytes()
+    assert before==rifatto, \
+        ('la rigenerazione non riproduce l’artefatto versionato: o le cartelle indicate non sono '
+         'quelle con cui e’ stato prodotto, o qualcosa e’ cambiato senza passare di qui')
+    assert (out/'mondo_connessioni_evidenze.json').read_bytes()==before, \
+        'la verifica ha toccato l’artefatto ufficiale: non deve mai succedere'
     report=dict(status='PASS',fields=len(data['fields']),scripts=sum(bool(r['script']) for r in data['fields']),
         triggers=sum(len(r['triggers']) for r in data['fields']),
         calls=sum(len(p['calls']) for r in data['fields'] for p in r['procedures']),
@@ -58,4 +76,4 @@ def verify(out, scripts):
     print(json.dumps(report))
 
 
-if __name__=='__main__': verify(sys.argv[1],sys.argv[2])
+if __name__=='__main__': verify(*sys.argv[1:4])

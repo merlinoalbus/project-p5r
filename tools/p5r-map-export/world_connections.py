@@ -95,8 +95,42 @@ def procedures(source):
     return result
 
 
-def main(out, scripts, cpk=GAME):
+# Il corpus di partenza e' fisso: gli stessi CPK, gli stessi 227 script. Un'estrazione che
+# scende sotto questi valori non ha trovato meno cose, ha guardato nel posto sbagliato — ed e'
+# esattamente cosi' che l'artefatto e' stato una volta sostituito con uno formalmente valido ma
+# vuoto di prove. Sono un pavimento, non un traguardo: se un giorno le fonti crescono, si alzano.
+MINIMI = dict(campi=209, conScript=192, procedure=15734, chiamate=2514, triggerRisolti=4495)
+
+
+def controlla_minimi(righe):
+    """Rifiuta un'estrazione piu' povera di quella gia' misurata, prima di scrivere."""
+    misurato = dict(
+        campi=len(righe),
+        conScript=sum(1 for r in righe if r['script']),
+        procedure=sum(len(r['procedures']) for r in righe),
+        # `calls` raccoglie gia' le sole CALL_FIELD: sono le destinazioni citate nel codice
+        chiamate=sum(len(p['calls']) for r in righe for p in r['procedures']),
+        triggerRisolti=sum(1 for r in righe for t in r['triggers'] if t['procedureStatus'] == 'risolta'))
+    scarsi = {k: (v, MINIMI[k]) for k, v in misurato.items() if v < MINIMI[k]}
+    if scarsi:
+        raise ValueError(
+            'estrazione piu’ povera del corpus noto, non viene scritta: '
+            + ', '.join(f'{k} {v} invece di almeno {atteso}' for k, (v, atteso) in scarsi.items())
+            + '. Di solito vuol dire che --scripts o --bf indicano una cartella sbagliata.')
+    return misurato
+
+
+def main(out, scripts, bf=None, cpk=GAME):
+    """Le fonti sono tre e vanno dette tutte e tre.
+
+    `out` porta i metadati e riceve l'artefatto; `scripts` e' la cartella dei `.flow`
+    decompilati; `bf` quella dei `FHIT_<campo>.BF` originali, che serve a provare che ogni
+    `.flow` viene proprio dai byte estratti dal CPK. Prima le ultime due erano lo stesso
+    argomento, e siccome i `.BF` non stavano nella cartella degli script il confronto non
+    avveniva mai: l'estrazione riusciva lo stesso e produceva un file senza prove.
+    """
     out, scripts=Path(out),Path(scripts)
+    bf_dir=Path(bf) if bf else scripts
     metadata=json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
     titles=title_table((out/'metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD').read_bytes())
     sources={}; resources={}
@@ -125,7 +159,12 @@ def main(out, scripts, cpk=GAME):
         row['entrances']=positions(fb,4,36) if fb else []
         flow=scripts/(key+'.flow');procs={}
         if bf and flow.exists():
-            if (scripts/(key+'.BF')).read_bytes()!=bf:
+            gemello=bf_dir/f'FHIT_{key}.BF'
+            if not gemello.is_file():
+                raise ValueError(
+                    f'lo script {key} e’ decompilato ma manca il suo {gemello.name} in {bf_dir}: '
+                    'senza l’originale non si puo’ provare che il .flow venga da questi byte')
+            if gemello.read_bytes()!=bf:
                 raise ValueError('Script decodificato da sorgente diversa: '+key)
             raw=flow.read_bytes();procs=procedures(raw.decode('utf-8-sig'))
             dest=out/'connessioni_script'/(key+'.flow');dest.parent.mkdir(exist_ok=True);dest.write_bytes(raw)
@@ -147,11 +186,18 @@ def main(out, scripts, cpk=GAME):
         'I corpi delle procedure conservano condizioni e chiamate indirette ancora da interpretare.',
         'Le coordinate XYZ non sono coordinate della planimetria.',
         'Le etichette prompt diverse da GO restano identificate dalla tabella e dall indice nativi.'])
+    misurato=controlla_minimi(rows)
     (out/'mondo_connessioni_evidenze.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
     print('CAMPI',len(rows),'HTB',sum(bool(r['sources']['htb']) for r in rows),'SCRIPT',sum(bool(r['script']) for r in rows),
-        'CHIAMATE',sum(len(p['calls']) for r in rows for p in r['procedures']))
+        'CHIAMATE',sum(len(p['calls']) for r in rows for p in r['procedures']),
+        'CALL_FIELD',misurato['chiamate'],'TRIGGER_RISOLTI',misurato['triggerRisolti'])
+    return result
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('out');p.add_argument('--scripts',required=True);p.add_argument('--cpk',default=str(GAME))
-    a=p.parse_args();main(a.out,a.scripts,a.cpk)
+    p=argparse.ArgumentParser()
+    p.add_argument('out')
+    p.add_argument('--scripts',required=True,help='cartella dei .flow decompilati')
+    p.add_argument('--bf',required=True,help='cartella dei FHIT_<campo>.BF originali')
+    p.add_argument('--cpk',default=str(GAME))
+    a=p.parse_args();main(a.out,a.scripts,a.bf,a.cpk)

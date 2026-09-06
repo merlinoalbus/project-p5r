@@ -83,10 +83,19 @@ def main(out):
                (v['occorrenze'], r['mappe'], v['condizionali'], v['effettoZero'])
         assert r['mappeUrbane'] == sum(int(m[5:8]) < 100 for m in r['mappe'])
         assert r['mappeDungeon'] == len(r['mappe'])-r['mappeUrbane']
-        basso, alto = atteso['associazioneUrbana']['blocco']
-        if r['associazione'] == 'blocco-urbano-dimostrato':
+        # Due blocchi, non uno: quello urbano e quello del Covo dei Ladri, ciascuno con il suo
+        # scarto. Il controllo ne conosceva solo il primo e mandava il secondo nel ramo «non deve
+        # avere sprite», dove invece lo sprite ce l'ha ed e' dimostrato — falliva su una cosa giusta.
+        import map_icons as mi
+        blocchi = {'blocco-urbano-dimostrato': (mi.BLOCCO_CITTA, mi.SCARTO_CITTA),
+                   'blocco-covo-dimostrato': (mi.BLOCCO_MY_PALACE, mi.SCARTO_MY_PALACE)}
+        assert tuple(atteso['associazioneUrbana']['blocco']) == mi.BLOCCO_CITTA and \
+            atteso['associazioneUrbana']['scarto'] == mi.SCARTO_CITTA, \
+            'il blocco urbano dichiarato nell’artefatto non è quello del generatore'
+        if r['associazione'] in blocchi:
+            (basso, alto), scarto = blocchi[r['associazione']]
             assert basso <= r['tipoNativo'] <= alto and r['mappeDungeon'] == 0
-            sprite = atteso['sprite'][r['tipoNativo']+atteso['associazioneUrbana']['scarto']]
+            sprite = atteso['sprite'][r['tipoNativo']+scarto]
             assert r['sprite'] == sprite['index'] and r['nomeNativo'] == sprite['nome'] and not sprite['vuoto']
         else:
             assert r['sprite'] is None and r['nomeNativo'] is None
