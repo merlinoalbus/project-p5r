@@ -27,6 +27,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 import { MappaMemento } from '../components/mappe/MappaMemento';
+import { urlStratoDedalo } from '../components/mappe/stratiMemento';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
@@ -121,7 +122,8 @@ export function DungeonDettaglioPage() {
 
           {/* I Memento non sono un Palazzo con delle aree: sono una discesa di nove dedali, e il
               gioco li presenta così. Sopra le schede, la discesa disegnata con i suoi elementi. */}
-          {d.tipo === 'mementos' && <MappaMemento aree={d.aree} />}
+          {d.tipo === 'mementos' && <MappaMemento aree={d.aree} selezionata={area.chiave}
+            onSeleziona={(k) => { setParams({ area: k }); setSelezionato(null); }} />}
 
           <FilaScorrevole className="items-center" role="tablist" aria-label="Aree">
             {d.aree.map((a) => (
@@ -136,7 +138,15 @@ export function DungeonDettaglioPage() {
               <h2 className="m-0 text-[15px] font-semibold">{area.nome}</h2>
               {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
               <div className="flex flex-wrap items-center gap-2">
-                <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />
+                {/* Per un dedalo dei Memento non esiste una pianta — i piani sono generati a ogni
+                    visita — e la miniatura restava le iniziali. Al suo posto va il pezzo con cui
+                    il gioco lo disegna nel pozzo: non è una pianta, è la sua raffigurazione. */}
+                {d.tipo === 'mementos' && !area.mappa && !area.pianta
+                  ? <span className="flex h-[64px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded bg-[#8d0012]">
+                      <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`}
+                        className="max-h-full max-w-full object-contain" />
+                    </span>
+                  : <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />}
                 <span className="text-[12px] text-text-muted flex-1 min-w-[200px]">
                   {fonteUsata ? (
                     <>
@@ -151,7 +161,11 @@ export function DungeonDettaglioPage() {
                       Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="credito">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
                     </>
                   ) : (
+                    d.tipo === 'mementos' ? (
+                    <>I piani dei Memento sono generati a ogni visita e nessuna guida ne pubblica una pianta. Qui sotto c’è il pezzo con cui il gioco disegna questo dedalo nel pozzo: non è una pianta, è la sua raffigurazione. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
+                    ) : (
                     <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
+                    )
                   )}
                 </span>
                 {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
