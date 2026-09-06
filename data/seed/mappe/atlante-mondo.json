@@ -1,0 +1,6724 @@
+{
+ "versione": 1,
+ "mappe": [
+  {
+   "chiave": "nativo-rmap-007-1-0",
+   "nome": "Electric Town",
+   "tipo": "luogo",
+   "genitore": "citta-akihabara",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-007-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-0-0",
+   "nome": "Edificio principale 1P / Edificio laboratori 1P",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-0-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-0-1",
+   "nome": "Edificio principale 2P / Edificio laboratori 2P",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-0-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-0-2",
+   "nome": "Edificio principale 3P / Edificio laboratori 3P",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-0-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-1-0",
+   "nome": "Cancello della scuola",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-5-0",
+   "nome": "Tetto",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-6-0",
+   "nome": "Aula",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-002-8-0",
+   "nome": "Biblioteca",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-002-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-011-4-0",
+   "nome": "Banchina della metropolitana",
+   "tipo": "luogo",
+   "genitore": "citta-shujin-academy",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-011-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-011-6-0",
+   "nome": "Banchina della metropolitana",
+   "tipo": "luogo",
+   "genitore": "citta-yongen-jaya",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-011-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-010-4-0",
+   "nome": "Cappella",
+   "tipo": "luogo",
+   "genitore": "citta-kanda-jinbocho",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-010-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-005-1-0",
+   "nome": "Quartiere dello shopping",
+   "tipo": "luogo",
+   "genitore": "citta-kichijoji",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-005-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-012-29-0",
+   "nome": "Cantiere dello stadio",
+   "tipo": "luogo",
+   "genitore": "citta-odaiba",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-012-29-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 256,
+   "altezza": 256,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-022-1-0",
+   "nome": "Covo dei Ladri — settore d’ingresso",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-022-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-022-1-0",
+    "nome": "Covo dei Ladri",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-022-1-1",
+   "nome": "Covo dei Ladri",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 1,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-022-1-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-022-1-0",
+    "nome": "Covo dei Ladri",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-022-1-2",
+   "nome": "Covo dei Ladri — porzione occidentale",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 2,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-022-1-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-022-1-0",
+    "nome": "Covo dei Ladri",
+    "ordine": 2,
+    "etichetta": "porzione occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-022-1-3",
+   "nome": "Covo dei Ladri — porzione settentrionale",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 3,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-022-1-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-022-1-0",
+    "nome": "Covo dei Ladri",
+    "ordine": 3,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-022-1-4",
+   "nome": "Covo dei Ladri — inquadratura orientale",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 4,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-022-1-4",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-022-1-0",
+    "nome": "Covo dei Ladri",
+    "ordine": 4,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-150-3-0",
+   "nome": "Area riservata allo staff — porzione occidentale",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-150-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-150-3-0",
+    "nome": "Area riservata allo staff",
+    "ordine": 0,
+    "etichetta": "porzione occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-150-3-1",
+   "nome": "Area riservata allo staff",
+   "tipo": "luogo",
+   "genitore": null,
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-150-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-150-3-0",
+    "nome": "Area riservata allo staff",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-190-1-0",
+   "nome": "Strutture ricorrenti dei Memento",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-190-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/1 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 0,
+    "etichetta": "risorsa 190/1 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-190-2-0",
+   "nome": "Strutture ricorrenti dei Memento — risorsa 190/2 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 1,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-190-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/2 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 1,
+    "etichetta": "risorsa 190/2 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-190-3-0",
+   "nome": "Strutture ricorrenti dei Memento — risorsa 190/3 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 2,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-190-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/3 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 2,
+    "etichetta": "risorsa 190/3 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-190-51-0",
+   "nome": "Strutture ricorrenti dei Memento — risorsa 190/51 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 3,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-190-51-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 256,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/51 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 3,
+    "etichetta": "risorsa 190/51 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-190-61-0",
+   "nome": "Strutture ricorrenti dei Memento — risorsa 190/61 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 4,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-190-61-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 256,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/61 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 4,
+    "etichetta": "risorsa 190/61 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-192-62-0",
+   "nome": "Strutture ricorrenti dei Memento — risorsa 192/62 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 5,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-192-62-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 192/62 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 5,
+    "etichetta": "risorsa 192/62 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-195-11-0",
+   "nome": "Strutture ricorrenti dei Memento — risorsa 195/11 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 6,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-195-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 195/11 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Strutture ricorrenti dei Memento",
+    "ordine": 6,
+    "etichetta": "risorsa 195/11 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-160-1-0",
+   "nome": "Piazza Stazione Shibuya",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-08-piazza-stazione-shibuya-mondo-del-clifoto"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-160-2-0",
+   "nome": "Cammino per il Santo Graal — 1º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-09-cammino-per-il-santo-graal-parte-i"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-160-3-0",
+   "nome": "Cammino per il Santo Graal — 2º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-10-cammino-per-il-santo-graal-parte-ii"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-160-4-0",
+   "nome": "Cammino per il Santo Graal — 3º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-11-cammino-per-il-santo-graal-parte-iii"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-160-4-0",
+    "nome": "Cammino per il Santo Graal — 3º tratto",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-160-4-1",
+   "nome": "Cammino per il Santo Graal — 3º tratto — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-4-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-160-4-0",
+    "nome": "Cammino per il Santo Graal — 3º tratto",
+    "ordine": 1,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-160-4-2",
+   "nome": "Cammino per il Santo Graal — 3º tratto — inquadratura meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 302,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-4-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-160-4-0",
+    "nome": "Cammino per il Santo Graal — 3º tratto",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-160-5-0",
+   "nome": "Cammino per il Santo Graal — 4º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-12-cammino-per-il-santo-graal-parte-iv"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-160-6-0",
+   "nome": "Entrata del santuario",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-07-santuario"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-160-10-0",
+   "nome": "Mondo del clifoto — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-160-10-0",
+    "nome": "Mondo del clifoto",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-160-10-1",
+   "nome": "Mondo del clifoto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-160-10-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-160-10-0",
+    "nome": "Mondo del clifoto",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-1-0",
+   "nome": "Entrata della piramide",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "futaba-01-entrata-della-piramide"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-2-0",
+   "nome": "Corridoio principale — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-2-0",
+    "nome": "Corridoio principale",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-2-1",
+   "nome": "Corridoio principale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "futaba-06-corridoio-principale-sezione-centrale"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-2-0",
+    "nome": "Corridoio principale",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-2-2",
+   "nome": "Corridoio principale — inquadratura orientale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 102,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-2-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-2-0",
+    "nome": "Corridoio principale",
+    "ordine": 2,
+    "etichetta": "inquadratura orientale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-2-3",
+   "nome": "Corridoio principale — inquadratura orientale — seconda per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 103,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-2-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — seconda per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-2-0",
+    "nome": "Corridoio principale",
+    "ordine": 3,
+    "etichetta": "inquadratura orientale — seconda per ampiezza"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-12-0",
+   "nome": "Corridoio principale — inquadratura orientale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 104,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-2-0",
+    "nome": "Corridoio principale",
+    "ordine": 4,
+    "etichetta": "inquadratura orientale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-12-1",
+   "nome": "Corridoio principale — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 105,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-12-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-2-0",
+    "nome": "Corridoio principale",
+    "ordine": 5,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-3-0",
+   "nome": "Camera del Rimorso 1P — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-3-0",
+    "nome": "Camera del Rimorso 1P",
+    "ordine": 0,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-3-2",
+   "nome": "Camera del Rimorso 1P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-3-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-3-0",
+    "nome": "Camera del Rimorso 1P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-3-1",
+   "nome": "Camera del Rimorso 2P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-4-0",
+   "nome": "Camera del Santuario 1P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-4-1",
+   "nome": "Camera del Santuario 2P — variante grafica",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-4-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «variante grafica» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-4-1",
+    "nome": "Camera del Santuario 2P",
+    "ordine": 0,
+    "etichetta": "variante grafica"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-6-1",
+   "nome": "Camera del Santuario 2P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-6-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-4-1",
+    "nome": "Camera del Santuario 2P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-6-2",
+   "nome": "Camera del Santuario 2P — inquadratura orientale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 502,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-6-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-4-1",
+    "nome": "Camera del Santuario 2P",
+    "ordine": 2,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-5-0",
+   "nome": "Caverna sotterranea 1P — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-5-0",
+    "nome": "Caverna sotterranea 1P",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-5-1",
+   "nome": "Caverna sotterranea 1P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-5-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-5-0",
+    "nome": "Caverna sotterranea 1P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-5-2",
+   "nome": "Caverna sotterranea 2P — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-5-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-5-2",
+    "nome": "Caverna sotterranea 2P",
+    "ordine": 0,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-5-3",
+   "nome": "Caverna sotterranea 2P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-5-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-5-2",
+    "nome": "Caverna sotterranea 2P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-7-0",
+   "nome": "Camera del Rigetto 1P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-7-1",
+   "nome": "Camera del Rigetto 2P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-8-0",
+   "nome": "Camera dei Sarcofagi 1P — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-8-0",
+    "nome": "Camera dei Sarcofagi 1P",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-8-1",
+   "nome": "Camera dei Sarcofagi 1P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1001,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-8-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "futaba-05-camera-dei-sarcofagi"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-8-0",
+    "nome": "Camera dei Sarcofagi 1P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-8-2",
+   "nome": "Camera dei Sarcofagi 2P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-8-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-8-2",
+    "nome": "Camera dei Sarcofagi 2P",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-8-3",
+   "nome": "Camera dei Sarcofagi 2P — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-8-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-8-2",
+    "nome": "Camera dei Sarcofagi 2P",
+    "ordine": 1,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-9-0",
+   "nome": "Camera della Vacuità 1P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-9-1",
+   "nome": "Camera della Vacuità 2P",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-9-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-10-0",
+   "nome": "Risorse grafiche non usate da alcun campo",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 64,
+   "altezza": 64,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-155-11-0",
+   "nome": "Passaggio sotterraneo 1F — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-11-0",
+    "nome": "Passaggio sotterraneo 1F",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-11-1",
+   "nome": "Passaggio sotterraneo 1F",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-11-0",
+    "nome": "Passaggio sotterraneo 1F",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-11-2",
+   "nome": "Passaggio sotterraneo 2F",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-11-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-11-2",
+    "nome": "Passaggio sotterraneo 2F",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-11-3",
+   "nome": "Passaggio sotterraneo 2F — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-11-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-155-11-2",
+    "nome": "Passaggio sotterraneo 2F",
+    "ordine": 1,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-155-13-0",
+   "nome": "Città nel deserto",
+   "tipo": "area",
+   "genitore": "dungeon-futaba",
+   "ordine": 1700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-155-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "futaba-03-citta-nel-deserto"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-151-0-0",
+   "nome": "Risorse grafiche non usate da alcun campo",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-0-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 151/0 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-0-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 0,
+    "etichetta": "risorsa 151/0 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-0-1",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 151/0 livello 1",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-0-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 151/0 livello 1» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-0-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 1,
+    "etichetta": "risorsa 151/0 livello 1"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-152-11-0",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 152/11 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 2,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 152/11 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-0-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 2,
+    "etichetta": "risorsa 152/11 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-152-11-1",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 152/11 livello 1",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 3,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 152/11 livello 1» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-0-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 3,
+    "etichetta": "risorsa 152/11 livello 1"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-1-0",
+   "nome": "Cancello del castello — porzione occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-1-0",
+    "nome": "Cancello del castello",
+    "ordine": 0,
+    "etichetta": "porzione occidentale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-4-elemento-5",
+     "nome": "Cancello del castello",
+     "campo": "F151_001_00",
+     "texpack": 4
+    },
+    {
+     "id": "texpack-137-elemento-5",
+     "nome": "Cancello del castello",
+     "campo": "F151_051_00",
+     "texpack": 137
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-151-1-1",
+   "nome": "Cancello del castello",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-1-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "kamoshida-01-cancello-del-castello-ingresso"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-1-0",
+    "nome": "Cancello del castello",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-2-0",
+   "nome": "Vecchio castello 1P",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-151-2-1",
+   "nome": "Vecchio castello 2P",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-2-1",
+    "nome": "Vecchio castello 2P",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-2-2",
+   "nome": "Vecchio castello 2P — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-2-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-2-1",
+    "nome": "Vecchio castello 2P",
+    "ordine": 1,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-4-1",
+   "nome": "Vecchio castello 3P — inquadratura orientale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-4-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-4-1",
+    "nome": "Vecchio castello 3P",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-4-2",
+   "nome": "Vecchio castello 3P — inquadratura orientale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-4-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-4-1",
+    "nome": "Vecchio castello 3P",
+    "ordine": 1,
+    "etichetta": "inquadratura orientale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-5-0",
+   "nome": "Vecchio castello 3P — porzione occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 402,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-4-1",
+    "nome": "Vecchio castello 3P",
+    "ordine": 2,
+    "etichetta": "porzione occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-5-1",
+   "nome": "Vecchio castello 3P",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 403,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-5-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-4-1",
+    "nome": "Vecchio castello 3P",
+    "ordine": 3,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-5-2",
+   "nome": "Vecchio castello 3P — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 404,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-5-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-4-1",
+    "nome": "Vecchio castello 3P",
+    "ordine": 4,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-6-0",
+   "nome": "Tetto — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-6-0",
+    "nome": "Tetto",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-6-1",
+   "nome": "Tetto — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-6-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-6-0",
+    "nome": "Tetto",
+    "ordine": 1,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-6-2",
+   "nome": "Tetto",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 502,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-6-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "kamoshida-13-tetto"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-6-0",
+    "nome": "Tetto",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-6-3",
+   "nome": "Tetto — inquadratura occidentale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 503,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-6-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-6-0",
+    "nome": "Tetto",
+    "ordine": 3,
+    "etichetta": "inquadratura occidentale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-6-4",
+   "nome": "Tetto — inquadratura occidentale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 504,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-6-4",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-6-0",
+    "nome": "Tetto",
+    "ordine": 4,
+    "etichetta": "inquadratura occidentale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-7-0",
+   "nome": "Torre: Livello inferiore",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-151-9-0",
+   "nome": "Torre: Livello di mezzo",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-151-10-0",
+   "nome": "Torre: Livello superiore — inquadratura meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-10-0",
+    "nome": "Torre: Livello superiore",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-10-1",
+   "nome": "Torre: Livello superiore",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-10-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-10-0",
+    "nome": "Torre: Livello superiore",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-151-11-0",
+   "nome": "Torre: Sala del trono — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-11-0",
+    "nome": "Torre: Sala del trono",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-13-elemento-15",
+     "nome": "Torre: Sala del trono",
+     "campo": "F151_011_00",
+     "texpack": 13
+    },
+    {
+     "id": "texpack-14-elemento-15",
+     "nome": "Torre: Sala del trono",
+     "campo": "F151_012_00",
+     "texpack": 14
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-151-11-1",
+   "nome": "Torre: Sala del trono",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 901,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-151-11-0",
+    "nome": "Torre: Sala del trono",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-13-elemento-15",
+     "nome": "Torre: Sala del trono",
+     "campo": "F151_011_00",
+     "texpack": 13
+    },
+    {
+     "id": "texpack-14-elemento-15",
+     "nome": "Torre: Sala del trono",
+     "campo": "F151_012_00",
+     "texpack": 14
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-151-13-0",
+   "nome": "Stanza segreta",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-151-16-0",
+   "nome": "Sala centrale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-151-16-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "kamoshida-02-sala-centrale"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-152-1-0",
+   "nome": "Prigione sotterranea 1P — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-152-1-0",
+    "nome": "Prigione sotterranea 1P",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-17-elemento-4",
+     "nome": "Prigione sotterranea 1P",
+     "campo": "F152_001_00",
+     "texpack": 17
+    },
+    {
+     "id": "texpack-137-elemento-4",
+     "nome": "Prigione sotterranea 1P",
+     "campo": "F151_051_00",
+     "texpack": 137
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-152-1-1",
+   "nome": "Prigione sotterranea 1P",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-1-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-152-1-0",
+    "nome": "Prigione sotterranea 1P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-17-elemento-4",
+     "nome": "Prigione sotterranea 1P",
+     "campo": "F152_001_00",
+     "texpack": 17
+    },
+    {
+     "id": "texpack-137-elemento-4",
+     "nome": "Prigione sotterranea 1P",
+     "campo": "F151_051_00",
+     "texpack": 137
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-152-2-0",
+   "nome": "Prigione sotterranea 2P",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-152-2-0",
+    "nome": "Prigione sotterranea 2P",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-152-2-1",
+   "nome": "Prigione sotterranea 2P — variante grafica",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «variante grafica» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-152-2-0",
+    "nome": "Prigione sotterranea 2P",
+    "ordine": 1,
+    "etichetta": "variante grafica"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-152-4-0",
+   "nome": "Passaggio sotterraneo",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-152-5-0",
+   "nome": "Palazzo di Kamoshida",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-152-6-0",
+   "nome": "Palestra dell'amore",
+   "tipo": "area",
+   "genitore": "dungeon-kamoshida",
+   "ordine": 1600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-152-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-154-1-0",
+   "nome": "Entrata della banca",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-31-elemento-40",
+     "nome": "Entrata della banca",
+     "campo": "F154_001_00",
+     "texpack": 31
+    },
+    {
+     "id": "texpack-139-elemento-40",
+     "nome": "Entrata della banca",
+     "campo": "F154_051_00",
+     "texpack": 139
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-154-2-0",
+   "nome": "Sala d'ingresso 1P",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "kaneshiro-01-sala-d-ingresso"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-154-2-1",
+   "nome": "Sala d'ingresso 2P",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-154-3-0",
+   "nome": "Corridoio banchieri — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-3-0",
+    "nome": "Corridoio banchieri",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   },
+   "contesti": [
+    {
+     "id": "texpack-33-elemento-45",
+     "nome": "Corridoio banchieri",
+     "campo": "F154_003_00",
+     "texpack": 33
+    },
+    {
+     "id": "texpack-139-elemento-44",
+     "nome": "Corridoio banchieri",
+     "campo": "F154_051_00",
+     "texpack": 139
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-154-3-1",
+   "nome": "Corridoio banchieri",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-3-0",
+    "nome": "Corridoio banchieri",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-33-elemento-44",
+     "nome": "Corridoio banchieri",
+     "campo": "F154_003_00",
+     "texpack": 33
+    },
+    {
+     "id": "texpack-139-elemento-43",
+     "nome": "Corridoio banchieri",
+     "campo": "F154_051_00",
+     "texpack": 139
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-154-3-2",
+   "nome": "Corridoio banchieri — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 302,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-3-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-3-0",
+    "nome": "Corridoio banchieri",
+    "ordine": 2,
+    "etichetta": "inquadratura occidentale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-33-elemento-43",
+     "nome": "Corridoio banchieri",
+     "campo": "F154_003_00",
+     "texpack": 33
+    },
+    {
+     "id": "texpack-139-elemento-43",
+     "nome": "Corridoio banchieri",
+     "campo": "F154_051_00",
+     "texpack": 139
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-154-5-0",
+   "nome": "Caveau sotterraneo — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-5-0",
+    "nome": "Caveau sotterraneo",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   },
+   "contesti": [
+    {
+     "id": "texpack-34-elemento-52",
+     "nome": "Caveau sotterraneo",
+     "campo": "F154_005_00",
+     "texpack": 34
+    },
+    {
+     "id": "texpack-139-elemento-49",
+     "nome": "Ufficio riciclaggio",
+     "campo": "F154_051_00",
+     "texpack": 139
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-154-5-1",
+   "nome": "Caveau sotterraneo",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-5-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "kaneshiro-04-caveau-sotterraneo"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-5-0",
+    "nome": "Caveau sotterraneo",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-7-0",
+   "nome": "Caveau 1P — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-7-0",
+    "nome": "Caveau 1P",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-7-1",
+   "nome": "Caveau 1P",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-7-0",
+    "nome": "Caveau 1P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-8-0",
+   "nome": "Caveau 2P — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-8-0",
+    "nome": "Caveau 2P",
+    "ordine": 0,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-8-1",
+   "nome": "Caveau 2P",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-8-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-8-0",
+    "nome": "Caveau 2P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-9-0",
+   "nome": "Caveau 3P — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-9-0",
+    "nome": "Caveau 3P",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-9-1",
+   "nome": "Caveau 3P",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-9-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-9-0",
+    "nome": "Caveau 3P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-10-0",
+   "nome": "Centro del caveau",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-154-11-0",
+   "nome": "Ufficio riciclaggio — 1º tratto — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-11-0",
+    "nome": "Ufficio riciclaggio — 1º tratto",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-11-1",
+   "nome": "Ufficio riciclaggio — 1º tratto — inquadratura meridionale — seconda per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 901,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-11-0",
+    "nome": "Ufficio riciclaggio — 1º tratto",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — seconda per ampiezza"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-11-2",
+   "nome": "Ufficio riciclaggio — 1º tratto — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 902,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-11-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-11-0",
+    "nome": "Ufficio riciclaggio — 1º tratto",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-14-0",
+   "nome": "Ufficio riciclaggio — 1º tratto — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 903,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-14-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-11-0",
+    "nome": "Ufficio riciclaggio — 1º tratto",
+    "ordine": 3,
+    "etichetta": "porzione meridionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-42-elemento-50",
+     "nome": "Ufficio riciclaggio",
+     "campo": "F154_014_00",
+     "texpack": 42
+    },
+    {
+     "id": "texpack-139-elemento-48",
+     "nome": "Ufficio riciclaggio",
+     "campo": "F154_051_00",
+     "texpack": 139
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-154-14-1",
+   "nome": "Ufficio riciclaggio — 1º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 904,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-14-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "kaneshiro-03-ufficio-riciclaggio"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-11-0",
+    "nome": "Ufficio riciclaggio — 1º tratto",
+    "ordine": 4,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-12-0",
+   "nome": "Ufficio riciclaggio — 2º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-12-0",
+    "nome": "Ufficio riciclaggio — 2º tratto",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-12-1",
+   "nome": "Ufficio riciclaggio — 2º tratto — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1001,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-12-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-12-0",
+    "nome": "Ufficio riciclaggio — 2º tratto",
+    "ordine": 1,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-12-2",
+   "nome": "Ufficio riciclaggio — 2º tratto — inquadratura meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1002,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-12-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-12-0",
+    "nome": "Ufficio riciclaggio — 2º tratto",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-13-0",
+   "nome": "Risorse grafiche non usate da alcun campo",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 154/13 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-13-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 0,
+    "etichetta": "risorsa 154/13 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-13-1",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 154/13 livello 1",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-13-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 154/13 livello 1» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-13-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 1,
+    "etichetta": "risorsa 154/13 livello 1"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-13-2",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 154/13 livello 2",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1102,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-13-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 154/13 livello 2» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-154-13-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 2,
+    "etichetta": "risorsa 154/13 livello 2"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-154-15-0",
+   "nome": "Central Street",
+   "tipo": "area",
+   "genitore": "dungeon-kaneshiro",
+   "ordine": 1200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-154-15-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-153-1-0",
+   "nome": "Entrata del Museo",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "madarame-01-entrata-del-museo"
+   },
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-23-elemento-20",
+     "nome": "Entrata del Museo",
+     "campo": "F153_001_00",
+     "texpack": 23
+    },
+    {
+     "id": "texpack-138-elemento-20",
+     "nome": "Entrata del Museo",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-2-0",
+   "nome": "Museo, 1P — variante grafica",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «variante grafica» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-2-0",
+    "nome": "Museo, 1P",
+    "ordine": 0,
+    "etichetta": "variante grafica"
+   },
+   "contesti": [
+    {
+     "id": "texpack-24-elemento-22",
+     "nome": "Museo, 1P",
+     "campo": "F153_002_00",
+     "texpack": 24
+    },
+    {
+     "id": "texpack-138-elemento-21",
+     "nome": "Museo, 1P",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-2-1",
+   "nome": "Museo, 1P",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-2-0",
+    "nome": "Museo, 1P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-3-0",
+   "nome": "Museo, 2P — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-3-0",
+    "nome": "Museo, 2P",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-25-elemento-23",
+     "nome": "Museo, 2P",
+     "campo": "F153_003_00",
+     "texpack": 25
+    },
+    {
+     "id": "texpack-138-elemento-22",
+     "nome": "Museo, 1P",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-3-1",
+   "nome": "Museo, 2P",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-3-0",
+    "nome": "Museo, 2P",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-3-2",
+   "nome": "Museo, 2P — inquadratura settentrionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 202,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-3-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-3-0",
+    "nome": "Museo, 2P",
+    "ordine": 2,
+    "etichetta": "inquadratura settentrionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-3-3",
+   "nome": "Museo, 2P — inquadratura settentrionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 203,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-3-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-3-0",
+    "nome": "Museo, 2P",
+    "ordine": 3,
+    "etichetta": "inquadratura settentrionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-4-0",
+   "nome": "Ripostiglio",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-153-5-0",
+   "nome": "Giardino centrale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "madarame-05-giardino-centrale"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-5-0",
+    "nome": "Giardino centrale",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-27-elemento-27",
+     "nome": "Giardino centrale",
+     "campo": "F153_005_00",
+     "texpack": 27
+    },
+    {
+     "id": "texpack-138-elemento-23",
+     "nome": "Museo, 2P",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-5-1",
+   "nome": "Giardino centrale — inquadratura orientale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-5-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 64,
+   "altezza": 64,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-5-0",
+    "nome": "Giardino centrale",
+    "ordine": 1,
+    "etichetta": "inquadratura orientale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-27-elemento-27",
+     "nome": "Giardino centrale",
+     "campo": "F153_005_00",
+     "texpack": 27
+    },
+    {
+     "id": "texpack-138-elemento-23",
+     "nome": "Museo, 2P",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-6-0",
+   "nome": "Sala del Tesoro - Atrio — variante grafica",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «variante grafica» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-6-0",
+    "nome": "Sala del Tesoro - Atrio",
+    "ordine": 0,
+    "etichetta": "variante grafica"
+   },
+   "contesti": [
+    {
+     "id": "texpack-28-elemento-28",
+     "nome": "Sala del Tesoro - Atrio",
+     "campo": "F153_006_00",
+     "texpack": 28
+    },
+    {
+     "id": "texpack-138-elemento-24",
+     "nome": "Museo, 2P",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-6-1",
+   "nome": "Sala del Tesoro - Atrio",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-6-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "madarame-06-sala-del-tesoro-atrio"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-6-0",
+    "nome": "Sala del Tesoro - Atrio",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-28-elemento-29",
+     "nome": "Sala del Tesoro - Atrio",
+     "campo": "F153_006_00",
+     "texpack": 28
+    },
+    {
+     "id": "texpack-138-elemento-25",
+     "nome": "Museo, 2P",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-7-0",
+   "nome": "Sala del Tesoro - Galleria — porzione occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-7-0",
+    "nome": "Sala del Tesoro - Galleria",
+    "ordine": 0,
+    "etichetta": "porzione occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-7-1",
+   "nome": "Sala del Tesoro - Galleria",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "madarame-07-sala-del-tesoro-stanza-intermedia-con-safe-room-e-sala-del-t"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-7-0",
+    "nome": "Sala del Tesoro - Galleria",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-7-2",
+   "nome": "Sala del Tesoro - Galleria — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 602,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-7-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-7-0",
+    "nome": "Sala del Tesoro - Galleria",
+    "ordine": 2,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-8-0",
+   "nome": "Risorse grafiche non usate da alcun campo",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 64,
+   "altezza": 64,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/8 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 0,
+    "etichetta": "risorsa 153/8 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-8-1",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/8 livello 1",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-8-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/8 livello 1» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 1,
+    "etichetta": "risorsa 153/8 livello 1"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-8-2",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/8 livello 2",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 702,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-8-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/8 livello 2» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 2,
+    "etichetta": "risorsa 153/8 livello 2"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-10-0",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/10 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 703,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 64,
+   "altezza": 64,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/10 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 3,
+    "etichetta": "risorsa 153/10 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-11-0",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/11 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 704,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 64,
+   "altezza": 64,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/11 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 4,
+    "etichetta": "risorsa 153/11 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-12-0",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/12 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 705,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/12 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 5,
+    "etichetta": "risorsa 153/12 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-13-0",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/13 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 706,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/13 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-8-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 6,
+    "etichetta": "risorsa 153/13 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-153-9-0",
+   "nome": "Sala del Tesoro — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-9-0",
+    "nome": "Sala del Tesoro",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-30-elemento-34",
+     "nome": "Sala del Tesoro",
+     "campo": "F153_009_00",
+     "texpack": 30
+    },
+    {
+     "id": "texpack-138-elemento-28",
+     "nome": "Sala del Tesoro - Atrio",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-9-1",
+   "nome": "Sala del Tesoro",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-9-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-9-0",
+    "nome": "Sala del Tesoro",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-30-elemento-35",
+     "nome": "Sala del Tesoro",
+     "campo": "F153_009_00",
+     "texpack": 30
+    },
+    {
+     "id": "texpack-138-elemento-29",
+     "nome": "Sala del Tesoro - Atrio",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-153-9-2",
+   "nome": "Sala del Tesoro — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-madarame",
+   "ordine": 802,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-153-9-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-153-9-0",
+    "nome": "Sala del Tesoro",
+    "ordine": 2,
+    "etichetta": "inquadratura settentrionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-30-elemento-36",
+     "nome": "Sala del Tesoro",
+     "campo": "F153_009_00",
+     "texpack": 30
+    },
+    {
+     "id": "texpack-138-elemento-30",
+     "nome": "Sala del Tesoro - Galleria",
+     "campo": "F153_051_00",
+     "texpack": 138
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-162-1-0",
+   "nome": "??? Ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-01-ingresso"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-162-2-0",
+   "nome": "??? Sala d'ingresso — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-2-0",
+    "nome": "??? Sala d'ingresso",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-2-1",
+   "nome": "??? Sala d'ingresso — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-2-0",
+    "nome": "??? Sala d'ingresso",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-2-2",
+   "nome": "??? Sala d'ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 102,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-2-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-02-sala-d-ingresso"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-2-0",
+    "nome": "??? Sala d'ingresso",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-2-3",
+   "nome": "??? Sala d'ingresso — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 103,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-2-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-2-0",
+    "nome": "??? Sala d'ingresso",
+    "ordine": 3,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-3-0",
+   "nome": "??? Corridoio — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-3-0",
+    "nome": "??? Corridoio",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-3-1",
+   "nome": "??? Corridoio",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-04-corridoio"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-3-0",
+    "nome": "??? Corridoio",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-4-0",
+   "nome": "??? Percorso di prova",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-03-percorso-di-prova"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-162-5-0",
+   "nome": "Modello psi-cognitivo Eden",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-12-eden-modello-psi-cognitivo-eden"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-5-0",
+    "nome": "Modello psi-cognitivo Eden",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-10-0",
+   "nome": "Modello psi-cognitivo Eden — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-5-0",
+    "nome": "Modello psi-cognitivo Eden",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-10-1",
+   "nome": "Modello psi-cognitivo Eden — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 402,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-10-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-5-0",
+    "nome": "Modello psi-cognitivo Eden",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-7-0",
+   "nome": "??? Auditorium — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-7-0",
+    "nome": "??? Auditorium",
+    "ordine": 0,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-7-1",
+   "nome": "??? Auditorium",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-05-auditorium"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-7-0",
+    "nome": "??? Auditorium",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-9-0",
+   "nome": "Sala visite — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-9-0",
+    "nome": "Sala visite",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-9-1",
+   "nome": "Sala visite — inquadratura meridionale — seconda per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-9-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-9-0",
+    "nome": "Sala visite",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — seconda per ampiezza"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-9-2",
+   "nome": "Sala visite — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 602,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-9-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-9-0",
+    "nome": "Sala visite",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-9-3",
+   "nome": "Sala visite",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 603,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-9-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-09-sala-visite"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-9-0",
+    "nome": "Sala visite",
+    "ordine": 3,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-9-4",
+   "nome": "Sala visite — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 604,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-9-4",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-9-0",
+    "nome": "Sala visite",
+    "ordine": 4,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-11-0",
+   "nome": "Corridoio del Crepuscolo — inquadratura orientale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-11-0",
+    "nome": "Corridoio del Crepuscolo",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-11-1",
+   "nome": "Corridoio del Crepuscolo",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-11-corridoio-del-crepuscolo"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-11-0",
+    "nome": "Corridoio del Crepuscolo",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-11-2",
+   "nome": "Corridoio del Crepuscolo — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 702,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-11-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-11-0",
+    "nome": "Corridoio del Crepuscolo",
+    "ordine": 2,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-12-0",
+   "nome": "??? Sala di controllo — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-12-0",
+    "nome": "??? Sala di controllo",
+    "ordine": 0,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-12-1",
+   "nome": "??? Sala di controllo",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-12-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-07-sala-di-controllo"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-12-0",
+    "nome": "??? Sala di controllo",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-14-0",
+   "nome": "??? Ripostiglio — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-14-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-14-0",
+    "nome": "??? Ripostiglio",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-14-1",
+   "nome": "??? Ripostiglio — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 901,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-14-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-14-0",
+    "nome": "??? Ripostiglio",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-14-2",
+   "nome": "??? Ripostiglio",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 902,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-14-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-06-ripostiglio"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-14-0",
+    "nome": "??? Ripostiglio",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-14-3",
+   "nome": "??? Ripostiglio — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 903,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-14-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-14-0",
+    "nome": "??? Ripostiglio",
+    "ordine": 3,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-15-0",
+   "nome": "Sala di supporto — inquadratura occidentale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-15-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-15-0",
+    "nome": "Sala di supporto",
+    "ordine": 0,
+    "etichetta": "inquadratura occidentale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-15-1",
+   "nome": "Sala di supporto",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1001,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-15-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-10-sala-di-supporto"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-15-0",
+    "nome": "Sala di supporto",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-15-2",
+   "nome": "Sala di supporto — inquadratura occidentale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1002,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-15-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-15-0",
+    "nome": "Sala di supporto",
+    "ordine": 2,
+    "etichetta": "inquadratura occidentale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-16-0",
+   "nome": "Ala ricerca — porzione occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-16-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-16-0",
+    "nome": "Ala ricerca",
+    "ordine": 0,
+    "etichetta": "porzione occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-16-1",
+   "nome": "Ala ricerca",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-16-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "maruki-08-ala-ricerca"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-16-0",
+    "nome": "Ala ricerca",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-16-2",
+   "nome": "Ala ricerca — inquadratura orientale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1102,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-16-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-16-0",
+    "nome": "Ala ricerca",
+    "ordine": 2,
+    "etichetta": "inquadratura orientale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-16-3",
+   "nome": "Ala ricerca — inquadratura orientale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1103,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-16-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-16-0",
+    "nome": "Ala ricerca",
+    "ordine": 3,
+    "etichetta": "inquadratura orientale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-162-16-4",
+   "nome": "Ala ricerca — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-maruki",
+   "ordine": 1104,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-162-16-4",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-162-16-0",
+    "nome": "Ala ricerca",
+    "ordine": 4,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-1-0",
+   "nome": "Entrata del casinò — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-1-0",
+    "nome": "Entrata del casinò",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-1-1",
+   "nome": "Entrata del casinò",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 1,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-1-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-01-entrata-del-casino"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-1-0",
+    "nome": "Entrata del casinò",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-3-0",
+   "nome": "Risorse grafiche non usate da alcun campo",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 157/3 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-3-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 0,
+    "etichetta": "risorsa 157/3 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-3-1",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 157/3 livello 1",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 157/3 livello 1» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-3-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 1,
+    "etichetta": "risorsa 157/3 livello 1"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-4-0",
+   "nome": "Piano terra — settore d’ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «settore d’ingresso» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-4-0",
+    "nome": "Piano terra",
+    "ordine": 0,
+    "etichetta": "settore d’ingresso"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-4-1",
+   "nome": "Piano terra",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-4-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-02-piano-terra"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-4-0",
+    "nome": "Piano terra",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-5-0",
+   "nome": "Area riservata allo staff (verso Piano terra) — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dai luoghi a cui è collegata. Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-5-0",
+    "nome": "Area riservata allo staff (verso Piano terra)",
+    "ordine": 0,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-5-1",
+   "nome": "Area riservata allo staff (verso Piano terra)",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-5-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-03-area-riservata-allo-staff-parte-i"
+   },
+   "note": "Zona omonima distinta dai luoghi a cui è collegata.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-5-0",
+    "nome": "Area riservata allo staff (verso Piano terra)",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-6-0",
+   "nome": "Lobby piano riservato ai soci",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-06-lobby-piano-riservato-ai-soci"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-157-7-0",
+   "nome": "Area dadi",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-07-area-dadi-parte-i"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-7-0",
+    "nome": "Area dadi",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-7-1",
+   "nome": "Area dadi — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 501,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-7-0",
+    "nome": "Area dadi",
+    "ordine": 1,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-8-0",
+   "nome": "Area riservata allo staff (verso Area dadi) — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dai luoghi a cui è collegata. Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-8-0",
+    "nome": "Area riservata allo staff (verso Area dadi)",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-8-1",
+   "nome": "Area riservata allo staff (verso Area dadi)",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-8-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-04-area-riservata-allo-staff-parte-ii"
+   },
+   "note": "Zona omonima distinta dai luoghi a cui è collegata.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-8-0",
+    "nome": "Area riservata allo staff (verso Area dadi)",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-9-0",
+   "nome": "Stanza slot machine — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-9-0",
+    "nome": "Stanza slot machine",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-9-1",
+   "nome": "Stanza slot machine",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-9-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-09-stanza-slot-machine-1"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-9-0",
+    "nome": "Stanza slot machine",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-10-0",
+   "nome": "Stanza slot machine — inquadratura orientale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 702,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-9-0",
+    "nome": "Stanza slot machine",
+    "ordine": 2,
+    "etichetta": "inquadratura orientale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-10-1",
+   "nome": "Stanza slot machine — inquadratura orientale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 703,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-10-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-9-0",
+    "nome": "Stanza slot machine",
+    "ordine": 3,
+    "etichetta": "inquadratura orientale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-11-0",
+   "nome": "Lobby piano puntate alte — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-11-0",
+    "nome": "Lobby piano puntate alte",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-11-1",
+   "nome": "Lobby piano puntate alte",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-11-lobby-piano-puntate-alte"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-11-0",
+    "nome": "Lobby piano puntate alte",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-11-2",
+   "nome": "Lobby piano puntate alte — inquadratura meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 802,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-11-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-11-0",
+    "nome": "Lobby piano puntate alte",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-12-0",
+   "nome": "Oscura Dimora",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-13-oscura-dimora"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-12-0",
+    "nome": "Oscura Dimora",
+    "ordine": 0,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-13-0",
+   "nome": "Oscura Dimora — inquadratura meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 901,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 500,
+   "altezza": 500,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-12-0",
+    "nome": "Oscura Dimora",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-15-0",
+   "nome": "Arena combattimenti",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-15-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-12-arena-combattimenti"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-157-16-0",
+   "nome": "Direzione — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-16-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-16-0",
+    "nome": "Direzione",
+    "ordine": 0,
+    "etichetta": "porzione settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-16-1",
+   "nome": "Direzione",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 1101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-16-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "niijima-14-direzione-sala-del-boss"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-157-16-0",
+    "nome": "Direzione",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-157-17-0",
+   "nome": "Palazzo di Niijima",
+   "tipo": "area",
+   "genitore": "dungeon-niijima",
+   "ordine": 1200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-157-17-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-156-1-0",
+   "nome": "Entrata laterale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-01-entrata-laterale"
+   },
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-56-elemento-80",
+     "nome": "Entrata laterale",
+     "campo": "F156_001_00",
+     "texpack": 56
+    },
+    {
+     "id": "texpack-141-elemento-80",
+     "nome": "Entrata laterale",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-2-0",
+   "nome": "Corridoi del complesso — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-2-0",
+    "nome": "Corridoi del complesso",
+    "ordine": 0,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-3-0",
+   "nome": "Corridoi del complesso — porzione occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-2-0",
+    "nome": "Corridoi del complesso",
+    "ordine": 1,
+    "etichetta": "porzione occidentale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-58-elemento-82",
+     "nome": "Corridoi del complesso",
+     "campo": "F156_003_00",
+     "texpack": 58
+    },
+    {
+     "id": "texpack-141-elemento-82",
+     "nome": "Corridoi del complesso",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-3-1",
+   "nome": "Corridoi del complesso",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 102,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-02-corridoi-del-complesso"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-2-0",
+    "nome": "Corridoi del complesso",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-58-elemento-83",
+     "nome": "Corridoi del complesso",
+     "campo": "F156_003_00",
+     "texpack": 58
+    },
+    {
+     "id": "texpack-141-elemento-83",
+     "nome": "Corridoi del complesso",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-4-0",
+   "nome": "Dintorni del complesso",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-04-dintorni-del-complesso"
+   },
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-59-elemento-85",
+     "nome": "Dintorni del complesso",
+     "campo": "F156_004_00",
+     "texpack": 59
+    },
+    {
+     "id": "texpack-141-elemento-85",
+     "nome": "Dintorni del complesso",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-5-0",
+   "nome": "Interscambio — inquadratura orientale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-5-0",
+    "nome": "Interscambio",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-6-0",
+   "nome": "Interscambio",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-09-interscambio"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-5-0",
+    "nome": "Interscambio",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-61-elemento-92",
+     "nome": "Interscambio",
+     "campo": "F156_006_00",
+     "texpack": 61
+    },
+    {
+     "id": "texpack-141-elemento-91",
+     "nome": "Interscambio",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-7-0",
+   "nome": "Linea esportazioni — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-7-0",
+    "nome": "Linea esportazioni",
+    "ordine": 0,
+    "etichetta": "inquadratura settentrionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-62-elemento-86",
+     "nome": "Linea esportazioni",
+     "campo": "F156_007_00",
+     "texpack": 62
+    },
+    {
+     "id": "texpack-141-elemento-86",
+     "nome": "Linea esportazioni",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-7-1",
+   "nome": "Linea esportazioni",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-05-linea-esportazioni"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-7-0",
+    "nome": "Linea esportazioni",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-62-elemento-87",
+     "nome": "Linea esportazioni",
+     "campo": "F156_007_00",
+     "texpack": 62
+    },
+    {
+     "id": "texpack-141-elemento-86",
+     "nome": "Linea esportazioni",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-8-0",
+   "nome": "Linea di produzione",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-06-linea-di-produzione"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-156-9-0",
+   "nome": "Linea di smaltimento — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-9-0",
+    "nome": "Linea di smaltimento",
+    "ordine": 0,
+    "etichetta": "inquadratura occidentale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-64-elemento-89",
+     "nome": "Linea di smaltimento",
+     "campo": "F156_009_00",
+     "texpack": 64
+    },
+    {
+     "id": "texpack-141-elemento-88",
+     "nome": "Linea di produzione",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-9-1",
+   "nome": "Linea di smaltimento",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 601,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-9-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-07-linea-di-smaltimento"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-9-0",
+    "nome": "Linea di smaltimento",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-64-elemento-89",
+     "nome": "Linea di smaltimento",
+     "campo": "F156_009_00",
+     "texpack": 64
+    },
+    {
+     "id": "texpack-141-elemento-88",
+     "nome": "Linea di produzione",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-10-0",
+   "nome": "Produzione armamenti — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-10-0",
+    "nome": "Produzione armamenti",
+    "ordine": 0,
+    "etichetta": "porzione meridionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-65-elemento-93",
+     "nome": "Produzione armamenti",
+     "campo": "F156_010_00",
+     "texpack": 65
+    },
+    {
+     "id": "texpack-141-elemento-92",
+     "nome": "Interscambio",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-10-1",
+   "nome": "Produzione armamenti",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-10-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-10-produzione-armamenti"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-10-0",
+    "nome": "Produzione armamenti",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-65-elemento-94",
+     "nome": "Produzione armamenti",
+     "campo": "F156_010_00",
+     "texpack": 65
+    },
+    {
+     "id": "texpack-141-elemento-93",
+     "nome": "Produzione armamenti",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-10-2",
+   "nome": "Produzione armamenti — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 702,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-10-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-10-0",
+    "nome": "Produzione armamenti",
+    "ordine": 2,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-11-0",
+   "nome": "Manutenzione armamenti — inquadratura occidentale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-11-0",
+    "nome": "Manutenzione armamenti",
+    "ordine": 0,
+    "etichetta": "inquadratura occidentale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-11-1",
+   "nome": "Manutenzione armamenti — inquadratura occidentale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-11-0",
+    "nome": "Manutenzione armamenti",
+    "ordine": 1,
+    "etichetta": "inquadratura occidentale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-11-2",
+   "nome": "Manutenzione armamenti — porzione meridionale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 802,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-11-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "Versione «porzione meridionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-11-0",
+    "nome": "Manutenzione armamenti",
+    "ordine": 2,
+    "etichetta": "porzione meridionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-11-3",
+   "nome": "Manutenzione armamenti",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 803,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-11-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-156-11-0",
+    "nome": "Manutenzione armamenti",
+    "ordine": 3,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-156-12-0",
+   "nome": "Fabbrica centrale",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-08-fabbrica-centrale"
+   },
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-67-elemento-90",
+     "nome": "Fabbrica centrale",
+     "campo": "F156_012_00",
+     "texpack": 67
+    },
+    {
+     "id": "texpack-141-elemento-89",
+     "nome": "Linea di smaltimento",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-156-13-0",
+   "nome": "Caserma",
+   "tipo": "area",
+   "genitore": "dungeon-okumura",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-156-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "okumura-03-caserma"
+   },
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-68-elemento-84",
+     "nome": "Caserma",
+     "campo": "F156_013_00",
+     "texpack": 68
+    },
+    {
+     "id": "texpack-141-elemento-84",
+     "nome": "Caserma",
+     "campo": "F156_051_00",
+     "texpack": 141
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-1-0",
+   "nome": "Ponte anteriore",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "contesti": [
+    {
+     "id": "texpack-84-elemento-120",
+     "nome": "Ponte anteriore",
+     "campo": "F159_001_00",
+     "texpack": 84
+    },
+    {
+     "id": "texpack-143-elemento-120",
+     "nome": "Ponte anteriore",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-2-0",
+   "nome": "Sala d'ingresso — inquadratura meridionale — seconda per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-2-0",
+    "nome": "Sala d'ingresso",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale — seconda per ampiezza"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-2-1",
+   "nome": "Sala d'ingresso — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-2-0",
+    "nome": "Sala d'ingresso",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-2-2",
+   "nome": "Sala d'ingresso — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 102,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-2-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-2-0",
+    "nome": "Sala d'ingresso",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-2-3",
+   "nome": "Sala d'ingresso",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 103,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-2-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-01-passaggio-centrale-sala-d-ingresso"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-2-0",
+    "nome": "Sala d'ingresso",
+    "ordine": 3,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-2-4",
+   "nome": "Sala d'ingresso — inquadratura meridionale — terza per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 104,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-2-4",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — terza per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-2-0",
+    "nome": "Sala d'ingresso",
+    "ordine": 4,
+    "etichetta": "inquadratura meridionale — terza per ampiezza"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-2-5",
+   "nome": "Sala d'ingresso — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 105,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-2-5",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-2-0",
+    "nome": "Sala d'ingresso",
+    "ordine": 5,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-3-0",
+   "nome": "Passaggio e salone centrale — porzione occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-3-0",
+    "nome": "Passaggio e salone centrale",
+    "ordine": 0,
+    "etichetta": "porzione occidentale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-86-elemento-122",
+     "nome": "Passaggio e salone centrale",
+     "campo": "F159_003_00",
+     "texpack": 86
+    },
+    {
+     "id": "texpack-143-elemento-125",
+     "nome": "Corridoio mezzavia tribordo",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-3-1",
+   "nome": "Passaggio e salone centrale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-3-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-3-0",
+    "nome": "Passaggio e salone centrale",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-86-elemento-123",
+     "nome": "Passaggio e salone centrale",
+     "campo": "F159_003_00",
+     "texpack": 86
+    },
+    {
+     "id": "texpack-143-elemento-126",
+     "nome": "Corridoio mezzavia tribordo",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-6-0",
+   "nome": "Sala intrattenimento 2P — inquadratura orientale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-6-0",
+    "nome": "Sala intrattenimento 2P",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale — più ristretta"
+   },
+   "contesti": [
+    {
+     "id": "texpack-87-elemento-134",
+     "nome": "Sala intrattenimento 2P",
+     "campo": "F159_006_00",
+     "texpack": 87
+    },
+    {
+     "id": "texpack-143-elemento-137",
+     "nome": "Ponte laterale",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-6-1",
+   "nome": "Sala intrattenimento 2P — inquadratura orientale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-6-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-6-0",
+    "nome": "Sala intrattenimento 2P",
+    "ordine": 1,
+    "etichetta": "inquadratura orientale — più ampia"
+   },
+   "contesti": [
+    {
+     "id": "texpack-87-elemento-134",
+     "nome": "Sala intrattenimento 2P",
+     "campo": "F159_006_00",
+     "texpack": 87
+    },
+    {
+     "id": "texpack-143-elemento-136",
+     "nome": "Corridoio inferiore babordo",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-6-2",
+   "nome": "Sala intrattenimento 2P",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 302,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-6-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-08-sala-intrattenimento"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-6-0",
+    "nome": "Sala intrattenimento 2P",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-87-elemento-133",
+     "nome": "Sala intrattenimento 2P",
+     "campo": "F159_006_00",
+     "texpack": 87
+    },
+    {
+     "id": "texpack-143-elemento-135",
+     "nome": "Corridoio inferiore babordo",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-6-3",
+   "nome": "Sala intrattenimento 2P — porzione settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 303,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-6-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-6-0",
+    "nome": "Sala intrattenimento 2P",
+    "ordine": 3,
+    "etichetta": "porzione settentrionale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-87-elemento-133",
+     "nome": "Sala intrattenimento 2P",
+     "campo": "F159_006_00",
+     "texpack": 87
+    },
+    {
+     "id": "texpack-143-elemento-134",
+     "nome": "Sala intrattenimento 2P",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-7-0",
+   "nome": "Ponte di poppa — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-7-0",
+    "nome": "Ponte di poppa",
+    "ordine": 0,
+    "etichetta": "porzione orientale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-88-elemento-132",
+     "nome": "Ponte di poppa",
+     "campo": "F159_007_00",
+     "texpack": 88
+    },
+    {
+     "id": "texpack-143-elemento-133",
+     "nome": "Sala intrattenimento 2P",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-7-1",
+   "nome": "Ponte di poppa",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-7-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-07-ponte-di-poppa"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-7-0",
+    "nome": "Ponte di poppa",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-88-elemento-131",
+     "nome": "Ponte di poppa",
+     "campo": "F159_007_00",
+     "texpack": 88
+    },
+    {
+     "id": "texpack-143-elemento-132",
+     "nome": "Ponte di poppa",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-8-0",
+   "nome": "Cabina reale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 256,
+   "altezza": 256,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-159-9-0",
+   "nome": "Ristorante",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 600,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-03-ristorante"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-159-10-0",
+   "nome": "Ponte piscina — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-10-0",
+    "nome": "Ponte piscina",
+    "ordine": 0,
+    "etichetta": "porzione orientale"
+   },
+   "contesti": [
+    {
+     "id": "texpack-91-elemento-128",
+     "nome": "Ponte piscina",
+     "campo": "F159_010_00",
+     "texpack": 91
+    },
+    {
+     "id": "texpack-143-elemento-130",
+     "nome": "Corridoio superiore tribordo",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-10-1",
+   "nome": "Ponte piscina",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 701,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-10-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-05-ponte-piscina"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-10-0",
+    "nome": "Ponte piscina",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   },
+   "contesti": [
+    {
+     "id": "texpack-91-elemento-127",
+     "nome": "Ponte piscina",
+     "campo": "F159_010_00",
+     "texpack": 91
+    },
+    {
+     "id": "texpack-143-elemento-129",
+     "nome": "Corridoio superiore tribordo",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-11-0",
+   "nome": "Ponte laterale — inquadratura meridionale — seconda per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-11-0",
+    "nome": "Ponte laterale",
+    "ordine": 0,
+    "etichetta": "inquadratura meridionale — seconda per ampiezza"
+   },
+   "contesti": [
+    {
+     "id": "texpack-92-elemento-137",
+     "nome": "Ponte laterale",
+     "campo": "F159_011_00",
+     "texpack": 92
+    },
+    {
+     "id": "texpack-143-elemento-139",
+     "nome": "Ponte laterale",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-11-1",
+   "nome": "Ponte laterale — inquadratura meridionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-11-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-11-0",
+    "nome": "Ponte laterale",
+    "ordine": 1,
+    "etichetta": "inquadratura meridionale — più ampia"
+   },
+   "contesti": [
+    {
+     "id": "texpack-92-elemento-137",
+     "nome": "Ponte laterale",
+     "campo": "F159_011_00",
+     "texpack": 92
+    },
+    {
+     "id": "texpack-143-elemento-170",
+     "nome": "Ponte laterale",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-11-2",
+   "nome": "Ponte laterale — inquadratura meridionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 802,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-11-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-11-0",
+    "nome": "Ponte laterale",
+    "ordine": 2,
+    "etichetta": "inquadratura meridionale — più ristretta"
+   },
+   "contesti": [
+    {
+     "id": "texpack-92-elemento-138",
+     "nome": "Ponte laterale",
+     "campo": "F159_011_00",
+     "texpack": 92
+    },
+    {
+     "id": "texpack-143-elemento-170",
+     "nome": "Ponte laterale",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-11-3",
+   "nome": "Ponte laterale — inquadratura meridionale — terza per ampiezza",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 803,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-11-3",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura meridionale — terza per ampiezza» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-11-0",
+    "nome": "Ponte laterale",
+    "ordine": 3,
+    "etichetta": "inquadratura meridionale — terza per ampiezza"
+   },
+   "contesti": [
+    {
+     "id": "texpack-92-elemento-139",
+     "nome": "Ponte laterale",
+     "campo": "F159_011_00",
+     "texpack": 92
+    },
+    {
+     "id": "texpack-143-elemento-170",
+     "nome": "Ponte laterale",
+     "campo": "F159_051_00",
+     "texpack": 143
+    }
+   ]
+  },
+  {
+   "chiave": "nativo-rmap-159-11-4",
+   "nome": "Ponte laterale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 804,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-11-4",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-10-ponte-laterale-parte-i"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-11-0",
+    "nome": "Ponte laterale",
+    "ordine": 4,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-12-0",
+   "nome": "Aula magna",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-16-aula-magna-tesoro-e-boss-finali"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-159-13-0",
+   "nome": "Sala macchine",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-13-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-14-sala-macchine"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-159-15-0",
+   "nome": "Risorse grafiche non usate da alcun campo",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-15-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 159/15 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-15-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 0,
+    "etichetta": "risorsa 159/15 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-16-0",
+   "nome": "Risorse grafiche non usate da alcun campo — risorsa 159/16 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-16-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 159/16 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-15-0",
+    "nome": "Risorse grafiche non usate da alcun campo",
+    "ordine": 1,
+    "etichetta": "risorsa 159/16 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-20-0",
+   "nome": "Corridoio mezzavia tribordo — inquadratura orientale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-20-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-20-0",
+    "nome": "Corridoio mezzavia tribordo",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-20-1",
+   "nome": "Corridoio mezzavia tribordo",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-20-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-04-corridoio-mezzavia-tribordo"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-20-0",
+    "nome": "Corridoio mezzavia tribordo",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-25-0",
+   "nome": "Corridoio superiore tribordo — porzione orientale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-25-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «porzione orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-25-0",
+    "nome": "Corridoio superiore tribordo",
+    "ordine": 0,
+    "etichetta": "porzione orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-25-1",
+   "nome": "Corridoio superiore tribordo",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1301,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-25-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-06-corridoio-superiore-tribordo"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-25-0",
+    "nome": "Corridoio superiore tribordo",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-30-0",
+   "nome": "Corridoio inferiore babordo — inquadratura orientale",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-30-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-30-0",
+    "nome": "Corridoio inferiore babordo",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-30-1",
+   "nome": "Corridoio inferiore babordo",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-30-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-09-corridoio-inferiore-babordo"
+   },
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-159-30-0",
+    "nome": "Corridoio inferiore babordo",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-159-35-0",
+   "nome": "Corridoio mezzavia babordo",
+   "tipo": "area",
+   "genitore": "dungeon-shido",
+   "ordine": 1500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-159-35-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "shido-11-corridoio-mezzavia-babordo"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-161-1-0",
+   "nome": "Entrata",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 700,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-01-entrata-profondita-dei-memento"
+   },
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-161-2-0",
+   "nome": "Corridoio della prigione — 1º tratto — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 800,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-2-0",
+    "nome": "Corridoio della prigione — 1º tratto",
+    "ordine": 0,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-2-1",
+   "nome": "Corridoio della prigione — 1º tratto — variante grafica",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 801,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «variante grafica» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-2-0",
+    "nome": "Corridoio della prigione — 1º tratto",
+    "ordine": 1,
+    "etichetta": "variante grafica"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-2-2",
+   "nome": "Corridoio della prigione — 1º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 802,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-2-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-02-corridoio-della-prigione-parte-i"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-2-0",
+    "nome": "Corridoio della prigione — 1º tratto",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-3-0",
+   "nome": "Corridoio della prigione — 2º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 900,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-04-corridoio-della-prigione-parte-ii"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-161-4-0",
+   "nome": "Vuoto cavernoso — 1º tratto — inquadratura occidentale",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1000,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura occidentale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-4-0",
+    "nome": "Vuoto cavernoso — 1º tratto",
+    "ordine": 0,
+    "etichetta": "inquadratura occidentale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-4-1",
+   "nome": "Vuoto cavernoso — 1º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1001,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-4-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-03-vuoto-cavernoso-parte-i"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-4-0",
+    "nome": "Vuoto cavernoso — 1º tratto",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-4-2",
+   "nome": "Vuoto cavernoso — 1º tratto — variante grafica",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1002,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-4-2",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «variante grafica» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-4-0",
+    "nome": "Vuoto cavernoso — 1º tratto",
+    "ordine": 2,
+    "etichetta": "variante grafica"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-5-0",
+   "nome": "Corridoio della prigione — 3º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-06-corridoio-della-prigione-parte-iii"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-161-6-0",
+   "nome": "Corridoio della prigione — 4º tratto — inquadratura settentrionale",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-6-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-6-0",
+    "nome": "Corridoio della prigione — 4º tratto",
+    "ordine": 0,
+    "etichetta": "inquadratura settentrionale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-6-1",
+   "nome": "Corridoio della prigione — 4º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1201,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-6-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-6-0",
+    "nome": "Corridoio della prigione — 4º tratto",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-7-0",
+   "nome": "Vuoto cavernoso — 2º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-7-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 512,
+   "entita": {
+    "tipo": "area",
+    "chiave": "iweleth-05-vuoto-cavernoso-parte-ii"
+   },
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-161-8-0",
+   "nome": "Corridoio della prigione — 5º tratto — inquadratura settentrionale — più ampia",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-8-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale — più ampia» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-8-0",
+    "nome": "Corridoio della prigione — 5º tratto",
+    "ordine": 0,
+    "etichetta": "inquadratura settentrionale — più ampia"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-9-0",
+   "nome": "Corridoio della prigione — 5º tratto — inquadratura settentrionale — più ristretta",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1401,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-9-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale — più ristretta» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-8-0",
+    "nome": "Corridoio della prigione — 5º tratto",
+    "ordine": 1,
+    "etichetta": "inquadratura settentrionale — più ristretta"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-10-0",
+   "nome": "Corridoio della prigione — 5º tratto",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1402,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-10-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 2048,
+   "entita": null,
+   "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-161-8-0",
+    "nome": "Corridoio della prigione — 5º tratto",
+    "ordine": 2,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-161-11-0",
+   "nome": "Santuario",
+   "tipo": "area",
+   "genitore": "dungeon-iweleth",
+   "ordine": 1500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-161-11-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-001-1-0",
+   "nome": "Piazza della stazione",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-001-2-0",
+   "nome": "Sottopasso — inquadratura orientale",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Versione «inquadratura orientale» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-001-2-0",
+    "nome": "Sottopasso",
+    "ordine": 0,
+    "etichetta": "inquadratura orientale"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-001-2-1",
+   "nome": "Sottopasso",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 101,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-2-1",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-001-2-0",
+    "nome": "Sottopasso",
+    "ordine": 1,
+    "etichetta": "planimetria completa"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-001-3-0",
+   "nome": "Central Street",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 200,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-3-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 512,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-001-4-0",
+   "nome": "Centro comm. sotterraneo",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 300,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-4-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-001-5-0",
+   "nome": "Tornello della linea Ginza",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 400,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-5-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 512,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-001-12-0",
+   "nome": "Banchina della metropolitana",
+   "tipo": "luogo",
+   "genitore": "citta-shibuya",
+   "ordine": 500,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-001-12-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 2048,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-006-1-0",
+   "nome": "Quartiere a luci rosse",
+   "tipo": "luogo",
+   "genitore": "citta-shinjuku",
+   "ordine": 0,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-006-1-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  },
+  {
+   "chiave": "nativo-rmap-009-2-0",
+   "nome": "Vicoli",
+   "tipo": "luogo",
+   "genitore": "citta-yongen-jaya",
+   "ordine": 100,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-009-2-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 1024,
+   "altezza": 1024,
+   "entita": null,
+   "note": "",
+   "spilli": []
+  }
+ ]
+}

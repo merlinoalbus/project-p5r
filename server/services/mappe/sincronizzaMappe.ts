@@ -39,9 +39,14 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
   if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0, riclassificati: 0 };
   const immaginiMappa = new Set(tabelle.has('immagine') ? (db.prepare("SELECT chiave FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string }>).map((r) => r.chiave) : []);
-  const insMappa = db.prepare(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, entita_tipo, entita_chiave, origine, updated_at)
-    VALUES (@chiave, @nome, @tipo, @genitore, @ordine, @immagine, @asset, @entitaTipo, @entitaChiave, 'seed', @adesso)
-    ON CONFLICT(chiave) DO UPDATE SET immagine_chiave = COALESCE(mappa.immagine_chiave, excluded.immagine_chiave), asset = COALESCE(mappa.asset, excluded.asset)`);
+  // Tokyo, i quartieri e i Palazzi portano illustrazioni disegnate per l'applicazione, non piante
+  // estratte dal gioco: il ruolo lo dichiarano qui, invece di lasciarlo dedurre dall'asset. La
+  // colonna arriva con la migrazione 043, mentre questa funzione gira già dalla 027: dove non
+  // c'è ancora, l'inserimento la omette e la 043 assegnerà il ruolo alle righe esistenti.
+  const conRuolo = (db.prepare('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
+  const insMappa = db.prepare(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, entita_tipo, entita_chiave, origine, updated_at${conRuolo ? ', ruolo_immagine' : ''})
+    VALUES (@chiave, @nome, @tipo, @genitore, @ordine, @immagine, @asset, @entitaTipo, @entitaChiave, 'seed', @adesso${conRuolo ? ", CASE WHEN @asset IS NULL AND @immagine IS NULL THEN 'nessuna' WHEN @asset LIKE 'palazzi/%' THEN 'emblema' ELSE 'illustrazione-editoriale' END" : ''})
+    ON CONFLICT(chiave) DO UPDATE SET immagine_chiave = COALESCE(mappa.immagine_chiave, excluded.immagine_chiave), asset = COALESCE(mappa.asset, excluded.asset)${conRuolo ? ", ruolo_immagine = CASE WHEN mappa.ruolo_immagine <> 'nessuna' THEN mappa.ruolo_immagine ELSE excluded.ruolo_immagine END" : ''}`);
   let mappe = 0;
   const prima = (db.prepare('SELECT COUNT(*) AS n FROM mappa').get() as { n: number }).n;
   const t = adesso();
