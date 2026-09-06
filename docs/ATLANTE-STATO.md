@@ -276,6 +276,51 @@ Altre due strade cercate e chiuse, perché non le ricerchi di nuovo chi legge:
   1480 file estratti, con hash e dimensione: non contiene l'indice dei CPK, quindi da qui non si
   può nemmeno sapere quali file esistono e non sono stati presi.
 
+### I 5443 script del gioco, aperti senza decompilatore
+
+Con l'accesso ai CPK installati (`C:\Program Files (x86)\Steam\steamapps\common\P5R`) è caduta
+l'ipotesi che mancasse materiale sorgente, e insieme a lei una mia affermazione sbagliata.
+
+**Quello che i CPK dicono, e che chiude tre strade per sempre:**
+
+* nella cartella `ROADMAP` ci sono **solo** 534 `.BIN`, 313 `.DDS` e `ROADMAP.TBL`: nessuno sprite
+  sheet, nessun layout, nessuno script. L'estrazione precedente non aveva tralasciato nulla;
+* fra i **122 file `.SPD`** dei due archivi non ce n'è uno della mappa d'insieme: quelli di mappa
+  sono `MAP_SYMBOL` (dieci simboli della minimappa in gioco), `P5MINIMAP_01`, `P5_MAPDATA` (la rete
+  della metropolitana) e `MEMENTOS`;
+* i file `FHIT_*.BF`, gli script di campo, sono esattamente **227** nei CPK, e tutti e 227 erano
+  già stati decompilati: da quel lato non mancava niente.
+
+**Quello che invece mancava davvero:** gli altri script. Il gioco ne contiene **5443**, e ne erano
+stati letti 227. In `SCRIPT/FIELD` ce ne sono 904, in `FIELD/DOOR` 130, in `FIELD/INIT` 254, in
+`FIELD/NPC` 161, in `EVENT_DATA/SCRIPT` 934.
+
+Non avendo il decompilatore esterno ho scritto un lettore del formato compilato,
+`tools/p5r-map-export/flow_binario.py`. Il formato `FLW0` è a sezioni, big-endian; gli opcode che
+servono sono stati **dedotti dal confronto con gli script già decompilati**, non supposti: la
+sequenza `001d:0f94 · 0000:0000 2000:0000 · 000e · 0008:000d` è esattamente
+`BIT_ON(0x20000000 + 3988)`, e da lì si ricavano `PUSHIS`, `PUSHI`, `ADD`, `COMM` e l'indice 13 di
+`BIT_ON`. L'indice non è scritto da nessuna parte: si trova provandoli tutti su script di risposta
+nota e tenendo quello che la riproduce.
+
+`verify_flow_binario.py` lo mette alla prova sui 181 script di controllo: **precisione 97,2%,
+richiamo 83,4%**, 37 riprodotti alla lettera. Su tutti e 5443 gli script del gioco: letti tutti,
+**zero falliti, 13 secondi**, 3258 bandiere distinte.
+
+**Una trappola trovata e disinnescata.** Le bandiere **non sono globali**: 931 delle 3258 sono
+accese da script di Palazzi diversi. Cercandole senza vincolo, il tipo 97 — dimostrato come *seme
+della bramosia* dalle 21 occorrenze incrociate con la guida — risultava «forziere» con 23 casi su
+23. Con il vincolo che lo script citi il campo della mappa, i conflitti con il già dimostrato
+scendono a **zero**. Il vincolo non è una cautela: senza, si producono attribuzioni false.
+
+**Effetto sulla copertura:** i pin condizionali con una procedura pertinente che li accende
+passano da 425 a **657**, e la copertura complessiva da 423 a **490 pin (34,3%)**.
+
+Resta un dato da capire prima di consolidare: fra i 141 pin che hanno *sia* il tipo dimostrato
+*sia* la bandiera parlante, 93 concordano e **48 no**. Finché non è chiaro quale delle due prove
+ceda in quei casi, non aumento la copertura oltre: sarebbe ripetere l'errore della lettura
+geometrica.
+
 Cercata e chiusa anche la strada delle **stazioni della metropolitana**, che il piano elenca fra
 le categorie della Fase 2. I dati ci sono e sono ottimi — `extracted/metropolitana.json`, 31
 stazioni con nome e testi italiani ufficiali, 91 tratte, 64 archi — ma **manca la posizione**: le
