@@ -81,3 +81,24 @@ Shujin è tornata in `QUARTIERI_TOKYO` a `x: 40, y: 40`, con la linea `Aoyama–
 Aoyama-Itchōme. È **l'unica sagoma della mappa che non viene dal gioco**, e sta scritto lì accanto:
 il resto dell'atlante è estratto e dimostrato, e un disegno fatto apposta non deve poter passare
 per originale.
+
+---
+
+## 2 e 3 — RITIRATE: i pezzi dei Memento c'erano già
+
+Avevo scritto due prompt per Codex — nove grappoli di città divelta e le catene del cratere — e
+**erano sbagliati da chiedere**: quelle immagini stanno già negli originali estratti, in
+`IT/FIELD/PANEL/MEMENTOS/MEMENTOS.SPD`, e hanno pure i nomi.
+
+Gli otto `第N層` — «strato N» — sono i grappoli che compongono l'imbuto scendendo, l'ultimo con la
+punta a trivella del fondo. `街並み` è il profilo della città sopra il pozzo, `鎖` sono le catene,
+i `血管` («vasi sanguigni») sono le venature rosse che solcano il cratere, e il terzo semestre ha i
+suoi dieci strati a parte perché lì il pozzo cambia. In tutto **73 elementi**, estratti da
+`lmap_sprites.py` in `public/asset/mappe/lmap/memento/`.
+
+**La lezione, scritta perché non si ripeta:** prima di scrivere un prompt si guarda se la cosa
+esiste già fra gli originali. Un asset generato al posto di uno del gioco non è solo lavoro
+sprecato — è una differenza di tratto che si vede, ed è un pezzo di mappa che smette di essere
+autentico. La sagoma di Shujin (voce 1) resta legittima perché quella nel gioco **non c'è**: la
+scuola non è una destinazione del treno, e l'ho verificato nel foglio degli sprite prima di
+chiedere il disegno.

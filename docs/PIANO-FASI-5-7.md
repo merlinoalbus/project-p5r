@@ -193,3 +193,52 @@ dimensione un layout ce l'ha quasi certamente.
 Se la posizione non salta fuori da nessuna delle due, si dichiara e si scrive una tabella di
 collocazione **autorata**, detta tale — un layout scritto a mano è legittimo, spacciarlo per
 estratto no.
+
+---
+
+# Da fare, in ordine — lista aperta al 6 settembre 2026 sera
+
+Scritta qui perché la prossima sessione riparta da questa e non da capo. Sono richieste
+dell'utente, testuali o quasi, nell'ordine in cui le ha date.
+
+## 1. «Palazzi e Dedali» diventa «Palazzi»
+
+Il Dedalo che resta è **solo Iweleth**, con le sue mappe. I Memento non ci vanno: hanno la loro
+pagina. Da cambiare anche l'etichetta della piastrella nella Guida, non solo il titolo.
+
+## 2. La Città mostra la mappa due volte
+
+`CittaPage` rende `MappaTokyo` **e** `MappaIncorporata chiave="tokyo"`. La seconda va tolta:
+`MappaTokyo` **è** la mappa di Tokyo, non un di più. E anche `Mappe → Tokyo` deve portare a quella
+— o reindirizzarci — invece di aprire un visore alternativo.
+
+## 3. Le miniature delle schede dei quartieri sono vuote
+
+Devono usare **le stesse immagini della mappa composta**, cioè le sagome `_lm` in
+`public/asset/mappe/lmap/tokyo/<quartiere>.png`. Oggi `MiniaturaMappa` cerca solo
+`mappe/<chiave>` e per i quartieri non trova niente.
+
+## 4. La pagina di dettaglio di un Palazzo va rifatta
+
+È il punto 5.1 per il lotto A e ancora non è stato toccato: layout molto grafico e moderno,
+desktop/tablet/mobile. Oggi è una scheda con delle liste.
+
+## 5. Un elemento fuori riquadro: «SCHEDA DEL PALAZZO»
+
+Compare e sparisce senza che si capisca quando né perché, e sborda. Va capito da dove esce e
+tolto o reso stabile.
+
+## 6. Il resto delle Fasi 5-7
+
+Lotto A: `MappaPage`, `QuartierePage`, `DungeonPage`, `DungeonDettaglioPage`, `AccessoMondoPage`.
+Lotto B (Codex): inventari. Poi la Fase 6 sulla grafica e la 7 di revisione incrociata.
+
+## Come lavorare, che stavolta è servito impararlo
+
+- **Prima di scrivere un prompt grafico, cercare fra gli originali estratti.** Il pozzo dei
+  Memento era già in `MEMENTOS.SPD`, con i nomi, e per poco non si faceva ridisegnare.
+- **Guardare il riferimento prima di costruire**, non dopo: la mappa di Tokyo e quella dei Memento
+  sono state rifatte tre volte perché si è partiti a disegnare senza avere sotto gli occhi come le
+  fa il gioco.
+- **Un pezzo per volta, verificato nel browser, poi il commit.** Diversi commit di oggi sono
+  partiti su lavoro che a schermo non reggeva.

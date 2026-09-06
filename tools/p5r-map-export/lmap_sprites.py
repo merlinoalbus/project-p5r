@@ -33,11 +33,13 @@ from pathlib import Path
 from scrittura import scrivi_json
 import argparse
 import io
+import re
 import sys
 
 from map_icons import sprite_del_foglio
 
 FOGLIO = 'originali/IT/FIELD/PANEL/LMAP/P5_MAPDATA.SPD'
+FOGLIO_MEMENTO = 'originali/IT/FIELD/PANEL/MEMENTOS/MEMENTOS.SPD'
 
 # nome dello sprite giapponese -> chiave del quartiere nell'app. Le grafie del gioco non sempre
 # coincidono con quelle comuni, ed è la ragione per cui questa tabella è scritta e non dedotta.
@@ -86,15 +88,45 @@ LATINI = {
     'NAKANO': 'nakano',
 }
 
-# Gli elementi con cui il gioco disegna i Memento: il corpo, i tentacoli e le vie di luce, ognuno
-# con la propria maschera di trasparenza.
+# Gli elementi con cui il gioco disegna la mappa dei Memento, da `MEMENTOS.SPD`. Il pozzo non si
+# inventa: c'è tutto qui dentro, e ha pure i nomi. Gli otto `第N層` — «strato N» — sono i grappoli
+# di città divelta che compongono l'imbuto scendendo; `街並み` è il profilo della città che sta
+# sopra; i `血管`, letteralmente «vasi sanguigni», sono le venature rosse che solcano il cratere;
+# `鎖` sono le catene. Il terzo semestre ha i suoi dieci strati a parte, perché il pozzo cambia.
 MEMENTO = {
-    '本体': 'corpo', '本体_マスク': 'corpo-maschera',
-    '触手': 'tentacolo', '触手_マスク': 'tentacolo-maschera',
-    'テクスチャ': 'trama', '光': 'luce', '光（仮）': 'luce-provvisoria', 'ヒカリ（新規）': 'luce-nuova',
-    '光の道1(下)': 'via-di-luce-1-sotto', '光の道1(上)': 'via-di-luce-1-sopra',
-    '光の道2(下)': 'via-di-luce-2-sotto', '光の道2(上)': 'via-di-luce-2-sopra',
-    '光の道3(下)': 'via-di-luce-3-sotto', '光の道3(上)': 'via-di-luce-3-sopra',
+    # gli strati dell'imbuto, dall'alto in giù
+    '第１層': 'strato-1', '第2層': 'strato-2', '第3層': 'strato-3', '第4層': 'strato-4',
+    '第5層': 'strato-5', '第6層': 'strato-6', '第7層': 'strato-7', '第8層': 'strato-8',
+    '第1層入口': 'strato-1-ingresso',
+    # il mondo attorno al pozzo
+    '街並み': 'citta-sopra', '街並み（反転）': 'citta-sopra-riflessa',
+    '雲大': 'nuvola-grande', '雲中': 'nuvola-media', '雲小': 'nuvola-piccola',
+    '109': 'edificio-109', '都庁': 'municipio', 'スカイツリー': 'skytree',
+    '東京タワー': 'torre-di-tokyo', '普通のビル': 'palazzo-qualunque',
+    # le catene e le venature del cratere
+    '鎖': 'catena', '鎖小': 'catena-corta',
+    '血管長': 'vena-lunga', '血管長　反転': 'vena-lunga-riflessa',
+    '右上血管0': 'vena-alto-destra-0', '右上血管1': 'vena-alto-destra-1',
+    '右上血管2': 'vena-alto-destra-2', '中央血管0': 'vena-centrale-0',
+    '中央血管1': 'vena-centrale-1', '中央血管2': 'vena-centrale-2',
+    '右下血管': 'vena-basso-destra',
+    '血管グラデ': 'vena-sfumata', '赤丸': 'cerchio-rosso', '青丸': 'cerchio-blu',
+    # insegne e figure
+    'メメントスロゴ': 'logo', 'モルガナカー': 'pulmino-di-morgana',
+    '入口': 'ingresso', '神殿跡地　文字': 'rovine-del-tempio',
+    '認知得し者たちの路': 'via-di-chi-ha-compreso',
+    # il terzo semestre: il pozzo cambia, e ha i suoi strati
+    '３学期メメントス①': 'terzo-semestre-1', '３学期メメントス②': 'terzo-semestre-2',
+    '３学期メメントス③': 'terzo-semestre-3', '３学期メメントス④': 'terzo-semestre-4',
+    '３学期メメントス⑤': 'terzo-semestre-5', '３学期メメントス⑥': 'terzo-semestre-6',
+    '３学期メメントス⑦': 'terzo-semestre-7', '３学期メメントス⑧': 'terzo-semestre-8',
+    '３学期メメントス⑨': 'terzo-semestre-9', '３学期メメントス⑩': 'terzo-semestre-10',
+    '3学期用　街': 'terzo-semestre-citta',
+    # i tentacoli, che nel gioco avvolgono il pozzo
+    '触手①': 'tentacolo-1', '触手②': 'tentacolo-2', '触手③': 'tentacolo-3',
+    '触手④': 'tentacolo-4', '触手⑤': 'tentacolo-5', '触手⑥': 'tentacolo-6',
+    '触手⑦': 'tentacolo-7', '触手縦伸ばし': 'tentacolo-allungato',
+    '町素材': 'materiale-di-citta', 'パレス': 'palazzo',
 }
 
 
@@ -118,10 +150,11 @@ def famiglia(nome):
         return 'tokyo', QUARTIERI[nome.replace('　日本語', '')], 'nome-giapponese'
     if nome in MEMENTO:
         return 'memento', MEMENTO[nome], 'elemento'
-    for schema, resa in MEMENTO.items():
-        # i tentacoli e le loro maschere sono numerati: 触手01 … 触手06
-        if nome.startswith(schema) and nome[len(schema):].isdigit():
-            return 'memento', f'{resa}-{int(nome[len(schema):])}', 'elemento'
+    # `触手3学期第N層` — i tentacoli del terzo semestre, uno per strato
+    m = re.fullmatch(r'触手3学期第(\d+)層([12ABC]?)', nome)
+    if m:
+        coda = f'-{m.group(2).lower()}' if m.group(2) else ''
+        return 'memento', f'tentacolo-terzo-semestre-{int(m.group(1))}{coda}', 'elemento'
     return None, None, None
 
 
@@ -129,41 +162,42 @@ def main(out, destinazione=None):
     from PIL import Image
     out = Path(out)
     destinazione = Path(destinazione) if destinazione else out/'lmap'
-    dati = (out/FOGLIO).read_bytes()
-    texture, voci = sprite_del_foglio(dati)
-    immagini = {t['id']: Image.open(io.BytesIO(dati[t['offset']:t['offset']+t['bytes']])).convert('RGBA')
-                for t in texture}
     righe = []
-    for v in voci:
-        if v.get('vuoto'):
-            continue
-        mappa, chiave, veste = famiglia(v['nome'])
-        if not mappa:
-            continue
-        im = immagini.get(v['texturaId'])
-        riquadro = (v['x'], v['y'], v['x']+v['larghezza'], v['y']+v['altezza'])
-        if im is None or riquadro[2] > im.width or riquadro[3] > im.height:
-            righe.append(dict(indice=v['index'], nome=v['nome'], mappa=mappa, chiave=chiave,
-                              veste=veste, png=None, motivo='ritaglio fuori dalla texture'))
-            continue
-        cartella = destinazione/mappa
-        cartella.mkdir(parents=True, exist_ok=True)
-        file = f'{chiave}-{veste}.png' if veste != 'disegno' else f'{chiave}.png'
-        ritaglio = im.crop(riquadro)
-        ritaglio.save(cartella/file)
-        # L'alfa deve essere reale, non un rettangolo opaco: se lo fosse, il disegno del quartiere
-        # apparirebbe come un francobollo sopra la mappa invece che come una sagoma.
-        canale = ritaglio.getchannel('A')
-        righe.append(dict(indice=v['index'], nome=v['nome'], mappa=mappa, chiave=chiave, veste=veste,
-                          larghezza=v['larghezza'], altezza=v['altezza'],
-                          png=f'{mappa}/{file}', alfaMinima=canale.getextrema()[0],
-                          conTrasparenza=canale.getextrema()[0] < 255))
+    for foglio in (FOGLIO, FOGLIO_MEMENTO):
+      dati = (out/foglio).read_bytes()
+      texture, voci = sprite_del_foglio(dati)
+      immagini = {t['id']: Image.open(io.BytesIO(dati[t['offset']:t['offset']+t['bytes']])).convert('RGBA')
+                  for t in texture}
+      for v in voci:
+          if v.get('vuoto'):
+              continue
+          mappa, chiave, veste = famiglia(v['nome'])
+          if not mappa:
+              continue
+          im = immagini.get(v['texturaId'])
+          riquadro = (v['x'], v['y'], v['x']+v['larghezza'], v['y']+v['altezza'])
+          if im is None or riquadro[2] > im.width or riquadro[3] > im.height:
+              righe.append(dict(indice=v['index'], nome=v['nome'], mappa=mappa, chiave=chiave,
+                                veste=veste, png=None, motivo='ritaglio fuori dalla texture'))
+              continue
+          cartella = destinazione/mappa
+          cartella.mkdir(parents=True, exist_ok=True)
+          file = f'{chiave}-{veste}.png' if veste != 'disegno' else f'{chiave}.png'
+          ritaglio = im.crop(riquadro)
+          ritaglio.save(cartella/file)
+          # L'alfa deve essere reale, non un rettangolo opaco: se lo fosse, il disegno del quartiere
+          # apparirebbe come un francobollo sopra la mappa invece che come una sagoma.
+          canale = ritaglio.getchannel('A')
+          righe.append(dict(indice=v['index'], nome=v['nome'], mappa=mappa, chiave=chiave, veste=veste,
+                            larghezza=v['larghezza'], altezza=v['altezza'],
+                            png=f'{mappa}/{file}', alfaMinima=canale.getextrema()[0],
+                            conTrasparenza=canale.getextrema()[0] < 255))
     per_mappa = {}
     for r in righe:
         per_mappa.setdefault(r['mappa'], set()).add(r['chiave'])
     risultato = dict(
         schemaVersion=1,
-        sources={'foglio': FOGLIO},
+        sources={'fogli': [FOGLIO, FOGLIO_MEMENTO]},
         criterio=dict(
             associazione='tabella scritta a mano: le grafie del gioco non coincidono sempre con '
                          'quelle comuni (渋屋 per Shibuya, 四軒茶屋 per Yongen-Jaya)',

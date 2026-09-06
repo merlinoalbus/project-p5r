@@ -1791,3 +1791,210 @@ hover/selezione, raccolto ed evidenza suggerita. Le riserve SVG devono restare n
 contenitore. Aggiornare commenti/CSS e il test di `SpilloGrafico`: con asset presente deve esistere
 sia il contenitore-pin sia la figura, non un'immagine nuda. La controprova è visiva nel visore a
 dimensione reale e automatica sul componente.
+
+### Riverifica — Mappa dei Memento, commit `95b95f7`
+
+**FAIL funzionale, sanamento a Claude.** La composizione grafica è una base leggibile e usa gli
+elementi estratti presenti in `public/asset/mappe/lmap/memento/`, ma il contratto di presenza nel
+momento di gioco non è collegato:
+
+1. `DungeonDettaglioPage` monta `MappaMemento` soltanto con `aree={d.aree}`. Non passa mai la
+   prop `sbloccati`; il componente quindi interpreta sempre ogni Dedalo come aperto
+   (`!sbloccati || sbloccati.size === 0`).
+2. Anche con una prop popolata, l'elenco finale `ol` mappa tutte le aree senza filtrare o
+   disabilitare quelle non aperte. Risultano quindi ancora navigabili dal lettore, in contrasto
+   con il punto grafico nascosto.
+3. Il nuovo componente non ha test: il claim di suite verde non prova i due rami di presenza.
+
+**Sanamento richiesto:** esporre dal dato della partita un insieme esplicito di Dedali disponibili
+(derivato da stato di storia realmente tracciato, non da parsing della prosa), passarlo alla mappa
+e usare la stessa sorgente sia per i nodi grafici sia per l'elenco/accessibilità. Se lo stato non
+è disponibile, non va simulata una partita avanzata: va dichiarata la vista completa e resa
+esplicitamente consultativa. Aggiungere test per: nessun dato di partita, un Dedalo disponibile,
+un Dedalo non disponibile non cliccabile/navigabile e ordine stabile dei nove Dedali.
+
+### Verifica prompt Fase 6.2 — asset Memento proposti in `fabbisogno.md` §2–3
+
+**WARN — non generare ancora.** I prompt ora definiscono bene stile, misure, RGBA e soggetto, ma
+non definiscono una consegna integrabile:
+
+1. `MappaMemento.tsx` non riferisce né `dedalo-1.png`…`dedalo-9.png` né `catena.png`; generare
+   ora dieci file produrrebbe asset non consumati.
+2. I nove nodi del renderer seguono una spirale, hanno posizioni non contigue e scale diverse.
+   Nove generazioni indipendenti non possono soddisfare la prova «unica figura senza tagli»:
+   il prompt descrive bordi che continuano sopra/sotto, mentre il layout non impila i nodi in quel
+   modo.
+
+**Proposta concreta a Claude prima di cambiare lo stato in `pronto`:** fissare prima il contratto
+di composizione nel renderer. Per mantenere la presenza per Dedalo, generare una singola
+composizione-master trasparente con tutti i nove pezzi coerenti, poi ricavarne nove ritagli RGBA
+deterministici (maschera/ritaglio documentati) da posare alle coordinate effettive; ciascun
+ritaglio si può così mostrare o celare senza rompere lo stile complessivo. `catena.png` va
+generata solo dopo che il renderer la usa davvero, oppure va esplicitamente eliminata dal
+fabbisogno in favore della polilinea SVG esistente. Dopo mapping file→posizione/scala e consumo
+nel componente, Codex può generare e verificare alfa, figura complessiva e resa alla scala reale.
+
+### Riverifica condivisa — fondamenta 5.3 e integrazione, stato del 6 settembre
+
+**`DoveSiTrova`: PASS limitato alla fondazione.** La suite mirata corrente passa: `1 file, 5 test`.
+La prova copre effettivamente il ramo unico (mappa, spillo, centro e URL), multiplo senza scelta,
+assente, `soloCollegamento` e rifiuto API; typecheck e lint del worktree condiviso sono verdi.
+
+**Ma il requisito 5.3 non e' ancora integrato nelle pagine.** Una ricerca sull'albero `src/`,
+escludendo componente e test, non trova alcun montaggio di `<DoveSiTrova>`: la base e' corretta,
+ma Negozi, inventari, attivita', Covo e pagine del mondo non possono ancora mostrare la posizione
+in pagina ne' portare l'utente all'ancora dell'atlante tramite questo componente. Non e' quindi un
+PASS della richiesta utente, soltanto della sua fondazione riusabile.
+
+**Restano aperti e non sostituiti dalla modifica grafica Memento:**
+
+1. `DungeonDettaglioPage` continua a montare `MappaMemento` senza `sbloccati`, percio' ogni
+   Dedalo resta aperto;
+2. `SpilloGrafico` continua a rendere un PNG RGBA nudo anziche' nel contenitore-pin dell'app;
+3. non esiste ancora un adottante di `DoveSiTrova`.
+
+Il worktree contiene inoltre una modifica non pubblicata di `MappaMemento.tsx`; non e' stata
+oggetto di verdetto finale. Il suo layout puo' proseguire, ma non chiude i tre punti funzionali
+elencati sopra.
+
+### Stabilita' della suite — rosso intermittente da chiudere prima della riverifica finale
+
+Il primo `npm test` parallelo sul worktree ha dato `137 file, 573 test PASS; 1 test FAIL`:
+`MappaPage.test.tsx`, caso «il contesto URL cambia il titolo del visore». Il visore aveva gia'
+reso `Mappa: Museo, 1P`, ma l'asserzione immediata riceveva ancora `document.title = "Mappa —
+Project P5R"`.
+
+Non e' un difetto riproducibile del layout Memento: il file mirato passa tre volte consecutive
+(`8/8` ogni volta) e la suite completa seriale passa (`138 file, 574 test`). E' comunque una
+prova concorrente fragile, dunque la suite parallela non e' ancora un gate affidabile.
+
+**Sanamento proposto al proprietario del test:** nel caso URL attendere esplicitamente il titolo
+con `waitFor(() => expect(document.title).toContain('Museo, 1P'))` dopo il rendering del visore,
+o isolare il titolo dalla concorrenza fra file. Ripetere almeno una suite parallela e una seriale;
+il verde di entrambe e' il criterio di chiusura. Questo rilievo e' separato dai tre requisiti
+funzionali dell'Atlante, che restano aperti.
+
+### Osservazione immediata sul worktree Memento — non ancora un verdetto di lotto
+
+La lavorazione non pubblicata separa `stratiMemento.ts` e rende gli strati pulsanti, ma prima di
+un candidato deve chiudere tre dettagli deterministici:
+
+1. `urlStratoDedalo` e' esportata da `stratiMemento.ts`, mentre `DungeonDettaglioPage` la importa
+   ancora da `MappaMemento.tsx`; con il file corrente l'import non esiste e typecheck/build non
+   possono passare. Importarla dal modulo nuovo oppure riesportarla esplicitamente dal componente.
+2. `MappaMemento` espone `selezionata` e `onSeleziona`, ma il chiamante monta solo
+   `aree={d.aree}`. I pulsanti della mappa non cambiano quindi l'area della scheda, e la scheda
+   non illumina lo strato corrente: il requisito «stessa selezione» non e' ancora vero.
+3. Il chiamante continua a non costruire/passare `sbloccati`; l'espressione del componente tratta
+   l'assenza come «tutti aperti». Il sanamento di presenza temporale resta quindi indipendente dal
+   rifacimento grafico e ancora necessario.
+
+Questa e' una lettura del worktree non pubblicato, non un FAIL sul commit `7894cc3`. Il prossimo
+candidato deve includere i tre rami di test: selezione scheda↔strato, Dedalo non disponibile non
+interattivo/non navigabile, e una prova di import/build.
+
+### Decisione utente — separazione Palazzi / Dedali dei Memento (6 settembre)
+
+Questa decisione **sostituisce** il requisito precedente che portava i nove Dedali dei Memento
+nella pagina «Palazzi e Dedali» e rende non pertinente il completamento grafico Memento in quel
+percorso.
+
+- la pagina e la navigazione diventano **«Palazzi»**, non «Palazzi e Dedali»;
+- vi restano i nove Palazzi e il solo **Dedalo di Iweleth**, con le sue mappe;
+- i nove Dedali dei Memento non devono comparire, essere navigabili o essere suggeriti da quella
+  pagina/routing; la loro rappresentazione non e' un criterio per chiudere il lotto Palazzi;
+- gli asset Memento gia' estratti non vanno cancellati ne' rigenerati in questa decisione: restano
+  fuori da questo lotto finche' l'utente non assegna loro un percorso autonomo.
+
+**Sanamento richiesto a Claude:** adeguare titolo, liste, filtri, contatori, collegamenti e test
+di `DungeonPage`/`DungeonDettaglioPage` alla tassonomia sopra. La prova di chiusura deve mostrare
+che i nove Palazzi e Iweleth sono raggiungibili con le mappe previste e che `mementos` non e'
+esposto dal percorso Palazzi. Questa decisione prevale sui rilievi precedenti relativi a
+`MappaMemento` e `sbloccati` per questo lotto.
+
+### Specifica di sanamento UX — dettaglio radice «Dedalo di Iweleth»
+
+**Input osservato:** la schermata corrente `MappaPage` per una radice senza planimetria mostra
+una grande card quasi vuota, un elenco di luoghi a testo e miniature 112×96; la gerarchia non
+porta lo sguardo alla prossima area, le planimetrie sembrano allegati e non un percorso, e le
+piccole immagini grigie non consentono di capire quale carta si sta aprendo. E' il contrario della
+consultazione rapida che serve davanti al gioco.
+
+**Obiettivo:** fare del dettaglio Iweleth una pagina-editoriale di percorso, moderna e P5R,
+senza inventare mappe: le planimetrie restano quelle reali gia' presenti, ogni voce deve aprire
+la sua ancorata sullo stesso atlante, e «Dedalo di Iweleth» resta l'unico Dedalo dentro il percorso
+Palazzi.
+
+#### Struttura obbligatoria desktop
+
+1. **Hero compatto, non una card vuota.** Breadcrumb `Mappe / Palazzi / Dedalo di Iweleth`,
+   emblema Iweleth gia' disponibile, titolo display, riga di contesto «12 aree · N planimetrie ·
+   N punti di interesse» e due azioni leggibili: `Apri atlante` e `Scheda del Dedalo`.
+   Il fondo puo' usare texture/rosso/nero gia' nel sistema, ma non un'immagine inventata.
+2. **Navigatore di percorso persistente.** Colonna sinistra (desktop) o barra scorrevole
+   (tablet/mobile) numerata 01–12: ogni area ha stato mappa disponibile/non disponibile,
+   nome completo e link. Nessun semplice elenco a pallini; l'area attiva e' immediatamente
+   distinguibile e la tastiera la percorre nell'ordine reale.
+3. **Pannello centrale “area selezionata”.** Titolo/contesto dell'area, una CTA primaria
+   `Apri mappa interattiva` e la griglia delle sue planimetrie reali. La prima carta e' grande
+   (preview 16:9), le altre sono carte secondarie; ciascuna porta nome, copertura e numero punti.
+   Non usare icone/glyph come sostituti di preview quando la planimetria e' disponibile.
+4. **Colonna di orientamento.** Mostra solo metadati utili: collegamento al Palazzo/Dedalo,
+   presenza di piano, punti e stato della partita. Nessun blocco vuoto, nessuna ripetizione del
+   titolo, nessun testo di amministrazione in prima lettura.
+
+#### Comportamento e responsive
+
+- Desktop: griglia `minmax(210px, 280px) / minmax(0,1fr) / 240px`, hero massimo 220 px;
+  il navigatore resta visibile mentre si scorrono le planimetrie.
+- Tablet: navigatore orizzontale sopra al pannello, preview primaria seguita da due colonne.
+- Mobile: una colonna, navigatori a chip numerati con label troncata, preview a larghezza piena,
+  controlli almeno 44×44 px; mai miniature illeggibili o una card che lasci meta' viewport vuota.
+- Ogni carta planimetria e link deve avere nome accessibile, focus P5R ad alto contrasto e stato
+  attivo; immagini decorative con `alt=""`, planimetrie con alt descrittivo.
+
+#### Vincoli dati e criteri di accettazione
+
+- `AlberoLuoghi` diventa una presentazione di percorso: mantiene ordine/catalogo, non deduce
+  planimetrie e non elimina aree senza immagine; per queste mostra uno stato esplicito, non una
+  finta anteprima.
+- `ImmaginiLuogo` riceve varianti `hero` / `card` oppure un componente dedicato: non deve piu'
+  imporre globalmente `w-28 h-24` al dettaglio Iweleth.
+- Il click su area e planimetria conserva URL e ancora reali; `MappaPage` continua a usare
+  `haPlanimetria`, `urlMappa` e i dati della partita.
+- Test richiesti: ordine delle 12 aree; una area con tre planimetrie rende una hero e tre link;
+  una senza planimetria e' dichiarata tale ma resta raggiungibile; ogni link usa la sua chiave;
+  mobile non perde le azioni principali.
+
+**Proprietario dell'implementazione:** Claude (`MappaPage.tsx`, `AlberoLuoghi.tsx`,
+`ImmaginiLuogo.tsx` e CSS proprietario). Codex riverifica il candidato pubblicato su gerarchia,
+responsivita', semantica dei link, build e regressioni; nessuna modifica diretta ai suoi file.
+
+### Sanamento obbligatorio — indice Palazzi e doppia destinazione incoerente
+
+Le due schermate confermano che la decisione «solo Palazzi, con il solo Iweleth» non e' stata
+ancora applicata nel codice pubblicato. Non e' un problema di cache ne' di styling:
+
+- `src/components/guida/sezioniGuida.tsx` espone ancora la piastrella `Palazzi e Dedali`;
+- `src/pages/DungeonPage.tsx` usa ancora titolo/document title/sottotitolo `Palazzi e Dedali` e
+  itera l'intero `getDungeons`, incluso `mementos`;
+- `src/pages/MappaPage.tsx` descrive ancora le mappe come Tokyo, Palazzi e Dedali.
+
+Nella stessa `DungeonPage` c'e' inoltre il difetto visivo segnalato dall'utente: ogni `<li>`
+contiene una card-link verso l'arrivo in mappa e, **fuori dalla card**, un secondo
+`CollegamentoVisivo` «Scheda del Palazzo» verso la scheda editoriale. Le due destinazioni non
+sono distinguibili dalla card, il secondo elemento rompe il perimetro e appare come un'azione
+fantasma quando il layout ricalcola. Non e' ammesso mantenere questo doppio target ambiguo.
+
+**Implementazione richiesta a Claude:**
+
+1. rinominare ovunque il percorso editoriale in **Palazzi** e aggiornare le descrizioni;
+2. filtrare la pagina a `tipo === 'palazzo'` (che gia' comprende Iweleth nel catalogo) e
+   conservare Iweleth come unico Dedalo raggiungibile con le sue mappe;
+3. fare della card un solo target primario, la **scheda del Palazzo**;
+4. se l'arrivo sull'atlante serve, renderlo come azione secondaria *dentro il footer della stessa
+   card*, con etichetta `Apri sulla mappa`, visibile e stabile; se non ha una destinazione unica,
+   non mostrarlo;
+5. aggiornare test di `DungeonPage`, `GuidaPage`, testi di `MappaPage` e snapshot/accessibilita':
+   nessun testo «Palazzi e Dedali», nessuna card Mementos, una sola CTA primaria per card e nessun
+   elemento azione fuori dal suo perimetro.
