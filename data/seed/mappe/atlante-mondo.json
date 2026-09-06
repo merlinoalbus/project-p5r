@@ -16,22 +16,6 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR». Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
-     "x": 24.609,
-     "y": 51.855,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536874967, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "negozio",
      "nome": "Negozio Otaku Tokobushiya",
      "descrizione": "Pin nativo del gioco.",
@@ -42,7 +26,7 @@
       "chiave": "akihabara/tokobushiya"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 0
     },
     {
      "tipo": "ristorante",
@@ -55,7 +39,7 @@
       "chiave": "akihabara/maid-cafe-akihabara"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 1
     },
     {
      "tipo": "negozio",
@@ -68,7 +52,7 @@
       "chiave": "akihabara/akindo"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 2
     },
     {
      "tipo": "negozio",
@@ -78,7 +62,7 @@
      "y": 24.609,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 3
     },
     {
      "tipo": "negozio",
@@ -88,7 +72,7 @@
      "y": 44.824,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 4
     },
     {
      "tipo": "negozio",
@@ -101,7 +85,7 @@
       "chiave": "akihabara/super-baron"
      },
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 5
     },
     {
      "tipo": "sala-giochi",
@@ -114,7 +98,7 @@
       "chiave": "akihabara/sala-giochi-akihabara"
      },
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 6
     },
     {
      "tipo": "distributore",
@@ -124,7 +108,7 @@
      "y": 29.883,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 7
     },
     {
      "tipo": "distributore",
@@ -134,7 +118,7 @@
      "y": 13.086,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 9
+     "ordine": 8
     },
     {
      "tipo": "distributore",
@@ -144,7 +128,7 @@
      "y": 32.129,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 10
+     "ordine": 9
     },
     {
      "tipo": "distributore",
@@ -154,7 +138,7 @@
      "y": 39.258,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 11
+     "ordine": 10
     }
    ]
   },
@@ -460,22 +444,6 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR». Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
-     "x": 17.48,
-     "y": 42.969,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536874967, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "negozio",
      "nome": "Cristalloterapia Stoneon",
      "descrizione": "Pin nativo del gioco.",
@@ -486,7 +454,7 @@
       "chiave": "kichijoji/stoneon"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 0
     },
     {
      "tipo": "negozio",
@@ -499,7 +467,7 @@
       "chiave": "kichijoji/mitsubachi"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 1
     },
     {
      "tipo": "negozio",
@@ -512,7 +480,7 @@
       "chiave": "kichijoji/mantra-ganda"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 2
     },
     {
      "tipo": "negozio",
@@ -525,7 +493,7 @@
       "chiave": "kichijoji/vestiti-usati-kichijoji"
      },
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 3
     },
     {
      "tipo": "culto",
@@ -538,7 +506,7 @@
       "chiave": "kichijoji/vecchio-tempio-kichijoji"
      },
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 4
     },
     {
      "tipo": "attivita",
@@ -551,7 +519,7 @@
       "chiave": "kichijoji/jazz-jin"
      },
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 5
     },
     {
      "tipo": "attivita",
@@ -564,7 +532,7 @@
       "chiave": "kichijoji/penguin-sniper"
      },
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 6
     },
     {
      "tipo": "ristorante",
@@ -577,7 +545,7 @@
       "chiave": "kichijoji/hagoromo"
      },
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 7
     },
     {
      "tipo": "distributore",
@@ -587,7 +555,7 @@
      "y": 37.793,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 9
+     "ordine": 8
     }
    ]
   },
@@ -878,7 +846,24 @@
    "altezza": 512,
    "entita": null,
    "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno medio — la più estesa» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.578,
+     "y": 64.453,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873598, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
@@ -899,7 +884,24 @@
    "altezza": 512,
    "entita": null,
    "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno medio — la meno estesa» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.578,
+     "y": 11.133,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873598, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
@@ -920,7 +922,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela alta, disegno minuto» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 46.875,
+     "y": 34.473,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873597, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
@@ -1365,7 +1384,56 @@
     "chiave": "futaba-06-corridoio-principale-sezione-centrale"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.115,
+     "y": 52.832,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 10.059,
+     "y": 32.812,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.018,
+     "y": 13.477,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-2-0",
     "nome": "Corridoio principale",
@@ -1594,6 +1662,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.404,
+     "y": 20.654,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1601,7 +1685,7 @@
      "y": 33.984,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1617,11 +1701,27 @@
      "y": 5.371,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536872608, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 4.053,
+     "y": 20.898,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -1658,6 +1758,38 @@
      ]
     },
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.404,
+     "y": 20.654,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 4.053,
+     "y": 20.898,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1665,7 +1797,7 @@
      "y": 39.697,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1681,7 +1813,7 @@
      "y": 25.391,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1728,6 +1860,38 @@
      ]
     },
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.404,
+     "y": 20.654,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 4.053,
+     "y": 20.898,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -1735,7 +1899,7 @@
      "y": 39.697,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -1751,7 +1915,7 @@
      "y": 25.391,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2358,7 +2522,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto — la meno estesa» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.014,
+     "y": 25.977,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871271, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
     "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
@@ -2379,7 +2560,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto — la più estesa» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.014,
+     "y": 25.977,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871271, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
     "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
@@ -2461,14 +2659,30 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03».",
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.324,
+     "y": 10.254,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871263, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 32.617,
      "y": 23.828,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2477,14 +2691,14 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03».",
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 21.191,
      "y": 23.828,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2500,11 +2714,27 @@
      "y": 21.191,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871387, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.922,
+     "y": 30.42,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871482, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -2516,7 +2746,7 @@
      "y": 25.684,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2541,6 +2771,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 36.914,
+     "y": 29.443,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2548,7 +2794,7 @@
      "y": 28.32,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2559,12 +2805,12 @@
     {
      "tipo": "forziere",
      "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 49.902,
      "y": 12.012,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2573,14 +2819,14 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03».",
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
      "x": 35.449,
      "y": 33.984,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2596,7 +2842,7 @@
      "y": 10.205,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2612,7 +2858,7 @@
      "y": 22.656,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2621,14 +2867,30 @@
      ]
     },
     {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.494,
+     "y": 13.281,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871487, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 44.824,
      "y": 14.844,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2657,7 +2919,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 36.914,
+     "y": 29.443,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-2-1",
     "nome": "Vecchio castello 2P",
@@ -2680,6 +2959,38 @@
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.223,
+     "y": 13.184,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 55.371,
+     "y": 29.443,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2687,7 +2998,7 @@
      "y": 29.443,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2703,7 +3014,7 @@
      "y": 2.051,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2719,7 +3030,7 @@
      "y": 21.387,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2728,14 +3039,14 @@
      ]
     },
     {
-     "tipo": "meccanismo",
-     "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_04_e159_040_START».",
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 57.812,
      "y": 18.701,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2766,6 +3077,22 @@
    "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.223,
+     "y": 13.184,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_04_TBOX_minimap_18».",
@@ -2773,7 +3100,7 @@
      "y": 9.131,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2804,6 +3131,38 @@
    "note": "Versione «porzione occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.426,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 13.574,
+     "y": 38.721,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -2811,7 +3170,7 @@
      "y": 38.721,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2827,7 +3186,7 @@
      "y": 11.377,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2843,7 +3202,7 @@
      "y": 30.664,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2852,14 +3211,14 @@
      ]
     },
     {
-     "tipo": "meccanismo",
-     "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_04_e159_040_START».",
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 16.016,
      "y": 27.979,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2954,14 +3313,46 @@
      ]
     },
     {
-     "tipo": "meccanismo",
-     "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_04_e159_040_START».",
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.426,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 13.574,
+     "y": 38.721,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 16.016,
      "y": 27.979,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -2990,7 +3381,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.426,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-4-1",
     "nome": "Vecchio castello 3P",
@@ -3134,9 +3542,9 @@
    "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
    "spilli": [
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_06_TBOX_minimap_11».",
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco.",
      "x": 11.621,
      "y": 18.115,
      "riferimento": null,
@@ -3172,6 +3580,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.742,
+     "y": 20.117,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -3179,11 +3603,27 @@
      "y": 40.723,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871410, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 36.621,
+     "y": 28.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875572, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -3392,6 +3832,22 @@
    "note": "Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.508,
+     "y": 50.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -3399,7 +3855,7 @@
      "y": 58.789,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3444,6 +3900,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.508,
+     "y": 50.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_11_TBOX_minimap_16».",
@@ -3451,7 +3923,7 @@
      "y": 51.465,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3529,6 +4001,22 @@
    "note": "Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.014,
+     "y": 25.977,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871271, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -3536,7 +4024,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3552,7 +4040,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3595,7 +4083,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.014,
+     "y": 25.977,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871271, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-152-1-0",
     "nome": "Prigione sotterranea 1P",
@@ -3707,9 +4212,9 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0000».",
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
      "x": 42.139,
      "y": 36.23,
      "riferimento": null,
@@ -3800,38 +4305,6 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871642, non ancora tradotta in una condizione della guida."
       }
      ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 18.359,
-     "y": 3.32,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875684, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 30.273,
-     "y": 11.133,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 2,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872136, non ancora tradotta in una condizione della guida."
-      }
-     ]
     }
    ],
    "contesti": [
@@ -3867,54 +4340,6 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 43.652,
-     "y": 43.457,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875684, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 21.484,
-     "y": 42.48,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 51.758,
-     "y": 27.734,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 2,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872136, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -3922,7 +4347,7 @@
      "y": 38.086,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3938,7 +4363,7 @@
      "y": 30.322,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3954,11 +4379,27 @@
      "y": 41.26,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871642, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.484,
+     "y": 36.426,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871644, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -3970,7 +4411,7 @@
      "y": 26.27,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3986,7 +4427,7 @@
      "y": 26.27,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4002,7 +4443,7 @@
      "y": 10.889,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 8,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4018,7 +4459,7 @@
      "y": 10.889,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 9,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4034,7 +4475,7 @@
      "y": 14.111,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 10,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4061,48 +4502,32 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_03_BigDoorLook_FIRST».",
-     "x": 43.652,
-     "y": 22.217,
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.35,
+     "y": 30.127,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872257, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871645, non ancora tradotta in una condizione della guida."
       }
      ]
     },
     {
      "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 21.484,
-     "y": 42.48,
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.311,
+     "y": 25.195,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 43.652,
-     "y": 43.457,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 2,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875684, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872245, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -4125,16 +4550,16 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_011_DOOR_OPEN».",
-     "x": 45.947,
-     "y": 4.395,
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.508,
+     "y": 7.324,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872219, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871647, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -4175,18 +4600,18 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 40.43,
-     "y": 32.373,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.598,
+     "y": 26.709,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -4273,7 +4698,7 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_03_LOCKED_DOOR_03».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 49.658,
      "y": 21.191,
      "riferimento": null,
@@ -4339,18 +4764,18 @@
    "note": "Versione «inquadratura occidentale» della stessa zona.",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Serranda",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN».",
-     "x": 40.43,
-     "y": 32.373,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.598,
+     "y": 26.709,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872149, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -4407,9 +4832,9 @@
    "note": "Versione «settore d’ingresso» della stessa zona.",
    "spilli": [
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC».",
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco.",
      "x": 50.781,
      "y": 24.17,
      "riferimento": null,
@@ -4462,34 +4887,18 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC».",
-     "x": 39.795,
-     "y": 65.82,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.691,
+     "y": 65.674,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872214, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_09_DOOR_OPEN».",
-     "x": 47.607,
-     "y": 33.203,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872217, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -4607,9 +5016,9 @@
    "note": "Versione «porzione orientale» della stessa zona.",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_08_MONEY_DOOR_FRONT».",
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 23.218,
      "y": 19.58,
      "riferimento": null,
@@ -4645,34 +5054,34 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_08_MONEY_DOOR_BACK».",
-     "x": 37.793,
-     "y": 13.184,
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 41.846,
+     "y": 13.477,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872040, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872209, non ancora tradotta in una condizione della guida."
       }
      ]
     },
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_08_MONEY_DOOR_BACK».",
-     "x": 41.846,
-     "y": 13.477,
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.16,
+     "y": 23.145,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872209, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875895, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -4717,7 +5126,7 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_MONEY_DOOR_PROC».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 44.141,
      "y": 12.842,
      "riferimento": null,
@@ -4753,30 +5162,14 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_09_DOOR_OPEN».",
-     "x": 26.465,
-     "y": 57.031,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872217, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_09_MONEY_DOOR_BACK».",
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 33.203,
      "y": 14.355,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4785,14 +5178,14 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_09_MONEY_DOOR_BACK».",
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
      "x": 38.818,
      "y": 30.518,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4808,7 +5201,7 @@
      "y": 21.484,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4908,9 +5301,9 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0693».",
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
      "x": 41.406,
      "y": 20.02,
      "riferimento": null,
@@ -4948,28 +5341,12 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D03_011_DOOR_OPEN».",
-     "x": 35.254,
-     "y": 40.723,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872219, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "porta",
-     "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_11_DOOR».",
      "x": 28.857,
      "y": 16.553,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -4985,7 +5362,7 @@
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5016,18 +5393,18 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC».",
-     "x": 39.551,
-     "y": 28.418,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.598,
+     "y": 5.225,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872214, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -5119,18 +5496,18 @@
      ]
     },
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC».",
-     "x": 39.551,
-     "y": 28.418,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.598,
+     "y": 5.225,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872214, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -5332,7 +5709,7 @@
     {
      "tipo": "sicura",
      "nome": "Stanza sicura",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D02_SAFEROOM_IN_SET».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 21.973,
      "y": 10.254,
      "riferimento": null,
@@ -5341,7 +5718,7 @@
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873563, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -5424,6 +5801,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536871652, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.324,
+     "y": 21.191,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871653, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -5460,7 +5853,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 5.493,
+     "y": 2.563,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-2-0",
     "nome": "Museo, 1P",
@@ -5483,6 +5893,22 @@
    "note": "Versione «porzione settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 51.123,
+     "y": 38.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -5490,7 +5916,7 @@
      "y": 35.01,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5506,7 +5932,7 @@
      "y": 16.211,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5522,7 +5948,7 @@
      "y": 36.035,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5538,7 +5964,7 @@
      "y": 16.016,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5581,7 +6007,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 51.123,
+     "y": 38.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-3-0",
     "nome": "Museo, 2P",
@@ -5616,6 +6059,22 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871795, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.1,
+     "y": 11.865,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875623, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -5663,6 +6122,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.754,
+     "y": 17.578,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871756, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -5670,7 +6145,7 @@
      "y": 34.814,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5686,7 +6161,7 @@
      "y": 27.783,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5702,7 +6177,7 @@
      "y": 23.828,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5718,7 +6193,7 @@
      "y": 17.432,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5734,7 +6209,7 @@
      "y": 4.248,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5760,7 +6235,24 @@
     "chiave": "madarame-05-giardino-centrale"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.043,
+     "y": 70.898,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-5-0",
     "nome": "Giardino centrale",
@@ -5832,6 +6324,22 @@
    "note": "Versione «variante grafica» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.566,
+     "y": 5.566,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -5839,7 +6347,7 @@
      "y": 20.508,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5855,7 +6363,7 @@
      "y": 12.842,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5871,7 +6379,7 @@
      "y": 14.941,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5887,7 +6395,7 @@
      "y": 14.941,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5903,11 +6411,27 @@
      "y": 4.688,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536871810, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.564,
+     "y": 14.795,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871655, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -5949,7 +6473,24 @@
     "chiave": "madarame-06-sala-del-tesoro-atrio"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.566,
+     "y": 5.566,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-6-0",
     "nome": "Sala del Tesoro - Atrio",
@@ -6266,6 +6807,22 @@
    "note": "Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.387,
+     "y": 28.369,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
      "nome": "Porta",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0038».",
@@ -6273,7 +6830,7 @@
      "y": 14.795,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6321,6 +6878,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.387,
+     "y": 28.369,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -6328,7 +6901,7 @@
      "y": 14.551,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6344,7 +6917,7 @@
      "y": 25.83,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6360,11 +6933,27 @@
      "y": 14.795,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536875958, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.029,
+     "y": 7.08,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873588, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -6376,7 +6965,7 @@
      "y": 4.59,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6419,7 +7008,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.029,
+     "y": 7.08,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873588, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-9-0",
     "nome": "Sala del Tesoro",
@@ -6525,6 +7131,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536875923, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.137,
+     "y": 47.852,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875928, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -6604,7 +7226,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.268,
+     "y": 15.283,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
     "nome": "Sala d'ingresso",
@@ -6629,16 +7268,48 @@
     {
      "tipo": "sicura",
      "nome": "Stanza sicura",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_01_SET».",
-     "x": 20.605,
-     "y": 5.615,
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.662,
+     "y": 15.234,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_01_SET».",
+     "x": 20.605,
+     "y": 5.615,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536875382, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 10.059,
+     "y": 12.061,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875457, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -6666,7 +7337,24 @@
     "chiave": "maruki-04-corridoio"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.662,
+     "y": 15.234,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-3-0",
     "nome": "Corridoio",
@@ -6869,6 +7557,22 @@
    "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.16,
+     "y": 62.402,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -6876,7 +7580,7 @@
      "y": 66.699,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -6905,7 +7609,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.16,
+     "y": 62.402,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-9-0",
     "nome": "Sala visite",
@@ -7117,9 +7838,9 @@
      ]
     },
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_162_11_TBOX_minimap_06».",
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco.",
      "x": 23.291,
      "y": 45.703,
      "riferimento": null,
@@ -7153,7 +7874,40 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 9.375,
+     "y": 46.484,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873588, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.213,
+     "y": 43.652,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875342, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-11-0",
     "nome": "Corridoio del Crepuscolo",
@@ -7176,9 +7930,9 @@
    "note": "Versione «porzione orientale» della stessa zona.",
    "spilli": [
     {
-     "tipo": "sicura",
-     "nome": "Stanza sicura",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_05_SET».",
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
      "x": 52.686,
      "y": 33.984,
      "riferimento": null,
@@ -7193,8 +7947,8 @@
     },
     {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock01».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 38.77,
      "y": 17.822,
      "riferimento": null,
@@ -7209,8 +7963,8 @@
     },
     {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock02».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 43.066,
      "y": 37.305,
      "riferimento": null,
@@ -7224,6 +7978,22 @@
      ]
     },
     {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.385,
+     "y": 17.725,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872093, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -7231,7 +8001,7 @@
      "y": 27.393,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7240,14 +8010,14 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «CheckPasswardDoor».",
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
      "x": 44.385,
      "y": 12.988,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7281,6 +8051,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.531,
+     "y": 47.266,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -7288,7 +8074,7 @@
      "y": 6.006,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7297,14 +8083,14 @@
      ]
     },
     {
-     "tipo": "sicura",
-     "nome": "Stanza sicura",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_05_SET».",
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 40.039,
      "y": 16.113,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7313,14 +8099,14 @@
      ]
     },
     {
-     "tipo": "forziere",
-     "nome": "Forziere raro",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_162_12_R_TBOX_minimap_03».",
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco.",
      "x": 26.514,
      "y": 8.887,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7470,7 +8256,40 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.121,
+     "y": 43.848,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.527,
+     "y": 9.766,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875482, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-15-0",
     "nome": "Sala di supporto",
@@ -7496,14 +8315,30 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.121,
+     "y": 43.848,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875411, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock01».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 10.889,
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7513,13 +8348,13 @@
     },
     {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock02».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 6.934,
      "y": 22.314,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7535,7 +8370,7 @@
      "y": 19.043,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7551,7 +8386,7 @@
      "y": 15.137,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7605,12 +8440,28 @@
     {
      "tipo": "sicura",
      "nome": "Stanza sicura",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_07_SET».",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.586,
+     "y": 12.744,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 28.564,
      "y": 18.701,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7620,13 +8471,13 @@
     },
     {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock01».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 26.953,
      "y": 22.119,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7660,6 +8511,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.586,
+     "y": 12.744,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_162_16_TBOX_minimap_11».",
@@ -7667,7 +8534,7 @@
      "y": 14.404,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7677,13 +8544,13 @@
     },
     {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock03».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 32.129,
      "y": 20.02,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7715,8 +8582,8 @@
    "spilli": [
     {
      "tipo": "porta",
-     "nome": "Porta chiusa",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock02».",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 22.705,
      "y": 22.461,
      "riferimento": null,
@@ -7732,7 +8599,7 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «LookPasswardDoor01».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 41.895,
      "y": 22.461,
      "riferimento": null,
@@ -7784,9 +8651,9 @@
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
    "spilli": [
     {
-     "tipo": "sicura",
-     "nome": "Stanza sicura",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_07_SET».",
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
      "x": 37.402,
      "y": 14.16,
      "riferimento": null,
@@ -7961,7 +8828,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «settore d’ingresso» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.461,
+     "y": 39.6,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-4-0",
     "nome": "Piano terra",
@@ -7987,6 +8871,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.461,
+     "y": 39.6,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -7994,11 +8894,27 @@
      "y": 36.865,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873387, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 7.812,
+     "y": 17.529,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875849, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -8010,7 +8926,7 @@
      "y": 22.607,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8019,14 +8935,14 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0649».",
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
      "x": 14.453,
      "y": 22.607,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8057,6 +8973,22 @@
    "note": "Zona omonima distinta dai luoghi a cui è collegata. Versione «inquadratura settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 28.564,
+     "y": 22.119,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -8064,7 +8996,7 @@
      "y": 35.742,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8080,7 +9012,7 @@
      "y": 32.08,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8096,7 +9028,7 @@
      "y": 41.162,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8107,12 +9039,28 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «f157_005_DOOR_0000».",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.484,
+     "y": 41.309,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875881, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
      "x": 19.775,
      "y": 16.748,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8123,12 +9071,12 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «f157_005_DOOR_0002».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 23.438,
      "y": 9.961,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8139,12 +9087,12 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «f157_005_DOOR_0000».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 30.469,
      "y": 8.35,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8200,7 +9148,24 @@
     "chiave": "niijima-06-lobby-piano-riservato-ai-soci"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 8.105,
+     "y": 23.047,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-157-7-0",
@@ -8220,6 +9185,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 64.062,
+     "y": 50.293,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875852, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
@@ -8227,7 +9208,7 @@
      "y": 19.922,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8279,6 +9260,22 @@
    "note": "Zona omonima distinta dai luoghi a cui è collegata. Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.832,
+     "y": 21.24,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -8286,7 +9283,7 @@
      "y": 9.326,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8302,11 +9299,27 @@
      "y": 37.012,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873391, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.008,
+     "y": 38.672,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875885, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -8366,6 +9379,22 @@
        "nota": "Il gioco lo mostra alla bandiera nativa 536873398, non ancora tradotta in una condizione della guida."
       }
      ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.832,
+     "y": 21.24,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
     }
    ],
    "gruppoImmagini": {
@@ -8390,22 +9419,6 @@
    "note": "Versione «porzione settentrionale» della stessa zona.",
    "spilli": [
     {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05».",
-     "x": 0.098,
-     "y": 27.441,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -8413,11 +9426,27 @@
      "y": 34.18,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873392, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 13.672,
+     "y": 21.973,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875886, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -8447,22 +9476,6 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05».",
-     "x": 0.098,
-     "y": 27.441,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -8470,7 +9483,7 @@
      "y": 29.297,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8486,11 +9499,27 @@
      "y": 38.574,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536875957, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.354,
+     "y": 26.367,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875887, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -8515,40 +9544,7 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
-   "spilli": [
-    {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_BIG_SLOT_GAME_DEFAULT».",
-     "x": 23.047,
-     "y": 14.941,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873131, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05».",
-     "x": 53.32,
-     "y": 21.387,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-9-0",
     "nome": "Stanza slot machine",
@@ -8571,46 +9567,14 @@
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
    "spilli": [
     {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_BIG_SLOT_GAME_DEFAULT».",
-     "x": 17.578,
-     "y": 18.066,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873131, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05».",
-     "x": 53.32,
-     "y": 21.387,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536873487, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "attivita",
-     "nome": "Gioco",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05».",
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 17.48,
      "y": 24.512,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8639,7 +9603,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.902,
+     "y": 3.369,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-11-0",
     "nome": "Lobby piano puntate alte",
@@ -8677,6 +9658,22 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873407, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.902,
+     "y": 3.369,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -8744,6 +9741,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 62.646,
+     "y": 35.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -8751,7 +9764,7 @@
      "y": 26.855,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8767,7 +9780,7 @@
      "y": 11.719,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8783,7 +9796,7 @@
      "y": 43.262,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8799,7 +9812,7 @@
      "y": 28.613,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8810,12 +9823,12 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D06_12_FIRST_DOOR».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 38.086,
      "y": 23.438,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8826,12 +9839,12 @@
     {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D06_12_DOWN_DOOR».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 17.09,
      "y": 38.672,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8862,6 +9875,22 @@
    "note": "Versione «inquadratura meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.6,
+     "y": 66.8,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D06_157_13_R_TBOX_03».",
@@ -8869,7 +9898,7 @@
      "y": 36.8,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8901,7 +9930,24 @@
     "chiave": "niijima-12-arena-combattimenti"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.795,
+     "y": 4.688,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-157-16-0",
@@ -9026,9 +10072,9 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D156_002_DOOR_NG».",
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 54.297,
      "y": 9.814,
      "riferimento": null,
@@ -9080,6 +10126,22 @@
    "note": "Versione «porzione occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.381,
+     "y": 32.52,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -9087,11 +10149,43 @@
      "y": 30.469,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536872988, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 44.287,
+     "y": 31.982,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875402, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 52.49,
+     "y": 18.652,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875403, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -9135,6 +10229,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.381,
+     "y": 32.52,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872953, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco.",
@@ -9142,7 +10252,7 @@
      "y": 32.031,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9190,6 +10300,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 46.826,
+     "y": 43.75,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -9197,7 +10323,7 @@
      "y": 18.604,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9213,7 +10339,7 @@
      "y": 34.277,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9437,6 +10563,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.551,
+     "y": 39.062,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -9444,7 +10586,7 @@
      "y": 13.965,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9460,7 +10602,7 @@
      "y": 31.934,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9476,7 +10618,7 @@
      "y": 27.881,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9492,7 +10634,7 @@
      "y": 28.564,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9508,7 +10650,7 @@
      "y": 10.107,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9524,7 +10666,7 @@
      "y": 35.938,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9540,7 +10682,7 @@
      "y": 28.564,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9556,7 +10698,7 @@
      "y": 28.467,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7,
+     "ordine": 8,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9572,7 +10714,7 @@
      "y": 21.289,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 8,
+     "ordine": 9,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9588,7 +10730,7 @@
      "y": 27.881,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 9,
+     "ordine": 10,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9604,7 +10746,7 @@
      "y": 7.031,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 10,
+     "ordine": 11,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9620,7 +10762,7 @@
      "y": 37.939,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 11,
+     "ordine": 12,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9636,7 +10778,7 @@
      "y": 30.615,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 12,
+     "ordine": 13,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9652,7 +10794,7 @@
      "y": 20.117,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 13,
+     "ordine": 14,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9668,7 +10810,7 @@
      "y": 25.977,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 14,
+     "ordine": 15,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9684,7 +10826,7 @@
      "y": 12.354,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 15,
+     "ordine": 16,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9700,7 +10842,7 @@
      "y": 33.887,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 16,
+     "ordine": 17,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9716,7 +10858,7 @@
      "y": 26.074,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 17,
+     "ordine": 18,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9732,7 +10874,7 @@
      "y": 7.08,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 18,
+     "ordine": 19,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9748,7 +10890,7 @@
      "y": 30.029,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 19,
+     "ordine": 20,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9793,14 +10935,30 @@
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
    "spilli": [
     {
-     "tipo": "seme-bramosia",
-     "nome": "Seme della bramosia",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D05_156_07_SEEDicon_2».",
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.922,
+     "y": 64.111,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
      "x": 46.191,
      "y": 19.336,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9848,14 +11006,30 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "seme-bramosia",
-     "nome": "Seme della bramosia",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D05_156_07_SEEDicon_2».",
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.922,
+     "y": 64.111,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
      "x": 15.43,
      "y": 61.963,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9871,7 +11045,7 @@
      "y": 73.926,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9951,6 +11125,22 @@
    "note": "Versione «inquadratura occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 56.152,
+     "y": 10.938,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -9958,7 +11148,7 @@
      "y": 20.508,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -9974,7 +11164,7 @@
      "y": 30.615,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10057,6 +11247,22 @@
    "note": "Versione «porzione meridionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 52.93,
+     "y": 35.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -10064,7 +11270,7 @@
      "y": 39.209,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10110,7 +11316,24 @@
     "chiave": "okumura-10-produzione-armamenti"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 52.93,
+     "y": 35.449,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872960, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-10-0",
     "nome": "Produzione armamenti",
@@ -10147,6 +11370,22 @@
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 52.93,
+     "y": 35.449,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872960, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -10154,7 +11393,7 @@
      "y": 15.234,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10289,6 +11528,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 23.633,
+     "y": 37.5,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -10296,7 +11551,7 @@
      "y": 31.25,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10312,7 +11567,7 @@
      "y": 22.949,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 2
     }
    ],
    "contesti": [
@@ -10360,6 +11615,70 @@
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536872998, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.0,
+     "y": 53.223,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.6,
+     "y": 28.76,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875404, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.92,
+     "y": 25.049,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875405, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.164,
+     "y": 15.234,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875406, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -10522,6 +11841,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.443,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 46.484,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -10529,7 +11880,7 @@
      "y": 8.203,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10538,30 +11889,14 @@
      ]
     },
     {
-     "tipo": "passaggio",
-     "nome": "Ascensore",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO».",
-     "x": 71.045,
-     "y": 8.057,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536871293, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0015».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 48.145,
      "y": 10.156,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10651,6 +11986,38 @@
    "note": "Versione «porzione occidentale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.443,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 46.484,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -10658,7 +12025,7 @@
      "y": 8.203,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10667,30 +12034,14 @@
      ]
     },
     {
-     "tipo": "passaggio",
-     "nome": "Ascensore",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO».",
-     "x": 71.045,
-     "y": 8.057,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536871293, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0015».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 48.145,
      "y": 10.156,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -10735,18 +12086,34 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "passaggio",
-     "nome": "Ascensore",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO».",
-     "x": 71.045,
-     "y": 8.057,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.443,
+     "y": 5.713,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536871293, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 46.484,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -10820,7 +12187,24 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 26.855,
+     "y": 44.434,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873584, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-6-0",
     "nome": "Sala intrattenimento 2P",
@@ -10947,6 +12331,22 @@
    "note": "Versione «porzione orientale» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 12.891,
+     "y": 46.582,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -10954,7 +12354,7 @@
      "y": 26.855,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11000,7 +12400,24 @@
     "chiave": "shido-07-ponte-di-poppa"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 12.891,
+     "y": 46.582,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-7-0",
     "nome": "Ponte di poppa",
@@ -11055,6 +12472,38 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.443,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 46.484,
+     "y": 5.713,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873587, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -11062,7 +12511,7 @@
      "y": 8.203,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11071,30 +12520,14 @@
      ]
     },
     {
-     "tipo": "passaggio",
-     "nome": "Ascensore",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO».",
-     "x": 71.045,
-     "y": 8.057,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536871293, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "porta",
      "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0015».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 48.145,
      "y": 10.156,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11157,6 +12590,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 9.912,
+     "y": 46.484,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -11164,7 +12613,7 @@
      "y": 33.398,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11209,18 +12658,18 @@
    "note": "Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
    "spilli": [
     {
-     "tipo": "meccanismo",
-     "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG».",
-     "x": 45.068,
-     "y": 21.045,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.219,
+     "y": 23.584,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875921, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -11261,18 +12710,18 @@
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
    "spilli": [
     {
-     "tipo": "meccanismo",
-     "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG».",
-     "x": 45.068,
-     "y": 21.045,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.219,
+     "y": 23.584,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875921, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873585, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -11436,7 +12885,7 @@
     {
      "tipo": "meccanismo",
      "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 28.027,
      "y": 9.912,
      "riferimento": null,
@@ -11493,18 +12942,18 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "meccanismo",
-     "nome": "Meccanismo",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG».",
-     "x": 54.199,
-     "y": 3.76,
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.598,
+     "y": 37.402,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875921, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875924, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -11599,18 +13048,50 @@
      ]
     },
     {
-     "tipo": "passaggio",
-     "nome": "Ascensore",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO».",
-     "x": 3.223,
-     "y": 28.223,
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.236,
+     "y": 28.662,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 2,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536871293, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873808, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 42.334,
+     "y": 37.939,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873809, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.012,
+     "y": 32.617,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873810, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -11622,7 +13103,7 @@
      "y": 17.969,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11638,11 +13119,27 @@
      "y": 37.842,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 6,
      "condizioni": [
       {
        "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536873812, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.48,
+     "y": 31.006,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -11672,34 +13169,34 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "passaggio",
-     "nome": "Ascensore",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO».",
-     "x": 3.223,
-     "y": 28.223,
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 3.418,
+     "y": 17.822,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536871293, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875956, non ancora tradotta in una condizione della guida."
       }
      ]
     },
     {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D07_159_20_TBOX_minimap_06».",
-     "x": 3.418,
-     "y": 17.822,
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.48,
+     "y": 31.006,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875956, non ancora tradotta in una condizione della guida."
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
       }
      ]
     }
@@ -11895,6 +13392,22 @@
    "note": "",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 14.551,
+     "y": 20.312,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873586, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
@@ -11902,7 +13415,7 @@
      "y": 4.346,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12145,7 +13658,7 @@
     {
      "tipo": "forziere",
      "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «D07_159_35_TBOX_minimap_12».",
+     "descrizione": "Pin nativo del gioco.",
      "x": 47.949,
      "y": 40.137,
      "riferimento": null,
@@ -12178,9 +13691,9 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0C80».",
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
      "x": 16.211,
      "y": 41.797,
      "riferimento": null,
@@ -12226,9 +13739,9 @@
      ]
     },
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0C80».",
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
      "x": 32.812,
      "y": 59.863,
      "riferimento": null,
@@ -12310,7 +13823,24 @@
     "chiave": "iweleth-04-corridoio-della-prigione-parte-ii"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.787,
+     "y": 18.555,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873582, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-161-4-0",
@@ -12426,7 +13956,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.078,
+     "y": 27.1,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873580, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-6-0",
     "nome": "Corridoio della prigione – Parte IV",
@@ -12488,6 +14035,22 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale — più ampia» della stessa zona.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.395,
+     "y": 14.111,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873583, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -12495,7 +14058,7 @@
      "y": 21.582,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12547,6 +14110,22 @@
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [
     {
+     "tipo": "sicura",
+     "nome": "Stanza sicura",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 23.242,
+     "y": 41.748,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873581, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
      "tipo": "forziere",
      "nome": "Forziere",
      "descrizione": "Pin nativo del gioco.",
@@ -12554,7 +14133,7 @@
      "y": 54.346,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0,
+     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12722,22 +14301,6 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR». Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
-     "x": 19.141,
-     "y": 43.945,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536874967, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "sala-giochi",
      "nome": "Sala giochi (Central Street)",
      "descrizione": "Pin nativo del gioco.",
@@ -12748,7 +14311,7 @@
       "chiave": "shibuya/sala-giochi-shibuya"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 0
     },
     {
      "tipo": "ristorante",
@@ -12761,7 +14324,7 @@
       "chiave": "shibuya/ore-no-beko"
      },
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 1
     },
     {
      "tipo": "negozio",
@@ -12774,7 +14337,7 @@
       "chiave": "shibuya/untouchable"
      },
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 2
     },
     {
      "tipo": "attivita",
@@ -12787,7 +14350,7 @@
       "chiave": "shibuya/protein-lovers"
      },
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 3
     },
     {
      "tipo": "negozio",
@@ -12800,7 +14363,7 @@
       "chiave": "shibuya/scarlet"
      },
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 4
     },
     {
      "tipo": "negozio",
@@ -12813,7 +14376,7 @@
       "chiave": "shibuya/rocinante"
      },
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 5
     },
     {
      "tipo": "negozio",
@@ -12826,7 +14389,7 @@
       "chiave": "shibuya/aohige"
      },
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 6
     },
     {
      "tipo": "ristorante",
@@ -12839,7 +14402,7 @@
       "chiave": "shibuya/diner"
      },
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 7
     },
     {
      "tipo": "ristorante",
@@ -12852,7 +14415,7 @@
       "chiave": "shibuya/big-bang-burger"
      },
      "collezionabile": false,
-     "ordine": 9
+     "ordine": 8
     },
     {
      "tipo": "negozio",
@@ -12865,7 +14428,7 @@
       "chiave": "shibuya/taiheido"
      },
      "collezionabile": false,
-     "ordine": 10
+     "ordine": 9
     },
     {
      "tipo": "negozio",
@@ -12878,7 +14441,7 @@
       "chiave": "shibuya/triple-seven"
      },
      "collezionabile": false,
-     "ordine": 11
+     "ordine": 10
     },
     {
      "tipo": "cinema",
@@ -12888,7 +14451,7 @@
      "y": 9.277,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 12
+     "ordine": 11
     },
     {
      "tipo": "distributore",
@@ -12898,7 +14461,7 @@
      "y": 53.906,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 13
+     "ordine": 12
     }
    ]
   },
@@ -13073,22 +14636,6 @@
    "note": "",
    "spilli": [
     {
-     "tipo": "porta",
-     "nome": "Porta",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR». Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
-     "x": 19.824,
-     "y": 40.43,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536874967, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
      "tipo": "ristorante",
      "nome": "Bar Crossroads",
      "descrizione": "Pin nativo del gioco.",
@@ -13099,7 +14646,7 @@
       "chiave": "shinjuku/crossroads"
      },
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 0
     },
     {
      "tipo": "negozio",
@@ -13109,7 +14656,7 @@
      "y": 30.664,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 2
+     "ordine": 1
     },
     {
      "tipo": "negozio",
@@ -13119,7 +14666,7 @@
      "y": 27.051,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 2
     },
     {
      "tipo": "negozio",
@@ -13132,7 +14679,7 @@
       "chiave": "shinjuku/hinokuniya"
      },
      "collezionabile": false,
-     "ordine": 4
+     "ordine": 3
     },
     {
      "tipo": "distributore",
@@ -13142,7 +14689,7 @@
      "y": 34.766,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 5
+     "ordine": 4
     },
     {
      "tipo": "distributore",
@@ -13152,7 +14699,7 @@
      "y": 31.25,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 6
+     "ordine": 5
     },
     {
      "tipo": "distributore",
@@ -13162,7 +14709,7 @@
      "y": 19.824,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 7
+     "ordine": 6
     },
     {
      "tipo": "cinema",
@@ -13175,7 +14722,7 @@
       "chiave": "shinjuku/cinema-cult9"
      },
      "collezionabile": false,
-     "ordine": 8
+     "ordine": 7
     }
    ]
   },
