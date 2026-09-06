@@ -15,7 +15,7 @@
 import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
-import { nascondeIlPinCondizione } from '../../shared/condizioniSpillo.js';
+import { proiezioneDiPresenza } from '../../shared/condizioniSpillo.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo, dataSbloccoQuartiere, ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
@@ -299,7 +299,14 @@ export function valutaDisponibilita(testi: Array<string | null | undefined>, st:
  */
 export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
   const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
-  const bloccante = requisiti.some((q, i) => q.stato === 'rosso' && nascondeIlPinCondizione(elenco[i]));
+  // Si valuta la **proiezione di presenza** di ciascun requisito, non il requisito intero: di
+  // `tutte(fascia sera, dote 3)` resta `tutte(fascia sera)`, e se quella e' rossa la cosa in
+  // quel momento non c'e' — dote o non dote. Chiedersi soltanto «e' una condizione di presenza?»
+  // lasciava visibile di giorno un negozio che apre la sera, perche' il gruppo era misto.
+  const bloccante = elenco.some((r, i) => {
+    const presenza = proiezioneDiPresenza(r as unknown as { tipo: string }) as RequisitoDisponibilita | null;
+    return presenza !== null && valutaRequisito({ ...presenza, testo: r.testo }, i, st).stato === 'rosso';
+  });
   const stato = bloccante ? 'bloccato'
     : requisiti.some((q) => q.stato === 'rosso' || q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };

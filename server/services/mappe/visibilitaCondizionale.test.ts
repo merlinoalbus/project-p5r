@@ -20,7 +20,9 @@ import { closeDb, initDb, getDb, prepared } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
+import { applicaPresenzaAiLuoghi } from './presenzaEntita.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
+import { eStrutturale } from '../../../shared/spilli.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
 import { dettaglioMappa } from './mappeService.js';
 
@@ -134,14 +136,33 @@ describe('visibilità condizionale dei pin', () => {
     expect(esito.stato).toBe('bloccato');
   });
 
-  it('un gruppo che mescola presenza e prerequisito non nasconde', () => {
-    // non è né l'una né l'altra cosa: nel dubbio si mostra, perché mostrare qualcosa di troppo si
-    // corregge guardando mentre nascondere qualcosa che c'è no
+  it('in un gruppo misto conta la parte di presenza: «solo di sera e serve il grimaldello» di giorno sparisce', () => {
+    // il negozio apre la sera **e** vuole il grimaldello: di giorno non c'è, grimaldello o no.
+    // Trattare il gruppo come «misto, quindi non nascondo» lo lasciava visibile di giorno.
     const esito = valutaRequisitiSpillo(
       [{ tipo: 'gruppo', modo: 'tutte', testo: 'misto',
          condizioni: [{ tipo: 'fascia', fascia: 'sera' }, { tipo: 'articolo', articolo: 'grimaldello' }] }],
       statoVuoto);
+    expect(esito.stato).toBe('bloccato');
+  });
+
+  it('in un «almeno una» con un ramo che tace sulla presenza non si conclude che manchi', () => {
+    // «di sera **oppure** col grimaldello»: col grimaldello ci si arriva anche di giorno, quindi
+    // dalla sola presenza non si può dire che la cosa non ci sia
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'gruppo', modo: 'almeno-una', testo: 'sera o grimaldello',
+         condizioni: [{ tipo: 'fascia', fascia: 'sera' }, { tipo: 'articolo', articolo: 'grimaldello' }] }],
+      statoVuoto);
     expect(esito.stato).not.toBe('bloccato');
+  });
+
+  it('un negozio disegnato sulla planimetria nativa non è strutturale: di sera chiude e sparisce', () => {
+    // la protezione degli elementi fissi vale per provenienza **e** tipo insieme: un negozio sulla
+    // planimetria resta un negozio, e quando è chiuso il pin non deve esserci
+    expect(eStrutturale('negozio')).toBe(false);
+    expect(eStrutturale('porta')).toBe(true);
+    expect(eStrutturale('passaggio')).toBe(true);
+    expect(eStrutturale('attivita')).toBe(false);
   });
 
   it('gli elementi fissi dell’atlante non si nascondono nemmeno se qualcuno ci attacca una presenza', () => {
@@ -160,6 +181,26 @@ describe('visibilità condizionale dei pin', () => {
     expect(spillo!.disponibilita?.stato).not.toBe('bloccato');
     getDb().prepare('UPDATE spillo SET condizioni_json = NULL WHERE id = ?').run(nativo!.id);
     getDb().prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
+  });
+
+  it('un negozio sulla planimetria nativa eredita la presenza del suo luogo, come quello editoriale', () => {
+    // e' lo stesso negozio visto da due mappe: se il quartiere non e' ancora aperto devono
+    // sparire tutti e due, non uno solo. Prima la presenza si attaccava ai soli pin editoriali
+    // e il gemello nativo restava visibile.
+    applicaPresenzaAiLuoghi(getDb());
+    const nativi = getDb().prepare(`SELECT s.condizioni_json FROM spillo s
+      WHERE s.mappa_chiave LIKE 'nativo-%' AND s.tipo = 'negozio'
+        AND s.riferimento_chiave LIKE 'akihabara/%'`).all() as Array<{ condizioni_json: string | null }>;
+    expect(nativi.length).toBeGreaterThan(0);
+    for (const n of nativi) {
+      expect(n.condizioni_json).toBeTruthy();
+      expect(JSON.parse(n.condizioni_json!)).toContainEqual({ tipo: 'quartiere', quartiere: 'akihabara' });
+    }
+    // e gli elementi fissi della stessa planimetria restano senza condizioni
+    const fissi = getDb().prepare(`SELECT COUNT(*) AS n FROM spillo
+      WHERE mappa_chiave LIKE 'nativo-%' AND tipo IN ('porta','forziere','passaggio','scala')
+        AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`).get() as { n: number };
+    expect(fissi.n).toBe(0);
   });
 
   it('un forziere è collezionabile: lo nasconde il filtro dei raccolti, non una condizione', () => {
