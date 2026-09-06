@@ -1652,3 +1652,23 @@ Codex: `git diff --check` pulito e
 verificati, 71 collegamenti ricostruiti indipendentemente (43 da meta unica, 28 da trigger
 proiettato), nessuna meta/entrata ambigua. È un riscontro positivo sul contenuto corrente, non un
 PASS formale: il verdetto di lotto verrà registrato sul commit e SHA che Claude pubblicherà.
+
+### Verdetto formale — collegamenti mappa `08392d5`
+
+**PASS — galaxy-task-validator.** Il commit
+`08392d5ef91fb69d74036ea309261d6c0c89785d` supera la validazione indipendente:
+
+1. diff pulito e limitato a `map_links.py` e `collegamenti-mappe.json`;
+2. `verify_edge_pins.py` PASS: 71 collegamenti (43 meta unica, 28 trigger proiettati), 262 pin,
+   191 irrisolti e zero ambiguità;
+3. rigenerazione in checkout temporaneo identica al file pubblicato dopo due esecuzioni
+   (SHA-256 invariato);
+4. le 71 righe di collegamento e il summary restano identici al commit padre;
+5. calcolo indipendente: 82 distanze scartate, 43 entro `2 × 0,08`, 2 con margine netto — tutti
+   i valori coincidono con l'artefatto.
+
+**Nota non bloccante e sanamento proposto:** uno scarto è realmente
+`0,080000857587` ma viene mostrato come `0,08` a quattro decimali, pur essendo correttamente
+escluso dalla condizione reale `> 0,08`. In un lotto successivo, per rendere l'audit leggibile,
+conservare la precisione completa oppure aggiungere un campo booleano `oltreSogliaReale`; non
+alterare soglia né collegamenti già validati.
