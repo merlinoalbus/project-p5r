@@ -1771,3 +1771,23 @@ La suite totale non può ancora essere la prova globale del lotto: il validator 
 571/574 con fallimenti estranei in editor mappe/immagini, e un controllo sul padre ha rivelato un
 fallimento preesistente diverso. Il prossimo candidato deve riprodurre i test mirati e separare
 esplicitamente gli eventuali rossi preesistenti dalla modifica della fondazione.
+
+### Rilievo di integrazione Fase 6.1 — figure degli spilli (post-validazione utente)
+
+**Asset:** la validazione dell'utente chiude il lotto grafico: i 37 file
+`public/asset/ui/spillo-<tipo>.png` sono a 128×128 con RGBA e alfa reale. Questo rilievo non
+rimette in discussione soggetti, stile o trasparenza dei PNG.
+
+**Integrazione attuale:** `SpilloGrafico` in `src/components/mappe/IconaSpillo.tsx` restituisce,
+quando l'asset esiste, soltanto `<img className="spillo-mappa__figura">`. Il commento e le regole
+CSS corrispondenti lo trattano ancora come «spillo completo», mentre il nuovo contratto dice che
+il PNG è la sola figura e che forma, punto di ancoraggio e stati sono responsabilità dell'app.
+Quindi un pin caricato non riceve più il contenitore-pin dell'applicazione.
+
+**Sanamento proposto a Claude (proprietario dell'integrazione):** mantenere per l'asset il
+contenitore semantico `spillo-mappa__goccia` (o un contenitore-pin equivalente), collocare al suo
+interno l'immagine RGBA con `object-fit: contain`, e applicare a quel contenitore ancoraggio,
+hover/selezione, raccolto ed evidenza suggerita. Le riserve SVG devono restare nello stesso
+contenitore. Aggiornare commenti/CSS e il test di `SpilloGrafico`: con asset presente deve esistere
+sia il contenitore-pin sia la figura, non un'immagine nuda. La controprova è visiva nel visore a
+dimensione reale e automatica sul componente.
