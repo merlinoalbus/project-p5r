@@ -842,3 +842,30 @@ corretto integrare la PR dopo il PASS di uno solo di questi punti, perché porte
 anche lavoro ancora respinto o non verificato. Il primo merge può quindi avvenire soltanto dopo
 il PASS formale di tutti i lotti già presenti nella diff della PR. Dal checkpoint successivo, ogni
 nuovo punto deve vivere in un branch/PR isolato e venire fuso subito dopo il proprio PASS.
+
+L'utente ha autorizzato espressamente l'eccezione: la **prima** PR può essere fusa in forma
+unificata con tutti i PASS accumulati. `github/main` contiene già la PR #21 con Fase 0 e Fase 1;
+la PR #25 aperta può quindi diventare il primo checkpoint cumulativo successivo, ma soltanto dopo
+che tutti i lotti effettivamente presenti nella sua diff hanno ottenuto il proprio PASS. Da quel
+merge in avanti resta la regola un punto, un PASS, una PR.
+
+### Rilievi della review della PR #25 da chiudere prima del merge
+
+La review automatica sul commit remoto `8448c87` ha rilevato due difetti riproducibili che il check
+verde della PR non copre ancora:
+
+1. `verify_world_connections.py` confronta i byte del JSON versionato con quelli rigenerati, ma il
+   produttore scrive con la terminazione di riga predefinita della piattaforma. Il file può quindi
+   essere CRLF su Windows e LF su Linux/Docker pur rappresentando lo stesso JSON. La soluzione
+   robusta è imporre esplicitamente una terminazione stabile anche nel file versionato, oppure
+   confrontare una serializzazione canonica e provare separatamente il determinismo byte-per-byte;
+2. `verifica_tutto.py --artefatti <radice>` passa la radice selezionata soltanto come primo
+   argomento. Le cartelle `.flow` e `.BF` di `verify_world_connections.py` restano derivate dalla
+   costante globale `ARTEFATTI`; inoltre un percorso relativo viene interpretato dal `cwd` interno
+   del subprocess. L'opzione va risolta una volta rispetto al chiamante e tutti gli argomenti
+   dipendenti dagli artefatti devono essere derivati da quella radice risolta.
+
+Servono controprove su una copia isolata: `--artefatti` assoluto e relativo devono verificare
+esclusivamente quella copia; una sua sorgente `.flow` o `.BF` manomessa deve far fallire il gate
+senza leggere i default. Il controllo delle evidenze deve passare sia con terminazioni Windows sia
+Unix senza indebolire il confronto del contenuto.
