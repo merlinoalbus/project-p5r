@@ -1581,7 +1581,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-160-6-0. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 35.059,
      "y": 41.406,
      "riferimento": null,
@@ -1597,7 +1597,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-160-4-1. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 35.449,
      "y": 19.189,
      "riferimento": null,
@@ -1757,7 +1757,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-155-2-0. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 43.213,
      "y": 35.938,
      "riferimento": null,
@@ -1941,7 +1941,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-155-9-0. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 6.592,
      "y": 28.418,
      "riferimento": null,
@@ -3420,12 +3420,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-151-2-1.",
      "x": 22.461,
      "y": 8.105,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-151-2-1",
+      "x": 34.434,
+      "y": 32.059,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3475,12 +3481,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-151-2-1.",
      "x": 22.461,
      "y": 8.105,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-151-2-1",
+      "x": 34.434,
+      "y": 32.059,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -3705,12 +3717,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-151-1-1.",
      "x": 29.102,
      "y": 37.598,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
+     "destinazione": {
+      "mappa": "nativo-rmap-151-1-1",
+      "x": 32.13,
+      "y": 25.125,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5623,12 +5641,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-154-2-1.",
      "x": 18.359,
      "y": 3.32,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
+     "destinazione": {
+      "mappa": "nativo-rmap-154-2-1",
+      "x": 36.547,
+      "y": 43.359,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -5864,7 +5888,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-154-3-0. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 21.484,
      "y": 42.48,
      "riferimento": null,
@@ -6821,12 +6845,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-154-3-1.",
      "x": 35.254,
      "y": 40.723,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-154-3-1",
+      "x": 40.267,
+      "y": 9.754,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7176,12 +7206,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-153-2-0.",
      "x": 49.316,
      "y": 19.775,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-153-2-0",
+      "x": 10.166,
+      "y": 5.907,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -7520,7 +7556,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-153-2-1. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 23.096,
      "y": 6.592,
      "riferimento": null,
@@ -7636,7 +7672,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-153-2-1. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 23.096,
      "y": 6.592,
      "riferimento": null,
@@ -7932,12 +7968,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-153-6-0.",
      "x": 19.043,
      "y": 2.539,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 2,
+     "destinazione": {
+      "mappa": "nativo-rmap-153-6-0",
+      "x": 14.898,
+      "y": 42.082,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -8115,7 +8157,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-153-5-1. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 15.039,
      "y": 46.582,
      "riferimento": null,
@@ -9636,7 +9678,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-162-15-2. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 25.146,
      "y": 71.777,
      "riferimento": null,
@@ -9822,7 +9864,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-162-15-2. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 17.725,
      "y": 7.568,
      "riferimento": null,
@@ -11589,12 +11631,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-157-11-0.",
      "x": 38.477,
      "y": 28.809,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
+     "destinazione": {
+      "mappa": "nativo-rmap-157-11-0",
+      "x": 24.135,
+      "y": 13.597,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11954,12 +12002,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-157-10-0.",
      "x": 43.75,
      "y": 29.492,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-157-10-0",
+      "x": 23.147,
+      "y": 14.319,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -12043,12 +12097,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-157-10-0.",
      "x": 43.75,
      "y": 29.492,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-157-10-0",
+      "x": 23.147,
+      "y": 14.319,
+      "zoom": 3
+     },
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -14673,7 +14733,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-159-2-0. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 54.932,
      "y": 31.055,
      "riferimento": null,
@@ -17685,7 +17745,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
+     "descrizione": "Pin nativo del gioco. Porta a nativo-rmap-161-11-0. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 28.32,
      "y": 2.734,
      "riferimento": null,
@@ -17770,22 +17830,34 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-001-3-0.",
      "x": 44.336,
      "y": 50.586,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 0
+     "ordine": 0,
+     "destinazione": {
+      "mappa": "nativo-rmap-001-3-0",
+      "x": 38.256,
+      "y": 61.338,
+      "zoom": 3
+     }
     },
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-001-3-0.",
      "x": 35.889,
      "y": 50.586,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1
+     "ordine": 1,
+     "destinazione": {
+      "mappa": "nativo-rmap-001-3-0",
+      "x": 38.256,
+      "y": 61.338,
+      "zoom": 3
+     }
     },
     {
      "tipo": "passaggio",
@@ -17866,7 +17938,7 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-001-2-1. Il punto preciso di arrivo non e’ noto: la planimetria di arrivo non ha una proiezione certificata.",
      "x": 36.621,
      "y": 39.16,
      "riferimento": null,
@@ -17886,12 +17958,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-001-1-0.",
      "x": 42.139,
      "y": 5.859,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3
+     "ordine": 3,
+     "destinazione": {
+      "mappa": "nativo-rmap-001-1-0",
+      "x": 38.091,
+      "y": 33.541,
+      "zoom": 3
+     }
     },
     {
      "tipo": "passaggio",
@@ -17999,12 +18077,18 @@
     {
      "tipo": "passaggio",
      "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti. Porta a nativo-rmap-005-1-0.",
      "x": 55.176,
      "y": 41.797,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 14
+     "ordine": 14,
+     "destinazione": {
+      "mappa": "nativo-rmap-005-1-0",
+      "x": 63.178,
+      "y": 47.222,
+      "zoom": 3
+     }
     }
    ],
    "gruppoImmagini": {

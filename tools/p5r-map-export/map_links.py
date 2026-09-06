@@ -7,10 +7,14 @@ posto giusto. Serve rispondere a due domande diverse, e le fonti sono due.
 planimetria attraverso quell'entrata. Le chiamate sono state lette da tutti i 5443 script del
 gioco (`collegamenti-script.json`).
 
-**Quale pin ci porta.** Qui la prudenza è d'obbligo. Se una planimetria ha **un solo** pin di
-passaggio e il suo campo ha **una sola** destinazione, l'abbinamento è forzato e non c'è niente da
-scegliere. Se ne ha tre e tre, sapere quale va dove richiederebbe di indovinare, e allora si
-lascia stare: meglio nessun collegamento che un collegamento che porta altrove.
+**Quale pin ci porta.** Il trigger che chiama `CALL_FIELD` ha una posizione nel mondo, e dove la
+planimetria di partenza ha una proiezione certificata quella posizione diventa un punto
+sull'immagine: il pin di passaggio che gli sta più vicino è quello che porta lì. Non è un
+indovinello — è il punto in cui il gioco fa scattare il movimento, misurato sulla stessa
+planimetria. Oltre la distanza ammessa non si abbina niente.
+
+Resta il caso in cui la planimetria ha un solo pin di passaggio e il suo campo una sola
+destinazione: lì l'abbinamento è forzato e vale anche senza proiezione.
 
 **In che punto si arriva.** L'entrata citata dalla chiamata ha una posizione nel mondo, e dove la
 planimetria di arrivo ha una proiezione certificata quella posizione diventa un punto preciso
@@ -25,6 +29,9 @@ import sys
 
 # Ingrandimento con cui si arriva: abbastanza per vedere dove si è senza perdere il contesto.
 ZOOM = 3
+# Quanto puo' distare, in frazione della diagonale, il trigger dal pin perche' si possa dire
+# che sia quello: oltre, il pin piu' vicino e' solo il meno lontano.
+DISTANZA_ABBINAMENTO = 0.08
 
 
 def chiave_di(codice):
@@ -86,42 +93,100 @@ def main(out):
     per_campo = destinazioni_per_campo(collegamenti)
     esistenti = set(meta)
 
+    def destinazioni_per_procedura(collegamenti):
+        fuori = {}
+        for c in collegamenti:
+            trovato = re.search(r'(\d{3})_(\d{3})_(\d{2})', c['script'])
+            if trovato:
+                fuori[('F%s_%s_%s' % trovato.groups(), c['procedura'])] = c['destinazioni']
+        return fuori
+
+    per_procedura = destinazioni_per_procedura(collegamenti)
     righe, esiti = [], collections.Counter()
     for codice, mappa in sorted(meta.items()):
         chiave = chiave_di(codice)
         rif = riferimento.get(chiave)
         if not rif or rif['esito'] != 'condiviso':
             continue
-        pin = [i for i in rif['collocabili'] if mappa['pins'][i]['nativeType'] in bordo]
-        if not pin:
+        indici = [i for i in rif['collocabili'] if mappa['pins'][i]['nativeType'] in bordo]
+        if not indici:
             continue
-        destinazioni = set()
-        for campo in mappa['fields']:
-            destinazioni |= per_campo.get(campo, set())
-        # solo le destinazioni che sono planimetrie vere e diverse da questa
-        mia = tuple(int(v) for v in codice.split('_')[1:])
-        valide = sorted({d for d in destinazioni
-                         if (d[0], d[1], d[2]) != mia and 'RMAP_%03d_%d_%d' % d[:3] in esistenti})
-        if not valide:
-            esiti['nessuna destinazione nota'] += len(pin)
-            continue
-        if len(pin) != 1 or len(valide) != 1:
-            esiti['abbinamento ambiguo, lasciato senza'] += len(pin)
-            continue
-        maggiore, minore, sub, ingresso = valide[0]
-        arrivo_codice = 'RMAP_%03d_%d_%d' % (maggiore, minore, sub)
         fattore = rif['fattoreScala']
         larghezza, altezza = rif['dimensione']
-        p = mappa['pins'][pin[0]]
-        punto, motivo = punto_di_arrivo(arrivo_codice, ingresso, meta, campi, proiezioni)
-        righe.append(dict(
-            partenza=chiave, indicePin=pin[0],
-            x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
-            arrivo=chiave_di(arrivo_codice), ingresso=ingresso,
-            punto=punto, motivoSenzaPunto=motivo,
-            prova=f'la planimetria ha un solo pin di passaggio e il suo campo una sola '
-                  f'destinazione, {arrivo_codice} attraverso l’entrata {ingresso}'))
-        esiti['collegamento certo' if punto else 'collegamento certo, senza punto di arrivo'] += 1
+        diagonale = (larghezza**2 + altezza**2) ** 0.5
+        pin = [(i, mappa['pins'][i]['x']*fattore, mappa['pins'][i]['y']*fattore) for i in indici]
+        mia = tuple(int(v) for v in codice.split('_')[1:])
+        riga_proiezione = proiezioni.get(codice)
+        assegnati = {}
+
+        # 1. dove la proiezione regge: il trigger che chiama CALL_FIELD si porta sull'immagine, e
+        #    il pin di passaggio piu' vicino e' quello che fa scattare quel movimento
+        if riga_proiezione and riga_proiezione['esito'] == 'certificata':
+            p = riga_proiezione['proiezione']
+            campo = campi.get(p['campo'])
+            nomi = [q['name'] for q in campo['procedures']] if campo else []
+            for t in (campo['triggers'] if campo else []):
+                posizione = t.get('position')
+                if not posizione:
+                    continue
+                i = t.get('procedureIndex')
+                nome = nomi[i] if isinstance(i, int) and 0 <= i < len(nomi) else None
+                destinazioni = per_procedura.get((p['campo'], nome)) if nome else None
+                if not destinazioni:
+                    continue
+                x, z = posizione['xyz'][0], posizione['xyz'][2]
+                if p['scambiaAssi']:
+                    x, z = z, x
+                px = x*p['segnoX']*p['scala'] + p['traslazione'][0]
+                py = z*p['segnoY']*p['scala'] + p['traslazione'][1]
+                vicino = min(pin, key=lambda q: (q[1]-px)**2 + (q[2]-py)**2)
+                distanza = ((vicino[1]-px)**2 + (vicino[2]-py)**2) ** 0.5 / diagonale
+                if distanza > DISTANZA_ABBINAMENTO:
+                    esiti['trigger troppo lontano da ogni pin'] += 1
+                    continue
+                scelta = next((d for d in destinazioni
+                               if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti),
+                              None)
+                if not scelta:
+                    continue
+                precedente = assegnati.get(vicino[0])
+                if precedente and precedente[1] <= distanza:
+                    continue
+                assegnati[vicino[0]] = (scelta, distanza,
+                                        f'il trigger che chiama il movimento cade a '
+                                        f'{round(distanza*100, 1)}% della tela da questo pin',
+                                        'trigger proiettato')
+
+        # 2. dove non regge, resta il caso forzato: un pin, una destinazione
+        if not assegnati and len(indici) == 1:
+            destinazioni = set()
+            for nome_campo in mappa['fields']:
+                destinazioni |= per_campo.get(nome_campo, set())
+            valide = sorted({d for d in destinazioni
+                             if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti})
+            if len(valide) == 1:
+                assegnati[indici[0]] = (list(valide[0]), None,
+                                        'la planimetria ha un solo pin di passaggio e il suo '
+                                        'campo una sola destinazione',
+                                        'un solo pin, una sola destinazione')
+
+        for indice, (scelta, distanza, motivo, modo) in sorted(assegnati.items()):
+            maggiore, minore, sub, ingresso = scelta
+            arrivo_codice = 'RMAP_%03d_%d_%d' % (maggiore, minore, sub)
+            punto, senza = punto_di_arrivo(arrivo_codice, ingresso, meta, campi, proiezioni)
+            p_pin = mappa['pins'][indice]
+            righe.append(dict(
+                partenza=chiave, indicePin=indice,
+                x=round(100*p_pin['x']*fattore/larghezza, 3),
+                y=round(100*p_pin['y']*fattore/altezza, 3),
+                arrivo=chiave_di(arrivo_codice), ingresso=ingresso,
+                punto=punto, motivoSenzaPunto=senza, modo=modo,
+                distanza=round(distanza, 4) if distanza is not None else None,
+                prova=motivo))
+            esiti['collegato' if punto else 'collegato, senza punto di arrivo'] += 1
+        senza_collegamento = len(indici) - len(assegnati)
+        if senza_collegamento:
+            esiti['pin di passaggio senza destinazione'] += senza_collegamento
 
     grafo = set()
     for c in collegamenti:
@@ -139,13 +204,16 @@ def main(out):
         sources=dict(collegamenti='collegamenti-script.json', proiezioni='proiezioni-mappa.json',
                      bordo='pin-di-bordo.json', riferimento='riferimento-pin.json'),
         criterio=dict(zoom=ZOOM,
-                      abbinamento='solo dove è forzato: una planimetria con un solo pin di '
-                                  'passaggio e una sola destinazione nota',
+                      distanzaAbbinamento=DISTANZA_ABBINAMENTO,
+                      abbinamento='il pin più vicino al trigger che chiama il movimento, entro la '
+                                  'distanza ammessa; in mancanza di proiezione, solo il caso '
+                                  'forzato di un pin e una destinazione',
                       arrivo='posizione dell’entrata citata dalla chiamata, proiettata sulla '
                              'planimetria di arrivo dove la proiezione è certificata'),
         collegamenti=righe,
         grafoDelleRisorse=dict(archi=len(grafo), reciproci=reciproci),
-        summary=dict(collegamentiCerti=len(righe),
+        summary=dict(collegamenti=len(righe),
+                     perModo=dict(collections.Counter(r['modo'] for r in righe)),
                      conPuntoDiArrivo=sum(1 for r in righe if r['punto']),
                      esiti=dict(esiti), archiDelGrafo=len(grafo), archiReciproci=reciproci),
         limits=['Dove i pin di passaggio sono più d’uno e le destinazioni pure, quale porti dove '
