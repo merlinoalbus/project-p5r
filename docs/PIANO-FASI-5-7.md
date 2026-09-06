@@ -143,32 +143,53 @@ fondamenta condivise (A scrive, B verifica)
 
 ---
 
-## 5.4 esteso — «anche la mappa dei Memento va sostituita con quella dei Memento, ecc. ecc.»
+## 5.4 — la mappa di Tokyo e quella dei Memento si **costruiscono**
 
-L'utente ha allargato il punto il 6 settembre: non è solo Tokyo. **Ogni mappa radice deve essere
-la mappa che il gioco usa per quella cosa**, non un'illustrazione editoriale.
+Precisazioni dell'utente del 6 settembre, che restringono e chiariscono il punto:
 
-Oggi le undici radici stanno così:
+> non hai capito... fai la mappa dei mementos e quella dei quartieri di tokyo
+>
+> se poi la costruisci con gli elementi originali... e puoi rendere i quartieri visibili solo se
+> sbloccati ancora meglio
+>
+> stessa cosa per i memento... gli altri lascia così
+>
+> nella mappa di tokyo aggiungi i PNG posizionati a dovere dei palazzi quando attivi e del covo
+> fantasma e delle altre mappe root quando attive
 
-| radice | immagine attuale | mappa del gioco |
-|---|---|---|
-| `tokyo` | `mappe/tokyo` — illustrazione | **da comporre**: non esiste un'unica immagine. Il gioco disegna la schermata di viaggio con gli sprite di `P5_MAPDATA.SPD` (icone dei quartieri: il 105 di Shibuya, il Kabukichō di Shinjuku, la ruota di Odaiba, il Kaminarimon di Asakusa…) più le 31 stazioni e i 64 archi di `metropolitana.json` |
-| `dungeon-kamoshida` | `palazzi/kamoshida` — illustrazione | **trovata**: `nativo-rmap-151-0-0`, il castello intero visto d'insieme. Verificata a occhio |
-| gli altri 8 Palazzi | `palazzi/<nome>` — illustrazione | **da individuare** |
-| `dungeon-mementos` | `palazzi/mementos` — illustrazione | **da individuare** |
+Quindi: **due mappe, non undici.** I nove Palazzi tengono la loro illustrazione. Tokyo e Memento si
+disegnano nell'app, con gli elementi originali del gioco, e diventano vive:
 
-### Dove si è arrivati nella ricerca, così non si ricomincia
+- **Tokyo** — i quartieri, visibili **solo quando sbloccati**; sopra, i Palazzi **quando sono
+  attivi** (la finestra dal/al è già in `finestre-dungeon.json` e già valutata), il Covo dei Ladri,
+  e le altre mappe radice quando attive;
+- **Memento** — la stessa cosa per i suoi livelli.
 
-L'ipotesi «la mappa d'insieme è quella con codice `<campo>-0-<n>`» **regge solo per Kamoshida**:
-degli altri dieci Palazzi nessuno ha un figlio con minore 0. Il gioco non numera le mappe
-d'insieme in modo uniforme, quindi la strada è un'altra.
+Le condizioni ci sono già tutte: la data di sblocco di ogni quartiere sta in `quartiere`, la
+finestra di ogni Palazzo in `finestre-dungeon.json`, e il valutatore che le legge è quello della
+Fase 2. Il lavoro è il disegno, non i dati.
 
-La fonte giusta è `nomi-mappe-ufficiali.json`, estratto da `FLDWHOLEMAPTABLE.FTD` e
-`FLDWHOLEMAPTABLEDNG.FTD`: la tabella `dungeon` ha **11 record e 98 voci valide** — undici come le
-radici. È il menu di viaggio che il gioco mostra sulla mappa d'insieme, e le sue voci dovrebbero
-dire quale ROADMAP fa da mappa d'insieme per ciascun Palazzo. **Prossimo passo: leggerla record per
-record e incrociarla con i codici delle planimetrie.**
+### Gli elementi originali: cosa c'è, e cosa manca ancora
 
-Attenzione a una tentazione: prendere «la planimetria più grande» o «quella con più pin» come
-mappa d'insieme. Sarebbe un indovinello, e su undici radici ne sbaglierebbe qualcuna in silenzio —
-esattamente il tipo di scorciatoia che in Fase 1 è già stata respinta.
+**C'è**, dentro `P5_MAPDATA.SPD` (3 texture, 245 sprite, già estratte in
+`extracted/png/IT/FIELD/PANEL/LMAP/`): l'icona disegnata di ogni quartiere — il 105 di Shibuya, il
+Kabukichō di Shinjuku, la ruota di Odaiba, il Kaminarimon di Asakusa, il cigno di Inokashira — e
+gli sprite dei **nomi**, sia in caratteri latini (`SHIBUYA`, `YONGENJAYA`, `AKIHABARA`) sia in
+giapponese (`渋谷`, `新宿`, `秋葉原`, `お台場`). Gli sprite sono **nominati per quartiere**: è ciò
+che rende possibile associarli senza indovinare.
+
+**Manca la posizione.** Il campo `resa` di ogni sprite non è la collocazione sulla mappa: vale
+sempre esattamente metà della larghezza e metà dell'altezza — è il perno, non il posto. Va cercata
+altrove, e le piste sono due:
+
+- `BASE/FIELD/PANEL/LMAP/P5_MAPINFO.PLG` — solo 368 byte, troppo pochi per trenta posizioni:
+  probabilmente descrive il riquadro delle informazioni, non la mappa;
+- `IT/FIELD/PANEL/LMAP/LMAP.BF` — 150 kB e contiene un blocco `FLW0`: è lo script della schermata,
+  ed è lì che le posizioni hanno più senso di stare.
+
+Per i Memento c'è `IT/FIELD/PANEL/MEMENTOS/MEMENTOS.PLG`, **197 kB**: un pannello di quella
+dimensione un layout ce l'ha quasi certamente.
+
+Se la posizione non salta fuori da nessuna delle due, si dichiara e si scrive una tabella di
+collocazione **autorata**, detta tale — un layout scritto a mano è legittimo, spacciarlo per
+estratto no.

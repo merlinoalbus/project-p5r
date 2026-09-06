@@ -1349,6 +1349,12 @@ export interface DungeonRiassuntoDto {
   arcanaSovrano: string;
   arcanaSovranoNome: string;
   date: { sblocco: string; scadenza: string; furtoConsigliato: string };
+  /** La finestra in cui il Palazzo esiste, in MM-GG del calendario di gioco. `date` qui sopra è
+   *  prosa — «12 Aprile (Martedì) – prima infiltrazione» — e da una frase non si ricava una data
+   *  senza sbagliarne qualcuna in silenzio: questa viene da `finestre-dungeon.json`, trascritto a
+   *  mano una volta. Serve a mostrare il Palazzo sulla mappa **solo quando c'è**. `al` manca dove
+   *  il gioco non fissa una scadenza: Iweleth e i Memento, una volta aperti, restano. */
+  finestra: { dal: string; al: string | null } | null;
   livelloConsigliato: string;
   aree: number;
   punti: number;
