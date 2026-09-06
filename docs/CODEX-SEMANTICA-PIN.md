@@ -248,3 +248,40 @@ Per il gate servono inoltre: comando npm registrato, test di rigenerazione deter
 di caricamento da database nuovo, test API che esponga soltanto chiavi esistenti e test UI che
 provi presenza del collegamento per un match e assenza per uno scartato. Questi sono feedback di
 collaborazione prima del commit, non un verdetto finale su codice incompleto.
+
+## Aggiornamento 3 — il crosswalk non deve introdurre articoli incompleti nel catalogo
+
+**Base analizzata:** `1a91816`, con due correzioni concorrenti non ancora committate
+**Stato:** rilievo anticipato a Claude; nessun file della sua colonna modificato
+
+Il passaggio da collegamento al negozio a creazione di nuove righe `articolo` ha allargato la
+portata della Fase 3d e introdotto dati che la fonte usata non dimostra. Il confronto fra
+`3f1810c:data/seed/negozi.json` e `1a91816:data/seed/negozi.json` trova **48 articoli nuovi**:
+
+* 48 su 48 hanno `effetto: null`, `per: null`, `disponibileDal: null`, `condizione: null` e
+  `statistiche: null`;
+* 4 non hanno neppure il prezzo;
+* tutti e 48 sono marcati `verificato: true`;
+* la categoria viene scelta da `integra-articoli-negozi.ts` come categoria più frequente del
+  negozio, non letta dalla fonte. Per esempio i quattro articoli del negozio del Palazzo di
+  Niijima sono classificati `arma` per maggioranza, compresi `Catena di perline` e
+  `Tessera puntate alte`.
+
+La pagina «Elenco dei negozi» prova che un nome è venduto in un certo negozio e, dove presente,
+il prezzo. Non prova automaticamente effetto, destinatario, categoria o completezza della riga
+di catalogo. Marcare l'intera riga come verificata trasforma campi mancanti e categorie dedotte
+in dati apparentemente certificati.
+
+Questo ampliamento non è necessario per l'obiettivo della Fase 3d: lo schema del crosswalk già
+permette un collegamento al `negozio` quando non esiste una chiave `articolo`. La soluzione più
+robusta è quindi una delle due:
+
+1. mantenere per questi casi il collegamento al negozio e non creare articoli incompleti; oppure
+2. completare ogni nuova scheda da fonti che dimostrino tutti i campi e registrare la provenienza
+   campo per campo, senza derivare la categoria dalla maggioranza.
+
+Correggere a mano due righe dei distributori non chiude il problema generale: il gate deve
+controllare tutte le 48 aggiunte e rifiutare `verificato: true` quando la fonte certifica soltanto
+nome, negozio e prezzo. Restano inoltre aperti i due rilievi già comunicati: il generatore legge
+ancora il database runtime e il campo `generato` usa la data corrente, quindi l'output non è
+ancora autosufficiente e byte-deterministico rispetto ai soli file versionati.
