@@ -21,6 +21,7 @@
     "preview": "vite preview",
     "accesso:copertura": "tsx --env-file=.env scripts/copertura-accesso.ts",
     "oggetti:crosswalk": "tsx --env-file=.env scripts/genera-crosswalk-oggetti.ts",
+    "negozi:integra": "tsx scripts/integra-articoli-negozi.ts",
     "seed:scarica": "tsx scripts/seed/scaricaDataset.ts",
     "seed:normalizza": "tsx scripts/seed/normalizzaDataset.ts",
     "seed:verifica": "tsx scripts/seed/verificaIncrociata.ts",

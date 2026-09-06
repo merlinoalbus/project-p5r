@@ -41,9 +41,9 @@
       "errori": []
     },
     "articolo": {
-      "voci": 499,
-      "conAccesso": 457,
-      "conPunto": 395,
+      "voci": 547,
+      "conAccesso": 501,
+      "conPunto": 423,
       "senzaAccesso": [
         "negozio-palazzo-niijima/raggio-della-vittoria",
         "negozio-palazzo-niijima/soma",
@@ -79,11 +79,11 @@
     }
   },
   "summary": {
-    "voci": 1371,
-    "conAccesso": 1321,
-    "conPunto": 498,
+    "voci": 1419,
+    "conAccesso": 1365,
+    "conPunto": 526,
     "errori": 0,
-    "quotaAccesso": 0.9635,
-    "quotaPunto": 0.3632
+    "quotaAccesso": 0.9619,
+    "quotaPunto": 0.3707
   }
 }
