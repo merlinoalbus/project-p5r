@@ -161,10 +161,24 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     traduzioni: (db.prepare('SELECT COUNT(*) AS n FROM traduzione').get() as { n: number }).n,
   });
   if (!forza && leggiMeta(db, 'hash') === seed.hash) {
-    // le mappe strutturali e i passaggi automatici si allineano a ogni avvio (idempotente, mai sopra le modifiche dell'utente)
-    sincronizzaMappe(db);
-    collegaPalazziAiLuoghi(db);
-    applicaPresenzaAiLuoghi(db);
+    // Il livello mappe si forma una volta e poi resta com'è. Finché lo si riallineava a ogni
+    // avvio, «idempotente» era una parola scritta nel commento: la prova riga per riga mostrava
+    // un alias in più al secondo avvio, perché il percorso pubblico di una mappa si assestava
+    // solo all'ultima ricostruzione. Un alias è poca cosa; il punto è che su un database con una
+    // partita dentro nessuno deve riscrivere niente senza esserne richiesto, e finché la
+    // riconciliazione riparte a ogni avvio quella garanzia non c'è.
+    //
+    // `mappeFormate` porta l'hash del seed con cui il livello mappe è stato costruito. Se
+    // coincide non c'è niente da fare. Se manca — un database formato da una versione
+    // precedente, come quello dell'utente — si allinea questa volta e si marca: da lì in avanti
+    // l'avvio non tocca più nulla.
+    if (leggiMeta(db, 'mappeFormate') !== seed.hash) {
+      sincronizzaMappe(db);
+      collegaPalazziAiLuoghi(db);
+      applicaPresenzaAiLuoghi(db);
+      db.prepare(`INSERT INTO seed_meta (chiave, valore) VALUES ('mappeFormate', ?)
+        ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore`).run(seed.hash);
+    }
     return { caricato: false, versione: seed.versione, hash: seed.hash, conteggi: conteggi() };
   }
 
@@ -631,6 +645,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     insMeta.run('hash', seed.hash);
     insMeta.run('versione', String(seed.versione));
     insMeta.run('caricatoIl', adesso);
+    // Il livello mappe è appena stato costruito da questo seed: gli avvii successivi non hanno
+    // niente da riallineare, e non devono provarci.
+    insMeta.run('mappeFormate', seed.hash);
   })();
   invalidaCacheTraduzioni();
   invalidaMotoreFusione();
