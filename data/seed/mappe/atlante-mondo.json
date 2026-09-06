@@ -14,7 +14,133 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "negozio",
+     "nome": "Negozio Otaku Tokobushiya",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 20.996,
+     "y": 33.496,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "akihabara/tokobushiya"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "ristorante",
+     "nome": "Maid Café",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.969,
+     "y": 39.355,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "akihabara/maid-cafe-akihabara"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Megastore di elettronica Akindo",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 20.312,
+     "y": 44.336,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "akihabara/akindo"
+     },
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Ferramenta",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 33.398,
+     "y": 24.609,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Distributori di capsule",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 30.664,
+     "y": 44.824,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Negozio di retrogaming Super Baron",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.594,
+     "y": 15.039,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "akihabara/super-baron"
+     },
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "sala-giochi",
+     "nome": "Sala giochi di Akihabara",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 19.434,
+     "y": 24.707,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "akihabara/sala-giochi-akihabara"
+     },
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 23.438,
+     "y": 29.883,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 22.949,
+     "y": 13.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 31.055,
+     "y": 32.129,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 9
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 30.957,
+     "y": 39.258,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 10
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-002-0-0",
@@ -29,7 +155,68 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 36.816,
+     "y": 42.969,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 26.66,
+     "y": 30.957,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 48.73,
+     "y": 28.223,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Panetteria",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 31.641,
+     "y": 45.898,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "nota",
+     "nome": "Servizi igienici",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 18.359,
+     "y": 60.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "nota",
+     "nome": "Servizi igienici",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 55.859,
+     "y": 60.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-002-0-1",
@@ -44,7 +231,41 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "nota",
+     "nome": "Servizi igienici",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 18.262,
+     "y": 60.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Servizi igienici",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 55.762,
+     "y": 60.645,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Aula del protagonista",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.066,
+     "y": 28.223,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shujin-academy/aula-shujin"
+     },
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-002-0-2",
@@ -59,7 +280,38 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "nota",
+     "nome": "Servizi igienici",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 55.762,
+     "y": 60.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "nota",
+     "nome": "Servizi igienici",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 18.359,
+     "y": 60.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Libreria",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 27.832,
+     "y": 45.215,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-002-1-0",
@@ -74,7 +326,18 @@
    "altezza": 512,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 34.668,
+     "y": 23.828,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-002-5-0",
@@ -179,7 +442,122 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "negozio",
+     "nome": "Cristalloterapia Stoneon",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.984,
+     "y": 7.617,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/stoneon"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Cartoleria Mitsubachi",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 30.859,
+     "y": 51.953,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/mitsubachi"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Mantra Ganda",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 35.449,
+     "y": 22.461,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/mantra-ganda"
+     },
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Negozio di abiti usati",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 40.137,
+     "y": 51.953,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/vestiti-usati-kichijoji"
+     },
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "culto",
+     "nome": "Vecchio tempio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 55.469,
+     "y": 37.988,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/vecchio-tempio-kichijoji"
+     },
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Jazz Club (Jazz Jin)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 55.078,
+     "y": 18.262,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/jazz-jin"
+     },
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Penguin Sniper (Freccette e Biliardo)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 38.867,
+     "y": 3.809,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/penguin-sniper"
+     },
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "ristorante",
+     "nome": "Friggitoria/Macelleria Hagoromo",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.746,
+     "y": 41.602,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "kichijoji/hagoromo"
+     },
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 41.504,
+     "y": 37.793,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-012-29-0",
@@ -6607,7 +6985,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "attivita",
+     "nome": "Lotteria",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 42.725,
+     "y": 22.07,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-001-2-0",
@@ -6622,7 +7011,61 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "distributore",
+     "nome": "Chiosco dei succhi",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 29.834,
+     "y": 39.844,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Chiosco della stazione KiyasuKu",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 50.098,
+     "y": 32.91,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/kiyasuku"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "cercalavoro",
+     "nome": "Bacheca dei lavori",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 35.742,
+     "y": 41.504,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "cercalavoro",
+     "nome": "Bacheca dei lavori",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 37.5,
+     "y": 34.961,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 27.734,
+     "y": 45.801,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-001-2-0",
     "nome": "Sottopasso",
@@ -6664,7 +7107,171 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "sala-giochi",
+     "nome": "Sala giochi (Central Street)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.781,
+     "y": 35.059,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/sala-giochi-shibuya"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "ristorante",
+     "nome": "Ore no Beko (Gyudon)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.07,
+     "y": 47.168,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/ore-no-beko"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Untouchable",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 11.133,
+     "y": 40.43,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/untouchable"
+     },
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Palestra Protein Lovers",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 58.398,
+     "y": 36.035,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/protein-lovers"
+     },
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Videonoleggio Scarlet",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 52.148,
+     "y": 57.617,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/scarlet"
+     },
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Discount Rocinante",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 18.359,
+     "y": 22.266,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/rocinante"
+     },
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Farmacia Aohige",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 51.953,
+     "y": 24.219,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/aohige"
+     },
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "ristorante",
+     "nome": "Diner",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.289,
+     "y": 51.562,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/diner"
+     },
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "ristorante",
+     "nome": "Big Bang Burger",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 55.469,
+     "y": 31.738,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/big-bang-burger"
+     },
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Libreria Taiheido",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 27.734,
+     "y": 58.789,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/taiheido"
+     },
+     "collezionabile": false,
+     "ordine": 9
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Triple Seven",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.781,
+     "y": 30.957,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/triple-seven"
+     },
+     "collezionabile": false,
+     "ordine": 10
+    },
+    {
+     "tipo": "cinema",
+     "nome": "Cinema",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 40.039,
+     "y": 9.277,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 11
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 32.422,
+     "y": 53.906,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 12
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-001-4-0",
@@ -6679,7 +7286,84 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "negozio",
+     "nome": "Gioielleria",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 40.186,
+     "y": 19.922,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Fiorista Rafflesia",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 47.07,
+     "y": 20.117,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/rafflesia"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Accessori",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 45.02,
+     "y": 22.559,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Body Chop",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 45.117,
+     "y": 33.203,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/body-chop"
+     },
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Articoli tradizionali",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 37.891,
+     "y": 19.824,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Articoli sportivi",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 32.52,
+     "y": 16.504,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Supermercato",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 32.227,
+     "y": 22.363,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-001-5-0",
@@ -6694,7 +7378,41 @@
    "altezza": 512,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "negozio",
+     "nome": "Panetteria Yon-Germain",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.297,
+     "y": 37.5,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shibuya/yon-germain"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 25.0,
+     "y": 39.648,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 15.723,
+     "y": 50.781,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-001-12-0",
@@ -6724,7 +7442,97 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "ristorante",
+     "nome": "Bar Crossroads",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 36.621,
+     "y": 22.266,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shinjuku/crossroads"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Casalinghi",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 32.422,
+     "y": 30.664,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Fioraio",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 32.422,
+     "y": 27.051,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Libreria Hinokuniya",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 21.875,
+     "y": 27.637,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shinjuku/hinokuniya"
+     },
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 24.512,
+     "y": 34.766,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 35.254,
+     "y": 31.25,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore di bevande",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: nessun luogo del quartiere corrisponde.",
+     "x": 23.145,
+     "y": 19.824,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "cinema",
+     "nome": "Cinema \"Cult 9\"",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.332,
+     "y": 48.242,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "shinjuku/cinema-cult9"
+     },
+     "collezionabile": false,
+     "ordine": 7
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-009-2-0",
@@ -6739,7 +7547,138 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "distributore",
+     "nome": "Distributore automatico (Tabaccaio)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 54.785,
+     "y": 30.859,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/distributore-tabaccaio"
+     },
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "distributore",
+     "nome": "Distributore automatico (Tabaccaio)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 39.355,
+     "y": 28.809,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/distributore-tabaccaio"
+     },
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "lavanderia",
+     "nome": "Lavanderia",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 51.27,
+     "y": 29.883,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/lavanderia-yongen"
+     },
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "attivita",
+     "nome": "Gabbie di Battuta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 37.793,
+     "y": 25.488,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/batting-cage-yongen"
+     },
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "casa",
+     "nome": "Café Leblanc",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 43.066,
+     "y": 24.316,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/leblanc"
+     },
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Super Muramasa",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 33.691,
+     "y": 21.484,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/super-muramasa"
+     },
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "terme",
+     "nome": "Bagno pubblico (Terme Yongen-Jaya)",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 57.52,
+     "y": 26.27,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/bagno-pubblico"
+     },
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Negozio di articoli usati Yumenoshima",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 38.379,
+     "y": 36.035,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/negozio-usato-yumenoshima"
+     },
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "negozio",
+     "nome": "Clinica Medica Takemi",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 34.863,
+     "y": 40.82,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/clinica-takemi"
+     },
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
+     "tipo": "cinema",
+     "nome": "Cinema di Yongen-Jaya",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 22.949,
+     "y": 30.566,
+     "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/cinema-yongen"
+     },
+     "collezionabile": false,
+     "ordine": 9
+    }
+   ]
   }
  ]
 }
