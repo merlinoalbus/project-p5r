@@ -306,6 +306,11 @@ commit stabile, confrontando i campi con il seguente corpus editoriale indicato 
 * accessori: https://www.allgamestaff.it/persona-5-royal/accessori/
 * abiti: https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/
 * regali per i Confidenti: https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/
+* oggetti consumabili e reperibilità: https://www.allgamestaff.it/persona-5-royal/oggetti/
+* elenco generale dei negozi: https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/
+* strumenti e materiali: https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/
+* libri: https://www.allgamestaff.it/persona-5-royal/libri/
+* DVD a noleggio: https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/
 
 Per ogni nuova riga, `verificato` deve riferirsi ai campi effettivamente attestati dalla fonte.
 Nome, negozio e prezzo possono venire dall'elenco dei negozi; effetto, categoria, destinatario,
