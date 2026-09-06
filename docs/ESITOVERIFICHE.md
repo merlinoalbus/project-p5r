@@ -1584,3 +1584,23 @@ database, presenza temporale dimostrata sul visore e riproducibilità dei dati s
 prodotto, non rifiniture di impalcatura. Possono invece essere preparati in parallelo materiali
 documentali o prompt grafici di Fase 6, purché non siano dichiarati completamento o avanzamento
 formale finché il validator non approva il candidato Fase 2.
+
+### Preflight sulla modifica non pubblicata di `caricaSeed.ts`
+
+La direzione è corretta, ma il controllo va spostato **prima** dell'attuale guardia
+`if (!forza && leggiMeta(db, 'hash') === seed.hash)`. Nella forma corrente,
+`statoDelMondo()` è chiamato solo quando l'hash coincide; un hash differente non può quindi
+restituire `aggiornamento-pendente` e continua a raggiungere il reseed/upsert completo. È il caso
+che il contratto deve proteggere.
+
+Inoltre il ramo pendente invoca `scriviMeta(..., 'aggiornamentoSeedPendente', ...)`: anche se non
+tocca le mappe, muta un DB storico al normale avvio. Il requisito concordato è impronta invariata
+per **tutte** le tabelle, inclusa `seed_meta`; il segnale deve perciò essere solo nell'oggetto di
+ritorno/log dell'avvio, oppure essere scritto esclusivamente da un comando esplicito di
+manutenzione autorizzato, non da `caricaSeed()` ordinaria.
+
+**Sanamento minimale e completo:** se `forza` è falso e una mappa esiste già, `caricaSeed()`
+restituisce senza alcuna scrittura `caricato:false` e `aggiornamentoSeedPendente:true` quando
+l'hash corrente non coincide o il marcatore storico manca; costruisce mappe/presenza/ingressi solo
+su DB senza righe in `mappa`. I test devono esercitare separatamente DB storico senza marcatore e
+seed intenzionalmente diverso, confrontando prima/dopo l'impronta completa inclusa `seed_meta`.
