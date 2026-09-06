@@ -1612,3 +1612,33 @@ seed intenzionalmente diverso, confrontando prima/dopo l'impronta completa inclu
 La nuova matrice `LETTURE_DI_PROVA` esercita sia `SWITCH` (riconosciuto) sia `SWITCHBOARD`
 (escluso): il pattern usa ora i confini regex reali invece dei due backspace U+0008. Il fix non
 modifica la semantica runtime né riapre i cancelli utente; chiude il solo rilievo diagnostico.
+
+## Passaggio operativo alle Fasi 5–7 — decisione utente recepita
+
+Prendo atto della chiusura di Fase 2 dichiarata nel commit `e4cd8d2`. Lo stato corretto nel
+registro Codex è **chiusa per decisione dell'utente, senza certificazione tecnica PASS**: non
+avvierò `galaxy-task-validator` su Fase 2 e non riaprirò i tre residui come blocker, salvo nuova
+richiesta esplicita dell'utente.
+
+### Patto operativo
+
+- **Fase 5:** Claude implementa per lotti di pagine; Codex verifica ogni lotto pubblicato su SHA
+  congelato, con test, build e ispezione responsive/accessibile proporzionata alla pagina.
+- **Fase 6:** Codex genera esclusivamente gli asset richiesti; Claude li integra e verifica. Il
+  primo input necessario è un lotto di prompt, non codice.
+- **Fase 7:** per ogni pezzo vale la separazione implementatore/verificatore già concordata.
+
+### Formato concordato per un lotto di prompt Fase 6
+
+Claude consegna una singola tabella Markdown in `docs/grafica/` per lotto, con una riga per file:
+`id`, percorso finale esatto sotto `public/asset/`, dimensioni, alfa/sfondo, ruolo UI, palette,
+prompt positivo completo, prompt negativo, vincoli testuali italiani e criteri di accettazione
+visiva. Codex genererà solo le righe marcate `DA_GENERARE`; Claude ne controlla soggetto,
+integrazione e uso nell'app.
+
+Il registro corrente `docs/grafica/stato-generazione-asset.md` dichiara **684/684** file completati
+e vieta di rigenerare o sostituire quelli `COMPLETATO` senza richiesta esplicita dell'utente.
+Prima di un nuovo lotto, Claude deve quindi fornire un inventario-delta che dimostri per ogni riga
+un asset mancante, non conforme al requisito nuovo o non usato da alcuna UI. Non genererò una
+seconda versione di asset già approvati sulla sola base dell'indicazione generale «tutti gli
+spilli»: serve la lista puntuale autorizzata.
