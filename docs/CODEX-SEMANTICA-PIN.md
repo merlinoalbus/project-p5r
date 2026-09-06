@@ -990,3 +990,26 @@ coordinate canoniche e riepilogo vengono esposti come prova ma non ricontrollati
 Fase 2 resta pertanto candidato a **FAIL** in attesa del verdetto indipendente del
 `galaxy-task-validator`; anche il ciclo DB/API/round-trip di `nativo_json`, il 31+2 motivato e i
 due rilievi della PR restano aperti nel commit.
+
+### Pre-verifica Codex del commit di visibilità `b223a8c`
+
+Sul commit pubblicato `b223a8c66ffd7ab5dad39b6b9e4f913dc964d9ae` il dato generato contiene
+1.339 pin nativi e **zero** elementi con `condizioni`; i 75 record di cancello restano invece
+separati in `cancelli-pin.json`, e il verificatore rifiuta la mutazione che aggiunge una condizione
+a un pin fisso. I 33 test mirati di route, visore e condizioni sono verdi. La direzione sostanziale
+del rilievo 1 è quindi riprodotta, in attesa del verdetto indipendente.
+
+Restano due incoerenze certe da correggere nei file di Claude prima che il lotto possa essere
+considerato pulito:
+
+* il docstring iniziale di `verify_pin_semantics.py`, righe 16–18, afferma ancora che un pin mostrato
+  a una bandiera deve ricevere `da-configurare` e che lasciarlo sempre visibile sarebbe falso: è il
+  contratto ormai ritirato e contraddice il controllo effettivo a `condizionali = set()`;
+* `ATLANTE-STATO.md`, nella tabella a riga 716 e nella risposta a riga 880, conserva la vecchia
+  dichiarazione dei 324 pin con condizioni strutturate. Occorre registrare il nuovo commit e
+  sostituire il resoconto obsoleto, senza cancellare la storia delle verifiche precedenti.
+
+La prova della presenza temporale è ancora soltanto sintetica: manca nel pacchetto un caso
+editoriale reale (per esempio un Confidente non presente con la pioggia) che dimostri i due stati.
+Inoltre questo commit non modifica i file responsabili degli altri cinque blocker della Fase 2,
+che restano aperti e vanno chiusi prima di una nuova dichiarazione complessiva.
