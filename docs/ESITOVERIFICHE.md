@@ -281,3 +281,61 @@ e riproducibile da installazione nuova senza dipendere da residui dell'atlante p
 **Decisione:** Fase 1d respinta. Per il nuovo riesame devono sparire tutte le 26 etichette
 tecniche dal DOM espanso e la stessa etichetta di versione deve provenire da un'unica funzione
 condivisa in tutti gli otto punti elencati nel piano. Le Fasi 1a, 1b e 1c restano approvate.
+
+## Fase 2 — Pin di tutti i tipi, parte urbana (2a, 2b, 2c)
+
+**Esito complessivo: WARN**
+**Commit verificati:** `4201e53`, `5b7bcc5`
+**Data verifica:** 6 settembre 2026
+
+### Fase 2b — Riferimento fra pin nativi e planimetria: PASS
+
+1. La rigenerazione isolata di `riferimento-pin.json` è byte-identica al file versionato:
+   SHA-256 `0CB2859AC8457A42A7C3D5BAF4D4A11A4FDF27FB87DF912438300F0F6956F6A4`.
+2. Il verificatore dedicato passa su 250 planimetrie con pin: 227 riferimenti condivisi,
+   1.361 pin collocabili su 1.429, 7 esclusioni individuali documentate, 23 planimetrie
+   respinte e 51 planimetrie senza pin. Le otto correzioni di scala sono limitate ai fattori
+   0,5 e 0,25 e migliorano effettivamente l'allineamento rispetto alla scala unitaria.
+3. Il controllo indipendente delle maschere alpha conferma che la prova non è vacua: nessuna
+   planimetria è interamente opaca e i pin accettati ricadono sul disegno secondo il criterio
+   dichiarato. Le 23 esclusioni riportano una motivazione puntuale.
+
+### Fasi 2a e 2c — Sottoinsieme urbano dimostrato: PASS
+
+1. `pin_semantics.py` rigenera `semantica-pin.json` byte per byte, SHA-256
+   `381793EE0D69BF11273D47C982334EAAF3279A9AF1CA58E0F2A71514C67EA007`; il verificatore
+   dedicato conferma 51 tipi determinati e 51 lasciati senza associazione.
+2. Tutte le 80 occorrenze contemporaneamente determinate e collocabili sono importate in 13
+   planimetrie, senza duplicati e con coordinate nell'intervallo ammesso. Nessuna delle 80 è
+   condizionale. Le 42 associazioni a un luogo del catalogo sono state ricontrollate una per
+   una e risultano semanticamente coerenti; le altre 38 restano correttamente non collegate.
+3. `build_seed_package.py` rigenera contenuti logicamente identici al pacchetto versionato
+   (differenza soltanto CRLF/LF): SHA-256 normalizzato
+   `804363258675BD883E76E467E9F3F89ABED3DF3425E426A714F4D8B77A77431F`. Il rapporto è
+   byte-identico, SHA-256 `CD3A89446C3D3C0476E52FB638BFBF1E23C514EB379C251DA7098B8806E0E58F`.
+4. La prova runtime individua senza ambiguità Penguin Sniper dalla scheda di accesso, conserva
+   correttamente le due destinazioni per Leblanc e mostra nove pin sulla planimetria di
+   Kichijoji; il controllo visivo conferma il pin selezionato e il relativo dettaglio.
+
+### Avvertenze da correggere
+
+1. La frase di avanzamento «i 51 dei Palazzi restano senza significato assegnato» non descrive
+   i dati reali: fra i 51 tipi non determinati, 25 compaiono anche in planimetrie urbane e 13
+   compaiono esclusivamente in planimetrie urbane. È quindi approvato il solo blocco urbano
+   dimostrato dei tipi 46–96, non la copertura di tutti i tipi presenti nelle mappe urbane.
+2. Il rapporto del pacchetto contabilizza 80 pin posati, 1.248 esclusi per significato non
+   dimostrato e 94 esclusi per assenza di riferimento condiviso: il totale è 1.422, non 1.429.
+   Mancano dal riepilogo finale i 7 pin esclusi individualmente nelle planimetrie condivise,
+   pur correttamente tracciati in `riferimento-pin.json`.
+
+### Regressioni generali
+
+- `npm run typecheck`: PASS;
+- `npm run lint`: PASS;
+- `npm test -- --run`: PASS, 132 file e **534 test su 534**.
+
+**Decisione:** il riferimento geometrico della Fase 2b e il sottoinsieme di 80 pin urbani
+dimostrati sono approvati e possono essere usati dalle fasi successive. La Fase 2 complessiva
+non può però essere marcata PASS: occorre correggere la descrizione dell'ambito, chiudere la
+contabilità dei 7 pin esclusi individualmente e mantenere espliciti i tipi ancora non
+determinati fino alla loro successiva classificazione.
