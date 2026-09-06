@@ -11,9 +11,9 @@
       "errori": []
     },
     "negozio": {
-      "voci": 47,
-      "conAccesso": 44,
-      "conPunto": 30,
+      "voci": 60,
+      "conAccesso": 57,
+      "conPunto": 29,
       "senzaAccesso": [
         "negozio-palazzo-niijima",
         "tanaka-affari-loschi",
@@ -41,9 +41,9 @@
       "errori": []
     },
     "articolo": {
-      "voci": 547,
-      "conAccesso": 501,
-      "conPunto": 423,
+      "voci": 575,
+      "conAccesso": 529,
+      "conPunto": 401,
       "senzaAccesso": [
         "negozio-palazzo-niijima/raggio-della-vittoria",
         "negozio-palazzo-niijima/soma",
@@ -79,11 +79,11 @@
     }
   },
   "summary": {
-    "voci": 1419,
-    "conAccesso": 1365,
-    "conPunto": 526,
+    "voci": 1460,
+    "conAccesso": 1406,
+    "conPunto": 503,
     "errori": 0,
-    "quotaAccesso": 0.9619,
-    "quotaPunto": 0.3707
+    "quotaAccesso": 0.963,
+    "quotaPunto": 0.3445
   }
 }
