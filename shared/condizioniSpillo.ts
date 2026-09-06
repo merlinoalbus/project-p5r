@@ -57,6 +57,29 @@ export type RequisitoSpillo =
 export type TipoCondizioneSpillo = RequisitoSpillo['tipo'];
 
 /** Voci del selettore dell'editor: la pioggia ha due verbi (solo con / mai con), gli altri tipi uno. */
+/** Le condizioni che dicono se una cosa **c'è**, in quel momento della partita.
+ *
+ * Sono le sole che possono far sparire un pin dal visore, e la distinzione non è un dettaglio di
+ * implementazione: è la regola del prodotto. Un quartiere che apre il 18 giugno l'11 aprile non
+ * esiste, e mostrarne i negozi manda il giocatore in un posto che non c'è; un Palazzo esiste solo
+ * fra la data in cui si apre e quella in cui scade; un venditore che esce solo quando piove col
+ * sole non c'è.
+ *
+ * Tutto il resto — una dote da alzare, un Confidente da portare a un rango, un Palazzo da
+ * completare, una porta che vuole una chiave — è un **prerequisito**: la cosa c'è, semplicemente
+ * non puoi ancora usarla. Nascondere un prerequisito vorrebbe dire che la guida ti mostra dov'è
+ * una porta solo dopo che l'hai aperta, cioè quando non ti serve più. Quelle condizioni si
+ * scrivono e si spiegano, non tolgono il pin.
+ */
+export const CONDIZIONI_DI_PRESENZA = [
+  'data', 'intervallo', 'fascia', 'piove', 'meteo', 'giorno-settimana', 'stagione', 'quartiere',
+] as const;
+
+/** Vero se questa condizione, non soddisfatta, deve far sparire il pin invece che spiegarsi. */
+export function nascondeIlPin(tipo: string): boolean {
+  return (CONDIZIONI_DI_PRESENZA as readonly string[]).includes(tipo);
+}
+
 export const SCELTE_CONDIZIONE = [
   { chiave: 'data', nome: 'Da una data in avanti' },
   { chiave: 'intervallo', nome: 'Solo in un periodo' },

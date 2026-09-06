@@ -1,0 +1,82 @@
+{
+  "cosaE": "La finestra di tempo in cui ciascun Palazzo esiste nel gioco: prima non c'è, dopo la scadenza non è più accessibile. Serve a nascondere sulla mappa i Palazzi che, alla data della partita, non ci sono.",
+  "perche": "Le date stanno già nel catalogo (`dungeon.data_sblocco`, `dungeon.data_scadenza`) ma come prosa — «12 Aprile (Martedì) – prima infiltrazione esplorativa nel Palazzo» — e ricavarne una data con un'espressione regolare vuol dire sbagliarne qualcuna in silenzio. Sono dieci righe, si trascrivono una volta e restano.",
+  "formato": "`dal` e `al` in MM-GG del calendario di gioco (aprile → marzo). `al` assente dove il gioco non fissa una scadenza.",
+  "fonte": "campi `data_sblocco` e `data_scadenza` del catalogo, letti dalla guida allgamestaff",
+  "trascrittoIl": "2026-09-06",
+  "finestre": [
+    {
+      "dungeon": "kamoshida",
+      "dal": "04-12",
+      "al": "05-02",
+      "testoSblocco": "12 Aprile (Martedì) – prima infiltrazione esplorativa nel Palazzo",
+      "testoScadenza": "2 maggio (ultimo giorno utile; la guida consiglia il furto il 22 aprile)"
+    },
+    {
+      "dungeon": "madarame",
+      "dal": "05-16",
+      "al": "06-05",
+      "testoSblocco": "16 maggio (Lunedì) – giorno in cui il Palazzo si materializza nel Meta-Nav",
+      "testoScadenza": "5 giugno (ultimo giorno utile; la guida fissa la lettera di sfida entro il 2 giugno)"
+    },
+    {
+      "dungeon": "kaneshiro",
+      "dal": "06-19",
+      "al": "07-09",
+      "testoSblocco": "19 giugno (domenica) – prima esplorazione/scoperta della banca",
+      "testoScadenza": "9 luglio (ultimo giorno utile; la guida consiglia di chiudere entro il 27 giugno)"
+    },
+    {
+      "dungeon": "futaba",
+      "dal": "07-25",
+      "al": "08-21",
+      "testoSblocco": "25 luglio",
+      "testoScadenza": "21 agosto (attacco di Medjed; la guida consiglia di completare entro il 19 agosto)"
+    },
+    {
+      "dungeon": "okumura",
+      "dal": "09-15",
+      "al": "10-11",
+      "testoSblocco": "15 settembre (giovedì) – prima visita esplorativa",
+      "testoScadenza": "11 ottobre (ultimo giorno utile; la guida consiglia il furto il 6 ottobre)"
+    },
+    {
+      "dungeon": "niijima",
+      "dal": "10-29",
+      "al": "11-20",
+      "testoSblocco": "29 ottobre (sabato) – primo accesso",
+      "testoScadenza": "20 novembre (ultimo giorno utile; la guida consiglia il 13 novembre)"
+    },
+    {
+      "dungeon": "shido",
+      "dal": "11-24",
+      "al": "12-18",
+      "testoSblocco": "24 novembre (prima esplorazione, solo prologo); esplorazione libera dal 25 novembre",
+      "testoScadenza": "18 dicembre (elezioni; la guida completa tutto l'11-12 dicembre)"
+    },
+    {
+      "dungeon": "iweleth",
+      "dal": "12-24",
+      "al": null,
+      "testoSblocco": "24 dicembre (sabato), tramite l'Area 14 del Dedalo di Sheriruth",
+      "testoScadenza": null,
+      "nota": "Il gioco non fissa una scadenza: una volta aperto resta accessibile."
+    },
+    {
+      "dungeon": "maruki",
+      "dal": "01-02",
+      "al": "02-03",
+      "testoSblocco": "2 gennaio (evento di trama, «Palazzo sconosciuto»)",
+      "testoScadenza": "3 febbraio (giorno delle battaglie finali; il percorso va assicurato entro il 2 febbraio)",
+      "nota": "Il terzo semestre si attiva solo portando il Confidente di Maruki al Rango 9 entro il 17 novembre: è un prerequisito, non una finestra, e resta nella scheda del Palazzo."
+    },
+    {
+      "dungeon": "mementos",
+      "dal": "05-09",
+      "al": null,
+      "testoSblocco": "9 maggio (prima esplorazione con Morgana)",
+      "testoScadenza": null,
+      "nota": "Il Dedalo resta accessibile per tutta la partita."
+    }
+  ]
+}
