@@ -633,3 +633,28 @@ superficie da ogni comando che promette «Sulla mappa»:
 
 Questa correzione preserva la distinzione fra «vai alla scheda» e «trova sulla mappa», evita
 fallback inventati e consente una controprova UI end-to-end sulla rotta pubblica effettiva.
+
+## Contabilità delle tre planimetrie assorbite come copie
+
+La riverifica del pacchetto ha separato le 90 occorrenze non posate: 14 sono esclusioni puntuali
+certificate, 43 appartengono davvero a planimetrie senza riferimento condiviso, ma 33 provengono
+dalle tre copie `RMAP_155_6_0`, `RMAP_151_3_0` e `RMAP_151_4_0`. Queste tre planimetrie hanno
+tutte `esito = condiviso`; classificarle fra quelle senza riferimento è quindi falso.
+
+Il confronto completo mostra una corrispondenza uno-a-uno con le rispettive canoniche: 9 pin per
+Futaba e 12+12 per Kamoshida. Le differenze osservate sono limitate a:
+
+* `nativeType 17` contro `26` a coordinate e flag identici; entrambi sono dimostrati e resi
+  dall'app come `forziere`;
+* tre pin Kamoshida con ascissa `753` invece di `756`, a parità di tipo, ordinata, flag ed effetto;
+* un ulteriore `17` contro `26`, ancora con la stessa resa `forziere`.
+
+Non vanno quindi creati 33 pin sovrapposti sulla mappa canonica. Il generatore deve invece
+dichiararli come `assorbitiDaCopie`, conservarne la provenienza completa e produrre il mapping
+uno-a-uno verso il pin canonico dopo la resa semantica. Il verificatore deve ricostruire quel
+mapping dalle fonti, esigere la stessa resa applicativa, gli stessi flag/effetti e coordinate
+identiche o entro la tolleranza esplicitamente motivata di 3 pixel.
+
+La contabilità corretta diventa `1339 posati + 14 esclusi puntualmente + 43 senza riferimento +
+33 assorbiti da copie = 1429`. Una semplice rinomina del contatore senza mapping e prove non
+chiude il rilievo, perché non dimostrerebbe che nessuna informazione distinta sia stata persa.
