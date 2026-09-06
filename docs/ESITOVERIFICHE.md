@@ -1873,3 +1873,22 @@ con `waitFor(() => expect(document.title).toContain('Museo, 1P'))` dopo il rende
 o isolare il titolo dalla concorrenza fra file. Ripetere almeno una suite parallela e una seriale;
 il verde di entrambe e' il criterio di chiusura. Questo rilievo e' separato dai tre requisiti
 funzionali dell'Atlante, che restano aperti.
+
+### Osservazione immediata sul worktree Memento — non ancora un verdetto di lotto
+
+La lavorazione non pubblicata separa `stratiMemento.ts` e rende gli strati pulsanti, ma prima di
+un candidato deve chiudere tre dettagli deterministici:
+
+1. `urlStratoDedalo` e' esportata da `stratiMemento.ts`, mentre `DungeonDettaglioPage` la importa
+   ancora da `MappaMemento.tsx`; con il file corrente l'import non esiste e typecheck/build non
+   possono passare. Importarla dal modulo nuovo oppure riesportarla esplicitamente dal componente.
+2. `MappaMemento` espone `selezionata` e `onSeleziona`, ma il chiamante monta solo
+   `aree={d.aree}`. I pulsanti della mappa non cambiano quindi l'area della scheda, e la scheda
+   non illumina lo strato corrente: il requisito «stessa selezione» non e' ancora vero.
+3. Il chiamante continua a non costruire/passare `sbloccati`; l'espressione del componente tratta
+   l'assenza come «tutti aperti». Il sanamento di presenza temporale resta quindi indipendente dal
+   rifacimento grafico e ancora necessario.
+
+Questa e' una lettura del worktree non pubblicato, non un FAIL sul commit `7894cc3`. Il prossimo
+candidato deve includere i tre rami di test: selezione scheda↔strato, Dedalo non disponibile non
+interattivo/non navigabile, e una prova di import/build.
