@@ -200,6 +200,9 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     figlie.forEach((f, i) => {
       // Le planimetrie native richiedono ingressi reali: la griglia non è una connessione del gioco.
       if (f.chiave.startsWith('nativo-')) return;
+      // I Memento stanno fuori dall'atlante e hanno una pagina loro: niente passaggio da Tokyo,
+      // altrimenti resta la porta di servizio verso una radice che dall'indice è stata tolta.
+      if (f.chiave === 'citta-mementos') return;
       if (esiste.get('mappa', f.chiave)) return;
       const [x, y] = posizionePassaggio(radice.chiave, f.chiave, i, figlie.length);
       const passaggio = insSpillo.run(radice.chiave, 'passaggio', f.nome, '', Math.round(x * 10) / 10, Math.round(y * 10) / 10, 'mappa', f.chiave, 0, i, 'seed', t);
@@ -257,6 +260,10 @@ export function collegaPalazziAiLuoghi(db: AppDatabase): number {
     VALUES (?, 'passaggio', ?, ?, ?, ?, 'mappa', ?, 0, ?, 'seed', ?)`);
   let creati = 0;
   for (const f of dati.finestre ?? []) {
+    // I Memento restano fuori dall'atlante: non sono un luogo che si raggiunge da Tokyo, sono un
+    // pozzo con una pagina sua. Un pin d'ingresso sulla mappa generale porterebbe a una radice che
+    // dall'indice delle mappe e' stata tolta apposta.
+    if (f.dungeon === 'mementos') continue;
     const mappaPalazzo = `dungeon-${f.dungeon}`;
     const dove = f.luogo?.mappa;
     if (!dove || !mappaEsiste.get(dove) || !mappaEsiste.get(mappaPalazzo) || esiste.get(mappaPalazzo)) continue;

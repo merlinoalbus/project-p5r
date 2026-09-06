@@ -32,10 +32,17 @@ function nomiConfidenti(): Map<string, string> {
   return new Map((prepared('SELECT chiave, nome FROM confidente').all() as Array<{ chiave: string; nome: string }>).map((c) => [c.chiave, c.nome]));
 }
 
+/** «Entrata dei Memento» sta nella tabella dei quartieri, ma un quartiere non è: non ha negozi né
+ *  Confidenti, è la porta di un pozzo che ha una pagina sua. In fondo alla Città faceva una scheda
+ *  vuota che non portava dove il lettore si aspetta. Si raggiunge da `/guida/dungeon/mementos` e
+ *  dalle richieste dei Memento, che a quella pagina puntano. */
+const NON_UN_QUARTIERE = new Set(['mementos']);
+
 /** Quartieri in ordine con conteggi dei luoghi. */
 export function elencaQuartieri(): QuartiereRiassuntoDto[] {
-  const righe = prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.verificato = 1) AS verificati
-    FROM quartiere q ORDER BY q.ordine`).all() as Array<RigaQuartiere & { luoghi: number; verificati: number }>;
+  const righe = (prepared(`SELECT q.*, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave) AS luoghi, (SELECT COUNT(*) FROM luogo l WHERE l.quartiere_chiave = q.chiave AND l.verificato = 1) AS verificati
+    FROM quartiere q ORDER BY q.ordine`).all() as Array<RigaQuartiere & { luoghi: number; verificati: number }>)
+    .filter((q) => !NON_UN_QUARTIERE.has(q.chiave));
   return righe.map((q) => ({ chiave: q.chiave, nome: q.nome, sblocco: q.sblocco, sbloccoData:q.sblocco_data, mappaChiave:chiaveMappa(chiaveImmagineQuartiere(q.chiave)), ingresso:ingressoQuartiere(q.chiave), descrizione: q.descrizione, luoghi: q.luoghi, verificati: q.verificati }));
 }
 
