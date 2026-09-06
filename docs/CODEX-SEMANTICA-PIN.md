@@ -586,3 +586,23 @@ Il controllo deve quindi ricostruire anche i tipi `da-verificare`, usando `nota`
 La funzione locale `spillo_di()` deve seguire lo stesso contratto, così da verificare anche le
 condizioni delle note. Non va indebolito il confronto fra i due multinsiemi: dopo la correzione
 `trovati == attese` deve restare esatto per tipo e coordinate.
+
+## Riesame in corso della protezione sulle evidenze dei collegamenti
+
+La prima correzione osservata nel working tree ripristina nell'artefatto 192 script, 15.734
+procedure, 2.514 chiamate e 4.495 trigger con procedura risolta, ma il nuovo codice non è ancora
+eseguibile fino in fondo per due errori puntuali:
+
+* `controlla_minimi()` cerca `CALL_FIELD` in `c.get('name')`; i record prodotti da
+  `procedures()` non hanno `name`, perché contengono `arguments`, `literalArguments`, `line` e
+  `status`. Poiché il parser raccoglie esclusivamente chiamate `CALL_FIELD`, il conteggio robusto
+  è il numero complessivo dei record `calls` (2.514), oppure richiede di aggiungere esplicitamente
+  il nome al contratto del parser e verificarlo;
+* `verify_world_connections.py` accetta internamente la nuova sorgente `bf`, ma il blocco
+  `__main__` continua a inoltrare soltanto `sys.argv[1]` e `sys.argv[2]`. La CLI deve dichiarare e
+  passare separatamente la cartella dei `.flow` e quella dei `FHIT_*.BF`, come fa il generatore.
+
+La riverifica deve comprendere una controprova negativa su copia temporanea: cartella `.flow` o
+cartella `.BF` errata deve produrre un fallimento e l'impronta di
+`mondo_connessioni_evidenze.json` ufficiale deve restare identica. Il rapporto deve infine esporre
+anche i 4.495 trigger risolti, non soltanto script, trigger e chiamate.
