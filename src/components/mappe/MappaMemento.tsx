@@ -1,27 +1,27 @@
 // ============================================================
-// MappaMemento — l'imbuto che sprofonda, e i dedali che compaiono scendendo
+// MappaMemento — il pozzo, montato con i pezzi del gioco
 // ============================================================
 //
-// I Memento non sono una città e non sono un elenco: sono **un imbuto**. Il gioco li disegna come
-// un cratere che sprofonda sotto Tokyo — lo skyline nero tutto intorno, il terreno rosso solcato
-// da crepe e attraversato da catene, e i dedali come grappoli di edifici che scendono a spirale
-// verso il fondo, legati da un filo rosso. Questa è quella forma.
+// I Memento sono un imbuto che sprofonda sotto Tokyo, e il gioco lo disegna come una pila di
+// grappoli di città divelta che si stringono scendendo, dentro un cratere rosso solcato da venature
+// e attraversato da catene, con il profilo della città sopra.
 //
-// **Il pezzo compare quando il dedalo si sblocca**, come ha chiesto l'utente: finché non lo si è
-// aperto al suo posto c'è solo il punto sul filo, e il filo prosegue lo stesso — il pozzo c'è
-// tutto dal principio, è la discesa che si guadagna.
+// **Ogni pezzo è originale.** Stanno in `IT/FIELD/PANEL/MEMENTOS/MEMENTOS.SPD` e hanno i loro nomi:
+// gli otto `第N層` — «strato N» — sono i grappoli, l'ultimo con la punta a trivella del fondo;
+// `街並み` è il profilo della città; `鎖` sono le catene; i `血管`, «vasi sanguigni», sono le
+// venature rosse. Estratti da `lmap_sprites.py` in `public/asset/mappe/lmap/memento/`.
 //
-// Le date dei singoli dedali **restano prosa**. Nel catalogo sono scritte come «Sblocco: 7 maggio
-// (Sabato 5/07). Aver completato il Palazzo di Kamoshida», e la maggior parte non è nemmeno una
-// data ma una condizione di storia: «Palazzo di Madarame completato». Ricavarne un giorno con
-// un'espressione regolare vuol dire sbagliarne qualcuna in silenzio. Quindi non si indovina: la
-// frase si mostra com'è, e a decidere se il pezzo c'è è la partita — quali Palazzi ha finito —
-// non un'interpretazione del testo. Finché quel dato non è collegato, si mostrano tutti e si dice
-// che si stanno mostrando tutti.
+// C'era il rischio di disegnarli a mano, ed è stato corso: la prima versione aveva un cratere fatto
+// di gradienti e targhe col nome, e per i grappoli era già stato scritto un prompt da mandare a
+// Codex. Erano lì da sempre. La regola che ne resta è in `docs/grafica/fabbisogno.md`: prima di
+// chiedere un disegno, si guarda se il gioco ce l'ha.
 //
-// Il fondo — il cratere, le crepe, le catene, lo skyline — è **disegnato qui**, non estratto: nel
-// foglio degli sprite ci sono soltanto i livelli dell'effetto animato dell'ingresso (una nuvola,
-// dei nastri, degli aloni), che qui fanno l'atmosfera e non la struttura.
+// **Il pezzo compare quando il dedalo si sblocca**: finché non lo si è aperto il suo posto è vuoto
+// e il pozzo prosegue lo stesso, perché il pozzo c'è tutto dal principio — è la discesa che si
+// guadagna. Le date dei dedali restano prosa: nel catalogo la maggior parte non è una data ma una
+// condizione di storia — «Palazzo di Madarame completato» — e ricavarne un giorno con
+// un'espressione regolare vuol dire sbagliarne qualcuna in silenzio. Finché la partita non tiene
+// quel conto si mostrano tutti, e lo si dice.
 // ============================================================
 
 import { Link } from 'react-router-dom';
@@ -30,6 +30,13 @@ import type { AreaDungeonDto } from '../../types';
 
 const BASE = '/asset/mappe/lmap/memento';
 
+/** Gli otto strati del gioco, più il decimo del terzo semestre per il dedalo che viene dopo.
+ *
+ * I dedali sono nove e gli strati otto: l'ultimo, Da'at, appartiene al terzo semestre, e il gioco
+ * per quello disegna un pozzo diverso — `３学期メメントス`. Si usa il suo pezzo più grande. */
+const STRATI = ['strato-1', 'strato-2', 'strato-3', 'strato-4', 'strato-5', 'strato-6',
+  'strato-7', 'strato-8', 'terzo-semestre-10'];
+
 interface Props {
   aree: AreaDungeonDto[];
   /** Chiavi dei dedali già raggiunti. Vuoto o assente: si mostrano tutti, e lo si dice. */
@@ -37,10 +44,7 @@ interface Props {
   className?: string;
 }
 
-/** La prima frase della descrizione: è lì che il catalogo scrive quando il dedalo si apre.
- *
- * Non si estrae una data, si taglia una frase: «2 Aree (Area 1 e Area 2) Sblocco: 7 maggio
- * (Sabato 5/07). Aver completato il Palazzo di Kamoshida…» → fino al primo punto. */
+/** La prima frase della descrizione: è lì che il catalogo scrive quando il dedalo si apre. */
 function primaFrase(testo: string | null | undefined): string {
   const t = (testo ?? '').trim();
   if (!t) return '';
@@ -48,84 +52,66 @@ function primaFrase(testo: string | null | undefined): string {
   return punto > 0 ? t.slice(0, punto + 1) : t.length > 110 ? `${t.slice(0, 107)}…` : t;
 }
 
-/** La spirale della discesa: dal bordo largo in alto fino al fondo stretto.
+/** Dove cade uno strato nella discesa.
  *
- * Il raggio si stringe e il passo si accorcia man mano che si scende: è quel che dà l'imbuto.
- * L'oscillazione laterale alterna i lati come nel disegno del gioco, dove i grappoli non cadono
- * in colonna ma si scostano a destra e a sinistra del filo. */
-function puntoDellaDiscesa(i: number, quanti: number): { x: number; y: number; scala: number } {
+ * Si stringe e si scosta alternando i lati, come nel disegno del gioco, dove i grappoli non
+ * cadono in colonna. Gli strati si sovrappongono di proposito: è la sovrapposizione a farne una
+ * figura sola invece di nove disegni impilati. */
+function posaDelloStrato(i: number, quanti: number) {
   const t = quanti > 1 ? i / (quanti - 1) : 0;
-  const raggio = 30 * (1 - t) ** 1.35;
   return {
-    x: 50 + Math.sin(i * 2.1) * raggio,
-    y: 10 + t * 82,
-    scala: 20 - 9 * t,
+    x: 50 + Math.sin(i * 1.9) * 21 * (1 - t * 0.7),
+    y: 9 + t * 80,
+    larghezza: 34 - 19 * t,
   };
 }
 
 export function MappaMemento({ aree, sbloccati, className = '' }: Props) {
   const tappe = useMemo(() => aree.map((a, i) => ({
     area: a,
-    dove: puntoDellaDiscesa(i, aree.length),
+    strato: STRATI[Math.min(i, STRATI.length - 1)],
+    posa: posaDelloStrato(i, aree.length),
     aperto: !sbloccati || sbloccati.size === 0 || sbloccati.has(a.chiave),
   })), [aree, sbloccati]);
-  const filo = tappe.map((t) => `${t.dove.x},${t.dove.y}`).join(' ');
 
   return <div className={`flex flex-col gap-2 ${className}`}>
-    <div className="relative w-full overflow-hidden rounded-lg bg-[#7a0010]" style={{ aspectRatio: '4 / 3' }}>
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden className="absolute inset-0 h-full w-full">
-        <defs>
-          {/* Il cratere: il rosso si scurisce verso il fondo, ed è quel che fa la profondità. */}
-          <radialGradient id="memento-pozzo" cx="50%" cy="96%" r="86%">
-            <stop offset="0%" stopColor="#ff4d2e" />
-            <stop offset="18%" stopColor="#c40016" />
-            <stop offset="55%" stopColor="#8d0011" />
-            <stop offset="100%" stopColor="#5c000c" />
-          </radialGradient>
-        </defs>
-        <rect width="100" height="100" fill="url(#memento-pozzo)" />
-        {/* Gli anelli concentrici del cratere e le crepe che ne partono. */}
-        {[74, 56, 40, 26, 14].map((r) => <ellipse key={r} cx="50" cy="96" rx={r} ry={r * 0.92}
-          fill="none" stroke="#6d000d" strokeWidth="0.5" opacity="0.75" />)}
-        {Array.from({ length: 13 }, (_, i) => {
-          const ang = Math.PI + (i / 12) * Math.PI;
-          return <line key={i} x1="50" y1="96" x2={50 + Math.cos(ang) * 95} y2={96 + Math.sin(ang) * 95}
-            stroke="#ff2d16" strokeWidth={i % 3 === 0 ? 0.55 : 0.28} opacity="0.6" />;
-        })}
-      </svg>
+    <div className="relative w-full overflow-hidden rounded-lg bg-[#8d0012]" style={{ aspectRatio: '4 / 5' }}>
+      {/* Il cratere: il rosso si accende verso il fondo, dove il pozzo va più giù. */}
+      <div className="absolute inset-0" style={{
+        background: 'radial-gradient(ellipse 80% 55% at 50% 97%, #ff4a22 0%, #c40016 22%, #8d0012 55%, #5c000c 100%)',
+      }} />
 
-      {/* Lo skyline nero: la città che sta sopra, che dal pozzo si vede solo come profilo. */}
-      <svg viewBox="0 0 100 22" preserveAspectRatio="none" aria-hidden className="absolute inset-x-0 top-0 h-[16%] w-full">
-        <path fill="#0a0006" d={`M0 22 V8 ${Array.from({ length: 34 }, (_, i) => {
-          const x = i * 3; const h = 4 + ((i * 7) % 9);
-          return `H${x} V${12 - h} H${x + 1.7} V${8 + ((i * 5) % 5)}`;
-        }).join(' ')} H100 V0 H0 Z`} />
-      </svg>
+      {/* Le venature del gioco, che nel cratere corrono come vasi. Sono i `血管` del foglio. */}
+      <img src={`${BASE}/vena-lunga-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute left-[16%] top-0 h-full w-auto opacity-70" />
+      <img src={`${BASE}/vena-lunga-riflessa-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute right-[15%] top-0 h-full w-auto opacity-70" />
+      <img src={`${BASE}/vena-alto-destra-0-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute right-[4%] top-[6%] w-[26%] opacity-60" />
+      <img src={`${BASE}/vena-basso-destra-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute bottom-[10%] right-0 w-[52%] opacity-55" />
 
-      {/* Il filo rosso che lega i dedali: il pozzo c'è tutto, anche dove non si è ancora scesi. */}
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full">
-        <polyline points={filo} fill="none" stroke="#1a0004" strokeWidth={5}
-          strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        <polyline points={filo} fill="none" stroke="#ff2d16" strokeWidth={2.5}
-          strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        {tappe.filter((t) => !t.aperto).map((t) => <circle key={t.area.chiave}
-          cx={t.dove.x} cy={t.dove.y} r={1.1} fill="#3a0008" stroke="#ff2d16" strokeWidth={0.35} />)}
-      </svg>
+      {/* Le catene, ai due lati del pozzo. */}
+      <img src={`${BASE}/catena-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute left-[3%] top-[8%] h-[72%] w-auto opacity-85" />
+      <img src={`${BASE}/catena-corta-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute right-[6%] top-[30%] h-[26%] w-auto opacity-85" />
 
-      {/* L'atmosfera del gioco: la texture di rumore e gli aloni della terza texture del foglio. */}
-      <img src={`${BASE}/trama-elemento.png`} alt="" aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.07] mix-blend-overlay" />
-      <img src={`${BASE}/luce-nuova-elemento.png`} alt="" aria-hidden
-        className="pointer-events-none absolute bottom-0 left-1/2 w-[60%] -translate-x-1/2 translate-y-1/4 opacity-40" />
+      {/* Il profilo della città sopra il pozzo: dal fondo si vede solo quello. */}
+      <img src={`${BASE}/citta-sopra-elemento.png`} alt="" aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 w-full" />
 
-      {tappe.filter((t) => t.aperto).map((t) => <Link
+      {/* Gli strati, dal primo in giù. Quelli non ancora raggiunti lasciano il posto vuoto. */}
+      {tappe.map((t) => t.aperto && <Link
         key={t.area.chiave}
         to={`/guida/mondo/area/${encodeURIComponent(t.area.chiave)}`}
-        className="group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline"
-        style={{ left: `${t.dove.x}%`, top: `${t.dove.y}%`, width: `${t.dove.scala}%` }}
+        className="group absolute -translate-x-1/2 -translate-y-1/2 no-underline"
+        style={{ left: `${t.posa.x}%`, top: `${t.posa.y}%`, width: `${t.posa.larghezza}%` }}
         title={primaFrase(t.area.descrizione) || t.area.nome}
       >
-        <span className="whitespace-nowrap rounded-[2px] border border-white bg-black px-[0.45em] py-[0.1em] font-display text-[8px] uppercase leading-tight tracking-[0.04em] text-white shadow-[0_2px_6px_rgba(0,0,0,0.7)] transition-colors group-hover:border-[#ffd23f] group-hover:text-[#ffd23f] sm:text-[10px]">
+        <img src={`${BASE}/${t.strato}-elemento.png`} alt="" aria-hidden
+          className="w-full drop-shadow-[0_3px_8px_rgba(0,0,0,0.6)] transition-transform duration-150 group-hover:scale-[1.08]" />
+        <span className="pointer-events-none absolute left-1/2 top-full -translate-x-1/2 -translate-y-2 whitespace-nowrap rounded-[2px] border-2 border-white bg-black px-[0.5em] py-[0.12em] font-display text-[11px] uppercase leading-none tracking-[0.05em] text-white shadow-[0_2px_8px_rgba(0,0,0,0.8)] transition-colors group-hover:border-[#ffd23f] group-hover:text-[#ffd23f] sm:text-[14px]">
           {t.area.nome.replace(/^Dedalo di /, '')}
         </span>
       </Link>)}
