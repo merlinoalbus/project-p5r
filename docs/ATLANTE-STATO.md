@@ -192,8 +192,7 @@ Le due strade sono indipendenti e concordano dove si incontrano.
 
 ### La copertura dei pin, e che cosa la limita ancora
 
-Aggiornato il 6 settembre 2026, dopo l'ampliamento delle prove. **1297 pin su 1429 sono posati:
-il 90,8%.** Erano 710 (49,7%) alla dichiarazione precedente.
+Aggiornato il 6 settembre 2026, dopo l'ampliamento delle prove. **1300 pin su 1429 sono posati: il 91,0%.** Erano 710 (49,7%) alla dichiarazione precedente.
 
 | grado di prova | tipi | pin del tipo |
 |---|---|---|
@@ -217,8 +216,8 @@ interventi, in ordine di peso:
    proiezione di un livello gemello. Corretto.
 2. **I livelli della stessa risorsa condividono la tela.** `ICON_<maggiore>_<minore>.BIN` divide i
    pin in sezioni con un record separatore: sono livelli grafici della *stessa* zona, quindi la
-   trasformazione è per forza la stessa. Ora i loro pin si stimano **insieme** (29 planimetrie
-   certificate così) e una proiezione provata su un livello si **riprova** sugli altri (20 così,
+   trasformazione è per forza la stessa. Ora i loro pin si stimano **insieme** (26 planimetrie
+   certificate così) e una proiezione provata su un livello si **riprova** sugli altri (18 così,
    ciascuna rimisurata sui propri pin, e accettata solo se almeno metà ci cade sopra).
 3. **La procedura del trigger sotto il pin.** Con la proiezione si sa quale punto del campo sta
    sotto ogni pin. Se è un trigger, si sa quale procedura chiama, e il nome dice che cosa vi si
@@ -244,29 +243,41 @@ riserva SVG; il prompt per l'asset in stile va nella Fase 4, come previsto dal p
 
 #### Che cosa resta fuori, e perché
 
-I 132 pin non posati, con il motivo per ciascuno:
+I 129 pin non posati, con il motivo per ciascuno:
 
 | motivo | pin |
 |---|---|
-| la planimetria non condivide il riferimento con i suoi pin | 69 |
-| il tipo nativo non ha significato e il pin non ha un trigger sotto | 41 |
-| il pin è escluso singolarmente: cade lontano dal tratto della sua tela | 22 |
+| la planimetria non condivide il riferimento con i suoi pin | 76 |
+| il tipo nativo non ha significato e il pin non ha un trigger sotto | 39 |
+| il pin è escluso singolarmente: cade lontano dal tratto della sua tela | 14 |
 
-I 69 stanno su **23 planimetrie**, quasi tutte con uno, due o tre pin in croce; nove hanno i pin
-completamente fuori dal disegno, anche con il fattore di scala che i dati stessi suggeriscono, il
-che fa pensare che quei pin appartengano visivamente a un altro livello del gruppo. I 22 esclusi
-singolarmente sono la stessa cosa vista da vicino: collocarli significherebbe metterli nel posto
-sbagliato, che è peggio che non metterli.
+Il grosso sta su planimetrie con **un solo pin**, e lì c'è una ragione misurata, non una soglia
+scelta a mano. Con un pin solo la posizione non distingue il riferimento giusto da quello
+sbagliato: il criterio calcola quale frazione della tela sarebbe vicina al tratto almeno quanto
+quel pin, e dove quella frazione supera il 5% la vicinanza non prova nulla. Su queste planimetrie
+il disegno è denso e la frazione è alta, quindi restano fuori — sono 12 pin che una soglia più
+generosa avrebbe fatto entrare senza averne il diritto.
 
-Resta quindi un residuo del **9,2%**, tutto documentato pin per pin. Non lo dichiaro un limite
+Due strade allargate hanno invece funzionato e sono già dentro: il **tratto della risorsa intera**
+(i livelli sono sovrapposizioni, e un pin del piano superiore può cadere dove quel livello è
+trasparente ma il disegno c'è) e il **fattore di scala suggerito dai dati**, cioè il rapporto fra
+l'estensione del disegno e quella dei pin, oltre alle potenze di due.
+
+Resta aperta una strada che non ho percorso, e la scrivo perché è il prossimo passo naturale:
+per una planimetria con un solo pin si potrebbe confermare il riferimento **dalla proiezione
+ereditata da un livello gemello** — se quel pin cade su un punto del campo, è una prova
+indipendente dalla sua vicinanza al tratto. Vale una dozzina di pin e richiede di rompere la
+circolarità fra riferimento e proiezione, che oggi si leggono in quest'ordine.
+
+Resta quindi un residuo del **9,0%**, tutto documentato pin per pin. Non lo dichiaro un limite
 invalicabile: è il punto in cui è arrivata la misura, con i motivi scritti perché il prossimo
 passo sappia dove guardare.
 
 #### Il riferimento e la proiezione, in numeri
 
-- **227 planimetrie su 250 con pin** condividono il riferimento; 1371 pin sono convertibili in
+- **217 planimetrie su 250 con pin** condividono il riferimento; 1372 pin sono convertibili in
   percentuali. Le 51 planimetrie senza pin non fanno numero.
-- **176 proiezioni certificate**, scarto mediano dell'1% della tela, **1178 coppie** fra pin e
+- **173 proiezioni certificate**, scarto mediano dell'1% della tela, **1187 coppie** fra pin e
   punti del campo, tutte riprodotte punto per punto da `verify_map_projection.py`.
 
 ### Che cosa è successo, e perché la Fase 2 non è tutta qui
@@ -349,7 +360,7 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 
 ### Fase 2 — terza dichiarazione, 6 settembre 2026
 
-Copertura portata da 710 a **1297 pin su 1429 (90,8%)**. Comandi per riprodurre, nell'ordine:
+Copertura portata da 710 a **1300 pin su 1429 (91,0%)**. Comandi per riprodurre, nell'ordine:
 
 ```
 python tools/p5r-map-export/map_icons.py data/atlas/extracted

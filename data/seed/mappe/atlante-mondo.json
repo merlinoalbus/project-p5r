@@ -1978,18 +1978,7 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 9.448,
-     "y": 12.354,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-150-3-0",
     "nome": "Area riservata allo staff",
@@ -2010,18 +1999,7 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 9.448,
-     "y": 12.354,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-150-3-0",
     "nome": "Area riservata allo staff",
@@ -3889,8 +3867,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 44.287,
-     "y": 53.174,
+     "x": 11.072,
+     "y": 13.293,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
@@ -3905,8 +3883,8 @@
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco.",
-     "x": 34.424,
-     "y": 18.555,
+     "x": 8.606,
+     "y": 4.639,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
@@ -4240,24 +4218,7 @@
     "chiave": "futaba-05-camera-dei-sarcofagi"
    },
    "note": "",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 17.529,
-     "y": 23.877,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872616, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-8-0",
     "nome": "Camera dei Sarcofagi 1P",
@@ -4368,24 +4329,7 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 5.273,
-     "y": 40.82,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872702, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ]
+   "spilli": []
   },
   {
    "chiave": "nativo-rmap-155-10-0",
@@ -4469,24 +4413,7 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 3.223,
-     "y": 14.941,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872704, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-11-0",
     "nome": "Passaggio sotterraneo 1F",
@@ -6140,7 +6067,24 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 29.395,
+     "y": 17.578,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536871490, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-6-0",
     "nome": "Tetto",
@@ -8738,28 +8682,12 @@
     {
      "tipo": "forziere",
      "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: il trigger sotto questo pin chiama «D03_154_08_TBOX_minimap_12».",
-     "x": 55.811,
-     "y": 46.582,
+     "descrizione": "Pin nativo del gioco.",
+     "x": 23.218,
+     "y": 19.58,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872216, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    },
-    {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 46.436,
-     "y": 39.16,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 1,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -11829,24 +11757,7 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 14.404,
-     "y": 60.547,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875208, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
     "nome": "Sala d'ingresso",
@@ -12586,8 +12497,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 23.486,
-     "y": 42.676,
+     "x": 11.743,
+     "y": 21.338,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
@@ -12602,8 +12513,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 13.037,
-     "y": 41.992,
+     "x": 6.519,
+     "y": 20.996,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
@@ -12618,8 +12529,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 23.047,
-     "y": 20.508,
+     "x": 11.523,
+     "y": 10.254,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 2,
@@ -12634,8 +12545,8 @@
      "tipo": "meccanismo",
      "nome": "Meccanismo",
      "descrizione": "Pin nativo del gioco.",
-     "x": 3.369,
-     "y": 18.506,
+     "x": 1.685,
+     "y": 9.253,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 3,
@@ -14547,7 +14458,136 @@
     "chiave": "maruki-10-sala-di-supporto"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.121,
+     "y": 43.848,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875411, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 24.17,
+     "y": 51.27,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875408, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 15.234,
+     "y": 58.838,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875409, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 16.064,
+     "y": 2.93,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875410, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 10.889,
+     "y": 29.297,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875483, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 6.934,
+     "y": 22.314,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875484, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 2.93,
+     "y": 19.043,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875396, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 25.049,
+     "y": 15.137,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536875392, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-15-0",
     "nome": "Sala di supporto",
@@ -14568,24 +14608,7 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
-   "spilli": [
-    {
-     "tipo": "forziere",
-     "nome": "Forziere",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 20.508,
-     "y": 28.32,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536875389, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-15-0",
     "nome": "Sala di supporto",
@@ -16883,8 +16906,8 @@
      "tipo": "seme-bramosia",
      "nome": "Seme della bramosia",
      "descrizione": "Pin nativo del gioco.",
-     "x": 31.641,
-     "y": 3.76,
+     "x": 15.82,
+     "y": 1.88,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
@@ -16899,8 +16922,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 24.609,
-     "y": 43.311,
+     "x": 12.305,
+     "y": 21.655,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
@@ -19632,12 +19655,28 @@
     {
      "tipo": "forziere",
      "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Riconosciuto singolarmente: il trigger sotto questo pin chiama «D05_156_10_R_TBOX_minimap_03».",
+     "x": 29.297,
+     "y": 8.594,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536870992, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
      "descrizione": "Pin nativo del gioco.",
      "x": 38.867,
      "y": 39.209,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 3,
+     "ordine": 4,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -19653,7 +19692,7 @@
      "y": 40.332,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 4,
+     "ordine": 5,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -19772,15 +19811,47 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 53.711,
-     "y": 9.766,
+     "x": 26.855,
+     "y": 40.332,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
      "condizioni": [
       {
        "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872841, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 53.711,
+     "y": 9.766,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
        "nota": "Il gioco lo mostra alla bandiera nativa 536872842, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "passaggio",
+     "nome": "Passaggio",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 52.93,
+     "y": 35.449,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536872960, non ancora tradotta in una condizione della guida."
       }
      ]
     },
@@ -19792,7 +19863,7 @@
      "y": 15.234,
      "riferimento": null,
      "collezionabile": false,
-     "ordine": 1,
+     "ordine": 3,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -19821,24 +19892,7 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 25.293,
-     "y": 10.352,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536872941, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ],
+   "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-11-0",
     "nome": "Manutenzione armamenti",
@@ -22235,8 +22289,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 26.81,
-     "y": 26.107,
+     "x": 24.219,
+     "y": 23.584,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 0,
@@ -22251,8 +22305,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 26.81,
-     "y": 26.107,
+     "x": 24.219,
+     "y": 23.584,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 1,
@@ -22267,8 +22321,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 26.81,
-     "y": 26.107,
+     "x": 24.219,
+     "y": 23.584,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 2,
@@ -22283,8 +22337,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 39.729,
-     "y": 25.243,
+     "x": 35.889,
+     "y": 22.803,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 3,
@@ -22299,8 +22353,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 9.405,
-     "y": 25.297,
+     "x": 8.496,
+     "y": 22.852,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 4,
@@ -22315,8 +22369,8 @@
      "tipo": "passaggio",
      "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 49.891,
-     "y": 23.297,
+     "x": 45.068,
+     "y": 21.045,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 5,
@@ -22328,14 +22382,30 @@
      ]
     },
     {
-     "tipo": "forziere",
-     "nome": "Forziere raro",
+     "tipo": "passaggio",
+     "nome": "Passaggio",
      "descrizione": "Pin nativo del gioco.",
-     "x": 19.621,
-     "y": 29.513,
+     "x": 59.863,
+     "y": 22.656,
      "riferimento": null,
      "collezionabile": false,
      "ordine": 6,
+     "condizioni": [
+      {
+       "tipo": "da-configurare",
+       "nota": "Il gioco lo mostra alla bandiera nativa 536873622, non ancora tradotta in una condizione della guida."
+      }
+     ]
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco.",
+     "x": 17.725,
+     "y": 26.66,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7,
      "condizioni": [
       {
        "tipo": "da-configurare",
@@ -24612,24 +24682,7 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [
-    {
-     "tipo": "passaggio",
-     "nome": "Passaggio",
-     "descrizione": "Pin nativo del gioco.",
-     "x": 13.428,
-     "y": 21.484,
-     "riferimento": null,
-     "collezionabile": false,
-     "ordine": 0,
-     "condizioni": [
-      {
-       "tipo": "da-configurare",
-       "nota": "Il gioco lo mostra alla bandiera nativa 536874122, non ancora tradotta in una condizione della guida."
-      }
-     ]
-    }
-   ]
+   "spilli": []
   },
   {
    "chiave": "nativo-rmap-001-1-0",
