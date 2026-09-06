@@ -41,9 +41,14 @@ LONTANO = 0.06
 # Quota minima di pin collocabili perché la mappa valga: sotto, non è un pin fuori posto ma un
 # riferimento diverso.
 QUOTA_COLLOCABILI = 0.5
-# Con un solo pin la quota non dice nulla e la prova sta tutta nella distanza: quel pin deve
-# stare praticamente sul tratto, non soltanto vicino.
-VICINO_PIN_SOLO = VICINO/2
+# Con un solo pin appoggiato la quota non dice nulla, e una soglia piu' stretta sarebbe un numero
+# scelto a mano. La prova diventa allora un confronto con il fondo: si misura quanto disterebbe dal
+# tratto un punto qualunque preso dentro il riquadro del disegno, e si chiede che quel pin sia
+# molto piu' vicino di cosi'. In concreto: si guarda che frazione dei punti del riquadro sarebbe
+# vicina al tratto almeno quanto quel pin. Se e' una frazione piccola, la vicinanza non e' un caso;
+# se meta' della tela e' vicina quanto lui, non prova nulla.
+FRAZIONE_FONDO = 0.05
+PASSO_FONDO = 48
 # Alcune planimetrie hanno i pin in un'altra risoluzione: si prova solo con potenze di due, e si
 # accetta il cambio solo se migliora la mediana di almeno questo fattore.
 FATTORI = [1.0, 0.5, 2.0, 0.25, 4.0]
@@ -71,17 +76,21 @@ def chiave_di(codice):
     return 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in codice.split('_')[1:])
 
 
-def prova_mappa(mappa, immagine, maschera):
+def prova_mappa(mappa, immagine, maschera, maschera_gruppo=None, riquadro_gruppo=None):
     """Le prove su una singola planimetria, e il fattore di scala con cui i pin le corrispondono."""
     import numpy
     larghezza, altezza = immagine['width'], immagine['height']
     pin = mappa['pins']
     if not pin:
         return dict(esito='senza-pin', motivo='la mappa non ha pin nativi', pin=0)
-    x0, y0, x1, y1 = immagine['alpha_bbox']
+    x0, y0, x1, y1 = riquadro_gruppo or immagine['alpha_bbox']
     diagonale = (larghezza**2 + altezza**2) ** 0.5
     margine = MARGINE_TELA * diagonale
-    ys, xs = numpy.nonzero(maschera)
+    # I livelli di una stessa risorsa sono sovrapposizioni: il piano superiore disegna solo ciò che
+    # gli appartiene, e un suo pin puo' cadere dove quel livello e' trasparente ma il disegno,
+    # nell'insieme dei livelli, c'e' eccome. Il tratto di riferimento e' allora quello della
+    # risorsa intera; dove i livelli non condividono la tela si resta al proprio.
+    ys, xs = numpy.nonzero(maschera_gruppo if maschera_gruppo is not None else maschera)
 
     def distanze_con(fattore):
         return [float(numpy.hypot(xs - p['x']*fattore, ys - p['y']*fattore).min()) / diagonale for p in pin]
@@ -119,9 +128,18 @@ def prova_mappa(mappa, immagine, maschera):
     elif quota < QUOTA_COLLOCABILI:
         esito, motivo = 'non-condiviso', (f'solo {len(collocabili)} pin su {len(pin)} '
                                           f'({round(quota*100)}%) sono appoggiati al disegno')
-    elif len(collocabili) == 1 and med > VICINO_PIN_SOLO:
-        esito, motivo = 'non-condiviso', (f'un solo pin appoggiato, e dista il {round(med*100, 1)}% '
-                                          'della tela dal tratto: troppo per farne una prova')
+    elif len(collocabili) == 1:
+        # un solo pin: vale se e' molto piu' vicino al tratto di quanto lo sarebbe un punto a caso
+        griglia_x = numpy.linspace(x0, x1, PASSO_FONDO)
+        griglia_y = numpy.linspace(y0, y1, PASSO_FONDO)
+        gx, gy = numpy.meshgrid(griglia_x, griglia_y)
+        campione = numpy.stack([gx.ravel(), gy.ravel()], 1)
+        fondo = [float(numpy.hypot(xs - c[0], ys - c[1]).min())/diagonale for c in campione]
+        frazione = sum(1 for f in fondo if f <= med)/len(fondo)
+        if frazione > FRAZIONE_FONDO:
+            esito, motivo = 'non-condiviso', (
+                f'un solo pin appoggiato, e il {round(frazione*100)}% della tela e’ vicino al tratto '
+                f'quanto lui: la sua posizione non prova che il riferimento sia condiviso')
     return dict(esito=esito, motivo=motivo, pin=len(pin), fattoreScala=fattore,
                 collocabili=collocabili if esito == 'condiviso' else [],
                 numeroCollocabili=len(collocabili) if esito == 'condiviso' else 0,
@@ -132,6 +150,7 @@ def prova_mappa(mappa, immagine, maschera):
                 quotaCollocabili=round(quota, 4), distanzaMediana=round(med, 4),
                 distanzaMedianaScalaUno=round(base, 4),
                 dimensione=[larghezza, altezza], riquadroContenuto=[x0, y0, x1, y1],
+                tratto='livelli della risorsa uniti' if maschera_gruppo is not None else 'solo questo livello',
                 margineAmmesso=round(margine, 1))
 
 
@@ -147,16 +166,49 @@ def main(out):
         if m:
             immagini[m.group(1)] = e
 
-    righe = []
+    maschere, valide = {}, {}
     for mappa in meta['maps']:
         immagine = immagini[mappa['code']]
         chiave = chiave_di(mappa['code'])
         maschera = numpy.array(Image.open(native/(chiave + '.png')).convert('RGBA').getchannel('A')) > 0
-        if maschera.shape != (immagine['height'], immagine['width']):
+        maschere[mappa['code']] = maschera
+        valide[mappa['code']] = maschera.shape == (immagine['height'], immagine['width'])
+
+    # unione dei tratti, per risorsa e solo fra livelli che hanno la stessa tela
+    per_risorsa = collections.defaultdict(list)
+    for codice in maschere:
+        maggiore, minore, _ = (int(v) for v in codice.split('_')[1:])
+        per_risorsa[(maggiore, minore)].append(codice)
+    unione, riquadro_unione = {}, {}
+    for codici in per_risorsa.values():
+        gruppi = collections.defaultdict(list)
+        for c in codici:
+            if valide[c]:
+                gruppi[maschere[c].shape].append(c)
+        for insieme in gruppi.values():
+            if len(insieme) < 2:
+                continue
+            somma = numpy.zeros_like(maschere[insieme[0]])
+            for c in insieme:
+                somma |= maschere[c]
+            ys, xs = numpy.nonzero(somma)
+            if not len(xs):
+                continue
+            riquadro = [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())]
+            for c in insieme:
+                unione[c] = somma
+                riquadro_unione[c] = riquadro
+
+    righe = []
+    for mappa in meta['maps']:
+        immagine = immagini[mappa['code']]
+        chiave = chiave_di(mappa['code'])
+        if not valide[mappa['code']]:
             righe.append(dict(chiave=chiave, codice=mappa['code'], esito='non-condiviso',
                               motivo='il PNG non ha le dimensioni dichiarate dal manifest'))
             continue
-        esito = prova_mappa(mappa, immagine, maschera)
+        esito = prova_mappa(mappa, immagine, maschere[mappa['code']],
+                            unione.get(mappa['code']), riquadro_unione.get(mappa['code']))
         righe.append(dict(chiave=chiave, codice=mappa['code'], **esito))
 
     condivise = [r for r in righe if r['esito'] == 'condiviso']
@@ -167,7 +219,7 @@ def main(out):
         criterio=dict(sistemaCoordinate=meta['coordinateSystem'], margineTela=MARGINE_TELA,
                       vicino=VICINO, lontano=LONTANO, quotaCollocabili=QUOTA_COLLOCABILI,
                       fattori=FATTORI, miglioramento=MIGLIORAMENTO,
-                      vicinoPinSolo=VICINO_PIN_SOLO,
+                      frazioneFondo=FRAZIONE_FONDO, passoFondo=PASSO_FONDO,
                       fattoreSuggerito='rapporto fra estensione del disegno ed estensione dei pin',
                       conversione='x% = 100·x·fattoreScala/larghezza, y% = 100·y·fattoreScala/altezza, '
                                   'solo per gli indici elencati in «collocabili» delle mappe condivise'),

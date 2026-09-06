@@ -1002,30 +1002,14 @@
     {
       "chiave": "nativo-rmap-150-3-0",
       "codice": "RMAP_150_3_0",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        2048,
-        2048
-      ],
-      "fattoreScala": 0.5
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-150-3-1",
       "codice": "RMAP_150_3_1",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        2048,
-        2048
-      ],
-      "fattoreScala": 0.5
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-190-1-0",
@@ -1178,30 +1162,14 @@
     {
       "chiave": "nativo-rmap-190-61-0",
       "codice": "RMAP_190_61_0",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        256,
-        1024
-      ],
-      "fattoreScala": 1.0
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-190-62-0",
       "codice": "RMAP_190_62_0",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        256,
-        1024
-      ],
-      "fattoreScala": 1.0
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-192-62-0",
@@ -1212,16 +1180,8 @@
     {
       "chiave": "nativo-rmap-195-11-0",
       "codice": "RMAP_195_11_0",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        2048,
-        2048
-      ],
-      "fattoreScala": 1.0
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-160-1-0",
@@ -1998,7 +1958,7 @@
         2048,
         2048
       ],
-      "fattoreScala": 1.0
+      "fattoreScala": 0.25
     },
     {
       "chiave": "nativo-rmap-155-7-0",
@@ -2106,16 +2066,8 @@
     {
       "chiave": "nativo-rmap-155-8-1",
       "codice": "RMAP_155_8_1",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        1024,
-        1024
-      ],
-      "fattoreScala": 0.5
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-155-8-2",
@@ -2147,16 +2099,8 @@
     {
       "chiave": "nativo-rmap-155-9-1",
       "codice": "RMAP_155_9_1",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        1024,
-        1024
-      ],
-      "fattoreScala": 1.0
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-155-10-0",
@@ -2183,13 +2127,13 @@
         "scambiaAssi": false,
         "segnoX": 1,
         "segnoY": 1,
-        "scala": 0.069626,
+        "scala": 0.069524,
         "traslazione": [
-          262.963,
-          272.376
+          263.382,
+          273.666
         ],
         "coppie": 2,
-        "scarto": 0.00229,
+        "scarto": 0.00268,
         "accoppiamenti": [
           [
             0,
@@ -2202,46 +2146,15 @@
         ],
         "campo": "F155_011_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 7,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 3
       }
     },
     {
       "chiave": "nativo-rmap-155-11-1",
       "codice": "RMAP_155_11_1",
-      "esito": "certificata",
-      "motivo": null,
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        2048,
-        2048
-      ],
-      "fattoreScala": 1.0,
-      "alternative": 0,
-      "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": 1,
-        "segnoY": 1,
-        "scala": 0.069626,
-        "traslazione": [
-          262.963,
-          272.376
-        ],
-        "coppie": 1,
-        "scarto": 0.00271,
-        "accoppiamenti": [
-          [
-            0,
-            23
-          ]
-        ],
-        "campo": "F155_011_00",
-        "stimataSu": "livelli-uniti",
-        "pinUniti": 7,
-        "livelliUniti": 4
-      }
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-155-11-2",
@@ -2262,13 +2175,13 @@
         "scambiaAssi": false,
         "segnoX": 1,
         "segnoY": 1,
-        "scala": 0.069626,
+        "scala": 0.069524,
         "traslazione": [
-          262.963,
-          272.376
+          263.382,
+          273.666
         ],
         "coppie": 2,
-        "scarto": 0.00373,
+        "scarto": 0.00357,
         "accoppiamenti": [
           [
             0,
@@ -2281,8 +2194,8 @@
         ],
         "campo": "F155_011_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 7,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 3
       }
     },
     {
@@ -2304,13 +2217,13 @@
         "scambiaAssi": false,
         "segnoX": 1,
         "segnoY": 1,
-        "scala": 0.069626,
+        "scala": 0.069524,
         "traslazione": [
-          262.963,
-          272.376
+          263.382,
+          273.666
         ],
         "coppie": 2,
-        "scarto": 0.00373,
+        "scarto": 0.00357,
         "accoppiamenti": [
           [
             0,
@@ -2323,8 +2236,8 @@
         ],
         "campo": "F155_011_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 7,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 3
       }
     },
     {
@@ -3121,6 +3034,20 @@
     {
       "chiave": "nativo-rmap-151-6-0",
       "codice": "RMAP_151_6_0",
+      "esito": "non-certificata",
+      "motivo": "nessun campo offre abbastanza punti accoppiabili",
+      "pinCollocabili": [
+        0
+      ],
+      "dimensione": [
+        2048,
+        2048
+      ],
+      "fattoreScala": 1.0
+    },
+    {
+      "chiave": "nativo-rmap-151-6-1",
+      "codice": "RMAP_151_6_1",
       "esito": "certificata",
       "motivo": null,
       "pinCollocabili": [
@@ -3133,33 +3060,27 @@
       "fattoreScala": 1.0,
       "alternative": 0,
       "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": 1,
-        "segnoY": -1,
-        "scala": 0.064666,
+        "scambiaAssi": true,
+        "segnoX": -1,
+        "segnoY": 1,
+        "scala": 0.07568,
         "traslazione": [
-          836.551,
-          331.263
+          464.296,
+          903.48
         ],
         "coppie": 1,
-        "scarto": 0.00111,
+        "scarto": 0.00288,
         "accoppiamenti": [
           [
             0,
-            32
+            27
           ]
         ],
         "campo": "F151_006_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 5,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 5
       }
-    },
-    {
-      "chiave": "nativo-rmap-151-6-1",
-      "codice": "RMAP_151_6_1",
-      "esito": "senza-riferimento",
-      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-151-6-2",
@@ -3176,26 +3097,26 @@
       "fattoreScala": 1.0,
       "alternative": 0,
       "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": 1,
-        "segnoY": -1,
-        "scala": 0.064666,
+        "scambiaAssi": true,
+        "segnoX": -1,
+        "segnoY": 1,
+        "scala": 0.07568,
         "traslazione": [
-          836.551,
-          331.263
+          464.296,
+          903.48
         ],
         "coppie": 1,
-        "scarto": 0.00321,
+        "scarto": 0.00195,
         "accoppiamenti": [
           [
             0,
-            10
+            26
           ]
         ],
         "campo": "F151_006_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 5,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 5
       }
     },
     {
@@ -3214,30 +3135,30 @@
       "fattoreScala": 1.0,
       "alternative": 0,
       "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": 1,
-        "segnoY": -1,
-        "scala": 0.064666,
+        "scambiaAssi": true,
+        "segnoX": -1,
+        "segnoY": 1,
+        "scala": 0.07568,
         "traslazione": [
-          836.551,
-          331.263
+          464.296,
+          903.48
         ],
         "coppie": 2,
-        "scarto": 0.00432,
+        "scarto": 0.00905,
         "accoppiamenti": [
           [
             0,
-            22
+            15
           ],
           [
             1,
-            10
+            26
           ]
         ],
         "campo": "F151_006_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 5,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 5
       }
     },
     {
@@ -3255,26 +3176,26 @@
       "fattoreScala": 1.0,
       "alternative": 0,
       "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": 1,
-        "segnoY": -1,
-        "scala": 0.064666,
+        "scambiaAssi": true,
+        "segnoX": -1,
+        "segnoY": 1,
+        "scala": 0.07568,
         "traslazione": [
-          836.551,
-          331.263
+          464.296,
+          903.48
         ],
         "coppie": 1,
-        "scarto": 0.01016,
+        "scarto": 0.01226,
         "accoppiamenti": [
           [
             0,
-            10
+            25
           ]
         ],
         "campo": "F151_006_00",
         "stimataSu": "livelli-uniti",
-        "pinUniti": 5,
-        "livelliUniti": 4
+        "pinUniti": 6,
+        "livelliUniti": 5
       }
     },
     {
@@ -4521,8 +4442,8 @@
     {
       "chiave": "nativo-rmap-154-8-0",
       "codice": "RMAP_154_8_0",
-      "esito": "certificata",
-      "motivo": null,
+      "esito": "non-certificata",
+      "motivo": "nessun campo offre abbastanza punti accoppiabili",
       "pinCollocabili": [
         0,
         1
@@ -4531,38 +4452,7 @@
         2048,
         1024
       ],
-      "fattoreScala": 1.0,
-      "alternative": 0,
-      "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": 1,
-        "segnoY": 1,
-        "scala": 0.055169,
-        "traslazione": [
-          1209.511,
-          276.948
-        ],
-        "coppie": 2,
-        "scarto": 0.01931,
-        "accoppiamenti": [
-          [
-            0,
-            16
-          ],
-          [
-            1,
-            26
-          ]
-        ],
-        "campo": "F154_008_00",
-        "punti": 40,
-        "generi": {
-          "trigger": 37,
-          "ingresso": 3
-        },
-        "stimataSu": "livello-gemello",
-        "ereditataDa": "nativo-rmap-154-8-1"
-      }
+      "fattoreScala": 0.5
     },
     {
       "chiave": "nativo-rmap-154-8-1",
@@ -6130,43 +6020,8 @@
     {
       "chiave": "nativo-rmap-162-2-0",
       "codice": "RMAP_162_2_0",
-      "esito": "certificata",
-      "motivo": null,
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        2048,
-        2048
-      ],
-      "fattoreScala": 1.0,
-      "alternative": 0,
-      "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": -1,
-        "segnoY": -1,
-        "scala": 0.026629,
-        "traslazione": [
-          254.395,
-          907.819
-        ],
-        "coppie": 1,
-        "scarto": 0.00436,
-        "accoppiamenti": [
-          [
-            0,
-            49
-          ]
-        ],
-        "campo": "F162_002_00",
-        "punti": 81,
-        "generi": {
-          "trigger": 57,
-          "ingresso": 24
-        },
-        "stimataSu": "livello-gemello",
-        "ereditataDa": "nativo-rmap-162-2-1"
-      }
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-162-2-1",
@@ -6494,18 +6349,18 @@
         2048,
         2048
       ],
-      "fattoreScala": 1.0,
+      "fattoreScala": 0.5,
       "proiezione": {
         "scambiaAssi": false,
         "segnoX": 1,
         "segnoY": 1,
-        "scala": 0.069301,
+        "scala": 0.03465,
         "traslazione": [
-          283.165,
-          710.931
+          141.582,
+          355.466
         ],
         "coppie": 4,
-        "scarto": 0.00939,
+        "scarto": 0.00469,
         "accoppiamenti": [
           [
             0,
@@ -6553,25 +6408,25 @@
         "scambiaAssi": false,
         "segnoX": 1,
         "segnoY": 1,
-        "scala": 0.069301,
+        "scala": 0.03465,
         "traslazione": [
-          283.165,
-          710.931
+          141.582,
+          355.466
         ],
         "coppie": 3,
-        "scarto": 0.02567,
+        "scarto": 0.00639,
         "accoppiamenti": [
           [
             0,
-            13
+            1
           ],
           [
             1,
-            20
+            27
           ],
           [
             2,
-            32
+            16
           ]
         ],
         "campo": "F162_007_00",
@@ -7563,38 +7418,66 @@
     {
       "chiave": "nativo-rmap-162-15-1",
       "codice": "RMAP_162_15_1",
-      "esito": "senza-riferimento",
-      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
-    },
-    {
-      "chiave": "nativo-rmap-162-15-2",
-      "codice": "RMAP_162_15_2",
       "esito": "certificata",
       "motivo": null,
       "pinCollocabili": [
-        0
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
       ],
       "dimensione": [
         2048,
         2048
       ],
       "fattoreScala": 1.0,
-      "alternative": 0,
       "proiezione": {
         "scambiaAssi": false,
-        "segnoX": -1,
-        "segnoY": -1,
-        "scala": 0.066515,
+        "segnoX": 1,
+        "segnoY": 1,
+        "scala": 0.069101,
         "traslazione": [
-          -10.241,
-          263.585
+          846.006,
+          837.478
         ],
-        "coppie": 1,
-        "scarto": 0.01039,
+        "coppie": 8,
+        "scarto": 0.00711,
         "accoppiamenti": [
           [
             0,
-            54
+            87
+          ],
+          [
+            1,
+            18
+          ],
+          [
+            2,
+            62
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            24
+          ],
+          [
+            5,
+            98
+          ],
+          [
+            6,
+            45
+          ],
+          [
+            7,
+            76
           ]
         ],
         "campo": "F162_015_00",
@@ -7602,10 +7485,15 @@
         "generi": {
           "trigger": 85,
           "ingresso": 34
-        },
-        "stimataSu": "livello-gemello",
-        "ereditataDa": "nativo-rmap-162-15-0"
-      }
+        }
+      },
+      "alternative": 1
+    },
+    {
+      "chiave": "nativo-rmap-162-15-2",
+      "codice": "RMAP_162_15_2",
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-162-16-0",
@@ -8749,8 +8637,8 @@
     {
       "chiave": "nativo-rmap-157-11-2",
       "codice": "RMAP_157_11_2",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
+      "esito": "certificata",
+      "motivo": null,
       "pinCollocabili": [
         0,
         1
@@ -8759,7 +8647,38 @@
         1024,
         2048
       ],
-      "fattoreScala": 1.0
+      "fattoreScala": 0.5,
+      "alternative": 0,
+      "proiezione": {
+        "scambiaAssi": false,
+        "segnoX": -1,
+        "segnoY": 1,
+        "scala": 0.056712,
+        "traslazione": [
+          161.917,
+          215.068
+        ],
+        "coppie": 2,
+        "scarto": 0.01268,
+        "accoppiamenti": [
+          [
+            0,
+            27
+          ],
+          [
+            1,
+            8
+          ]
+        ],
+        "campo": "F157_011_00",
+        "punti": 43,
+        "generi": {
+          "trigger": 33,
+          "ingresso": 10
+        },
+        "stimataSu": "livello-gemello",
+        "ereditataDa": "nativo-rmap-157-11-0"
+      }
     },
     {
       "chiave": "nativo-rmap-157-12-0",
@@ -9940,6 +9859,7 @@
         0,
         1,
         2,
+        3,
         4,
         5
       ],
@@ -9949,42 +9869,47 @@
       ],
       "fattoreScala": 1.0,
       "proiezione": {
-        "scambiaAssi": true,
-        "segnoX": 1,
+        "scambiaAssi": false,
+        "segnoX": -1,
         "segnoY": -1,
-        "scala": 0.461646,
+        "scala": 0.069572,
         "traslazione": [
-          379.253,
-          825.822
+          492.122,
+          351.532
         ],
-        "coppie": 5,
-        "scarto": 0.00267,
+        "coppie": 6,
+        "scarto": 0.00832,
         "accoppiamenti": [
           [
             0,
-            0
+            17
           ],
           [
             1,
-            0
+            17
           ],
           [
             2,
-            0
+            17
           ],
           [
             3,
-            4
+            15
           ],
           [
             4,
-            3
+            8
+          ],
+          [
+            5,
+            18
           ]
         ],
-        "campo": "F156_051_00",
-        "punti": 5,
+        "campo": "F156_010_00",
+        "punti": 28,
         "generi": {
-          "ingresso": 5
+          "trigger": 24,
+          "ingresso": 4
         }
       },
       "alternative": 2
@@ -10005,30 +9930,31 @@
       "fattoreScala": 1.0,
       "alternative": 0,
       "proiezione": {
-        "scambiaAssi": true,
-        "segnoX": 1,
+        "scambiaAssi": false,
+        "segnoX": -1,
         "segnoY": -1,
-        "scala": 0.461646,
+        "scala": 0.069572,
         "traslazione": [
-          379.253,
-          825.822
+          492.122,
+          351.532
         ],
         "coppie": 2,
-        "scarto": 0.00244,
+        "scarto": 0.00624,
         "accoppiamenti": [
           [
             0,
-            3
+            18
           ],
           [
             1,
-            0
+            17
           ]
         ],
-        "campo": "F156_051_00",
-        "punti": 5,
+        "campo": "F156_010_00",
+        "punti": 28,
         "generi": {
-          "ingresso": 5
+          "trigger": 24,
+          "ingresso": 4
         },
         "stimataSu": "livello-gemello",
         "ereditataDa": "nativo-rmap-156-10-0"
@@ -10037,60 +9963,68 @@
     {
       "chiave": "nativo-rmap-156-10-2",
       "codice": "RMAP_156_10_2",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
+      "esito": "certificata",
+      "motivo": null,
       "pinCollocabili": [
+        0,
         1,
+        2,
         3
       ],
       "dimensione": [
         1024,
         2048
       ],
-      "fattoreScala": 1.0
+      "fattoreScala": 1.0,
+      "proiezione": {
+        "scambiaAssi": false,
+        "segnoX": -1,
+        "segnoY": -1,
+        "scala": 0.062899,
+        "traslazione": [
+          506.446,
+          396.998
+        ],
+        "coppie": 4,
+        "scarto": 0.01603,
+        "accoppiamenti": [
+          [
+            0,
+            18
+          ],
+          [
+            1,
+            9
+          ],
+          [
+            2,
+            17
+          ],
+          [
+            3,
+            1
+          ]
+        ],
+        "campo": "F156_010_00",
+        "punti": 28,
+        "generi": {
+          "trigger": 24,
+          "ingresso": 4
+        }
+      },
+      "alternative": 1
     },
     {
       "chiave": "nativo-rmap-156-11-0",
       "codice": "RMAP_156_11_0",
-      "esito": "certificata",
-      "motivo": null,
-      "pinCollocabili": [
-        1
-      ],
-      "dimensione": [
-        1024,
-        1024
-      ],
-      "fattoreScala": 1.0,
-      "alternative": 0,
-      "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": -1,
-        "segnoY": 1,
-        "scala": 0.077025,
-        "traslazione": [
-          102.748,
-          235.856
-        ],
-        "coppie": 1,
-        "scarto": 0.00663,
-        "accoppiamenti": [
-          [
-            0,
-            13
-          ]
-        ],
-        "campo": "F156_011_00",
-        "stimataSu": "livelli-uniti",
-        "pinUniti": 4,
-        "livelliUniti": 2
-      }
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-156-11-1",
       "codice": "RMAP_156_11_1",
-      "esito": "certificata",
-      "motivo": null,
+      "esito": "non-certificata",
+      "motivo": "nessun campo offre abbastanza punti accoppiabili",
       "pinCollocabili": [
         0,
         1,
@@ -10100,38 +10034,7 @@
         1024,
         1024
       ],
-      "fattoreScala": 1.0,
-      "alternative": 0,
-      "proiezione": {
-        "scambiaAssi": false,
-        "segnoX": -1,
-        "segnoY": 1,
-        "scala": 0.077025,
-        "traslazione": [
-          102.748,
-          235.856
-        ],
-        "coppie": 3,
-        "scarto": 0.01068,
-        "accoppiamenti": [
-          [
-            0,
-            5
-          ],
-          [
-            1,
-            11
-          ],
-          [
-            2,
-            0
-          ]
-        ],
-        "campo": "F156_011_00",
-        "stimataSu": "livelli-uniti",
-        "pinUniti": 4,
-        "livelliUniti": 2
-      }
+      "fattoreScala": 1.0
     },
     {
       "chiave": "nativo-rmap-156-11-2",
@@ -11140,40 +11043,53 @@
         3,
         4,
         5,
+        6,
         7
       ],
       "dimensione": [
         2048,
         2048
       ],
-      "fattoreScala": 1.107,
+      "fattoreScala": 1.0,
       "proiezione": {
-        "scambiaAssi": true,
-        "segnoX": 1,
+        "scambiaAssi": false,
+        "segnoX": -1,
         "segnoY": -1,
-        "scala": 0.014563,
+        "scala": 0.046071,
         "traslazione": [
-          533.093,
-          722.929
+          777.738,
+          486.286
         ],
-        "coppie": 4,
-        "scarto": 0.00889,
+        "coppie": 7,
+        "scarto": 0.00817,
         "accoppiamenti": [
           [
             0,
-            39
+            36
           ],
           [
             1,
-            39
+            36
           ],
           [
             2,
+            36
+          ],
+          [
+            3,
+            42
+          ],
+          [
+            4,
             39
           ],
           [
-            6,
-            49
+            5,
+            37
+          ],
+          [
+            7,
+            0
           ]
         ],
         "campo": "F159_011_00",
@@ -12181,16 +12097,8 @@
     {
       "chiave": "nativo-rmap-161-11-0",
       "codice": "RMAP_161_11_0",
-      "esito": "non-certificata",
-      "motivo": "nessun campo offre abbastanza punti accoppiabili",
-      "pinCollocabili": [
-        0
-      ],
-      "dimensione": [
-        1024,
-        1024
-      ],
-      "fattoreScala": 0.5
+      "esito": "senza-riferimento",
+      "motivo": "la planimetria non ha un riferimento certificato per i suoi pin"
     },
     {
       "chiave": "nativo-rmap-001-1-0",
@@ -13169,16 +13077,16 @@
   ],
   "summary": {
     "mappe": 301,
-    "certificate": 176,
-    "daLivelliUniti": 29,
+    "certificate": 173,
+    "daLivelliUniti": 26,
     "conCampoAllargato": 6,
-    "ereditate": 20,
-    "coppie": 1178,
-    "scartoMediano": 0.00968,
+    "ereditate": 18,
+    "coppie": 1187,
+    "scartoMediano": 0.00963,
     "perEsito": {
-      "certificata": 176,
-      "non-certificata": 51,
-      "senza-riferimento": 74
+      "certificata": 173,
+      "non-certificata": 44,
+      "senza-riferimento": 84
     }
   },
   "limits": [

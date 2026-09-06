@@ -33,11 +33,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 98,
-        "ingressi": 40,
-        "quotaIngressi": 0.408,
-        "scartoDallaMedia": 1.23,
-        "mediaIngressi": 0.349,
+        "coppie": 100,
+        "ingressi": 39,
+        "quotaIngressi": 0.39,
+        "scartoDallaMedia": 1.03,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Striscia": 3,
           "Barista": 2,
@@ -48,36 +48,36 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 98,
-        "ingressi": 40,
-        "senzaNome": 44,
+        "coppie": 100,
+        "ingressi": 39,
+        "senzaNome": 47,
         "famiglie": {
-          "passaggio|Passaggio": 50,
+          "passaggio|Passaggio": 49,
           "forziere|Forziere": 2,
           "scala|Scala": 1,
           "seme-bramosia|Seme della bramosia": 1
         },
         "procedure": {
+          "D05_010_TIMELIMIT_EVENT_01": 3,
           "D07_159_04_minimap_02": 2,
           "D10_162_16_EX_GUIDE": 2,
           "D151_04_miniEV06_START": 2,
           "D159_07_NPC_04_START": 2,
-          "DUCT_153_009_04_INOUT": 2,
-          "DUCT_156_007_B_INOUT": 2
+          "DUCT_153_009_04_INOUT": 2
         },
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 50,
-          "riconosciute": 54,
-          "quota": 0.926,
-          "motivo": "50 punti su 54 riconosciuti dicono «passaggio», di cui 40 ingressi del campo"
+          "casi": 49,
+          "riconosciute": 53,
+          "quota": 0.925,
+          "motivo": "49 punti su 53 riconosciuti dicono «passaggio», di cui 39 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 50 punti su 54 riconosciuti dicono «passaggio», di cui 40 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 49 punti su 53 riconosciuti dicono «passaggio», di cui 39 ingressi del campo"
     },
     {
       "tipoNativo": 5,
@@ -115,8 +115,8 @@
         "coppie": 72,
         "ingressi": 24,
         "quotaIngressi": 0.333,
-        "scartoDallaMedia": -0.28,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.14,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Libri": 3,
           "Agenzia investigativa": 2,
@@ -191,11 +191,11 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 70,
-        "ingressi": 15,
-        "quotaIngressi": 0.214,
-        "scartoDallaMedia": -2.36,
-        "mediaIngressi": 0.349,
+        "coppie": 72,
+        "ingressi": 16,
+        "quotaIngressi": 0.222,
+        "scartoDallaMedia": -2.13,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Striscia": 4,
           "Apri porta": 3,
@@ -206,11 +206,11 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 70,
-        "ingressi": 15,
-        "senzaNome": 46,
+        "coppie": 72,
+        "ingressi": 16,
+        "senzaNome": 47,
         "famiglie": {
-          "passaggio|Passaggio": 21,
+          "passaggio|Passaggio": 22,
           "meccanismo|Meccanismo": 2,
           "forziere|Forziere": 1
         },
@@ -225,10 +225,10 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 21,
-          "riconosciute": 24,
-          "quota": 0.875,
-          "motivo": "21 punti su 24 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
+          "casi": 22,
+          "riconosciute": 25,
+          "quota": 0.88,
+          "motivo": "22 punti su 25 riconosciuti dicono «passaggio», di cui 16 ingressi del campo"
         }
       },
       "tipoSpillo": "porta",
@@ -271,11 +271,11 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 61,
+        "coppie": 62,
         "ingressi": 7,
-        "quotaIngressi": 0.115,
-        "scartoDallaMedia": -3.84,
-        "mediaIngressi": 0.349,
+        "quotaIngressi": 0.113,
+        "scartoDallaMedia": -3.79,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sala trasmissioni": 29,
           "Striscia": 3,
@@ -286,9 +286,9 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 61,
+        "coppie": 62,
         "ingressi": 7,
-        "senzaNome": 52,
+        "senzaNome": 53,
         "famiglie": {
           "passaggio|Passaggio": 8,
           "forziere|Forziere": 1
@@ -343,11 +343,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 43,
-        "ingressi": 20,
-        "quotaIngressi": 0.465,
-        "scartoDallaMedia": 1.6,
-        "mediaIngressi": 0.349,
+        "coppie": 46,
+        "ingressi": 23,
+        "quotaIngressi": 0.5,
+        "scartoDallaMedia": 2.27,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Tavolo": 2,
           "Allenati": 1,
@@ -355,14 +355,18 @@
           "Pavimento ricoperto di rifiuti": 1,
           "Piazza della stazione": 1
         },
-        "proposta": null
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "motivo": "cade su un ingresso del campo nel 50% dei casi, contro il 34% medio (+2.3 deviazioni)"
+        }
       },
       "sottoIlPin": {
-        "coppie": 43,
-        "ingressi": 20,
+        "coppie": 46,
+        "ingressi": 23,
         "senzaNome": 16,
         "famiglie": {
-          "passaggio|Passaggio": 25,
+          "passaggio|Passaggio": 28,
           "meccanismo|Meccanismo": 1,
           "uscita|Uscita": 1
         },
@@ -377,16 +381,16 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 25,
-          "riconosciute": 27,
-          "quota": 0.926,
-          "motivo": "25 punti su 27 riconosciuti dicono «passaggio», di cui 20 ingressi del campo"
+          "casi": 28,
+          "riconosciute": 30,
+          "quota": 0.933,
+          "motivo": "28 punti su 30 riconosciuti dicono «passaggio», di cui 23 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 25 punti su 27 riconosciuti dicono «passaggio», di cui 20 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 28 punti su 30 riconosciuti dicono «passaggio», di cui 23 ingressi del campo"
     },
     {
       "tipoNativo": 14,
@@ -417,26 +421,26 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 41,
+        "coppie": 42,
         "ingressi": 15,
-        "quotaIngressi": 0.366,
-        "scartoDallaMedia": 0.23,
-        "mediaIngressi": 0.349,
+        "quotaIngressi": 0.357,
+        "scartoDallaMedia": 0.22,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Aspetta il treno": 1,
           "Calcia": 1,
           "Cercalavoro": 1,
           "Cristalloterapia": 1,
-          "Panetteria": 1
+          "Interscambio": 1
         },
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 41,
+        "coppie": 42,
         "ingressi": 15,
         "senzaNome": 21,
         "famiglie": {
-          "passaggio|Passaggio": 17,
+          "passaggio|Passaggio": 18,
           "forziere|Forziere": 2,
           "forziere|Forziere raro": 1
         },
@@ -451,16 +455,16 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 17,
-          "riconosciute": 20,
-          "quota": 0.85,
-          "motivo": "17 punti su 20 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
+          "casi": 18,
+          "riconosciute": 21,
+          "quota": 0.857,
+          "motivo": "18 punti su 21 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 17 punti su 20 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 18 punti su 21 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
     },
     {
       "tipoNativo": 15,
@@ -491,11 +495,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 48,
-        "ingressi": 18,
-        "quotaIngressi": 0.375,
-        "scartoDallaMedia": 0.38,
-        "mediaIngressi": 0.349,
+        "coppie": 51,
+        "ingressi": 19,
+        "quotaIngressi": 0.373,
+        "scartoDallaMedia": 0.47,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Central Street": 3,
           "Sottopasso": 2,
@@ -506,35 +510,36 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 48,
-        "ingressi": 18,
-        "senzaNome": 21,
+        "coppie": 51,
+        "ingressi": 19,
+        "senzaNome": 22,
         "famiglie": {
-          "passaggio|Passaggio": 25,
+          "passaggio|Passaggio": 26,
           "attivita|Voce del Covo dei Ladri": 1,
+          "forziere|Forziere raro": 1,
           "meccanismo|Meccanismo": 1
         },
         "procedure": {
           "D02_153_09_minimap_00": 2,
+          "D10_162_07_minimap_00": 2,
           "AC_CENTER_106_BUTTON": 1,
           "AC_GOTO_CENTER_HACHI": 1,
           "AC_GOTO_CENTER_YAMA": 1,
-          "AC_GOTO_UNDER_YAMA": 1,
-          "AC_UNDER_CENTER": 1
+          "AC_GOTO_UNDER_YAMA": 1
         },
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 25,
-          "riconosciute": 27,
-          "quota": 0.926,
-          "motivo": "25 punti su 27 riconosciuti dicono «passaggio», di cui 18 ingressi del campo"
+          "casi": 26,
+          "riconosciute": 29,
+          "quota": 0.897,
+          "motivo": "26 punti su 29 riconosciuti dicono «passaggio», di cui 19 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 25 punti su 27 riconosciuti dicono «passaggio», di cui 18 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 26 punti su 29 riconosciuti dicono «passaggio», di cui 19 ingressi del campo"
     },
     {
       "tipoNativo": 16,
@@ -561,11 +566,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 53,
-        "ingressi": 25,
-        "quotaIngressi": 0.472,
-        "scartoDallaMedia": 1.88,
-        "mediaIngressi": 0.349,
+        "coppie": 50,
+        "ingressi": 23,
+        "quotaIngressi": 0.46,
+        "scartoDallaMedia": 1.77,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sottopasso": 3,
           "Libri": 2,
@@ -576,11 +581,11 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 53,
-        "ingressi": 25,
-        "senzaNome": 21,
+        "coppie": 50,
+        "ingressi": 23,
+        "senzaNome": 20,
         "famiglie": {
-          "passaggio|Passaggio": 31,
+          "passaggio|Passaggio": 29,
           "forziere|Forziere raro": 1
         },
         "procedure": {
@@ -594,16 +599,16 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 31,
-          "riconosciute": 32,
-          "quota": 0.969,
-          "motivo": "31 punti su 32 riconosciuti dicono «passaggio», di cui 25 ingressi del campo"
+          "casi": 29,
+          "riconosciute": 30,
+          "quota": 0.967,
+          "motivo": "29 punti su 30 riconosciuti dicono «passaggio», di cui 23 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 31 punti su 32 riconosciuti dicono «passaggio», di cui 25 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 29 punti su 30 riconosciuti dicono «passaggio», di cui 23 ingressi del campo"
     },
     {
       "tipoNativo": 17,
@@ -634,11 +639,11 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 115,
+        "coppie": 114,
         "ingressi": 25,
-        "quotaIngressi": 0.217,
-        "scartoDallaMedia": -2.96,
-        "mediaIngressi": 0.349,
+        "quotaIngressi": 0.219,
+        "scartoDallaMedia": -2.75,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Chiama ascensore": 2,
           "Il mio posto": 2,
@@ -649,16 +654,16 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 115,
+        "coppie": 114,
         "ingressi": 25,
         "senzaNome": 62,
         "famiglie": {
           "passaggio|Passaggio": 27,
           "forziere|Forziere": 20,
           "meccanismo|Meccanismo": 2,
-          "seme-bramosia|Seme della bramosia": 2,
           "forziere|Forziere raro": 1,
-          "scala|Scala": 1
+          "scala|Scala": 1,
+          "seme-bramosia|Seme della bramosia": 1
         },
         "procedure": {
           "D01_151_10_TBOX_minimap_07": 2,
@@ -687,10 +692,10 @@
       "script": null,
       "proiezione": {
         "coppie": 147,
-        "ingressi": 73,
-        "quotaIngressi": 0.497,
-        "scartoDallaMedia": 3.76,
-        "mediaIngressi": 0.349,
+        "ingressi": 72,
+        "quotaIngressi": 0.49,
+        "scartoDallaMedia": 3.8,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Cortile": 3,
           "Libri": 3,
@@ -701,15 +706,15 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "motivo": "cade su un ingresso del campo nel 50% dei casi, contro il 35% medio (+3.8 deviazioni)"
+          "motivo": "cade su un ingresso del campo nel 49% dei casi, contro il 34% medio (+3.8 deviazioni)"
         }
       },
       "sottoIlPin": {
         "coppie": 147,
-        "ingressi": 73,
-        "senzaNome": 51,
+        "ingressi": 72,
+        "senzaNome": 52,
         "famiglie": {
-          "passaggio|Passaggio": 87,
+          "passaggio|Passaggio": 86,
           "negozio|Negozio": 3,
           "forziere|Forziere": 2,
           "uscita|Uscita": 2,
@@ -727,16 +732,16 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 87,
-          "riconosciute": 96,
-          "quota": 0.906,
-          "motivo": "87 punti su 96 riconosciuti dicono «passaggio», di cui 73 ingressi del campo"
+          "casi": 86,
+          "riconosciute": 95,
+          "quota": 0.905,
+          "motivo": "86 punti su 95 riconosciuti dicono «passaggio», di cui 72 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 87 punti su 96 riconosciuti dicono «passaggio», di cui 73 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 86 punti su 95 riconosciuti dicono «passaggio», di cui 72 ingressi del campo"
     },
     {
       "tipoNativo": 20,
@@ -752,8 +757,8 @@
         "coppie": 13,
         "ingressi": 8,
         "quotaIngressi": 0.615,
-        "scartoDallaMedia": 2.02,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 2.09,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Vicolo cieco": 3,
           "Negozio di udon": 1,
@@ -762,7 +767,7 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "motivo": "cade su un ingresso del campo nel 62% dei casi, contro il 35% medio (+2.0 deviazioni)"
+          "motivo": "cade su un ingresso del campo nel 62% dei casi, contro il 34% medio (+2.1 deviazioni)"
         }
       },
       "sottoIlPin": {
@@ -808,8 +813,8 @@
         "coppie": 6,
         "ingressi": 1,
         "quotaIngressi": 0.167,
-        "scartoDallaMedia": -0.94,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.9,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sali sul treno": 4
         },
@@ -849,8 +854,8 @@
         "coppie": 2,
         "ingressi": 1,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 0.45,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 0.47,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sali sul treno": 1
         },
@@ -903,11 +908,11 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 32,
-        "ingressi": 10,
-        "quotaIngressi": 0.312,
-        "scartoDallaMedia": -0.43,
-        "mediaIngressi": 0.349,
+        "coppie": 33,
+        "ingressi": 7,
+        "quotaIngressi": 0.212,
+        "scartoDallaMedia": -1.56,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Barista": 1,
           "Clinica di agopuntura": 1,
@@ -918,12 +923,12 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 32,
-        "ingressi": 10,
-        "senzaNome": 19,
+        "coppie": 33,
+        "ingressi": 7,
+        "senzaNome": 21,
         "famiglie": {
-          "passaggio|Passaggio": 11,
-          "forziere|Forziere raro": 2
+          "passaggio|Passaggio": 9,
+          "forziere|Forziere raro": 3
         },
         "procedure": {
           "CheckMarukiNote01": 1,
@@ -936,10 +941,10 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 11,
-          "riconosciute": 13,
-          "quota": 0.846,
-          "motivo": "11 punti su 13 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
+          "casi": 9,
+          "riconosciute": 12,
+          "quota": 0.75,
+          "motivo": "9 punti su 12 riconosciuti dicono «passaggio», di cui 7 ingressi del campo"
         }
       },
       "tipoSpillo": "forziere",
@@ -959,10 +964,10 @@
       "script": null,
       "proiezione": {
         "coppie": 87,
-        "ingressi": 35,
-        "quotaIngressi": 0.402,
-        "scartoDallaMedia": 1.05,
-        "mediaIngressi": 0.349,
+        "ingressi": 34,
+        "quotaIngressi": 0.391,
+        "scartoDallaMedia": 0.98,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Prigione sotterranea": 2,
           "Riemergi": 2,
@@ -974,10 +979,10 @@
       },
       "sottoIlPin": {
         "coppie": 87,
-        "ingressi": 35,
-        "senzaNome": 38,
+        "ingressi": 34,
+        "senzaNome": 39,
         "famiglie": {
-          "passaggio|Passaggio": 45,
+          "passaggio|Passaggio": 44,
           "forziere|Forziere": 2,
           "scala|Scala": 1,
           "seme-bramosia|Seme della bramosia": 1
@@ -993,16 +998,16 @@
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 45,
-          "riconosciute": 49,
-          "quota": 0.918,
-          "motivo": "45 punti su 49 riconosciuti dicono «passaggio», di cui 35 ingressi del campo"
+          "casi": 44,
+          "riconosciute": 48,
+          "quota": 0.917,
+          "motivo": "44 punti su 48 riconosciuti dicono «passaggio», di cui 34 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 45 punti su 49 riconosciuti dicono «passaggio», di cui 35 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 44 punti su 48 riconosciuti dicono «passaggio», di cui 34 ingressi del campo"
     },
     {
       "tipoNativo": 29,
@@ -1033,11 +1038,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 31,
-        "ingressi": 10,
-        "quotaIngressi": 0.323,
-        "scartoDallaMedia": -0.31,
-        "mediaIngressi": 0.349,
+        "coppie": 32,
+        "ingressi": 7,
+        "quotaIngressi": 0.219,
+        "scartoDallaMedia": -1.46,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Vetrina dei trofei": 3,
           "Dintorni del complesso": 2,
@@ -1048,34 +1053,34 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 31,
-        "ingressi": 10,
-        "senzaNome": 16,
+        "coppie": 32,
+        "ingressi": 7,
+        "senzaNome": 19,
         "famiglie": {
-          "passaggio|Passaggio": 13,
+          "passaggio|Passaggio": 11,
           "meccanismo|Meccanismo": 2
         },
         "procedure": {
+          "D05_010_TIMELIMIT_EVENT_02": 3,
           "D10_162_14_minimap_03": 2,
           "GOTO_156_04_01": 2,
+          "D010_CALL_ELEVATOR": 1,
           "D03_154_014_Go_154_013": 1,
-          "D04_155_002_GOTO": 1,
-          "D05_SAFETY_ROOM_06_SET": 1,
-          "D07_159_02_minimap_03": 1
+          "D04_155_002_GOTO": 1
         },
         "proposta": {
           "tipoSpillo": "passaggio",
           "etichetta": "Passaggio",
-          "casi": 13,
-          "riconosciute": 15,
-          "quota": 0.867,
-          "motivo": "13 punti su 15 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
+          "casi": 11,
+          "riconosciute": 13,
+          "quota": 0.846,
+          "motivo": "11 punti su 13 riconosciuti dicono «passaggio», di cui 7 ingressi del campo"
         }
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "procedura del trigger che sta sotto il pin: 13 punti su 15 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
+      "prova": "procedura del trigger che sta sotto il pin: 11 punti su 13 riconosciuti dicono «passaggio», di cui 7 ingressi del campo"
     },
     {
       "tipoNativo": 30,
@@ -1102,34 +1107,34 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 33,
+        "coppie": 31,
         "ingressi": 9,
-        "quotaIngressi": 0.273,
-        "scartoDallaMedia": -0.92,
-        "mediaIngressi": 0.349,
+        "quotaIngressi": 0.29,
+        "scartoDallaMedia": -0.6,
+        "mediaIngressi": 0.341,
         "etichette": {
-          "Vetrina dei trofei": 3,
-          "Guarda galleria": 2,
+          "Vetrina dei trofei": 2,
           "Aspetta il treno": 1,
           "Beef Bowl Shop": 1,
-          "Chiama ascensore": 1
+          "Chiama ascensore": 1,
+          "Corridoio mezzavia tribordo": 1
         },
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 33,
+        "coppie": 31,
         "ingressi": 9,
-        "senzaNome": 16,
+        "senzaNome": 14,
         "famiglie": {
           "passaggio|Passaggio": 17
         },
         "procedure": {
-          "D10_CHECK_POSTER_SESSION_TYPE_A": 2,
           "D159_04_Block_R02_START": 2,
           "D010_CALL_ELEVATOR_ENTRANCE": 1,
           "D010_CALL_ELEVATOR_FAILURE": 1,
           "D03_154_014_Go_154_005": 1,
-          "D03_154_05_minimap_01": 1
+          "D03_154_05_minimap_01": 1,
+          "D05_156_12_minimap_06": 1
         },
         "proposta": {
           "tipoSpillo": "passaggio",
@@ -1159,8 +1164,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1207,8 +1212,8 @@
         "coppie": 2,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.02,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1241,8 +1246,8 @@
         "coppie": 2,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.02,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1275,8 +1280,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1309,8 +1314,8 @@
         "coppie": 2,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.02,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Corridoio della prigione": 1,
           "Libreria Taiheido": 1
@@ -1347,8 +1352,8 @@
         "coppie": 4,
         "ingressi": 3,
         "quotaIngressi": 0.75,
-        "scartoDallaMedia": 1.68,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.72,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1405,8 +1410,8 @@
         "coppie": 2,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.02,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1454,11 +1459,11 @@
         "stato": "non-determinato"
       },
       "proiezione": {
-        "coppie": 4,
+        "coppie": 3,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.46,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.25,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Scaffale": 1,
           "Scivola giù": 1
@@ -1466,15 +1471,15 @@
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 4,
+        "coppie": 3,
         "ingressi": 0,
         "senzaNome": 1,
         "famiglie": {
-          "forziere|Forziere": 2,
+          "forziere|Forziere": 1,
           "scorciatoia|Scorciatoia": 1
         },
         "procedure": {
-          "D03_154_08_TBOX_minimap_12": 2,
+          "D03_154_08_TBOX_minimap_12": 1,
           "D04_SUBERITDAI_01": 1,
           "MAIN_MY_Bed": 1
         },
@@ -1496,22 +1501,25 @@
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
       "proiezione": {
-        "coppie": 2,
+        "coppie": 3,
         "ingressi": 2,
-        "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.93,
-        "mediaIngressi": 0.349,
+        "quotaIngressi": 0.667,
+        "scartoDallaMedia": 1.19,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 2,
+        "coppie": 3,
         "ingressi": 2,
         "senzaNome": 0,
         "famiglie": {
-          "passaggio|Passaggio": 2
+          "passaggio|Passaggio": 2,
+          "forziere|Forziere raro": 1
         },
-        "procedure": {},
+        "procedure": {
+          "D05_156_10_R_TBOX_minimap_03": 1
+        },
         "proposta": null
       },
       "tipoSpillo": null,
@@ -1551,8 +1559,8 @@
         "coppie": 43,
         "ingressi": 6,
         "quotaIngressi": 0.14,
-        "scartoDallaMedia": -2.88,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -2.79,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Tira leva": 8,
           "Magazzino audiovisivi": 6,
@@ -1621,8 +1629,8 @@
         "coppie": 18,
         "ingressi": 9,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 1.35,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.42,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Distributore automatico": 2,
           "Angolo studio": 1,
@@ -1676,8 +1684,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1710,8 +1718,8 @@
         "coppie": 2,
         "ingressi": 2,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.93,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.97,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1744,8 +1752,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1778,8 +1786,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Centro comm. sotterraneo": 1
         },
@@ -1814,8 +1822,8 @@
         "coppie": 3,
         "ingressi": 2,
         "quotaIngressi": 0.667,
-        "scartoDallaMedia": 1.15,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.19,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Centro della movida": 1
         },
@@ -1852,8 +1860,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Negozio di videonoleggio": 1
         },
@@ -1888,8 +1896,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Diner": 1
         },
@@ -1924,8 +1932,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Beef Bowl Shop": 1
         },
@@ -1960,8 +1968,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -1994,8 +2002,8 @@
         "coppie": 2,
         "ingressi": 1,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 0.45,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 0.47,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Karaoke": 1
         },
@@ -2032,8 +2040,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sala giochi": 1
         },
@@ -2068,8 +2076,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2102,8 +2110,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2136,8 +2144,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2170,8 +2178,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sottopasso": 1
         },
@@ -2208,8 +2216,8 @@
         "coppie": 3,
         "ingressi": 2,
         "quotaIngressi": 0.667,
-        "scartoDallaMedia": 1.15,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.19,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Clinica di agopuntura": 1
         },
@@ -2246,8 +2254,8 @@
         "coppie": 2,
         "ingressi": 1,
         "quotaIngressi": 0.5,
-        "scartoDallaMedia": 0.45,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 0.47,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Stanza di Velluto": 1
         },
@@ -2284,8 +2292,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Tavolo": 1
         },
@@ -2320,8 +2328,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2354,8 +2362,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Negozio d'articoli locali": 1
         },
@@ -2390,8 +2398,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Gioielleria": 1
         },
@@ -2426,8 +2434,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Negozio di accessori": 1
         },
@@ -2462,8 +2470,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Negozio di cosmetici": 1
         },
@@ -2500,8 +2508,8 @@
         "coppie": 2,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.04,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.02,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Libri": 1,
           "Piazza della stazione": 1
@@ -2540,8 +2548,8 @@
         "coppie": 3,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.27,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.25,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Aula computer": 1,
           "Aula di Cucito": 1,
@@ -2580,8 +2588,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Calligrafia": 1
         },
@@ -2633,8 +2641,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Cinema": 1
         },
@@ -2669,8 +2677,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Cartello": 1
         },
@@ -2705,8 +2713,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2739,8 +2747,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2773,8 +2781,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Mensola articoli": 1
         },
@@ -2811,8 +2819,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2845,8 +2853,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2879,8 +2887,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2913,8 +2921,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Pianta d'appartamento": 1
         },
@@ -2949,8 +2957,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -2983,8 +2991,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Mensola": 1
         },
@@ -3019,8 +3027,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3053,8 +3061,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3087,8 +3095,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3121,8 +3129,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Negozio di telefonia": 1
         },
@@ -3157,8 +3165,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3191,8 +3199,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3242,8 +3250,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3276,8 +3284,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Ottico": 1
         },
@@ -3312,8 +3320,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Bar": 1
         },
@@ -3350,8 +3358,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3384,8 +3392,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3431,33 +3439,29 @@
         "stato": "determinato"
       },
       "proiezione": {
-        "coppie": 17,
+        "coppie": 18,
         "ingressi": 10,
-        "quotaIngressi": 0.588,
-        "scartoDallaMedia": 2.07,
-        "mediaIngressi": 0.349,
+        "quotaIngressi": 0.556,
+        "scartoDallaMedia": 1.92,
+        "mediaIngressi": 0.341,
         "etichette": {},
-        "proposta": {
-          "tipoSpillo": "passaggio",
-          "etichetta": "Passaggio",
-          "motivo": "cade su un ingresso del campo nel 59% dei casi, contro il 35% medio (+2.1 deviazioni)"
-        }
+        "proposta": null
       },
       "sottoIlPin": {
-        "coppie": 17,
+        "coppie": 18,
         "ingressi": 10,
-        "senzaNome": 6,
+        "senzaNome": 7,
         "famiglie": {
           "passaggio|Passaggio": 10,
           "forziere|Forziere": 1
         },
         "procedure": {
-          "D01_151_06_minimap_06": 1,
+          "D01_151_06_minimap_13": 1,
           "D03_154_03_minimap_02": 1,
           "D04_155_007_GO_TO_155_002_05": 1,
           "D06_157_05_minimap_00": 1,
-          "D07_159_20_minimap_19": 1,
-          "D07_159_30_minimap_15": 1
+          "D06_157_11_minimap_07": 1,
+          "D07_159_20_minimap_19": 1
         },
         "proposta": {
           "tipoSpillo": "passaggio",
@@ -3487,8 +3491,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Avvia Personalizza Covo": 1
         },
@@ -3525,8 +3529,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Avvia lettore musicale": 1
         },
@@ -3563,8 +3567,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3597,8 +3601,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda galleria": 1
         },
@@ -3635,8 +3639,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Gioca a Magnate": 1
         },
@@ -3673,8 +3677,8 @@
         "coppie": 4,
         "ingressi": 1,
         "quotaIngressi": 0.25,
-        "scartoDallaMedia": -0.41,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.38,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 2
         },
@@ -3721,8 +3725,8 @@
         "coppie": 8,
         "ingressi": 5,
         "quotaIngressi": 0.625,
-        "scartoDallaMedia": 1.64,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.69,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda galleria": 1
         },
@@ -3763,8 +3767,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3797,8 +3801,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Bar": 1
         },
@@ -3835,8 +3839,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Bar": 1
         },
@@ -3873,8 +3877,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -3941,8 +3945,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Negozio d'abbigliamento": 1
         },
@@ -3979,8 +3983,8 @@
         "coppie": 1,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -0.73,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.72,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Sali sul treno": 1
         },
@@ -4017,8 +4021,8 @@
         "coppie": 9,
         "ingressi": 1,
         "quotaIngressi": 0.111,
-        "scartoDallaMedia": -1.5,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.46,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 6,
           "Divano elegante": 1
@@ -4068,8 +4072,8 @@
         "coppie": 10,
         "ingressi": 3,
         "quotaIngressi": 0.3,
-        "scartoDallaMedia": -0.32,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.27,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 4,
           "Modello psi-cognitivo Eden": 1
@@ -4116,8 +4120,8 @@
         "coppie": 14,
         "ingressi": 1,
         "quotaIngressi": 0.071,
-        "scartoDallaMedia": -2.18,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -2.13,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 8,
           "Divano elegante": 1
@@ -4172,8 +4176,8 @@
         "coppie": 6,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.79,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.76,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 6
         },
@@ -4219,8 +4223,8 @@
         "coppie": 4,
         "ingressi": 1,
         "quotaIngressi": 0.25,
-        "scartoDallaMedia": -0.41,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -0.38,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 2
         },
@@ -4260,8 +4264,8 @@
         "coppie": 3,
         "ingressi": 0,
         "quotaIngressi": 0.0,
-        "scartoDallaMedia": -1.27,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": -1.25,
+        "mediaIngressi": 0.341,
         "etichette": {
           "Guarda premi": 2,
           "Modello psi-cognitivo Eden": 1
@@ -4302,8 +4306,8 @@
         "coppie": 1,
         "ingressi": 1,
         "quotaIngressi": 1.0,
-        "scartoDallaMedia": 1.37,
-        "mediaIngressi": 0.349,
+        "scartoDallaMedia": 1.39,
+        "mediaIngressi": 0.341,
         "etichette": {},
         "proposta": null
       },
@@ -4452,16 +4456,6 @@
       "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
     },
     {
-      "chiave": "nativo-rmap-154-8-0",
-      "indicePin": 0,
-      "tipoNativo": 39,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "campo": "F154_008_00",
-      "procedura": "D03_154_08_TBOX_minimap_12",
-      "prova": "il trigger sotto questo pin chiama «D03_154_08_TBOX_minimap_12»"
-    },
-    {
       "chiave": "nativo-rmap-154-8-1",
       "indicePin": 1,
       "tipoNativo": 39,
@@ -4500,6 +4494,16 @@
       "campo": "F155_001_00",
       "procedura": "D04_SUBERITDAI_01",
       "prova": "il trigger sotto questo pin chiama «D04_SUBERITDAI_01»"
+    },
+    {
+      "chiave": "nativo-rmap-156-10-0",
+      "indicePin": 3,
+      "tipoNativo": 40,
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere raro",
+      "campo": "F156_010_00",
+      "procedura": "D05_156_10_R_TBOX_minimap_03",
+      "prova": "il trigger sotto questo pin chiama «D05_156_10_R_TBOX_minimap_03»"
     },
     {
       "chiave": "nativo-rmap-156-5-0",

@@ -19,7 +19,8 @@
       4.0
     ],
     "miglioramento": 5,
-    "vicinoPinSolo": 0.01,
+    "frazioneFondo": 0.05,
+    "passoFondo": 48,
     "fattoreSuggerito": "rapporto fra estensione del disegno ed estensione dei pin",
     "conversione": "x% = 100·x·fattoreScala/larghezza, y% = 100·y·fattoreScala/altezza, solo per gli indici elencati in «collocabili» delle mappe condivise"
   },
@@ -69,6 +70,7 @@
         468,
         563
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -109,7 +111,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1243,
+      "fattoreSuggerito": 1.1384,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -118,11 +120,12 @@
         1024
       ],
       "riquadroContenuto": [
-        159,
+        148,
         171,
-        600,
-        650
+        601,
+        651
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -158,7 +161,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.018,
+      "fattoreSuggerito": 1.0284,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -168,10 +171,11 @@
       ],
       "riquadroContenuto": [
         148,
-        178,
-        600,
-        650
+        171,
+        601,
+        651
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -201,7 +205,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3384,
+      "fattoreSuggerito": 1.3569,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -210,11 +214,12 @@
         1024
       ],
       "riquadroContenuto": [
-        153,
-        180,
-        602,
-        652
+        148,
+        171,
+        601,
+        651
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -249,6 +254,7 @@
         473,
         206
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 22.9
     },
     {
@@ -282,6 +288,7 @@
         602,
         651
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -313,6 +320,7 @@
         600,
         652
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -343,6 +351,7 @@
         602,
         652
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -371,6 +380,7 @@
         621,
         195
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 22.9
     },
     {
@@ -399,6 +409,7 @@
         341,
         204
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -431,6 +442,7 @@
         261,
         335
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -475,6 +487,7 @@
         648,
         561
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -508,6 +521,7 @@
         121,
         98
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 7.2
     },
     {
@@ -526,7 +540,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.9719,
+      "fattoreSuggerito": 3.1953,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -535,11 +549,12 @@
         1024
       ],
       "riquadroContenuto": [
-        203,
-        157,
-        542,
-        540
+        98,
+        50,
+        623,
+        685
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -570,7 +585,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1304,
+      "fattoreSuggerito": 1.1284,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -581,9 +596,10 @@
       "riquadroContenuto": [
         98,
         50,
-        624,
-        686
+        623,
+        685
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -602,7 +618,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.9492,
+      "fattoreSuggerito": 4.9536,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -613,9 +629,10 @@
       "riquadroContenuto": [
         98,
         50,
-        621,
-        686
+        623,
+        685
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -643,9 +660,10 @@
       "riquadroContenuto": [
         98,
         50,
-        621,
-        686
+        623,
+        685
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -666,7 +684,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4128,
+      "fattoreSuggerito": 1.8232,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -675,24 +693,23 @@
         1024
       ],
       "riquadroContenuto": [
-        172,
-        103,
-        591,
-        576
+        98,
+        50,
+        623,
+        685
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
       "chiave": "nativo-rmap-150-3-0",
       "codice": "RMAP_150_3_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 38% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 0.5,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -707,22 +724,21 @@
       "riquadroContenuto": [
         28,
         45,
-        634,
-        470
+        633,
+        533
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-150-3-1",
       "codice": "RMAP_150_3_1",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 38% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 0.5,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -737,9 +753,10 @@
       "riquadroContenuto": [
         28,
         45,
-        634,
-        534
+        633,
+        533
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -772,6 +789,7 @@
         200,
         252
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -806,6 +824,7 @@
         288,
         354
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -841,6 +860,7 @@
         287,
         357
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -875,19 +895,18 @@
         129,
         496
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 21.1
     },
     {
       "chiave": "nativo-rmap-190-61-0",
       "codice": "RMAP_190_61_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 100% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 2,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 1,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 1,
@@ -905,19 +924,18 @@
         138,
         675
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 21.1
     },
     {
       "chiave": "nativo-rmap-190-62-0",
       "codice": "RMAP_190_62_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 100% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 2,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 1,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 1,
@@ -935,13 +953,14 @@
         138,
         675
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 21.1
     },
     {
       "chiave": "nativo-rmap-192-62-0",
       "codice": "RMAP_192_62_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.6% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 75% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 2,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -963,19 +982,18 @@
         596,
         885
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
       "chiave": "nativo-rmap-195-11-0",
       "codice": "RMAP_195_11_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 81% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -993,6 +1011,7 @@
         1108,
         1192
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -1025,6 +1044,7 @@
         641,
         573
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -1058,6 +1078,7 @@
         516,
         626
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -1090,6 +1111,7 @@
         516,
         909
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -1108,20 +1130,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.2301,
+      "fattoreSuggerito": 2.2691,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0141,
-      "distanzaMedianaScalaUno": 0.0141,
+      "distanzaMediana": 0.0019,
+      "distanzaMedianaScalaUno": 0.0019,
       "dimensione": [
         1024,
         2048
       ],
       "riquadroContenuto": [
         124,
-        108,
-        524,
-        1205
+        7,
+        523,
+        1204
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -1169,6 +1192,7 @@
         476,
         825
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -1200,6 +1224,7 @@
         419,
         476
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -1213,17 +1238,17 @@
       "chiave": "nativo-rmap-160-10-1",
       "codice": "RMAP_160_10_1",
       "esito": "non-condiviso",
-      "motivo": "i pin distano in media il 2.1% della tela dal tratto",
+      "motivo": "i pin distano in media il 100.0% della tela dal tratto",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
       "numeroCollocabili": 0,
-      "esclusi": 0,
+      "esclusi": 1,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 0,
+      "fuoriDalDisegno": 1,
       "fattoreSuggerito": null,
-      "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0207,
+      "quotaCollocabili": 0.0,
+      "distanzaMediana": 1.0,
       "distanzaMedianaScalaUno": 0.0207,
       "dimensione": [
         1024,
@@ -1232,9 +1257,10 @@
       "riquadroContenuto": [
         64,
         63,
-        675,
-        581
+        674,
+        580
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -1270,6 +1296,7 @@
         849,
         767
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -1287,17 +1314,18 @@
       "fattoreSuggerito": null,
       "quotaCollocabili": 0.0,
       "distanzaMediana": 1.0,
-      "distanzaMedianaScalaUno": 0.3204,
+      "distanzaMedianaScalaUno": 0.123,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        1126,
-        1326,
-        1301,
-        1659
+        172,
+        130,
+        1300,
+        1658
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1329,7 +1357,7 @@
       "esclusi": 3,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 3,
-      "fattoreSuggerito": 2.3236,
+      "fattoreSuggerito": 2.3216,
       "quotaCollocabili": 0.8421,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0028,
@@ -1340,9 +1368,10 @@
       "riquadroContenuto": [
         172,
         130,
-        1301,
-        1659
+        1300,
+        1658
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1376,7 +1405,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.9974,
+      "fattoreSuggerito": 3.1432,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1387,9 +1416,10 @@
       "riquadroContenuto": [
         100,
         81,
-        624,
-        1024
+        689,
+        1023
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -1407,7 +1437,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 8.1538,
+      "fattoreSuggerito": 8.1439,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0119,
       "distanzaMedianaScalaUno": 0.0119,
@@ -1418,9 +1448,10 @@
       "riquadroContenuto": [
         100,
         81,
-        690,
-        1024
+        689,
+        1023
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -1452,7 +1483,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3862,
+      "fattoreSuggerito": 1.7364,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1462,10 +1493,11 @@
       ],
       "riquadroContenuto": [
         43,
-        76,
-        1524,
-        900
+        74,
+        1854,
+        1130
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1488,7 +1520,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6141,
+      "fattoreSuggerito": 1.6129,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1499,9 +1531,10 @@
       "riquadroContenuto": [
         43,
         74,
-        1855,
-        1131
+        1854,
+        1130
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1534,11 +1567,12 @@
         1024
       ],
       "riquadroContenuto": [
-        157,
-        165,
-        437,
-        390
+        94,
+        69,
+        505,
+        481
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -1563,7 +1597,7 @@
       "esclusi": 1,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 1,
-      "fattoreSuggerito": 2.2465,
+      "fattoreSuggerito": 2.241,
       "quotaCollocabili": 0.6667,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1574,9 +1608,10 @@
       "riquadroContenuto": [
         94,
         69,
-        506,
-        482
+        505,
+        481
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -1601,7 +1636,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3862,
+      "fattoreSuggerito": 1.7372,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1611,10 +1646,11 @@
       ],
       "riquadroContenuto": [
         43,
-        76,
-        1524,
-        900
+        74,
+        1854,
+        1131
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1637,7 +1673,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6141,
+      "fattoreSuggerito": 1.6137,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1648,9 +1684,10 @@
       "riquadroContenuto": [
         43,
         74,
-        1855,
+        1854,
         1131
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1659,7 +1696,7 @@
       "esito": "condiviso",
       "motivo": null,
       "pin": 2,
-      "fattoreScala": 1.0,
+      "fattoreScala": 0.25,
       "collocabili": [
         0,
         1
@@ -1668,20 +1705,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.9714,
+      "fattoreSuggerito": 5.2281,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0121,
+      "distanzaMediana": 0.0001,
       "distanzaMedianaScalaUno": 0.0121,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        148,
+        43,
         74,
-        1855,
-        1132
+        1854,
+        1131
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1699,7 +1737,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.3364,
+      "fattoreSuggerito": 2.9762,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.009,
       "distanzaMedianaScalaUno": 0.009,
@@ -1709,10 +1747,11 @@
       ],
       "riquadroContenuto": [
         78,
-        144,
-        1102,
-        992
+        42,
+        1144,
+        1237
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1733,7 +1772,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.0285,
+      "fattoreSuggerito": 2.0267,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -1744,18 +1783,19 @@
       "riquadroContenuto": [
         78,
         42,
-        1145,
-        1238
+        1144,
+        1237
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-155-8-0",
       "codice": "RMAP_155_8_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.9% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 27% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
-      "fattoreScala": 1.0,
+      "fattoreScala": 0.25,
       "collocabili": [],
       "numeroCollocabili": 0,
       "esclusi": 0,
@@ -1763,48 +1803,48 @@
       "fuoriDalDisegno": 0,
       "fattoreSuggerito": null,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0193,
+      "distanzaMediana": 0.0002,
       "distanzaMedianaScalaUno": 0.0193,
       "dimensione": [
         1024,
         1024
       ],
       "riquadroContenuto": [
-        201,
-        255,
-        400,
-        462
+        52,
+        45,
+        399,
+        461
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
       "chiave": "nativo-rmap-155-8-1",
       "codice": "RMAP_155_8_1",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 27% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
-      "fattoreScala": 0.5,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "fattoreScala": 0.25,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
       "fattoreSuggerito": null,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0005,
+      "distanzaMediana": 0.0002,
       "distanzaMedianaScalaUno": 0.0193,
       "dimensione": [
         1024,
         1024
       ],
       "riquadroContenuto": [
-        88,
-        186,
-        400,
-        462
+        52,
+        45,
+        399,
+        461
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -1818,7 +1858,7 @@
       "chiave": "nativo-rmap-155-8-3",
       "codice": "RMAP_155_8_3",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.9% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 86% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -1837,9 +1877,10 @@
       "riquadroContenuto": [
         52,
         45,
-        336,
-        353
+        399,
+        461
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -1857,7 +1898,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4885,
+      "fattoreSuggerito": 1.5254,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0028,
       "distanzaMedianaScalaUno": 0.0028,
@@ -1866,28 +1907,27 @@
         1024
       ],
       "riquadroContenuto": [
-        57,
-        40,
-        466,
-        676
+        52,
+        19,
+        467,
+        675
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
       "chiave": "nativo-rmap-155-9-1",
       "codice": "RMAP_155_9_1",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 58% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 2,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 1,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 1,
-      "fattoreSuggerito": 5.2984,
+      "fattoreSuggerito": 5.2868,
       "quotaCollocabili": 0.5,
       "distanzaMediana": 0.0028,
       "distanzaMedianaScalaUno": 0.0392,
@@ -1898,9 +1938,10 @@
       "riquadroContenuto": [
         52,
         19,
-        468,
-        676
+        467,
+        675
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -1925,7 +1966,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6679,
+      "fattoreSuggerito": 2.4889,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0093,
       "distanzaMedianaScalaUno": 0.0093,
@@ -1934,24 +1975,23 @@
         2048
       ],
       "riquadroContenuto": [
-        93,
-        208,
-        513,
-        480
+        84,
+        64,
+        690,
+        479
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-155-11-1",
       "codice": "RMAP_155_11_1",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 74% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -1964,11 +2004,12 @@
         2048
       ],
       "riquadroContenuto": [
-        93,
-        73,
-        513,
-        480
+        84,
+        64,
+        690,
+        479
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -1986,10 +2027,10 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4613,
+      "fattoreSuggerito": 1.4634,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0086,
-      "distanzaMedianaScalaUno": 0.0086,
+      "distanzaMediana": 0.0077,
+      "distanzaMedianaScalaUno": 0.0077,
       "dimensione": [
         2048,
         2048
@@ -1997,9 +2038,10 @@
       "riquadroContenuto": [
         84,
         64,
-        691,
-        477
+        690,
+        479
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2017,10 +2059,10 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4613,
+      "fattoreSuggerito": 1.4634,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0086,
-      "distanzaMedianaScalaUno": 0.0086,
+      "distanzaMediana": 0.0077,
+      "distanzaMedianaScalaUno": 0.0077,
       "dimensione": [
         2048,
         2048
@@ -2028,9 +2070,10 @@
       "riquadroContenuto": [
         84,
         64,
-        691,
-        477
+        690,
+        479
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2048,17 +2091,18 @@
       "fattoreSuggerito": null,
       "quotaCollocabili": 0.0,
       "distanzaMediana": 1.0,
-      "distanzaMedianaScalaUno": 0.238,
+      "distanzaMedianaScalaUno": 0.123,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        833,
-        1324,
-        1301,
-        1659
+        242,
+        139,
+        1300,
+        1658
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2084,16 +2128,17 @@
       "riquadroContenuto": [
         242,
         139,
-        1301,
-        1659
+        1300,
+        1658
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-155-13-0",
       "codice": "RMAP_155_13_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.3% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 66% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -2115,6 +2160,7 @@
         648,
         533
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -2158,10 +2204,11 @@
       ],
       "riquadroContenuto": [
         152,
-        109,
+        108,
         503,
-        473
+        472
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -2179,7 +2226,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 17.5474,
+      "fattoreSuggerito": 17.4993,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0193,
       "distanzaMedianaScalaUno": 0.0193,
@@ -2190,9 +2237,10 @@
       "riquadroContenuto": [
         152,
         108,
-        504,
-        473
+        503,
+        472
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -2220,7 +2268,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3891,
+      "fattoreSuggerito": 1.7419,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2230,10 +2278,11 @@
       ],
       "riquadroContenuto": [
         15,
-        6,
-        785,
-        897
+        3,
+        1235,
+        896
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2261,7 +2310,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.2825,
+      "fattoreSuggerito": 1.3769,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2270,11 +2319,12 @@
         2048
       ],
       "riquadroContenuto": [
-        25,
+        15,
         3,
-        1236,
-        795
+        1235,
+        896
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2295,7 +2345,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.0589,
+      "fattoreSuggerito": 4.2269,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2304,11 +2354,12 @@
         2048
       ],
       "riquadroContenuto": [
-        25,
+        15,
         3,
-        1236,
-        795
+        1235,
+        896
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2350,6 +2401,7 @@
         1236,
         795
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -2377,7 +2429,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.2825,
+      "fattoreSuggerito": 1.5706,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2388,9 +2440,10 @@
       "riquadroContenuto": [
         25,
         3,
-        1236,
-        795
+        1796,
+        819
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2414,7 +2467,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.378,
+      "fattoreSuggerito": 2.0125,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2423,11 +2476,12 @@
         2048
       ],
       "riquadroContenuto": [
-        888,
-        14,
-        1797,
-        820
+        25,
+        3,
+        1796,
+        819
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2446,7 +2500,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.336,
+      "fattoreSuggerito": 3.985,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2455,11 +2509,12 @@
         2048
       ],
       "riquadroContenuto": [
-        888,
-        14,
-        1797,
-        820
+        25,
+        3,
+        1796,
+        819
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2483,7 +2538,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.38,
+      "fattoreSuggerito": 1.3784,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2494,9 +2549,10 @@
       "riquadroContenuto": [
         32,
         203,
-        942,
-        1009
+        941,
+        1008
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2519,7 +2575,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.749,
+      "fattoreSuggerito": 1.7486,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2528,11 +2584,12 @@
         2048
       ],
       "riquadroContenuto": [
-        34,
+        32,
         203,
-        942,
-        1009
+        941,
+        1008
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2550,7 +2607,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.357,
+      "fattoreSuggerito": 3.3544,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0021,
       "distanzaMedianaScalaUno": 0.0021,
@@ -2559,11 +2616,12 @@
         2048
       ],
       "riquadroContenuto": [
-        34,
+        32,
         203,
-        942,
-        1009
+        941,
+        1008
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2582,46 +2640,50 @@
       "fuoriDalDisegno": 0,
       "fattoreSuggerito": null,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0097,
-      "distanzaMedianaScalaUno": 0.0097,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        971,
-        162,
-        1093,
-        292
+        196,
+        52,
+        1092,
+        436
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-151-6-1",
       "codice": "RMAP_151_6_1",
-      "esito": "non-condiviso",
-      "motivo": "i pin distano in media il 100.0% della tela dal tratto",
+      "esito": "condiviso",
+      "motivo": null,
       "pin": 1,
       "fattoreScala": 1.0,
-      "collocabili": [],
-      "numeroCollocabili": 0,
-      "esclusi": 1,
+      "collocabili": [
+        0
+      ],
+      "numeroCollocabili": 1,
+      "esclusi": 0,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 1,
+      "fuoriDalDisegno": 0,
       "fattoreSuggerito": null,
-      "quotaCollocabili": 0.0,
-      "distanzaMediana": 1.0,
-      "distanzaMedianaScalaUno": 0.0628,
+      "quotaCollocabili": 1.0,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        783,
-        162,
-        1093,
-        407
+        196,
+        52,
+        1092,
+        436
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2640,18 +2702,19 @@
       "fuoriDalDisegno": 0,
       "fattoreSuggerito": null,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0093,
-      "distanzaMedianaScalaUno": 0.0093,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        258,
+        196,
         52,
-        1093,
-        437
+        1092,
+        436
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2669,20 +2732,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 5.6948,
+      "fattoreSuggerito": 6.8642,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0093,
-      "distanzaMedianaScalaUno": 0.0093,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        258,
+        196,
         52,
-        964,
-        437
+        1092,
+        436
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2709,10 +2773,11 @@
       ],
       "riquadroContenuto": [
         196,
-        160,
-        430,
-        420
+        52,
+        1092,
+        436
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -2750,6 +2815,7 @@
         960,
         609
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -2783,6 +2849,7 @@
         976,
         400
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -2802,7 +2869,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.7029,
+      "fattoreSuggerito": 1.6989,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2813,9 +2880,10 @@
       "riquadroContenuto": [
         156,
         108,
-        584,
-        539
+        583,
+        538
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -2836,7 +2904,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4415,
+      "fattoreSuggerito": 1.4395,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2845,11 +2913,12 @@
         1024
       ],
       "riquadroContenuto": [
-        157,
+        156,
         108,
-        584,
-        539
+        583,
+        538
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -2870,7 +2939,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.8058,
+      "fattoreSuggerito": 2.487,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2880,10 +2949,11 @@
       ],
       "riquadroContenuto": [
         540,
-        259,
-        978,
-        681
+        15,
+        977,
+        680
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -2905,7 +2975,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3529,
+      "fattoreSuggerito": 1.3546,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -2914,11 +2984,12 @@
         1024
       ],
       "riquadroContenuto": [
-        543,
+        540,
         15,
-        978,
-        681
+        977,
+        680
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -2951,6 +3022,7 @@
         833,
         950
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -2982,6 +3054,7 @@
         756,
         746
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -3004,7 +3077,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 9.7927,
+      "fattoreSuggerito": 9.7814,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3013,11 +3086,12 @@
         1024
       ],
       "riquadroContenuto": [
-        44,
+        42,
         40,
-        836,
-        707
+        835,
+        706
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3039,7 +3113,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.7518,
+      "fattoreSuggerito": 2.7479,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3050,9 +3124,10 @@
       "riquadroContenuto": [
         42,
         40,
-        836,
-        707
+        835,
+        706
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3070,7 +3145,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.6278,
+      "fattoreSuggerito": 4.6202,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3081,9 +3156,10 @@
       "riquadroContenuto": [
         81,
         100,
-        516,
-        890
+        515,
+        889
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3123,6 +3199,7 @@
         960,
         560
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -3154,13 +3231,14 @@
         367,
         547
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-152-6-0",
       "codice": "RMAP_152_6_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.1% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 53% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -3182,6 +3260,7 @@
         972,
         596
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -3202,7 +3281,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 12.0316,
+      "fattoreSuggerito": 12.018,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3211,11 +3290,12 @@
         1024
       ],
       "riquadroContenuto": [
-        44,
+        42,
         40,
-        836,
-        707
+        835,
+        706
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3236,7 +3316,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 12.0357,
+      "fattoreSuggerito": 12.018,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3247,9 +3327,10 @@
       "riquadroContenuto": [
         42,
         40,
-        836,
-        707
+        835,
+        706
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3285,6 +3366,7 @@
         376,
         458
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -3314,7 +3396,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1676,
+      "fattoreSuggerito": 1.4337,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3323,11 +3405,12 @@
         2048
       ],
       "riquadroContenuto": [
-        400,
+        399,
         136,
-        1172,
-        863
+        1502,
+        862
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3359,10 +3442,11 @@
       ],
       "riquadroContenuto": [
         399,
-        138,
-        1503,
-        863
+        136,
+        1502,
+        862
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3382,18 +3466,19 @@
       "fuoriDalDisegno": 0,
       "fattoreSuggerito": null,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0192,
-      "distanzaMedianaScalaUno": 0.0192,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        740,
-        145,
-        1576,
-        751
+        100,
+        48,
+        1575,
+        1004
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3421,7 +3506,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.3243,
+      "fattoreSuggerito": 2.3224,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3432,9 +3517,10 @@
       "riquadroContenuto": [
         100,
         48,
-        1576,
-        1005
+        1575,
+        1004
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3455,7 +3541,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.1044,
+      "fattoreSuggerito": 3.9163,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3466,9 +3552,10 @@
       "riquadroContenuto": [
         100,
         48,
-        1149,
-        1005
+        1575,
+        1004
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3494,11 +3581,12 @@
         2048
       ],
       "riquadroContenuto": [
-        762,
-        457,
-        1066,
-        533
+        100,
+        20,
+        1415,
+        1687
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3522,7 +3610,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.6311,
+      "fattoreSuggerito": 2.6293,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3533,9 +3621,10 @@
       "riquadroContenuto": [
         100,
         20,
-        1416,
-        1688
+        1415,
+        1687
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3563,7 +3652,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.069,
+      "fattoreSuggerito": 2.0667,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3574,9 +3663,10 @@
       "riquadroContenuto": [
         100,
         55,
-        994,
-        1006
+        993,
+        1005
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3585,7 +3675,7 @@
       "esito": "condiviso",
       "motivo": null,
       "pin": 2,
-      "fattoreScala": 1.0,
+      "fattoreScala": 0.5,
       "collocabili": [
         0,
         1
@@ -3594,10 +3684,10 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.3472,
+      "fattoreSuggerito": 4.338,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0088,
-      "distanzaMedianaScalaUno": 0.0088,
+      "distanzaMediana": 0.0003,
+      "distanzaMedianaScalaUno": 0.0082,
       "dimensione": [
         2048,
         1024
@@ -3605,9 +3695,10 @@
       "riquadroContenuto": [
         409,
         114,
-        1136,
-        487
+        1135,
+        486
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3627,7 +3718,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.5304,
+      "fattoreSuggerito": 1.5276,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0017,
       "distanzaMedianaScalaUno": 0.0017,
@@ -3638,9 +3729,10 @@
       "riquadroContenuto": [
         409,
         114,
-        1136,
-        487
+        1135,
+        486
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -3659,7 +3751,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.8134,
+      "fattoreSuggerito": 2.3124,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3668,11 +3760,12 @@
         2048
       ],
       "riquadroContenuto": [
-        557,
+        544,
         90,
-        979,
-        888
+        1035,
+        1159
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3692,7 +3785,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1311,
+      "fattoreSuggerito": 1.1295,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3703,9 +3796,10 @@
       "riquadroContenuto": [
         544,
         90,
-        1036,
-        1160
+        1035,
+        1159
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3737,6 +3831,7 @@
         443,
         560
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -3754,7 +3849,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.1095,
+      "fattoreSuggerito": 9.4073,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3763,11 +3858,12 @@
         2048
       ],
       "riquadroContenuto": [
-        619,
-        304,
-        761,
-        746
+        538,
+        202,
+        883,
+        820
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3785,7 +3881,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.4672,
+      "fattoreSuggerito": 2.4625,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3796,9 +3892,10 @@
       "riquadroContenuto": [
         538,
         202,
-        884,
+        883,
         820
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3817,7 +3914,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.2984,
+      "fattoreSuggerito": 1.2954,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3828,9 +3925,10 @@
       "riquadroContenuto": [
         538,
         202,
-        884,
-        821
+        883,
+        820
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3894,7 +3992,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6107,
+      "fattoreSuggerito": 1.8922,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3903,11 +4001,12 @@
         2048
       ],
       "riquadroContenuto": [
-        613,
+        534,
         68,
-        923,
+        929,
         623
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3929,7 +4028,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1337,
+      "fattoreSuggerito": 1.1313,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -3940,9 +4039,10 @@
       "riquadroContenuto": [
         534,
         68,
-        930,
-        624
+        929,
+        623
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -3983,6 +4083,7 @@
         1264,
         888
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -4010,7 +4111,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.155,
+      "fattoreSuggerito": 1.1534,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4021,9 +4122,10 @@
       "riquadroContenuto": [
         56,
         38,
-        696,
-        869
+        695,
+        868
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4042,7 +4144,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.2783,
+      "fattoreSuggerito": 1.2765,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0002,
       "distanzaMedianaScalaUno": 0.01,
@@ -4053,9 +4155,10 @@
       "riquadroContenuto": [
         56,
         38,
-        696,
-        869
+        695,
+        868
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4082,7 +4185,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1131,
+      "fattoreSuggerito": 1.112,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4093,9 +4196,10 @@
       "riquadroContenuto": [
         91,
         163,
-        1202,
-        1125
+        1201,
+        1124
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4114,7 +4218,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.5371,
+      "fattoreSuggerito": 1.5417,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0097,
       "distanzaMedianaScalaUno": 0.0097,
@@ -4125,9 +4229,10 @@
       "riquadroContenuto": [
         91,
         163,
-        1202,
-        1115
+        1201,
+        1124
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4145,7 +4250,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 10.8415,
+      "fattoreSuggerito": null,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4154,11 +4259,12 @@
         2048
       ],
       "riquadroContenuto": [
-        292,
-        204,
-        731,
-        465
+        91,
+        163,
+        1201,
+        1124
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4203,6 +4309,7 @@
         817,
         1128
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -4238,6 +4345,7 @@
         449,
         759
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -4271,7 +4379,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.0547,
+      "fattoreSuggerito": 1.0535,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4282,9 +4390,10 @@
       "riquadroContenuto": [
         40,
         68,
-        800,
-        1021
+        799,
+        1020
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4305,7 +4414,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3095,
+      "fattoreSuggerito": 1.3099,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4316,9 +4425,10 @@
       "riquadroContenuto": [
         40,
         68,
-        798,
-        1021
+        799,
+        1020
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4345,11 +4455,12 @@
         2048
       ],
       "riquadroContenuto": [
-        100,
+        92,
         82,
-        856,
-        1006
+        965,
+        1005
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4368,7 +4479,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 5.6451,
+      "fattoreSuggerito": 5.6779,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4377,11 +4488,12 @@
         2048
       ],
       "riquadroContenuto": [
-        100,
+        92,
         82,
-        966,
-        1006
+        965,
+        1005
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4399,7 +4511,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.2635,
+      "fattoreSuggerito": 6.2607,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0104,
       "distanzaMedianaScalaUno": 0.0104,
@@ -4409,10 +4521,11 @@
       ],
       "riquadroContenuto": [
         92,
-        102,
-        966,
-        533
+        82,
+        965,
+        1005
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4456,7 +4569,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.9139,
+      "fattoreSuggerito": 3.0669,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4465,11 +4578,12 @@
         2048
       ],
       "riquadroContenuto": [
-        376,
-        157,
-        876,
-        636
+        100,
+        60,
+        912,
+        804
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4494,7 +4608,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4223,
+      "fattoreSuggerito": 1.4204,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4505,9 +4619,10 @@
       "riquadroContenuto": [
         100,
         60,
-        913,
-        805
+        912,
+        804
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4526,7 +4641,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.2503,
+      "fattoreSuggerito": 4.2448,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4537,9 +4652,10 @@
       "riquadroContenuto": [
         100,
         60,
-        913,
-        805
+        912,
+        804
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4560,7 +4676,7 @@
       "chiave": "nativo-rmap-153-12-0",
       "codice": "RMAP_153_12_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.7% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 88% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -4582,6 +4698,7 @@
         969,
         519
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -4622,19 +4739,18 @@
         624,
         842
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-162-2-0",
       "codice": "RMAP_162_2_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 40% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -4647,11 +4763,12 @@
         2048
       ],
       "riquadroContenuto": [
-        255,
-        1090,
-        341,
-        1235
+        99,
+        39,
+        597,
+        1727
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4674,7 +4791,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.9084,
+      "fattoreSuggerito": 3.8651,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0014,
       "distanzaMedianaScalaUno": 0.0014,
@@ -4684,10 +4801,11 @@
       ],
       "riquadroContenuto": [
         99,
-        728,
-        566,
-        1728
+        39,
+        597,
+        1727
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4706,7 +4824,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.2434,
+      "fattoreSuggerito": 2.2404,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4717,9 +4835,10 @@
       "riquadroContenuto": [
         99,
         39,
-        598,
-        1728
+        597,
+        1727
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4739,7 +4858,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.0558,
+      "fattoreSuggerito": 2.8276,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4748,11 +4867,12 @@
         2048
       ],
       "riquadroContenuto": [
-        177,
+        99,
         39,
-        598,
-        1197
+        597,
+        1727
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4778,7 +4898,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.0965,
+      "fattoreSuggerito": 1.2582,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4789,9 +4909,10 @@
       "riquadroContenuto": [
         75,
         36,
-        811,
-        477
+        810,
+        604
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4812,7 +4933,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1365,
+      "fattoreSuggerito": 1.1347,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0097,
       "distanzaMedianaScalaUno": 0.0097,
@@ -4823,9 +4944,10 @@
       "riquadroContenuto": [
         75,
         36,
-        811,
-        605
+        810,
+        604
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4857,6 +4979,7 @@
         632,
         791
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -4887,6 +5010,7 @@
         1904,
         836
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -4895,7 +5019,7 @@
       "esito": "condiviso",
       "motivo": null,
       "pin": 4,
-      "fattoreScala": 1.0,
+      "fattoreScala": 0.5,
       "collocabili": [
         0,
         1,
@@ -4906,9 +5030,9 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.5232,
+      "fattoreSuggerito": 2.521,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0074,
+      "distanzaMediana": 0.0002,
       "distanzaMedianaScalaUno": 0.0074,
       "dimensione": [
         2048,
@@ -4917,9 +5041,10 @@
       "riquadroContenuto": [
         55,
         20,
-        720,
-        1719
+        719,
+        1718
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4938,10 +5063,10 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.803,
+      "fattoreSuggerito": 2.7999,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0002,
-      "distanzaMedianaScalaUno": 0.0079,
+      "distanzaMedianaScalaUno": 0.0074,
       "dimensione": [
         2048,
         2048
@@ -4949,9 +5074,10 @@
       "riquadroContenuto": [
         55,
         20,
-        720,
-        1719
+        719,
+        1718
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -4972,7 +5098,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.854,
+      "fattoreSuggerito": 4.2647,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -4981,11 +5107,12 @@
         2048
       ],
       "riquadroContenuto": [
-        265,
-        975,
-        545,
-        1448
+        161,
+        178,
+        593,
+        1447
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5003,7 +5130,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.6216,
+      "fattoreSuggerito": 4.2647,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0079,
       "distanzaMedianaScalaUno": 0.0079,
@@ -5013,10 +5140,11 @@
       ],
       "riquadroContenuto": [
         161,
-        769,
-        545,
-        1448
+        178,
+        593,
+        1447
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5043,10 +5171,11 @@
       ],
       "riquadroContenuto": [
         161,
-        481,
-        594,
-        1039
+        178,
+        593,
+        1447
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5073,7 +5202,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6508,
+      "fattoreSuggerito": 3.1895,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0041,
       "distanzaMedianaScalaUno": 0.0041,
@@ -5082,11 +5211,12 @@
         2048
       ],
       "riquadroContenuto": [
-        165,
+        161,
         178,
-        555,
-        697
+        593,
+        1447
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5143,20 +5273,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.3579,
+      "fattoreSuggerito": 3.7827,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0048,
-      "distanzaMedianaScalaUno": 0.0048,
+      "distanzaMediana": 0.0035,
+      "distanzaMedianaScalaUno": 0.0035,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        411,
+        100,
         96,
-        2038,
-        1954
+        2037,
+        1958
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5212,7 +5343,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.567,
+      "fattoreSuggerito": 2.6196,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0021,
       "distanzaMedianaScalaUno": 0.0021,
@@ -5222,10 +5353,11 @@
       ],
       "riquadroContenuto": [
         100,
-        100,
-        1966,
-        1959
+        96,
+        2037,
+        1958
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5246,7 +5378,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 11.9825,
+      "fattoreSuggerito": 17.032,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5255,11 +5387,12 @@
         2048
       ],
       "riquadroContenuto": [
-        122,
-        114,
-        1966,
-        1328
+        100,
+        96,
+        2037,
+        1958
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5282,7 +5415,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.787,
+      "fattoreSuggerito": 3.2195,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5293,9 +5426,10 @@
       "riquadroContenuto": [
         221,
         100,
-        1832,
-        824
+        1831,
+        1256
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5319,7 +5453,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.5775,
+      "fattoreSuggerito": 1.5764,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5330,16 +5464,17 @@
       "riquadroContenuto": [
         221,
         100,
-        1832,
-        1257
+        1831,
+        1256
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-162-14-0",
       "codice": "RMAP_162_14_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.1% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 74% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -5356,11 +5491,12 @@
         2048
       ],
       "riquadroContenuto": [
-        333,
-        556,
-        523,
-        809
+        107,
+        20,
+        758,
+        878
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5378,7 +5514,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.5312,
+      "fattoreSuggerito": 5.0405,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0114,
       "distanzaMedianaScalaUno": 0.0114,
@@ -5387,11 +5523,12 @@
         2048
       ],
       "riquadroContenuto": [
-        333,
-        276,
-        525,
-        809
+        107,
+        20,
+        758,
+        878
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5409,7 +5546,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.0989,
+      "fattoreSuggerito": 2.0961,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5420,9 +5557,10 @@
       "riquadroContenuto": [
         107,
         20,
-        759,
-        879
+        758,
+        878
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5450,9 +5588,10 @@
       "riquadroContenuto": [
         107,
         20,
-        759,
-        879
+        758,
+        878
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5475,7 +5614,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4141,
+      "fattoreSuggerito": 5.8426,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5484,52 +5623,61 @@
         2048
       ],
       "riquadroContenuto": [
-        203,
+        38,
         66,
-        543,
-        1177
+        1999,
+        1176
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-162-15-1",
       "codice": "RMAP_162_15_1",
-      "esito": "non-condiviso",
-      "motivo": "i pin distano in media il 100.0% della tela dal tratto",
+      "esito": "condiviso",
+      "motivo": null,
       "pin": 8,
       "fattoreScala": 1.0,
-      "collocabili": [],
-      "numeroCollocabili": 0,
-      "esclusi": 8,
+      "collocabili": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "numeroCollocabili": 8,
+      "esclusi": 0,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 8,
-      "fattoreSuggerito": 1.8869,
-      "quotaCollocabili": 0.0,
-      "distanzaMediana": 1.0,
-      "distanzaMedianaScalaUno": 0.1803,
+      "fuoriDalDisegno": 0,
+      "fattoreSuggerito": 2.6492,
+      "quotaCollocabili": 1.0,
+      "distanzaMediana": 0.01,
+      "distanzaMedianaScalaUno": 0.01,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        730,
+        38,
         66,
-        2000,
-        1177
+        1999,
+        1176
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-162-15-2",
       "codice": "RMAP_162_15_2",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 31% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -5543,10 +5691,11 @@
       ],
       "riquadroContenuto": [
         38,
-        289,
-        466,
-        610
+        66,
+        1999,
+        1176
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5568,7 +5717,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.8307,
+      "fattoreSuggerito": 3.5944,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5577,11 +5726,12 @@
         2048
       ],
       "riquadroContenuto": [
-        177,
+        100,
         223,
-        859,
-        636
+        1160,
+        1163
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5601,7 +5751,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.5609,
+      "fattoreSuggerito": 3.1179,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5610,11 +5760,12 @@
         2048
       ],
       "riquadroContenuto": [
-        177,
+        100,
         223,
-        907,
-        637
+        1160,
+        1163
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5634,7 +5785,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.0821,
+      "fattoreSuggerito": 7.485,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5643,11 +5794,12 @@
         2048
       ],
       "riquadroContenuto": [
-        279,
-        289,
-        1161,
-        637
+        100,
+        223,
+        1160,
+        1163
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5666,7 +5818,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.811,
+      "fattoreSuggerito": 5.0878,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5676,10 +5828,11 @@
       ],
       "riquadroContenuto": [
         100,
-        289,
-        1161,
-        1164
+        223,
+        1160,
+        1163
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -5705,7 +5858,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.6669,
+      "fattoreSuggerito": 6.7985,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5714,11 +5867,12 @@
         2048
       ],
       "riquadroContenuto": [
-        156,
-        424,
-        411,
-        876
+        121,
+        82,
+        410,
+        875
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -5736,7 +5890,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.0189,
+      "fattoreSuggerito": 3.0116,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0082,
       "distanzaMedianaScalaUno": 0.0082,
@@ -5747,44 +5901,17 @@
       "riquadroContenuto": [
         121,
         82,
-        411,
-        876
+        410,
+        875
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
       "chiave": "nativo-rmap-157-3-0",
       "codice": "RMAP_157_3_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.9% della tela dal tratto: troppo per farne una prova",
-      "pin": 1,
-      "fattoreScala": 1.0,
-      "collocabili": [],
-      "numeroCollocabili": 0,
-      "esclusi": 0,
-      "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 0,
-      "fattoreSuggerito": null,
-      "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0193,
-      "distanzaMedianaScalaUno": 0.0193,
-      "dimensione": [
-        1024,
-        1024
-      ],
-      "riquadroContenuto": [
-        148,
-        89,
-        576,
-        896
-      ],
-      "margineAmmesso": 29.0
-    },
-    {
-      "chiave": "nativo-rmap-157-3-1",
-      "codice": "RMAP_157_3_1",
-      "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.9% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 88% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -5803,9 +5930,39 @@
       "riquadroContenuto": [
         148,
         88,
-        565,
-        896
+        575,
+        895
       ],
+      "tratto": "livelli della risorsa uniti",
+      "margineAmmesso": 29.0
+    },
+    {
+      "chiave": "nativo-rmap-157-3-1",
+      "codice": "RMAP_157_3_1",
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 88% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
+      "pin": 1,
+      "fattoreScala": 1.0,
+      "collocabili": [],
+      "numeroCollocabili": 0,
+      "esclusi": 0,
+      "fuoriDallaTela": 0,
+      "fuoriDalDisegno": 0,
+      "fattoreSuggerito": null,
+      "quotaCollocabili": 1.0,
+      "distanzaMediana": 0.0193,
+      "distanzaMedianaScalaUno": 0.0193,
+      "dimensione": [
+        1024,
+        1024
+      ],
+      "riquadroContenuto": [
+        148,
+        88,
+        575,
+        895
+      ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -5834,11 +5991,12 @@
         2048
       ],
       "riquadroContenuto": [
-        85,
-        507,
-        372,
-        851
+        56,
+        39,
+        406,
+        850
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -5865,7 +6023,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.0634,
+      "fattoreSuggerito": 1.0613,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -5876,9 +6034,10 @@
       "riquadroContenuto": [
         56,
         39,
-        407,
-        851
+        406,
+        850
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -5920,6 +6079,7 @@
         1185,
         888
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -5964,6 +6124,7 @@
         370,
         373
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -5999,6 +6160,7 @@
         1402,
         550
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -6029,7 +6191,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.4558,
+      "fattoreSuggerito": 1.4541,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6040,9 +6202,10 @@
       "riquadroContenuto": [
         30,
         27,
-        843,
-        848
+        842,
+        847
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -6063,7 +6226,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 6.5687,
+      "fattoreSuggerito": 6.5607,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6074,9 +6237,10 @@
       "riquadroContenuto": [
         30,
         27,
-        843,
-        848
+        842,
+        847
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -6100,7 +6264,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.5391,
+      "fattoreSuggerito": 1.5386,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6111,9 +6275,10 @@
       "riquadroContenuto": [
         29,
         81,
-        872,
+        871,
         523
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6134,7 +6299,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.2435,
+      "fattoreSuggerito": 2.2389,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6145,9 +6310,10 @@
       "riquadroContenuto": [
         29,
         81,
-        872,
-        524
+        871,
+        523
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6166,20 +6332,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.7745,
+      "fattoreSuggerito": 4.925,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0044,
-      "distanzaMedianaScalaUno": 0.0044,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         1024,
         1024
       ],
       "riquadroContenuto": [
-        214,
+        115,
         66,
-        558,
-        623
+        557,
+        622
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -6198,7 +6365,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.8232,
+      "fattoreSuggerito": 4.8143,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6209,9 +6376,10 @@
       "riquadroContenuto": [
         115,
         66,
-        558,
-        623
+        557,
+        622
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -6233,7 +6401,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.4327,
+      "fattoreSuggerito": 4.4301,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6242,11 +6410,12 @@
         2048
       ],
       "riquadroContenuto": [
-        45,
+        44,
         36,
-        461,
-        1570
+        460,
+        1569
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6269,7 +6438,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.3188,
+      "fattoreSuggerito": 2.3166,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6280,9 +6449,10 @@
       "riquadroContenuto": [
         44,
         36,
-        461,
-        1570
+        460,
+        1569
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6291,7 +6461,7 @@
       "esito": "condiviso",
       "motivo": null,
       "pin": 2,
-      "fattoreScala": 1.0,
+      "fattoreScala": 0.5,
       "collocabili": [
         0,
         1
@@ -6300,20 +6470,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.5239,
+      "fattoreSuggerito": 3.8352,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0137,
+      "distanzaMediana": 0.0024,
       "distanzaMedianaScalaUno": 0.0137,
       "dimensione": [
         1024,
         2048
       ],
       "riquadroContenuto": [
-        122,
         44,
-        369,
-        1354
+        36,
+        460,
+        1569
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6354,6 +6525,7 @@
         1388,
         485
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -6387,6 +6559,7 @@
         405,
         375
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.1
     },
     {
@@ -6420,6 +6593,7 @@
         773,
         453
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -6446,11 +6620,12 @@
         1024
       ],
       "riquadroContenuto": [
-        144,
+        60,
         64,
-        408,
-        389
+        407,
+        902
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -6468,7 +6643,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 6.5159,
+      "fattoreSuggerito": 6.4984,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0181,
       "distanzaMedianaScalaUno": 0.0181,
@@ -6479,9 +6654,10 @@
       "riquadroContenuto": [
         60,
         64,
-        408,
-        903
+        407,
+        902
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -6522,6 +6698,7 @@
         335,
         401
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -6556,6 +6733,7 @@
         588,
         850
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -6580,7 +6758,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.2432,
+      "fattoreSuggerito": 1.613,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6590,10 +6768,11 @@
       ],
       "riquadroContenuto": [
         276,
-        259,
-        1192,
-        824
+        52,
+        1399,
+        823
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -6617,7 +6796,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1519,
+      "fattoreSuggerito": 1.1507,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6628,9 +6807,10 @@
       "riquadroContenuto": [
         276,
         52,
-        1400,
-        824
+        1399,
+        823
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -6667,6 +6847,7 @@
         998,
         1003
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -6713,6 +6894,7 @@
         1328,
         1894
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -6772,6 +6954,7 @@
         1482,
         1907
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -6793,7 +6976,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.7059,
+      "fattoreSuggerito": 1.748,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6804,9 +6987,10 @@
       "riquadroContenuto": [
         61,
         104,
-        975,
-        1442
+        974,
+        1549
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6829,7 +7013,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6506,
+      "fattoreSuggerito": 1.728,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6840,9 +7024,10 @@
       "riquadroContenuto": [
         61,
         104,
-        916,
-        1550
+        974,
+        1549
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6880,6 +7065,7 @@
         927,
         768
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -6906,7 +7092,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.682,
+      "fattoreSuggerito": 1.69,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6916,10 +7102,11 @@
       ],
       "riquadroContenuto": [
         100,
-        48,
-        1401,
-        1072
+        40,
+        1403,
+        1071
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -6940,15 +7127,16 @@
         0,
         1,
         2,
+        3,
         4,
         5
       ],
-      "numeroCollocabili": 5,
-      "esclusi": 1,
+      "numeroCollocabili": 6,
+      "esclusi": 0,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 1,
-      "fattoreSuggerito": 1.6765,
-      "quotaCollocabili": 0.8333,
+      "fuoriDalDisegno": 0,
+      "fattoreSuggerito": 1.74,
+      "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
@@ -6957,10 +7145,11 @@
       ],
       "riquadroContenuto": [
         100,
-        250,
-        651,
-        1088
+        164,
+        650,
+        1087
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -6978,7 +7167,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.322,
+      "fattoreSuggerito": 5.645,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -6989,9 +7178,10 @@
       "riquadroContenuto": [
         100,
         164,
-        579,
-        849
+        650,
+        1087
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -7002,57 +7192,59 @@
       "pin": 4,
       "fattoreScala": 1.0,
       "collocabili": [
+        0,
         1,
+        2,
         3
       ],
-      "numeroCollocabili": 2,
-      "esclusi": 2,
+      "numeroCollocabili": 4,
+      "esclusi": 0,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 2,
-      "fattoreSuggerito": 0.6901,
-      "quotaCollocabili": 0.5,
-      "distanzaMediana": 0.0127,
-      "distanzaMedianaScalaUno": 0.1712,
+      "fuoriDalDisegno": 0,
+      "fattoreSuggerito": 1.7372,
+      "quotaCollocabili": 1.0,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         1024,
         2048
       ],
       "riquadroContenuto": [
-        219,
+        100,
         164,
-        523,
-        336
+        650,
+        1087
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
       "chiave": "nativo-rmap-156-11-0",
       "codice": "RMAP_156_11_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "i pin distano in media il 2.1% della tela dal tratto",
       "pin": 2,
       "fattoreScala": 1.0,
-      "collocabili": [
-        1
-      ],
-      "numeroCollocabili": 1,
-      "esclusi": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
+      "esclusi": 0,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 1,
-      "fattoreSuggerito": 1.3269,
-      "quotaCollocabili": 0.5,
-      "distanzaMediana": 0.0041,
+      "fuoriDalDisegno": 0,
+      "fattoreSuggerito": 1.3812,
+      "quotaCollocabili": 1.0,
+      "distanzaMediana": 0.0207,
       "distanzaMedianaScalaUno": 0.0207,
       "dimensione": [
         1024,
         1024
       ],
       "riquadroContenuto": [
-        93,
-        84,
-        387,
-        474
+        80,
+        67,
+        386,
+        473
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7071,7 +7263,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.1831,
+      "fattoreSuggerito": 1.1797,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7082,9 +7274,10 @@
       "riquadroContenuto": [
         80,
         67,
-        387,
-        474
+        386,
+        473
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7135,6 +7328,7 @@
         441,
         667
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -7178,6 +7372,7 @@
         809,
         1216
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -7211,6 +7406,7 @@
         1101,
         512
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -7228,17 +7424,18 @@
       "fattoreSuggerito": null,
       "quotaCollocabili": 0.0,
       "distanzaMediana": 1.0,
-      "distanzaMedianaScalaUno": 0.0264,
+      "distanzaMedianaScalaUno": 0.0232,
       "dimensione": [
         1024,
         1024
       ],
       "riquadroContenuto": [
-        199,
+        196,
         141,
         497,
-        532
+        531
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7256,7 +7453,7 @@
       "esclusi": 1,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 1,
-      "fattoreSuggerito": 2.2494,
+      "fattoreSuggerito": 2.2656,
       "quotaCollocabili": 0.6667,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7265,11 +7462,12 @@
         1024
       ],
       "riquadroContenuto": [
-        199,
+        196,
         141,
         497,
-        530
+        531
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7306,7 +7504,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.881,
+      "fattoreSuggerito": 1.8864,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7315,11 +7513,12 @@
         2048
       ],
       "riquadroContenuto": [
-        208,
+        192,
         74,
-        1682,
-        531
+        1681,
+        530
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7353,10 +7552,11 @@
       ],
       "riquadroContenuto": [
         192,
-        216,
-        492,
-        447
+        74,
+        1681,
+        530
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7386,7 +7586,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.881,
+      "fattoreSuggerito": 1.878,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7397,9 +7597,10 @@
       "riquadroContenuto": [
         208,
         74,
-        1682,
-        531
+        1681,
+        530
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7419,7 +7620,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 4.6734,
+      "fattoreSuggerito": 4.6644,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0024,
       "distanzaMedianaScalaUno": 0.0024,
@@ -7430,9 +7631,10 @@
       "riquadroContenuto": [
         208,
         74,
-        1682,
-        531
+        1681,
+        530
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7468,11 +7670,12 @@
         1024
       ],
       "riquadroContenuto": [
-        226,
-        121,
-        564,
-        657
+        152,
+        73,
+        563,
+        656
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7498,11 +7701,12 @@
         1024
       ],
       "riquadroContenuto": [
-        153,
+        152,
         73,
-        561,
-        657
+        563,
+        656
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7530,9 +7734,10 @@
       "riquadroContenuto": [
         152,
         73,
-        561,
-        630
+        563,
+        656
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7553,7 +7758,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 3.8603,
+      "fattoreSuggerito": 3.851,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7564,9 +7769,10 @@
       "riquadroContenuto": [
         79,
         15,
-        462,
-        596
+        461,
+        595
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7595,9 +7801,10 @@
       "riquadroContenuto": [
         79,
         15,
-        462,
-        596
+        461,
+        595
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 29.0
     },
     {
@@ -7626,6 +7833,7 @@
         221,
         253
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 7.2
     },
     {
@@ -7669,13 +7877,14 @@
         1682,
         531
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
       "chiave": "nativo-rmap-159-10-0",
       "codice": "RMAP_159_10_0",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.8% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 99% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -7692,11 +7901,12 @@
         1024
       ],
       "riquadroContenuto": [
-        172,
+        116,
         123,
-        956,
-        563
+        955,
+        562
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -7718,7 +7928,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.3413,
+      "fattoreSuggerito": 1.3387,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7729,9 +7939,10 @@
       "riquadroContenuto": [
         116,
         123,
-        956,
-        563
+        955,
+        562
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -7754,20 +7965,21 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6659,
+      "fattoreSuggerito": 5.7144,
       "quotaCollocabili": 1.0,
-      "distanzaMediana": 0.0125,
-      "distanzaMedianaScalaUno": 0.0125,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
-        150,
-        447,
-        1288,
-        564
+        148,
+        58,
+        1287,
+        596
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7776,7 +7988,7 @@
       "esito": "condiviso",
       "motivo": null,
       "pin": 8,
-      "fattoreScala": 1.107,
+      "fattoreScala": 1.0,
       "collocabili": [
         0,
         1,
@@ -7784,26 +7996,28 @@
         3,
         4,
         5,
+        6,
         7
       ],
-      "numeroCollocabili": 7,
-      "esclusi": 1,
+      "numeroCollocabili": 8,
+      "esclusi": 0,
       "fuoriDallaTela": 0,
-      "fuoriDalDisegno": 1,
-      "fattoreSuggerito": 1.107,
-      "quotaCollocabili": 0.875,
-      "distanzaMediana": 0.0001,
-      "distanzaMedianaScalaUno": 0.0124,
+      "fuoriDalDisegno": 0,
+      "fattoreSuggerito": 2.8805,
+      "quotaCollocabili": 1.0,
+      "distanzaMediana": 0.0,
+      "distanzaMedianaScalaUno": 0.0,
       "dimensione": [
         2048,
         2048
       ],
       "riquadroContenuto": [
         148,
-        447,
-        1288,
-        577
+        58,
+        1287,
+        596
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7817,7 +8031,7 @@
       "chiave": "nativo-rmap-159-11-3",
       "codice": "RMAP_159_11_3",
       "esito": "non-condiviso",
-      "motivo": "un solo pin appoggiato, e dista il 1.3% della tela dal tratto: troppo per farne una prova",
+      "motivo": "un solo pin appoggiato, e il 45% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 1.0,
       "collocabili": [],
@@ -7834,11 +8048,12 @@
         2048
       ],
       "riquadroContenuto": [
-        238,
-        500,
-        930,
-        597
+        148,
+        58,
+        1287,
+        596
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7858,7 +8073,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.2812,
+      "fattoreSuggerito": 1.609,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7867,11 +8082,12 @@
         2048
       ],
       "riquadroContenuto": [
-        236,
+        148,
         58,
-        959,
-        597
+        1287,
+        596
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -7903,6 +8119,7 @@
         443,
         516
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -7935,6 +8152,7 @@
         558,
         1037
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -7977,7 +8195,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6008,
+      "fattoreSuggerito": 1.6234,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -7986,11 +8204,12 @@
         2048
       ],
       "riquadroContenuto": [
-        79,
+        37,
         66,
-        1485,
-        1508
+        1484,
+        1507
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -8012,7 +8231,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.8762,
+      "fattoreSuggerito": 2.8804,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -8023,9 +8242,10 @@
       "riquadroContenuto": [
         37,
         66,
-        1485,
-        1500
+        1484,
+        1507
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -8052,7 +8272,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6975,
+      "fattoreSuggerito": 1.7255,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -8062,10 +8282,11 @@
       ],
       "riquadroContenuto": [
         12,
-        67,
-        1389,
-        1344
+        33,
+        1388,
+        1343
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -8087,7 +8308,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 2.4915,
+      "fattoreSuggerito": 2.4896,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -8098,9 +8319,10 @@
       "riquadroContenuto": [
         12,
         33,
-        1389,
-        1344
+        1388,
+        1343
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -8124,7 +8346,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6068,
+      "fattoreSuggerito": 2.1287,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -8133,11 +8355,12 @@
         2048
       ],
       "riquadroContenuto": [
-        431,
+        208,
         361,
-        1511,
-        1112
+        1510,
+        1484
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -8160,7 +8383,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.6383,
+      "fattoreSuggerito": 1.637,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -8171,9 +8394,10 @@
       "riquadroContenuto": [
         208,
         361,
-        1511,
-        1485
+        1510,
+        1484
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 57.9
     },
     {
@@ -8209,6 +8433,7 @@
         1397,
         1305
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -8243,6 +8468,7 @@
         443,
         626
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -8276,6 +8502,7 @@
         719,
         1487
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8324,6 +8551,7 @@
         1487,
         1487
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 57.9
     },
     {
@@ -8352,6 +8580,7 @@
         299,
         348
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -8398,6 +8627,7 @@
         493,
         1346
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8432,6 +8662,7 @@
         719,
         1487
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8467,6 +8698,7 @@
         299,
         348
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 14.5
     },
     {
@@ -8502,6 +8734,7 @@
         719,
         1487
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8533,6 +8766,7 @@
         719,
         1487
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8568,19 +8802,18 @@
         802,
         1487
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
       "chiave": "nativo-rmap-161-11-0",
       "codice": "RMAP_161_11_0",
-      "esito": "condiviso",
-      "motivo": null,
+      "esito": "non-condiviso",
+      "motivo": "un solo pin appoggiato, e il 40% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso",
       "pin": 1,
       "fattoreScala": 0.5,
-      "collocabili": [
-        0
-      ],
-      "numeroCollocabili": 1,
+      "collocabili": [],
+      "numeroCollocabili": 0,
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
@@ -8598,6 +8831,7 @@
         396,
         456
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -8643,6 +8877,7 @@
         974,
         528
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8682,7 +8917,7 @@
       "esclusi": 0,
       "fuoriDallaTela": 0,
       "fuoriDalDisegno": 0,
-      "fattoreSuggerito": 1.0358,
+      "fattoreSuggerito": 1.281,
       "quotaCollocabili": 1.0,
       "distanzaMediana": 0.0,
       "distanzaMedianaScalaUno": 0.0,
@@ -8691,11 +8926,12 @@
         1024
       ],
       "riquadroContenuto": [
-        439,
+        235,
         76,
-        1109,
-        540
+        1192,
+        539
       ],
+      "tratto": "livelli della risorsa uniti",
       "margineAmmesso": 45.8
     },
     {
@@ -8766,6 +9002,7 @@
         342,
         665
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 22.9
     },
     {
@@ -8807,6 +9044,7 @@
         1020,
         408
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8842,6 +9080,7 @@
         438,
         314
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 22.9
     },
     {
@@ -8875,6 +9114,7 @@
         1084,
         437
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 45.8
     },
     {
@@ -8919,6 +9159,7 @@
         436,
         578
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     },
     {
@@ -8977,32 +9218,42 @@
         636,
         467
       ],
+      "tratto": "solo questo livello",
       "margineAmmesso": 29.0
     }
   ],
   "summary": {
     "mappe": 301,
-    "condivise": 227,
-    "conFattoreDiverso": 9,
-    "pinConvertibili": 1371,
-    "pinEsclusiDalleCondivise": 22,
+    "condivise": 217,
+    "conFattoreDiverso": 8,
+    "pinConvertibili": 1372,
+    "pinEsclusiDalleCondivise": 14,
     "pinTotali": 1429,
     "perEsito": {
-      "condiviso": 227,
-      "non-condiviso": 23,
+      "condiviso": 217,
+      "non-condiviso": 33,
       "senza-pin": 51
     },
     "motivi": {
       "i pin distano in media il 2.1% della tela dal tratto": 2,
       "i pin distano in media il 2.2% della tela dal tratto": 1,
-      "un solo pin appoggiato, e dista il 1.6% della tela dal tratto: troppo per farne una prova": 1,
+      "un solo pin appoggiato, e il 38% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 2,
+      "un solo pin appoggiato, e il 100% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 2,
+      "un solo pin appoggiato, e il 75% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 81% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
       "la mappa non ha pin nativi": 51,
-      "i pin distano in media il 100.0% della tela dal tratto": 9,
-      "un solo pin appoggiato, e dista il 1.9% della tela dal tratto: troppo per farne una prova": 4,
-      "un solo pin appoggiato, e dista il 1.3% della tela dal tratto: troppo per farne una prova": 2,
-      "un solo pin appoggiato, e dista il 1.1% della tela dal tratto: troppo per farne una prova": 2,
-      "un solo pin appoggiato, e dista il 1.7% della tela dal tratto: troppo per farne una prova": 1,
-      "un solo pin appoggiato, e dista il 1.8% della tela dal tratto: troppo per farne una prova": 1
+      "i pin distano in media il 100.0% della tela dal tratto": 8,
+      "un solo pin appoggiato, e il 27% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 2,
+      "un solo pin appoggiato, e il 86% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 58% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 74% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 2,
+      "un solo pin appoggiato, e il 66% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 53% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 88% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 3,
+      "un solo pin appoggiato, e il 40% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 2,
+      "un solo pin appoggiato, e il 31% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 99% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1,
+      "un solo pin appoggiato, e il 45% della tela e’ vicino al tratto quanto lui: la sua posizione non prova che il riferimento sia condiviso": 1
     }
   },
   "limits": [
