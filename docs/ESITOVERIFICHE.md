@@ -695,3 +695,54 @@ sostanzialmente riprodotti, ma la Fase 2 resta respinta. Prima della riverifica 
 e verificare davvero la soglia fuori-tratto, rigenerare a cascata copertura e collegamenti,
 rendere effettiva la controprova sul tipo 26, blindare l'unicità delle mete e rendere stabile la
 provenienza delle cinque schermate.
+
+## Fase 2 — Quinta verifica dopo le correzioni
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `3989bfe`
+**Data verifica:** 6 settembre 2026
+
+### Rilievi chiusi
+
+1. La prova dei tipi 13–16 è stata riformulata correttamente sulla dominanza laterale e sul
+   contrasto con i tipi interni: 65,2% alto, 70,4% destra, 75,8% basso e 79,7% sinistra, contro
+   un massimo interno del 48,5%. La quota fuori dal tratto è ora soltanto descrittiva. La
+   controprova binomiale indipendente, corretta prudenzialmente sui 16 tipi e sui quattro lati,
+   resta significativa per tutti e quattro i tipi.
+2. `verify_icon_observations.py` legge ora l'evidenza grezza degli script: il tipo 26 è
+   confermato come `forziere` sia dal conteggio visivo sia dalle procedure `R_TBOX`. Il
+   verificatore pretende almeno una conferma indipendente e controlla anche la posizione
+   registrata per il tipo 4.
+3. `map_links.py` scarta ora le procedure con più mappe valide invece di scegliere la prima.
+   Una ricostruzione indipendente dello stato corrente trova 28 assegnazioni da trigger senza
+   ambiguità, 43 collegamenti a meta unica e contabilità chiusa: 71 collegati + 191 irrisolti =
+   262 candidati.
+4. I generatori non usano più la freccia Unicode nell'output e terminano con codice 0 sulla
+   console Windows ordinaria. Due rigenerazioni isolate dei quattro artefatti coincidono fra
+   loro e con i file versionati. Il pacchetto seed rigenerato coincide byte per byte con quello
+   versionato: 298 mappe, 780 pin posati, 637 condizionati e 1429/1429 pin contabilizzati.
+
+### Rilievi ancora bloccanti
+
+1. **Il docstring di `edge_pins.py` contraddice il criterio corretto.** Alle righe 7–8 dichiara
+   ancora che i quattro tipi cadono «fuori dal tratto nel 90% dei casi». I valori reali sono
+   57,6%, 56,3%, 47,0% e 59,3%. Logica, artefatto e stato sono coerenti con la nuova prova
+   laterale, ma questa affermazione residua è falsa e deve essere corretta.
+2. **Il verificatore non copre le 28 assegnazioni `trigger proiettato`.**
+   `verify_edge_pins.py` ricostruisce le mete soltanto dentro il ramo
+   `meta unica della planimetria`. Per le righe da trigger controlla il tipo del pin e l'unicità
+   della chiave, ma non ricostruisce procedura vincente, proiezione, soglia dell'8%, distanza,
+   mete valide, `arrivo` e `ingresso`. Alterare arbitrariamente un arrivo continuerebbe quindi
+   a far passare il controllo, purché il totale resti 71.
+
+**Correzione richiesta a Claude:** correggere il docstring obsoleto e fare sì che il verificatore
+ricostruisca l'intero insieme atteso delle 28 assegnazioni da trigger con la stessa informazione
+nativa ma con calcolo indipendente, confrontando esattamente partenza, indice del pin, arrivo,
+ingresso, distanza e modo. Devono essere verificati anche la soglia dell'8%, il candidato più
+vicino, la sostituzione del precedente e i modi ammessi. L'unicità va pretesa sulla destinazione
+completa; se più ingressi della stessa mappa sono ammessi, la scelta deve essere motivata e
+verificata esplicitamente.
+
+**Decisione:** le quattro correzioni producono dati correnti corretti e riproducibili, ma il gate
+resta **FAIL** finché il controllo automatico non è capace di rilevare una regressione nelle 28
+assegnazioni da trigger e la documentazione nel codice non descrive fedelmente la prova adottata.
