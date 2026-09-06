@@ -746,3 +746,70 @@ verificata esplicitamente.
 **Decisione:** le quattro correzioni producono dati correnti corretti e riproducibili, ma il gate
 resta **FAIL** finché il controllo automatico non è capace di rilevare una regressione nelle 28
 assegnazioni da trigger e la documentazione nel codice non descrive fedelmente la prova adottata.
+
+## Fase 2 — Sesta verifica dopo la ricostruzione dei collegamenti
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `68b7c5a`
+**Data verifica:** 6 settembre 2026
+
+### I due rilievi precedenti sono chiusi
+
+1. Il docstring di `edge_pins.py` descrive ora la prova effettiva: dominanza laterale del 65,2%,
+   70,4%, 75,8% e 79,7% contro il massimo interno del 48,5%. Le quote oltre il perimetro del
+   57,6%, 56,3%, 47,0% e 59,3% sono presentate correttamente come dati descrittivi.
+2. Il verificatore ricostruisce le 28 assegnazioni `trigger proiettato`: riproietta i trigger,
+   calcola l'argmin fra tutti i pin, applica la soglia dell'8%, risolve le contese per distanza e
+   confronta partenza, indice del pin, arrivo, ingresso, distanza, modo e punto d'arrivo. Insieme
+   ai 43 casi a meta unica ricostruisce esattamente le 71 righe; 71 + 191 = 262.
+3. In una copia temporanea l'artefatto rigenerato è byte-identico al versionato, 34.432 byte. Le
+   mutazioni indipendenti di arrivo, ingresso, distanza, modo, punto d'arrivo e contabilità sono
+   state tutte rifiutate con codice di uscita 1.
+
+### Regressione dati bloccante introdotta dal commit
+
+`data/atlas/extracted/mondo_connessioni_evidenze.json` è stato rigenerato senza la directory
+corretta degli script e ha perso le evidenze già certificate. Il confronto con il genitore del
+commit misura:
+
+| dato | prima | dopo |
+|---|---:|---:|
+| campi | 209 | 209 |
+| trigger | 4.525 | 4.525 |
+| script | **192** | **0** |
+| procedure | **15.734** | **0** |
+| chiamate `CALL_FIELD` | **2.514** | **0** |
+| trigger con procedura risolta | **4.495** | **0** |
+
+Il diff dell'artefatto è di 10.007 righe aggiunte e 148.576 eliminate. Nel contempo
+`verifica_connessioni_evidenze.json` è rimasto stantio e dichiara ancora `PASS`, 192 script e
+2.514 chiamate: i due artefatti versionati si contraddicono.
+
+La causa è riproducibile nel comando documentato:
+
+```bash
+cd tools/p5r-map-export && for v in verify_*.py; do python "$v" ../../data/atlas/extracted ../..; done
+```
+
+`verify_world_connections.py` interpreta il secondo argomento come cartella contenente i file
+`.flow`; `../..` non è quella cartella. Il generatore ricrea quindi l'artefatto con zero script e,
+una volta che quella versione impoverita è diventata la baseline, il controllo di determinismo
+può risultare verde. Mancano inoltre asserzioni che impediscano la caduta a zero della copertura.
+
+### Correzioni richieste a Claude
+
+1. Ripristinare `mondo_connessioni_evidenze.json` completo da fonte certificata, con almeno i
+   conteggi precedenti: 192 script, 15.734 procedure, 2.514 chiamate e 4.495 trigger risolti.
+2. Rigenerare coerentemente `verifica_connessioni_evidenze.json`, così che rapporto e artefatto
+   descrivano lo stesso stato.
+3. Correggere il comando cumulativo affinché passi la vera sorgente degli script; il verificatore
+   deve operare su una copia temporanea o comunque non distruggere l'artefatto versionato quando
+   gli input sono incompleti.
+4. Aggiungere asserzioni sui conteggi attesi o su minimi non nulli prima di qualunque scrittura.
+5. Come miglioramento non bloccante, duplicare nel verificatore il calcolo del punto d'arrivo:
+   oggi la selezione dei trigger è indipendente, ma `map_links.punto_di_arrivo` è riusato e un
+   errore sistematico in quella funzione passerebbe sia nel produttore sia nel controllo.
+
+**Decisione:** la ricostruzione dei collegamenti supera il riesame, ma la Fase 2 resta **FAIL**
+perché il commit che la dichiara pronta ha cancellato evidenze native già certificate e ha lasciato
+un rapporto di verifica incoerente. Nessun gate può passare introducendo una regressione di dati.
