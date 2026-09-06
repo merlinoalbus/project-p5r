@@ -1,0 +1,29 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("190_051_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void SAFEROOM_EXIT()
+{
+    return;
+}
+
+
+// Procedure Index: 1
+void D190_51_BRIEFING_HIT()
+{
+    return;
+}
+

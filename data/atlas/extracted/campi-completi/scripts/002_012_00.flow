@@ -1,0 +1,484 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("002_012_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void MAIN_DOOR_SOUTH()
+{
+    int var0;
+    var0 = FLD_OBJ_CNV_RESHND(15);
+    // bit id (0) + (96) = 96
+    
+    if (BIT_CHK((0 + 96)) == 1)
+    {
+        SUB_KFEVT_DOOR_SOUTH();
+    }
+    else 
+    {
+        FLD_CAMERA_LOCK();
+        FLD_CAMERA_LOCK_INTERP(-765.0166f, 189.662f, -449.2079f, -0.0372f, 0.6998f, 0.0365f, 0.7124f, 0);
+        FLD_OPEN_ORD_DOOR_FADE(var0, 2, 10);
+        CALL_FIELD(2, 2, 5, 0);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 1
+void MAIN_DOOR_NORTH()
+{
+    int var1;
+    var1 = FLD_OBJ_CNV_RESHND(0x10);
+    // bit id (0) + (96) = 96
+    
+    if (BIT_CHK((0 + 96)) == 1)
+    {
+        SUB_KFEVT_DOOR_NORTH();
+    }
+    else 
+    {
+        FLD_CAMERA_LOCK();
+        FLD_CAMERA_LOCK_INTERP(-761.3007f, 193.8403f, -1451.523f, -0.0356f, 0.705f, 0.0355f, 0.7074f, 0);
+        FLD_OPEN_ORD_DOOR_FADE(var1, 2, 10);
+        CALL_FIELD(2, 2, 6, 0);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 2
+void CHK_COUNTER()
+{
+    int var2;
+    // bit id (0) + (81) = 81
+    // bit id (268435456) + (422) = 3494
+    // bit id (268435456) + (422) = 3494
+    
+    if (BIT_CHK((0 + 81)) == 1)
+    {
+        
+        if (BIT_CHK((0x10000000 + 422)) == 0)
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_INFO_KAMO_BF, 0);
+            MSG_WND_CLS();
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_WOMAN_INFO, 0);
+            MSG_WND_CLS();
+        }
+        else 
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_WOMAN_INFO, 0);
+            MSG_WND_CLS();
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_KAMO_BF_MORU, 0);
+            MSG_WND_CLS();
+        }
+
+    }
+    else 
+    {
+        
+        if (BIT_CHK((0x10000000 + 422)) == 1)
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_KAMO_AF_MORU, 0);
+            MSG_WND_CLS();
+        }
+        else 
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_INFO_KAMO_AF, 0);
+            MSG_WND_CLS();
+        }
+
+        
+        if (GET_TIME() == 4)
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_WOMAN_NO, 0);
+            MSG_WND_CLS();
+            return;
+        }
+
+        
+        if (GET_ITEM_NUM((12288 + 252)) >= 1)
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_THINK, 0);
+            SEL_DEFKEY(14, 1);
+            var2 = SEL(MSG_KITCHEN_THINK_SEL);
+            MSG_WND_CLS();
+            
+            if (var2 == 0)
+            {
+                MSG_WND_DSP();
+                MSG(MSG_KITCHEN_WOMAN_START, 0);
+                MSG_WND_CLS();
+            }
+            else 
+            {
+                return;
+            }
+
+        }
+        else 
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_WOMAN_INFO, 0);
+            MSG_WND_CLS();
+            return;
+        }
+
+        Fld_FadeOut_Default();
+        SET_ITEM_NUM((12288 + 252), 0);
+        MSG_WND_DSP();
+        MSG_MIND(MSG_KITCHEN_DUMMY, 0);
+        MSG_WND_CLS();
+        Fld_FadeIn_Default();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 3
+void CHK_TICKET_MACHINE()
+{
+    int var4;
+    int var5;
+    int var3;
+    var4 = ADD_PC_MONEY(0);
+    var5 = 500;
+    
+    if (GET_TIME() == 4)
+    {
+        MSG_WND_DSP();
+        MSG(MSG_TICKET_NOT_BUY, 0);
+        MSG_WND_CLS();
+        return;
+    }
+
+    MSG_WND_DSP();
+    MSG(MSG_TICKET_START, 0);
+    CALL_GLOBAL_MONEY_PANEL();
+    SEL_DEFKEY(14, 1);
+    var3 = SEL(MSG_TICKET_THINK_SEL);
+    MSG_WND_CLS();
+    
+    if (var3 == 0)
+    {
+        
+        if (GET_ITEM_NUM((12288 + 252)) >= 1)
+        {
+            DEL_GLOBAL_MONEY_PANEL();
+            MSG_WND_DSP();
+            MSG(MSG_TICKET_HAVE_TICKET, 0);
+            MSG_WND_CLS();
+            return;
+        }
+        else if (var4 < var5)
+        {
+            DEL_GLOBAL_MONEY_PANEL();
+            MSG_WND_DSP();
+            MSG(MSG_TICKET_NOMONEY, 0);
+            MSG_WND_CLS();
+            return;
+        }
+        else 
+        {
+            MSG_WND_DSP();
+            MSG(MSG_TICKET_BUY, 0);
+            MSG_WND_CLS();
+            SET_ITEM_NUM((12288 + 252), 1);
+            CHANGE_GLOBAL_MONEY((-1 * var5), 0);
+            DEL_GLOBAL_MONEY_PANEL();
+        }
+
+    }
+    else 
+    {
+        DEL_GLOBAL_MONEY_PANEL();
+        return;
+    }
+
+    return;
+}
+
+
+// Procedure Index: 4
+void CHK_KITCHEN_SPACE()
+{
+    // bit id (0) + (66) = 66
+    // bit id (0) + (66) = 66
+    
+    if (GET_TIME() == 4)
+    {
+        
+        if (BIT_CHK((0 + 66)) == 1)
+        {
+            MSG_WND_DSP();
+            MSG(MSG_KITCHEN_ERROR_HOUKAG, 0);
+            MSG_WND_CLS();
+        }
+        else 
+        {
+            MSG_WND_DSP();
+            MSG_MIND(MSG_KITCHEN_ERROR_NULL, 0);
+            MSG_WND_CLS();
+        }
+
+    }
+    else if (BIT_CHK((0 + 66)) == 1)
+    {
+        MSG_WND_DSP();
+        MSG(MSG_KITCHEN_ERROR_MORU, 0);
+        MSG_WND_CLS();
+    }
+    else 
+    {
+        MSG_WND_DSP();
+        MSG_MIND(MSG_KITCHEN_ERROR, 0);
+        MSG_WND_CLS();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 5
+void SUB_KFEVT_DOOR_SOUTH()
+{
+    FLD_LOCAL_FLAG_ON((49152 + 15));
+    SUB_KFEVT_DOOR();
+    return;
+}
+
+
+// Procedure Index: 6
+void SUB_KFEVT_DOOR_NORTH()
+{
+    FLD_LOCAL_FLAG_OFF((49152 + 15));
+    SUB_KFEVT_DOOR();
+    return;
+}
+
+
+// Procedure Index: 7
+void SUB_KFEVT_DOOR()
+{
+    int var9;
+    int var10;
+    int var11;
+    int var12;
+    int var6;
+    int var7;
+    int var8;
+    int var13;
+    var9 = 0;
+    var10 = 0;
+    var11 = 0;
+    var12 = 0;
+    var6 = GET_COUNT(0x10);
+    var7 = (var6 / 100);
+    var8 = REM(var6, 1000);
+    
+    if (var7 == 2432)
+    {
+        var9 = 243;
+        var10 = 202;
+        var11 = 0;
+        var12 = 0;
+    }
+
+    
+    if (var9 != 0)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 15)) == 1)
+        {
+            var12 = 5;
+            FLD_CAMERA_LOCK();
+            FLD_CAMERA_LOCK_INTERP(-765.0166f, 189.662f, -449.2079f, -0.0372f, 0.6998f, 0.0365f, 0.7124f, 0);
+            var13 = FLD_OBJ_CNV_RESHND(15);
+            FLD_OPEN_ORD_DOOR_FADE(var13, 2, 10);
+        }
+        else 
+        {
+            var12 = 6;
+            FLD_CAMERA_LOCK();
+            FLD_CAMERA_LOCK_INTERP(-761.3007f, 193.8403f, -1451.523f, -0.0356f, 0.705f, 0.0355f, 0.7074f, 0);
+            var13 = FLD_OBJ_CNV_RESHND(0x10);
+            FLD_OPEN_ORD_DOOR_FADE(var13, 2, 10);
+        }
+
+        FLD_LOCAL_FLAG_OFF((49152 + 15));
+        CALL_KF_EVENT(var9, var10, var11, var12);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 11
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 14
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 18
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 19
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 20
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 21
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 22
+void SUB_MoruShowFace()
+{
+    int var14;
+    int var15;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var14 = FLD_PC_GET_CURRENT_RESHND(0);
+        var15 = MDL_GET_ITEM_RESHND(var14, 2);
+        MDL_ANIM(var15, 50, 0, 0, 1.00f);
+        MDL_ANIM_NEXT(var15, 51, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 23
+void SUB_MoruReturnBag()
+{
+    int var16;
+    int var17;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var16 = FLD_PC_GET_CURRENT_RESHND(0);
+        var17 = MDL_GET_ITEM_RESHND(var16, 2);
+        MDL_ANIM(var17, 52, 0, 5, 1.00f);
+        MDL_ANIM_NEXT(var17, 0, 1, 0, 1.00f);
+    }
+
+    return;
+}
+

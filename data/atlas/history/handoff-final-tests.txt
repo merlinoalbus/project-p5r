@@ -1,0 +1,37 @@
+
+> project-p5r@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Repository/project-p5r-main
+
+ ❯ server/routes/mappe-editor.test.ts (15 tests | 1 failed) 10305ms
+     × costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori 219ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  server/routes/mappe-editor.test.ts > API mappe a livelli (Fase 13.1) > costruisce l’albero dalla guida (Tokyo → quartieri, Palazzi/Dedalo → aree) con gli spilli dai marcatori
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ server/routes/mappe-editor.test.ts:55:89
+     53|     const palazzi = albero.filter((m) => m.tipo === 'palazzo');
+     54|     expect(palazzi.length).toBeGreaterThan(3);
+     55|     expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'mem…
+       |                                                                                         ^
+     56|     const aree = albero.filter((m) => m.tipo === 'area');
+     57|     expect(aree.length).toBeGreaterThan(10);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 131 passed (132)
+      Tests  1 failed | 533 passed (534)
+   Start at  06:58:00
+   Duration  16.01s (transform 22.51s, setup 21.71s, import 71.90s, tests 122.74s, environment 92.05s)
+

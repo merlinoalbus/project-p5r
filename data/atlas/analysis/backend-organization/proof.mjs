@@ -1,0 +1,28 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import Database from 'file:///C:/Repository/project-p5r-main/node_modules/better-sqlite3/lib/index.js';
+import { migration042 } from './server/db/migrations/042_contenuti_guida.ts';
+const db=new Database(new URL('./proof.db',import.meta.url).pathname.replace(/^\/(\w:)/,'$1'));
+db.pragma('foreign_keys=ON');
+const row=db.prepare("SELECT s.* FROM spillo s JOIN mappa m ON m.chiave=s.mappa_chiave WHERE m.entita_tipo='area' LIMIT 1").get();
+const t='2026-09-06T00:00:00Z';
+const p=db.prepare('INSERT INTO partita(nome,created_at,updated_at) VALUES(?,?,?)').run('Migration proof',t,t).lastInsertRowid;
+db.prepare('INSERT INTO spillo_partita VALUES(?,?,1,?)').run(p,row.id,t);
+db.prepare('INSERT INTO spillo_immagine(spillo_id,ordine,asset,didascalia,updated_at) VALUES(?,0,?,?,?)').run(row.id,'test-only','proof',t);
+db.prepare('INSERT INTO spillo_destinazione VALUES(?,?,?,?,?)').run(row.id,'tokyo',12,34,2);
+db.prepare('UPDATE mappa SET nome=?,note=? WHERE chiave=?').run('Nome personalizzato','Note personalizzate',row.mappa_chiave);
+const ids=db.prepare('SELECT id FROM spillo ORDER BY id').all();
+const rel=Object.fromEntries(['spillo_partita','spillo_immagine','spillo_destinazione'].map(x=>[x,db.prepare('SELECT * FROM '+x).all()]));
+const oldAliases=db.prepare('SELECT * FROM mappa_alias WHERE mappa_chiave=?').all(row.mappa_chiave);
+db.pragma('foreign_keys=OFF');db.transaction(()=>migration042.up(db))();db.pragma('foreign_keys=ON');
+assert.deepEqual(db.pragma('foreign_key_check'),[]);assert.deepEqual(db.prepare('SELECT id FROM spillo ORDER BY id').all(),ids);
+for(const [table,value] of Object.entries(rel)) assert.deepEqual(db.prepare('SELECT * FROM '+table).all(),value);
+assert.equal(db.prepare('SELECT count(*) n FROM mappa').get().n,349);
+assert.equal(db.prepare('SELECT count(*) n FROM guida_mappa').get().n,116);
+assert.equal(db.prepare('SELECT nome FROM guida_mappa WHERE area_chiave=?').get(row.mappa_chiave).nome,'Nome personalizzato');
+for(const x of oldAliases) assert.equal(db.prepare('SELECT area_chiave FROM guida_alias WHERE chiave=?').get(x.chiave).area_chiave,row.mappa_chiave);
+assert.equal(db.prepare('SELECT mappa_chiave FROM spillo WHERE id=?').get(row.id).mappa_chiave,null);
+const next=db.prepare('INSERT INTO spillo(mappa_chiave,tipo,nome,x,y,updated_at) VALUES(?,?,?,?,?,?)').run('tokyo','passaggio','Fixture',1,1,t).lastInsertRowid;assert(next>Math.max(...ids.map(x=>x.id)));
+const result={pass:true,maps:349,guideAreas:116,preservedPinIds:ids.length,nonemptyStateImageDestinationFixtures:true,oldAliasesRetained:true,customNameAndNotesRetained:true,foreignKeyViolations:0,nextInsertId:next};
+fs.writeFileSync(new URL('./proof-result.json',import.meta.url),JSON.stringify(result,null,2));console.log(result);db.close();
+

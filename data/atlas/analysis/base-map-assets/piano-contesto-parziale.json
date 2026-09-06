@@ -1,0 +1,23 @@
+{
+  "merges": {},
+  "updates": {},
+  "presentationPatches": [
+    {
+      "chiave": "nativo-rmap-153-4-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": null,
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_004_00-texpack-26",
+          "nome": "Ripostiglio",
+          "campo": "F153_004_00",
+          "texpack": 26
+        }
+      ]
+    }
+  ]
+}

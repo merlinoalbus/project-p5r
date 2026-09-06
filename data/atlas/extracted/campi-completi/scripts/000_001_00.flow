@@ -1,0 +1,22 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("000_001_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void f000_001_floor()
+{
+    return;
+}
+

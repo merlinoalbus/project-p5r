@@ -1,0 +1,4 @@
+import fs from 'node:fs';
+import {initDb,closeDb} from 'file:///C:/Repository/project-p5r-main/server/db/dbService.ts';
+import {elencaMappe,dettaglioMappa} from 'file:///C:/Repository/project-p5r-main/server/services/mappe/mappeService.ts';
+initDb('work/backend-organization/collection-proof.db');const rows=elencaMappe();const marked=rows.filter(m=>m.immagineCollezione);const groups=new Set(marked.map(m=>m.immagineCollezione.ambito));const mismatch=marked.filter(m=>JSON.stringify(dettaglioMappa(m.chiave).immagineCollezione)!==JSON.stringify(m.immagineCollezione));fs.writeFileSync('work/backend-organization/collection-proof.json',JSON.stringify({nodes:rows.length,marked:marked.length,groups:groups.size,detailMismatches:mismatch,rows:marked.map(m=>({key:m.chiave,name:m.nome,...m.immagineCollezione}))},null,2));console.log(JSON.stringify({nodes:rows.length,marked:marked.length,groups:groups.size,detailMismatches:mismatch.length}));closeDb();

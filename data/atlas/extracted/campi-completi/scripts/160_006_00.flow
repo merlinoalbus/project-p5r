@@ -1,0 +1,246 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("160_006_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_160_05_01()
+{
+    AREA_OUT_ACTION_160_05_01();
+    CALL_FIELD(160, 5, 1, 0);
+    return;
+}
+
+
+// Procedure Index: 1
+void GOTO_160_06_00()
+{
+    int var0;
+    var0 = FLD_SCRIPT_READ(160, 5, 110);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 0x10)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 0x10));
+        SET_COUNT(152, 60050);
+        D08_LAST_BATTLE();
+    }
+    else 
+    {
+        SET_COUNT(152, 60025);
+        D08_LAST_BATTLE_PREPARE();
+    }
+
+}
+
+
+// Procedure Index: 2
+void D08_LAST_BATTLE()
+{
+    FLD_START_BOSS(69);
+}
+
+
+// Procedure Index: 3
+void D08_160_06_minimap_00()
+{
+    // bit id (536870912) + (3212) = 9356
+    BIT_ON((0x20000000 + 3212));
+}
+
+
+// Procedure Index: 4
+void D08_LAST_BATTLE_PREPARE()
+{
+    int var1;
+    int var2;
+    int var3;
+    int var4;
+    var1 = FLD_PC_GET_RESHND(0);
+    var2 = FLD_PC_GET_RESHND(1);
+    var3 = FLD_PC_GET_RESHND(2);
+    var4 = FLD_PC_GET_RESHND(3);
+    FLD_MODEL_SET_ROTATE(var1, 0, 0.00f, 0, 8);
+    FLD_MODEL_ANIM(var1, 1, 1, 5, 1.00f);
+    FLD_MODEL_SYNC_ROTATE(var1);
+    FLD_MODEL_DIR_TRANSLATE(var1, 0.00f, 150, 100);
+    FLD_MODEL_SYNC_TRANSLATE(var1);
+}
+
+
+// Procedure Index: 5
+void AREA_OUT_ACTION_160_05_01()
+{
+    float fVar0;
+    float fVar1;
+    float fVar2;
+    int var5;
+    int var6;
+    int var7;
+    int var8;
+    var5 = FLD_PC_GET_RESHND(0);
+    var6 = FLD_PC_GET_RESHND(1);
+    var7 = FLD_PC_GET_RESHND(2);
+    var8 = FLD_PC_GET_RESHND(3);
+    fVar0 = 29;
+    fVar1 = 873;
+    fVar2 = 3656;
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(-13.1075f, 1503.361f, 2667.587f, -0.00f, 0.9723f, 0.2338f, -0.00f, 0);
+    FLD_MODEL_SET_TRANSLATE(var5, fVar0, fVar1, fVar2, 20);
+    FLD_MODEL_POINT_ROTATE(var5, fVar0, fVar1, fVar2, 5);
+    FLD_UNIT_SET_RUN(var5);
+    FLD_MODEL_SYNC_TRANSLATE(var5);
+    FLD_REQ_NEXT_SCN_FADE(160, 5, 1, 0);
+}
+
+
+// Procedure Index: 6
+void D08_02_e457_045_START()
+{
+    int var9;
+    var9 = FLD_SCRIPT_READ(160, 5, 100);
+    FLD_SCRIPT_READ_SYNC(var9);
+    FLD_SCRIPT_EXEC(var9, 0);
+    FLD_SCRIPT_FREE(var9);
+    // bit id (536870912) + (3123) = 9267
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 0x10)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 0x10));
+        BIT_ON((0x20000000 + 3123));
+        SET_COUNT(152, 54150);
+        FLD_START_BOSS(68);
+    }
+    else 
+    {
+        SET_COUNT(152, 54125);
+    }
+
+}
+
+
+// Procedure Index: 7
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 11
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 13
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 14
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 18
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 19
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 20
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

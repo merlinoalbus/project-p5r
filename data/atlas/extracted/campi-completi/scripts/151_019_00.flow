@@ -1,0 +1,34 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("151_019_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void DUMMY_SYS()
+{
+    return;
+}
+
+
+// Procedure Index: 1
+void Test_Mementos()
+{
+    FLD_PANEL_MMAP_NEW_STAGE(8);
+    MSG_WND_DSP();
+    MSG(TestMementos_msg, 5);
+    MSG_WND_CLS();
+    FLD_PANEL_MMAP_NEW_STAGE_EXIT();
+    return;
+}
+

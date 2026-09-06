@@ -1,0 +1,310 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("002_010_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void CHECK_DESK_DUMMY01()
+{
+    return;
+}
+
+
+// Procedure Index: 1
+void CHECK_DESK_DUMMY02()
+{
+    return;
+}
+
+
+// Procedure Index: 2
+void CHECK_DESK_DUMMY03()
+{
+    return;
+}
+
+
+// Procedure Index: 3
+void CHECK_DESK_DUMMY04()
+{
+    return;
+}
+
+
+// Procedure Index: 4
+void CHECK_DESK_KAMOSHIDA()
+{
+    return;
+}
+
+
+// Procedure Index: 5
+void CHECK_DESK_DUMMY05()
+{
+    return;
+}
+
+
+// Procedure Index: 6
+void EVENT_ANN_ARART()
+{
+    return;
+}
+
+
+// Procedure Index: 7
+void EVENT_ANN_ARART_END()
+{
+    return;
+}
+
+
+// Procedure Index: 8
+void EVENT_ANN_ARART01()
+{
+    return;
+}
+
+
+// Procedure Index: 9
+void EVENT_ANN_ARART02()
+{
+    return;
+}
+
+
+// Procedure Index: 10
+void EVENT_ANN_ARART03()
+{
+    return;
+}
+
+
+// Procedure Index: 11
+void EVENT_ANN_ARART04()
+{
+    return;
+}
+
+
+// Procedure Index: 12
+void EVENT_ANN_PLEASURE()
+{
+    return;
+}
+
+
+// Procedure Index: 13
+void EVENT_ANN_PLEASURE02()
+{
+    return;
+}
+
+
+// Procedure Index: 14
+void CHECK_COUNT_MISS()
+{
+    return;
+}
+
+
+// Procedure Index: 15
+void TIME_COUNT()
+{
+    return;
+}
+
+
+// Procedure Index: 16
+void CURSOL_OFF()
+{
+    return;
+}
+
+
+// Procedure Index: 17
+void CURSOL_ON()
+{
+    return;
+}
+
+
+// Procedure Index: 18
+void CAMERA_DEFAULT()
+{
+    return;
+}
+
+
+// Procedure Index: 19
+void ANN_TIME_CALL()
+{
+    return;
+}
+
+
+// Procedure Index: 20
+void M01_FLAG_CLEAR()
+{
+    return;
+}
+
+
+// Procedure Index: 21
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 22
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 23
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 24
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 25
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 26
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 27
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 28
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 29
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 30
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 31
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 32
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 33
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 34
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 35
+void SUB_MoruShowFace()
+{
+    int var2;
+    int var3;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var2 = FLD_PC_GET_CURRENT_RESHND(0);
+        var3 = MDL_GET_ITEM_RESHND(var2, 2);
+        MDL_ANIM(var3, 50, 0, 0, 1.00f);
+        MDL_ANIM_NEXT(var3, 51, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 36
+void SUB_MoruReturnBag()
+{
+    int var4;
+    int var5;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var4 = FLD_PC_GET_CURRENT_RESHND(0);
+        var5 = MDL_GET_ITEM_RESHND(var4, 2);
+        MDL_ANIM(var5, 52, 0, 5, 1.00f);
+        MDL_ANIM_NEXT(var5, 0, 1, 0, 1.00f);
+    }
+
+    return;
+}
+

@@ -1,0 +1,200 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("152_006_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D01_152_06_minimap_01()
+{
+    // bit id (536870912) + (595) = 6739
+    BIT_ON((0x20000000 + 595));
+}
+
+
+// Procedure Index: 1
+void D01_152_06_minimap_04()
+{
+    // bit id (536870912) + (4648) = 10792
+    BIT_ON((0x20000000 + 4648));
+}
+
+
+// Procedure Index: 2
+void D01_02_e130_011_START()
+{
+    int var0;
+    // bit id (536870912) + (226) = 6370
+    BIT_ON((0x20000000 + 226));
+    // bit id (536870912) + (548) = 6692
+    BIT_OFF((0x20000000 + 548));
+    // bit id (536870912) + (549) = 6693
+    BIT_OFF((0x20000000 + 549));
+    SET_COUNT(145, 26150);
+    var0 = FLD_SCRIPT_READ(152, 6, 100);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    SET_COUNT(145, 26200);
+    // bit id (536870912) + (596) = 6740
+    BIT_ON((0x20000000 + 596));
+    CALL_EVENT(130, 1);
+    CALL_FIELD(152, 6, 5, 0);
+    return;
+}
+
+
+// Procedure Index: 3
+void D01_02_e130_101()
+{
+    int var1;
+    FLD_LOCAL_FLAG_ON((49152 + 49));
+    var1 = FLD_SCRIPT_READ(152, 6, 105);
+    FLD_SCRIPT_READ_SYNC(var1);
+    FLD_SCRIPT_EXEC(var1, 0);
+    FLD_SCRIPT_FREE(var1);
+    FLD_LOCAL_FLAG_OFF((49152 + 49));
+    
+    if (GET_COUNT(145) == 26400)
+    {
+        D01_02_ROOM_CHECK_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 4
+void D01_02_e130_102()
+{
+    int var2;
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    var2 = FLD_SCRIPT_READ(152, 6, 105);
+    FLD_SCRIPT_READ_SYNC(var2);
+    FLD_SCRIPT_EXEC(var2, 0);
+    FLD_SCRIPT_FREE(var2);
+    FLD_LOCAL_FLAG_OFF((49152 + 50));
+    
+    if (GET_COUNT(145) == 26400)
+    {
+        D01_02_ROOM_CHECK_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 5
+void D01_02_e130_103()
+{
+    int var3;
+    FLD_LOCAL_FLAG_ON((49152 + 51));
+    var3 = FLD_SCRIPT_READ(152, 6, 105);
+    FLD_SCRIPT_READ_SYNC(var3);
+    FLD_SCRIPT_EXEC(var3, 0);
+    FLD_SCRIPT_FREE(var3);
+    FLD_LOCAL_FLAG_OFF((49152 + 51));
+    
+    if (GET_COUNT(145) == 26400)
+    {
+        D01_02_ROOM_CHECK_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 6
+void D01_02_e130_104()
+{
+    int var4;
+    FLD_LOCAL_FLAG_ON((49152 + 52));
+    var4 = FLD_SCRIPT_READ(152, 6, 105);
+    FLD_SCRIPT_READ_SYNC(var4);
+    FLD_SCRIPT_EXEC(var4, 0);
+    FLD_SCRIPT_FREE(var4);
+    FLD_LOCAL_FLAG_OFF((49152 + 52));
+    
+    if (GET_COUNT(145) == 26400)
+    {
+        D01_02_ROOM_CHECK_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 7
+void D01_02_e130_105()
+{
+    int var5;
+    FLD_LOCAL_FLAG_ON((49152 + 53));
+    var5 = FLD_SCRIPT_READ(152, 6, 105);
+    FLD_SCRIPT_READ_SYNC(var5);
+    FLD_SCRIPT_EXEC(var5, 0);
+    FLD_SCRIPT_FREE(var5);
+    FLD_LOCAL_FLAG_OFF((49152 + 53));
+    
+    if (GET_COUNT(145) == 26400)
+    {
+        D01_02_ROOM_CHECK_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 8
+void D01_02_ROOM_CHECK_END()
+{
+    // bit id (536870912) + (284) = 6428
+    BIT_ON((0x20000000 + 284));
+    return;
+}
+
+
+// Procedure Index: 9
+void PRISON_NPC_TALK01()
+{
+    MSG_WND_DSP();
+    MSG(PRISON_NPC_TALK_01_mes01, 0);
+    MSG_WND_CLS();
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0)
+    {
+        MSG_WND_DSP();
+        MSG(PRISON_NPC_TALK_01_mes02, 0);
+        MSG_WND_CLS();
+        FLD_LOCAL_FLAG_ON((49152 + 24));
+    }
+
+}
+
+
+// Procedure Index: 10
+void PRISON_NPC_TALK02()
+{
+    MSG_WND_DSP();
+    MSG(PRISON_NPC_TALK_02_mes01, 0);
+    MSG_WND_CLS();
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 25)) == 0)
+    {
+        MSG_WND_DSP();
+        MSG(PRISON_NPC_TALK_02_mes02, 0);
+        MSG_WND_CLS();
+        FLD_LOCAL_FLAG_ON((49152 + 25));
+    }
+
+}
+

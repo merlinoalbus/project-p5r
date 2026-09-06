@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "fields": 209,
+  "scripts": 192,
+  "triggers": 4525,
+  "calls": 2514,
+  "passes": [
+    "Copertura, sintassi, hash e riferimenti",
+    "Rilettura indipendente record binari",
+    "Diramazioni, input malformati e determinismo"
+  ],
+  "scope": "Evidenze grezze; nessuna certificazione di navigabilita o associazione semantica dei POI"
+}

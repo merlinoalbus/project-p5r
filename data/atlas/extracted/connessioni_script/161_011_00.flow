@@ -1,0 +1,289 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("161_011_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_161_010()
+{
+    CALL_FIELD(161, 10, 1, 0);
+    return;
+}
+
+
+// Procedure Index: 1
+void D08_BOSS_BATTLE_START()
+{
+    int var0;
+    var0 = FLD_SCRIPT_READ(161, 11, 100);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 0x10)) == 1)
+    {
+        Fld_FadeOut_CallEvent();
+        FLD_START_BOSS(63);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 2
+void D08_161_11_minimap_00()
+{
+    // bit id (536870912) + (3210) = 9354
+    BIT_ON((0x20000000 + 3210));
+    // bit id (536870912) + (2779) = 8923
+    BIT_ON((0x20000000 + 2779));
+}
+
+
+// Procedure Index: 3
+void D08_01_e446_053_START()
+{
+    MSG_WND_DSP();
+    MSG(D08_01_e446_053_mes01, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(D08_01_e446_053_mes02, 0);
+    MSG_WND_CLS();
+    return;
+}
+
+
+// Procedure Index: 4
+void D08_01_NPC_TALK_26()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_26_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 5
+void D08_01_NPC_TALK_27()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_27_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 6
+void D08_01_NPC_TALK_28()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_28_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 7
+void D08_01_NPC_TALK_29()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_29_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 8
+void D08_01_NPC_TALK_30()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_30_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 9
+void D08_01_NPC_TALK_31()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_31_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 10
+void D08_01_NPC_TALK_32()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_32_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 11
+void D08_01_NPC_TALK_33()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(D08_01_NPC_TALK_33_mes01, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    return;
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 14
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 18
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 19
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 20
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 21
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 22
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 23
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 24
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 25
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

@@ -1,0 +1,21 @@
+// Decompiled by Atlus Script Tools
+const int Dummy                            = 0;
+const int e210_152_mes01                   = 1;
+const int e210_152_mes02                   = 2;
+const int e210_151_mes06                   = 3;
+const int D153_007_miniEV_01_mes01         = 4;
+const int D153_007_miniEV_01_mes02         = 5;
+const int D153_007_miniEV_02_mes01         = 6;
+const int D153_007_miniEV_02_mes02         = 7;
+const int D153_007_miniEV_03_mes01         = 8;
+const int D153_007_miniEV_03_mes02         = 9;
+const int D153_007_miniEV_04_mes01         = 10;
+const int D153_007_miniEV_04_mes02         = 11;
+const int D153_007_miniEV_05_mes01         = 12;
+const int D153_007_miniEV_05_mes02         = 13;
+const int D153_007_miniEV_05_mes03         = 14;
+const int D153_007_miniEV_06_mes01         = 15;
+const int D153_007_miniEV_06_mes02         = 16;
+const int D153_007_miniEV_06_mes03         = 17;
+const int D02_07_EX_SHUTTER_mes01          = 18;
+const int D02_07_EX_SHUTTER_mes03          = 19;

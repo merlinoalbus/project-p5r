@@ -1,0 +1,1519 @@
+{
+  "result": "PASS",
+  "imported": {
+    "mappe": 322,
+    "spilli": 0,
+    "immagini": 301,
+    "saltate": [],
+    "condizioniScartate": 0
+  },
+  "preservedExistingMaps": 152,
+  "allImagesRetrieved": 301,
+  "maps": [
+    {
+      "nativeKey": "nativo-rmap-001-12-0",
+      "publicKey": "shibuya-banchina-della-metropolitana-rmap-001-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-12-0/file?v=2026-09-05T22%3A44%3A25.305Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-001-1-0",
+      "publicKey": "shibuya-piazza-della-stazione-rmap-001-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-1-0/file?v=2026-09-05T22%3A44%3A25.305Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-001-2-0",
+      "publicKey": "shibuya-sottopasso-rmap-001-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-2-0/file?v=2026-09-05T22%3A44%3A25.306Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-001-2-1",
+      "publicKey": "risorse-native-001-shibuya-sottopasso-rmap-001-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-2-1/file?v=2026-09-05T22%3A44%3A25.307Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-001-3-0",
+      "publicKey": "shibuya-central-street-rmap-001-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-3-0/file?v=2026-09-05T22%3A44%3A25.307Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-001-4-0",
+      "publicKey": "shibuya-centro-comm-sotterraneo-rmap-001-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-4-0/file?v=2026-09-05T22%3A44%3A25.308Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-001-5-0",
+      "publicKey": "shibuya-tornello-della-linea-ginza-rmap-001-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-001-5-0/file?v=2026-09-05T22%3A44%3A25.308Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-0-0",
+      "publicKey": "shujin-academy-scuola-edificio-principale-1p-edificio-laboratori-1p-rmap-002-0-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-0-0/file?v=2026-09-05T22%3A44%3A25.308Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-0-1",
+      "publicKey": "shujin-academy-scuola-edificio-principale-2p-edificio-laboratori-2p-rmap-002-0-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-0-1/file?v=2026-09-05T22%3A44%3A25.309Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-0-2",
+      "publicKey": "shujin-academy-scuola-edificio-principale-3p-edificio-laboratori-3p-rmap-002-0-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-0-2/file?v=2026-09-05T22%3A44%3A25.309Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-1-0",
+      "publicKey": "shujin-academy-scuola-cancello-della-scuola-rmap-002-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-1-0/file?v=2026-09-05T22%3A44%3A25.310Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-5-0",
+      "publicKey": "shujin-academy-scuola-tetto-rmap-002-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-5-0/file?v=2026-09-05T22%3A44%3A25.310Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-6-0",
+      "publicKey": "risorse-native-002-shujin-academy-aula-rmap-002-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-6-0/file?v=2026-09-05T22%3A44%3A25.311Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-002-8-0",
+      "publicKey": "risorse-native-002-shujin-academy-biblioteca-rmap-002-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-002-8-0/file?v=2026-09-05T22%3A44%3A25.311Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-005-1-0",
+      "publicKey": "kichijoji-quartiere-dello-shopping-rmap-005-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-005-1-0/file?v=2026-09-05T22%3A44%3A25.311Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-006-1-0",
+      "publicKey": "shinjuku-quartiere-a-luci-rosse-rmap-006-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-006-1-0/file?v=2026-09-05T22%3A44%3A25.312Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-007-1-0",
+      "publicKey": "akihabara-electric-town-rmap-007-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-007-1-0/file?v=2026-09-05T22%3A44%3A25.312Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-009-2-0",
+      "publicKey": "yongen-jaya-vicoli-rmap-009-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-009-2-0/file?v=2026-09-05T22%3A44%3A25.313Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-010-4-0",
+      "publicKey": "risorse-native-010-chiesa-cappella-rmap-010-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-010-4-0/file?v=2026-09-05T22%3A44%3A25.313Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-011-4-0",
+      "publicKey": "risorse-native-011-aoyama-itchome-banchina-della-metropolitana-rmap-011-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-011-4-0/file?v=2026-09-05T22%3A44%3A25.313Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-011-6-0",
+      "publicKey": "yongen-jaya-banchina-della-metropolitana-rmap-011-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-011-6-0/file?v=2026-09-05T22%3A44%3A25.314Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-012-29-0",
+      "publicKey": "risorse-native-012-seaside-park-cantiere-dello-stadio-rmap-012-29-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-012-29-0/file?v=2026-09-05T22%3A44%3A25.314Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-022-1-0",
+      "publicKey": "risorse-native-022-covo-dei-ladri-covo-dei-ladri-livello-grafico-1-rmap-022-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-022-1-0/file?v=2026-09-05T22%3A44%3A25.315Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-022-1-1",
+      "publicKey": "risorse-native-022-covo-dei-ladri-covo-dei-ladri-livello-grafico-2-rmap-022-1-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-022-1-1/file?v=2026-09-05T22%3A44%3A25.315Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-022-1-2",
+      "publicKey": "risorse-native-022-covo-dei-ladri-covo-dei-ladri-livello-grafico-3-rmap-022-1-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-022-1-2/file?v=2026-09-05T22%3A44%3A25.316Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-022-1-3",
+      "publicKey": "risorse-native-022-covo-dei-ladri-covo-dei-ladri-livello-grafico-4-rmap-022-1-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-022-1-3/file?v=2026-09-05T22%3A44%3A25.316Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-022-1-4",
+      "publicKey": "risorse-native-022-covo-dei-ladri-covo-dei-ladri-livello-grafico-5-rmap-022-1-4",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-022-1-4/file?v=2026-09-05T22%3A44%3A25.316Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-150-3-0",
+      "publicKey": "risorse-native-150-luogo-150-area-003-rmap-150-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-150-3-0/file?v=2026-09-05T22%3A44%3A25.317Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-150-3-1",
+      "publicKey": "risorse-native-150-luogo-150-area-003-rmap-150-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-150-3-1/file?v=2026-09-05T22%3A44%3A25.317Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-0-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-area-000-rmap-151-0-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-0-0/file?v=2026-09-05T22%3A44%3A25.318Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-0-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-area-000-rmap-151-0-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-0-1/file?v=2026-09-05T22%3A44%3A25.318Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-10-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-torre-livello-superiore-rmap-151-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-10-0/file?v=2026-09-05T22%3A44%3A25.318Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-10-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-torre-livello-superiore-rmap-151-10-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-10-1/file?v=2026-09-05T22%3A44%3A25.319Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-11-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-torre-sala-del-trono-rmap-151-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-11-0/file?v=2026-09-05T22%3A44%3A25.319Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-11-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-torre-sala-del-trono-rmap-151-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-11-1/file?v=2026-09-05T22%3A44%3A25.320Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-13-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-stanza-segreta-rmap-151-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-13-0/file?v=2026-09-05T22%3A44%3A25.320Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-16-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-area-016-rmap-151-16-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-16-0/file?v=2026-09-05T22%3A44%3A25.320Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-1-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-cancello-del-castello-rmap-151-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-1-0/file?v=2026-09-05T22%3A44%3A25.321Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-1-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-cancello-del-castello-rmap-151-1-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-1-1/file?v=2026-09-05T22%3A44%3A25.321Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-2-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-1p-rmap-151-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-2-0/file?v=2026-09-05T22%3A44%3A25.322Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-2-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-2-1/file?v=2026-09-05T22%3A44%3A25.322Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-2-2",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-2-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-2-2/file?v=2026-09-05T22%3A44%3A25.323Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-3-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-3-0/file?v=2026-09-05T22%3A44%3A25.323Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-4-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-4-0/file?v=2026-09-05T22%3A44%3A25.323Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-4-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-3p-rmap-151-4-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-4-1/file?v=2026-09-05T22%3A44%3A25.324Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-4-2",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-3p-rmap-151-4-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-4-2/file?v=2026-09-05T22%3A44%3A25.324Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-5-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-3p-rmap-151-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-5-0/file?v=2026-09-05T22%3A44%3A25.325Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-5-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-3p-rmap-151-5-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-5-1/file?v=2026-09-05T22%3A44%3A25.325Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-5-2",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-3p-rmap-151-5-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-5-2/file?v=2026-09-05T22%3A44%3A25.325Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-6-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-tetto-rmap-151-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-6-0/file?v=2026-09-05T22%3A44%3A25.326Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-6-1",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-tetto-rmap-151-6-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-6-1/file?v=2026-09-05T22%3A44%3A25.326Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-6-2",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-tetto-rmap-151-6-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-6-2/file?v=2026-09-05T22%3A44%3A25.327Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-6-3",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-tetto-rmap-151-6-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-6-3/file?v=2026-09-05T22%3A44%3A25.327Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-6-4",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-tetto-rmap-151-6-4",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-6-4/file?v=2026-09-05T22%3A44%3A25.328Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-7-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-torre-livello-inferiore-rmap-151-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-7-0/file?v=2026-09-05T22%3A44%3A25.328Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-151-9-0",
+      "publicKey": "risorse-native-151-palazzo-di-kamoshida-torre-livello-di-mezzo-rmap-151-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-151-9-0/file?v=2026-09-05T22%3A44%3A25.328Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-11-0",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-area-011-rmap-152-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-11-0/file?v=2026-09-05T22%3A44%3A25.329Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-11-1",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-area-011-rmap-152-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-11-1/file?v=2026-09-05T22%3A44%3A25.329Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-1-0",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-prigione-sotterranea-1p-rmap-152-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-1-0/file?v=2026-09-05T22%3A44%3A25.330Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-1-1",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-prigione-sotterranea-1p-rmap-152-1-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-1-1/file?v=2026-09-05T22%3A44%3A25.330Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-2-0",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-prigione-sotterranea-2p-rmap-152-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-2-0/file?v=2026-09-05T22%3A44%3A25.331Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-2-1",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-prigione-sotterranea-2p-rmap-152-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-2-1/file?v=2026-09-05T22%3A44%3A25.331Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-4-0",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-passaggio-sotterraneo-rmap-152-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-4-0/file?v=2026-09-05T22%3A44%3A25.331Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-5-0",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-area-005-rmap-152-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-5-0/file?v=2026-09-05T22%3A44%3A25.332Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-152-6-0",
+      "publicKey": "risorse-native-152-palazzo-di-kamoshida-palestra-dellamore-rmap-152-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-152-6-0/file?v=2026-09-05T22%3A44%3A25.332Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-10-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-010-rmap-153-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-10-0/file?v=2026-09-05T22%3A44%3A25.332Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-11-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-011-rmap-153-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-11-0/file?v=2026-09-05T22%3A44%3A25.333Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-12-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-012-rmap-153-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-12-0/file?v=2026-09-05T22%3A44%3A25.333Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-13-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-013-rmap-153-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-13-0/file?v=2026-09-05T22%3A44%3A25.333Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-1-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-entrata-del-museo-rmap-153-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-1-0/file?v=2026-09-05T22%3A44%3A25.334Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-2-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-museo-1p-rmap-153-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-2-0/file?v=2026-09-05T22%3A44%3A25.334Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-2-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-museo-1p-rmap-153-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-2-1/file?v=2026-09-05T22%3A44%3A25.335Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-3-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-003-rmap-153-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-3-0/file?v=2026-09-05T22%3A44%3A25.335Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-3-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-museo-2p-rmap-153-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-3-1/file?v=2026-09-05T22%3A44%3A25.335Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-3-2",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-museo-2p-rmap-153-3-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-3-2/file?v=2026-09-05T22%3A44%3A25.336Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-3-3",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-museo-2p-rmap-153-3-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-3-3/file?v=2026-09-05T22%3A44%3A25.336Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-4-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-004-rmap-153-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-4-0/file?v=2026-09-05T22%3A44%3A25.337Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-5-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-005-rmap-153-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-5-0/file?v=2026-09-05T22%3A44%3A25.337Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-5-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-005-rmap-153-5-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-5-1/file?v=2026-09-05T22%3A44%3A25.338Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-6-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-006-rmap-153-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-6-0/file?v=2026-09-05T22%3A44%3A25.338Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-6-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-006-rmap-153-6-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-6-1/file?v=2026-09-05T22%3A44%3A25.338Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-7-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-sala-del-tesoro-galleria-rmap-153-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-7-0/file?v=2026-09-05T22%3A44%3A25.339Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-7-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-sala-del-tesoro-galleria-rmap-153-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-7-1/file?v=2026-09-05T22%3A44%3A25.339Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-7-2",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-sala-del-tesoro-galleria-rmap-153-7-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-7-2/file?v=2026-09-05T22%3A44%3A25.340Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-8-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-008-rmap-153-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-8-0/file?v=2026-09-05T22%3A44%3A25.340Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-8-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-008-rmap-153-8-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-8-1/file?v=2026-09-05T22%3A44%3A25.341Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-8-2",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-008-rmap-153-8-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-8-2/file?v=2026-09-05T22%3A44%3A25.341Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-9-0",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-009-rmap-153-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-9-0/file?v=2026-09-05T22%3A44%3A25.341Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-9-1",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-009-rmap-153-9-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-9-1/file?v=2026-09-05T22%3A44%3A25.342Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-153-9-2",
+      "publicKey": "risorse-native-153-palazzo-di-madarame-area-009-rmap-153-9-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-153-9-2/file?v=2026-09-05T22%3A44%3A25.342Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-10-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-centro-del-caveau-rmap-154-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-10-0/file?v=2026-09-05T22%3A44%3A25.342Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-11-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-ufficio-riciclaggio-rmap-154-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-11-0/file?v=2026-09-05T22%3A44%3A25.343Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-11-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-ufficio-riciclaggio-rmap-154-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-11-1/file?v=2026-09-05T22%3A44%3A25.343Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-11-2",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-ufficio-riciclaggio-rmap-154-11-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-11-2/file?v=2026-09-05T22%3A44%3A25.344Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-12-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-012-rmap-154-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-12-0/file?v=2026-09-05T22%3A44%3A25.344Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-12-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-012-rmap-154-12-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-12-1/file?v=2026-09-05T22%3A44%3A25.344Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-12-2",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-012-rmap-154-12-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-12-2/file?v=2026-09-05T22%3A44%3A25.345Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-13-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-013-rmap-154-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-13-0/file?v=2026-09-05T22%3A44%3A25.345Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-13-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-013-rmap-154-13-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-13-1/file?v=2026-09-05T22%3A44%3A25.345Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-13-2",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-013-rmap-154-13-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-13-2/file?v=2026-09-05T22%3A44%3A25.346Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-14-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-ufficio-riciclaggio-rmap-154-14-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-14-0/file?v=2026-09-05T22%3A44%3A25.346Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-14-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-ufficio-riciclaggio-rmap-154-14-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-14-1/file?v=2026-09-05T22%3A44%3A25.346Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-15-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-015-rmap-154-15-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-15-0/file?v=2026-09-05T22%3A44%3A25.347Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-1-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-entrata-della-banca-rmap-154-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-1-0/file?v=2026-09-05T22%3A44%3A25.347Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-2-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-sala-dingresso-1p-rmap-154-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-2-0/file?v=2026-09-05T22%3A44%3A25.348Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-2-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-sala-dingresso-2p-rmap-154-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-2-1/file?v=2026-09-05T22%3A44%3A25.348Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-3-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-corridoio-banchieri-rmap-154-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-3-0/file?v=2026-09-05T22%3A44%3A25.348Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-3-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-corridoio-banchieri-rmap-154-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-3-1/file?v=2026-09-05T22%3A44%3A25.349Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-3-2",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-corridoio-banchieri-rmap-154-3-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-3-2/file?v=2026-09-05T22%3A44%3A25.349Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-5-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-area-005-rmap-154-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-5-0/file?v=2026-09-05T22%3A44%3A25.350Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-5-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-sotterraneo-rmap-154-5-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-5-1/file?v=2026-09-05T22%3A44%3A25.350Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-7-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-1p-rmap-154-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-7-0/file?v=2026-09-05T22%3A44%3A25.350Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-7-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-1p-rmap-154-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-7-1/file?v=2026-09-05T22%3A44%3A25.351Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-8-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-2p-rmap-154-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-8-0/file?v=2026-09-05T22%3A44%3A25.351Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-8-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-2p-rmap-154-8-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-8-1/file?v=2026-09-05T22%3A44%3A25.352Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-9-0",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-3p-rmap-154-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-9-0/file?v=2026-09-05T22%3A44%3A25.352Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-154-9-1",
+      "publicKey": "risorse-native-154-palazzo-di-kaneshiro-caveau-3p-rmap-154-9-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-154-9-1/file?v=2026-09-05T22%3A44%3A25.352Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-10-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-area-010-rmap-155-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-10-0/file?v=2026-09-05T22%3A44%3A25.353Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-11-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-passaggio-sotterraneo-1f-rmap-155-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-11-0/file?v=2026-09-05T22%3A44%3A25.353Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-11-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-passaggio-sotterraneo-1f-rmap-155-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-11-1/file?v=2026-09-05T22%3A44%3A25.354Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-11-2",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-passaggio-sotterraneo-2f-rmap-155-11-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-11-2/file?v=2026-09-05T22%3A44%3A25.354Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-11-3",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-passaggio-sotterraneo-2f-rmap-155-11-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-11-3/file?v=2026-09-05T22%3A44%3A25.354Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-12-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-corridoio-principale-rmap-155-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-12-0/file?v=2026-09-05T22%3A44%3A25.355Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-12-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-corridoio-principale-rmap-155-12-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-12-1/file?v=2026-09-05T22%3A44%3A25.355Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-13-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-citta-nel-deserto-rmap-155-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-13-0/file?v=2026-09-05T22%3A44%3A25.356Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-1-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-entrata-della-piramide-rmap-155-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-1-0/file?v=2026-09-05T22%3A44%3A25.356Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-2-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-corridoio-principale-rmap-155-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-2-0/file?v=2026-09-05T22%3A44%3A25.356Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-2-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-corridoio-principale-rmap-155-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-2-1/file?v=2026-09-05T22%3A44%3A25.357Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-2-2",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-area-002-rmap-155-2-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-2-2/file?v=2026-09-05T22%3A44%3A25.357Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-2-3",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-area-002-rmap-155-2-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-2-3/file?v=2026-09-05T22%3A44%3A25.358Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-3-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-rimorso-1p-rmap-155-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-3-0/file?v=2026-09-05T22%3A44%3A25.358Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-3-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-rimorso-2p-rmap-155-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-3-1/file?v=2026-09-05T22%3A44%3A25.358Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-3-2",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-area-003-rmap-155-3-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-3-2/file?v=2026-09-05T22%3A44%3A25.359Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-4-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-1p-rmap-155-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-4-0/file?v=2026-09-05T22%3A44%3A25.359Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-4-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-2p-rmap-155-4-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-4-1/file?v=2026-09-05T22%3A44%3A25.359Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-5-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-caverna-sotterranea-1p-rmap-155-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-5-0/file?v=2026-09-05T22%3A44%3A25.360Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-5-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-caverna-sotterranea-1p-rmap-155-5-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-5-1/file?v=2026-09-05T22%3A44%3A25.360Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-5-2",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-caverna-sotterranea-2p-rmap-155-5-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-5-2/file?v=2026-09-05T22%3A44%3A25.361Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-5-3",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-caverna-sotterranea-2p-rmap-155-5-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-5-3/file?v=2026-09-05T22%3A44%3A25.361Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-6-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-1p-rmap-155-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-6-0/file?v=2026-09-05T22%3A44%3A25.362Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-6-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-2p-rmap-155-6-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-6-1/file?v=2026-09-05T22%3A44%3A25.362Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-6-2",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-2p-rmap-155-6-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-6-2/file?v=2026-09-05T22%3A44%3A25.362Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-7-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-rigetto-1p-rmap-155-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-7-0/file?v=2026-09-05T22%3A44%3A25.363Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-7-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-del-rigetto-2p-rmap-155-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-7-1/file?v=2026-09-05T22%3A44%3A25.363Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-8-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-dei-sarcofagi-1p-rmap-155-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-8-0/file?v=2026-09-05T22%3A44%3A25.364Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-8-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-dei-sarcofagi-1p-rmap-155-8-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-8-1/file?v=2026-09-05T22%3A44%3A25.364Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-8-2",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-dei-sarcofagi-2p-rmap-155-8-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-8-2/file?v=2026-09-05T22%3A44%3A25.364Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-8-3",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-dei-sarcofagi-2p-rmap-155-8-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-8-3/file?v=2026-09-05T22%3A44%3A25.365Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-9-0",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-della-vacuita-1p-rmap-155-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-9-0/file?v=2026-09-05T22%3A44%3A25.365Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-155-9-1",
+      "publicKey": "risorse-native-155-palazzo-di-futaba-camera-della-vacuita-2p-rmap-155-9-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-155-9-1/file?v=2026-09-05T22%3A44%3A25.366Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-10-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-area-010-rmap-156-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-10-0/file?v=2026-09-05T22%3A44%3A25.366Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-10-1",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-produzione-armamenti-rmap-156-10-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-10-1/file?v=2026-09-05T22%3A44%3A25.366Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-10-2",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-produzione-armamenti-rmap-156-10-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-10-2/file?v=2026-09-05T22%3A44%3A25.367Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-11-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-manutenzione-armamenti-rmap-156-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-11-0/file?v=2026-09-05T22%3A44%3A25.367Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-11-1",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-manutenzione-armamenti-rmap-156-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-11-1/file?v=2026-09-05T22%3A44%3A25.367Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-11-2",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-area-011-rmap-156-11-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-11-2/file?v=2026-09-05T22%3A44%3A25.368Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-11-3",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-area-011-rmap-156-11-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-11-3/file?v=2026-09-05T22%3A44%3A25.369Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-12-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-area-012-rmap-156-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-12-0/file?v=2026-09-05T22%3A44%3A25.369Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-13-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-caserma-rmap-156-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-13-0/file?v=2026-09-05T22%3A44%3A25.370Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-1-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-entrata-laterale-rmap-156-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-1-0/file?v=2026-09-05T22%3A44%3A25.370Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-2-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-corridoi-del-complesso-rmap-156-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-2-0/file?v=2026-09-05T22%3A44%3A25.370Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-3-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-corridoi-del-complesso-rmap-156-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-3-0/file?v=2026-09-05T22%3A44%3A25.371Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-3-1",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-corridoi-del-complesso-rmap-156-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-3-1/file?v=2026-09-05T22%3A44%3A25.371Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-4-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-dintorni-del-complesso-rmap-156-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-4-0/file?v=2026-09-05T22%3A44%3A25.372Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-5-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-interscambio-rmap-156-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-5-0/file?v=2026-09-05T22%3A44%3A25.372Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-6-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-interscambio-rmap-156-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-6-0/file?v=2026-09-05T22%3A44%3A25.372Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-7-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-linea-esportazioni-rmap-156-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-7-0/file?v=2026-09-05T22%3A44%3A25.373Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-7-1",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-linea-esportazioni-rmap-156-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-7-1/file?v=2026-09-05T22%3A44%3A25.373Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-8-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-linea-di-produzione-rmap-156-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-8-0/file?v=2026-09-05T22%3A44%3A25.373Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-9-0",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-area-009-rmap-156-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-9-0/file?v=2026-09-05T22%3A44%3A25.374Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-156-9-1",
+      "publicKey": "risorse-native-156-palazzo-di-okumura-area-009-rmap-156-9-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-156-9-1/file?v=2026-09-05T22%3A44%3A25.374Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-10-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-stanza-slot-machine-rmap-157-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-10-0/file?v=2026-09-05T22%3A44%3A25.375Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-10-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-stanza-slot-machine-rmap-157-10-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-10-1/file?v=2026-09-05T22%3A44%3A25.375Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-11-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-lobby-piano-puntate-alte-rmap-157-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-11-0/file?v=2026-09-05T22%3A44%3A25.375Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-11-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-lobby-piano-puntate-alte-rmap-157-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-11-1/file?v=2026-09-05T22%3A44%3A25.376Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-11-2",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-lobby-piano-puntate-alte-rmap-157-11-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-11-2/file?v=2026-09-05T22%3A44%3A25.376Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-12-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-oscura-dimora-rmap-157-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-12-0/file?v=2026-09-05T22%3A44%3A25.376Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-13-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-oscura-dimora-rmap-157-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-13-0/file?v=2026-09-05T22%3A44%3A25.377Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-15-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-arena-combattimenti-rmap-157-15-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-15-0/file?v=2026-09-05T22%3A44%3A25.377Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-16-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-direzione-rmap-157-16-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-16-0/file?v=2026-09-05T22%3A44%3A25.378Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-16-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-direzione-rmap-157-16-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-16-1/file?v=2026-09-05T22%3A44%3A25.378Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-17-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-017-rmap-157-17-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-17-0/file?v=2026-09-05T22%3A44%3A25.378Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-1-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-entrata-del-casino-rmap-157-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-1-0/file?v=2026-09-05T22%3A44%3A25.379Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-1-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-entrata-del-casino-rmap-157-1-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-1-1/file?v=2026-09-05T22%3A44%3A25.379Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-3-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-003-rmap-157-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-3-0/file?v=2026-09-05T22%3A44%3A25.380Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-3-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-003-rmap-157-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-3-1/file?v=2026-09-05T22%3A44%3A25.380Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-4-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-piano-terra-rmap-157-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-4-0/file?v=2026-09-05T22%3A44%3A25.380Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-4-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-piano-terra-rmap-157-4-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-4-1/file?v=2026-09-05T22%3A44%3A25.381Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-5-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-riservata-allo-staff-rmap-157-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-5-0/file?v=2026-09-05T22%3A44%3A25.381Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-5-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-005-rmap-157-5-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-5-1/file?v=2026-09-05T22%3A44%3A25.382Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-6-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-lobby-piano-riservato-ai-soci-rmap-157-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-6-0/file?v=2026-09-05T22%3A44%3A25.382Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-7-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-dadi-rmap-157-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-7-0/file?v=2026-09-05T22%3A44%3A25.382Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-7-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-007-rmap-157-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-7-1/file?v=2026-09-05T22%3A44%3A25.383Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-8-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-riservata-allo-staff-rmap-157-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-8-0/file?v=2026-09-05T22%3A44%3A25.383Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-8-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-area-riservata-allo-staff-rmap-157-8-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-8-1/file?v=2026-09-05T22%3A44%3A25.384Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-9-0",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-stanza-slot-machine-rmap-157-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-9-0/file?v=2026-09-05T22%3A44%3A25.384Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-157-9-1",
+      "publicKey": "risorse-native-157-palazzo-di-niijima-stanza-slot-machine-rmap-157-9-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-157-9-1/file?v=2026-09-05T22%3A44%3A25.385Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-10-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-010-rmap-159-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-10-0/file?v=2026-09-05T22%3A44%3A25.385Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-10-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-010-rmap-159-10-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-10-1/file?v=2026-09-05T22%3A44%3A25.386Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-11-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-laterale-rmap-159-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-11-0/file?v=2026-09-05T22%3A44%3A25.386Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-11-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-laterale-rmap-159-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-11-1/file?v=2026-09-05T22%3A44%3A25.387Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-11-2",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-laterale-rmap-159-11-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-11-2/file?v=2026-09-05T22%3A44%3A25.387Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-11-3",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-laterale-rmap-159-11-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-11-3/file?v=2026-09-05T22%3A44%3A25.387Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-11-4",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-laterale-rmap-159-11-4",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-11-4/file?v=2026-09-05T22%3A44%3A25.388Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-12-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-aula-magna-rmap-159-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-12-0/file?v=2026-09-05T22%3A44%3A25.388Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-13-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-macchine-rmap-159-13-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-13-0/file?v=2026-09-05T22%3A44%3A25.389Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-15-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-015-rmap-159-15-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-15-0/file?v=2026-09-05T22%3A44%3A25.389Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-16-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-016-rmap-159-16-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-16-0/file?v=2026-09-05T22%3A44%3A25.389Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-1-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-anteriore-rmap-159-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-1-0/file?v=2026-09-05T22%3A44%3A25.390Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-20-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-mezzavia-tribordo-rmap-159-20-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-20-0/file?v=2026-09-05T22%3A44%3A25.390Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-20-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-mezzavia-tribordo-rmap-159-20-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-20-1/file?v=2026-09-05T22%3A44%3A25.391Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-25-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-superiore-tribordo-rmap-159-25-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-25-0/file?v=2026-09-05T22%3A44%3A25.391Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-25-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-superiore-tribordo-rmap-159-25-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-25-1/file?v=2026-09-05T22%3A44%3A25.392Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-2-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-dingresso-rmap-159-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-2-0/file?v=2026-09-05T22%3A44%3A25.392Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-2-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-dingresso-rmap-159-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-2-1/file?v=2026-09-05T22%3A44%3A25.392Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-2-2",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-dingresso-rmap-159-2-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-2-2/file?v=2026-09-05T22%3A44%3A25.393Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-2-3",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-dingresso-rmap-159-2-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-2-3/file?v=2026-09-05T22%3A44%3A25.393Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-2-4",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-dingresso-rmap-159-2-4",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-2-4/file?v=2026-09-05T22%3A44%3A25.394Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-2-5",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-dingresso-rmap-159-2-5",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-2-5/file?v=2026-09-05T22%3A44%3A25.394Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-30-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-inferiore-babordo-rmap-159-30-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-30-0/file?v=2026-09-05T22%3A44%3A25.395Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-30-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-inferiore-babordo-rmap-159-30-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-30-1/file?v=2026-09-05T22%3A44%3A25.395Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-35-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-corridoio-mezzavia-babordo-rmap-159-35-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-35-0/file?v=2026-09-05T22%3A44%3A25.395Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-3-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-003-rmap-159-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-3-0/file?v=2026-09-05T22%3A44%3A25.396Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-3-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-003-rmap-159-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-3-1/file?v=2026-09-05T22%3A44%3A25.396Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-6-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-006-rmap-159-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-6-0/file?v=2026-09-05T22%3A44%3A25.397Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-6-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-006-rmap-159-6-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-6-1/file?v=2026-09-05T22%3A44%3A25.397Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-6-2",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-006-rmap-159-6-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-6-2/file?v=2026-09-05T22%3A44%3A25.397Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-6-3",
+      "publicKey": "risorse-native-159-palazzo-di-shido-sala-intrattenimento-2p-rmap-159-6-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-6-3/file?v=2026-09-05T22%3A44%3A25.398Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-7-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-007-rmap-159-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-7-0/file?v=2026-09-05T22%3A44%3A25.398Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-7-1",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ponte-di-poppa-rmap-159-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-7-1/file?v=2026-09-05T22%3A44%3A25.399Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-8-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-area-008-rmap-159-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-8-0/file?v=2026-09-05T22%3A44%3A25.399Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-159-9-0",
+      "publicKey": "risorse-native-159-palazzo-di-shido-ristorante-rmap-159-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-159-9-0/file?v=2026-09-05T22%3A44%3A25.400Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-10-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-area-010-rmap-160-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-10-0/file?v=2026-09-05T22%3A44%3A25.400Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-10-1",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-area-010-rmap-160-10-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-10-1/file?v=2026-09-05T22%3A44%3A25.401Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-1-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-piazza-stazione-shibuya-rmap-160-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-1-0/file?v=2026-09-05T22%3A44%3A25.401Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-2-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-cammino-per-il-santo-graal-rmap-160-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-2-0/file?v=2026-09-05T22%3A44%3A25.402Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-3-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-cammino-per-il-santo-graal-rmap-160-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-3-0/file?v=2026-09-05T22%3A44%3A25.402Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-4-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-cammino-per-il-santo-graal-rmap-160-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-4-0/file?v=2026-09-05T22%3A44%3A25.403Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-4-1",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-area-004-rmap-160-4-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-4-1/file?v=2026-09-05T22%3A44%3A25.403Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-4-2",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-area-004-rmap-160-4-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-4-2/file?v=2026-09-05T22%3A44%3A25.403Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-5-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-cammino-per-il-santo-graal-rmap-160-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-5-0/file?v=2026-09-05T22%3A44%3A25.404Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-160-6-0",
+      "publicKey": "risorse-native-160-mondo-del-clifoto-entrata-del-santuario-rmap-160-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-160-6-0/file?v=2026-09-05T22%3A44%3A25.404Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-10-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-10-0/file?v=2026-09-05T22%3A44%3A25.405Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-11-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-santuario-rmap-161-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-11-0/file?v=2026-09-05T22%3A44%3A25.405Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-1-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-entrata-rmap-161-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-1-0/file?v=2026-09-05T22%3A44%3A25.406Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-2-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-2-0/file?v=2026-09-05T22%3A44%3A25.406Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-2-1",
+      "publicKey": "risorse-native-161-profondita-dei-memento-area-002-rmap-161-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-2-1/file?v=2026-09-05T22%3A44%3A25.407Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-2-2",
+      "publicKey": "risorse-native-161-profondita-dei-memento-area-002-rmap-161-2-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-2-2/file?v=2026-09-05T22%3A44%3A25.407Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-3-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-3-0/file?v=2026-09-05T22%3A44%3A25.407Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-4-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-vuoto-cavernoso-rmap-161-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-4-0/file?v=2026-09-05T22%3A44%3A25.408Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-4-1",
+      "publicKey": "risorse-native-161-profondita-dei-memento-area-004-rmap-161-4-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-4-1/file?v=2026-09-05T22%3A44%3A25.408Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-4-2",
+      "publicKey": "risorse-native-161-profondita-dei-memento-area-004-rmap-161-4-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-4-2/file?v=2026-09-05T22%3A44%3A25.409Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-5-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-5-0/file?v=2026-09-05T22%3A44%3A25.409Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-6-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-6-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-6-0/file?v=2026-09-05T22%3A44%3A25.409Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-6-1",
+      "publicKey": "risorse-native-161-profondita-dei-memento-area-006-rmap-161-6-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-6-1/file?v=2026-09-05T22%3A44%3A25.410Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-7-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-vuoto-cavernoso-rmap-161-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-7-0/file?v=2026-09-05T22%3A44%3A25.410Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-8-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-8-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-8-0/file?v=2026-09-05T22%3A44%3A25.411Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-161-9-0",
+      "publicKey": "risorse-native-161-profondita-dei-memento-corridoio-della-prigione-rmap-161-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-161-9-0/file?v=2026-09-05T22%3A44%3A25.411Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-10-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-modello-psi-cognitivo-eden-rmap-162-10-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-10-0/file?v=2026-09-05T22%3A44%3A25.411Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-10-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-modello-psi-cognitivo-eden-rmap-162-10-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-10-1/file?v=2026-09-05T22%3A44%3A25.412Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-11-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-corridoio-del-crepuscolo-rmap-162-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-11-0/file?v=2026-09-05T22%3A44%3A25.412Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-11-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-corridoio-del-crepuscolo-rmap-162-11-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-11-1/file?v=2026-09-05T22%3A44%3A25.413Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-11-2",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-corridoio-del-crepuscolo-rmap-162-11-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-11-2/file?v=2026-09-05T22%3A44%3A25.413Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-12-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-di-controllo-rmap-162-12-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-12-0/file?v=2026-09-05T22%3A44%3A25.413Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-12-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-di-controllo-rmap-162-12-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-12-1/file?v=2026-09-05T22%3A44%3A25.414Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-14-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ripostiglio-rmap-162-14-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-14-0/file?v=2026-09-05T22%3A44%3A25.414Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-14-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ripostiglio-rmap-162-14-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-14-1/file?v=2026-09-05T22%3A44%3A25.415Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-14-2",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ripostiglio-rmap-162-14-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-14-2/file?v=2026-09-05T22%3A44%3A25.415Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-14-3",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ripostiglio-rmap-162-14-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-14-3/file?v=2026-09-05T22%3A44%3A25.415Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-15-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-di-supporto-rmap-162-15-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-15-0/file?v=2026-09-05T22%3A44%3A25.416Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-15-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-di-supporto-rmap-162-15-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-15-1/file?v=2026-09-05T22%3A44%3A25.416Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-15-2",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-di-supporto-rmap-162-15-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-15-2/file?v=2026-09-05T22%3A44%3A25.417Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-16-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ala-ricerca-rmap-162-16-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-16-0/file?v=2026-09-05T22%3A44%3A25.417Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-16-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ala-ricerca-rmap-162-16-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-16-1/file?v=2026-09-05T22%3A44%3A25.417Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-16-2",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ala-ricerca-rmap-162-16-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-16-2/file?v=2026-09-05T22%3A44%3A25.418Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-16-3",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ala-ricerca-rmap-162-16-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-16-3/file?v=2026-09-05T22%3A44%3A25.418Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-16-4",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ala-ricerca-rmap-162-16-4",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-16-4/file?v=2026-09-05T22%3A44%3A25.419Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-1-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-ingresso-rmap-162-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-1-0/file?v=2026-09-05T22%3A44%3A25.419Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-2-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-dingresso-rmap-162-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-2-0/file?v=2026-09-05T22%3A44%3A25.419Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-2-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-dingresso-rmap-162-2-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-2-1/file?v=2026-09-05T22%3A44%3A25.420Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-2-2",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-dingresso-rmap-162-2-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-2-2/file?v=2026-09-05T22%3A44%3A25.420Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-2-3",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-dingresso-rmap-162-2-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-2-3/file?v=2026-09-05T22%3A44%3A25.421Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-3-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-corridoio-rmap-162-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-3-0/file?v=2026-09-05T22%3A44%3A25.421Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-3-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-corridoio-rmap-162-3-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-3-1/file?v=2026-09-05T22%3A44%3A25.422Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-4-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-percorso-di-prova-rmap-162-4-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-4-0/file?v=2026-09-05T22%3A44%3A25.422Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-5-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-modello-psi-cognitivo-eden-rmap-162-5-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-5-0/file?v=2026-09-05T22%3A44%3A25.422Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-7-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-auditorium-rmap-162-7-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-7-0/file?v=2026-09-05T22%3A44%3A25.423Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-7-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-auditorium-rmap-162-7-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-7-1/file?v=2026-09-05T22%3A44%3A25.423Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-9-0",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-visite-rmap-162-9-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-9-0/file?v=2026-09-05T22%3A44%3A25.424Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-9-1",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-visite-rmap-162-9-1",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-9-1/file?v=2026-09-05T22%3A44%3A25.424Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-9-2",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-visite-rmap-162-9-2",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-9-2/file?v=2026-09-05T22%3A44%3A25.424Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-9-3",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-visite-rmap-162-9-3",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-9-3/file?v=2026-09-05T22%3A44%3A25.425Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-162-9-4",
+      "publicKey": "risorse-native-162-palazzo-di-maruki-sala-visite-rmap-162-9-4",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-162-9-4/file?v=2026-09-05T22%3A44%3A25.425Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-190-1-0",
+      "publicKey": "risorse-native-190-memento-aree-fisse-area-001-rmap-190-1-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-190-1-0/file?v=2026-09-05T22%3A44%3A25.425Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-190-2-0",
+      "publicKey": "risorse-native-190-memento-aree-fisse-area-002-rmap-190-2-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-190-2-0/file?v=2026-09-05T22%3A44%3A25.426Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-190-3-0",
+      "publicKey": "risorse-native-190-memento-aree-fisse-area-003-rmap-190-3-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-190-3-0/file?v=2026-09-05T22%3A44%3A25.426Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-190-51-0",
+      "publicKey": "risorse-native-190-memento-aree-fisse-area-051-rmap-190-51-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-190-51-0/file?v=2026-09-05T22%3A44%3A25.427Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-190-61-0",
+      "publicKey": "risorse-native-190-memento-aree-fisse-area-061-rmap-190-61-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-190-61-0/file?v=2026-09-05T22%3A44%3A25.427Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-190-62-0",
+      "publicKey": "risorse-native-190-memento-aree-fisse-area-062-rmap-190-62-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-190-62-0/file?v=2026-09-05T22%3A44%3A25.428Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-192-62-0",
+      "publicKey": "risorse-native-192-memento-aree-fisse-area-062-rmap-192-62-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-192-62-0/file?v=2026-09-05T22%3A44%3A25.428Z"
+    },
+    {
+      "nativeKey": "nativo-rmap-195-11-0",
+      "publicKey": "risorse-native-195-memento-aree-fisse-area-011-rmap-195-11-0",
+      "imageUrl": "/api/immagini/mappa/nativo-rmap-195-11-0/file?v=2026-09-05T22%3A44%3A25.428Z"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "mappa": 344,
+  "spillo": 387,
+  "spillo_destinazione": 0,
+  "guida_mappa": 116,
+  "mappa_presentazione": 30,
+  "quartiere_ingresso": 1,
+  "pinSuMappeNative": 5,
+  "mappeNativeConPin": 3,
+  "pinConDestinazioneSuMappeNative": 0,
+  "nuoveRinomineApplicate": 0,
+  "nuoveRinominePreparate": 9,
+  "frontendStatus": 200,
+  "backendStatus": 200
+}

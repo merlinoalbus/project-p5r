@@ -9,7 +9,7 @@ import { runMigrations } from '../db/migrationRunner.js';
 import { caricaSeed } from '../services/seed/caricaSeed.js';
 import { invalidaCacheTraduzioni } from '../services/traduzioniService.js';
 import { createApp } from '../bootstrap.js';
-import { dimensioniImmagine, importaMappe } from '../services/mappe/mappeService.js';
+import { creaMappa, creaSpillo, dimensioniImmagine, importaMappe } from '../services/mappe/mappeService.js';
 import { leggiZip } from '../utils/zip.js';
 import { salvaImmagine } from '../services/immaginiService.js';
 import type { EsportazioneMappeDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../shared/types.js';
@@ -31,6 +31,10 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     runMigrations(db);
     caricaSeed(db, DIR_SEED);
     invalidaCacheTraduzioni();
+    // Explicit positioned fixture: editorial seed points no longer pretend to have a physical map.
+    const punto=db.prepare('SELECT chiave FROM punto_interesse LIMIT 1').get() as {chiave:string};
+    const fixture=creaMappa(undefined,{nome:'Fixture geografica',tipo:'area',genitore:'dungeon-kamoshida'});
+    creaSpillo(fixture.chiave,{tipo:'nota',nome:'Punto verificato fixture',x:10,y:20,riferimento:{tipo:'punto',chiave:punto.chiave}});
     partitaId = ((await request(app).post('/api/partite').send({ nome: 'Mappe' })).body.data as { id: number }).id;
   });
   afterAll(() => closeDb());
@@ -41,7 +45,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(tokyo).toMatchObject({ tipo: 'citta', genitore: null, origine: 'seed' });
     const quartieri = albero.filter((m) => m.tipo === 'quartiere');
     expect(quartieri.length).toBeGreaterThan(5);
-    expect(quartieri.every((q) => q.genitore === 'tokyo' && q.entita?.tipo === 'quartiere' && q.asset === `mappe/${q.chiave}`)).toBe(true);
+    expect(quartieri.every((q) => q.genitore === 'tokyo')).toBe(true);
+    expect(quartieri.filter(q=>q.entita?.tipo==='quartiere').every(q=>q.asset===`mappe/${q.chiave}`)).toBe(true);
     // i figli di Tokyo sono i quartieri della guida più le mappe dei pacchetti dell'utente agganciate a Tokyo (es. una banchina della metropolitana)
     expect(tokyo.numeroFigli).toBe(albero.filter((m) => m.genitore === 'tokyo').length);
     expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
@@ -52,7 +57,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(aree.length).toBeGreaterThan(10);
     // le aree dei Palazzi/Dedali vengono dalla guida (entità «area»); i pacchetti dell'utente possono aggiungere aree anche sotto Tokyo o un quartiere
     const areeDungeon = aree.filter((a) => a.entita?.tipo === 'area');
-    expect(areeDungeon.length).toBeGreaterThan(10);
+    expect(areeDungeon).toHaveLength(0);
+    expect(getDb().prepare('SELECT count(*) n FROM guida_mappa').get()).toEqual({n:116});
     expect(areeDungeon.every((a) => a.entita?.tipo === 'area')).toBe(true);
     // ogni chiave è instradabile (minuscole, cifre, trattini)
     for (const m of albero) expect(m.chiave).toMatch(/^[a-z0-9][a-z0-9-]{0,179}$/);
@@ -64,11 +70,12 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     // ogni quartiere ha il passaggio automatico da Tokyo; una mappa dell'utente agganciata a Tokyo ma raggiunta da un passaggio
     // posato altrove (es. la banchina della metropolitana da Yongen-Jaya) non ne riceve uno doppio
     const passaggiTokyo = tokyoDett.spilli.filter((s) => s.tipo === 'passaggio' && s.riferimento?.tipo === 'mappa').map((s) => s.riferimento!.chiave);
-    for (const q of quartieri) expect(passaggiTokyo).toContain(q.chiave);
+    for (const q of quartieri.filter(q=>q.entita?.tipo==='quartiere')) expect(passaggiTokyo).toContain(q.chiave);
+    expect(passaggiTokyo).not.toContain('aoyama-itchome'); // Native hierarchy does not certify a transfer.
     const figlieTokyo = new Set(albero.filter((m) => m.genitore === 'tokyo').map((m) => m.chiave));
     for (const p of passaggiTokyo) expect(figlieTokyo.has(p)).toBe(true);
     const kamoshida = (await request(app).get('/api/mappe/dungeon-kamoshida')).body.data as MappaDto;
-    expect(kamoshida.spilli.length).toBe(kamoshida.figli.length);
+    expect(kamoshida.spilli).toHaveLength(0); // Hierarchy alone must not manufacture physical passages.
     expect(kamoshida.spilli.every((s) => s.tipo === 'passaggio' && s.dettaglio?.tipo === 'mappa' && s.x >= 0 && s.x <= 100)).toBe(true);
     // Tokyo: posizioni stimate dalla mappa ufficiale (Shibuya al centro-sinistra); Mementos: discesa verticale in ordine
     expect(tokyoDett.spilli.find((s) => s.riferimento?.chiave === 'shibuya')).toMatchObject({ x: 34.5, y: 49.5 });
@@ -77,18 +84,18 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(y).toEqual([...y].sort((a, b) => a - b));
     // la sincronizzazione ripetuta (seed invariato) non duplica i passaggi
     expect(caricaSeed(getDb(), DIR_SEED).caricato).toBe(false);
-    expect(((await request(app).get('/api/mappe/tokyo')).body.data as MappaDto).spilli.length).toBe(quartieri.length);
+    expect(((await request(app).get('/api/mappe/tokyo')).body.data as MappaDto).spilli.length).toBe(tokyoDett.spilli.length);
   });
 
   it('il dettaglio espone percorso, figli, spilli con il dettaglio dell’entità collegata (punto, luogo con negozio e articoli)', async () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
-    const area = albero.find((m) => m.tipo === 'area' && m.numeroSpilli > 0)!;
+    const area = albero.find((m) => m.nome === 'Fixture geografica')!;
     const dettaglio = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
     expect(dettaglio.percorso.map((p) => p.chiave)).toEqual([area.genitore, area.chiave]);
     expect(dettaglio.spilli.length).toBe(area.numeroSpilli);
     const spilloPunto = dettaglio.spilli.find((s) => s.riferimento?.tipo === 'punto')!;
     expect(spilloPunto.dettaglio?.tipo).toBe('punto');
-    expect(spilloPunto.dettaglio?.punto?.area).toBe(area.entita?.chiave);
+    expect(spilloPunto.dettaglio?.punto?.area).toBeTruthy();
     expect(spilloPunto.raccolto).toBe(false);
     expect(spilloPunto.x).toBeGreaterThanOrEqual(0);
     expect(spilloPunto.x).toBeLessThanOrEqual(100);
@@ -149,7 +156,7 @@ describe('API mappe a livelli (Fase 13.1)', () => {
 
   it('stato «raccolto» per partita: uno spillo collegato a un punto aggiorna anche il punto della Guida', async () => {
     const albero = (await request(app).get('/api/mappe/albero')).body.data as MappaRiassuntoDto[];
-    const area = albero.find((m) => m.tipo === 'area' && m.numeroSpilli > 0)!;
+    const area = albero.find((m) => m.nome === 'Fixture geografica')!;
     const prima = (await request(app).get(`/api/mappe/${area.chiave}?partita=${partitaId}`)).body.data as MappaDto;
     const spillo = prima.spilli.find((s) => s.riferimento?.tipo === 'punto')!;
     const raccolto = (await request(app).put(`/api/partite/${partitaId}/spilli/${spillo.id}`).send({ raccolto: true })).body.data as SpilloDto;
@@ -539,3 +546,5 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(dimensioniImmagine(Buffer.from('non è un\'immagine'))).toBeNull();
   });
 });
+
+

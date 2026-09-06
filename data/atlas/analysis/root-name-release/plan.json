@@ -1,0 +1,44 @@
+{
+  "merges": {},
+  "updates": {},
+  "presentationPatches": [],
+  "renames": {
+    "citta-shujin-academy": {
+      "before": "Shujin Academy (scuola)",
+      "after": "Shujin Academy"
+    },
+    "dungeon-madarame": {
+      "before": "Palazzo di Madarame (Museo)",
+      "after": "Palazzo di Madarame"
+    },
+    "dungeon-futaba": {
+      "before": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+      "after": "Palazzo di Futaba"
+    },
+    "dungeon-niijima": {
+      "before": "Palazzo di Niijima (Sae) — Casinò",
+      "after": "Palazzo di Niijima"
+    },
+    "dungeon-mementos": {
+      "before": "Mementos (i Dedali)",
+      "after": "Memento"
+    },
+    "yongen-java-banchina-della-metropolitana": {
+      "before": "Yongen-Java - Banchina della metropolitana",
+      "after": "Banchina della metropolitana di Yongen-Jaya"
+    },
+    "citta-yokohama-chinatown": {
+      "before": "Chinatown (Yokohama)",
+      "after": "Chinatown"
+    },
+    "citta-suidobashi": {
+      "before": "Suidobashi (Dome Town)",
+      "after": "Suidobashi"
+    },
+    "citta-mementos": {
+      "before": "Mementos (ingresso)",
+      "after": "Entrata dei Memento"
+    }
+  },
+  "rectifySeedNames": true
+}

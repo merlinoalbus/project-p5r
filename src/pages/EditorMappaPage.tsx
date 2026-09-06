@@ -1,3 +1,8 @@
+import { etichettaPlanimetria, nomePresentazioneMappa, presentaMappa } from '../utils/presentazioneMappa';
+import { RisolviMappa } from '../components/mappe/RisolviMappa';
+import { destinazioneMappaSpillo } from '../utils/navigazioneMappa';
+import { DestinazioneSpilloEditor } from '../components/mappe/DestinazioneSpilloEditor';
+import type { DestinazioneSpillo } from '../types';
 import { CondizioniEditor } from '../components/guida/CondizioniEditor';
 // ============================================================
 // EditorMappaPage — editor di una mappa a livelli (Fase 13.3): strumenti seleziona/sposta e aggiungi, proprietà dello spillo con
@@ -32,7 +37,7 @@ const NOME_RIFERIMENTO: Record<TipoRiferimento, string> = { mappa: 'Altra mappa'
 function messaggio(err: unknown, predefinito: string): string { return err instanceof Error ? err.message : predefinito; }
 
 /** Spillo copiato negli appunti dell'editor: tutti i campi tranne la posizione; sopravvive al cambio di mappa e alla ricarica della pagina. */
-export interface AppuntiSpillo { tipo: TipoSpillo; nome: string; descrizione: string; collezionabile: boolean; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
+export interface AppuntiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo: TipoSpillo; nome: string; descrizione: string; collezionabile: boolean; riferimento: { tipo: TipoRiferimento; chiave: string } | null; condizioni: RequisitoSpillo[] }
 /** Le condizioni dello spillo senza il testo descrittivo del server (è il server a ricalcolarlo). */
 function condizioniNude(s: SpilloDto): RequisitoSpillo[] {
   return s.condizioni.map((c) => { const copia: Record<string, unknown> = { ...c }; delete copia.testo; return copia as unknown as RequisitoSpillo; });
@@ -47,6 +52,10 @@ function scriviAppunti(a: AppuntiSpillo | null): void {
 
 export function EditorMappaPage() {
   const { chiave = '' } = useParams<{ chiave: string }>();
+  return <RisolviMappa chiave={chiave}>{k => <EditorMappaRisolta key={k} chiave={k} />}</RisolviMappa>;
+}
+
+function EditorMappaRisolta({ chiave }: { chiave: string }) {
   const navigate = useNavigate();
   const { dati, caricamento, errore, ricarica } = useCarica(() => getMappa(chiave), [chiave]);
   const albero = useCarica(() => getAlberoMappe(), [chiave]);
@@ -114,7 +123,7 @@ export function EditorMappaPage() {
       {dati && (
         <VisoreMappa
           key={dati.chiave}
-          mappa={dati}
+          mappa={presentaMappa(dati)}
           partitaId={null}
           onNaviga={vai}
           onChiudi={() => navigate(`/guida/mappe/${encodeURIComponent(chiave)}`)}
@@ -236,7 +245,7 @@ function PannelloEditor(p: PropsPannello) {
   const assetOriginale = useAsset(mappa.assetOriginale);
   const assetConsegnato = assetAttuale ?? assetOriginale;
   // una mappa si «raggiunge» da questa se uno spillo (passaggio, stazione o altro) punta a lei: le figlie senza spillo e il genitore senza ritorno vengono segnalati
-  const raggiunge = (destinazione: string) => mappa.spilli.some((s) => s.riferimento?.tipo === 'mappa' && s.riferimento.chiave === destinazione);
+  const raggiunge = (destinazione: string) => mappa.spilli.some((s) => destinazioneMappaSpillo(s) === destinazione);
   return (
     <>
       <nav className="editor-mappa__sezioni" aria-label="Sezioni dell’editor">
@@ -311,20 +320,20 @@ function PannelloEditor(p: PropsPannello) {
               <li key={f.chiave} className="flex flex-col">
                 <button type="button" className="visore-mappa__figlia" onClick={() => p.onVai(f.chiave)}>
                   <IconaSpillo tipo="passaggio" dimensione={18} />
-                  <span className="flex-1 min-w-0 truncate">{f.nome}</span>
+                  <span className="flex-1 min-w-0 truncate">{etichettaPlanimetria(f)}</span>
                   <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[f.tipo]}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
                 </button>
                 {!raggiunge(f.chiave) && (
                   <div className="editor-mappa__senza-passaggio">
                     <span className="flex-1 min-w-0">Senza passaggio da questa mappa.</span>
-                    <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => void p.onCreaPassaggio(f.chiave)} aria-label={`Crea passaggio verso ${f.nome}`}>Crea passaggio</button>
+                    <button type="button" className="visore-mappa__azione-testo touch" disabled={occupato} onClick={() => void p.onCreaPassaggio(f.chiave)} aria-label={`Crea passaggio verso ${nomePresentazioneMappa(f)}`}>Crea passaggio</button>
                   </div>
                 )}
               </li>
             ))}
           </ul>
         )}
-        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${mappa.nome}`} disabled={occupato} onClick={p.onNuovaMappa} />
+        <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="carica-altri" dimensione={20} />} titolo="Nuova mappa" dettaglio={`figlia di ${nomePresentazioneMappa(mappa)}`} disabled={occupato} onClick={p.onNuovaMappa} />
       </section>
 
       </div>
@@ -357,14 +366,17 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
   const [nome, setNome] = useState(s.nome);
   const [tipo, setTipo] = useState<TipoSpillo>(s.tipo);
   const [descrizione, setDescrizione] = useState(s.descrizione);
+  const [soloPosizione, setSoloPosizione] = useState(s.soloPosizione ?? false);
   const [collezionabile, setCollezionabile] = useState(s.collezionabile);
   const [riferimento, setRiferimento] = useState<{ tipo: TipoRiferimento; chiave: string; nome?: string } | null>(s.riferimento);
   const [condizioni, setCondizioni] = useState<RequisitoSpillo[]>(() => condizioniNude(s));
+  const [destinazione, setDestinazione] = useState<DestinazioneSpillo|null|undefined>(s.destinazione ?? undefined);
+  const [arrivoPronto, setArrivoPronto] = useState(true);
   const [tipoRicerca, setTipoRicerca] = useState<TipoRiferimento>(s.riferimento?.tipo ?? DEFINIZIONI_SPILLO[s.tipo].riferimento ?? 'mappa');
   const [testoRicerca, setTestoRicerca] = useState('');
   const [risultati, setRisultati] = useState<RiferimentoTrovatoApi[] | null>(null);
   const [cercando, setCercando] = useState(false);
-  const modificato = nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione || collezionabile !== s.collezionabile || (riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null) || JSON.stringify(condizioni) !== JSON.stringify(condizioniNude(s));
+  const modificato = soloPosizione !== (s.soloPosizione ?? false) || JSON.stringify(destinazione) !== JSON.stringify(s.destinazione ?? undefined) || nome !== s.nome || tipo !== s.tipo || descrizione !== s.descrizione || collezionabile !== s.collezionabile || (riferimento?.tipo ?? null) !== (s.riferimento?.tipo ?? null) || (riferimento?.chiave ?? null) !== (s.riferimento?.chiave ?? null) || JSON.stringify(condizioni) !== JSON.stringify(condizioniNude(s));
   const nomeRiferimento = useMemo(() => {
     if (!riferimento) return null;
     if (riferimento.nome) return riferimento.nome;
@@ -379,8 +391,9 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
   };
   const salva = (e: FormEvent) => {
     e.preventDefault();
+    if (!arrivoPronto) { notifica('error', 'Scegli il punto di arrivo prima di salvare.'); return; }
     if (!condizioni.every(c=>normalizzaRequisitoSpillo(c)!==null)) { notifica('error','Completa o rimuovi i gruppi vuoti prima di salvare.'); return; }
-    void onSalva({ nome: nome.trim() || s.nome, tipo, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni });
+    void onSalva({ nome: nome.trim() || s.nome, tipo, descrizione, collezionabile, soloPosizione, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni, destinazione });
   };
   return (
     <section className="visore-mappa__sezione visore-mappa__scheda" aria-label={`Proprietà dello spillo: ${s.nome}`}>
@@ -433,11 +446,13 @@ function FormSpillo({ spillo: s, occupato, elenchi, onSalva, onCopia, onElimina,
           )}
         </fieldset>
 
+        <label className="flex items-center gap-2 text-[12px]"><input type="checkbox" checked={soloPosizione} onChange={e => setSoloPosizione(e.target.checked)} /> Posizione del luogo (non indica un’attività disponibile)</label>
+        <DestinazioneSpilloEditor valore={destinazione} invalidata={s.destinazioneNonDisponibile??false} disabilitato={occupato} onCambia={setDestinazione} onPronto={setArrivoPronto}/>
         <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} elenchi={elenchi} disabilitato={occupato} />
 
         <div className="flex flex-wrap gap-1.5">
-          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato} />
-          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato} onClick={() => onCopia({ tipo, nome: nome.trim() || s.nome, descrizione, collezionabile, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni })} />
+          <PulsanteVisivo type="submit" tono="primario" compatto icona={<IconaAzione chiave="registra" dimensione={20} />} titolo="Salva spillo" disabled={occupato || !modificato || !arrivoPronto} />
+          <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="copia" dimensione={20} />} titolo="Copia" dettaglio="per incollarlo altrove" disabled={occupato || !arrivoPronto || (s.destinazioneNonDisponibile && destinazione === undefined)} onClick={() => onCopia({ tipo, nome: nome.trim() || s.nome, descrizione, collezionabile, soloPosizione, riferimento: riferimento ? { tipo: riferimento.tipo, chiave: riferimento.chiave } : null, condizioni, destinazione })} />
           {!riferimento && <PulsanteVisivo tono="secondario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo="Crea mappa collegata" disabled={occupato || modificato} onClick={() => void onCreaMappaCollegata()} />}
           <PulsanteVisivo tono="pericolo" compatto icona={<IconaAzione chiave="elimina" dimensione={20} />} titolo="Elimina" disabled={occupato} onClick={() => void onElimina()} />
         </div>
@@ -498,7 +513,7 @@ function FormMappa({ mappa, albero, occupato, onSalva, onElimina }: PropsFormMap
         <label className="editor-mappa__campo">Mappa genitore
           <select className="form-input" value={genitore} onChange={(e) => setGenitore(e.target.value)}>
             <option value="">— nessuna (radice) —</option>
-            {albero.filter((m) => !discendenti.has(m.chiave)).map((m) => <option key={m.chiave} value={m.chiave}>{m.nomeCompleto ?? m.nome} ({NOME_TIPO_MAPPA[m.tipo]})</option>)}
+            {albero.filter((m) => !discendenti.has(m.chiave)).map((m) => <option key={m.chiave} value={m.chiave}>{etichettaPlanimetria(m)} ({NOME_TIPO_MAPPA[m.tipo]})</option>)}
           </select>
         </label>
         <label className="editor-mappa__campo">Note<textarea className="form-input" rows={2} value={note} onChange={(e) => setNote(e.target.value)} maxLength={2000} /></label>

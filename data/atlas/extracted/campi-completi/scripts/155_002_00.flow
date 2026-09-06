@@ -1,0 +1,1326 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("155_002_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D04_155_002_EXIT()
+{
+    // bit id (536870912) + (1402) = 7546
+    // bit id (536870912) + (1404) = 7548
+    
+    if ((BIT_CHK((0x20000000 + 1402)) == 1) && (GET_COUNT(148) < 20000))
+    {
+        D155_02_L_01_START();
+    }
+    else if (((BIT_CHK((0x20000000 + 1404)) == 1) && (GET_COUNT(148) >= 30300)) && (GET_COUNT(148) < 30500))
+    {
+        
+        if (GET_COUNT(148) < 30400)
+        {
+            D04_02_e295_025_START();
+        }
+        else 
+        {
+            D04_02_e295_025_AF_START();
+        }
+
+    }
+    else 
+    {
+        CALL_FIELD(155, 1, 1, 0);
+    }
+
+}
+
+
+// Procedure Index: 1
+void D04_155_002_GOTO()
+{
+    int var0;
+    FLD_LOCAL_FLAG_ON((49152 + 58));
+    var0 = FLD_SCRIPT_READ(155, 2, 170);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    FLD_LOCAL_FLAG_OFF((49152 + 58));
+    CALL_FIELD(155, 9, 0, 0);
+}
+
+
+// Procedure Index: 2
+void D04_155_002_GO_TO_155_007_01()
+{
+    AREA_OUT_ACTION_155_07_01();
+    CALL_FIELD(155, 7, 1, 0);
+}
+
+
+// Procedure Index: 3
+void D04_155_002_GO_TO_155_003_01()
+{
+    AREA_OUT_ACTION_155_03_01();
+    CALL_FIELD(155, 3, 1, 0);
+}
+
+
+// Procedure Index: 4
+void D04_155_002_GO_TO_155_006_03()
+{
+    AREA_OUT_ACTION_155_06_03();
+    CALL_FIELD(155, 6, 3, 0);
+}
+
+
+// Procedure Index: 5
+void D04_155_02_minimap_A_OFF()
+{
+    // bit id (536870912) + (1795) = 7939
+    BIT_OFF((0x20000000 + 1795));
+}
+
+
+// Procedure Index: 6
+void D04_155_02_minimap_B_OFF()
+{
+    // bit id (536870912) + (1797) = 7941
+    BIT_OFF((0x20000000 + 1797));
+}
+
+
+// Procedure Index: 7
+void D04_155_02_minimap_C_OFF()
+{
+    // bit id (536870912) + (1798) = 7942
+    BIT_OFF((0x20000000 + 1798));
+}
+
+
+// Procedure Index: 8
+void D04_155_02_minimap_D_OFF()
+{
+    // bit id (536870912) + (1799) = 7943
+    BIT_OFF((0x20000000 + 1799));
+}
+
+
+// Procedure Index: 9
+void D04_SAFETY_ROOM_02_SET()
+{
+    int var1;
+    int var2;
+    int var3;
+    var1 = (0x20000000 + 2669);
+    var2 = (0x20000000 + 1642);
+    BIT_ON(var1);
+    
+    if (BIT_CHK(var2) == 1)
+    {
+        var3 = 66;
+    }
+    else 
+    {
+        var3 = 65;
+    }
+
+    FLD_SET_LOCAL_COUNT((49152 + 15), var3);
+    FLD_START_SUPPORT_MSG();
+    return;
+}
+
+
+// Procedure Index: 10
+void D04_SAFETY_ROOM_03_SET()
+{
+    int var4;
+    int var5;
+    int var6;
+    var4 = (0x20000000 + 2670);
+    var5 = (0x20000000 + 1643);
+    BIT_ON(var4);
+    
+    if (BIT_CHK(var5) == 1)
+    {
+        var6 = 66;
+    }
+    else 
+    {
+        var6 = 65;
+    }
+
+    FLD_SET_LOCAL_COUNT((49152 + 15), var6);
+    FLD_START_SUPPORT_MSG();
+    return;
+}
+
+
+// Procedure Index: 11
+void D04_SAFETY_ROOM_04_SET()
+{
+    int var7;
+    int var8;
+    int var9;
+    var7 = (0x20000000 + 2671);
+    var8 = (0x20000000 + 1644);
+    BIT_ON(var7);
+    
+    if (BIT_CHK(var8) == 1)
+    {
+        var9 = 66;
+    }
+    else 
+    {
+        var9 = 65;
+    }
+
+    FLD_SET_LOCAL_COUNT((49152 + 15), var9);
+    FLD_START_SUPPORT_MSG();
+    return;
+}
+
+
+// Procedure Index: 12
+void D04_01_e293_020_START()
+{
+    int var10;
+    // bit id (536870912) + (1416) = 7560
+    BIT_ON((0x20000000 + 1416));
+    SET_COUNT(148, 12050);
+    var10 = FLD_SCRIPT_READ(155, 2, 100);
+    FLD_SCRIPT_READ_SYNC(var10);
+    FLD_SCRIPT_EXEC(var10, 0);
+    FLD_SCRIPT_FREE(var10);
+    SET_COUNT(148, 12100);
+}
+
+
+// Procedure Index: 13
+void D04_01_e293_201_START()
+{
+    int var11;
+    // bit id (536870912) + (1417) = 7561
+    BIT_ON((0x20000000 + 1417));
+    SET_COUNT(148, 12150);
+    var11 = FLD_SCRIPT_READ(155, 2, 100);
+    FLD_SCRIPT_READ_SYNC(var11);
+    FLD_SCRIPT_EXEC(var11, 0);
+    FLD_SCRIPT_FREE(var11);
+    SET_COUNT(148, 12200);
+}
+
+
+// Procedure Index: 14
+void D04_01_e293_301_01()
+{
+    // bit id (536870912) + (1418) = 7562
+    BIT_ON((0x20000000 + 1418));
+    SET_COUNT(130, 1);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 15
+void D04_01_e293_301_02()
+{
+    // bit id (536870912) + (1419) = 7563
+    BIT_ON((0x20000000 + 1419));
+    SET_COUNT(130, 2);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 16
+void D04_01_e293_301_03()
+{
+    // bit id (536870912) + (1441) = 7585
+    BIT_ON((0x20000000 + 1441));
+    SET_COUNT(130, 3);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 17
+void D04_01_e293_301_04()
+{
+    // bit id (536870912) + (1442) = 7586
+    BIT_ON((0x20000000 + 1442));
+    SET_COUNT(130, 4);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 18
+void D04_01_e293_025_START()
+{
+    int var12;
+    // bit id (536870912) + (1443) = 7587
+    BIT_ON((0x20000000 + 1443));
+    SET_COUNT(148, 12250);
+    var12 = FLD_SCRIPT_READ(155, 2, 100);
+    FLD_SCRIPT_READ_SYNC(var12);
+    FLD_SCRIPT_EXEC(var12, 0);
+    FLD_SCRIPT_FREE(var12);
+    SET_COUNT(148, 12300);
+    D04_01_e294_001_START();
+}
+
+
+// Procedure Index: 19
+void D04_01_e294_001_START()
+{
+    // bit id (536870912) + (9) = 6153
+    BIT_OFF((0x20000000 + 9));
+    // bit id (536870912) + (30) = 6174
+    BIT_OFF((0x20000000 + 30));
+    // bit id (536870912) + (31) = 6175
+    BIT_OFF((0x20000000 + 31));
+    // bit id (536870912) + (32) = 6176
+    BIT_OFF((0x20000000 + 0x20));
+    // bit id (536870912) + (35) = 6179
+    BIT_OFF((0x20000000 + 35));
+    // bit id (536870912) + (36) = 6180
+    BIT_OFF((0x20000000 + 36));
+    SET_COUNT(148, 12350);
+    CALL_EVENT(294, 1);
+    SET_COUNT(148, 12450);
+    CALL_EVENT(295, 1);
+    SET_COUNT(148, 20000);
+    CALL_EVENT(295, 101);
+    // bit id (536870912) + (1451) = 7595
+    BIT_ON((0x20000000 + 1451));
+    // bit id (536870912) + (1452) = 7596
+    BIT_ON((0x20000000 + 1452));
+    // bit id (536870912) + (1453) = 7597
+    BIT_ON((0x20000000 + 1453));
+    // bit id (536870912) + (1454) = 7598
+    BIT_ON((0x20000000 + 1454));
+    CALL_FIELD(155, 2, 15, 0);
+}
+
+
+// Procedure Index: 20
+void D155_02_L_01_START()
+{
+    int var13;
+    FLD_LOCAL_FLAG_ON((49152 + 17));
+    var13 = FLD_SCRIPT_READ(155, 2, 105);
+    FLD_SCRIPT_READ_SYNC(var13);
+    FLD_SCRIPT_EXEC(var13, 0);
+    FLD_SCRIPT_FREE(var13);
+    FLD_LOCAL_FLAG_OFF((49152 + 17));
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+}
+
+
+// Procedure Index: 21
+void AREA_OUT_ACTION_155_07_01()
+{
+    float fVar0;
+    float fVar1;
+    float fVar2;
+    int var14;
+    int var15;
+    int var16;
+    int var17;
+    var14 = FLD_PC_GET_RESHND(0);
+    var15 = FLD_PC_GET_RESHND(1);
+    var16 = FLD_PC_GET_RESHND(2);
+    var17 = FLD_PC_GET_RESHND(3);
+    fVar0 = -2335;
+    fVar1 = 2800;
+    fVar2 = -3725;
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(-1174.768f, 3005.777f, -3702.414f, -0.0623f, 0.6965f, 0.0609f, 0.7122f, 30);
+    FLD_MODEL_SET_TRANSLATE(var14, fVar0, fVar1, fVar2, 20);
+    FLD_MODEL_POINT_ROTATE(var14, fVar0, fVar1, fVar2, 5);
+    FLD_UNIT_SET_RUN(var14);
+    FLD_MODEL_SYNC_TRANSLATE(var14);
+    FLD_REQ_NEXT_SCN_FADE(155, 7, 1, 0);
+    FLD_CAMERA_LOCK_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+}
+
+
+// Procedure Index: 22
+void AREA_OUT_ACTION_155_03_01()
+{
+    float fVar3;
+    float fVar4;
+    float fVar5;
+    int var18;
+    int var19;
+    int var20;
+    int var21;
+    var18 = FLD_PC_GET_RESHND(0);
+    var19 = FLD_PC_GET_RESHND(1);
+    var20 = FLD_PC_GET_RESHND(2);
+    var21 = FLD_PC_GET_RESHND(3);
+    fVar3 = 2276;
+    fVar4 = 4400;
+    fVar5 = -10104;
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(1126.075f, 4605.776f, -10117.55f, -0.0608f, -0.7137f, -0.0624f, 0.695f, 30);
+    FLD_MODEL_SET_TRANSLATE(var18, fVar3, fVar4, fVar5, 20);
+    FLD_MODEL_POINT_ROTATE(var18, fVar3, fVar4, fVar5, 5);
+    FLD_UNIT_SET_RUN(var18);
+    FLD_MODEL_SYNC_TRANSLATE(var18);
+    FLD_REQ_NEXT_SCN_FADE(155, 3, 1, 0);
+    FLD_CAMERA_LOCK_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+}
+
+
+// Procedure Index: 23
+void AREA_OUT_ACTION_155_06_03()
+{
+    float fVar6;
+    float fVar7;
+    float fVar8;
+    int var22;
+    int var23;
+    int var24;
+    int var25;
+    var22 = FLD_PC_GET_RESHND(0);
+    var23 = FLD_PC_GET_RESHND(1);
+    var24 = FLD_PC_GET_RESHND(2);
+    var25 = FLD_PC_GET_RESHND(3);
+    fVar6 = -2287;
+    fVar7 = 6000;
+    fVar8 = -16500;
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(-1215.624f, 6205.777f, -16501.69f, -0.0613f, 0.7077f, 0.0619f, 0.7011f, 30);
+    FLD_MODEL_SET_TRANSLATE(var22, fVar6, fVar7, fVar8, 20);
+    FLD_MODEL_POINT_ROTATE(var22, fVar6, fVar7, fVar8, 5);
+    FLD_UNIT_SET_RUN(var22);
+    FLD_MODEL_SYNC_TRANSLATE(var22);
+    FLD_REQ_NEXT_SCN_FADE(155, 6, 3, 0);
+    FLD_CAMERA_LOCK_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+}
+
+
+// Procedure Index: 24
+void D04_155_002_CHK_DOOR01()
+{
+    int var26;
+    // bit id (536870912) + (1404) = 7548
+    
+    if ((BIT_CHK((0x20000000 + 1404)) == 1) && (GET_COUNT(148) < 30300))
+    {
+        SET_COUNT(148, 30250);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 53));
+    var26 = FLD_SCRIPT_READ(155, 2, 110);
+    FLD_SCRIPT_READ_SYNC(var26);
+    FLD_SCRIPT_EXEC(var26, 0);
+    FLD_SCRIPT_FREE(var26);
+    FLD_LOCAL_FLAG_OFF((49152 + 53));
+    FLD_LOCAL_FLAG_ON((49152 + 5));
+    // bit id (536870912) + (1404) = 7548
+    // bit id (536870912) + (1415) = 7559
+    
+    if ((BIT_CHK((0x20000000 + 1404)) == 1) && (GET_COUNT(148) < 30300))
+    {
+        BIT_ON((0x20000000 + 1415));
+        SET_COUNT(148, 30300);
+    }
+
+}
+
+
+// Procedure Index: 25
+void D04_02_e295_025_START()
+{
+    int var27;
+    int var28;
+    // bit id (536870912) + (1424) = 7568
+    BIT_ON((0x20000000 + 1424));
+    var27 = FLD_NPCID_SEARCH_RESHND2(8660, 0);
+    
+    if (var27 > 0)
+    {
+        FLD_MODEL_SET_VISIBLE(var27, 1, 10);
+    }
+
+    SET_COUNT(148, 30350);
+    var28 = FLD_SCRIPT_READ(155, 2, 120);
+    FLD_SCRIPT_READ_SYNC(var28);
+    FLD_SCRIPT_EXEC(var28, 0);
+    FLD_SCRIPT_FREE(var28);
+    SET_COUNT(148, 30400);
+}
+
+
+// Procedure Index: 26
+void D04_02_e295_025_AF_START()
+{
+    int var29;
+    var29 = FLD_SCRIPT_READ(155, 2, 120);
+    FLD_SCRIPT_READ_SYNC(var29);
+    FLD_SCRIPT_EXEC(var29, 0);
+    FLD_SCRIPT_FREE(var29);
+}
+
+
+// Procedure Index: 27
+void D04_03_e295_090_START()
+{
+    int var30;
+    // bit id (536870912) + (1481) = 7625
+    BIT_ON((0x20000000 + 1481));
+    
+    if (GET_COUNT(148) < 45100)
+    {
+        SET_COUNT(148, 45050);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 30));
+    var30 = FLD_SCRIPT_READ(155, 2, 135);
+    FLD_SCRIPT_READ_SYNC(var30);
+    FLD_SCRIPT_EXEC(var30, 0);
+    FLD_SCRIPT_FREE(var30);
+    FLD_LOCAL_FLAG_OFF((49152 + 30));
+    FLD_LOCAL_FLAG_ON((49152 + 14));
+    
+    if (GET_COUNT(148) < 45100)
+    {
+        SET_COUNT(148, 45100);
+    }
+
+}
+
+
+// Procedure Index: 28
+void D04_155_002_GIMMIC_01()
+{
+    int var31;
+    // bit id (536870912) + (1401) = 7545
+    // bit id (536870912) + (1480) = 7624
+    
+    if (BIT_CHK((0x20000000 + 1401)) == 1)
+    {
+        FLD_LOCAL_FLAG_ON((49152 + 31));
+        var31 = FLD_SCRIPT_READ(155, 2, 135);
+        FLD_SCRIPT_READ_SYNC(var31);
+        FLD_SCRIPT_EXEC(var31, 0);
+        FLD_SCRIPT_FREE(var31);
+        FLD_LOCAL_FLAG_OFF((49152 + 31));
+        FLD_LOCAL_FLAG_ON((49152 + 15));
+    }
+    else if (BIT_CHK((0x20000000 + 1480)) == 0)
+    {
+        D04_03_e295_095_START();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 29
+void D155_02_F01_c_03_START()
+{
+    int var32;
+    FLD_LOCAL_FLAG_ON((49152 + 49));
+    var32 = FLD_SCRIPT_READ(155, 2, 130);
+    FLD_SCRIPT_READ_SYNC(var32);
+    FLD_SCRIPT_EXEC(var32, 0);
+    FLD_SCRIPT_FREE(var32);
+    FLD_LOCAL_FLAG_OFF((49152 + 49));
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+    // bit id (536870912) + (1478) = 7622
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 48)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 48));
+        BIT_ON((0x20000000 + 1478));
+        FLD_LOCAL_FLAG_OFF((49152 + 1));
+        
+        if (GET_COUNT(148) < 45200)
+        {
+            SET_COUNT(148, 45200);
+        }
+
+    }
+
+    // bit id (536870912) + (1478) = 7622
+    // bit id (536870912) + (1479) = 7623
+    
+    if ((BIT_CHK((0x20000000 + 1478)) == 1) && (BIT_CHK((0x20000000 + 1479)) == 1))
+    {
+        D04_03_e295_095_START();
+    }
+    else 
+    {
+        FADEIN(0, 10);
+        FADE_SYNC();
+    }
+
+}
+
+
+// Procedure Index: 30
+void D155_02_F01_c_04_START()
+{
+    int var33;
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    var33 = FLD_SCRIPT_READ(155, 2, 130);
+    FLD_SCRIPT_READ_SYNC(var33);
+    FLD_SCRIPT_EXEC(var33, 0);
+    FLD_SCRIPT_FREE(var33);
+    FLD_LOCAL_FLAG_OFF((49152 + 50));
+    FLD_LOCAL_FLAG_ON((49152 + 2));
+    // bit id (536870912) + (1479) = 7623
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 48)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 48));
+        BIT_ON((0x20000000 + 1479));
+        FLD_LOCAL_FLAG_OFF((49152 + 2));
+        
+        if (GET_COUNT(148) < 45200)
+        {
+            SET_COUNT(148, 45200);
+        }
+
+    }
+
+    // bit id (536870912) + (1478) = 7622
+    // bit id (536870912) + (1479) = 7623
+    
+    if ((BIT_CHK((0x20000000 + 1478)) == 1) && (BIT_CHK((0x20000000 + 1479)) == 1))
+    {
+        D04_03_e295_095_START();
+    }
+    else 
+    {
+        FADEIN(0, 10);
+        FADE_SYNC();
+    }
+
+}
+
+
+// Procedure Index: 31
+void D04_03_e295_095_START()
+{
+    int var34;
+    // bit id (536870912) + (1480) = 7624
+    BIT_ON((0x20000000 + 1480));
+    SET_COUNT(148, 45250);
+    var34 = FLD_SCRIPT_READ(155, 2, 130);
+    FLD_SCRIPT_READ_SYNC(var34);
+    FLD_SCRIPT_EXEC(var34, 0);
+    FLD_SCRIPT_FREE(var34);
+    SET_COUNT(148, 45300);
+    FLD_HIT_SET_TYPE(20, 0, 118);
+    // bit id (536870912) + (1795) = 7939
+    BIT_ON((0x20000000 + 1795));
+    // bit id (536870912) + (1796) = 7940
+    BIT_OFF((0x20000000 + 1796));
+}
+
+
+// Procedure Index: 32
+void D04_03_e295_097_START()
+{
+    int var35;
+    // bit id (536870912) + (1770) = 7914
+    BIT_ON((0x20000000 + 1770));
+    SET_COUNT(148, 45350);
+    var35 = FLD_SCRIPT_READ(155, 2, 130);
+    FLD_SCRIPT_READ_SYNC(var35);
+    FLD_SCRIPT_EXEC(var35, 0);
+    FLD_SCRIPT_FREE(var35);
+    SET_COUNT(148, 45500);
+    // bit id (536870912) + (1451) = 7595
+    BIT_OFF((0x20000000 + 1451));
+}
+
+
+// Procedure Index: 33
+void D04_155_002_CHK_DOOR02()
+{
+    int var36;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 45600))
+    {
+        SET_COUNT(148, 45550);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 54));
+    var36 = FLD_SCRIPT_READ(155, 2, 140);
+    FLD_SCRIPT_READ_SYNC(var36);
+    FLD_SCRIPT_EXEC(var36, 0);
+    FLD_SCRIPT_FREE(var36);
+    FLD_LOCAL_FLAG_OFF((49152 + 54));
+    FLD_LOCAL_FLAG_ON((49152 + 6));
+    // bit id (536870912) + (1406) = 7550
+    // bit id (536870912) + (1495) = 7639
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 45600))
+    {
+        
+        if (BIT_CHK((0x20000000 + 1495)) == 0)
+        {
+            D04_155_002_OPEN_FENCE01();
+        }
+
+        SET_COUNT(148, 45600);
+    }
+
+}
+
+
+// Procedure Index: 34
+void D155_02_F02_c_01_START()
+{
+    int var37;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 53100))
+    {
+        SET_COUNT(148, 53050);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    var37 = FLD_SCRIPT_READ(155, 2, 140);
+    FLD_SCRIPT_READ_SYNC(var37);
+    FLD_SCRIPT_EXEC(var37, 0);
+    FLD_SCRIPT_FREE(var37);
+    FLD_LOCAL_FLAG_OFF((49152 + 50));
+    FLD_LOCAL_FLAG_ON((49152 + 2));
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 53100))
+    {
+        SET_COUNT(148, 53100);
+    }
+
+}
+
+
+// Procedure Index: 35
+void D155_02_F02_c_02_START()
+{
+    int var38;
+    FLD_LOCAL_FLAG_ON((49152 + 51));
+    var38 = FLD_SCRIPT_READ(155, 2, 140);
+    FLD_SCRIPT_READ_SYNC(var38);
+    FLD_SCRIPT_EXEC(var38, 0);
+    FLD_SCRIPT_FREE(var38);
+    FLD_LOCAL_FLAG_OFF((49152 + 51));
+    FLD_LOCAL_FLAG_ON((49152 + 3));
+}
+
+
+// Procedure Index: 36
+void D04_155_002_GIMMIC_02()
+{
+    int var39;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 53200))
+    {
+        SET_COUNT(148, 53150);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 49));
+    var39 = FLD_SCRIPT_READ(155, 2, 145);
+    FLD_SCRIPT_READ_SYNC(var39);
+    FLD_SCRIPT_EXEC(var39, 0);
+    FLD_SCRIPT_FREE(var39);
+    FLD_LOCAL_FLAG_OFF((49152 + 49));
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+    // bit id (536870912) + (1483) = 7627
+    // bit id (536870912) + (1447) = 7591
+    
+    if (GET_COUNT(148) < 53400)
+    {
+        
+        if (BIT_CHK((0x20000000 + 1483)) == 1)
+        {
+            SET_COUNT(148, 53200);
+            FLD_LOCAL_FLAG_OFF((49152 + 2));
+        }
+
+        
+        if (BIT_CHK((0x20000000 + 1447)) == 1)
+        {
+            D04_03_e296_101_START();
+            FLD_HIT_SET_TYPE(21, 0, 118);
+        }
+
+    }
+
+}
+
+
+// Procedure Index: 37
+void D04_03_e296_101_START()
+{
+    int var40;
+    SET_COUNT(148, 53350);
+    var40 = FLD_SCRIPT_READ(155, 2, 145);
+    FLD_SCRIPT_READ_SYNC(var40);
+    FLD_SCRIPT_EXEC(var40, 0);
+    FLD_SCRIPT_FREE(var40);
+    SET_COUNT(148, 53400);
+    // bit id (536870912) + (1447) = 7591
+    BIT_ON((0x20000000 + 1447));
+}
+
+
+// Procedure Index: 38
+void D04_03_e295_125_START()
+{
+    int var41;
+    // bit id (536870912) + (1771) = 7915
+    BIT_ON((0x20000000 + 1771));
+    SET_COUNT(148, 53450);
+    var41 = FLD_SCRIPT_READ(155, 2, 140);
+    FLD_SCRIPT_READ_SYNC(var41);
+    FLD_SCRIPT_EXEC(var41, 0);
+    FLD_SCRIPT_FREE(var41);
+    SET_COUNT(148, 53500);
+    // bit id (536870912) + (1452) = 7596
+    BIT_OFF((0x20000000 + 1452));
+}
+
+
+// Procedure Index: 39
+void D04_155_002_CHK_DOOR03()
+{
+    int var42;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 53600))
+    {
+        SET_COUNT(148, 53550);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 55));
+    var42 = FLD_SCRIPT_READ(155, 2, 150);
+    FLD_SCRIPT_READ_SYNC(var42);
+    FLD_SCRIPT_EXEC(var42, 0);
+    FLD_SCRIPT_FREE(var42);
+    FLD_LOCAL_FLAG_OFF((49152 + 55));
+    FLD_LOCAL_FLAG_ON((49152 + 7));
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 53600))
+    {
+        SET_COUNT(148, 53600);
+    }
+
+}
+
+
+// Procedure Index: 40
+void D155_02_F03_c_01_START()
+{
+    int var43;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 59100))
+    {
+        SET_COUNT(148, 59050);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    var43 = FLD_SCRIPT_READ(155, 2, 150);
+    FLD_SCRIPT_READ_SYNC(var43);
+    FLD_SCRIPT_EXEC(var43, 0);
+    FLD_SCRIPT_FREE(var43);
+    FLD_LOCAL_FLAG_OFF((49152 + 50));
+    FLD_LOCAL_FLAG_ON((49152 + 2));
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 59100))
+    {
+        SET_COUNT(148, 59100);
+    }
+
+}
+
+
+// Procedure Index: 41
+void D04_155_002_GIMMIC_03()
+{
+    int var44;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 59200))
+    {
+        SET_COUNT(148, 59150);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 49));
+    var44 = FLD_SCRIPT_READ(155, 2, 155);
+    FLD_SCRIPT_READ_SYNC(var44);
+    FLD_SCRIPT_EXEC(var44, 0);
+    FLD_SCRIPT_FREE(var44);
+    FLD_LOCAL_FLAG_OFF((49152 + 49));
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+    // bit id (536870912) + (1484) = 7628
+    // bit id (536870912) + (1448) = 7592
+    
+    if (GET_COUNT(148) < 59400)
+    {
+        
+        if (BIT_CHK((0x20000000 + 1484)) == 1)
+        {
+            SET_COUNT(148, 59200);
+            FLD_LOCAL_FLAG_OFF((49152 + 2));
+        }
+
+        
+        if (BIT_CHK((0x20000000 + 1448)) == 1)
+        {
+            D04_03_e296_201_START();
+            FLD_HIT_SET_TYPE(22, 0, 118);
+        }
+
+    }
+
+}
+
+
+// Procedure Index: 42
+void D04_03_e296_201_START()
+{
+    int var45;
+    SET_COUNT(148, 59350);
+    var45 = FLD_SCRIPT_READ(155, 2, 155);
+    FLD_SCRIPT_READ_SYNC(var45);
+    FLD_SCRIPT_EXEC(var45, 0);
+    FLD_SCRIPT_FREE(var45);
+    SET_COUNT(148, 59400);
+    // bit id (536870912) + (1448) = 7592
+    BIT_ON((0x20000000 + 1448));
+}
+
+
+// Procedure Index: 43
+void D04_03_e296_235_START()
+{
+    int var46;
+    // bit id (536870912) + (1772) = 7916
+    BIT_ON((0x20000000 + 1772));
+    SET_COUNT(148, 59450);
+    var46 = FLD_SCRIPT_READ(155, 2, 150);
+    FLD_SCRIPT_READ_SYNC(var46);
+    FLD_SCRIPT_EXEC(var46, 0);
+    FLD_SCRIPT_FREE(var46);
+    SET_COUNT(148, 59500);
+    // bit id (536870912) + (1453) = 7597
+    BIT_OFF((0x20000000 + 1453));
+}
+
+
+// Procedure Index: 44
+void D04_155_002_CHK_DOOR04()
+{
+    int var47;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 59600))
+    {
+        SET_COUNT(148, 59550);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 56));
+    var47 = FLD_SCRIPT_READ(155, 2, 160);
+    FLD_SCRIPT_READ_SYNC(var47);
+    FLD_SCRIPT_EXEC(var47, 0);
+    FLD_SCRIPT_FREE(var47);
+    FLD_LOCAL_FLAG_OFF((49152 + 56));
+    FLD_LOCAL_FLAG_ON((49152 + 8));
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 59600))
+    {
+        SET_COUNT(148, 59600);
+    }
+
+}
+
+
+// Procedure Index: 45
+void D155_02_F04_c_01_START()
+{
+    int var48;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 65100))
+    {
+        SET_COUNT(148, 65050);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    var48 = FLD_SCRIPT_READ(155, 2, 160);
+    FLD_SCRIPT_READ_SYNC(var48);
+    FLD_SCRIPT_EXEC(var48, 0);
+    FLD_SCRIPT_FREE(var48);
+    FLD_LOCAL_FLAG_OFF((49152 + 50));
+    FLD_LOCAL_FLAG_ON((49152 + 2));
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 65100))
+    {
+        SET_COUNT(148, 65100);
+    }
+
+}
+
+
+// Procedure Index: 46
+void D04_155_002_GIMMIC_04()
+{
+    int var49;
+    // bit id (536870912) + (1406) = 7550
+    
+    if ((BIT_CHK((0x20000000 + 1406)) == 1) && (GET_COUNT(148) < 65200))
+    {
+        SET_COUNT(148, 65150);
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 49));
+    var49 = FLD_SCRIPT_READ(155, 2, 165);
+    FLD_SCRIPT_READ_SYNC(var49);
+    FLD_SCRIPT_EXEC(var49, 0);
+    FLD_SCRIPT_FREE(var49);
+    FLD_LOCAL_FLAG_OFF((49152 + 49));
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+    // bit id (536870912) + (1485) = 7629
+    // bit id (536870912) + (1449) = 7593
+    
+    if (GET_COUNT(148) < 65400)
+    {
+        
+        if (BIT_CHK((0x20000000 + 1485)) == 1)
+        {
+            SET_COUNT(148, 65200);
+            FLD_LOCAL_FLAG_OFF((49152 + 2));
+        }
+
+        
+        if (BIT_CHK((0x20000000 + 1449)) == 1)
+        {
+            D04_03_e296_301_START();
+            FLD_HIT_SET_TYPE(23, 0, 118);
+        }
+
+    }
+
+}
+
+
+// Procedure Index: 47
+void D04_03_e296_301_START()
+{
+    int var50;
+    SET_COUNT(148, 65350);
+    var50 = FLD_SCRIPT_READ(155, 2, 165);
+    FLD_SCRIPT_READ_SYNC(var50);
+    FLD_SCRIPT_EXEC(var50, 0);
+    FLD_SCRIPT_FREE(var50);
+    SET_COUNT(148, 65400);
+    // bit id (536870912) + (1449) = 7593
+    BIT_ON((0x20000000 + 1449));
+}
+
+
+// Procedure Index: 48
+void D04_03_e296_335_START()
+{
+    int var51;
+    // bit id (536870912) + (1773) = 7917
+    BIT_ON((0x20000000 + 1773));
+    SET_COUNT(148, 65450);
+    var51 = FLD_SCRIPT_READ(155, 2, 160);
+    FLD_SCRIPT_READ_SYNC(var51);
+    FLD_SCRIPT_EXEC(var51, 0);
+    FLD_SCRIPT_FREE(var51);
+    SET_COUNT(148, 65500);
+    // bit id (536870912) + (1454) = 7598
+    BIT_OFF((0x20000000 + 1454));
+    // bit id (536870912) + (1783) = 7927
+    BIT_ON((0x20000000 + 1783));
+}
+
+
+// Procedure Index: 49
+void D04_155_002_ROYAL_DOOR()
+{
+    int var52;
+    // bit id (536870912) + (1401) = 7545
+    // bit id (536870912) + (1400) = 7544
+    // bit id (536870912) + (1408) = 7552
+    // bit id (536870912) + (1408) = 7552
+    // bit id (536870912) + (1409) = 7553
+    // bit id (536870912) + (1492) = 7636
+    
+    if ((BIT_CHK((0x20000000 + 1401)) == 1) && (BIT_CHK((0x20000000 + 1400)) == 0))
+    {
+        
+        if (BIT_CHK((0x20000000 + 1408)) == 0)
+        {
+            D04_03_e296_339_START();
+            D04_03_e297_001_START();
+            return;
+        }
+        else if ((BIT_CHK((0x20000000 + 1408)) == 1) && (BIT_CHK((0x20000000 + 1409)) == 0))
+        {
+            D155_02_F05_c_01_START();
+            return;
+        }
+
+    }
+    else 
+    {
+        var52 = FLD_OBJ_CNV_RESHND(0);
+        FLD_MODEL_ANIM(var52, 1, 0, 0, 1.00f);
+        MDL_ANIM_SYNC(var52);
+        MDL_ANIM(var52, 2, 0, 0, 1.00f);
+        FLD_OBJ_MODEL_COLLIS(var52, 0);
+        SYNC();
+        FLD_OBJ_MODEL_COLLIS(var52, 1);
+        BIT_ON((0x20000000 + 1492));
+        return;
+    }
+
+}
+
+
+// Procedure Index: 50
+void D04_03_e296_339_START()
+{
+    SET_COUNT(148, 65550);
+    Fld_FadeOut_CallEvent();
+    SET_COUNT(148, 65600);
+}
+
+
+// Procedure Index: 51
+void D04_03_e297_001_START()
+{
+    SET_COUNT(148, 69050);
+    CALL_EVENT(297, 1);
+    SET_COUNT(148, 69100);
+    // bit id (0) + (2314) = 2314
+    BIT_ON((0 + 2314));
+    // bit id (0) + (343) = 343
+    BIT_OFF((0 + 343));
+    // bit id (536870912) + (1408) = 7552
+    BIT_ON((0x20000000 + 1408));
+    // bit id (536870912) + (1410) = 7554
+    BIT_ON((0x20000000 + 1410));
+    // bit id (536870912) + (1407) = 7551
+    BIT_ON((0x20000000 + 1407));
+    CALL_FIELD(155, 2, 1, 0);
+}
+
+
+// Procedure Index: 52
+void D155_02_F05_c_01_START()
+{
+    int var53;
+    FLD_LOCAL_FLAG_ON((49152 + 57));
+    var53 = FLD_SCRIPT_READ(155, 2, 170);
+    FLD_SCRIPT_READ_SYNC(var53);
+    FLD_SCRIPT_EXEC(var53, 0);
+    FLD_SCRIPT_FREE(var53);
+    FLD_LOCAL_FLAG_OFF((49152 + 57));
+    FLD_LOCAL_FLAG_ON((49152 + 9));
+}
+
+
+// Procedure Index: 53
+void D04_ex_e297_025_START()
+{
+    int var54;
+    // bit id (536870912) + (1492) = 7636
+    BIT_ON((0x20000000 + 1492));
+    SET_COUNT(148, 81050);
+    var54 = FLD_SCRIPT_READ(155, 2, 170);
+    FLD_SCRIPT_READ_SYNC(var54);
+    FLD_SCRIPT_EXEC(var54, 0);
+    FLD_SCRIPT_FREE(var54);
+    SET_COUNT(148, 81100);
+    // bit id (536870912) + (1783) = 7927
+    BIT_OFF((0x20000000 + 1783));
+}
+
+
+// Procedure Index: 54
+void D04_155_002_OPEN_FENCE01()
+{
+    int var55;
+    int var56;
+    var55 = FLD_OBJ_CNV_RESHND(3220);
+    var56 = FLD_OBJ_CNV_RESHND(3221);
+    FLD_MODEL_ANIM(var55, 1, 0, 0, 1.00f);
+    FLD_MODEL_ANIM(var56, 1, 0, 0, 1.00f);
+    FLD_OBJ_MODEL_COLLIS(var55, 0);
+    FLD_OBJ_MODEL_COLLIS(var56, 0);
+    // bit id (536870912) + (1495) = 7639
+    BIT_ON((0x20000000 + 1495));
+}
+
+
+// Procedure Index: 55
+void D04_155_002_OPEN_FENCE02()
+{
+    int var57;
+    int var58;
+    var57 = FLD_OBJ_CNV_RESHND(1620);
+    var58 = FLD_OBJ_CNV_RESHND(1621);
+    FLD_MODEL_ANIM(var57, 1, 0, 0, 1.00f);
+    FLD_MODEL_ANIM(var58, 1, 0, 0, 1.00f);
+    FLD_OBJ_MODEL_COLLIS(var57, 0);
+    FLD_OBJ_MODEL_COLLIS(var58, 0);
+    // bit id (536870912) + (1496) = 7640
+    BIT_ON((0x20000000 + 1496));
+}
+
+
+// Procedure Index: 56
+void D04_155_002_OPEN_FENCE03()
+{
+    int var59;
+    int var60;
+    var59 = FLD_OBJ_CNV_RESHND(20);
+    var60 = FLD_OBJ_CNV_RESHND(21);
+    FLD_MODEL_ANIM(var59, 1, 0, 0, 1.00f);
+    FLD_MODEL_ANIM(var60, 1, 0, 0, 1.00f);
+    FLD_OBJ_MODEL_COLLIS(var59, 0);
+    FLD_OBJ_MODEL_COLLIS(var60, 0);
+    // bit id (536870912) + (1497) = 7641
+    BIT_ON((0x20000000 + 1497));
+}
+
+
+// Procedure Index: 57
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 58
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 59
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 60
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 61
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 62
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 63
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 64
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 65
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 66
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 67
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 68
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 69
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 70
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

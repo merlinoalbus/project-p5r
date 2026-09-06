@@ -1,0 +1,177 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("161_004_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_161_005_000()
+{
+    int var0;
+    SND_VOICE_DNGEVT_SETUP(486, 310);
+    SND_VOICE_DNGEVT_SYNC();
+    
+    if (GET_COUNT(152) < 14000)
+    {
+        MSG_WND_DSP();
+        MSG(D08_01_e440_030_mes04, 0);
+        MSG_WND_CLS();
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 48));
+    var0 = FLD_SCRIPT_READ(161, 4, 110);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    FLD_LOCAL_FLAG_OFF((49152 + 48));
+    SND_VOICE_DNGEVT_FREE();
+    CALL_FIELD(161, 5, 0, 0);
+    return;
+}
+
+
+// Procedure Index: 1
+void D08_161_04_minimap_00()
+{
+    // bit id (536870912) + (3208) = 9352
+    BIT_ON((0x20000000 + 3208));
+}
+
+
+// Procedure Index: 2
+void D08_01_e440_030_START()
+{
+    int var1;
+    // bit id (536870912) + (3179) = 9323
+    BIT_ON((0x20000000 + 3179));
+    SET_COUNT(152, 13050);
+    var1 = FLD_SCRIPT_READ(161, 4, 100);
+    FLD_SCRIPT_READ_SYNC(var1);
+    FLD_SCRIPT_EXEC(var1, 0);
+    FLD_SCRIPT_FREE(var1);
+    SET_COUNT(152, 13100);
+    return;
+}
+
+
+// Procedure Index: 3
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 4
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 5
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 6
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 7
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 9
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 11
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 14
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

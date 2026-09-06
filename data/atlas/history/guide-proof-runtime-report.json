@@ -1,0 +1,73 @@
+{
+  "alias": {
+    "tipo": "guida",
+    "area": "kamoshida-01-cancello-del-castello-ingresso",
+    "dungeon": "kamoshida",
+    "mappaPalazzo": "palazzo-di-kamoshida",
+    "nome": "Cancello del Castello (ingresso)"
+  },
+  "uiTest": {
+    "realClickOpened": true,
+    "descriptionEditedInBrowser": true,
+    "switchedPartitaInBrowser": true
+  },
+  "partitaA": {
+    "id": 1,
+    "areaGuida": "kamoshida-01-cancello-del-castello-ingresso",
+    "descrizione": "Descrizione modificata e riletta nel browser",
+    "raccolto": true,
+    "disponibilita": {
+      "stato": "bloccato",
+      "requisiti": [
+        {
+          "indice": 0,
+          "tipo": "data",
+          "testo": "dal 10 aprile",
+          "confermato": false,
+          "stato": "rosso",
+          "dettaglio": "Disponibile dal 10 aprile, oggi è il 9 aprile",
+          "manuale": false
+        }
+      ]
+    },
+    "immagini": [
+      {
+        "id": 4,
+        "url": "/api/immagini/spillo/1-mtp64ebc-i7yh9/file",
+        "asset": null,
+        "didascalia": "Immagine personale conservata",
+        "ordine": 0
+      }
+    ]
+  },
+  "partitaB": {
+    "id": 1,
+    "areaGuida": "kamoshida-01-cancello-del-castello-ingresso",
+    "descrizione": "Descrizione modificata e riletta nel browser",
+    "raccolto": false,
+    "disponibilita": {
+      "stato": "disponibile",
+      "requisiti": [
+        {
+          "indice": 0,
+          "tipo": "data",
+          "testo": "dal 10 aprile",
+          "confermato": false,
+          "stato": "verde",
+          "dettaglio": "Disponibile dal 10 aprile (oggi 11 aprile)",
+          "manuale": false
+        }
+      ]
+    },
+    "immagini": [
+      {
+        "id": 4,
+        "url": "/api/immagini/spillo/1-mtp64ebc-i7yh9/file",
+        "asset": null,
+        "didascalia": "Immagine personale conservata",
+        "ordine": 0
+      }
+    ]
+  },
+  "pass": true
+}

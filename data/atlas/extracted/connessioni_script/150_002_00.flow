@@ -1,0 +1,248 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("150_002_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_150_01_00()
+{
+    int var0;
+    var0 = FLD_PC_GET_RESHND(0);
+    FLD_UNIT_WAIT_DISABLE(var0);
+    FLD_SMP_EVENT_BEGIN(0);
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(1078.988f, 1720.909f, 1664.982f, -0.0226f, -0.8563f, -0.0048f, 0.5159f, 0);
+    FLD_MODEL_SET_TRANSLATE(var0, 1710.00f, 1598.00f, 2120.00f, 15);
+    FLD_MODEL_POINT_ROTATE(var0, 1710.00f, 1598.00f, 2120.00f, -1);
+    FLD_UNIT_SET_RUN(var0);
+    FLD_MODEL_SYNC_TRANSLATE(var0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_LOCK_INTERP(1081.353f, 1775.078f, 1664.163f, -0.0226f, -0.8563f, -0.0048f, 0.516f, 45);
+    FLD_MODEL_SET_TRANSLATE(var0, 2450.511f, 2300.147f, 3127.274f, 45);
+    FLD_MODEL_SET_ROTATE(var0, 0, 48.00f, 0, 5);
+    FLD_WAIT(30);
+    FLD_REQ_NEXT_SCN_FADE(150, 3, 0, 0);
+    FLD_MODEL_SYNC_TRANSLATE(var0);
+    FLD_SMP_EVENT_END(0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    CALL_FIELD(150, 3, 0, 0);
+}
+
+
+// Procedure Index: 1
+void D00_01_e100_102_START()
+{
+    int var1;
+    int var2;
+    // bit id (536870912) + (2592) = 8736
+    BIT_ON((0x20000000 + 2592));
+    FLD_SMP_EVENT_BEGIN(0);
+    var1 = FLD_NPC_TBLID_LOAD(8602);
+    FLD_MODEL_LOADSYNC(var1);
+    FLD_MODEL_SET_VISIBLE(var1, 1, 10);
+    FLD_MODEL_SET_TRANSLATE(var1, 1790.00f, 1100.00f, 5380.00f, 0);
+    FLD_MODEL_SET_ROTATE(var1, 0, -90.00f, 0, 0);
+    MDL_ANIM(var1, 7, 0, 0, 1.00f);
+    MDL_ANIM_NEXT(var1, 1, 1, 3, 1.00f);
+    MDL_SET_SCALE(var1, 1.20f);
+    SND_VOICE_DNGEVT_SETUP(101, 301);
+    SND_VOICE_DNGEVT_SYNC();
+    // bit id (536870912) + (2201) = 8345
+    
+    if (BIT_CHK((0x20000000 + 2201)) == 0)
+    {
+        SET_COUNT(144, 10150);
+    }
+    else 
+    {
+        SET_COUNT(150, 80150);
+    }
+
+    var2 = FLD_SCRIPT_READ(150, 2, 110);
+    FLD_SCRIPT_READ_SYNC(var2);
+    FLD_SCRIPT_EXEC(var2, 0);
+    FLD_SCRIPT_FREE(var2);
+    // bit id (536870912) + (2201) = 8345
+    // bit id (536870912) + (3502) = 9646
+    // bit id (536870912) + (3512) = 9656
+    
+    if (BIT_CHK((0x20000000 + 2201)) == 0)
+    {
+        SET_COUNT(144, 10200);
+        BIT_OFF((0x20000000 + 3502));
+    }
+    else 
+    {
+        SET_COUNT(150, 80200);
+        BIT_OFF((0x20000000 + 3512));
+    }
+
+    SND_VOICE_DNGEVT_FREE();
+    FLD_MODEL_FREE(var1);
+}
+
+
+// Procedure Index: 2
+void D00_01_e100_001_START()
+{
+    // bit id (536870912) + (2593) = 8737
+    BIT_ON((0x20000000 + 2593));
+    WAIT(15);
+    Fld_FadeOut_CallEvent();
+    // bit id (536870912) + (5) = 6149
+    BIT_OFF((0x20000000 + 5));
+    // bit id (536870912) + (2201) = 8345
+    
+    if (BIT_CHK((0x20000000 + 2201)) == 0)
+    {
+        SET_COUNT(144, 10250);
+        FLD_START_BOSS(0);
+    }
+    else 
+    {
+        SET_COUNT(150, 80250);
+        FLD_START_BOSS(47);
+    }
+
+}
+
+
+// Procedure Index: 3
+void D00_AUTO_ACTION_ON()
+{
+    // bit id (536870912) + (5) = 6149
+    BIT_ON((0x20000000 + 5));
+}
+
+
+// Procedure Index: 4
+void D00_AUTO_ACTION_OFF()
+{
+    // bit id (536870912) + (5) = 6149
+    BIT_OFF((0x20000000 + 5));
+}
+
+
+// Procedure Index: 5
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 6
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 7
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 11
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 14
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 18
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

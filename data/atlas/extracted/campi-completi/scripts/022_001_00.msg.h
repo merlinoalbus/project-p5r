@@ -1,0 +1,22 @@
+// Decompiled by Atlus Script Tools
+const int DUMMY_MSG                        = 0;
+const int YESNO_SEL                        = 1;
+const int MSG_DAIFUGOU_TEST                = 2;
+const int MSG_VIDEO_TEST                   = 3;
+const int MSG_SOUND_TEST                   = 4;
+const int MSG_IMAGE_TEST                   = 5;
+const int MSG_AWARD_TEST                   = 6;
+const int MSG_PALACE_MAKER_TEST            = 7;
+const int MSG_001                          = 8;
+const int SEL_002                          = 9;
+const int Futaba_MSG                       = 10;
+const int Yaruda_MSG                       = 11;
+const int Maruki_MSG                       = 12;
+const int Arsene_MSG                       = 13;
+const int Kid_MSG                          = 14;
+const int Goemon_MSG                       = 15;
+const int Necro_MSG                        = 16;
+const int Robin_MSG                        = 17;
+const int Roki_MSG                         = 18;
+const int Cend_MSG                         = 19;
+const int Rakugaki_MSG                     = 20;

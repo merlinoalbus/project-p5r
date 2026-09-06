@@ -1,0 +1,40 @@
+{
+  "status": "PASS-census-only",
+  "files": 12,
+  "coverageSlots": 24,
+  "literalReferences": 100,
+  "unresolvedDynamicAddresses": 240,
+  "counts": [
+    {
+      "function": "BIT_ON",
+      "kind": "flag",
+      "address": 96,
+      "count": 26
+    },
+    {
+      "function": "SET_COUNT",
+      "kind": "counter",
+      "address": 16,
+      "count": 38
+    },
+    {
+      "function": "BIT_OFF",
+      "kind": "flag",
+      "address": 96,
+      "count": 12
+    },
+    {
+      "function": "BIT_OFF",
+      "kind": "flag",
+      "address": 102,
+      "count": 12
+    },
+    {
+      "function": "BIT_ON",
+      "kind": "flag",
+      "address": 102,
+      "count": 12
+    }
+  ],
+  "appConditionsGenerated": 0
+}

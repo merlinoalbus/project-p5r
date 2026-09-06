@@ -1,0 +1,10 @@
+{
+  "pass": true,
+  "forcedReseeds": 2,
+  "preservedPins": 387,
+  "names": 9,
+  "typos": 4,
+  "allPinRowsAndDependentsStable": true,
+  "preservedAliases": 1190,
+  "mapsUnchangedAcrossReseed": true
+}

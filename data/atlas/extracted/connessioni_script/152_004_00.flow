@@ -1,0 +1,131 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("152_004_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_152_01_01()
+{
+    return;
+}
+
+
+// Procedure Index: 1
+void D01_152_04_minimap_01()
+{
+    // bit id (536870912) + (446) = 6590
+    BIT_ON((0x20000000 + 446));
+}
+
+
+// Procedure Index: 2
+void D01_152_04_minimap_02()
+{
+    // bit id (536870912) + (447) = 6591
+    BIT_ON((0x20000000 + 447));
+}
+
+
+// Procedure Index: 3
+void D01_152_04_minimap_03()
+{
+    // bit id (536870912) + (448) = 6592
+    BIT_ON((0x20000000 + 448));
+}
+
+
+// Procedure Index: 4
+void D01_152_04_minimap_04()
+{
+    // bit id (536870912) + (449) = 6593
+    BIT_ON((0x20000000 + 449));
+}
+
+
+// Procedure Index: 5
+void D01_02_miniEV_02()
+{
+    int var0;
+    int var1;
+    SND_VOICE_DNGEVT_SETUP(489, 350);
+    SND_VOICE_DNGEVT_SYNC();
+    var0 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_ANIM(var0, 48, 0, 3, 1.00f);
+    FLD_WAIT(15);
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    // bit id (536870912) + (225) = 6369
+    BIT_ON((0x20000000 + 225));
+    SET_COUNT(145, 25150);
+    var1 = FLD_SCRIPT_READ(152, 4, 100);
+    FLD_SCRIPT_READ_SYNC(var1);
+    FLD_SCRIPT_EXEC(var1, 0);
+    FLD_SCRIPT_FREE(var1);
+    SND_VOICE_DNGEVT_FREE();
+    SET_COUNT(145, 25200);
+    FLD_START_BOSS(7);
+}
+
+
+// Procedure Index: 6
+void D01_02_e129_064_START()
+{
+    int var2;
+    SET_COUNT(145, 25550);
+    var2 = FLD_SCRIPT_READ(152, 4, 100);
+    FLD_SCRIPT_READ_SYNC(var2);
+    FLD_SCRIPT_EXEC(var2, 0);
+    FLD_SCRIPT_FREE(var2);
+    SET_COUNT(145, 25600);
+    // bit id (536870912) + (339) = 6483
+    BIT_ON((0x20000000 + 339));
+}
+
+
+// Procedure Index: 7
+void D01_02_e129_065_START()
+{
+    int var3;
+    SND_VOICE_DNGEVT_SETUP(489, 380);
+    SND_VOICE_DNGEVT_SYNC();
+    // bit id (805306368) + (10) = 11274
+    BIT_OFF((805306368 + 10));
+    SET_COUNT(145, 25350);
+    var3 = FLD_SCRIPT_READ(152, 4, 100);
+    FLD_SCRIPT_READ_SYNC(var3);
+    FLD_SCRIPT_EXEC(var3, 0);
+    FLD_SCRIPT_FREE(var3);
+    SND_VOICE_DNGEVT_FREE();
+    FLD_START_BOSS(9);
+}
+
+
+// Procedure Index: 8
+void D01_02_GUN_RELOADPRAC()
+{
+    int var4;
+    EVT_FAST_PROC_START();
+    FLD_START_FADE_DISABLE();
+    SET_COUNT(145, 25250);
+    var4 = FLD_SCRIPT_READ(152, 4, 100);
+    FLD_SCRIPT_READ_SYNC(var4);
+    FLD_SCRIPT_EXEC(var4, 0);
+    FLD_SCRIPT_FREE(var4);
+    SET_COUNT(145, 25300);
+    // bit id (536870912) + (4618) = 10762
+    BIT_ON((0x20000000 + 4618));
+    EVT_FAST_PROC_END();
+    FLD_START_BOSS(76);
+}
+

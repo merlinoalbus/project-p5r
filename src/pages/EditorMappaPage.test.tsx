@@ -11,7 +11,7 @@ import { EditorMappaPage } from './EditorMappaPage';
 import type { MappaDto, MappaRiassuntoDto, SpilloDto } from '../types';
 
 const api = vi.hoisted(() => ({
-  getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
+  risolviMappa: vi.fn(), getMappa: vi.fn(), getAlberoMappe: vi.fn(), creaSpillo: vi.fn(), aggiornaSpillo: vi.fn(), eliminaSpillo: vi.fn(), cercaRiferimenti: vi.fn(),
   aggiornaMappa: vi.fn(), creaMappa: vi.fn(), creaPassaggio: vi.fn(), eliminaMappa: vi.fn(), caricaImmagineMappa: vi.fn(), esportaMappe: vi.fn(), importaMappe: vi.fn(), scaricaPianta: vi.fn(), scaricaPiantaQuartiere: vi.fn(),
   esportaPacchettoRepository: vi.fn(), aggiungiImmagineSpillo: vi.fn(), aggiornaImmagineSpillo: vi.fn(), eliminaImmagineSpillo: vi.fn(),
   getConfidenti: vi.fn(), getQuartieri: vi.fn(), getRichieste: vi.fn(), getDungeons: vi.fn(),
@@ -36,6 +36,7 @@ describe('EditorMappaPage', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) f.mockReset();
     sessionStorage.clear();
+    api.risolviMappa.mockImplementation(async (mappa: string) => ({ tipo: 'mappa', mappa }));
     api.getAlberoMappe.mockResolvedValue(albero);
     api.getMappa.mockResolvedValue(base);
     // elenchi della Guida per le condizioni di visibilità
@@ -76,7 +77,7 @@ describe('EditorMappaPage', () => {
     await waitFor(() => expect(api.cercaRiferimenti).toHaveBeenCalledWith('negozio', 'untou'));
     fireEvent.click(await form.findByRole('button', { name: /Untouchable/ }));
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
-    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Armeria', tipo: 'negozio', descrizione: '', collezionabile: false, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [] }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Armeria', tipo: 'negozio', descrizione: '', collezionabile: false, soloPosizione: false, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [] }));
     const elimina = await screen.findByRole('button', { name: 'Elimina' });
     await waitFor(() => expect(elimina).not.toBeDisabled());
     fireEvent.click(elimina);
@@ -84,7 +85,7 @@ describe('EditorMappaPage', () => {
   });
 
   it('«Copia» sullo spillo selezionato mette negli appunti tutti i campi tranne la posizione; con «Incolla» un tocco sulla mappa crea lo spillo identico nel nuovo punto', async () => {
-    const negozio: SpilloDto = { ...nota, id: 12, tipo: 'negozio', tipoNome: 'Negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', riferimento: { tipo: 'negozio', chiave: 'untouchable' } };
+    const negozio: SpilloDto = { ...nota, soloPosizione: true, id: 12, tipo: 'negozio', tipoNome: 'Negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', riferimento: { tipo: 'negozio', chiave: 'untouchable' } };
     api.getMappa.mockResolvedValue({ ...base, spilli: [negozio] });
     api.creaSpillo.mockResolvedValue({ ...negozio, id: 13, x: 50, y: 50 });
     monta();
@@ -97,11 +98,11 @@ describe('EditorMappaPage', () => {
     const incolla = screen.getByRole('button', { name: /Incolla/ });
     expect(incolla).not.toBeDisabled();
     expect(incolla).toHaveAttribute('aria-pressed', 'true');
-    expect(JSON.parse(sessionStorage.getItem('p5r.editor.appunti-spillo') ?? 'null')).toEqual({ tipo: 'negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', collezionabile: false, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [] });
+    expect(JSON.parse(sessionStorage.getItem('p5r.editor.appunti-spillo') ?? 'null')).toEqual({ tipo: 'negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', collezionabile: false, soloPosizione: true, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [] });
     const tela = screen.getByRole('application');
     fireEvent.pointerDown(tela, { pointerId: 1, clientX: 0, clientY: 0 });
     fireEvent.pointerUp(tela, { pointerId: 1, clientX: 0, clientY: 0 });
-    await waitFor(() => expect(api.creaSpillo).toHaveBeenCalledWith('citta-shibuya', { tipo: 'negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', collezionabile: false, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [], x: 50, y: 50 }));
+    await waitFor(() => expect(api.creaSpillo).toHaveBeenCalledWith('citta-shibuya', { tipo: 'negozio', nome: 'Untouchable', descrizione: 'Armi e munizioni', collezionabile: false, soloPosizione: true, riferimento: { tipo: 'negozio', chiave: 'untouchable' }, condizioni: [], x: 50, y: 50 }));
     // dopo l'incolla si torna a «Seleziona», gli appunti restano per altre copie
     await waitFor(() => expect(screen.getByRole('button', { name: /Seleziona/ })).toHaveAttribute('aria-pressed', 'true'));
     expect(screen.getByRole('button', { name: /Incolla/ })).not.toBeDisabled();
@@ -147,7 +148,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(form.getByRole('button', { name: 'Togli la condizione: dopo il Palazzo di Madarame' }));
     expect(elenco().queryByText('dopo il Palazzo di Madarame', { selector: 'p' })).toBeNull();
     fireEvent.click(form.getByRole('button', { name: 'Salva spillo' }));
-    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', collezionabile: false, riferimento: null, condizioni: [{ tipo: 'confidente', confidente: 'sojiro', rango: 4 }] }));
+    await waitFor(() => expect(api.aggiornaSpillo).toHaveBeenCalledWith(9, { nome: 'Nota', tipo: 'nota', descrizione: '', collezionabile: false, soloPosizione: false, riferimento: null, condizioni: [{ tipo: 'confidente', confidente: 'sojiro', rango: 4 }] }));
   });
 
   it('il costruttore rifiuta un periodo con la fine prima dell’inizio e offre solo i giorni del mese scelto', async () => {
@@ -188,9 +189,9 @@ describe('EditorMappaPage', () => {
   it('albero (15.24): le figlie senza spillo che le raggiunge e il genitore senza ritorno hanno «Crea passaggio», che chiama l’API e seleziona lo spillo creato', async () => {
     const figliaRaggiunta = riassunto({ chiave: 'luogo-a', nome: 'Luogo A', tipo: 'luogo', genitore: 'citta-shibuya' });
     const figliaOrfana = riassunto({ chiave: 'luogo-b', nome: 'Luogo B', tipo: 'luogo', genitore: 'citta-shibuya' });
-    const versoA: SpilloDto = { ...nota, id: 21, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Luogo A', riferimento: { tipo: 'mappa', chiave: 'luogo-a' } };
+    const versoA: SpilloDto = { ...nota, id: 21, tipo: 'passaggio', tipoNome: 'Passaggio', nome: 'Luogo A', riferimento: { tipo: 'mappa', chiave: 'luogo-a' }, dettaglio: {tipo:'mappa',mappa:{chiave:'luogo-a',nome:'Luogo A',tipo:'luogo'},immagine:{url:null,asset:null}} };
     api.getMappa.mockResolvedValue({ ...base, figli: [figliaRaggiunta, figliaOrfana], spilli: [versoA] });
-    const creato: SpilloDto = { ...versoA, id: 22, nome: 'Luogo B', riferimento: { tipo: 'mappa', chiave: 'luogo-b' } };
+    const creato: SpilloDto = { ...versoA, id: 22, nome: 'Luogo B', riferimento: { tipo: 'mappa', chiave: 'luogo-b' }, dettaglio: {tipo:'mappa',mappa:{chiave:'luogo-b',nome:'Luogo B',tipo:'luogo'},immagine:{url:null,asset:null}} };
     api.creaPassaggio.mockResolvedValue(creato);
     monta();
     fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
@@ -209,6 +210,17 @@ describe('EditorMappaPage', () => {
     fireEvent.click(screen.getByRole('button',{name:'Collegamenti'}));
     fireEvent.click(screen.getByRole('button', { name: 'Crea passaggio di ritorno' }));
     await waitFor(() => expect(api.creaPassaggio).toHaveBeenLastCalledWith('citta-shibuya', 'tokyo'));
+  });
+
+  it.each(['esplicita','invalidata','legacy'] as const)('albero rispetta destinazione %s e precedenza sul riferimento',async(caso)=>{
+    const figli=['a','b'].map(k=>riassunto({chiave:`luogo-${k}`,nome:`Luogo ${k.toUpperCase()}`,tipo:'luogo',genitore:base.chiave}));
+    const spillo:SpilloDto={...nota,riferimento:{tipo:'mappa',chiave:'luogo-a'},dettaglio:{tipo:'mappa',mappa:{chiave:'luogo-a',nome:'Luogo A',tipo:'luogo'},immagine:{url:null,asset:null}},
+      destinazione:caso==='esplicita'?{mappa:'luogo-b',x:20,y:30,zoom:2}:null,destinazioneNonDisponibile:caso==='invalidata'};
+    api.getMappa.mockResolvedValue({...base,figli,spilli:[spillo]});monta();
+    fireEvent.click(await screen.findByRole('button',{name:'Collegamenti'}));
+    const regione=within(await screen.findByRole('region',{name:'Albero delle mappe'}));
+    expect(Boolean(regione.queryByRole('button',{name:'Crea passaggio verso Luogo A'}))).toBe(caso!=='legacy');
+    expect(Boolean(regione.queryByRole('button',{name:'Crea passaggio verso Luogo B'}))).toBe(caso!=='esplicita');
   });
 
   it('«Nuova mappa» (15.24): chiede il passaggio sul genitore (preselezionato) e il ritorno (a scelta) e li passa all’API', async () => {

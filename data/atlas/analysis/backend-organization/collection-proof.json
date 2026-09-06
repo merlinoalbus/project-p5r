@@ -1,0 +1,1191 @@
+{
+  "nodes": 344,
+  "marked": 169,
+  "groups": 60,
+  "detailMismatches": [],
+  "rows": [
+    {
+      "key": "palazzo-di-kamoshida-torre-livello-superiore-nativo-rmap-151-10-0",
+      "name": "Torre: Livello superiore",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-c1a029c9ce469ba51924e37c"
+    },
+    {
+      "key": "palazzo-di-kamoshida-torre-livello-superiore-nativo-rmap-151-10-1",
+      "name": "Torre: Livello superiore",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-c1a029c9ce469ba51924e37c"
+    },
+    {
+      "key": "palazzo-di-kamoshida-torre-sala-del-trono-nativo-rmap-151-11-0",
+      "name": "Torre: Sala del trono",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-96627b146e3d37415b4380e4"
+    },
+    {
+      "key": "palazzo-di-kamoshida-torre-sala-del-trono-nativo-rmap-151-11-1",
+      "name": "Torre: Sala del trono",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-96627b146e3d37415b4380e4"
+    },
+    {
+      "key": "palazzo-di-kamoshida-cancello-del-castello-nativo-rmap-151-1-0",
+      "name": "Cancello del castello",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-68f2870700a947d8b4f99b9c"
+    },
+    {
+      "key": "palazzo-di-kamoshida-cancello-del-castello-nativo-rmap-151-1-1",
+      "name": "Cancello del castello",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-68f2870700a947d8b4f99b9c"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-2-1",
+      "name": "Vecchio castello 2P",
+      "indice": 1,
+      "totale": 4,
+      "ambito": "immagini-1b22a2f00fdee7acc7db96a5"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-2-2",
+      "name": "Vecchio castello 2P",
+      "indice": 2,
+      "totale": 4,
+      "ambito": "immagini-1b22a2f00fdee7acc7db96a5"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-3-0",
+      "name": "Vecchio castello 2P",
+      "indice": 3,
+      "totale": 4,
+      "ambito": "immagini-1b22a2f00fdee7acc7db96a5"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-4-0",
+      "name": "Vecchio castello 2P",
+      "indice": 4,
+      "totale": 4,
+      "ambito": "immagini-1b22a2f00fdee7acc7db96a5"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-4-1",
+      "name": "Vecchio castello 3P",
+      "indice": 1,
+      "totale": 5,
+      "ambito": "immagini-f0ecec2d71dcc15363c03dc9"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-4-2",
+      "name": "Vecchio castello 3P",
+      "indice": 2,
+      "totale": 5,
+      "ambito": "immagini-f0ecec2d71dcc15363c03dc9"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-5-0",
+      "name": "Vecchio castello 3P",
+      "indice": 3,
+      "totale": 5,
+      "ambito": "immagini-f0ecec2d71dcc15363c03dc9"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-5-1",
+      "name": "Vecchio castello 3P",
+      "indice": 4,
+      "totale": 5,
+      "ambito": "immagini-f0ecec2d71dcc15363c03dc9"
+    },
+    {
+      "key": "palazzo-di-kamoshida-vecchio-castello-3p-nativo-rmap-151-5-2",
+      "name": "Vecchio castello 3P",
+      "indice": 5,
+      "totale": 5,
+      "ambito": "immagini-f0ecec2d71dcc15363c03dc9"
+    },
+    {
+      "key": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-0",
+      "name": "Tetto",
+      "indice": 1,
+      "totale": 5,
+      "ambito": "immagini-b4f0341152f1b53a6fcbf459"
+    },
+    {
+      "key": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-1",
+      "name": "Tetto",
+      "indice": 2,
+      "totale": 5,
+      "ambito": "immagini-b4f0341152f1b53a6fcbf459"
+    },
+    {
+      "key": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-2",
+      "name": "Tetto",
+      "indice": 3,
+      "totale": 5,
+      "ambito": "immagini-b4f0341152f1b53a6fcbf459"
+    },
+    {
+      "key": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-3",
+      "name": "Tetto",
+      "indice": 4,
+      "totale": 5,
+      "ambito": "immagini-b4f0341152f1b53a6fcbf459"
+    },
+    {
+      "key": "palazzo-di-kamoshida-tetto-nativo-rmap-151-6-4",
+      "name": "Tetto",
+      "indice": 5,
+      "totale": 5,
+      "ambito": "immagini-b4f0341152f1b53a6fcbf459"
+    },
+    {
+      "key": "palazzo-di-kamoshida-prigione-sotterranea-1p-nativo-rmap-152-1-0",
+      "name": "Prigione sotterranea 1P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-3423a575d64b7305eb2d29e6"
+    },
+    {
+      "key": "palazzo-di-kamoshida-prigione-sotterranea-1p-nativo-rmap-152-1-1",
+      "name": "Prigione sotterranea 1P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-3423a575d64b7305eb2d29e6"
+    },
+    {
+      "key": "palazzo-di-kamoshida-prigione-sotterranea-2p-nativo-rmap-152-2-0",
+      "name": "Prigione sotterranea 2P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-d3514627ccc75f1cefc15e9a"
+    },
+    {
+      "key": "palazzo-di-kamoshida-prigione-sotterranea-2p-nativo-rmap-152-2-1",
+      "name": "Prigione sotterranea 2P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-d3514627ccc75f1cefc15e9a"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-1p-nativo-rmap-153-2-0",
+      "name": "Museo, 1P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-7dc0fb3dce9345a935b93236"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-1p-nativo-rmap-153-2-1",
+      "name": "Museo, 1P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-7dc0fb3dce9345a935b93236"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-2p-nativo-rmap-153-3-1",
+      "name": "Museo, 2P",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-4da378ee2f12bfb8449508f4"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-2p-nativo-rmap-153-3-2",
+      "name": "Museo, 2P",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-4da378ee2f12bfb8449508f4"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-2p-nativo-rmap-153-3-3",
+      "name": "Museo, 2P",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-4da378ee2f12bfb8449508f4"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-2p-sala-del-tesoro-atrio-nativo-rmap-153-6-0",
+      "name": "Museo, 2P / Sala del Tesoro - Atrio",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-ed011a9dec6368dc12d773e8"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-museo-2p-sala-del-tesoro-atrio-nativo-rmap-153-6-1",
+      "name": "Museo, 2P / Sala del Tesoro - Atrio",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-ed011a9dec6368dc12d773e8"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-sala-del-tesoro-galleria-nativo-rmap-153-7-0",
+      "name": "Sala del Tesoro - Galleria",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-b1d921a501cc8eb14d1f58ab"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-sala-del-tesoro-galleria-nativo-rmap-153-7-1",
+      "name": "Sala del Tesoro - Galleria",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-b1d921a501cc8eb14d1f58ab"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-sala-del-tesoro-galleria-nativo-rmap-153-7-2",
+      "name": "Sala del Tesoro - Galleria",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-b1d921a501cc8eb14d1f58ab"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-sala-del-tesoro-atrio-sala-del-tesoro-nativo-rmap-153-9-0",
+      "name": "Sala del Tesoro - Atrio / Sala del Tesoro",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-3e1435c0174bebed28010797"
+    },
+    {
+      "key": "palazzo-di-madarame-museo-sala-del-tesoro-atrio-sala-del-tesoro-nativo-rmap-153-9-1",
+      "name": "Sala del Tesoro - Atrio / Sala del Tesoro",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-3e1435c0174bebed28010797"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-ufficio-riciclaggio-nativo-rmap-154-11-0",
+      "name": "Ufficio riciclaggio",
+      "indice": 1,
+      "totale": 5,
+      "ambito": "immagini-df83fa6e9bc00c1eeb93f835"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-ufficio-riciclaggio-nativo-rmap-154-11-1",
+      "name": "Ufficio riciclaggio",
+      "indice": 2,
+      "totale": 5,
+      "ambito": "immagini-df83fa6e9bc00c1eeb93f835"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-ufficio-riciclaggio-nativo-rmap-154-11-2",
+      "name": "Ufficio riciclaggio",
+      "indice": 3,
+      "totale": 5,
+      "ambito": "immagini-df83fa6e9bc00c1eeb93f835"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-ufficio-riciclaggio-nativo-rmap-154-14-0",
+      "name": "Ufficio riciclaggio",
+      "indice": 4,
+      "totale": 5,
+      "ambito": "immagini-df83fa6e9bc00c1eeb93f835"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-ufficio-riciclaggio-nativo-rmap-154-14-1",
+      "name": "Ufficio riciclaggio",
+      "indice": 5,
+      "totale": 5,
+      "ambito": "immagini-df83fa6e9bc00c1eeb93f835"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-corridoio-banchieri-nativo-rmap-154-3-0",
+      "name": "Corridoio banchieri",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-c358ad20a94d230d36e5533c"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-corridoio-banchieri-nativo-rmap-154-3-1",
+      "name": "Corridoio banchieri",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-c358ad20a94d230d36e5533c"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-corridoio-banchieri-nativo-rmap-154-3-2",
+      "name": "Corridoio banchieri",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-c358ad20a94d230d36e5533c"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-caveau-1p-nativo-rmap-154-7-0",
+      "name": "Caveau 1P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-81d2f3fa4a503864c367dba9"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-caveau-1p-nativo-rmap-154-7-1",
+      "name": "Caveau 1P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-81d2f3fa4a503864c367dba9"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-caveau-2p-nativo-rmap-154-8-0",
+      "name": "Caveau 2P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-fcd9dc58ce169b753cd073b5"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-caveau-2p-nativo-rmap-154-8-1",
+      "name": "Caveau 2P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-fcd9dc58ce169b753cd073b5"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-caveau-3p-nativo-rmap-154-9-0",
+      "name": "Caveau 3P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-6a02498016e5474c9ae29c2c"
+    },
+    {
+      "key": "palazzo-di-kaneshiro-caveau-3p-nativo-rmap-154-9-1",
+      "name": "Caveau 3P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-6a02498016e5474c9ae29c2c"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-passaggio-sotterraneo-1f-nativo-rmap-155-11-0",
+      "name": "Passaggio sotterraneo 1F",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-508773b34ea16bb086b91323"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-passaggio-sotterraneo-1f-nativo-rmap-155-11-1",
+      "name": "Passaggio sotterraneo 1F",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-508773b34ea16bb086b91323"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-passaggio-sotterraneo-2f-nativo-rmap-155-11-2",
+      "name": "Passaggio sotterraneo 2F",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-3419c9275eed067cc0444d34"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-passaggio-sotterraneo-2f-nativo-rmap-155-11-3",
+      "name": "Passaggio sotterraneo 2F",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-3419c9275eed067cc0444d34"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-corridoio-principale-nativo-rmap-155-12-0",
+      "name": "Corridoio principale",
+      "indice": 1,
+      "totale": 4,
+      "ambito": "immagini-70cdca9e85be42e58a1306cc"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-corridoio-principale-nativo-rmap-155-12-1",
+      "name": "Corridoio principale",
+      "indice": 2,
+      "totale": 4,
+      "ambito": "immagini-70cdca9e85be42e58a1306cc"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-corridoio-principale-nativo-rmap-155-2-0",
+      "name": "Corridoio principale",
+      "indice": 3,
+      "totale": 4,
+      "ambito": "immagini-70cdca9e85be42e58a1306cc"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-corridoio-principale-nativo-rmap-155-2-1",
+      "name": "Corridoio principale",
+      "indice": 4,
+      "totale": 4,
+      "ambito": "immagini-70cdca9e85be42e58a1306cc"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-1p-nativo-rmap-155-4-0",
+      "name": "Camera del Santuario 1P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-5554d11876bc17ce0f6fc244"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-2p-nativo-rmap-155-4-1",
+      "name": "Camera del Santuario 2P",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-62f563bf51d48a89d595ca8b"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-caverna-sotterranea-1p-nativo-rmap-155-5-0",
+      "name": "Caverna sotterranea 1P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-45465ebdba01be31f72477c6"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-caverna-sotterranea-1p-nativo-rmap-155-5-1",
+      "name": "Caverna sotterranea 1P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-45465ebdba01be31f72477c6"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-caverna-sotterranea-2p-nativo-rmap-155-5-2",
+      "name": "Caverna sotterranea 2P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-64bfad8f90ac6266e4d0c432"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-caverna-sotterranea-2p-nativo-rmap-155-5-3",
+      "name": "Caverna sotterranea 2P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-64bfad8f90ac6266e4d0c432"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-1p-nativo-rmap-155-6-0",
+      "name": "Camera del Santuario 1P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-5554d11876bc17ce0f6fc244"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-2p-nativo-rmap-155-6-1",
+      "name": "Camera del Santuario 2P",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-62f563bf51d48a89d595ca8b"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-2p-nativo-rmap-155-6-2",
+      "name": "Camera del Santuario 2P",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-62f563bf51d48a89d595ca8b"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-dei-sarcofagi-1p-nativo-rmap-155-8-0",
+      "name": "Camera dei Sarcofagi 1P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-3164c14959138cb49a396848"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-dei-sarcofagi-1p-nativo-rmap-155-8-1",
+      "name": "Camera dei Sarcofagi 1P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-3164c14959138cb49a396848"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-dei-sarcofagi-2p-nativo-rmap-155-8-2",
+      "name": "Camera dei Sarcofagi 2P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-210b758cbc977ba66e1de792"
+    },
+    {
+      "key": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-dei-sarcofagi-2p-nativo-rmap-155-8-3",
+      "name": "Camera dei Sarcofagi 2P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-210b758cbc977ba66e1de792"
+    },
+    {
+      "key": "palazzo-di-okumura-produzione-armamenti-nativo-rmap-156-10-1",
+      "name": "Produzione armamenti",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-9b3101513ba12430f4daa4af"
+    },
+    {
+      "key": "palazzo-di-okumura-produzione-armamenti-nativo-rmap-156-10-2",
+      "name": "Produzione armamenti",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-9b3101513ba12430f4daa4af"
+    },
+    {
+      "key": "palazzo-di-okumura-manutenzione-armamenti-nativo-rmap-156-11-0",
+      "name": "Manutenzione armamenti",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-0e135cad9de8cdf0cd5b09eb"
+    },
+    {
+      "key": "palazzo-di-okumura-manutenzione-armamenti-nativo-rmap-156-11-1",
+      "name": "Manutenzione armamenti",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-0e135cad9de8cdf0cd5b09eb"
+    },
+    {
+      "key": "palazzo-di-okumura-corridoi-del-complesso-nativo-rmap-156-2-0",
+      "name": "Corridoi del complesso",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-509d91aedc5f285fe7d36e98"
+    },
+    {
+      "key": "palazzo-di-okumura-corridoi-del-complesso-nativo-rmap-156-3-0",
+      "name": "Corridoi del complesso",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-509d91aedc5f285fe7d36e98"
+    },
+    {
+      "key": "palazzo-di-okumura-corridoi-del-complesso-nativo-rmap-156-3-1",
+      "name": "Corridoi del complesso",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-509d91aedc5f285fe7d36e98"
+    },
+    {
+      "key": "palazzo-di-okumura-interscambio-nativo-rmap-156-5-0",
+      "name": "Interscambio",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-75f6f1b60ff66d66f17e64a9"
+    },
+    {
+      "key": "palazzo-di-okumura-interscambio-nativo-rmap-156-6-0",
+      "name": "Interscambio",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-75f6f1b60ff66d66f17e64a9"
+    },
+    {
+      "key": "palazzo-di-okumura-linea-esportazioni-nativo-rmap-156-7-0",
+      "name": "Linea esportazioni",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-224345d7e046ba1487334fcb"
+    },
+    {
+      "key": "palazzo-di-okumura-linea-esportazioni-nativo-rmap-156-7-1",
+      "name": "Linea esportazioni",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-224345d7e046ba1487334fcb"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-stanza-slot-machine-nativo-rmap-157-10-0",
+      "name": "Stanza slot machine",
+      "indice": 1,
+      "totale": 4,
+      "ambito": "immagini-45921b8291e39a74138c531b"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-stanza-slot-machine-nativo-rmap-157-10-1",
+      "name": "Stanza slot machine",
+      "indice": 2,
+      "totale": 4,
+      "ambito": "immagini-45921b8291e39a74138c531b"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-lobby-piano-puntate-alte-nativo-rmap-157-11-0",
+      "name": "Lobby piano puntate alte",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-3ae4edc79261a2576851e82d"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-lobby-piano-puntate-alte-nativo-rmap-157-11-1",
+      "name": "Lobby piano puntate alte",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-3ae4edc79261a2576851e82d"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-lobby-piano-puntate-alte-nativo-rmap-157-11-2",
+      "name": "Lobby piano puntate alte",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-3ae4edc79261a2576851e82d"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-oscura-dimora-nativo-rmap-157-12-0",
+      "name": "Oscura Dimora",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-f835591a8369067ff8e46b28"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-oscura-dimora-nativo-rmap-157-13-0",
+      "name": "Oscura Dimora",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-f835591a8369067ff8e46b28"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-direzione-nativo-rmap-157-16-0",
+      "name": "Direzione",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-85814e90cdbc9d8fdf438c5a"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-direzione-nativo-rmap-157-16-1",
+      "name": "Direzione",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-85814e90cdbc9d8fdf438c5a"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-entrata-del-casino-nativo-rmap-157-1-0",
+      "name": "Entrata del casinò",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-8ed2a874caca3892f2c6a52e"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-entrata-del-casino-nativo-rmap-157-1-1",
+      "name": "Entrata del casinò",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-8ed2a874caca3892f2c6a52e"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-piano-terra-nativo-rmap-157-4-0",
+      "name": "Piano terra",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-36bf800b7b8cd6e4a28cb60d"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-piano-terra-nativo-rmap-157-4-1",
+      "name": "Piano terra",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-36bf800b7b8cd6e4a28cb60d"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-area-riservata-allo-staff-nativo-rmap-157-5-0",
+      "name": "Area riservata allo staff",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-b72d01fd9744231d36d3eef4"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-area-riservata-allo-staff-nativo-rmap-157-8-0",
+      "name": "Area riservata allo staff",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-b72d01fd9744231d36d3eef4"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-area-riservata-allo-staff-nativo-rmap-157-8-1",
+      "name": "Area riservata allo staff",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-b72d01fd9744231d36d3eef4"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-stanza-slot-machine-nativo-rmap-157-9-0",
+      "name": "Stanza slot machine",
+      "indice": 3,
+      "totale": 4,
+      "ambito": "immagini-45921b8291e39a74138c531b"
+    },
+    {
+      "key": "palazzo-di-niijima-sae-casino-stanza-slot-machine-nativo-rmap-157-9-1",
+      "name": "Stanza slot machine",
+      "indice": 4,
+      "totale": 4,
+      "ambito": "immagini-45921b8291e39a74138c531b"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-superiore-tribordo-ponte-piscina-nativo-rmap-159-10-0",
+      "name": "Corridoio superiore tribordo / Ponte piscina",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-5ea14a6d3570e776a2e2009c"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-superiore-tribordo-ponte-piscina-nativo-rmap-159-10-1",
+      "name": "Corridoio superiore tribordo / Ponte piscina",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-5ea14a6d3570e776a2e2009c"
+    },
+    {
+      "key": "palazzo-di-shido-ponte-laterale-nativo-rmap-159-11-0",
+      "name": "Ponte laterale",
+      "indice": 1,
+      "totale": 5,
+      "ambito": "immagini-abc37dbbc056113612a56896"
+    },
+    {
+      "key": "palazzo-di-shido-ponte-laterale-nativo-rmap-159-11-1",
+      "name": "Ponte laterale",
+      "indice": 2,
+      "totale": 5,
+      "ambito": "immagini-abc37dbbc056113612a56896"
+    },
+    {
+      "key": "palazzo-di-shido-ponte-laterale-nativo-rmap-159-11-2",
+      "name": "Ponte laterale",
+      "indice": 3,
+      "totale": 5,
+      "ambito": "immagini-abc37dbbc056113612a56896"
+    },
+    {
+      "key": "palazzo-di-shido-ponte-laterale-nativo-rmap-159-11-3",
+      "name": "Ponte laterale",
+      "indice": 4,
+      "totale": 5,
+      "ambito": "immagini-abc37dbbc056113612a56896"
+    },
+    {
+      "key": "palazzo-di-shido-ponte-laterale-nativo-rmap-159-11-4",
+      "name": "Ponte laterale",
+      "indice": 5,
+      "totale": 5,
+      "ambito": "immagini-abc37dbbc056113612a56896"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-mezzavia-tribordo-nativo-rmap-159-20-0",
+      "name": "Corridoio mezzavia tribordo",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-c0dd69b6d6546cad3bc7bef2"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-mezzavia-tribordo-nativo-rmap-159-20-1",
+      "name": "Corridoio mezzavia tribordo",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-c0dd69b6d6546cad3bc7bef2"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-superiore-tribordo-nativo-rmap-159-25-0",
+      "name": "Corridoio superiore tribordo",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-8cca63d1c1c9289c8b411bbe"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-superiore-tribordo-nativo-rmap-159-25-1",
+      "name": "Corridoio superiore tribordo",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-8cca63d1c1c9289c8b411bbe"
+    },
+    {
+      "key": "palazzo-di-shido-sala-dingresso-nativo-rmap-159-2-0",
+      "name": "Sala d'ingresso",
+      "indice": 1,
+      "totale": 6,
+      "ambito": "immagini-3081f6ee3f3108a53235d7be"
+    },
+    {
+      "key": "palazzo-di-shido-sala-dingresso-nativo-rmap-159-2-1",
+      "name": "Sala d'ingresso",
+      "indice": 2,
+      "totale": 6,
+      "ambito": "immagini-3081f6ee3f3108a53235d7be"
+    },
+    {
+      "key": "palazzo-di-shido-sala-dingresso-nativo-rmap-159-2-2",
+      "name": "Sala d'ingresso",
+      "indice": 3,
+      "totale": 6,
+      "ambito": "immagini-3081f6ee3f3108a53235d7be"
+    },
+    {
+      "key": "palazzo-di-shido-sala-dingresso-nativo-rmap-159-2-3",
+      "name": "Sala d'ingresso",
+      "indice": 4,
+      "totale": 6,
+      "ambito": "immagini-3081f6ee3f3108a53235d7be"
+    },
+    {
+      "key": "palazzo-di-shido-sala-dingresso-nativo-rmap-159-2-4",
+      "name": "Sala d'ingresso",
+      "indice": 5,
+      "totale": 6,
+      "ambito": "immagini-3081f6ee3f3108a53235d7be"
+    },
+    {
+      "key": "palazzo-di-shido-sala-dingresso-nativo-rmap-159-2-5",
+      "name": "Sala d'ingresso",
+      "indice": 6,
+      "totale": 6,
+      "ambito": "immagini-3081f6ee3f3108a53235d7be"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-inferiore-babordo-nativo-rmap-159-30-0",
+      "name": "Corridoio inferiore babordo",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-1ad8af00e759e04e5cecf090"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-inferiore-babordo-nativo-rmap-159-30-1",
+      "name": "Corridoio inferiore babordo",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-1ad8af00e759e04e5cecf090"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-mezzavia-tribordo-passaggio-e-salone-centrale-nativo-rmap-159-3-0",
+      "name": "Corridoio mezzavia tribordo / Passaggio e salone centrale",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-90dac2da94ffe1910bdd567e"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-mezzavia-tribordo-passaggio-e-salone-centrale-nativo-rmap-159-3-1",
+      "name": "Corridoio mezzavia tribordo / Passaggio e salone centrale",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-90dac2da94ffe1910bdd567e"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-inferiore-babordo-sala-intrattenimento-2p-nativo-rmap-159-6-1",
+      "name": "Corridoio inferiore babordo / Sala intrattenimento 2P",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-22ea92801e197fcf4a77152e"
+    },
+    {
+      "key": "palazzo-di-shido-corridoio-inferiore-babordo-sala-intrattenimento-2p-nativo-rmap-159-6-2",
+      "name": "Corridoio inferiore babordo / Sala intrattenimento 2P",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-22ea92801e197fcf4a77152e"
+    },
+    {
+      "key": "dedalo-di-iweleth-mondo-del-clifoto-cammino-per-il-santo-graal-nativo-rmap-160-2-0",
+      "name": "Cammino per il Santo Graal",
+      "indice": 1,
+      "totale": 4,
+      "ambito": "immagini-1934a51033009290b15c6b5c"
+    },
+    {
+      "key": "dedalo-di-iweleth-mondo-del-clifoto-cammino-per-il-santo-graal-nativo-rmap-160-3-0",
+      "name": "Cammino per il Santo Graal",
+      "indice": 2,
+      "totale": 4,
+      "ambito": "immagini-1934a51033009290b15c6b5c"
+    },
+    {
+      "key": "dedalo-di-iweleth-mondo-del-clifoto-cammino-per-il-santo-graal-nativo-rmap-160-4-0",
+      "name": "Cammino per il Santo Graal",
+      "indice": 3,
+      "totale": 4,
+      "ambito": "immagini-1934a51033009290b15c6b5c"
+    },
+    {
+      "key": "dedalo-di-iweleth-mondo-del-clifoto-cammino-per-il-santo-graal-nativo-rmap-160-5-0",
+      "name": "Cammino per il Santo Graal",
+      "indice": 4,
+      "totale": 4,
+      "ambito": "immagini-1934a51033009290b15c6b5c"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-10-0",
+      "name": "Corridoio della prigione",
+      "indice": 1,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-2-0",
+      "name": "Corridoio della prigione",
+      "indice": 2,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-3-0",
+      "name": "Corridoio della prigione",
+      "indice": 3,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-vuoto-cavernoso-nativo-rmap-161-4-0",
+      "name": "Vuoto cavernoso",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-1a4a997385a6d5e91ee30ad5"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-5-0",
+      "name": "Corridoio della prigione",
+      "indice": 4,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-6-0",
+      "name": "Corridoio della prigione",
+      "indice": 5,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-vuoto-cavernoso-nativo-rmap-161-7-0",
+      "name": "Vuoto cavernoso",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-1a4a997385a6d5e91ee30ad5"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-8-0",
+      "name": "Corridoio della prigione",
+      "indice": 6,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "dedalo-di-iweleth-profondita-dei-memento-corridoio-della-prigione-nativo-rmap-161-9-0",
+      "name": "Corridoio della prigione",
+      "indice": 7,
+      "totale": 7,
+      "ambito": "immagini-c9cb38a897fb4b7b30f468bb"
+    },
+    {
+      "key": "palazzo-di-maruki-modello-psi-cognitivo-eden-nativo-rmap-162-10-0",
+      "name": "Modello psi-cognitivo Eden",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-fe22ff75d02fa04264aad05e"
+    },
+    {
+      "key": "palazzo-di-maruki-modello-psi-cognitivo-eden-nativo-rmap-162-10-1",
+      "name": "Modello psi-cognitivo Eden",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-fe22ff75d02fa04264aad05e"
+    },
+    {
+      "key": "palazzo-di-maruki-corridoio-del-crepuscolo-nativo-rmap-162-11-0",
+      "name": "Corridoio del Crepuscolo",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-8f0ddb055fa774a8130469ac"
+    },
+    {
+      "key": "palazzo-di-maruki-corridoio-del-crepuscolo-nativo-rmap-162-11-1",
+      "name": "Corridoio del Crepuscolo",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-8f0ddb055fa774a8130469ac"
+    },
+    {
+      "key": "palazzo-di-maruki-corridoio-del-crepuscolo-nativo-rmap-162-11-2",
+      "name": "Corridoio del Crepuscolo",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-8f0ddb055fa774a8130469ac"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-di-controllo-nativo-rmap-162-12-0",
+      "name": "??? Sala di controllo",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-c0161658640b5bb0f05c433c"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-di-controllo-nativo-rmap-162-12-1",
+      "name": "??? Sala di controllo",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-c0161658640b5bb0f05c433c"
+    },
+    {
+      "key": "palazzo-di-maruki-ripostiglio-nativo-rmap-162-14-0",
+      "name": "??? Ripostiglio",
+      "indice": 1,
+      "totale": 4,
+      "ambito": "immagini-2d4ef4ca7ae88cc7d22ed247"
+    },
+    {
+      "key": "palazzo-di-maruki-ripostiglio-nativo-rmap-162-14-1",
+      "name": "??? Ripostiglio",
+      "indice": 2,
+      "totale": 4,
+      "ambito": "immagini-2d4ef4ca7ae88cc7d22ed247"
+    },
+    {
+      "key": "palazzo-di-maruki-ripostiglio-nativo-rmap-162-14-2",
+      "name": "??? Ripostiglio",
+      "indice": 3,
+      "totale": 4,
+      "ambito": "immagini-2d4ef4ca7ae88cc7d22ed247"
+    },
+    {
+      "key": "palazzo-di-maruki-ripostiglio-nativo-rmap-162-14-3",
+      "name": "??? Ripostiglio",
+      "indice": 4,
+      "totale": 4,
+      "ambito": "immagini-2d4ef4ca7ae88cc7d22ed247"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-di-supporto-nativo-rmap-162-15-0",
+      "name": "Sala di supporto",
+      "indice": 1,
+      "totale": 3,
+      "ambito": "immagini-93f1b95666f308594ef9e859"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-di-supporto-nativo-rmap-162-15-1",
+      "name": "Sala di supporto",
+      "indice": 2,
+      "totale": 3,
+      "ambito": "immagini-93f1b95666f308594ef9e859"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-di-supporto-nativo-rmap-162-15-2",
+      "name": "Sala di supporto",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-93f1b95666f308594ef9e859"
+    },
+    {
+      "key": "palazzo-di-maruki-ala-ricerca-nativo-rmap-162-16-0",
+      "name": "Ala ricerca",
+      "indice": 1,
+      "totale": 5,
+      "ambito": "immagini-0b2fff0f849ba45564df6389"
+    },
+    {
+      "key": "palazzo-di-maruki-ala-ricerca-nativo-rmap-162-16-1",
+      "name": "Ala ricerca",
+      "indice": 2,
+      "totale": 5,
+      "ambito": "immagini-0b2fff0f849ba45564df6389"
+    },
+    {
+      "key": "palazzo-di-maruki-ala-ricerca-nativo-rmap-162-16-2",
+      "name": "Ala ricerca",
+      "indice": 3,
+      "totale": 5,
+      "ambito": "immagini-0b2fff0f849ba45564df6389"
+    },
+    {
+      "key": "palazzo-di-maruki-ala-ricerca-nativo-rmap-162-16-3",
+      "name": "Ala ricerca",
+      "indice": 4,
+      "totale": 5,
+      "ambito": "immagini-0b2fff0f849ba45564df6389"
+    },
+    {
+      "key": "palazzo-di-maruki-ala-ricerca-nativo-rmap-162-16-4",
+      "name": "Ala ricerca",
+      "indice": 5,
+      "totale": 5,
+      "ambito": "immagini-0b2fff0f849ba45564df6389"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-dingresso-nativo-rmap-162-2-0",
+      "name": "??? Sala d'ingresso",
+      "indice": 1,
+      "totale": 4,
+      "ambito": "immagini-af0469c32ba8b6c4d1da6f23"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-dingresso-nativo-rmap-162-2-1",
+      "name": "??? Sala d'ingresso",
+      "indice": 2,
+      "totale": 4,
+      "ambito": "immagini-af0469c32ba8b6c4d1da6f23"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-dingresso-nativo-rmap-162-2-2",
+      "name": "??? Sala d'ingresso",
+      "indice": 3,
+      "totale": 4,
+      "ambito": "immagini-af0469c32ba8b6c4d1da6f23"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-dingresso-nativo-rmap-162-2-3",
+      "name": "??? Sala d'ingresso",
+      "indice": 4,
+      "totale": 4,
+      "ambito": "immagini-af0469c32ba8b6c4d1da6f23"
+    },
+    {
+      "key": "palazzo-di-maruki-corridoio-nativo-rmap-162-3-0",
+      "name": "??? Corridoio",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-29cbbceef8ffd73b501e3994"
+    },
+    {
+      "key": "palazzo-di-maruki-corridoio-nativo-rmap-162-3-1",
+      "name": "??? Corridoio",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-29cbbceef8ffd73b501e3994"
+    },
+    {
+      "key": "palazzo-di-maruki-modello-psi-cognitivo-eden-nativo-rmap-162-5-0",
+      "name": "Modello psi-cognitivo Eden",
+      "indice": 3,
+      "totale": 3,
+      "ambito": "immagini-fe22ff75d02fa04264aad05e"
+    },
+    {
+      "key": "palazzo-di-maruki-auditorium-nativo-rmap-162-7-0",
+      "name": "??? Auditorium",
+      "indice": 1,
+      "totale": 2,
+      "ambito": "immagini-966918c322f1514751fd94be"
+    },
+    {
+      "key": "palazzo-di-maruki-auditorium-nativo-rmap-162-7-1",
+      "name": "??? Auditorium",
+      "indice": 2,
+      "totale": 2,
+      "ambito": "immagini-966918c322f1514751fd94be"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-visite-nativo-rmap-162-9-0",
+      "name": "Sala visite",
+      "indice": 1,
+      "totale": 5,
+      "ambito": "immagini-7bdb536e6ed702dba6706d51"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-visite-nativo-rmap-162-9-1",
+      "name": "Sala visite",
+      "indice": 2,
+      "totale": 5,
+      "ambito": "immagini-7bdb536e6ed702dba6706d51"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-visite-nativo-rmap-162-9-2",
+      "name": "Sala visite",
+      "indice": 3,
+      "totale": 5,
+      "ambito": "immagini-7bdb536e6ed702dba6706d51"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-visite-nativo-rmap-162-9-3",
+      "name": "Sala visite",
+      "indice": 4,
+      "totale": 5,
+      "ambito": "immagini-7bdb536e6ed702dba6706d51"
+    },
+    {
+      "key": "palazzo-di-maruki-sala-visite-nativo-rmap-162-9-4",
+      "name": "Sala visite",
+      "indice": 5,
+      "totale": 5,
+      "ambito": "immagini-7bdb536e6ed702dba6706d51"
+    }
+  ]
+}

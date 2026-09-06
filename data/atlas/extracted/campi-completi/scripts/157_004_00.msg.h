@@ -1,0 +1,20 @@
+// Decompiled by Atlus Script Tools
+const int D157_004_miniEV_01_mes01         = 0;
+const int D157_004_miniEV_01_mes02         = 1;
+const int D157_004_miniEV_02_mes01         = 2;
+const int D157_004_miniEV_02_selA          = 3;
+const int D157_004_miniEV_02_selA_         = 4;
+const int D157_004_miniEV_02_selA__2       = 5;
+const int e380_255_mes01                   = 6;
+const int EV_MOVE_57_04_MENU               = 7;
+const int EV_MOVE_57_04_SEL                = 8;
+const int EV_MOVE_57_04_VIP                = 9;
+const int EV_MOVE_57_04_HIGH               = 10;
+const int EV_MOVE_57_04_BOSS               = 11;
+const int EV_MOVE_57_04_BOSS_BATTL         = 12;
+const int EV_MOVE_57_04_CAN                = 13;
+const int EV_MOVE_57_04_NOT                = 14;
+const int TEST_KENJI_EVENT                 = 15;
+const int D157_004_miniEV_04_mes01         = 16;
+const int D157_004_LOCK_KENJI_mes0         = 17;
+const int D157_004_LOCK_KENJI_mes0_2       = 18;

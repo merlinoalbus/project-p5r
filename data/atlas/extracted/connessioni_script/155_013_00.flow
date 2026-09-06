@@ -1,0 +1,1325 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("155_013_00.msg");
+
+// 
+// Script-level variable definitions
+// 
+
+int sVar2;
+int sVar3;
+int sVar4;
+int sVar1;
+int sVar0;
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_EXIT()
+{
+    int var5;
+    var5 = FLD_SCRIPT_READ(155, 13, 10);
+    FLD_SCRIPT_READ_SYNC(var5);
+    FLD_SCRIPT_EXEC(var5, 0);
+    FLD_SCRIPT_FREE(var5);
+    // bit id (536870912) + (33) = 6177
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 0x10)) == 1)
+    {
+        BIT_OFF((0x20000000 + 33));
+        SET_COUNT(164, 0);
+        SET_COUNT(160, 0);
+        CALL_FIELD(155, 1, 10, 0);
+    }
+
+}
+
+
+// Procedure Index: 1
+void D04_02_e296_520_START()
+{
+    int var6;
+    // bit id (536870912) + (1427) = 7571
+    BIT_ON((0x20000000 + 1427));
+    SET_COUNT(148, 31050);
+    var6 = FLD_SCRIPT_READ(155, 13, 110);
+    FLD_SCRIPT_READ_SYNC(var6);
+    FLD_SCRIPT_EXEC(var6, 0);
+    FLD_SCRIPT_FREE(var6);
+    SET_COUNT(148, 32000);
+    return;
+}
+
+
+// Procedure Index: 2
+void D04_02_e296_531_START()
+{
+    int var7;
+    FLD_LOCAL_FLAG_ON((49152 + 17));
+    var7 = FLD_SCRIPT_READ(155, 13, 120);
+    FLD_SCRIPT_READ_SYNC(var7);
+    FLD_SCRIPT_EXEC(var7, 0);
+    FLD_SCRIPT_FREE(var7);
+    FLD_LOCAL_FLAG_OFF((49152 + 17));
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 48)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 48));
+        FLD_START_BOSS(26);
+    }
+    else 
+    {
+        SET_COUNT(148, 33000);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 3
+void D04_02_e296_501_START()
+{
+    int var8;
+    // bit id (536870912) + (1422) = 7566
+    BIT_ON((0x20000000 + 1422));
+    SET_COUNT(148, 32450);
+    var8 = FLD_SCRIPT_READ(155, 13, 110);
+    FLD_SCRIPT_READ_SYNC(var8);
+    FLD_SCRIPT_EXEC(var8, 0);
+    FLD_SCRIPT_FREE(var8);
+    SET_COUNT(148, 32500);
+    return;
+}
+
+
+// Procedure Index: 4
+void D04_POINT_A1()
+{
+    int var9;
+    int var10;
+    var9 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var10 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var10 == 0)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 1);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 1);
+            FLD_NPC_SET_CURRENT_PATHNODE(var9, 0);
+            FLD_NPC_STOP_PATHNODE(var9, 2);
+            FLD_NPC_STOP_NOW(var9, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 5
+void D04_POINT_A2()
+{
+    int var11;
+    int var12;
+    var11 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var12 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var12 == 0)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 3);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 3);
+            FLD_NPC_SET_CURRENT_PATHNODE(var11, 8);
+            FLD_NPC_STOP_PATHNODE(var11, 10);
+            FLD_NPC_STOP_NOW(var11, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 6
+void D04_POINT_B1()
+{
+    int var13;
+    int var14;
+    int var15;
+    var13 = 0;
+    var14 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var15 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var15 == 1)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 22)) == 0)
+        {
+            var13 = 1;
+            sVar2 = 2;
+            D04_EVT_SECOND_START();
+            FLD_LOCAL_FLAG_ON((49152 + 22));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 7) && (FLD_LOCAL_FLAG_CHK((49152 + 23)) == 0))
+        {
+            var13 = 2;
+            sVar3 = 2;
+            D04_EVT_3RD_START();
+            FLD_LOCAL_FLAG_ON((49152 + 23));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 12) && (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0))
+        {
+            var13 = 3;
+            sVar4 = 2;
+            D04_EVT_4TH_START();
+            FLD_LOCAL_FLAG_ON((49152 + 24));
+        }
+
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 2);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 2);
+            FLD_NPC_SET_CURRENT_PATHNODE(var14, 2);
+            FLD_NPC_STOP_PATHNODE(var14, 4);
+            FLD_NPC_STOP_NOW(var14, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    
+    if (var13 == 1)
+    {
+        D04_EVT_SECOND_END();
+    }
+    else if (var13 == 2)
+    {
+        D04_EVT_3RD_END();
+    }
+    else if (var13 == 3)
+    {
+        D04_EVT_4TH_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 7
+void D04_POINT_B2()
+{
+    int var16;
+    int var17;
+    int var18;
+    var16 = 0;
+    var17 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var18 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var18 == 1)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 22)) == 0)
+        {
+            var16 = 1;
+            sVar2 = 3;
+            D04_EVT_SECOND_START();
+            FLD_LOCAL_FLAG_ON((49152 + 22));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 7) && (FLD_LOCAL_FLAG_CHK((49152 + 23)) == 0))
+        {
+            var16 = 2;
+            sVar3 = 3;
+            D04_EVT_3RD_START();
+            FLD_LOCAL_FLAG_ON((49152 + 23));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 12) && (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0))
+        {
+            var16 = 3;
+            sVar4 = 3;
+            D04_EVT_4TH_START();
+            FLD_LOCAL_FLAG_ON((49152 + 24));
+        }
+
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 9);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 9);
+            FLD_NPC_SET_CURRENT_PATHNODE(var17, 31);
+            FLD_NPC_STOP_PATHNODE(var17, 33);
+            FLD_NPC_STOP_NOW(var17, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    
+    if (var16 == 1)
+    {
+        D04_EVT_SECOND_END();
+    }
+    else if (var16 == 2)
+    {
+        D04_EVT_3RD_END();
+    }
+    else if (var16 == 3)
+    {
+        D04_EVT_4TH_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 8
+void D04_POINT_C1()
+{
+    int var19;
+    int var20;
+    var19 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var20 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var20 == 2)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 3);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 3);
+            FLD_NPC_SET_CURRENT_PATHNODE(var19, 4);
+            FLD_NPC_STOP_PATHNODE(var19, 6);
+            FLD_NPC_STOP_NOW(var19, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 9
+void D04_POINT_C2()
+{
+    int var21;
+    int var22;
+    var21 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var22 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var22 == 2)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 6);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 6);
+            FLD_NPC_SET_CURRENT_PATHNODE(var21, 18);
+            FLD_NPC_STOP_PATHNODE(var21, 20);
+            FLD_NPC_STOP_NOW(var21, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 10
+void D04_POINT_D1()
+{
+    int var23;
+    int var24;
+    var23 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var24 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var24 == 3)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 0);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 0);
+            FLD_NPC_SET_CURRENT_PATHNODE(var23, 6);
+            FLD_NPC_STOP_PATHNODE(var23, 8);
+            FLD_NPC_STOP_NOW(var23, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 11
+void D04_POINT_D2()
+{
+    int var25;
+    int var26;
+    var25 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var26 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var26 == 3)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 4);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 4);
+            FLD_NPC_SET_CURRENT_PATHNODE(var25, 10);
+            FLD_NPC_STOP_PATHNODE(var25, 11);
+            FLD_NPC_STOP_NOW(var25, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 12
+void D04_POINT_E1()
+{
+    int var27;
+    int var28;
+    var27 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var28 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var28 == 4)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 10);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 10);
+            FLD_NPC_SET_CURRENT_PATHNODE(var27, 11);
+            FLD_NPC_STOP_PATHNODE(var27, 13);
+            FLD_NPC_STOP_NOW(var27, 0);
+        }
+
+        D04_EVT_LAST();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 13
+void D04_POINT_E2()
+{
+    int var29;
+    int var30;
+    var29 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var30 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var30 == 4)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 2);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 2);
+            FLD_NPC_SET_CURRENT_PATHNODE(var29, 0x10);
+            FLD_NPC_STOP_PATHNODE(var29, 18);
+            FLD_NPC_STOP_NOW(var29, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 14
+void D04_POINT_F1()
+{
+    int var31;
+    int var32;
+    int var33;
+    var31 = 0;
+    var32 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var33 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var33 == 5)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 22)) == 0)
+        {
+            var31 = 1;
+            sVar2 = 0;
+            D04_EVT_SECOND_START();
+            FLD_LOCAL_FLAG_ON((49152 + 22));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 7) && (FLD_LOCAL_FLAG_CHK((49152 + 23)) == 0))
+        {
+            var31 = 2;
+            sVar3 = 0;
+            D04_EVT_3RD_START();
+            FLD_LOCAL_FLAG_ON((49152 + 23));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 12) && (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0))
+        {
+            var31 = 3;
+            sVar4 = 0;
+            D04_EVT_4TH_START();
+            FLD_LOCAL_FLAG_ON((49152 + 24));
+        }
+
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 7);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 7);
+            FLD_NPC_SET_CURRENT_PATHNODE(var32, 22);
+            FLD_NPC_STOP_PATHNODE(var32, 25);
+            FLD_NPC_STOP_NOW(var32, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    
+    if (var31 == 1)
+    {
+        D04_EVT_SECOND_END();
+    }
+    else if (var31 == 2)
+    {
+        D04_EVT_3RD_END();
+    }
+    else if (var31 == 3)
+    {
+        D04_EVT_4TH_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 15
+void D04_POINT_F2()
+{
+    int var34;
+    int var35;
+    int var36;
+    var34 = 0;
+    var35 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var36 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var36 == 5)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 22)) == 0)
+        {
+            var34 = 1;
+            sVar2 = 1;
+            D04_EVT_SECOND_START();
+            FLD_LOCAL_FLAG_ON((49152 + 22));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 7) && (FLD_LOCAL_FLAG_CHK((49152 + 23)) == 0))
+        {
+            var34 = 2;
+            sVar3 = 1;
+            D04_EVT_3RD_START();
+            FLD_LOCAL_FLAG_ON((49152 + 23));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 12) && (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0))
+        {
+            var34 = 3;
+            sVar4 = 1;
+            D04_EVT_4TH_START();
+            FLD_LOCAL_FLAG_ON((49152 + 24));
+        }
+
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 4);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 4);
+            FLD_NPC_SET_CURRENT_PATHNODE(var35, 14);
+            FLD_NPC_STOP_PATHNODE(var35, 0x10);
+            FLD_NPC_STOP_NOW(var35, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    
+    if (var34 == 1)
+    {
+        D04_EVT_SECOND_END();
+    }
+    else if (var34 == 2)
+    {
+        D04_EVT_3RD_END();
+    }
+    else if (var34 == 3)
+    {
+        D04_EVT_4TH_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 16
+void D04_POINT_G1()
+{
+    int var37;
+    int var38;
+    int var39;
+    var37 = 0;
+    var38 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var39 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var39 == 6)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 21)) == 0)
+        {
+            var37 = 1;
+            sVar1 = 0;
+            D04_EVT_FIRST_START();
+            FLD_LOCAL_FLAG_ON((49152 + 21));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 7) && (FLD_LOCAL_FLAG_CHK((49152 + 23)) == 0))
+        {
+            var37 = 2;
+            sVar3 = 4;
+            D04_EVT_3RD_START();
+            FLD_LOCAL_FLAG_ON((49152 + 23));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 12) && (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0))
+        {
+            var37 = 3;
+            sVar4 = 4;
+            D04_EVT_4TH_START();
+            FLD_LOCAL_FLAG_ON((49152 + 24));
+        }
+
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 1);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 1);
+            FLD_NPC_SET_CURRENT_PATHNODE(var38, 39);
+            FLD_NPC_STOP_PATHNODE(var38, 40);
+            FLD_NPC_STOP_NOW(var38, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    
+    if (var37 == 1)
+    {
+        D04_EVT_FIRST_END();
+    }
+    else if (var37 == 2)
+    {
+        D04_EVT_3RD_END();
+    }
+    else if (var37 == 3)
+    {
+        D04_EVT_4TH_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 17
+void D04_POINT_G2()
+{
+    int var40;
+    int var41;
+    int var42;
+    var40 = 0;
+    var41 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var42 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var42 == 6)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 21)) == 0)
+        {
+            var40 = 1;
+            sVar1 = 1;
+            D04_EVT_FIRST_START();
+            FLD_LOCAL_FLAG_ON((49152 + 21));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 7) && (FLD_LOCAL_FLAG_CHK((49152 + 23)) == 0))
+        {
+            var40 = 2;
+            sVar3 = 5;
+            D04_EVT_3RD_START();
+            FLD_LOCAL_FLAG_ON((49152 + 23));
+        }
+        else if ((FLD_GET_LOCAL_COUNT((49152 + 6)) >= 12) && (FLD_LOCAL_FLAG_CHK((49152 + 24)) == 0))
+        {
+            var40 = 3;
+            sVar4 = 5;
+            D04_EVT_4TH_START();
+            FLD_LOCAL_FLAG_ON((49152 + 24));
+        }
+
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 5);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 5);
+            FLD_NPC_SET_CURRENT_PATHNODE(var41, 20);
+            FLD_NPC_STOP_PATHNODE(var41, 22);
+            FLD_NPC_STOP_NOW(var41, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    
+    if (var40 == 1)
+    {
+        D04_EVT_FIRST_END();
+    }
+    else if (var40 == 2)
+    {
+        D04_EVT_3RD_END();
+    }
+    else if (var40 == 3)
+    {
+        D04_EVT_4TH_END();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 18
+void D04_POINT_H1()
+{
+    int var43;
+    int var44;
+    var43 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var44 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var44 == 7)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 8);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 8);
+            FLD_NPC_SET_CURRENT_PATHNODE(var43, 25);
+            FLD_NPC_STOP_PATHNODE(var43, 27);
+            FLD_NPC_STOP_NOW(var43, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 19
+void D04_POINT_H2()
+{
+    int var45;
+    int var46;
+    var45 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var46 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var46 == 7)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 6);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 6);
+            FLD_NPC_SET_CURRENT_PATHNODE(var45, 37);
+            FLD_NPC_STOP_PATHNODE(var45, 39);
+            FLD_NPC_STOP_NOW(var45, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 20
+void D04_POINT_I1()
+{
+    int var47;
+    int var48;
+    var47 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var48 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var48 == 8)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 9);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 9);
+            FLD_NPC_SET_CURRENT_PATHNODE(var47, 27);
+            FLD_NPC_STOP_PATHNODE(var47, 29);
+            FLD_NPC_STOP_NOW(var47, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 21
+void D04_POINT_I2()
+{
+    int var49;
+    int var50;
+    var49 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var50 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var50 == 8)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 7);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 7);
+            FLD_NPC_SET_CURRENT_PATHNODE(var49, 35);
+            FLD_NPC_STOP_PATHNODE(var49, 37);
+            FLD_NPC_STOP_NOW(var49, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 22
+void D04_POINT_J1()
+{
+    int var51;
+    int var52;
+    var51 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var52 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var52 == 9)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 0);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 0);
+            FLD_NPC_SET_CURRENT_PATHNODE(var51, 29);
+            FLD_NPC_STOP_PATHNODE(var51, 30);
+            FLD_NPC_STOP_NOW(var51, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 23
+void D04_POINT_J2()
+{
+    int var53;
+    int var54;
+    var53 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    var54 = FLD_GET_LOCAL_COUNT((49152 + 4));
+    
+    if (var54 == 9)
+    {
+        
+        if (FLD_LOCAL_FLAG_CHK((49152 + 20)) == 0)
+        {
+            FLD_SET_LOCAL_COUNT((49152 + 5), 8);
+        }
+        else 
+        {
+            FLD_LOCAL_FLAG_ON((49152 + 20));
+            FLD_SET_LOCAL_COUNT((49152 + 4), 8);
+            FLD_NPC_SET_CURRENT_PATHNODE(var53, 33);
+            FLD_NPC_STOP_PATHNODE(var53, 35);
+            FLD_NPC_STOP_NOW(var53, 0);
+        }
+
+        FLD_SET_LOCAL_COUNT((49152 + 6), (FLD_GET_LOCAL_COUNT((49152 + 6)) + 1));
+    }
+
+    return;
+}
+
+
+// Procedure Index: 24
+void D04_EVT_FIRST_START()
+{
+    int var55;
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_RESHND(0);
+    FLD_CAMERA_LOCK();
+    var55 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    
+    if (sVar1 == 0)
+    {
+        FLD_CAMERA_LOCK_INTERP(-48.8182f, 114.5653f, 1569.588f, -0.0274f, -0.1017f, -0.0028f, 0.9944f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 50.2912f, 0.00f, 1455.244f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 180.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var55, 0, 0, 0, 0);
+    }
+    else 
+    {
+        FLD_CAMERA_LOCK_INTERP(-42.3361f, 107.5383f, -0.9273f, 0.0031f, 0.9967f, 0.046f, -0.0668f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 20.2124f, -7.3618f, 144.7515f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 0.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var55, 0, 180, 0, 0);
+    }
+
+    FADEIN(0, 10);
+    FADE_SYNC();
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(MSG_e296_521_000, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_521_001, 0);
+    MSG_WND_CLS();
+    return;
+}
+
+
+// Procedure Index: 25
+void D04_EVT_FIRST_END()
+{
+    FLD_WAIT(30);
+    MSG_WND_DSP();
+    MSG(MSG_e296_521_002, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_CAMERA_INTERP_ASYNC(15);
+}
+
+
+// Procedure Index: 26
+void D04_EVT_SECOND_START()
+{
+    int var56;
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_RESHND(0);
+    FLD_CAMERA_LOCK();
+    var56 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    
+    if (sVar2 == 0)
+    {
+        FLD_CAMERA_LOCK_INTERP(-1496.484f, 139.3619f, 2317.245f, -0.0441f, -0.8182f, -0.0632f, 0.5697f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -1420.446f, 0.0001f, 2390.147f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 70.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var56, 0, -90, 0, 0);
+    }
+    else if (sVar2 == 1)
+    {
+        FLD_CAMERA_LOCK_INTERP(-19.776f, 113.9818f, 2584.911f, -0.0342f, 0.587f, 0.0248f, 0.8085f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -148.566f, 0.0001f, 2488.312f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -90.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var56, 0, 90, 0, 0);
+    }
+    else if (sVar2 == 2)
+    {
+        FLD_CAMERA_LOCK_INTERP(7.6975f, 664.1812f, -1058.097f, -0.0022f, 0.9563f, 0.2923f, 0.0072f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -52.5367f, 485.1883f, -991.5363f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -17.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var56, 0, 180, 0, 0);
+    }
+    else if (sVar2 == 3)
+    {
+        FLD_CAMERA_LOCK_INTERP(-65.6519f, 100.5364f, 122.5977f, 0.0572f, -0.144f, 0.0084f, 0.9879f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 56.4777f, 8.7322f, 22.2654f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -180.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var56, 0, 0, 0, 0);
+    }
+
+    FADEIN(0, 10);
+    FADE_SYNC();
+    MSG_WND_DSP();
+    MSG(MSG_e296_522_000, 0);
+    MSG_WND_CLS();
+    return;
+}
+
+
+// Procedure Index: 27
+void D04_EVT_SECOND_END()
+{
+    FLD_WAIT(30);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(MSG_e296_522_001, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_522_002, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_522_003, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_522_004, 0);
+    MSG_WND_CLS();
+    
+    if (GET_COUNT(148) < 32500)
+    {
+        SET_COUNT(148, 32500);
+    }
+
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_CAMERA_INTERP_ASYNC(15);
+    return;
+}
+
+
+// Procedure Index: 28
+void D04_EVT_3RD_START()
+{
+    int var57;
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_RESHND(0);
+    FLD_CAMERA_LOCK();
+    var57 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    PUTS("*************************************");
+    PUTS("*************************************");
+    PUT(sVar3);
+    PUTS("*************************************");
+    PUTS("*************************************");
+    
+    if (sVar3 == 0)
+    {
+        FLD_CAMERA_LOCK_INTERP(-1496.484f, 139.3619f, 2317.245f, -0.0441f, -0.8182f, -0.0632f, 0.5697f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -1420.446f, 0.0001f, 2390.147f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 70.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var57, 0, -90, 0, 0);
+    }
+    else if (sVar3 == 1)
+    {
+        FLD_CAMERA_LOCK_INTERP(-19.776f, 113.9818f, 2584.911f, -0.0342f, 0.587f, 0.0248f, 0.8085f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -148.566f, 0.0001f, 2488.312f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -90.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var57, 0, 90, 0, 0);
+    }
+    else if (sVar3 == 2)
+    {
+        FLD_CAMERA_LOCK_INTERP(7.6975f, 664.1812f, -1058.097f, -0.0022f, 0.9563f, 0.2923f, 0.0072f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -52.5367f, 485.1883f, -991.5363f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -17.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var57, 0, 180, 0, 0);
+    }
+    else if (sVar3 == 3)
+    {
+        FLD_CAMERA_LOCK_INTERP(-65.6519f, 100.5364f, 122.5977f, 0.0572f, -0.144f, 0.0084f, 0.9879f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 56.4777f, 8.7322f, 22.2654f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -180.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var57, 0, 0, 0, 0);
+    }
+    else if (sVar3 == 4)
+    {
+        FLD_CAMERA_LOCK_INTERP(-48.8182f, 114.5653f, 1569.588f, -0.0274f, -0.1017f, -0.0028f, 0.9944f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 50.2912f, 0.00f, 1455.244f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 180.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var57, 0, 0, 0, 0);
+    }
+    else if (sVar3 == 5)
+    {
+        FLD_CAMERA_LOCK_INTERP(-42.3361f, 107.5383f, -0.9273f, 0.0031f, 0.9967f, 0.046f, -0.0668f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 20.2124f, -7.3618f, 144.7515f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 0.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var57, 0, 180, 0, 0);
+    }
+
+    FADEIN(0, 10);
+    FADE_SYNC();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_000, 0);
+    MSG_WND_CLS();
+    return;
+}
+
+
+// Procedure Index: 29
+void D04_EVT_3RD_END()
+{
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_001, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_002, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_CAMERA_INTERP_ASYNC(15);
+}
+
+
+// Procedure Index: 30
+void D04_EVT_4TH_START()
+{
+    int var58;
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_RESHND(0);
+    FLD_CAMERA_LOCK();
+    var58 = FLD_NPCID_SEARCH_RESHND2(8687, 0);
+    PUTS("*************************************");
+    PUTS("*************************************");
+    PUT(sVar4);
+    PUTS("*************************************");
+    PUTS("*************************************");
+    
+    if (sVar4 == 0)
+    {
+        FLD_CAMERA_LOCK_INTERP(-1496.484f, 139.3619f, 2317.245f, -0.0441f, -0.8182f, -0.0632f, 0.5697f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -1420.446f, 0.0001f, 2390.147f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 70.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var58, 0, -90, 0, 0);
+    }
+    else if (sVar4 == 1)
+    {
+        FLD_CAMERA_LOCK_INTERP(-19.776f, 113.9818f, 2584.911f, -0.0342f, 0.587f, 0.0248f, 0.8085f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -148.566f, 0.0001f, 2488.312f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -90.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var58, 0, 90, 0, 0);
+    }
+    else if (sVar4 == 2)
+    {
+        FLD_CAMERA_LOCK_INTERP(7.6975f, 664.1812f, -1058.097f, -0.0022f, 0.9563f, 0.2923f, 0.0072f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, -52.5367f, 485.1883f, -991.5363f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -17.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var58, 0, 180, 0, 0);
+    }
+    else if (sVar4 == 3)
+    {
+        FLD_CAMERA_LOCK_INTERP(-65.6519f, 100.5364f, 122.5977f, 0.0572f, -0.144f, 0.0084f, 0.9879f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 56.4777f, 8.7322f, 22.2654f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, -180.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var58, 0, 0, 0, 0);
+    }
+    else if (sVar4 == 4)
+    {
+        FLD_CAMERA_LOCK_INTERP(-48.8182f, 114.5653f, 1569.588f, -0.0274f, -0.1017f, -0.0028f, 0.9944f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 50.2912f, 0.00f, 1455.244f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 180.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var58, 0, 0, 0, 0);
+    }
+    else if (sVar4 == 5)
+    {
+        FLD_CAMERA_LOCK_INTERP(-42.3361f, 107.5383f, -0.9273f, 0.0031f, 0.9967f, 0.046f, -0.0668f, 0);
+        FLD_MODEL_SET_TRANSLATE(sVar0, 20.2124f, -7.3618f, 144.7515f, 0);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, 0.00f, 0, 0);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_MODEL_SET_ROTATE(var58, 0, 180, 0, 0);
+    }
+
+    FADEIN(0, 10);
+    FADE_SYNC();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_003, 0);
+    MSG_WND_CLS();
+    return;
+}
+
+
+// Procedure Index: 31
+void D04_EVT_4TH_END()
+{
+    FLD_WAIT(30);
+    EVT_FAST_PROC_START();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_004, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_005, 0);
+    MSG_WND_CLS();
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_CAMERA_INTERP_ASYNC(15);
+}
+
+
+// Procedure Index: 32
+void D04_EVT_LAST()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_SET_TRANSLATE(sVar0, -1471.599f, 0.0001f, 399.6464f, 0);
+    FLD_MODEL_SET_ROTATE(sVar0, 0, 0.00f, 0, 0);
+    FLD_ALLY_SET_WAIT(0);
+    FLD_PTY_MODEL_SET_STD_POS();
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(-1535.483f, 113.222f, 268.1792f, 0.0009f, 0.9991f, 0.0333f, -0.0264f, 0);
+    FADEIN(0, 10);
+    FADE_SYNC();
+    EVT_FAST_PROC_START();
+    FLD_WAIT(40);
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_006, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(MSG_e296_523_007, 0);
+    MSG_WND_CLS();
+    // bit id (536870912) + (1432) = 7576
+    BIT_ON((0x20000000 + 1432));
+    // bit id (536870912) + (1781) = 7925
+    
+    if (GET_COUNT(148) < 33000)
+    {
+        SET_COUNT(148, 33000);
+        BIT_ON((0x20000000 + 1781));
+    }
+
+    EVT_FAST_PROC_END();
+    FLD_SMP_EVENT_END(0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_CAMERA_INTERP_ASYNC(15);
+    return;
+}
+

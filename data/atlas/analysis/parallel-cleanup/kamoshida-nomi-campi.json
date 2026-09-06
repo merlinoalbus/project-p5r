@@ -1,0 +1,3768 @@
+{
+  "scope": "Tutte36 immagini Kamoshida, sola proposta di organizzazione nominale. Nessuna nuova estrazione/decompilazione.",
+  "summary": {
+    "images": 36,
+    "statuses": {
+      "missing-field-binding": 4,
+      "retain-native-floor": 15,
+      "multiple-field-contexts": 5,
+      "context-only-specific-title": 3,
+      "field-floor-conflict": 1,
+      "specific-field-title-proposal": 7,
+      "field-title-unresolved": 1
+    }
+  },
+  "resources": [
+    {
+      "code": "RMAP_151_0_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-0-0",
+        "nome": "Area 000 — RMAP_151_0_0",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Area 000",
+      "status": "missing-field-binding",
+      "afterProposed": "Area 000 — RMAP_151_0_0",
+      "reason": "Nessun campo ROADMAP associato: non applicare titolo dal codice risorsa.",
+      "contexts": [],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_0_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-0-1",
+        "nome": "Area 000 — RMAP_151_0_1",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Area 000",
+      "status": "missing-field-binding",
+      "afterProposed": "Area 000 — RMAP_151_0_1",
+      "reason": "Nessun campo ROADMAP associato: non applicare titolo dal codice risorsa.",
+      "contexts": [],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_1_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-1-0",
+        "nome": "Cancello del castello",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Cancello del castello",
+      "status": "retain-native-floor",
+      "afterProposed": "Cancello del castello",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19800,
+              "rawHex": "97000100010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0500000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 19852,
+                "elementIndex": 5,
+                "elementOffset": 80,
+                "elementRawHex": "0400000001000e000c0200200e010e01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 14,
+                  "offset": 1552,
+                  "rawHex": "0000000000000016000000010000000043616e63656c6c6f2064656c2063617374656c6c6f0000000000000000000000",
+                  "text": "Cancello del castello",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F151_001_00",
+          "roadmapOffset": 48,
+          "texpack": 4,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 576,
+              "rawHex": "97000100020000001f85bb41ffffffff0080094400004844000096440000c8440000fa440000164500002f4500004845f70100200500050000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 628,
+                "elementIndex": 5,
+                "elementOffset": 80,
+                "elementRawHex": "0400000001000e000c0200200e010e01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 14,
+                  "offset": 1552,
+                  "rawHex": "0000000000000016000000010000000043616e63656c6c6f2064656c2063617374656c6c6f0000000000000000000000",
+                  "text": "Cancello del castello",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Cancello del castello",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 1,
+            "offset": 152,
+            "rawHex": "0104010500000000",
+            "indices": [
+              260,
+              261,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 261,
+              "offset": 8276,
+              "rawHex": "43616e63656c6c6f2064656c2063617374656c6c6f00",
+              "text": "Cancello del castello",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19800,
+              "rawHex": "97000100010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0500000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 19852,
+                "elementIndex": 5,
+                "elementOffset": 80,
+                "elementRawHex": "0400000001000e000c0200200e010e01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 14,
+                  "offset": 1552,
+                  "rawHex": "0000000000000016000000010000000043616e63656c6c6f2064656c2063617374656c6c6f0000000000000000000000",
+                  "text": "Cancello del castello",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_1_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-1-1",
+        "nome": "Cancello del castello",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Cancello del castello",
+      "status": "retain-native-floor",
+      "afterProposed": "Cancello del castello",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_001_00",
+          "roadmapOffset": 48,
+          "texpack": 4,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 576,
+              "rawHex": "97000100020000001f85bb41ffffffff0080094400004844000096440000c8440000fa440000164500002f4500004845f70100200500050000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 630,
+                "elementIndex": 5,
+                "elementOffset": 80,
+                "elementRawHex": "0400000001000e000c0200200e010e01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 14,
+                  "offset": 1552,
+                  "rawHex": "0000000000000016000000010000000043616e63656c6c6f2064656c2063617374656c6c6f0000000000000000000000",
+                  "text": "Cancello del castello",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Cancello del castello",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 1,
+            "offset": 152,
+            "rawHex": "0104010500000000",
+            "indices": [
+              260,
+              261,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 261,
+              "offset": 8276,
+              "rawHex": "43616e63656c6c6f2064656c2063617374656c6c6f00",
+              "text": "Cancello del castello",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_2_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-2-0",
+        "nome": "Vecchio castello 1P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 1P",
+      "status": "multiple-field-contexts",
+      "afterProposed": "Vecchio castello 1P",
+      "reason": "Tre campi diversi selezionano lo stesso pacchetto/layer. La sala centrale e i due piani ovest non sono titoli universali.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19944,
+              "rawHex": "97000200010000001f85bb415a0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 19996,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null,
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_002_00",
+          "roadmapOffset": 64,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 772,
+                "elementIndex": 6,
+                "elementOffset": 96,
+                "elementRawHex": "0500000001000f000d02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 15,
+                  "offset": 1600,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20315000000000000000000000000000",
+                  "text": "Vecchio castello 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Sala centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 2,
+            "offset": 160,
+            "rawHex": "0104010600000000",
+            "indices": [
+              260,
+              262,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 262,
+              "offset": 8308,
+              "rawHex": "53616c612063656e7472616c6500",
+              "text": "Sala centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Sala centrale",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_003_00",
+          "roadmapOffset": 80,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 772,
+                "elementIndex": 6,
+                "elementOffset": 96,
+                "elementRawHex": "0500000001000f000d02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 15,
+                  "offset": 1600,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20315000000000000000000000000000",
+                  "text": "Vecchio castello 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio ovest 2P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 3,
+            "offset": 168,
+            "rawHex": "0104010800000000",
+            "indices": [
+              260,
+              264,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 264,
+              "offset": 8372,
+              "rawHex": "456469666963696f206f7665737420325000",
+              "text": "Edificio ovest 2P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio ovest 2P",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_014_00",
+          "roadmapOffset": 240,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 772,
+                "elementIndex": 6,
+                "elementOffset": 96,
+                "elementRawHex": "0500000001000f000d02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 15,
+                  "offset": 1600,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20315000000000000000000000000000",
+                  "text": "Vecchio castello 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio ovest 1P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 14,
+            "offset": 256,
+            "rawHex": "0104010700000000",
+            "indices": [
+              260,
+              263,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 263,
+              "offset": 8340,
+              "rawHex": "456469666963696f206f7665737420315000",
+              "text": "Edificio ovest 1P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio ovest 1P",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19944,
+              "rawHex": "97000200010000001f85bb415a0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 19996,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null,
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_2_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-2-1",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 2P",
+      "status": "multiple-field-contexts",
+      "afterProposed": "Vecchio castello 2P",
+      "reason": "Tre campi diversi selezionano lo stesso pacchetto/layer. La sala centrale e i due piani ovest non sono titoli universali.",
+      "contexts": [
+        {
+          "field": "F151_002_00",
+          "roadmapOffset": 64,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 774,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Sala centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 2,
+            "offset": 160,
+            "rawHex": "0104010600000000",
+            "indices": [
+              260,
+              262,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 262,
+              "offset": 8308,
+              "rawHex": "53616c612063656e7472616c6500",
+              "text": "Sala centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Sala centrale",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_003_00",
+          "roadmapOffset": 80,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 774,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio ovest 2P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 3,
+            "offset": 168,
+            "rawHex": "0104010800000000",
+            "indices": [
+              260,
+              264,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 264,
+              "offset": 8372,
+              "rawHex": "456469666963696f206f7665737420325000",
+              "text": "Edificio ovest 2P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio ovest 2P",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_014_00",
+          "roadmapOffset": 240,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 774,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio ovest 1P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 14,
+            "offset": 256,
+            "rawHex": "0104010700000000",
+            "indices": [
+              260,
+              263,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 263,
+              "offset": 8340,
+              "rawHex": "456469666963696f206f7665737420315000",
+              "text": "Edificio ovest 1P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio ovest 1P",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_2_2",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-2-2",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 2P",
+      "status": "multiple-field-contexts",
+      "afterProposed": "Vecchio castello 2P",
+      "reason": "Tre campi diversi selezionano lo stesso pacchetto/layer. La sala centrale e i due piani ovest non sono titoli universali.",
+      "contexts": [
+        {
+          "field": "F151_002_00",
+          "roadmapOffset": 64,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 2,
+                "indexOffset": 776,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Sala centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 2,
+            "offset": 160,
+            "rawHex": "0104010600000000",
+            "indices": [
+              260,
+              262,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 262,
+              "offset": 8308,
+              "rawHex": "53616c612063656e7472616c6500",
+              "text": "Sala centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Sala centrale",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_003_00",
+          "roadmapOffset": 80,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 2,
+                "indexOffset": 776,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio ovest 2P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 3,
+            "offset": 168,
+            "rawHex": "0104010800000000",
+            "indices": [
+              260,
+              264,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 264,
+              "offset": 8372,
+              "rawHex": "456469666963696f206f7665737420325000",
+              "text": "Edificio ovest 2P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio ovest 2P",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        },
+        {
+          "field": "F151_014_00",
+          "roadmapOffset": 240,
+          "texpack": 5,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 720,
+              "rawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+              "layer": {
+                "layer": 2,
+                "indexOffset": 776,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio ovest 1P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 14,
+            "offset": 256,
+            "rawHex": "0104010700000000",
+            "indices": [
+              260,
+              263,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 263,
+              "offset": 8340,
+              "rawHex": "456469666963696f206f7665737420315000",
+              "text": "Edificio ovest 1P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio ovest 1P",
+          "proposalLimitation": "Solo nome del campo selezionato; floor della risorsa resta distinto e non può essere sostituito."
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_3_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-3-0",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 2P",
+      "status": "context-only-specific-title",
+      "afterProposed": "Vecchio castello 2P",
+      "reason": "F151015 identifica Edificio est2P; altri contesti safe-room non coperti dal titolo di campo.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20016,
+              "rawHex": "97000300010000001f85bb415b0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20068,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F151_015_00",
+          "roadmapOffset": 256,
+          "texpack": 6,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 864,
+              "rawHex": "97000300010000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200700000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 916,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est 2P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 15,
+            "offset": 264,
+            "rawHex": "0104010900000000",
+            "indices": [
+              260,
+              265,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 265,
+              "offset": 8404,
+              "rawHex": "456469666963696f2065737420325000",
+              "text": "Edificio est 2P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio est 2P"
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20016,
+              "rawHex": "97000300010000001f85bb415b0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20068,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_4_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-4-0",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 2P",
+      "status": "field-floor-conflict",
+      "afterProposed": "Vecchio castello 2P",
+      "reason": "F151004 ha nome Edificio est3P ma il layer nativo è Vecchio castello2P. Non sostituire2P con3P.",
+      "contexts": [
+        {
+          "field": "F151_004_00",
+          "roadmapOffset": 96,
+          "texpack": 7,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1008,
+              "rawHex": "97000400030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200700090009000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1060,
+                "elementIndex": 7,
+                "elementOffset": 112,
+                "elementRawHex": "06000000010010000e02002058029501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 16,
+                  "offset": 1648,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20325000000000000000000000000000",
+                  "text": "Vecchio castello 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est 3P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 4,
+            "offset": 176,
+            "rawHex": "0104010a00000000",
+            "indices": [
+              260,
+              266,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 266,
+              "offset": 8436,
+              "rawHex": "456469666963696f2065737420335000",
+              "text": "Edificio est 3P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_4_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-4-1",
+        "nome": "Vecchio castello 3P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 3P",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Edificio est 3P",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_004_00",
+          "roadmapOffset": 96,
+          "texpack": 7,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1008,
+              "rawHex": "97000400030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200700090009000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 1062,
+                "elementIndex": 9,
+                "elementOffset": 144,
+                "elementRawHex": "08000001010011000f0200209001c201",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 17,
+                  "offset": 1696,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20335000000000000000000000000000",
+                  "text": "Vecchio castello 3P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est 3P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 4,
+            "offset": 176,
+            "rawHex": "0104010a00000000",
+            "indices": [
+              260,
+              266,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 266,
+              "offset": 8436,
+              "rawHex": "456469666963696f2065737420335000",
+              "text": "Edificio est 3P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_4_2",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-4-2",
+        "nome": "Vecchio castello 3P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 3P",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Edificio est 3P",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_004_00",
+          "roadmapOffset": 96,
+          "texpack": 7,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1008,
+              "rawHex": "97000400030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200700090009000000000000000000000000000000",
+              "layer": {
+                "layer": 2,
+                "indexOffset": 1064,
+                "elementIndex": 9,
+                "elementOffset": 144,
+                "elementRawHex": "08000001010011000f0200209001c201",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 17,
+                  "offset": 1696,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20335000000000000000000000000000",
+                  "text": "Vecchio castello 3P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est 3P",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 4,
+            "offset": 176,
+            "rawHex": "0104010a00000000",
+            "indices": [
+              260,
+              266,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 266,
+              "offset": 8436,
+              "rawHex": "456469666963696f2065737420335000",
+              "text": "Edificio est 3P",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_5_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-5-0",
+        "nome": "Vecchio castello 3P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 3P",
+      "status": "context-only-specific-title",
+      "afterProposed": "Vecchio castello 3P",
+      "reason": "Nome campo Edificio est,dépendance e floor nativo3P concordi; il nome composito non è una nuova citazione letterale.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20088,
+              "rawHex": "97000500010000001f85bb415c0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20140,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            },
+            {
+              "offset": 20160,
+              "rawHex": "97000500010000001f85bb415d0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20212,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F151_005_00",
+          "roadmapOffset": 112,
+          "texpack": 8,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1152,
+              "rawHex": "97000500030000001f85bb41ffffffff00002f4400007a440080bb440000e144004003450000164500002f4500004845f70100200900090009000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1204,
+                "elementIndex": 9,
+                "elementOffset": 144,
+                "elementRawHex": "08000001010011000f0200209001c201",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 17,
+                  "offset": 1696,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20335000000000000000000000000000",
+                  "text": "Vecchio castello 3P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est, dépendance",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 5,
+            "offset": 184,
+            "rawHex": "0104010b00000000",
+            "indices": [
+              260,
+              267,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 267,
+              "offset": 8468,
+              "rawHex": "456469666963696f206573742c2064849e70656e64616e636500",
+              "text": "Edificio est, dépendance",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio est, dépendance — 3P"
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20088,
+              "rawHex": "97000500010000001f85bb415c0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20140,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            },
+            {
+              "offset": 20160,
+              "rawHex": "97000500010000001f85bb415d0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20212,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_5_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-5-1",
+        "nome": "Vecchio castello 3P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 3P",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Edificio est, dépendance — 3P",
+      "reason": "Nome campo Edificio est,dépendance e floor nativo3P concordi; il nome composito non è una nuova citazione letterale.",
+      "contexts": [
+        {
+          "field": "F151_005_00",
+          "roadmapOffset": 112,
+          "texpack": 8,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1152,
+              "rawHex": "97000500030000001f85bb41ffffffff00002f4400007a440080bb440000e144004003450000164500002f4500004845f70100200900090009000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 1206,
+                "elementIndex": 9,
+                "elementOffset": 144,
+                "elementRawHex": "08000001010011000f0200209001c201",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 17,
+                  "offset": 1696,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20335000000000000000000000000000",
+                  "text": "Vecchio castello 3P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est, dépendance",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 5,
+            "offset": 184,
+            "rawHex": "0104010b00000000",
+            "indices": [
+              260,
+              267,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 267,
+              "offset": 8468,
+              "rawHex": "456469666963696f206573742c2064849e70656e64616e636500",
+              "text": "Edificio est, dépendance",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio est, dépendance — 3P"
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_5_2",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-5-2",
+        "nome": "Vecchio castello 3P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Vecchio castello 3P",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Edificio est, dépendance — 3P",
+      "reason": "Nome campo Edificio est,dépendance e floor nativo3P concordi; il nome composito non è una nuova citazione letterale.",
+      "contexts": [
+        {
+          "field": "F151_005_00",
+          "roadmapOffset": 112,
+          "texpack": 8,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1152,
+              "rawHex": "97000500030000001f85bb41ffffffff00002f4400007a440080bb440000e144004003450000164500002f4500004845f70100200900090009000000000000000000000000000000",
+              "layer": {
+                "layer": 2,
+                "indexOffset": 1208,
+                "elementIndex": 9,
+                "elementOffset": 144,
+                "elementRawHex": "08000001010011000f0200209001c201",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 17,
+                  "offset": 1696,
+                  "rawHex": "000000000000001400000001000000005665636368696f2063617374656c6c6f20335000000000000000000000000000",
+                  "text": "Vecchio castello 3P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Edificio est, dépendance",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 5,
+            "offset": 184,
+            "rawHex": "0104010b00000000",
+            "indices": [
+              260,
+              267,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 267,
+              "offset": 8468,
+              "rawHex": "456469666963696f206573742c2064849e70656e64616e636500",
+              "text": "Edificio est, dépendance",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Edificio est, dépendance — 3P"
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_6_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-6-0",
+        "nome": "Tetto",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Tetto",
+      "status": "retain-native-floor",
+      "afterProposed": "Tetto",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_006_00",
+          "roadmapOffset": 128,
+          "texpack": 9,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1296,
+              "rawHex": "97000600050000001f85bb41ffffffff0000c8c30000fa430040834500409c4500b41b4600c81b4600f01b4600181c46ffffffff0a000a000a000a000b0000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1348,
+                "elementIndex": 10,
+                "elementOffset": 160,
+                "elementRawHex": "0900000201001200100200202602e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 18,
+                  "offset": 1744,
+                  "rawHex": "00000000000000060000000100000000546574746f0000000000000000000000",
+                  "text": "Tetto",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Tetto",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 6,
+            "offset": 192,
+            "rawHex": "0104010d00000000",
+            "indices": [
+              260,
+              269,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 269,
+              "offset": 8516,
+              "rawHex": "546574746f00",
+              "text": "Tetto",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_6_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-6-1",
+        "nome": "Tetto",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Tetto",
+      "status": "retain-native-floor",
+      "afterProposed": "Tetto",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_006_00",
+          "roadmapOffset": 128,
+          "texpack": 9,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1296,
+              "rawHex": "97000600050000001f85bb41ffffffff0000c8c30000fa430040834500409c4500b41b4600c81b4600f01b4600181c46ffffffff0a000a000a000a000b0000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 1350,
+                "elementIndex": 10,
+                "elementOffset": 160,
+                "elementRawHex": "0900000201001200100200202602e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 18,
+                  "offset": 1744,
+                  "rawHex": "00000000000000060000000100000000546574746f0000000000000000000000",
+                  "text": "Tetto",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Tetto",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 6,
+            "offset": 192,
+            "rawHex": "0104010d00000000",
+            "indices": [
+              260,
+              269,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 269,
+              "offset": 8516,
+              "rawHex": "546574746f00",
+              "text": "Tetto",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_6_2",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-6-2",
+        "nome": "Tetto",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Tetto",
+      "status": "retain-native-floor",
+      "afterProposed": "Tetto",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_006_00",
+          "roadmapOffset": 128,
+          "texpack": 9,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1296,
+              "rawHex": "97000600050000001f85bb41ffffffff0000c8c30000fa430040834500409c4500b41b4600c81b4600f01b4600181c46ffffffff0a000a000a000a000b0000000000000000000000",
+              "layer": {
+                "layer": 2,
+                "indexOffset": 1352,
+                "elementIndex": 10,
+                "elementOffset": 160,
+                "elementRawHex": "0900000201001200100200202602e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 18,
+                  "offset": 1744,
+                  "rawHex": "00000000000000060000000100000000546574746f0000000000000000000000",
+                  "text": "Tetto",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Tetto",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 6,
+            "offset": 192,
+            "rawHex": "0104010d00000000",
+            "indices": [
+              260,
+              269,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 269,
+              "offset": 8516,
+              "rawHex": "546574746f00",
+              "text": "Tetto",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_6_3",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-6-3",
+        "nome": "Tetto",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Tetto",
+      "status": "retain-native-floor",
+      "afterProposed": "Tetto",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_006_00",
+          "roadmapOffset": 128,
+          "texpack": 9,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1296,
+              "rawHex": "97000600050000001f85bb41ffffffff0000c8c30000fa430040834500409c4500b41b4600c81b4600f01b4600181c46ffffffff0a000a000a000a000b0000000000000000000000",
+              "layer": {
+                "layer": 3,
+                "indexOffset": 1354,
+                "elementIndex": 10,
+                "elementOffset": 160,
+                "elementRawHex": "0900000201001200100200202602e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 18,
+                  "offset": 1744,
+                  "rawHex": "00000000000000060000000100000000546574746f0000000000000000000000",
+                  "text": "Tetto",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Tetto",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 6,
+            "offset": 192,
+            "rawHex": "0104010d00000000",
+            "indices": [
+              260,
+              269,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 269,
+              "offset": 8516,
+              "rawHex": "546574746f00",
+              "text": "Tetto",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_6_4",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-6-4",
+        "nome": "Tetto",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Tetto",
+      "status": "retain-native-floor",
+      "afterProposed": "Tetto",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_006_00",
+          "roadmapOffset": 128,
+          "texpack": 9,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1296,
+              "rawHex": "97000600050000001f85bb41ffffffff0000c8c30000fa430040834500409c4500b41b4600c81b4600f01b4600181c46ffffffff0a000a000a000a000b0000000000000000000000",
+              "layer": {
+                "layer": 4,
+                "indexOffset": 1356,
+                "elementIndex": 11,
+                "elementOffset": 176,
+                "elementRawHex": "0900000401001200a61300202602e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 18,
+                  "offset": 1744,
+                  "rawHex": "00000000000000060000000100000000546574746f0000000000000000000000",
+                  "text": "Tetto",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Tetto",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 6,
+            "offset": 192,
+            "rawHex": "0104010d00000000",
+            "indices": [
+              260,
+              269,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 269,
+              "offset": 8516,
+              "rawHex": "546574746f00",
+              "text": "Tetto",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_7_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-7-0",
+        "nome": "Torre: Livello inferiore",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Torre: Livello inferiore",
+      "status": "context-only-specific-title",
+      "afterProposed": "Torre: Livello inferiore",
+      "reason": "Combina nome campo Torre centrale e livello nativo; non distingue i due layer superiori né deduce piani aggiuntivi.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20232,
+              "rawHex": "97000700010000001f85bb415e0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20284,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F151_007_00",
+          "roadmapOffset": 144,
+          "texpack": 10,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1440,
+              "rawHex": "97000700010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200c00000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1492,
+                "elementIndex": 12,
+                "elementOffset": 192,
+                "elementRawHex": "0a0000000100130011020020d0026801",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 19,
+                  "offset": 1776,
+                  "rawHex": "00000000000000190000000100000000546f7272653a204c6976656c6c6f20696e666572696f72650000000000000000",
+                  "text": "Torre: Livello inferiore",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Torre centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 7,
+            "offset": 200,
+            "rawHex": "0104010e00000000",
+            "indices": [
+              260,
+              270,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 270,
+              "offset": 8532,
+              "rawHex": "546f7272652063656e7472616c6500",
+              "text": "Torre centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Torre centrale: Livello inferiore"
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20232,
+              "rawHex": "97000700010000001f85bb415e0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20284,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_9_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-9-0",
+        "nome": "Torre: Livello di mezzo",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Torre: Livello di mezzo",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Torre centrale: Livello di mezzo",
+      "reason": "Combina nome campo Torre centrale e livello nativo; non distingue i due layer superiori né deduce piani aggiuntivi.",
+      "contexts": [
+        {
+          "field": "F151_009_00",
+          "roadmapOffset": 160,
+          "texpack": 11,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1584,
+              "rawHex": "97000900010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200d00000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1636,
+                "elementIndex": 13,
+                "elementOffset": 208,
+                "elementRawHex": "0b0000000100140013020020d0026801",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 20,
+                  "offset": 1824,
+                  "rawHex": "00000000000000180000000100000000546f7272653a204c6976656c6c6f206469206d657a7a6f000000000000000000",
+                  "text": "Torre: Livello di mezzo",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Torre centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 9,
+            "offset": 216,
+            "rawHex": "0104010e00000000",
+            "indices": [
+              260,
+              270,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 270,
+              "offset": 8532,
+              "rawHex": "546f7272652063656e7472616c6500",
+              "text": "Torre centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Torre centrale: Livello di mezzo"
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_10_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-10-0",
+        "nome": "Torre: Livello superiore",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Torre: Livello superiore",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Torre centrale: Livello superiore",
+      "reason": "Combina nome campo Torre centrale e livello nativo; non distingue i due layer superiori né deduce piani aggiuntivi.",
+      "contexts": [
+        {
+          "field": "F151_010_00",
+          "roadmapOffset": 176,
+          "texpack": 12,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1728,
+              "rawHex": "97000a00020000001f85bb41ffffffff008072440000fa4400401c450000c8440000fa440000164500002f4500004845f80100200e000e0000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1780,
+                "elementIndex": 14,
+                "elementOffset": 224,
+                "elementRawHex": "0c00000001001500140200204a012c01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 21,
+                  "offset": 1872,
+                  "rawHex": "00000000000000190000000100000000546f7272653a204c6976656c6c6f207375706572696f72650000000000000000",
+                  "text": "Torre: Livello superiore",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Torre centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 10,
+            "offset": 224,
+            "rawHex": "0104010e00000000",
+            "indices": [
+              260,
+              270,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 270,
+              "offset": 8532,
+              "rawHex": "546f7272652063656e7472616c6500",
+              "text": "Torre centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Torre centrale: Livello superiore"
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_10_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-10-1",
+        "nome": "Torre: Livello superiore",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Torre: Livello superiore",
+      "status": "specific-field-title-proposal",
+      "afterProposed": "Torre centrale: Livello superiore",
+      "reason": "Combina nome campo Torre centrale e livello nativo; non distingue i due layer superiori né deduce piani aggiuntivi.",
+      "contexts": [
+        {
+          "field": "F151_010_00",
+          "roadmapOffset": 176,
+          "texpack": 12,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1728,
+              "rawHex": "97000a00020000001f85bb41ffffffff008072440000fa4400401c450000c8440000fa440000164500002f4500004845f80100200e000e0000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 1782,
+                "elementIndex": 14,
+                "elementOffset": 224,
+                "elementRawHex": "0c00000001001500140200204a012c01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 21,
+                  "offset": 1872,
+                  "rawHex": "00000000000000190000000100000000546f7272653a204c6976656c6c6f207375706572696f72650000000000000000",
+                  "text": "Torre: Livello superiore",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Torre centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 10,
+            "offset": 224,
+            "rawHex": "0104010e00000000",
+            "indices": [
+              260,
+              270,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 270,
+              "offset": 8532,
+              "rawHex": "546f7272652063656e7472616c6500",
+              "text": "Torre centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Torre centrale: Livello superiore"
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_11_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-11-0",
+        "nome": "Torre: Sala del trono",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Torre: Sala del trono",
+      "status": "multiple-field-contexts",
+      "afterProposed": "Torre: Sala del trono",
+      "reason": "F151011 Sala del trono eF151012 Stanza del Tesoro selezionano la stessa risorsa in pacchetti13/14; il nome va scelto per contesto, non universalizzato.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20304,
+              "rawHex": "97000b00010000001f85bb415f0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20356,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F151_011_00",
+          "roadmapOffset": 192,
+          "texpack": 13,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1872,
+              "rawHex": "97000b00020000001f85bb41ffffffff0000fa4300004844000096440000c8440000fa440000164500002f4500004845f80100200f000f0000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 1924,
+                "elementIndex": 15,
+                "elementOffset": 240,
+                "elementRawHex": "0d0000010100170015020020d0026801",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 23,
+                  "offset": 1968,
+                  "rawHex": "00000000000000160000000100000000546f7272653a2053616c612064656c2074726f6e6f0000000000000000000000",
+                  "text": "Torre: Sala del trono",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Sala del trono",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 11,
+            "offset": 232,
+            "rawHex": "0104010f00000000",
+            "indices": [
+              260,
+              271,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 271,
+              "offset": 8564,
+              "rawHex": "53616c612064656c2074726f6e6f00",
+              "text": "Sala del trono",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Sala del trono"
+        },
+        {
+          "field": "F151_012_00",
+          "roadmapOffset": 208,
+          "texpack": 14,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2016,
+              "rawHex": "97000b00020000001f85bb41ffffffff0000c8c30000c84300004844000096440000c8440000fa440000164500002f45f80100200f000f0000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 2068,
+                "elementIndex": 15,
+                "elementOffset": 240,
+                "elementRawHex": "0d0000010100170015020020d0026801",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 23,
+                  "offset": 1968,
+                  "rawHex": "00000000000000160000000100000000546f7272653a2053616c612064656c2074726f6e6f0000000000000000000000",
+                  "text": "Torre: Sala del trono",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Stanza del Tesoro",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 12,
+            "offset": 240,
+            "rawHex": "0104011000000000",
+            "indices": [
+              260,
+              272,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 272,
+              "offset": 8596,
+              "rawHex": "5374616e7a612064656c205465736f726f00",
+              "text": "Stanza del Tesoro",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Stanza del Tesoro"
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 20304,
+              "rawHex": "97000b00010000001f85bb415f0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f80100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 20356,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_11_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-11-1",
+        "nome": "Torre: Sala del trono",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Torre: Sala del trono",
+      "status": "multiple-field-contexts",
+      "afterProposed": "Torre: Sala del trono",
+      "reason": "F151011 Sala del trono eF151012 Stanza del Tesoro selezionano la stessa risorsa in pacchetti13/14; il nome va scelto per contesto, non universalizzato.",
+      "contexts": [
+        {
+          "field": "F151_011_00",
+          "roadmapOffset": 192,
+          "texpack": 13,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 1872,
+              "rawHex": "97000b00020000001f85bb41ffffffff0000fa4300004844000096440000c8440000fa440000164500002f4500004845f80100200f000f0000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 1926,
+                "elementIndex": 15,
+                "elementOffset": 240,
+                "elementRawHex": "0d0000010100170015020020d0026801",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 23,
+                  "offset": 1968,
+                  "rawHex": "00000000000000160000000100000000546f7272653a2053616c612064656c2074726f6e6f0000000000000000000000",
+                  "text": "Torre: Sala del trono",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Sala del trono",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 11,
+            "offset": 232,
+            "rawHex": "0104010f00000000",
+            "indices": [
+              260,
+              271,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 271,
+              "offset": 8564,
+              "rawHex": "53616c612064656c2074726f6e6f00",
+              "text": "Sala del trono",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Sala del trono"
+        },
+        {
+          "field": "F151_012_00",
+          "roadmapOffset": 208,
+          "texpack": 14,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2016,
+              "rawHex": "97000b00020000001f85bb41ffffffff0000c8c30000c84300004844000096440000c8440000fa440000164500002f45f80100200f000f0000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 2070,
+                "elementIndex": 15,
+                "elementOffset": 240,
+                "elementRawHex": "0d0000010100170015020020d0026801",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 23,
+                  "offset": 1968,
+                  "rawHex": "00000000000000160000000100000000546f7272653a2053616c612064656c2074726f6e6f0000000000000000000000",
+                  "text": "Torre: Sala del trono",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Stanza del Tesoro",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 12,
+            "offset": 240,
+            "rawHex": "0104011000000000",
+            "indices": [
+              260,
+              272,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 272,
+              "offset": 8596,
+              "rawHex": "5374616e7a612064656c205465736f726f00",
+              "text": "Stanza del Tesoro",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": "Stanza del Tesoro"
+        }
+      ],
+      "requiresExplicitContext": true,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_13_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-13-0",
+        "nome": "Stanza segreta",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Stanza segreta",
+      "status": "retain-native-floor",
+      "afterProposed": "Stanza segreta",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_013_00",
+          "roadmapOffset": 224,
+          "texpack": 15,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2160,
+              "rawHex": "97000d00010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0800000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 2212,
+                "elementIndex": 8,
+                "elementOffset": 128,
+                "elementRawHex": "0f000000010019001702002000030803",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 25,
+                  "offset": 2064,
+                  "rawHex": "000000000000000f00000001000000005374616e7a6120736567726574610000",
+                  "text": "Stanza segreta",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Stanza segreta",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 13,
+            "offset": 248,
+            "rawHex": "0104011400000000",
+            "indices": [
+              260,
+              276,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 276,
+              "offset": 8724,
+              "rawHex": "5374616e7a61207365677265746100",
+              "text": "Stanza segreta",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_151_16_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-151-16-0",
+        "nome": "Sala centrale",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Area 016",
+      "status": "retain-native-floor",
+      "afterProposed": "Sala centrale",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_016_00",
+          "roadmapOffset": 272,
+          "texpack": 16,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2304,
+              "rawHex": "97001000010000001f85bb41ffffffff0000c843000096440000c8440000e1440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 2356,
+                "elementIndex": 0,
+                "elementOffset": 0,
+                "elementRawHex": "0000000000000000ffffffff00000000",
+                "groupTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Sala centrale",
+          "fieldTitleRecord": {
+            "major": 151,
+            "minor": 16,
+            "offset": 272,
+            "rawHex": "0104010600000000",
+            "indices": [
+              260,
+              262,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 262,
+              "offset": 8308,
+              "rawHex": "53616c612063656e7472616c6500",
+              "text": "Sala centrale",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_1_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-1-0",
+        "nome": "Prigione sotterranea 1P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Prigione sotterranea 1P",
+      "status": "retain-native-floor",
+      "afterProposed": "Prigione sotterranea 1P",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19872,
+              "rawHex": "98000100020000001f85bb41620a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200400040000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 19924,
+                "elementIndex": 4,
+                "elementOffset": 64,
+                "elementRawHex": "1100000001000d00080200208601e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 13,
+                  "offset": 1504,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203150000000000000000000",
+                  "text": "Prigione sotterranea 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19872,
+              "rawHex": "98000100020000001f85bb41620a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200400040000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 19924,
+                "elementIndex": 4,
+                "elementOffset": 64,
+                "elementRawHex": "1100000001000d00080200208601e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 13,
+                  "offset": 1504,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203150000000000000000000",
+                  "text": "Prigione sotterranea 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F152_001_00",
+          "roadmapOffset": 304,
+          "texpack": 17,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2448,
+              "rawHex": "98000100020000001f85bb41ffffffff008054440080bb440040ce440000e1440000fa440000164500002f4500004845f70100200400040000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 2500,
+                "elementIndex": 4,
+                "elementOffset": 64,
+                "elementRawHex": "1100000001000d00080200208601e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 13,
+                  "offset": 1504,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203150000000000000000000",
+                  "text": "Prigione sotterranea 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Prigione sotterranea",
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 1,
+            "offset": 312,
+            "rawHex": "0104011100000000",
+            "indices": [
+              260,
+              273,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 273,
+              "offset": 8628,
+              "rawHex": "50726967696f6e6520736f7474657272616e656100",
+              "text": "Prigione sotterranea",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_1_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-1-1",
+        "nome": "Prigione sotterranea 1P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Prigione sotterranea 1P",
+      "status": "retain-native-floor",
+      "afterProposed": "Prigione sotterranea 1P",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F151_051_00",
+          "roadmapOffset": 32,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19872,
+              "rawHex": "98000100020000001f85bb41620a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200400040000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 19926,
+                "elementIndex": 4,
+                "elementOffset": 64,
+                "elementRawHex": "1100000001000d00080200208601e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 13,
+                  "offset": 1504,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203150000000000000000000",
+                  "text": "Prigione sotterranea 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F152_051_00",
+          "roadmapOffset": 288,
+          "texpack": 137,
+          "mode": 2,
+          "textureRecords": [
+            {
+              "offset": 19872,
+              "rawHex": "98000100020000001f85bb41620a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200400040000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 19926,
+                "elementIndex": 4,
+                "elementOffset": 64,
+                "elementRawHex": "1100000001000d00080200208601e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 13,
+                  "offset": 1504,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203150000000000000000000",
+                  "text": "Prigione sotterranea 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": null,
+          "proposedContextName": null
+        },
+        {
+          "field": "F152_001_00",
+          "roadmapOffset": 304,
+          "texpack": 17,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2448,
+              "rawHex": "98000100020000001f85bb41ffffffff008054440080bb440040ce440000e1440000fa440000164500002f4500004845f70100200400040000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 2502,
+                "elementIndex": 4,
+                "elementOffset": 64,
+                "elementRawHex": "1100000001000d00080200208601e100",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 13,
+                  "offset": 1504,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203150000000000000000000",
+                  "text": "Prigione sotterranea 1P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Prigione sotterranea",
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 1,
+            "offset": 312,
+            "rawHex": "0104011100000000",
+            "indices": [
+              260,
+              273,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 273,
+              "offset": 8628,
+              "rawHex": "50726967696f6e6520736f7474657272616e656100",
+              "text": "Prigione sotterranea",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_2_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-2-0",
+        "nome": "Prigione sotterranea 2P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Prigione sotterranea 2P",
+      "status": "retain-native-floor",
+      "afterProposed": "Prigione sotterranea 2P",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F152_002_00",
+          "roadmapOffset": 320,
+          "texpack": 18,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2592,
+              "rawHex": "98000200020000001f85bb41ffffffff00a08c440000fa44004003450080094500c00f450000164500002f4500004845f70100200300030000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 2644,
+                "elementIndex": 3,
+                "elementOffset": 48,
+                "elementRawHex": "1200000001000c00090200200e019501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 12,
+                  "offset": 1456,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203250000000000000000000",
+                  "text": "Prigione sotterranea 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Prigione sotterranea",
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 2,
+            "offset": 320,
+            "rawHex": "0104011100000000",
+            "indices": [
+              260,
+              273,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 273,
+              "offset": 8628,
+              "rawHex": "50726967696f6e6520736f7474657272616e656100",
+              "text": "Prigione sotterranea",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_2_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-2-1",
+        "nome": "Prigione sotterranea 2P",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Prigione sotterranea 2P",
+      "status": "retain-native-floor",
+      "afterProposed": "Prigione sotterranea 2P",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F152_002_00",
+          "roadmapOffset": 320,
+          "texpack": 18,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2592,
+              "rawHex": "98000200020000001f85bb41ffffffff00a08c440000fa44004003450080094500c00f450000164500002f4500004845f70100200300030000000000000000000000000000000000",
+              "layer": {
+                "layer": 1,
+                "indexOffset": 2646,
+                "elementIndex": 3,
+                "elementOffset": 48,
+                "elementRawHex": "1200000001000c00090200200e019501",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 12,
+                  "offset": 1456,
+                  "rawHex": "0000000000000018000000010000000050726967696f6e6520736f7474657272616e6561203250000000000000000000",
+                  "text": "Prigione sotterranea 2P",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Prigione sotterranea",
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 2,
+            "offset": 320,
+            "rawHex": "0104011100000000",
+            "indices": [
+              260,
+              273,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 273,
+              "offset": 8628,
+              "rawHex": "50726967696f6e6520736f7474657272616e656100",
+              "text": "Prigione sotterranea",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_4_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-4-0",
+        "nome": "Passaggio sotterraneo",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Passaggio sotterraneo",
+      "status": "retain-native-floor",
+      "afterProposed": "Passaggio sotterraneo",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F152_004_00",
+          "roadmapOffset": 336,
+          "texpack": 20,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 2880,
+              "rawHex": "98000400010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200200000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 2932,
+                "elementIndex": 2,
+                "elementOffset": 32,
+                "elementRawHex": "1400000001000b000a0200202a038601",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 11,
+                  "offset": 1408,
+                  "rawHex": "0000000000000016000000010000000050617373616767696f20736f7474657272616e656f0000000000000000000000",
+                  "text": "Passaggio sotterraneo",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Passaggio sotterraneo",
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 4,
+            "offset": 336,
+            "rawHex": "0104011200000000",
+            "indices": [
+              260,
+              274,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 274,
+              "offset": 8660,
+              "rawHex": "50617373616767696f20736f7474657272616e656f00",
+              "text": "Passaggio sotterraneo",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_5_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-5-0",
+        "nome": "Area 005 — RMAP_152_5_0",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Area 005",
+      "status": "field-title-unresolved",
+      "afterProposed": "Area 005 — RMAP_152_5_0",
+      "reason": "Campo associato ma nome di campo non ricostruito: candidata grafica non equivale a binding.",
+      "contexts": [
+        {
+          "field": "F152_005_00",
+          "roadmapOffset": 352,
+          "texpack": 21,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 3024,
+              "rawHex": "98000500010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845f70100201100000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 3076,
+                "elementIndex": 17,
+                "elementOffset": 272,
+                "elementRawHex": "150000000100000015120020c5007a01",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 0,
+                  "offset": 896,
+                  "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                  "text": "???",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": null,
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 5,
+            "offset": 344,
+            "rawHex": "010400fa00000000",
+            "indices": [
+              260,
+              250,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 250,
+              "offset": 8084,
+              "rawHex": "3f3f3f00",
+              "text": "???",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_6_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-6-0",
+        "nome": "Palestra dell'amore",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Palestra dell'amore",
+      "status": "retain-native-floor",
+      "afterProposed": "Palestra dell'amore",
+      "reason": "Il titolo di campo non distingue ulteriormente le immagini del medesimo livello.",
+      "contexts": [
+        {
+          "field": "F152_006_00",
+          "roadmapOffset": 368,
+          "texpack": 22,
+          "mode": 3,
+          "textureRecords": [
+            {
+              "offset": 3168,
+              "rawHex": "98000600010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200100000000000000000000000000000000000000",
+              "layer": {
+                "layer": 0,
+                "indexOffset": 3220,
+                "elementIndex": 1,
+                "elementOffset": 16,
+                "elementRawHex": "1600000001000a000b0200202a03e001",
+                "groupTitle": {
+                  "index": 1,
+                  "offset": 928,
+                  "rawHex": "0000000000000015000000010000000050616c617a7a6f206469204b616d6f7368696461000000000000000000000000",
+                  "text": "Palazzo di Kamoshida",
+                  "unknownOffsets": []
+                },
+                "areaTitle": {
+                  "index": 10,
+                  "offset": 1360,
+                  "rawHex": "0000000000000014000000010000000050616c65737472612064656c6c27616d6f726500000000000000000000000000",
+                  "text": "Palestra dell'amore",
+                  "unknownOffsets": []
+                }
+              }
+            }
+          ],
+          "fieldTitle": "Palestra dell'amore",
+          "fieldTitleRecord": {
+            "major": 152,
+            "minor": 6,
+            "offset": 352,
+            "rawHex": "0104011300000000",
+            "indices": [
+              260,
+              275,
+              0,
+              0
+            ],
+            "group": {
+              "index": 260,
+              "offset": 8244,
+              "rawHex": "50616c617a7a6f206469204b616d6f736869646100",
+              "text": "Palazzo di Kamoshida",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "title": {
+              "index": 275,
+              "offset": 8692,
+              "rawHex": "50616c65737472612064656c6c27616d6f726500",
+              "text": "Palestra dell'amore",
+              "status": "valido",
+              "unknownOffsets": []
+            }
+          },
+          "proposedContextName": null
+        }
+      ],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_11_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-11-0",
+        "nome": "Area 011 — RMAP_152_11_0",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Area 011",
+      "status": "missing-field-binding",
+      "afterProposed": "Area 011 — RMAP_152_11_0",
+      "reason": "Nessun campo ROADMAP associato: non applicare titolo dal codice risorsa.",
+      "contexts": [],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    },
+    {
+      "code": "RMAP_152_11_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-152-11-1",
+        "nome": "Area 011 — RMAP_152_11_1",
+        "genitore_chiave": "dungeon-kamoshida"
+      },
+      "nativeFloorFromExistingMetadata": "Area 011",
+      "status": "missing-field-binding",
+      "afterProposed": "Area 011 — RMAP_152_11_1",
+      "reason": "Nessun campo ROADMAP associato: non applicare titolo dal codice risorsa.",
+      "contexts": [],
+      "requiresExplicitContext": false,
+      "deduplicationApproved": false
+    }
+  ],
+  "rules": [
+    "Binding campo→texpack→risorsa/layer verificato su ogni contesto; nessuna deduzione dal nome file.",
+    "Nome del campo e titolo nativo del layer conservati separatamente; conflitti non sanati arbitrariamente.",
+    "Più immagini con titolo ancora uguale non sono autorizzate alla fusione: audit pixel separato al backend.",
+    "Le proposte composite uniscono due titoli nativi concordi; non sono trascrizioni letterali nuove.",
+    "Il contesto safe-room privo di record non eredita il titolo normale."
+  ],
+  "sources": [
+    {
+      "file": "outputs\\mappe-p5r\\mondo_metadati.json",
+      "sha256": "080e569dbcb203e01ae1d6d325831ada3e2e7dbc6e4701ec1e755784808df2f6"
+    },
+    {
+      "file": "outputs\\mappe-p5r\\mondo_texpack_evidenze.json",
+      "sha256": "e14eecee8e1af87409de11645be63b6ba48fbde421a3e690847df8700f6eaf94"
+    },
+    {
+      "file": "work\\parallel-cleanup\\nomi-residui-approfondimento.json",
+      "sha256": "cb99270fefe716069b9b0630fb4d64168b2636ab6642334fde2a165f32e9e743"
+    }
+  ],
+  "applied": false
+}

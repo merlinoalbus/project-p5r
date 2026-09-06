@@ -1,0 +1,437 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("160_010_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D08_160_10_minimap_00()
+{
+    // bit id (536870912) + (3213) = 9357
+    BIT_ON((0x20000000 + 3213));
+}
+
+
+// Procedure Index: 1
+void D08_160_10_minimap_01()
+{
+    // bit id (536870912) + (1197) = 7341
+    BIT_ON((0x20000000 + 1197));
+}
+
+
+// Procedure Index: 2
+void D08_160_10_minimap_02()
+{
+    // bit id (536870912) + (1198) = 7342
+    BIT_ON((0x20000000 + 1198));
+}
+
+
+// Procedure Index: 3
+void D08_160_10_minimap_03()
+{
+    // bit id (536870912) + (1199) = 7343
+    BIT_ON((0x20000000 + 1199));
+}
+
+
+// Procedure Index: 4
+void D08_160_10_minimap_04()
+{
+    // bit id (536870912) + (1200) = 7344
+    BIT_ON((0x20000000 + 1200));
+}
+
+
+// Procedure Index: 5
+void D08_160_10_minimap_05()
+{
+    // bit id (536870912) + (1201) = 7345
+    BIT_ON((0x20000000 + 1201));
+    // bit id (536870912) + (1203) = 7347
+    BIT_ON((0x20000000 + 1203));
+}
+
+
+// Procedure Index: 6
+void D08_160_10_minimap_06()
+{
+    // bit id (536870912) + (1202) = 7346
+    BIT_ON((0x20000000 + 1202));
+    // bit id (536870912) + (1203) = 7347
+    BIT_ON((0x20000000 + 1203));
+}
+
+
+// Procedure Index: 7
+void D08_160_10_minimap_07()
+{
+    // bit id (536870912) + (1204) = 7348
+    BIT_ON((0x20000000 + 1204));
+}
+
+
+// Procedure Index: 8
+void D08_160_10_minimap_08()
+{
+    // bit id (536870912) + (1205) = 7349
+    BIT_ON((0x20000000 + 1205));
+}
+
+
+// Procedure Index: 9
+void D08_160_10_minimap_09()
+{
+    // bit id (536870912) + (1206) = 7350
+    BIT_ON((0x20000000 + 1206));
+}
+
+
+// Procedure Index: 10
+void PRISON_PC02()
+{
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(453, 101);
+    // bit id (536870912) + (3166) = 9310
+    BIT_OFF((0x20000000 + 3166));
+    // bit id (536870912) + (3160) = 9304
+    BIT_ON((0x20000000 + 3160));
+    PRISON_PARTY_CHECK();
+    CALL_FIELD(160, 10, 12, 0);
+    return;
+}
+
+
+// Procedure Index: 11
+void PRISON_PC04()
+{
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(453, 102);
+    // bit id (536870912) + (3167) = 9311
+    BIT_OFF((0x20000000 + 3167));
+    // bit id (536870912) + (3161) = 9305
+    BIT_ON((0x20000000 + 3161));
+    PRISON_PARTY_CHECK();
+    CALL_FIELD(160, 10, 14, 0);
+    return;
+}
+
+
+// Procedure Index: 12
+void PRISON_PC05()
+{
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(453, 103);
+    // bit id (536870912) + (3168) = 9312
+    BIT_OFF((0x20000000 + 3168));
+    // bit id (536870912) + (3162) = 9306
+    BIT_ON((0x20000000 + 3162));
+    PRISON_PARTY_CHECK();
+    CALL_FIELD(160, 10, 15, 0);
+    return;
+}
+
+
+// Procedure Index: 13
+void PRISON_PC06()
+{
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(453, 104);
+    // bit id (536870912) + (3169) = 9313
+    BIT_OFF((0x20000000 + 3169));
+    // bit id (536870912) + (3163) = 9307
+    BIT_ON((0x20000000 + 3163));
+    PRISON_PARTY_CHECK();
+    CALL_FIELD(160, 10, 0x10, 0);
+    return;
+}
+
+
+// Procedure Index: 14
+void PRISON_PC07()
+{
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(453, 105);
+    // bit id (536870912) + (3171) = 9315
+    BIT_OFF((0x20000000 + 3171));
+    // bit id (536870912) + (3165) = 9309
+    BIT_ON((0x20000000 + 3165));
+    PRISON_PARTY_CHECK();
+    CALL_FIELD(160, 10, 18, 0);
+    return;
+}
+
+
+// Procedure Index: 15
+void PRISON_PC08()
+{
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(453, 106);
+    // bit id (536870912) + (3170) = 9314
+    BIT_OFF((0x20000000 + 3170));
+    // bit id (536870912) + (3164) = 9308
+    BIT_ON((0x20000000 + 3164));
+    PRISON_PARTY_CHECK();
+    CALL_FIELD(160, 10, 17, 0);
+    return;
+}
+
+
+// Procedure Index: 16
+void PRISON_PARTY_CHECK()
+{
+    // bit id (536870912) + (3160) = 9304
+    // bit id (536870912) + (3161) = 9305
+    // bit id (536870912) + (3162) = 9306
+    // bit id (536870912) + (3163) = 9307
+    // bit id (536870912) + (3164) = 9308
+    // bit id (536870912) + (3165) = 9309
+    // bit id (536870912) + (3172) = 9316
+    
+    if ((((((BIT_CHK((0x20000000 + 3160)) == 1) && (BIT_CHK((0x20000000 + 3161)) == 1)) && (BIT_CHK((0x20000000 + 3162)) == 1)) && (BIT_CHK((0x20000000 + 3163)) == 1)) && (BIT_CHK((0x20000000 + 3164)) == 1)) && (BIT_CHK((0x20000000 + 3165)) == 1))
+    {
+        BIT_ON((0x20000000 + 3172));
+    }
+
+}
+
+
+// Procedure Index: 17
+void D08_e454_021_START()
+{
+    int var0;
+    // bit id (536870912) + (3172) = 9316
+    BIT_ON((0x20000000 + 3172));
+    SET_COUNT(152, 47150);
+    var0 = FLD_SCRIPT_READ(160, 10, 110);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    SET_COUNT(152, 47200);
+}
+
+
+// Procedure Index: 18
+void D08_e454_025_START()
+{
+    int var1;
+    SET_COUNT(152, 47250);
+    var1 = FLD_SCRIPT_READ(160, 10, 110);
+    FLD_SCRIPT_READ_SYNC(var1);
+    FLD_SCRIPT_EXEC(var1, 0);
+    FLD_SCRIPT_FREE(var1);
+    SET_COUNT(152, 48000);
+    // bit id (1073741824) + (48) = 11824
+    BIT_ON((0x40000000 + 48));
+    // bit id (1073741824) + (49) = 11825
+    BIT_ON((0x40000000 + 49));
+    // bit id (1073741824) + (50) = 11826
+    BIT_ON((0x40000000 + 50));
+    // bit id (1073741824) + (51) = 11827
+    BIT_ON((0x40000000 + 51));
+    // bit id (1073741824) + (52) = 11828
+    BIT_ON((0x40000000 + 52));
+    // bit id (1073741824) + (54) = 11830
+    BIT_ON((0x40000000 + 54));
+    // bit id (1073741824) + (53) = 11829
+    BIT_ON((0x40000000 + 53));
+    FLD_PARTY_LOAD();
+    CALL_EVENT(454, 1);
+    CALL_FIELD(160, 1, 0, 0);
+    return;
+}
+
+
+// Procedure Index: 19
+void D160_10_L_01_START()
+{
+    FLD_LOCAL_FLAG_ON((49152 + 30));
+    D160_10_LOCK_EV();
+    FLD_LOCAL_FLAG_OFF((49152 + 30));
+    FLD_LOCAL_FLAG_ON((49152 + 14));
+}
+
+
+// Procedure Index: 20
+void D160_10_L_02_R_START()
+{
+    FLD_LOCAL_FLAG_ON((49152 + 29));
+    D160_10_LOCK_EV();
+    FLD_LOCAL_FLAG_OFF((49152 + 29));
+    FLD_LOCAL_FLAG_ON((49152 + 13));
+}
+
+
+// Procedure Index: 21
+void D160_10_L_02_L_START()
+{
+    FLD_LOCAL_FLAG_ON((49152 + 28));
+    D160_10_LOCK_EV();
+    FLD_LOCAL_FLAG_OFF((49152 + 28));
+    FLD_LOCAL_FLAG_ON((49152 + 12));
+}
+
+
+// Procedure Index: 22
+void D160_10_LOCK_EV()
+{
+    int var2;
+    var2 = FLD_SCRIPT_READ(160, 10, 110);
+    FLD_SCRIPT_READ_SYNC(var2);
+    FLD_SCRIPT_EXEC(var2, 0);
+    FLD_SCRIPT_FREE(var2);
+}
+
+
+// Procedure Index: 23
+void VELVET_TABLE()
+{
+    int var3;
+    FLD_LOCAL_FLAG_ON((49152 + 17));
+    var3 = FLD_SCRIPT_READ(160, 10, 100);
+    FLD_SCRIPT_READ_SYNC(var3);
+    FLD_SCRIPT_EXEC(var3, 0);
+    FLD_SCRIPT_FREE(var3);
+    FLD_LOCAL_FLAG_OFF((49152 + 17));
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+    return;
+}
+
+
+// Procedure Index: 24
+void EXIT_DOOR()
+{
+    int var4;
+    FLD_LOCAL_FLAG_ON((49152 + 31));
+    var4 = FLD_SCRIPT_READ(160, 10, 100);
+    FLD_SCRIPT_READ_SYNC(var4);
+    FLD_SCRIPT_EXEC(var4, 0);
+    FLD_SCRIPT_FREE(var4);
+    FLD_LOCAL_FLAG_OFF((49152 + 31));
+    FLD_LOCAL_FLAG_ON((49152 + 15));
+    return;
+}
+
+
+// Procedure Index: 25
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 26
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 27
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 28
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 29
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 30
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 31
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 32
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 33
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 34
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 35
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 36
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 37
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 38
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

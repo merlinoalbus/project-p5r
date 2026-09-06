@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-09-06T01:29:00+02:00",
+  "scope": "Infrastruttura editor e visore delle destinazioni precise; non certifica collegamenti nativi del gioco",
+  "repository": "C:/Repository/project-p5r-main",
+  "checks": {
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "build": "PASS",
+    "testFiles": 121,
+    "testsPassed": 445,
+    "validator": "PASS galaxy_task_validator"
+  },
+  "browser": [
+    {"case": "Salvataggio da editor", "pin": 396, "coordinates": {"x": 65, "y": 35, "zoom": 3}, "apiReadBack": "PASS"},
+    {"case": "Navigazione stessa mappa", "query": "x=65&y=35&zoom=3", "visibleZoom": "300%", "selectionCleared": true},
+    {"case": "Navigazione altro piano", "pin": 395, "target": "shujin-academy-scuola-edificio-principale-2p-edificio-laboratori-2p-rmap-002-0-1", "query": "x=30&y=60&zoom=2.5", "visibleZoom": "250%"}
+  ],
+  "fixesValidated": [
+    "Attivazione da tastiera non genera coordinate implicite; inserimento esplicito di entrambe le percentuali",
+    "Immagine caricata e valida necessaria per scegliere un punto, errore e retry gestiti",
+    "Editor: precedenza destinazione esplicita, invalidazione, riferimento legacy risolto"
+  ],
+  "fixture": {"map": "verifica-navigazione-arrivi", "deletedAfterChecks": true},
+  "remaining": ["Collegamenti fisici nativi", "Mappatura delle condizioni originali nello stato partita", "Navigazione unificata del mondo completo"]
+}

@@ -1,0 +1,355 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("012_029_00.msg");
+
+// 
+// Script-level variable definitions
+// 
+
+int sVar12;
+int sVar13;
+int sVar14;
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void MAIN_GoOut01()
+{
+    int var4;
+    int var5;
+    int var6;
+    int var7;
+    int var1;
+    int var2;
+    int var3;
+    int var0;
+    var4 = 0;
+    var5 = 0;
+    var6 = 0;
+    var7 = 0;
+    var1 = GET_COUNT(0x10);
+    var2 = (var1 / 100);
+    var3 = REM(var1, 1000);
+    SEL_DEFKEY(14, 2);
+    // bit id (0) + (453) = 453
+    BIT_ON((0 + 453));
+    MSG_WND_DSP();
+    MSG_MIND(MND_GoOut, 0);
+    var0 = SEL(SEL_DEBUG_PLACE_000_00);
+    MSG_WND_CLS();
+    
+    if (var0 == 0)
+    {
+        var4 = 656;
+        var5 = 102;
+        var6 = 0;
+        var7 = 869;
+    }
+    else if (var0 == 1)
+    {
+        var4 = 656;
+        var5 = 103;
+        var6 = 0;
+        var7 = 869;
+    }
+    else 
+    {
+        return;
+    }
+
+    CALL_KF_EVENT(var4, var5, var6, var7);
+    return;
+}
+
+
+// Procedure Index: 1
+void MAIN_GoOut02()
+{
+    MAIN_GoOut01();
+    return;
+}
+
+
+// Procedure Index: 2
+void MAIN_GoOut03()
+{
+    MAIN_GoOut01();
+    return;
+}
+
+
+// Procedure Index: 3
+void SUB_KFEVT_GOTO_SINJUKU()
+{
+    return;
+}
+
+
+// Procedure Index: 4
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 5
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 6
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 7
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 10
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 11
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 14
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 18
+void SUB_MoruShowFace()
+{
+    int var8;
+    int var9;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var8 = FLD_PC_GET_CURRENT_RESHND(0);
+        var9 = MDL_GET_ITEM_RESHND(var8, 2);
+        MDL_ANIM(var9, 50, 0, 0, 1.00f);
+        MDL_ANIM_NEXT(var9, 51, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 19
+void SUB_MoruReturnBag()
+{
+    int var10;
+    int var11;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var10 = FLD_PC_GET_CURRENT_RESHND(0);
+        var11 = MDL_GET_ITEM_RESHND(var10, 2);
+        MDL_ANIM(var11, 52, 0, 5, 1.00f);
+        MDL_ANIM_NEXT(var11, 0, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 20
+void SUB_PhoneRing()
+{
+    int var15;
+    var15 = FLD_PC_GET_RESHND(0);
+    MDL_ICON(var15, 15);
+    FLD_COMSE_PLAY(1048);
+    WAIT(10);
+    RUMBLE_START_S(6, 12, 2, 30);
+    WAIT(30);
+    return;
+}
+
+
+// Procedure Index: 21
+void SUB_PhoneRumble()
+{
+    int var16;
+    var16 = FLD_PC_GET_RESHND(0);
+    MDL_ICON(var16, 18);
+    FLD_COMSE_PLAY(1047);
+    WAIT(10);
+    RUMBLE_START_S(6, 12, 2, 30);
+    WAIT(30);
+    return;
+}
+
+
+// Procedure Index: 22
+void SUB_PhonePickup()
+{
+    sVar12 = 0;
+    FLD_SET_CELLPHONE(1);
+    WAIT(15);
+    sVar12 = 1;
+    return;
+}
+
+
+// Procedure Index: 23
+void SUB_PhoneCall()
+{
+    sVar13 = FLD_PC_GET_RESHND(0);
+    
+    if (FLD_UMBREALLA_CHECK_USE() == 1)
+    {
+        sVar14 = FLD_MODEL_ADDMOTION_LOAD(sVar13, 101);
+    }
+    else 
+    {
+        sVar14 = FLD_MODEL_ADDMOTION_LOAD(sVar13, 1);
+    }
+
+    FLD_MODEL_LOADSYNC(sVar14);
+    FLD_MODEL_COPY_POSE_ANIM(sVar14, sVar13);
+    FLD_MODEL_SET_VISIBLE(sVar13, 0, 0);
+    FLD_MODEL_SET_VISIBLE(sVar14, 1, 0);
+    FLD_CELLPHONE_MODEL_VISIBLE(sVar14, 1);
+    MDL_ANIM(sVar14, (60 + 0), 0, 5, 1.00f);
+    MDL_ANIM_NEXT(sVar14, (60 + 1), 1, 0, 1.00f);
+    sVar12 = 2;
+    WAIT(30);
+    return;
+}
+
+
+// Procedure Index: 24
+void SUB_PhoneTalk()
+{
+    SUB_PhonePickup();
+    SUB_PhoneCall();
+    return;
+}
+
+
+// Procedure Index: 25
+void SUB_PhoneEnd()
+{
+    
+    if (sVar12 == 0)
+    {
+        return;
+    }
+
+    
+    if (sVar12 != 2)
+    {
+        FLD_SET_CELLPHONE(0);
+    }
+    else 
+    {
+        FLD_MODEL_SET_VISIBLE(sVar13, 0, 0);
+        FLD_MODEL_SET_VISIBLE(sVar14, 1, 0);
+        MDL_ANIM(sVar14, (60 + 2), 0, 10, 1.00f);
+        WAIT(65);
+        FLD_CELLPHONE_MODEL_VISIBLE(sVar14, 0);
+        MDL_ANIM_SYNC(sVar14);
+        MDL_ANIM(sVar14, 0, 1, 0, 1.00f);
+        MDL_ANIM_BLENDSYNC(sVar14);
+        FLD_MODEL_COPY_POSE_ANIM(sVar13, sVar14);
+        FLD_MODEL_SET_VISIBLE(sVar13, 1, 0);
+        FLD_MODEL_SET_VISIBLE(sVar14, 0, 0);
+        FLD_MODEL_FREE(sVar14);
+        FLD_SET_CELLPHONE(0);
+    }
+
+    sVar12 = 0;
+    return;
+}
+

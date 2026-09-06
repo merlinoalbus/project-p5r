@@ -1,0 +1,31 @@
+{
+  "passes": [
+    {
+      "pass_number": 1,
+      "status": "PASS",
+      "source_count": 1480,
+      "image_count": 741,
+      "checks": "all archive indexes, exact selection coverage, file bounds, source hashes, PNG dimensions and pixel hashes, syntax"
+    },
+    {
+      "pass_number": 2,
+      "status": "PASS",
+      "independent_lz_unique": 1136,
+      "independent_lz_sources": 1480,
+      "independent_bc_images": 741,
+      "maximum_channel_difference": 0,
+      "formats": {
+        "DXT5": 739,
+        "DXT1": 2
+      }
+    },
+    {
+      "pass_number": 3,
+      "status": "PASS",
+      "readable_maps": 308,
+      "overview_sheets": 37,
+      "classified_technical_resources": 12,
+      "checks": "all ROADMAP textures accounted for, exact original-to-readable pixel composition, all maps included once in overview sheets, overview decode, unchanged source archive metadata"
+    }
+  ]
+}

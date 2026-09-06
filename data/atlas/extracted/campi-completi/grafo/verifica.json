@@ -1,0 +1,16 @@
+{
+  "status": "PASS-global-inventory-only",
+  "fields": 848,
+  "maps": 301,
+  "occurrencesChecked": 2546,
+  "nativeFbnHashesChecked": 825,
+  "deduplicatedEdgesChecked": 2109,
+  "statuses": {
+    "field-and-entrance-resolved": 1688,
+    "target-field-absent": 4,
+    "dynamic-arguments": 114,
+    "entrance-id-missing": 728,
+    "target-fbn-missing": 12
+  },
+  "operationalPinsGenerated": 0
+}

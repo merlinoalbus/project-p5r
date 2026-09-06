@@ -1,0 +1,2564 @@
+[
+  {
+    "path": "FIELD/FTD/DATATDNGTBOXPACK.FTD",
+    "offset": 722712064,
+    "size": 344,
+    "extracted_size": 2288,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/DATENCOUNTPACK.FTD",
+    "offset": 722712576,
+    "size": 7892,
+    "extracted_size": 41056,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/DATTBOX.FTD",
+    "offset": 722720768,
+    "size": 1672,
+    "extracted_size": 3056,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/DATTBOXRND.FTD",
+    "offset": 722722816,
+    "size": 1704,
+    "extracted_size": 3088,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDACTFRAME.FTD",
+    "offset": 722724864,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDACTMOVELEN.FTD",
+    "offset": 722725376,
+    "size": 256,
+    "extracted_size": 256,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDADDACTANIM.FTD",
+    "offset": 722725888,
+    "size": 620,
+    "extracted_size": 1040,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDANIM.FTD",
+    "offset": 722726912,
+    "size": 6312,
+    "extracted_size": 28336,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDANIMBTLENCEFF.FTD",
+    "offset": 722733568,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDARCANARAND.FTD",
+    "offset": 722734080,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGACCIDENTTABLE.FTD",
+    "offset": 722734592,
+    "size": 752,
+    "extracted_size": 3888,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGBONUS.FTD",
+    "offset": 722735616,
+    "size": 192,
+    "extracted_size": 192,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGCAT.FTD",
+    "offset": 722736128,
+    "size": 224,
+    "extracted_size": 224,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGCOMMONPARAM.FTD",
+    "offset": 722736640,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGFORMRND.FTD",
+    "offset": 722737152,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGLAYOUTCOMB.FTD",
+    "offset": 722737664,
+    "size": 856,
+    "extracted_size": 2912,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGPACK.FTD",
+    "offset": 722738688,
+    "size": 1848,
+    "extracted_size": 5152,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGPARTSSEL.FTD",
+    "offset": 722740736,
+    "size": 332,
+    "extracted_size": 672,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDATDNGPLACENO.FTD",
+    "offset": 722741248,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDBFLDPACK.FTD",
+    "offset": 722741760,
+    "size": 460,
+    "extracted_size": 656,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDBGLAYOUTSE.FTD",
+    "offset": 722742272,
+    "size": 760,
+    "extracted_size": 1248,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDBGMCND.FTD",
+    "offset": 722743296,
+    "size": 1652,
+    "extracted_size": 4592,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDCORPPOS.FTD",
+    "offset": 722745344,
+    "size": 1232,
+    "extracted_size": 1376,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDDNGASSIST.FTD",
+    "offset": 722746880,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDDNGPACK.FTD",
+    "offset": 722747392,
+    "size": 1376,
+    "extracted_size": 4960,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDDNGPLACENO.FTD",
+    "offset": 722748928,
+    "size": 848,
+    "extracted_size": 1856,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDDOORANIM.FTD",
+    "offset": 722749952,
+    "size": 852,
+    "extracted_size": 2240,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDDOORSE.FTD",
+    "offset": 722750976,
+    "size": 780,
+    "extracted_size": 1088,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYCMNACTION.FTD",
+    "offset": 722752000,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYDEATHACTION.FTD",
+    "offset": 722752512,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYEXTRAACTION.FTD",
+    "offset": 722753024,
+    "size": 344,
+    "extracted_size": 352,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYNORMALACTION.FTD",
+    "offset": 722753536,
+    "size": 352,
+    "extracted_size": 384,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYRAREACTION.FTD",
+    "offset": 722754048,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYRELIEFACTION.FTD",
+    "offset": 722754560,
+    "size": 224,
+    "extracted_size": 224,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEMYSTRONGACTION.FTD",
+    "offset": 722755072,
+    "size": 348,
+    "extracted_size": 400,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDENTRANCENO.FTD",
+    "offset": 722755584,
+    "size": 160,
+    "extracted_size": 160,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDENVLIST.FTD",
+    "offset": 722756096,
+    "size": 4116,
+    "extracted_size": 13984,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDEXPMAPFLAG.FTD",
+    "offset": 722760704,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDFADETYPERULE.FTD",
+    "offset": 722761216,
+    "size": 1144,
+    "extracted_size": 2576,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDFOLLOWERNAMENO.FTD",
+    "offset": 722762752,
+    "size": 160,
+    "extracted_size": 160,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDFOOTSTEPCND.FTD",
+    "offset": 722763264,
+    "size": 1648,
+    "extracted_size": 3152,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDGIMMICKSE.FTD",
+    "offset": 722765312,
+    "size": 1740,
+    "extracted_size": 3408,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDHIDEOUTPOS.FTD",
+    "offset": 722767360,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDMODELSE.FTD",
+    "offset": 722767872,
+    "size": 6956,
+    "extracted_size": 44400,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDOBJFLAG.FTD",
+    "offset": 722775040,
+    "size": 1788,
+    "extracted_size": 32208,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPARAMUPFUNC.FTD",
+    "offset": 722777088,
+    "size": 2784,
+    "extracted_size": 12448,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPCADDMOTION.FTD",
+    "offset": 722780160,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPCATTACHITEM.FTD",
+    "offset": 722780672,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPCBAGSTATE.FTD",
+    "offset": 722781184,
+    "size": 112,
+    "extracted_size": 112,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPCSUBTYPE.FTD",
+    "offset": 722781696,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPLACENO.FTD",
+    "offset": 722782208,
+    "size": 804,
+    "extracted_size": 2800,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPLAYERPARAM.FTD",
+    "offset": 722783232,
+    "size": 176,
+    "extracted_size": 176,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPLAYERRESTPARAM.FTD",
+    "offset": 722783744,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPLAYERSPEED.FTD",
+    "offset": 722784256,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPOOLCONNECT.FTD",
+    "offset": 722784768,
+    "size": 1968,
+    "extracted_size": 8496,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPOOLPACK.FTD",
+    "offset": 722786816,
+    "size": 1164,
+    "extracted_size": 2912,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSAFEROOMCHKCOUNTER.FTD",
+    "offset": 722788352,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSAFEROOMUPDATEVALUEPACK.FTD",
+    "offset": 722788864,
+    "size": 520,
+    "extracted_size": 592,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSCHOBJBLANK.FTD",
+    "offset": 722789888,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSCHOBJFLAGPACK.FTD",
+    "offset": 722790400,
+    "size": 2272,
+    "extracted_size": 10720,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSCHOBJURARE.FTD",
+    "offset": 722792960,
+    "size": 296,
+    "extracted_size": 448,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSTATEONLY.FTD",
+    "offset": 722793472,
+    "size": 1180,
+    "extracted_size": 1824,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSYMMODELNO.FTD",
+    "offset": 722795008,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSYMMODELSCL.FTD",
+    "offset": 722795520,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSYMSUMMON.FTD",
+    "offset": 722796032,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSYMVOICEPACK.FTD",
+    "offset": 722796544,
+    "size": 328,
+    "extracted_size": 496,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDTESTDNGPACK.FTD",
+    "offset": 722797056,
+    "size": 296,
+    "extracted_size": 416,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDTESTDNGPLACENO.FTD",
+    "offset": 722797568,
+    "size": 176,
+    "extracted_size": 176,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDTESTEXISTLIST.FTD",
+    "offset": 722798080,
+    "size": 8080,
+    "extracted_size": 26512,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDWIREANIMDATA.FTD",
+    "offset": 722806272,
+    "size": 1280,
+    "extracted_size": 2512,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDWTHREFF.FTD",
+    "offset": 722807808,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D150_002.MAP",
+    "offset": 723148800,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D150_003.MAP",
+    "offset": 723149312,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_001.MAP",
+    "offset": 723149824,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_002.MAP",
+    "offset": 723150336,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_003.MAP",
+    "offset": 723150848,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_004.MAP",
+    "offset": 723151360,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_005.MAP",
+    "offset": 723151872,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_006.MAP",
+    "offset": 723152384,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_007.MAP",
+    "offset": 723152896,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_009.MAP",
+    "offset": 723153408,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_010.MAP",
+    "offset": 723153920,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_011.MAP",
+    "offset": 723154432,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_012.MAP",
+    "offset": 723154944,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_013.MAP",
+    "offset": 723155456,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_014.MAP",
+    "offset": 723155968,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_015.MAP",
+    "offset": 723156480,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_016.MAP",
+    "offset": 723150336,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_017.MAP",
+    "offset": 723156992,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_019.MAP",
+    "offset": 723150336,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D151_051.MAP",
+    "offset": 723157504,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_001.MAP",
+    "offset": 723158016,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_002.MAP",
+    "offset": 723158528,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_004.MAP",
+    "offset": 723159040,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_005.MAP",
+    "offset": 723159552,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_006.MAP",
+    "offset": 723160064,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_051.MAP",
+    "offset": 723160576,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_052.MAP",
+    "offset": 723160576,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D152_053.MAP",
+    "offset": 723160576,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_001.MAP",
+    "offset": 723161088,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_002.MAP",
+    "offset": 723161600,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_003.MAP",
+    "offset": 723162112,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_005.MAP",
+    "offset": 723162624,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_006.MAP",
+    "offset": 723163136,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_007.MAP",
+    "offset": 723163648,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_008.MAP",
+    "offset": 723164160,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_009.MAP",
+    "offset": 723164672,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_011.MAP",
+    "offset": 723165184,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_012.MAP",
+    "offset": 723165696,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D153_051.MAP",
+    "offset": 723166208,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_001.MAP",
+    "offset": 723166720,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_002.MAP",
+    "offset": 723167232,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_003.MAP",
+    "offset": 723167744,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_005.MAP",
+    "offset": 723168256,
+    "size": 112,
+    "extracted_size": 112,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_007.MAP",
+    "offset": 723168768,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_008.MAP",
+    "offset": 723169280,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_009.MAP",
+    "offset": 723169792,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_010.MAP",
+    "offset": 723170304,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_011.MAP",
+    "offset": 723170816,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_014.MAP",
+    "offset": 723171328,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_015.MAP",
+    "offset": 723171840,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_016.MAP",
+    "offset": 723172352,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D154_051.MAP",
+    "offset": 723172864,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_001.MAP",
+    "offset": 723173376,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_002.MAP",
+    "offset": 723173888,
+    "size": 76,
+    "extracted_size": 76,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_003.MAP",
+    "offset": 723174400,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_004.MAP",
+    "offset": 723174912,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_005.MAP",
+    "offset": 723175424,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_006.MAP",
+    "offset": 723175936,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_007.MAP",
+    "offset": 723176448,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_008.MAP",
+    "offset": 723176960,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_009.MAP",
+    "offset": 723177472,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_010.MAP",
+    "offset": 723177984,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_011.MAP",
+    "offset": 723178496,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_013.MAP",
+    "offset": 723179008,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D155_051.MAP",
+    "offset": 723179520,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_001.MAP",
+    "offset": 723180032,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_002.MAP",
+    "offset": 723180544,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_003.MAP",
+    "offset": 723181056,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_004.MAP",
+    "offset": 723181568,
+    "size": 128,
+    "extracted_size": 128,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_005.MAP",
+    "offset": 723182080,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_006.MAP",
+    "offset": 723182592,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_007.MAP",
+    "offset": 723183104,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_008.MAP",
+    "offset": 723183616,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_009.MAP",
+    "offset": 723184128,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_010.MAP",
+    "offset": 723184640,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_011.MAP",
+    "offset": 723185152,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_012.MAP",
+    "offset": 723185664,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_013.MAP",
+    "offset": 723186176,
+    "size": 272,
+    "extracted_size": 272,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D156_051.MAP",
+    "offset": 723186688,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_001.MAP",
+    "offset": 723187200,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_004.MAP",
+    "offset": 723187712,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_005.MAP",
+    "offset": 723188224,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_006.MAP",
+    "offset": 723188736,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_007.MAP",
+    "offset": 723189248,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_008.MAP",
+    "offset": 723189760,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_009.MAP",
+    "offset": 723190272,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_010.MAP",
+    "offset": 723190784,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_011.MAP",
+    "offset": 723191296,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_012.MAP",
+    "offset": 723191808,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_013.MAP",
+    "offset": 723192320,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_015.MAP",
+    "offset": 723192832,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_016.MAP",
+    "offset": 723193344,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_018.MAP",
+    "offset": 723193856,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_051.MAP",
+    "offset": 723194368,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D157_052.MAP",
+    "offset": 723194880,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_001.MAP",
+    "offset": 723195392,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_002.MAP",
+    "offset": 723195904,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_003.MAP",
+    "offset": 723196416,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_004.MAP",
+    "offset": 723196928,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_006.MAP",
+    "offset": 723197440,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_007.MAP",
+    "offset": 723197952,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_008.MAP",
+    "offset": 723198464,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_009.MAP",
+    "offset": 723198976,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_010.MAP",
+    "offset": 723199488,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_011.MAP",
+    "offset": 723200000,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_012.MAP",
+    "offset": 723200512,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_013.MAP",
+    "offset": 723201024,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_020.MAP",
+    "offset": 723201536,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_025.MAP",
+    "offset": 723202048,
+    "size": 160,
+    "extracted_size": 160,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_030.MAP",
+    "offset": 723202560,
+    "size": 112,
+    "extracted_size": 112,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_035.MAP",
+    "offset": 723203072,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D159_051.MAP",
+    "offset": 723203584,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_001.MAP",
+    "offset": 723204096,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_002.MAP",
+    "offset": 723204608,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_003.MAP",
+    "offset": 723205120,
+    "size": 40,
+    "extracted_size": 40,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_004.MAP",
+    "offset": 723205632,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_005.MAP",
+    "offset": 723206144,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_006.MAP",
+    "offset": 723206656,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_010.MAP",
+    "offset": 723207168,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D160_101.MAP",
+    "offset": 723207680,
+    "size": 52,
+    "extracted_size": 52,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_001.MAP",
+    "offset": 723208192,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_002.MAP",
+    "offset": 723208704,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_003.MAP",
+    "offset": 723209216,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_004.MAP",
+    "offset": 723209728,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_005.MAP",
+    "offset": 723210240,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_006.MAP",
+    "offset": 723210752,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_007.MAP",
+    "offset": 723211264,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_008.MAP",
+    "offset": 723211776,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_009.MAP",
+    "offset": 723212288,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_010.MAP",
+    "offset": 723212800,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_011.MAP",
+    "offset": 723213312,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D161_051.MAP",
+    "offset": 723213824,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_001.MAP",
+    "offset": 723214336,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_002.MAP",
+    "offset": 723214848,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_003.MAP",
+    "offset": 723215360,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_004.MAP",
+    "offset": 723215872,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_005.MAP",
+    "offset": 723216384,
+    "size": 128,
+    "extracted_size": 128,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_007.MAP",
+    "offset": 723216896,
+    "size": 112,
+    "extracted_size": 112,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_009.MAP",
+    "offset": 723217408,
+    "size": 80,
+    "extracted_size": 80,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_010.MAP",
+    "offset": 723217920,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_011.MAP",
+    "offset": 723218432,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_012.MAP",
+    "offset": 723218944,
+    "size": 128,
+    "extracted_size": 128,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_014.MAP",
+    "offset": 723219456,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_015.MAP",
+    "offset": 723219968,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_016.MAP",
+    "offset": 723220480,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_051.MAP",
+    "offset": 723220992,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D162_052.MAP",
+    "offset": 723221504,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D190_001.MAP",
+    "offset": 723222016,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D190_051.MAP",
+    "offset": 723222528,
+    "size": 192,
+    "extracted_size": 192,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D190_052.MAP",
+    "offset": 723223040,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D190_053.MAP",
+    "offset": 723223552,
+    "size": 368,
+    "extracted_size": 416,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D190_054.MAP",
+    "offset": 723224064,
+    "size": 288,
+    "extracted_size": 288,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_001.MAP",
+    "offset": 723224576,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_011.MAP",
+    "offset": 723225088,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_021.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_025.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_050.MAP",
+    "offset": 723226112,
+    "size": 144,
+    "extracted_size": 144,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_051.MAP",
+    "offset": 723224576,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_061.MAP",
+    "offset": 723226624,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_065.MAP",
+    "offset": 723227136,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D191_071.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D192_001.MAP",
+    "offset": 723227648,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D192_011.MAP",
+    "offset": 723228160,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D192_015.MAP",
+    "offset": 723228672,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D192_021.MAP",
+    "offset": 723229184,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D192_061.MAP",
+    "offset": 723229696,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D192_062.MAP",
+    "offset": 723230208,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_001.MAP",
+    "offset": 723230720,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_011.MAP",
+    "offset": 723231232,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_015.MAP",
+    "offset": 723231744,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_021.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_051.MAP",
+    "offset": 723230720,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_061.MAP",
+    "offset": 723231232,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_065.MAP",
+    "offset": 723232256,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D193_071.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_001.MAP",
+    "offset": 723232768,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_011.MAP",
+    "offset": 723233280,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_015.MAP",
+    "offset": 723233792,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_021.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_051.MAP",
+    "offset": 723232768,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_061.MAP",
+    "offset": 723233280,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_065.MAP",
+    "offset": 723233792,
+    "size": 28,
+    "extracted_size": 28,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_071.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D194_073.MAP",
+    "offset": 723225600,
+    "size": 56,
+    "extracted_size": 56,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D195_001.MAP",
+    "offset": 723234304,
+    "size": 320,
+    "extracted_size": 320,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D195_011.MAP",
+    "offset": 723234816,
+    "size": 48,
+    "extracted_size": 48,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D195_015.MAP",
+    "offset": 723235328,
+    "size": 32,
+    "extracted_size": 32,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/MAP/D195_021.MAP",
+    "offset": 723235840,
+    "size": 64,
+    "extracted_size": 64,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/NPC/CORPTBL.TBL",
+    "offset": 723325440,
+    "size": 4532,
+    "extracted_size": 41160,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/LMAP/FLDLMAPFARE.FTD",
+    "offset": 724633088,
+    "size": 884,
+    "extracted_size": 4944,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/LMAP/FLDLMAPLINE.FTD",
+    "offset": 724634112,
+    "size": 560,
+    "extracted_size": 1504,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP090_200_0.DDS",
+    "offset": 18186436096,
+    "size": 1724,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP090_201_0.DDS",
+    "offset": 18186438144,
+    "size": 1288,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP090_202_0.DDS",
+    "offset": 18186436096,
+    "size": 1724,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP090_203_0.DDS",
+    "offset": 18186438144,
+    "size": 1288,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_160_0.DDS",
+    "offset": 18186439680,
+    "size": 1224,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_161_0.DDS",
+    "offset": 18186441216,
+    "size": 1248,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_200_0.DDS",
+    "offset": 18186442752,
+    "size": 1932,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_201_0.DDS",
+    "offset": 18186444800,
+    "size": 1868,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_202_0.DDS",
+    "offset": 18186446848,
+    "size": 2536,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_203_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_204_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_205_0.DDS",
+    "offset": 18186451456,
+    "size": 1620,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_206_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_209_0.DDS",
+    "offset": 18186453504,
+    "size": 1444,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_210_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_213_0.DDS",
+    "offset": 18186456576,
+    "size": 2064,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_220_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_221_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_230_0.DDS",
+    "offset": 18186461184,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_231_0.DDS",
+    "offset": 18186463232,
+    "size": 1672,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_232_0.DDS",
+    "offset": 18186461184,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_240_0.DDS",
+    "offset": 18186465280,
+    "size": 2140,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP091_241_0.DDS",
+    "offset": 18186465280,
+    "size": 2140,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_160_0.DDS",
+    "offset": 18186439680,
+    "size": 1224,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_161_0.DDS",
+    "offset": 18186441216,
+    "size": 1248,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_200_0.DDS",
+    "offset": 18186442752,
+    "size": 1932,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_201_0.DDS",
+    "offset": 18186444800,
+    "size": 1868,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_202_0.DDS",
+    "offset": 18186446848,
+    "size": 2536,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_203_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_204_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_205_0.DDS",
+    "offset": 18186451456,
+    "size": 1620,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_206_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_209_0.DDS",
+    "offset": 18186453504,
+    "size": 1444,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_210_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_213_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_220_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_221_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_230_0.DDS",
+    "offset": 18186467840,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_231_0.DDS",
+    "offset": 18186469888,
+    "size": 1680,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_232_0.DDS",
+    "offset": 18186467840,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_240_0.DDS",
+    "offset": 18186471936,
+    "size": 2168,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP092_241_0.DDS",
+    "offset": 18186474496,
+    "size": 2160,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_160_0.DDS",
+    "offset": 18186439680,
+    "size": 1224,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_161_0.DDS",
+    "offset": 18186441216,
+    "size": 1248,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_200_0.DDS",
+    "offset": 18186442752,
+    "size": 1932,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_201_0.DDS",
+    "offset": 18186444800,
+    "size": 1868,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_202_0.DDS",
+    "offset": 18186446848,
+    "size": 2536,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_203_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_204_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_205_0.DDS",
+    "offset": 18186451456,
+    "size": 1620,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_206_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_209_0.DDS",
+    "offset": 18186453504,
+    "size": 1444,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_210_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_213_0.DDS",
+    "offset": 18186456576,
+    "size": 2064,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_220_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_221_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_230_0.DDS",
+    "offset": 18186461184,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_231_0.DDS",
+    "offset": 18186463232,
+    "size": 1672,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_232_0.DDS",
+    "offset": 18186461184,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_240_0.DDS",
+    "offset": 18186465280,
+    "size": 2140,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP093_241_0.DDS",
+    "offset": 18186477056,
+    "size": 2292,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_160_0.DDS",
+    "offset": 18186439680,
+    "size": 1224,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_161_0.DDS",
+    "offset": 18186441216,
+    "size": 1248,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_200_0.DDS",
+    "offset": 18186442752,
+    "size": 1932,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_201_0.DDS",
+    "offset": 18186444800,
+    "size": 1868,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_202_0.DDS",
+    "offset": 18186446848,
+    "size": 2536,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_203_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_204_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_205_0.DDS",
+    "offset": 18186451456,
+    "size": 1620,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_206_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_209_0.DDS",
+    "offset": 18186453504,
+    "size": 1444,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_210_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_213_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_220_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_221_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_230_0.DDS",
+    "offset": 18186467840,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_231_0.DDS",
+    "offset": 18186469888,
+    "size": 1680,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_232_0.DDS",
+    "offset": 18186467840,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_240_0.DDS",
+    "offset": 18186471936,
+    "size": 2168,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP094_241_0.DDS",
+    "offset": 18186474496,
+    "size": 2160,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_160_0.DDS",
+    "offset": 18186439680,
+    "size": 1224,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_161_0.DDS",
+    "offset": 18186441216,
+    "size": 1248,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_200_0.DDS",
+    "offset": 18186442752,
+    "size": 1932,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_201_0.DDS",
+    "offset": 18186444800,
+    "size": 1868,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_202_0.DDS",
+    "offset": 18186446848,
+    "size": 2536,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_203_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_204_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_205_0.DDS",
+    "offset": 18186451456,
+    "size": 1620,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_206_0.DDS",
+    "offset": 18186449408,
+    "size": 1552,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_209_0.DDS",
+    "offset": 18186453504,
+    "size": 1444,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_210_0.DDS",
+    "offset": 18186455040,
+    "size": 1452,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_213_0.DDS",
+    "offset": 18186456576,
+    "size": 2064,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_220_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_221_0.DDS",
+    "offset": 18186459136,
+    "size": 1968,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_230_0.DDS",
+    "offset": 18186461184,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_231_0.DDS",
+    "offset": 18186463232,
+    "size": 1672,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_232_0.DDS",
+    "offset": 18186461184,
+    "size": 1596,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_240_0.DDS",
+    "offset": 18186465280,
+    "size": 2140,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP095_241_0.DDS",
+    "offset": 18186465280,
+    "size": 2140,
+    "extracted_size": 36992,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MAP/MAP_SYMBOL.SPD",
+    "offset": 18186479616,
+    "size": 8084,
+    "extracted_size": 34576,
+    "attr": "CRI_CFATTR:ENCRYPT"
+  },
+  {
+    "path": "FIELD/PANEL/MEMENTOS/FLDATMAPLINE.FTD",
+    "offset": 724643328,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/MEMENTOS/FLDATMAPSTATION.FTD",
+    "offset": 724643840,
+    "size": 160,
+    "extracted_size": 160,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/MIDDLE_MAP/FLDMDLMAPITEM.FTD",
+    "offset": 724644352,
+    "size": 452,
+    "extracted_size": 2000,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/SHORT_CUT/FLDMYPSHORTCUTCAMERA.FTD",
+    "offset": 725000704,
+    "size": 460,
+    "extracted_size": 528,
+    "attr": ""
+  }
+]

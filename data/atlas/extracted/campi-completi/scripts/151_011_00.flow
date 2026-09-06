@@ -1,0 +1,191 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("151_011_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D01_151_11_minimap_00()
+{
+    // bit id (536870912) + (514) = 6658
+    BIT_ON((0x20000000 + 514));
+}
+
+
+// Procedure Index: 1
+void D01_151_11_minimap_01()
+{
+    // bit id (536870912) + (444) = 6588
+    BIT_ON((0x20000000 + 444));
+}
+
+
+// Procedure Index: 2
+void D01_151_11_minimap_02()
+{
+    // bit id (536870912) + (445) = 6589
+    BIT_ON((0x20000000 + 445));
+}
+
+
+// Procedure Index: 3
+void D01_151_11_minimap_03()
+{
+    // bit id (536870912) + (4636) = 10780
+    BIT_ON((0x20000000 + 4636));
+}
+
+
+// Procedure Index: 4
+void D01_151_11_TBOX_minimap_16()
+{
+    int var0;
+    // bit id (536870912) + (490) = 6634
+    BIT_ON((0x20000000 + 490));
+    var0 = 26;
+    FLD_SET_LOCAL_COUNT((49152 + 15), var0);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 5
+void D01_151_11_TBOX_minimap_14()
+{
+    int var1;
+    // bit id (536870912) + (488) = 6632
+    BIT_ON((0x20000000 + 488));
+    var1 = 26;
+    FLD_SET_LOCAL_COUNT((49152 + 15), var1);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 6
+void D01_SAFETY_ROOM_06_SET()
+{
+    int var2;
+    int var3;
+    int var4;
+    var2 = (0x20000000 + 2673);
+    var3 = (0x20000000 + 356);
+    BIT_ON(var2);
+    
+    if (BIT_CHK(var3) == 1)
+    {
+        var4 = 66;
+    }
+    else 
+    {
+        var4 = 65;
+    }
+
+    FLD_SET_LOCAL_COUNT((49152 + 15), var4);
+    FLD_START_SUPPORT_MSG();
+    return;
+}
+
+
+// Procedure Index: 7
+void D151_11_MAIN_DOOR()
+{
+    int var5;
+    // bit id (536870912) + (206) = 6350
+    // bit id (536870912) + (249) = 6393
+    
+    if ((BIT_CHK((0x20000000 + 206)) == 1) && (BIT_CHK((0x20000000 + 249)) == 0))
+    {
+        FLD_LOCAL_FLAG_ON((49152 + 31));
+        var5 = FLD_SCRIPT_READ(151, 11, 100);
+        FLD_SCRIPT_READ_SYNC(var5);
+        FLD_SCRIPT_EXEC(var5, 0);
+        FLD_SCRIPT_FREE(var5);
+        FLD_LOCAL_FLAG_OFF((49152 + 31));
+        
+        if (GET_COUNT(145) <= 50100)
+        {
+            SET_COUNT(145, 50100);
+        }
+
+    }
+
+    return;
+}
+
+
+// Procedure Index: 8
+void D01_04_e166_001_START()
+{
+    int var6;
+    // bit id (536870912) + (280) = 6424
+    BIT_ON((0x20000000 + 280));
+    SET_COUNT(145, 50150);
+    var6 = FLD_SCRIPT_READ(151, 11, 100);
+    FLD_SCRIPT_READ_SYNC(var6);
+    FLD_SCRIPT_EXEC(var6, 0);
+    FLD_SCRIPT_FREE(var6);
+    SET_COUNT(145, 50200);
+    // bit id (536870912) + (7) = 6151
+    BIT_ON((0x20000000 + 7));
+    return;
+}
+
+
+// Procedure Index: 9
+void D01_SHINOBI_ON()
+{
+    FLD_PANEL_HIDE_DISABLE();
+    // bit id (536870912) + (7) = 6151
+    BIT_ON((0x20000000 + 7));
+    return;
+}
+
+
+// Procedure Index: 10
+void D01_SHINOBI_OFF()
+{
+    FLD_PANEL_HIDE_DISABLE();
+    // bit id (536870912) + (7) = 6151
+    BIT_OFF((0x20000000 + 7));
+    return;
+}
+
+
+// Procedure Index: 11
+void D01_LOCK_01()
+{
+    int var7;
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    var7 = FLD_SCRIPT_READ(151, 11, 100);
+    FLD_SCRIPT_READ_SYNC(var7);
+    FLD_SCRIPT_EXEC(var7, 0);
+    FLD_SCRIPT_FREE(var7);
+    FLD_LOCAL_FLAG_ON((49152 + 50));
+    return;
+}
+
+
+// Procedure Index: 12
+void D01_MissionActive_Lock()
+{
+    int var8;
+    // bit id (536870912) + (282) = 6426
+    BIT_ON((0x20000000 + 282));
+    SET_COUNT(145, 68050);
+    var8 = FLD_SCRIPT_READ(151, 11, 130);
+    FLD_SCRIPT_READ_SYNC(var8);
+    FLD_SCRIPT_EXEC(var8, 0);
+    FLD_SCRIPT_FREE(var8);
+    SET_COUNT(145, 68100);
+    return;
+}
+

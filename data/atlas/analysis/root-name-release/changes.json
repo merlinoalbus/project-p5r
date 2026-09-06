@@ -1,0 +1,210 @@
+{
+  "maps": [
+    {
+      "file": "data/seed/citta.json",
+      "key": "citta-shujin-academy",
+      "before": "Shujin Academy (scuola)",
+      "after": "Shujin Academy"
+    },
+    {
+      "file": "data/seed/dungeon.json",
+      "key": "dungeon-madarame",
+      "before": "Palazzo di Madarame (Museo)",
+      "after": "Palazzo di Madarame"
+    },
+    {
+      "file": "data/seed/dungeon.json",
+      "key": "dungeon-futaba",
+      "before": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+      "after": "Palazzo di Futaba"
+    },
+    {
+      "file": "data/seed/dungeon.json",
+      "key": "dungeon-niijima",
+      "before": "Palazzo di Niijima (Sae) — Casinò",
+      "after": "Palazzo di Niijima"
+    },
+    {
+      "file": "data/seed/dungeon.json",
+      "key": "dungeon-mementos",
+      "before": "Mementos (i Dedali)",
+      "after": "Memento"
+    },
+    {
+      "file": "data/seed/mappe/yongen-java-banchina-della-metropolitana.json",
+      "key": "yongen-java-banchina-della-metropolitana",
+      "before": "Yongen-Java - Banchina della metropolitana",
+      "after": "Banchina della metropolitana di Yongen-Jaya"
+    },
+    {
+      "file": "data/seed/citta.json",
+      "key": "citta-yokohama-chinatown",
+      "before": "Chinatown (Yokohama)",
+      "after": "Chinatown"
+    },
+    {
+      "file": "data/seed/citta.json",
+      "key": "citta-suidobashi",
+      "before": "Suidobashi (Dome Town)",
+      "after": "Suidobashi"
+    },
+    {
+      "file": "data/seed/citta.json",
+      "key": "citta-mementos",
+      "before": "Mementos (ingresso)",
+      "after": "Entrata dei Memento"
+    }
+  ],
+  "pins": [
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "map": "citta-yongen-jaya",
+      "before": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Banchina della metropolitana",
+        "descrizione": "Sottopasso verso Yongen-Java Banchina della metropolitana",
+        "x": 88.3,
+        "y": 6.8,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "yongen-java-banchina-della-metropolitana"
+        },
+        "collezionabile": false,
+        "ordine": 0,
+        "immagini": [
+          {
+            "asset": "spilli/citta-yongen-jaya/2-1",
+            "didascalia": ""
+          }
+        ]
+      },
+      "after": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Jaya Banchina della metropolitana",
+        "descrizione": "Sottopasso verso Yongen-Jaya Banchina della metropolitana",
+        "x": 88.3,
+        "y": 6.8,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "yongen-java-banchina-della-metropolitana"
+        },
+        "collezionabile": false,
+        "ordine": 0,
+        "immagini": [
+          {
+            "asset": "spilli/citta-yongen-jaya/2-1",
+            "didascalia": ""
+          }
+        ]
+      }
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "map": "citta-yongen-jaya",
+      "before": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Banchina della metropolitana",
+        "descrizione": "Vicolo verso Yongen-Java Banchina della metropolitana",
+        "x": 76.8,
+        "y": 83.4,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "yongen-java-banchina-della-metropolitana"
+        },
+        "collezionabile": false,
+        "ordine": 0,
+        "immagini": [
+          {
+            "asset": "spilli/citta-yongen-jaya/3-1",
+            "didascalia": ""
+          }
+        ]
+      },
+      "after": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Jaya Banchina della metropolitana",
+        "descrizione": "Vicolo verso Yongen-Jaya Banchina della metropolitana",
+        "x": 76.8,
+        "y": 83.4,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "yongen-java-banchina-della-metropolitana"
+        },
+        "collezionabile": false,
+        "ordine": 0,
+        "immagini": [
+          {
+            "asset": "spilli/citta-yongen-jaya/3-1",
+            "didascalia": ""
+          }
+        ]
+      }
+    },
+    {
+      "file": "data/seed/mappe/yongen-java-banchina-della-metropolitana.json",
+      "map": "yongen-java-banchina-della-metropolitana",
+      "before": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Vicoli",
+        "descrizione": "Scale mobili verso Yongen-Java Vicoli",
+        "x": 75.2,
+        "y": 22.1,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "citta-yongen-jaya"
+        },
+        "collezionabile": false,
+        "ordine": 0
+      },
+      "after": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Jaya Vicoli",
+        "descrizione": "Scale mobili verso Yongen-Jaya Vicoli",
+        "x": 75.2,
+        "y": 22.1,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "citta-yongen-jaya"
+        },
+        "collezionabile": false,
+        "ordine": 0
+      }
+    },
+    {
+      "file": "data/seed/mappe/yongen-java-banchina-della-metropolitana.json",
+      "map": "yongen-java-banchina-della-metropolitana",
+      "before": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Vicoli",
+        "descrizione": "Sottopasso verso Yongen-Java Vicoli",
+        "x": 80.8,
+        "y": 28.5,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "citta-yongen-jaya"
+        },
+        "collezionabile": false,
+        "ordine": 0
+      },
+      "after": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Jaya Vicoli",
+        "descrizione": "Sottopasso verso Yongen-Jaya Vicoli",
+        "x": 80.8,
+        "y": 28.5,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "citta-yongen-jaya"
+        },
+        "collezionabile": false,
+        "ordine": 0
+      }
+    }
+  ],
+  "sourceSha256": {
+    "data/seed/citta.json": "581c101fecf8e42cc84f3f0e0c3b6334fce30d267fe3a64daea75a9aaa0760eb",
+    "data/seed/dungeon.json": "c8ed062eb5d3acf66266d926030ee8945b231d73ffcf20e266930b66101bd2f7",
+    "data/seed/mappe/citta-yongen-jaya.json": "ae035d339472e74690f4baa62b19ce4325b42701d56dc3a98432cf272a4dc7f7",
+    "data/seed/mappe/yongen-java-banchina-della-metropolitana.json": "945f1570d5072ff90f2b488234b651a761b1b2e667bdd8fbe2eb5ad52584f867"
+  }
+}

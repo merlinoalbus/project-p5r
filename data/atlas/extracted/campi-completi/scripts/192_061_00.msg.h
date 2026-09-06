@@ -1,0 +1,21 @@
+// Decompiled by Atlus Script Tools
+const int RETURN_SEL                       = 0;
+const int GO_SEL                           = 1;
+const int MSG_DNG_RETURN_01                = 2;
+const int MSG_DNG_RETURN_02                = 3;
+const int MSG_DNG_RETURN_03                = 4;
+const int MSG_DNG_GO                       = 5;
+const int MSG_DNG_GO_NG                    = 6;
+const int D08_01_e437_011_mes01            = 7;
+const int D08_01_e437_011_mes02            = 8;
+const int D08_01_e437_011_mes03            = 9;
+const int D08_01_e437_011_mes04            = 10;
+const int D08_01_e437_011_mes05            = 11;
+const int D08_01_e437_011_mes06            = 12;
+const int D08_01_e437_011_mes07            = 13;
+const int D08_01_e437_011_mes08            = 14;
+const int D08_01_e437_011_mes09            = 15;
+const int D08_01_e437_011_DUMMY            = 16;
+const int MEME_3RD_ENTER_MES01             = 17;
+const int MEME_3RD_ENTER_SEL               = 18;
+const int MEME_3RD_ENTER_MES02             = 19;

@@ -1,0 +1,5288 @@
+{
+  "scope": "Raggruppamenti residui e classificazione aggiuntiva dei59 nomi; nessuna mutazione",
+  "roots": [
+    {
+      "root": "nativo-archivio-001",
+      "resources": [
+        "RMAP_001_12_0",
+        "RMAP_001_1_0",
+        "RMAP_001_2_0",
+        "RMAP_001_2_1",
+        "RMAP_001_3_0",
+        "RMAP_001_4_0",
+        "RMAP_001_5_0"
+      ],
+      "decision": "gia-assegnato-root",
+      "canonicalTarget": "citta-shibuya",
+      "canonicalName": "Shibuya",
+      "evidence": [],
+      "note": "Consolidamento affidato al root; non ripetuto."
+    },
+    {
+      "root": "nativo-archivio-002",
+      "resources": [
+        "RMAP_002_0_0",
+        "RMAP_002_0_1",
+        "RMAP_002_0_2",
+        "RMAP_002_1_0",
+        "RMAP_002_5_0",
+        "RMAP_002_6_0",
+        "RMAP_002_8_0"
+      ],
+      "decision": "gia-assegnato-root",
+      "canonicalTarget": "citta-shujin-academy",
+      "canonicalName": "Shujin Academy",
+      "evidence": [],
+      "note": "Consolidamento affidato al root; non ripetuto."
+    },
+    {
+      "root": "nativo-archivio-010",
+      "resources": [
+        "RMAP_010_4_0"
+      ],
+      "decision": "associazione-luogo-verificata",
+      "canonicalTarget": "kanda-jinbocho/chiesa-kanda",
+      "canonicalName": "Chiesa di Kanda",
+      "evidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F010_004_00",
+          "placeRecord": {
+            "offset": 816,
+            "rawHex": "00c500f100000000",
+            "indices": [
+              197,
+              241,
+              0,
+              0
+            ],
+            "group": {
+              "index": 197,
+              "offset": 6660,
+              "rawHex": "43686965736100",
+              "text": "Chiesa",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 241,
+                "offset": 7844,
+                "rawHex": "43617070656c6c6100",
+                "text": "Cappella",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          }
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 34,
+          "offset": 1816,
+          "identifiersRawHex": "0a040000",
+          "rawTextHex": "436869657361206469204b616e6461000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Chiesa di Kanda",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        }
+      ],
+      "note": "Cappella e planimetria della chiesa; il luogo del catalogo esiste nel quartiere kanda-jinbocho. Non creare un secondo luogo Chiesa."
+    },
+    {
+      "root": "nativo-archivio-011",
+      "resources": [
+        "RMAP_011_4_0",
+        "RMAP_011_6_0"
+      ],
+      "decision": "separare-per-risorsa",
+      "canonicalTarget": null,
+      "canonicalName": null,
+      "evidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F011_004_00",
+          "placeRecord": {
+            "offset": 1008,
+            "rawHex": "0007003100000000",
+            "indices": [
+              7,
+              49,
+              0,
+              0
+            ],
+            "group": {
+              "index": 7,
+              "offset": 2500,
+              "rawHex": "416f79616d612d497463686f6d6500",
+              "text": "Aoyama-Itchome",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 49,
+                "offset": 3396,
+                "rawHex": "42616e6368696e612064656c6c61206d6574726f706f6c6974616e6100",
+                "text": "Banchina della metropolitana",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          }
+        },
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F011_006_00",
+          "placeRecord": {
+            "offset": 1024,
+            "rawHex": "0003003100000000",
+            "indices": [
+              3,
+              49,
+              0,
+              0
+            ],
+            "group": {
+              "index": 3,
+              "offset": 2404,
+              "rawHex": "596f6e67656e2d4a61796100",
+              "text": "Yongen-Jaya",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 49,
+                "offset": 3396,
+                "rawHex": "42616e6368696e612064656c6c61206d6574726f706f6c6974616e6100",
+                "text": "Banchina della metropolitana",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          }
+        }
+      ],
+      "note": "RMAP0114 appartiene ad Aoyama-Itchome; RMAP0116 a Yongen-Jaya. Non trasferire tutta la radice sotto un quartiere.",
+      "resourceTargets": [
+        {
+          "code": "RMAP_011_4_0",
+          "canonicalPlaceName": "Aoyama-Itchome",
+          "existingCityEntity": null,
+          "mapTitle": "Banchina della metropolitana",
+          "note": "Il catalogo non contiene quartiere Aoyama-Itchome. Non equipararlo alla scuola, che e solo un luogo del quartiere."
+        },
+        {
+          "code": "RMAP_011_6_0",
+          "canonicalPlaceName": "Yongen-Jaya",
+          "existingCityEntity": "yongen-jaya",
+          "mapTitle": "Banchina della metropolitana"
+        }
+      ]
+    },
+    {
+      "root": "nativo-archivio-012",
+      "resources": [
+        "RMAP_012_29_0"
+      ],
+      "decision": "associazione-quartiere-verificata",
+      "canonicalTarget": "citta-odaiba",
+      "canonicalName": "Seaside Park",
+      "evidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F012_029_00",
+          "placeRecord": {
+            "offset": 1288,
+            "rawHex": "006500d100000000",
+            "indices": [
+              101,
+              209,
+              0,
+              0
+            ],
+            "group": {
+              "index": 101,
+              "offset": 4596,
+              "rawHex": "53656173696465205061726b00",
+              "text": "Seaside Park",
+              "status": "valido",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 209,
+                "offset": 6932,
+                "rawHex": "43616e74696572652064656c6c6f2073746164696f00",
+                "text": "Cantiere dello stadio",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          }
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 42,
+          "offset": 2232,
+          "identifiersRawHex": "0c1d0000",
+          "rawTextHex": "43616e74696572652064656c6c6f2073746164696f000000000000000000000000000000000000000000000000000000",
+          "text": "Cantiere dello stadio",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        }
+      ],
+      "note": "Il catalogo odaiba include Seaside Park. Il Cantiere dello stadio resta luogo distinto dal parco per hangout: non attribuirgli attivita o condizioni del parco."
+    },
+    {
+      "root": "nativo-archivio-022",
+      "resources": [
+        "RMAP_022_1_0",
+        "RMAP_022_1_1",
+        "RMAP_022_1_2",
+        "RMAP_022_1_3",
+        "RMAP_022_1_4"
+      ],
+      "decision": "luogo-unico-con-immagini",
+      "canonicalTarget": null,
+      "canonicalName": "Covo dei Ladri",
+      "evidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F022_001_00",
+          "placeRecord": {
+            "offset": 2056,
+            "rawHex": "000000d000000000",
+            "indices": [
+              0,
+              208,
+              0,
+              0
+            ],
+            "group": {
+              "index": 0,
+              "offset": 2340,
+              "rawHex": "4e554c4c00",
+              "text": "NULL",
+              "status": "null",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 208,
+                "offset": 6900,
+                "rawHex": "436f766f20646569204c6164726900",
+                "text": "Covo dei Ladri",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          }
+        }
+      ],
+      "note": "Conservare cinque immagini/layer sotto identita comune; layer non equivalgono a piani verificati."
+    },
+    {
+      "root": "nativo-archivio-150",
+      "resources": [
+        "RMAP_150_3_0",
+        "RMAP_150_3_1"
+      ],
+      "decision": "contesto-narrativo-candidato",
+      "canonicalTarget": null,
+      "canonicalName": null,
+      "evidence": [
+        {
+          "file": "campi-completi/scripts/150_003_00.flow",
+          "lines": [
+            788,
+            804,
+            805
+          ],
+          "symbols": [
+            "CALL_EVENT(101, 1)",
+            "D06_DUNGEON_CLEAR()",
+            "SET_NEXT_DAY(11, 19, 6)"
+          ]
+        },
+        {
+          "file": "campi-completi/scripts/150_003_00.msg",
+          "symbols": [
+            "D00_01_e100_305_mes01",
+            "D06_01_e100_305_mes01"
+          ]
+        }
+      ],
+      "note": "Script condiviso fra prologo e conclusione D06; candidato Palazzo di Niijima ma manca prova nominale diretta nel record e non si impone la denominazione. Nessun accorpamento definitivo autorizzato dalla sola coincidenza narrativa."
+    },
+    {
+      "root": "nativo-archivio-160",
+      "resources": [
+        "RMAP_160_10_0",
+        "RMAP_160_10_1",
+        "RMAP_160_1_0",
+        "RMAP_160_2_0",
+        "RMAP_160_3_0",
+        "RMAP_160_4_0",
+        "RMAP_160_4_1",
+        "RMAP_160_4_2",
+        "RMAP_160_5_0",
+        "RMAP_160_6_0"
+      ],
+      "decision": "sezione-di-dungeon-esistente",
+      "canonicalTarget": "dungeon-iweleth",
+      "canonicalName": "Mondo del clifoto",
+      "evidence": [
+        {
+          "code": "RMAP_160_1_0",
+          "records": [
+            {
+              "group": "Mondo del clifoto",
+              "title": "Piazza Stazione Shibuya",
+              "texpack_offset": 14328,
+              "texpack_group": 99,
+              "texelem_index": 160,
+              "group_title_index": 9,
+              "area_title_index": 170,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1328,
+                "rawHex": "4d6f6e646f2064656c20636c69666f746f",
+                "text": "Mondo del clifoto"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 7712,
+                "rawHex": "5069617a7a61205374617a696f6e652053686962757961",
+                "text": "Piazza Stazione Shibuya"
+              },
+              "texpackRawHex": "a0000100010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffffa000000000000000000000000000000000000000",
+              "texelemRawHex": "630000000900aa00c80b0020e701c201"
+            },
+            {
+              "group": "???",
+              "title": "???",
+              "texpack_offset": 24840,
+              "texpack_group": 145,
+              "texelem_index": 0,
+              "group_title_index": 0,
+              "area_title_index": 0,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 912,
+                "rawHex": "3f3f3f",
+                "text": "???"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 912,
+                "rawHex": "3f3f3f",
+                "text": "???"
+              },
+              "texpackRawHex": "a0000100010000001f85bb415e0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0000000000000000000000000000000000000000",
+              "texelemRawHex": "0000000000000000ffffffff00000000"
+            }
+          ]
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 61,
+          "offset": 3220,
+          "identifiersRawHex": "a0010000",
+          "rawTextHex": "4d6f6e646f2064656c20636c69666f746f00000000000000000000000000000000000000000000000000000000000000",
+          "text": "Mondo del clifoto",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        }
+      ],
+      "note": "Preservare sottosezione Mondo del clifoto. La scheda iweleth del catalogo documenta espressamente entrambe le macrosezioni; non confonderla con Shibuya ordinaria."
+    },
+    {
+      "root": "nativo-archivio-161",
+      "resources": [
+        "RMAP_161_10_0",
+        "RMAP_161_11_0",
+        "RMAP_161_1_0",
+        "RMAP_161_2_0",
+        "RMAP_161_2_1",
+        "RMAP_161_2_2",
+        "RMAP_161_3_0",
+        "RMAP_161_4_0",
+        "RMAP_161_4_1",
+        "RMAP_161_4_2",
+        "RMAP_161_5_0",
+        "RMAP_161_6_0",
+        "RMAP_161_6_1",
+        "RMAP_161_7_0",
+        "RMAP_161_8_0",
+        "RMAP_161_9_0"
+      ],
+      "decision": "sezione-di-dungeon-esistente",
+      "canonicalTarget": "dungeon-iweleth",
+      "canonicalName": "Profondita dei Memento",
+      "evidence": [
+        {
+          "code": "RMAP_161_10_0",
+          "records": [
+            {
+              "group": "Profondità dei Memento",
+              "title": "Corridoio della prigione",
+              "texpack_offset": 16632,
+              "texpack_group": 115,
+              "texelem_index": 149,
+              "group_title_index": 8,
+              "area_title_index": 158,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1280,
+                "rawHex": "50726f666f6e646974849520646569204d656d656e746f",
+                "text": "Profondità dei Memento"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 7312,
+                "rawHex": "436f727269646f696f2064656c6c612070726967696f6e65",
+                "text": "Corridoio della prigione"
+              },
+              "texpackRawHex": "a1000a00010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff9500000000000000000000000000000000000000",
+              "texelemRawHex": "7300000008009e00da0a0020e100a302"
+            },
+            {
+              "group": "???",
+              "title": "???",
+              "texpack_offset": 24768,
+              "texpack_group": 145,
+              "texelem_index": 0,
+              "group_title_index": 0,
+              "area_title_index": 0,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 912,
+                "rawHex": "3f3f3f",
+                "text": "???"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 912,
+                "rawHex": "3f3f3f",
+                "text": "???"
+              },
+              "texpackRawHex": "a1000a00010000001f85bb415b0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0000000000000000000000000000000000000000",
+              "texelemRawHex": "0000000000000000ffffffff00000000"
+            }
+          ]
+        }
+      ],
+      "note": "Preservare sottosezione con nome nativo accentato dalle titleEvidence. Il catalogo iweleth documenta questa macrosezione distinta dal Clifoto."
+    },
+    {
+      "root": "nativo-archivio-190",
+      "resources": [
+        "RMAP_190_1_0",
+        "RMAP_190_2_0",
+        "RMAP_190_3_0",
+        "RMAP_190_51_0",
+        "RMAP_190_61_0",
+        "RMAP_190_62_0"
+      ],
+      "decision": "raccolta-risorse-memento",
+      "canonicalTarget": "dungeon-mementos",
+      "canonicalName": "Memento",
+      "evidence": [
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 72,
+          "offset": 3792,
+          "identifiersRawHex": "be010000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 73,
+          "offset": 3844,
+          "identifiersRawHex": "bf410000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 74,
+          "offset": 3896,
+          "identifiersRawHex": "c00f0000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 75,
+          "offset": 3948,
+          "identifiersRawHex": "c10f0000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 76,
+          "offset": 4000,
+          "identifiersRawHex": "c1410000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 77,
+          "offset": 4052,
+          "identifiersRawHex": "c20f0000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 78,
+          "offset": 4104,
+          "identifiersRawHex": "c2410000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 79,
+          "offset": 4156,
+          "identifiersRawHex": "c30f0000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        }
+      ],
+      "note": "Raggruppamento sotto dungeon Memento coerente con campi associati. Immagini riutilizzate fra sezioni non identificano singoli Dedali; nessuna assegnazione Qimranut ecc senza tabella specifica."
+    },
+    {
+      "root": "nativo-archivio-192",
+      "resources": [
+        "RMAP_192_62_0"
+      ],
+      "decision": "raccolta-risorse-memento",
+      "canonicalTarget": "dungeon-mementos",
+      "canonicalName": "Memento",
+      "evidence": [
+        {
+          "file": "campi-completi/scripts/192_062_00.flow",
+          "sha256": "78d59ad0374606c22b7c47c84636ff7a5a64c4e43ecc198fa0d605092830b349"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 74,
+          "offset": 3896,
+          "identifiersRawHex": "c00f0000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        }
+      ],
+      "note": "Famiglia campo192 presente nei salvataggi Memento; singolo campo062 non ha etichetta nominale. Parent Memento organizzativo, non identita del Dedalo."
+    },
+    {
+      "root": "nativo-archivio-195",
+      "resources": [
+        "RMAP_195_11_0"
+      ],
+      "decision": "raccolta-risorse-memento",
+      "canonicalTarget": "dungeon-mementos",
+      "canonicalName": "Memento",
+      "evidence": [
+        {
+          "file": "campi-completi/scripts/195_011_00.msg",
+          "message": "D08_01_e437_005_mes01",
+          "textEvidence": "porta per le profondita"
+        },
+        {
+          "file": "campi-completi/scripts/195_011_00.flow",
+          "sha256": "15505ffedadb6ac40f6e770b124bb0fb79cc0019f5245f7e10a5eb00375e69bf"
+        },
+        {
+          "file": "etichette_originali/IT/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+          "index": 79,
+          "offset": 4156,
+          "identifiersRawHex": "c30f0000",
+          "rawTextHex": "4d656d656e746f0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "text": "Memento",
+          "unknownOffsets": [],
+          "encodingStatus": "compatibile"
+        }
+      ],
+      "note": "Famiglia campo195 e campo015 registrato Memento; campo011 dialoga della porta per le profondita. Non nominare area con ordinali inventati."
+    }
+  ],
+  "unresolvedMaps": [
+    {
+      "code": "RMAP_001_2_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Shibuya",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_002_6_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Shujin Academy",
+      "fields": [],
+      "dormantNameEvidence": {
+        "offset": 304,
+        "group": {
+          "index": 2,
+          "offset": 2372,
+          "title": "Shujin Academy"
+        },
+        "floors": [
+          {
+            "index": 32,
+            "offset": 3044,
+            "title": "Aula"
+          },
+          {
+            "index": 0,
+            "offset": 2340,
+            "title": "NULL"
+          },
+          {
+            "index": 0,
+            "offset": 2340,
+            "title": "NULL"
+          }
+        ]
+      },
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_002_8_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Shujin Academy",
+      "fields": [],
+      "dormantNameEvidence": {
+        "offset": 320,
+        "group": {
+          "index": 2,
+          "offset": 2372,
+          "title": "Shujin Academy"
+        },
+        "floors": [
+          {
+            "index": 27,
+            "offset": 2948,
+            "title": "Biblioteca"
+          },
+          {
+            "index": 0,
+            "offset": 2340,
+            "title": "NULL"
+          },
+          {
+            "index": 0,
+            "offset": 2340,
+            "title": "NULL"
+          }
+        ]
+      },
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_150_3_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Luogo 150",
+      "fields": [
+        {
+          "field": "F150_003_00",
+          "roadmapOffset": 16,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F150_003_00.FBN",
+              "field": "F150_003_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F150_003_00.FBN",
+              "sha256": "013a66d2ab230fb08196d4e285e35803ed6230c50c4498339f20fc0468ac65ae",
+              "bytes": 3356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F150_003_00.HTB",
+              "field": "F150_003_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F150_003_00.HTB",
+              "sha256": "b0a6274541139c7fc0eb7e9d1185b09ddc81e6b8a11862bf3e6dccc58b9401dd",
+              "bytes": 896
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_150_003_00.BF",
+              "field": "F150_003_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_150_003_00.BF",
+              "sha256": "ec46933a00e2bb932325ccf167fdeb893db559d1f3e0e056504e9bdecd360575",
+              "bytes": 51767
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/150_003_00.flow",
+            "sha256": "aa2a8d2ce7dddd3b17b4ec303e81695d717a00e7f735a373a2f559f1e84e2474"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 88,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 96,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 241,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 248,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 326,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 341,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 348,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 355,
+              "declaration": "void D00_150_03_minimap_01()"
+            },
+            {
+              "line": 363,
+              "declaration": "void D00_150_03_minimap_02()"
+            },
+            {
+              "line": 371,
+              "declaration": "void D00_150_03_minimap_03()"
+            },
+            {
+              "line": 379,
+              "declaration": "void D00_150_03_minimap_04()"
+            },
+            {
+              "line": 387,
+              "declaration": "void D150_03_L_01()"
+            },
+            {
+              "line": 401,
+              "declaration": "void D150_03_L_02()"
+            },
+            {
+              "line": 415,
+              "declaration": "void D150_03_L_03()"
+            },
+            {
+              "line": 429,
+              "declaration": "void D150_03_L_04()"
+            },
+            {
+              "line": 443,
+              "declaration": "void D00_01_e100_302_START()"
+            },
+            {
+              "line": 478,
+              "declaration": "void D00_01_e100_303_START()"
+            },
+            {
+              "line": 517,
+              "declaration": "void D00_01_e100_305_START()"
+            },
+            {
+              "line": 657,
+              "declaration": "void D00_01_e100_305_af_START()"
+            },
+            {
+              "line": 674,
+              "declaration": "void D00_01_e480_020_START()"
+            },
+            {
+              "line": 723,
+              "declaration": "void D00_01_e100_304_START()"
+            },
+            {
+              "line": 814,
+              "declaration": "void DUNGEON_CLEAR()"
+            },
+            {
+              "line": 852,
+              "declaration": "void D06_DUNGEON_CLEAR()"
+            },
+            {
+              "line": 928,
+              "declaration": "void unequipAKECHI()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_150_3_1",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Luogo 150",
+      "fields": [
+        {
+          "field": "F150_003_00",
+          "roadmapOffset": 16,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F150_003_00.FBN",
+              "field": "F150_003_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F150_003_00.FBN",
+              "sha256": "013a66d2ab230fb08196d4e285e35803ed6230c50c4498339f20fc0468ac65ae",
+              "bytes": 3356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F150_003_00.HTB",
+              "field": "F150_003_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F150_003_00.HTB",
+              "sha256": "b0a6274541139c7fc0eb7e9d1185b09ddc81e6b8a11862bf3e6dccc58b9401dd",
+              "bytes": 896
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_150_003_00.BF",
+              "field": "F150_003_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_150_003_00.BF",
+              "sha256": "ec46933a00e2bb932325ccf167fdeb893db559d1f3e0e056504e9bdecd360575",
+              "bytes": 51767
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/150_003_00.flow",
+            "sha256": "aa2a8d2ce7dddd3b17b4ec303e81695d717a00e7f735a373a2f559f1e84e2474"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 88,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 96,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 241,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 248,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 326,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 341,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 348,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 355,
+              "declaration": "void D00_150_03_minimap_01()"
+            },
+            {
+              "line": 363,
+              "declaration": "void D00_150_03_minimap_02()"
+            },
+            {
+              "line": 371,
+              "declaration": "void D00_150_03_minimap_03()"
+            },
+            {
+              "line": 379,
+              "declaration": "void D00_150_03_minimap_04()"
+            },
+            {
+              "line": 387,
+              "declaration": "void D150_03_L_01()"
+            },
+            {
+              "line": 401,
+              "declaration": "void D150_03_L_02()"
+            },
+            {
+              "line": 415,
+              "declaration": "void D150_03_L_03()"
+            },
+            {
+              "line": 429,
+              "declaration": "void D150_03_L_04()"
+            },
+            {
+              "line": 443,
+              "declaration": "void D00_01_e100_302_START()"
+            },
+            {
+              "line": 478,
+              "declaration": "void D00_01_e100_303_START()"
+            },
+            {
+              "line": 517,
+              "declaration": "void D00_01_e100_305_START()"
+            },
+            {
+              "line": 657,
+              "declaration": "void D00_01_e100_305_af_START()"
+            },
+            {
+              "line": 674,
+              "declaration": "void D00_01_e480_020_START()"
+            },
+            {
+              "line": 723,
+              "declaration": "void D00_01_e100_304_START()"
+            },
+            {
+              "line": 814,
+              "declaration": "void DUNGEON_CLEAR()"
+            },
+            {
+              "line": 852,
+              "declaration": "void D06_DUNGEON_CLEAR()"
+            },
+            {
+              "line": 928,
+              "declaration": "void unequipAKECHI()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_151_0_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kamoshida",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_151_0_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kamoshida",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_151_16_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kamoshida",
+      "fields": [
+        {
+          "field": "F151_016_00",
+          "roadmapOffset": 272,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F151_016_00.FBN",
+              "field": "F151_016_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F151_016_00.FBN",
+              "sha256": "f0c3cdc3edb97fc38526623df4e2fd1264d231e2f76b82b35ddaea2d5d4fac32",
+              "bytes": 780
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F151_016_00.HTB",
+              "field": "F151_016_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F151_016_00.HTB",
+              "sha256": "1a757fc2186e5d3db61e640eeda4ec7f508e947b0980c22908a223d49e6dc451",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_151_016_00.BF",
+              "field": "F151_016_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_151_016_00.BF",
+              "sha256": "58b159464d5d46ed6e75d49b2ce10fbc99933c3663b70d14ad3470160eb03fa9",
+              "bytes": 8316
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/151_016_00.flow",
+            "sha256": "efe99199abc6f593e50e21e9e2cc87760499734dee60b4d78a1c89ff026626f5"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 18,
+              "declaration": "void GOTO_152_01_01()"
+            },
+            {
+              "line": 26,
+              "declaration": "void D01_02_e129_101_START()"
+            },
+            {
+              "line": 43,
+              "declaration": "void D151_16_MAIN_PICTURE()"
+            },
+            {
+              "line": 58,
+              "declaration": "void D151_16_SWITCH_L()"
+            },
+            {
+              "line": 73,
+              "declaration": "void D151_02_MAIN_DOOR_C()"
+            },
+            {
+              "line": 83,
+              "declaration": "void D151_02_MAIN_DOOR_R()"
+            },
+            {
+              "line": 93,
+              "declaration": "void D151_02_MAIN_DOOR_L()"
+            },
+            {
+              "line": 103,
+              "declaration": "void D151_02_MAIN_DOOR()"
+            },
+            {
+              "line": 114,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 122,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            },
+            {
+              "line": 129,
+              "declaration": "void Fld_FadeOut_CallEvent()"
+            },
+            {
+              "line": 137,
+              "declaration": "void Fld_FadeOut_CallCalendar()"
+            },
+            {
+              "line": 145,
+              "declaration": "void Fld_FadeOut_Default()"
+            },
+            {
+              "line": 153,
+              "declaration": "void Fld_FadeOut_Wait10()"
+            },
+            {
+              "line": 162,
+              "declaration": "void Fld_FadeIn_Default()"
+            },
+            {
+              "line": 170,
+              "declaration": "void Fld_FadeOut_Subway()"
+            },
+            {
+              "line": 178,
+              "declaration": "void Fld_FadeOut_Symbol()"
+            },
+            {
+              "line": 186,
+              "declaration": "void Fld_FadeOut_Rain()"
+            },
+            {
+              "line": 194,
+              "declaration": "void Fld_FadeOut_Cross()"
+            },
+            {
+              "line": 202,
+              "declaration": "void Fld_FadeOut_Parallel()"
+            },
+            {
+              "line": 210,
+              "declaration": "void Fld_FadeOut_CutChange()"
+            },
+            {
+              "line": 218,
+              "declaration": "void Fld_FadeOut_Velvet()"
+            },
+            {
+              "line": 226,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 234,
+              "declaration": "void dungeon_return()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_152_11_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kamoshida",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_152_11_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kamoshida",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_152_5_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kamoshida",
+      "fields": [
+        {
+          "field": "F152_005_00",
+          "roadmapOffset": 352,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F152_005_00.FBN",
+              "field": "F152_005_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F152_005_00.FBN",
+              "sha256": "fb9f7fd9fd82195c9abf978ed530077607616b328dbd1ba5cb89840cde4bc932",
+              "bytes": 1352
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F152_005_00.HTB",
+              "field": "F152_005_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F152_005_00.HTB",
+              "sha256": "f2a31e4f10c7917ea10ecc37ce9c8f2e036f0f0040c52dd1297d34c881744322",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_152_005_00.BF",
+              "field": "F152_005_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_152_005_00.BF",
+              "sha256": "7e687f4ccbe2ed8098e12dfc23913f61400728c0c22fd955ce4001b3ee237d6c",
+              "bytes": 1715
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/152_005_00.flow",
+            "sha256": "728d130f908a657bcae0a122dd40b11332c9c311d330d7cc98a6514d1db9f0ae"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 18,
+              "declaration": "void GOTO_151_13()"
+            },
+            {
+              "line": 32,
+              "declaration": "void D01_152_05_minimap_00()"
+            },
+            {
+              "line": 40,
+              "declaration": "void D01_152_05_minimap_01()"
+            },
+            {
+              "line": 48,
+              "declaration": "void D01_152_05_CHECK01_START()"
+            },
+            {
+              "line": 63,
+              "declaration": "void D01_04_EX03_BTL_START()"
+            },
+            {
+              "line": 102,
+              "declaration": "void D01_152_005_EX_GUIDE()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_153_10_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_11_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_12_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_13_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_4_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F153_051_00.FBN",
+              "field": "F153_051_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F153_051_00.FBN",
+              "sha256": "f6951fb17e25681f5a46f4f6c2ba1b168f0a0c27f14997c08671825785a06740",
+              "bytes": 1132
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F153_051_00.HTB",
+              "field": "F153_051_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F153_051_00.HTB",
+              "sha256": "5b8e13c4dff0928192e75c4c499315a733360746bcc87850df7691a7410430d7",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_153_051_00.BF",
+              "field": "F153_051_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_153_051_00.BF",
+              "sha256": "a3f35ac21462ece1c9ca6041bba6c7567300f664863aeddb8e653bd279f21566",
+              "bytes": 144734
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/153_051_00.flow",
+            "sha256": "44e3b8a16c1a400c133ee429149e14f96b0571b3f9b1e6bae4270f03343b6353"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 63,
+              "declaration": "void SAFEROOM_EXIT()"
+            },
+            {
+              "line": 117,
+              "declaration": "void D153_51_MEMBER_CHECK()"
+            },
+            {
+              "line": 140,
+              "declaration": "void D153_51_MEMBER_CHECK_TXT()"
+            },
+            {
+              "line": 164,
+              "declaration": "void D153_51_BRIEFING_HIT()"
+            },
+            {
+              "line": 171,
+              "declaration": "void NPC_ID_GET()"
+            },
+            {
+              "line": 472,
+              "declaration": "void NPC_ID_GET_DUNGEON_EX152()"
+            },
+            {
+              "line": 492,
+              "declaration": "void SAFETY_MODEL_SET()"
+            },
+            {
+              "line": 651,
+              "declaration": "void PLAYER_VISIBLE_ON()"
+            },
+            {
+              "line": 667,
+              "declaration": "void PLAYER_VISIBLE_OFF()"
+            },
+            {
+              "line": 683,
+              "declaration": "void AZITO_MENU_SET()"
+            },
+            {
+              "line": 763,
+              "declaration": "void AZITO_POSITION_SET()"
+            },
+            {
+              "line": 794,
+              "declaration": "void AZITO_01_POSITION_SET()"
+            },
+            {
+              "line": 923,
+              "declaration": "void AZITO_02_POSITION_SET()"
+            },
+            {
+              "line": 969,
+              "declaration": "void AZITO_03_POSITION_SET()"
+            },
+            {
+              "line": 1011,
+              "declaration": "void AZITO_04_POSITION_SET()"
+            },
+            {
+              "line": 1053,
+              "declaration": "void DUNGEON_POSITION_SET()"
+            },
+            {
+              "line": 1105,
+              "declaration": "void GOTO_DUNGEON_WIPE()"
+            },
+            {
+              "line": 1112,
+              "declaration": "void GOTO_DUNGEON_MOTION()"
+            },
+            {
+              "line": 1339,
+              "declaration": "void TARGET_PALACE_CHECK()"
+            },
+            {
+              "line": 1405,
+              "declaration": "void ACTIVE_DAY_SET()"
+            },
+            {
+              "line": 1418,
+              "declaration": "void AZITO_FAKE_SET()"
+            },
+            {
+              "line": 1463,
+              "declaration": "void AZITO_FAKE_END()"
+            },
+            {
+              "line": 1471,
+              "declaration": "void AZITO_01_SET_Cut00()"
+            },
+            {
+              "line": 1532,
+              "declaration": "void AZITO_01_SET_Cut00_EX()"
+            }
+          ]
+        },
+        {
+          "field": "F153_004_00",
+          "roadmapOffset": 448,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_153_5_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_8_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_8_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_153_8_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Madarame",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_154_12_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_012_00",
+          "roadmapOffset": 704,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_154_12_1",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_012_00",
+          "roadmapOffset": 704,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_154_12_2",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_012_00",
+          "roadmapOffset": 704,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_154_13_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_013_00",
+          "roadmapOffset": 720,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_154_13_1",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_013_00",
+          "roadmapOffset": 720,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_154_13_2",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_013_00",
+          "roadmapOffset": 720,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_154_15_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Kaneshiro",
+      "fields": [
+        {
+          "field": "F154_015_00",
+          "roadmapOffset": 752,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F154_015_00.FBN",
+              "field": "F154_015_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F154_015_00.FBN",
+              "sha256": "5dc9b2374f4d42ca4373db4b02d18aed9df8173787792286709542d5340bc817",
+              "bytes": 2328
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F154_015_00.HTB",
+              "field": "F154_015_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F154_015_00.HTB",
+              "sha256": "78b67aced3c3a1e36bf549adaa5763741e7a2093e11a991ae9ec49713b8b7ca3",
+              "bytes": 896
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_154_015_00.BF",
+              "field": "F154_015_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_154_015_00.BF",
+              "sha256": "6f0dc9c3401a7b0ac04a84c6f7a17599b5280ac8bd833796b65e43ed0fd52420",
+              "bytes": 10986
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/154_015_00.flow",
+            "sha256": "4062b7ea4f3f1e63115c82c017a3e85f336ec64da07730a7315a98e31cb87e18"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 27,
+              "declaration": "void START_SAVE()"
+            },
+            {
+              "line": 35,
+              "declaration": "void GOTO_154_01()"
+            },
+            {
+              "line": 43,
+              "declaration": "void D03_01_e246_110_START()"
+            },
+            {
+              "line": 87,
+              "declaration": "void D03_01_e246_111_START()"
+            },
+            {
+              "line": 135,
+              "declaration": "void D03_01_e246_112_START()"
+            },
+            {
+              "line": 209,
+              "declaration": "void D03_01_e246_101_START()"
+            },
+            {
+              "line": 248,
+              "declaration": "void ATM_CHECK_01()"
+            },
+            {
+              "line": 257,
+              "declaration": "void ATM_CHECK_02()"
+            },
+            {
+              "line": 266,
+              "declaration": "void ATM_CHECK_03()"
+            },
+            {
+              "line": 275,
+              "declaration": "void ATM_CHECK_04()"
+            },
+            {
+              "line": 284,
+              "declaration": "void ATM_CHECK_05()"
+            },
+            {
+              "line": 293,
+              "declaration": "void D03_02_miniEV02_START()"
+            },
+            {
+              "line": 308,
+              "declaration": "void D154_15_CHECK_01()"
+            },
+            {
+              "line": 317,
+              "declaration": "void D154_15_CHECK_02()"
+            },
+            {
+              "line": 327,
+              "declaration": "void D154_15_CHECK_03()"
+            },
+            {
+              "line": 350,
+              "declaration": "void D154_15_CHECK_04()"
+            },
+            {
+              "line": 360,
+              "declaration": "void D154_15_CHECK_05()"
+            },
+            {
+              "line": 400,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 408,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            },
+            {
+              "line": 415,
+              "declaration": "void Fld_FadeOut_CallEvent()"
+            },
+            {
+              "line": 423,
+              "declaration": "void Fld_FadeOut_CallCalendar()"
+            },
+            {
+              "line": 431,
+              "declaration": "void Fld_FadeOut_Default()"
+            },
+            {
+              "line": 439,
+              "declaration": "void Fld_FadeOut_Wait10()"
+            },
+            {
+              "line": 448,
+              "declaration": "void Fld_FadeIn_Default()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_155_10_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Futaba",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_155_2_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Futaba",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_155_2_3",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Futaba",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_155_3_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Futaba",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_156_11_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Okumura",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_156_11_3",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Okumura",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_156_9_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Okumura",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_157_17_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Niijima",
+      "fields": [
+        {
+          "field": "F157_017_00",
+          "roadmapOffset": 1488,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_157_3_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Niijima",
+      "fields": [
+        {
+          "field": "F157_003_00",
+          "roadmapOffset": 1280,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_157_3_1",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Niijima",
+      "fields": [
+        {
+          "field": "F157_003_00",
+          "roadmapOffset": 1280,
+          "sources": {
+            "fbn": null,
+            "htb": null,
+            "bf": null
+          },
+          "script": null,
+          "menuLabels": []
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_157_5_1",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Niijima",
+      "fields": [
+        {
+          "field": "F157_051_00",
+          "roadmapOffset": 1248,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F157_051_00.FBN",
+              "field": "F157_051_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F157_051_00.FBN",
+              "sha256": "af7cb23a681bce2dd6113be035d21132f70cb818ef93a77b4f441dff87a57948",
+              "bytes": 1132
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F157_051_00.HTB",
+              "field": "F157_051_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F157_051_00.HTB",
+              "sha256": "ff634695286db45216cb9a68a9a76f2d4ed284ca3c95bdf41aa7211031b15e0a",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_157_051_00.BF",
+              "field": "F157_051_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_157_051_00.BF",
+              "sha256": "45ff8e9b35b66febb7dafbb367c90edb2967fafeb2c2436dc7c6139bbfe8f5fc",
+              "bytes": 140009
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/157_051_00.flow",
+            "sha256": "42709b10607f9fa07758837a70cc0e74abc9f5764fbd274ea1e97433adb82926"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 61,
+              "declaration": "void SAFEROOM_EXIT()"
+            },
+            {
+              "line": 78,
+              "declaration": "void D157_51_BRIEFING_HIT()"
+            },
+            {
+              "line": 86,
+              "declaration": "void NPC_ID_GET()"
+            },
+            {
+              "line": 387,
+              "declaration": "void NPC_ID_GET_DUNGEON_EX152()"
+            },
+            {
+              "line": 407,
+              "declaration": "void SAFETY_MODEL_SET()"
+            },
+            {
+              "line": 566,
+              "declaration": "void PLAYER_VISIBLE_ON()"
+            },
+            {
+              "line": 582,
+              "declaration": "void PLAYER_VISIBLE_OFF()"
+            },
+            {
+              "line": 598,
+              "declaration": "void AZITO_MENU_SET()"
+            },
+            {
+              "line": 678,
+              "declaration": "void AZITO_POSITION_SET()"
+            },
+            {
+              "line": 709,
+              "declaration": "void AZITO_01_POSITION_SET()"
+            },
+            {
+              "line": 838,
+              "declaration": "void AZITO_02_POSITION_SET()"
+            },
+            {
+              "line": 884,
+              "declaration": "void AZITO_03_POSITION_SET()"
+            },
+            {
+              "line": 926,
+              "declaration": "void AZITO_04_POSITION_SET()"
+            },
+            {
+              "line": 968,
+              "declaration": "void DUNGEON_POSITION_SET()"
+            },
+            {
+              "line": 1020,
+              "declaration": "void GOTO_DUNGEON_WIPE()"
+            },
+            {
+              "line": 1027,
+              "declaration": "void GOTO_DUNGEON_MOTION()"
+            },
+            {
+              "line": 1254,
+              "declaration": "void TARGET_PALACE_CHECK()"
+            },
+            {
+              "line": 1320,
+              "declaration": "void ACTIVE_DAY_SET()"
+            },
+            {
+              "line": 1333,
+              "declaration": "void AZITO_FAKE_SET()"
+            },
+            {
+              "line": 1378,
+              "declaration": "void AZITO_FAKE_END()"
+            },
+            {
+              "line": 1386,
+              "declaration": "void AZITO_01_SET_Cut00()"
+            },
+            {
+              "line": 1447,
+              "declaration": "void AZITO_01_SET_Cut00_EX()"
+            },
+            {
+              "line": 1504,
+              "declaration": "void AZITO_01_SET_Cut00_CAM()"
+            },
+            {
+              "line": 1511,
+              "declaration": "void AZITO_01_SET_Cut01()"
+            }
+          ]
+        },
+        {
+          "field": "F157_052_00",
+          "roadmapOffset": 1504,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F157_052_00.FBN",
+              "field": "F157_052_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F157_052_00.FBN",
+              "sha256": "3d69b106e26dfd47d9517d16154bcf3ca0e8fc51fa51a54ff89acc4438d9525d",
+              "bytes": 1132
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F157_052_00.HTB",
+              "field": "F157_052_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F157_052_00.HTB",
+              "sha256": "ff634695286db45216cb9a68a9a76f2d4ed284ca3c95bdf41aa7211031b15e0a",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_157_052_00.BF",
+              "field": "F157_052_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_157_052_00.BF",
+              "sha256": "29e905e500a80ea8287a4b7dfc7df458e836855bd250a51bd5cebdecc596ac1b",
+              "bytes": 140017
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/157_052_00.flow",
+            "sha256": "44647ddc569d28489f58871c7a886bd3d1871d04ae0045b2251ce10abe398937"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 61,
+              "declaration": "void SAFEROOM_EXIT()"
+            },
+            {
+              "line": 79,
+              "declaration": "void D157_51_BRIEFING_HIT()"
+            },
+            {
+              "line": 87,
+              "declaration": "void NPC_ID_GET()"
+            },
+            {
+              "line": 388,
+              "declaration": "void NPC_ID_GET_DUNGEON_EX152()"
+            },
+            {
+              "line": 408,
+              "declaration": "void SAFETY_MODEL_SET()"
+            },
+            {
+              "line": 567,
+              "declaration": "void PLAYER_VISIBLE_ON()"
+            },
+            {
+              "line": 583,
+              "declaration": "void PLAYER_VISIBLE_OFF()"
+            },
+            {
+              "line": 599,
+              "declaration": "void AZITO_MENU_SET()"
+            },
+            {
+              "line": 679,
+              "declaration": "void AZITO_POSITION_SET()"
+            },
+            {
+              "line": 710,
+              "declaration": "void AZITO_01_POSITION_SET()"
+            },
+            {
+              "line": 839,
+              "declaration": "void AZITO_02_POSITION_SET()"
+            },
+            {
+              "line": 885,
+              "declaration": "void AZITO_03_POSITION_SET()"
+            },
+            {
+              "line": 927,
+              "declaration": "void AZITO_04_POSITION_SET()"
+            },
+            {
+              "line": 969,
+              "declaration": "void DUNGEON_POSITION_SET()"
+            },
+            {
+              "line": 1021,
+              "declaration": "void GOTO_DUNGEON_WIPE()"
+            },
+            {
+              "line": 1028,
+              "declaration": "void GOTO_DUNGEON_MOTION()"
+            },
+            {
+              "line": 1255,
+              "declaration": "void TARGET_PALACE_CHECK()"
+            },
+            {
+              "line": 1321,
+              "declaration": "void ACTIVE_DAY_SET()"
+            },
+            {
+              "line": 1334,
+              "declaration": "void AZITO_FAKE_SET()"
+            },
+            {
+              "line": 1379,
+              "declaration": "void AZITO_FAKE_END()"
+            },
+            {
+              "line": 1387,
+              "declaration": "void AZITO_01_SET_Cut00()"
+            },
+            {
+              "line": 1448,
+              "declaration": "void AZITO_01_SET_Cut00_EX()"
+            },
+            {
+              "line": 1505,
+              "declaration": "void AZITO_01_SET_Cut00_CAM()"
+            },
+            {
+              "line": 1512,
+              "declaration": "void AZITO_01_SET_Cut01()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_157_7_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Niijima",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_159_15_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Shido",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_159_16_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Shido",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_159_8_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Palazzo di Shido",
+      "fields": [
+        {
+          "field": "F159_008_00",
+          "roadmapOffset": 1632,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F159_008_00.FBN",
+              "field": "F159_008_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F159_008_00.FBN",
+              "sha256": "24107d91707176cb69a950a49d811690eb775e6d72d8b75bd951281e88f8e0b6",
+              "bytes": 424
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F159_008_00.HTB",
+              "field": "F159_008_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F159_008_00.HTB",
+              "sha256": "12603ae84de9f5703b1bd6d8615e2f707e015122c0962d11c351d1c656fd001a",
+              "bytes": 1120
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_159_008_00.BF",
+              "field": "F159_008_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_159_008_00.BF",
+              "sha256": "cd22197c8372c7bc04db438fc47df717476e65d49faa04725bd250cf8de0952b",
+              "bytes": 278
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/159_008_00.flow",
+            "sha256": "2b644551376559a5d33b55a59ebe4a43ce8f423554fd881b0da6977e280b18cc"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 18,
+              "declaration": "void GOTO_159_11_04()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_160_10_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Mondo del clifoto",
+      "fields": [
+        {
+          "field": "F160_010_00",
+          "roadmapOffset": 2016,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F160_010_00.FBN",
+              "field": "F160_010_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F160_010_00.FBN",
+              "sha256": "7701aa09b7c8898fb44960667105012d9a457ddb4549cc38a3bf37bdab4ffe5d",
+              "bytes": 5092
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F160_010_00.HTB",
+              "field": "F160_010_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F160_010_00.HTB",
+              "sha256": "ccafe105bd15f9af9d02200deefbf78be0ce8396270aef46791a88288a816888",
+              "bytes": 1856
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_160_010_00.BF",
+              "field": "F160_010_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_160_010_00.BF",
+              "sha256": "a52f91055b1d0589e0fe4193d5c961f2deab27537e9499f1128273cdd69b2d8f",
+              "bytes": 4502
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/160_010_00.flow",
+            "sha256": "41908ce61f757e4627a86537a43bd57bfd730497139c736d22933a5a503a638e"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 18,
+              "declaration": "void D08_160_10_minimap_00()"
+            },
+            {
+              "line": 26,
+              "declaration": "void D08_160_10_minimap_01()"
+            },
+            {
+              "line": 34,
+              "declaration": "void D08_160_10_minimap_02()"
+            },
+            {
+              "line": 42,
+              "declaration": "void D08_160_10_minimap_03()"
+            },
+            {
+              "line": 50,
+              "declaration": "void D08_160_10_minimap_04()"
+            },
+            {
+              "line": 58,
+              "declaration": "void D08_160_10_minimap_05()"
+            },
+            {
+              "line": 68,
+              "declaration": "void D08_160_10_minimap_06()"
+            },
+            {
+              "line": 78,
+              "declaration": "void D08_160_10_minimap_07()"
+            },
+            {
+              "line": 86,
+              "declaration": "void D08_160_10_minimap_08()"
+            },
+            {
+              "line": 94,
+              "declaration": "void D08_160_10_minimap_09()"
+            },
+            {
+              "line": 102,
+              "declaration": "void PRISON_PC02()"
+            },
+            {
+              "line": 117,
+              "declaration": "void PRISON_PC04()"
+            },
+            {
+              "line": 132,
+              "declaration": "void PRISON_PC05()"
+            },
+            {
+              "line": 147,
+              "declaration": "void PRISON_PC06()"
+            },
+            {
+              "line": 162,
+              "declaration": "void PRISON_PC07()"
+            },
+            {
+              "line": 177,
+              "declaration": "void PRISON_PC08()"
+            },
+            {
+              "line": 192,
+              "declaration": "void PRISON_PARTY_CHECK()"
+            },
+            {
+              "line": 211,
+              "declaration": "void D08_e454_021_START()"
+            },
+            {
+              "line": 226,
+              "declaration": "void D08_e454_025_START()"
+            },
+            {
+              "line": 257,
+              "declaration": "void D160_10_L_01_START()"
+            },
+            {
+              "line": 267,
+              "declaration": "void D160_10_L_02_R_START()"
+            },
+            {
+              "line": 277,
+              "declaration": "void D160_10_L_02_L_START()"
+            },
+            {
+              "line": 287,
+              "declaration": "void D160_10_LOCK_EV()"
+            },
+            {
+              "line": 298,
+              "declaration": "void VELVET_TABLE()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_160_10_1",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Mondo del clifoto",
+      "fields": [
+        {
+          "field": "F160_010_00",
+          "roadmapOffset": 2016,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F160_010_00.FBN",
+              "field": "F160_010_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F160_010_00.FBN",
+              "sha256": "7701aa09b7c8898fb44960667105012d9a457ddb4549cc38a3bf37bdab4ffe5d",
+              "bytes": 5092
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F160_010_00.HTB",
+              "field": "F160_010_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F160_010_00.HTB",
+              "sha256": "ccafe105bd15f9af9d02200deefbf78be0ce8396270aef46791a88288a816888",
+              "bytes": 1856
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_160_010_00.BF",
+              "field": "F160_010_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_160_010_00.BF",
+              "sha256": "a52f91055b1d0589e0fe4193d5c961f2deab27537e9499f1128273cdd69b2d8f",
+              "bytes": 4502
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/160_010_00.flow",
+            "sha256": "41908ce61f757e4627a86537a43bd57bfd730497139c736d22933a5a503a638e"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 18,
+              "declaration": "void D08_160_10_minimap_00()"
+            },
+            {
+              "line": 26,
+              "declaration": "void D08_160_10_minimap_01()"
+            },
+            {
+              "line": 34,
+              "declaration": "void D08_160_10_minimap_02()"
+            },
+            {
+              "line": 42,
+              "declaration": "void D08_160_10_minimap_03()"
+            },
+            {
+              "line": 50,
+              "declaration": "void D08_160_10_minimap_04()"
+            },
+            {
+              "line": 58,
+              "declaration": "void D08_160_10_minimap_05()"
+            },
+            {
+              "line": 68,
+              "declaration": "void D08_160_10_minimap_06()"
+            },
+            {
+              "line": 78,
+              "declaration": "void D08_160_10_minimap_07()"
+            },
+            {
+              "line": 86,
+              "declaration": "void D08_160_10_minimap_08()"
+            },
+            {
+              "line": 94,
+              "declaration": "void D08_160_10_minimap_09()"
+            },
+            {
+              "line": 102,
+              "declaration": "void PRISON_PC02()"
+            },
+            {
+              "line": 117,
+              "declaration": "void PRISON_PC04()"
+            },
+            {
+              "line": 132,
+              "declaration": "void PRISON_PC05()"
+            },
+            {
+              "line": 147,
+              "declaration": "void PRISON_PC06()"
+            },
+            {
+              "line": 162,
+              "declaration": "void PRISON_PC07()"
+            },
+            {
+              "line": 177,
+              "declaration": "void PRISON_PC08()"
+            },
+            {
+              "line": 192,
+              "declaration": "void PRISON_PARTY_CHECK()"
+            },
+            {
+              "line": 211,
+              "declaration": "void D08_e454_021_START()"
+            },
+            {
+              "line": 226,
+              "declaration": "void D08_e454_025_START()"
+            },
+            {
+              "line": 257,
+              "declaration": "void D160_10_L_01_START()"
+            },
+            {
+              "line": 267,
+              "declaration": "void D160_10_L_02_R_START()"
+            },
+            {
+              "line": 277,
+              "declaration": "void D160_10_L_02_L_START()"
+            },
+            {
+              "line": 287,
+              "declaration": "void D160_10_LOCK_EV()"
+            },
+            {
+              "line": 298,
+              "declaration": "void VELVET_TABLE()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_160_4_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Mondo del clifoto",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_160_4_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Mondo del clifoto",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_161_2_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Profondità dei Memento",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_161_2_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Profondità dei Memento",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_161_4_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Profondità dei Memento",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_161_4_2",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Profondità dei Memento",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_161_6_1",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Profondità dei Memento",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_190_1_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F190_001_00",
+          "roadmapOffset": 2464,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F190_001_00.FBN",
+              "field": "F190_001_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F190_001_00.FBN",
+              "sha256": "201ef76957984eeb39207a2d80c18b5b43a3dac2b22041bcbebc18382d69b68a",
+              "bytes": 1528
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F190_001_00.HTB",
+              "field": "F190_001_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F190_001_00.HTB",
+              "sha256": "5fd3dbb01b333ad1ac66b929964385ed14e3b5e6239b6090b9ad0559ef90b24e",
+              "bytes": 224
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_190_001_00.BF",
+              "field": "F190_001_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_190_001_00.BF",
+              "sha256": "0302c95f535680158db3df7d22b1a9ffcac214146cd22b2361be65172c1246e9",
+              "bytes": 62593
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/190_001_00.flow",
+            "sha256": "87223b16691bc3d9379d20a1091f5aa04118485788c5f535d6fa0d459dae6b82"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 42,
+              "declaration": "void AT_D_VELVET_HIT()"
+            },
+            {
+              "line": 72,
+              "declaration": "void GOTO_EXIT()"
+            },
+            {
+              "line": 145,
+              "declaration": "void AT_D_EXIT_SCENARIO_SET()"
+            },
+            {
+              "line": 160,
+              "declaration": "void AT_D_EXIT_CHECK_CAM_SET()"
+            },
+            {
+              "line": 183,
+              "declaration": "void AT_D_EXIT_CHECK_CAM_END()"
+            },
+            {
+              "line": 202,
+              "declaration": "void GOTO_DUNGEON()"
+            },
+            {
+              "line": 214,
+              "declaration": "void GOTO_EXIT_NG_EX()"
+            },
+            {
+              "line": 223,
+              "declaration": "void GOTO_SHOP()"
+            },
+            {
+              "line": 315,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 323,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            },
+            {
+              "line": 330,
+              "declaration": "void Fld_FadeOut_CallEvent()"
+            },
+            {
+              "line": 338,
+              "declaration": "void Fld_FadeOut_CallCalendar()"
+            },
+            {
+              "line": 346,
+              "declaration": "void Fld_FadeOut_Default()"
+            },
+            {
+              "line": 354,
+              "declaration": "void Fld_FadeOut_Wait10()"
+            },
+            {
+              "line": 363,
+              "declaration": "void Fld_FadeIn_Default()"
+            },
+            {
+              "line": 371,
+              "declaration": "void Fld_FadeOut_Subway()"
+            },
+            {
+              "line": 379,
+              "declaration": "void Fld_FadeOut_Symbol()"
+            },
+            {
+              "line": 387,
+              "declaration": "void Fld_FadeOut_Rain()"
+            },
+            {
+              "line": 395,
+              "declaration": "void Fld_FadeOut_Cross()"
+            },
+            {
+              "line": 403,
+              "declaration": "void Fld_FadeOut_Parallel()"
+            },
+            {
+              "line": 411,
+              "declaration": "void Fld_FadeOut_CutChange()"
+            },
+            {
+              "line": 419,
+              "declaration": "void Fld_FadeOut_Velvet()"
+            },
+            {
+              "line": 427,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 435,
+              "declaration": "void dungeon_return()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_190_2_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F191_011_00",
+          "roadmapOffset": 2496,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F191_011_00.FBN",
+              "field": "F191_011_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F191_011_00.FBN",
+              "sha256": "5b0b3e19d3eba293286aefe24d1382384aacd4ea00e38109440cf59549362f1c",
+              "bytes": 724
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F191_011_00.HTB",
+              "field": "F191_011_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F191_011_00.HTB",
+              "sha256": "e445e14c158c75d984f68383599fd725e247210dd24c54e76c404ce843ab6954",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_191_011_00.BF",
+              "field": "F191_011_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_191_011_00.BF",
+              "sha256": "98a787266e29ead76256ad71920bac501dee5f3792623bb046cdda46c3e2f1d0",
+              "bytes": 10246
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/191_011_00.flow",
+            "sha256": "76b9e744c51f7685679c68c0bf59abcc4ee51287c61bb6cbe70247f97856d57f"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 30,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 38,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 68,
+              "declaration": "void MEME_LOCK_CLEAR_01()"
+            },
+            {
+              "line": 110,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 118,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 263,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 270,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 348,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 363,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 370,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 377,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 385,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            },
+            {
+              "line": 392,
+              "declaration": "void Fld_FadeOut_CallEvent()"
+            },
+            {
+              "line": 400,
+              "declaration": "void Fld_FadeOut_CallCalendar()"
+            },
+            {
+              "line": 408,
+              "declaration": "void Fld_FadeOut_Default()"
+            },
+            {
+              "line": 416,
+              "declaration": "void Fld_FadeOut_Wait10()"
+            },
+            {
+              "line": 425,
+              "declaration": "void Fld_FadeIn_Default()"
+            },
+            {
+              "line": 433,
+              "declaration": "void Fld_FadeOut_Subway()"
+            },
+            {
+              "line": 441,
+              "declaration": "void Fld_FadeOut_Symbol()"
+            },
+            {
+              "line": 449,
+              "declaration": "void Fld_FadeOut_Rain()"
+            },
+            {
+              "line": 457,
+              "declaration": "void Fld_FadeOut_Cross()"
+            },
+            {
+              "line": 465,
+              "declaration": "void Fld_FadeOut_Parallel()"
+            },
+            {
+              "line": 473,
+              "declaration": "void Fld_FadeOut_CutChange()"
+            },
+            {
+              "line": 481,
+              "declaration": "void Fld_FadeOut_Velvet()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_190_3_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F191_061_00",
+          "roadmapOffset": 2512,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F191_061_00.FBN",
+              "field": "F191_061_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F191_061_00.FBN",
+              "sha256": "025680c696c3883957b8d0746691566315e6af7e76c1cd838d9cd593f21eb4f2",
+              "bytes": 824
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F191_061_00.HTB",
+              "field": "F191_061_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F191_061_00.HTB",
+              "sha256": "55ccda8536614ef22bf2dff418f5d62d990a5f02b2446eae3368010bf499f7a9",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_191_061_00.BF",
+              "field": "F191_061_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_191_061_00.BF",
+              "sha256": "ad4de3ccecb0a48d9353c159222afbd4abad149e4687315e0a378f1ac009ccf0",
+              "bytes": 36850
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/191_061_00.flow",
+            "sha256": "f200153dcca4e47a278bc9876a8a92aa28efc4f859e1252bf7516c865f7a0f15"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 54,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 62,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 86,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 106,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 123,
+              "declaration": "void MEME_LOCK_CLEAR_02()"
+            },
+            {
+              "line": 168,
+              "declaration": "void MEME_LOCK_02_OPEN_EV()"
+            },
+            {
+              "line": 212,
+              "declaration": "void MEME_LOCK_02_CLAUSE_EV()"
+            },
+            {
+              "line": 274,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 282,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 427,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 434,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 512,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 527,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 534,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 541,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 614,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 648,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 682,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 719,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 756,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 793,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 830,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 852,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 860,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            }
+          ]
+        },
+        {
+          "field": "F192_011_00",
+          "roadmapOffset": 2544,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F192_011_00.FBN",
+              "field": "F192_011_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F192_011_00.FBN",
+              "sha256": "237acdccc50adf2538928eca6fd9fd2d8eba3a715aba78be2c408feb0c39aff8",
+              "bytes": 824
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F192_011_00.HTB",
+              "field": "F192_011_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F192_011_00.HTB",
+              "sha256": "301e618a85ac97fcf90c4c806c0ce98ed87df7a0c3d365fe0566c8930edd3232",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_192_011_00.BF",
+              "field": "F192_011_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_192_011_00.BF",
+              "sha256": "53345a3146e240905f6567df136e2bc16e5fdda84f0901a712fc0852b18dc616",
+              "bytes": 36221
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/192_011_00.flow",
+            "sha256": "93d4c4092489849884ef39741ad1191bceddb3ada4998a26cbe647d21525a4c3"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 54,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 62,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 78,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 98,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 115,
+              "declaration": "void MEME_LOCK_CLEAR_07()"
+            },
+            {
+              "line": 160,
+              "declaration": "void MEME_LOCK_07_OPEN_EV()"
+            },
+            {
+              "line": 217,
+              "declaration": "void MEME_LOCK_07_CLAUSE_EV()"
+            },
+            {
+              "line": 258,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 266,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 411,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 418,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 496,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 511,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 518,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 525,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 598,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 632,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 666,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 703,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 740,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 777,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 814,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 836,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 844,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            }
+          ]
+        },
+        {
+          "field": "F193_011_00",
+          "roadmapOffset": 2624,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F193_011_00.FBN",
+              "field": "F193_011_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F193_011_00.FBN",
+              "sha256": "6f379cea16ebe5751920452bce215df2e86b51cf536c9b4c8665aa22d21ff12e",
+              "bytes": 824
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F193_011_00.HTB",
+              "field": "F193_011_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F193_011_00.HTB",
+              "sha256": "a3d89e051918dfee23ea6a75a7f5d8d7954ce66030c0ab39a3d2068e52234719",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_193_011_00.BF",
+              "field": "F193_011_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_193_011_00.BF",
+              "sha256": "072cbd711f085704782abf7a511b208987f65ff40dfa7c7110f8896c17b03e0b",
+              "bytes": 36315
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/193_011_00.flow",
+            "sha256": "ac66abea87905049424c1371f86093fce5680fbe01a5842bc706c706fa7a5283"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 54,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 62,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 86,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 106,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 123,
+              "declaration": "void MEME_LOCK_CLEAR_03()"
+            },
+            {
+              "line": 168,
+              "declaration": "void MEME_LOCK_03_OPEN_EV()"
+            },
+            {
+              "line": 215,
+              "declaration": "void MEME_LOCK_03_CLAUSE_EV()"
+            },
+            {
+              "line": 268,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 276,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 421,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 428,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 506,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 521,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 528,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 535,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 608,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 642,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 676,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 713,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 750,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 787,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 824,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 846,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 854,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            }
+          ]
+        },
+        {
+          "field": "F193_061_00",
+          "roadmapOffset": 2640,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F193_061_00.FBN",
+              "field": "F193_061_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F193_061_00.FBN",
+              "sha256": "02445c357719d6bd9187c2cabb8082006c557492855196645053aea365b3ea91",
+              "bytes": 824
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F193_061_00.HTB",
+              "field": "F193_061_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F193_061_00.HTB",
+              "sha256": "5d18a3ae7aa08106ccf665c1bc578c9a397ecb3b0fe1527c2d10f7833342e0bf",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_193_061_00.BF",
+              "field": "F193_061_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_193_061_00.BF",
+              "sha256": "9502231b95b50e399421810a20957609f84e88c9837cbba651853111a72a9555",
+              "bytes": 36200
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/193_061_00.flow",
+            "sha256": "10a628119f23d42a008adead354e669045d3f6a855f8841057ac619aa98c9b6f"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 54,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 62,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 86,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 106,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 123,
+              "declaration": "void MEME_LOCK_CLEAR_04()"
+            },
+            {
+              "line": 168,
+              "declaration": "void MEME_LOCK_04_OPEN_EV()"
+            },
+            {
+              "line": 212,
+              "declaration": "void MEME_LOCK_04_CLAUSE_EV()"
+            },
+            {
+              "line": 262,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 270,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 415,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 422,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 500,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 515,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 522,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 529,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 602,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 636,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 670,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 707,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 744,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 781,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 818,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 840,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 848,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            }
+          ]
+        },
+        {
+          "field": "F194_011_00",
+          "roadmapOffset": 2688,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F194_011_00.FBN",
+              "field": "F194_011_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F194_011_00.FBN",
+              "sha256": "7fd58eff2c74778b39794d0a2f54ee1c408d730ea5a14ee9e9965ce8c308f53e",
+              "bytes": 824
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F194_011_00.HTB",
+              "field": "F194_011_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F194_011_00.HTB",
+              "sha256": "df7ea7555a0d0e13f11e8f6b8994c3a4ad941811f37c1f965fddab29a74560aa",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_194_011_00.BF",
+              "field": "F194_011_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_194_011_00.BF",
+              "sha256": "734e72a2c308b1af9260b99f7273aa8e2959391764e9b2442990a79c3c5a2d50",
+              "bytes": 36245
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/194_011_00.flow",
+            "sha256": "23e7092e3d5de0894e708bac3c0c1eaf2e00caf0172b025a55fa84c8836afa66"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 54,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 62,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 86,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 106,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 123,
+              "declaration": "void MEME_LOCK_CLEAR_05()"
+            },
+            {
+              "line": 168,
+              "declaration": "void MEME_LOCK_05_OPEN_EV()"
+            },
+            {
+              "line": 212,
+              "declaration": "void MEME_LOCK_05_CLAUSE_EV()"
+            },
+            {
+              "line": 265,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 273,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 418,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 425,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 503,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 518,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 525,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 532,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 605,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 639,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 673,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 710,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 747,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 784,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 821,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 843,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 851,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            }
+          ]
+        },
+        {
+          "field": "F194_061_00",
+          "roadmapOffset": 2704,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F194_061_00.FBN",
+              "field": "F194_061_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F194_061_00.FBN",
+              "sha256": "6924227cfda7f2b7152cfcfb0643db0bcd58c2a8b86c587054a56341caf11211",
+              "bytes": 824
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F194_061_00.HTB",
+              "field": "F194_061_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F194_061_00.HTB",
+              "sha256": "1fd81cf4aeddff567986c59ec74911b54826e2e42490eb2e1cf7218576384204",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_194_061_00.BF",
+              "field": "F194_061_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_194_061_00.BF",
+              "sha256": "597113df76c7480fc035282f390a0978d70c3e32402cb93bb2e5ea6b790db2c9",
+              "bytes": 35949
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/194_061_00.flow",
+            "sha256": "0a8ff824ccc24c98d3df59573572bcbb40ad90f01f9c435bb1ec60e08c0af6a8"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 54,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 62,
+              "declaration": "void LANE_CHANGE()"
+            },
+            {
+              "line": 86,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 106,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 123,
+              "declaration": "void MEME_LOCK_CLEAR_06()"
+            },
+            {
+              "line": 168,
+              "declaration": "void MEME_LOCK_06_OPEN_EV()"
+            },
+            {
+              "line": 212,
+              "declaration": "void MEME_LOCK_06_CLAUSE_EV()"
+            },
+            {
+              "line": 259,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 267,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 412,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 419,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 497,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 512,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 519,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 526,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 599,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 633,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 667,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 704,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 741,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 778,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 815,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 837,
+              "declaration": "void Fld_FadeOut_CallField()"
+            },
+            {
+              "line": 845,
+              "declaration": "void Fld_FadeOut_Crowd()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_190_51_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F191_065_00",
+          "roadmapOffset": 2480,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F191_065_00.FBN",
+              "field": "F191_065_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F191_065_00.FBN",
+              "sha256": "b02c7e14d2e30b44377e901bbae17ebf33d90677bc764c151c077918410c8e1d",
+              "bytes": 1456
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F191_065_00.HTB",
+              "field": "F191_065_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F191_065_00.HTB",
+              "sha256": "998516f13249b8971f3f2fcc6413ae4b37aed479b18936ba04007fa793b04bb7",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_191_065_00.BF",
+              "field": "F191_065_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_191_065_00.BF",
+              "sha256": "902c39538e19c9dac5324a3bee17f1ed7a2a3489646e054abac171947901548b",
+              "bytes": 132559
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/191_065_00.flow",
+            "sha256": "2358a380e9f3f801f5dd289b05ca059dde1018f3821a4fc18b8ceb3560988010"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 92,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 101,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 109,
+              "declaration": "void TUTO_WAITING_ROOM()"
+            },
+            {
+              "line": 130,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 165,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 196,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 298,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 333,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 407,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 445,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 459,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 473,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 485,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 497,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 509,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 521,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 533,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 545,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 557,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 569,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 581,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 593,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 605,
+              "declaration": "void add_motion_CARD_IN()"
+            }
+          ]
+        },
+        {
+          "field": "F192_015_00",
+          "roadmapOffset": 2528,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F192_015_00.FBN",
+              "field": "F192_015_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F192_015_00.FBN",
+              "sha256": "65ace1fe113f15e914f9806cbe7f3f3ab88da317adaf893dab79dbbbb7f98ca5",
+              "bytes": 1356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F192_015_00.HTB",
+              "field": "F192_015_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F192_015_00.HTB",
+              "sha256": "0ffc94644cd632995ec3387fdf7495663bc3b6089740431fbc6426df07a53ee5",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_192_015_00.BF",
+              "field": "F192_015_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_192_015_00.BF",
+              "sha256": "992f970264b2d3ea4a7f1f493a3f876473a732ded1e9556916defd28e3ac547e",
+              "bytes": 132359
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/192_015_00.flow",
+            "sha256": "50d1e9593bd813867a1a32a01696f937aaece5259f7eeb1d0a7c7e903e557a10"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 92,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 101,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 109,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 144,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 175,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 277,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 312,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 386,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 424,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 438,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 452,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 464,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 476,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 488,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 500,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 512,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 524,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 536,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 548,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 560,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 572,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 584,
+              "declaration": "void add_motion_CARD_IN()"
+            },
+            {
+              "line": 596,
+              "declaration": "void add_motion_wait()"
+            }
+          ]
+        },
+        {
+          "field": "F193_015_00",
+          "roadmapOffset": 2592,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F193_015_00.FBN",
+              "field": "F193_015_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F193_015_00.FBN",
+              "sha256": "91127199125e13fba1b648f655be04c852f58fb3770520a7f8392e57727e0b11",
+              "bytes": 1356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F193_015_00.HTB",
+              "field": "F193_015_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F193_015_00.HTB",
+              "sha256": "0ffc94644cd632995ec3387fdf7495663bc3b6089740431fbc6426df07a53ee5",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_193_015_00.BF",
+              "field": "F193_015_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_193_015_00.BF",
+              "sha256": "992f970264b2d3ea4a7f1f493a3f876473a732ded1e9556916defd28e3ac547e",
+              "bytes": 132359
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/193_015_00.flow",
+            "sha256": "af1907721a776434ef7ac9afc44d15c0c4846ffb184abc8eccffc4dad1d9ca25"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 92,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 101,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 109,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 144,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 175,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 277,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 312,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 386,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 424,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 438,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 452,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 464,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 476,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 488,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 500,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 512,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 524,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 536,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 548,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 560,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 572,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 584,
+              "declaration": "void add_motion_CARD_IN()"
+            },
+            {
+              "line": 596,
+              "declaration": "void add_motion_wait()"
+            }
+          ]
+        },
+        {
+          "field": "F193_065_00",
+          "roadmapOffset": 2608,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F193_065_00.FBN",
+              "field": "F193_065_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F193_065_00.FBN",
+              "sha256": "d9b78212a11f65f9849d2fcb302eff561ab8a8f681ef789bb24d4957a4f1dccb",
+              "bytes": 1356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F193_065_00.HTB",
+              "field": "F193_065_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F193_065_00.HTB",
+              "sha256": "0ffc94644cd632995ec3387fdf7495663bc3b6089740431fbc6426df07a53ee5",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_193_065_00.BF",
+              "field": "F193_065_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_193_065_00.BF",
+              "sha256": "992f970264b2d3ea4a7f1f493a3f876473a732ded1e9556916defd28e3ac547e",
+              "bytes": 132359
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/193_065_00.flow",
+            "sha256": "bb28059eb6d1ed726c9c53649bc3fa824c8cd05566df9968d7b44d8900bbc600"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 92,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 101,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 109,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 144,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 175,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 277,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 312,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 386,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 424,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 438,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 452,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 464,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 476,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 488,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 500,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 512,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 524,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 536,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 548,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 560,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 572,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 584,
+              "declaration": "void add_motion_CARD_IN()"
+            },
+            {
+              "line": 596,
+              "declaration": "void add_motion_wait()"
+            }
+          ]
+        },
+        {
+          "field": "F194_015_00",
+          "roadmapOffset": 2656,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F194_015_00.FBN",
+              "field": "F194_015_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F194_015_00.FBN",
+              "sha256": "c4e6b1a0001478bbf91f7382b8ef9d616ef334808ce3914fd58038988410f0ca",
+              "bytes": 1356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F194_015_00.HTB",
+              "field": "F194_015_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F194_015_00.HTB",
+              "sha256": "0ffc94644cd632995ec3387fdf7495663bc3b6089740431fbc6426df07a53ee5",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_194_015_00.BF",
+              "field": "F194_015_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_194_015_00.BF",
+              "sha256": "992f970264b2d3ea4a7f1f493a3f876473a732ded1e9556916defd28e3ac547e",
+              "bytes": 132359
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/194_015_00.flow",
+            "sha256": "28167d9f936f2e327de7e09131eeba57750c4aaaee76f02bb6502e1f29d8090b"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 92,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 101,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 109,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 144,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 175,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 277,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 312,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 386,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 424,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 438,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 452,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 464,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 476,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 488,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 500,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 512,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 524,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 536,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 548,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 560,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 572,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 584,
+              "declaration": "void add_motion_CARD_IN()"
+            },
+            {
+              "line": 596,
+              "declaration": "void add_motion_wait()"
+            }
+          ]
+        },
+        {
+          "field": "F194_065_00",
+          "roadmapOffset": 2672,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F194_065_00.FBN",
+              "field": "F194_065_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F194_065_00.FBN",
+              "sha256": "a1ab42e89bdde50b2094d63958bc784314b3045bf7e6c2dc3327957edadec4ce",
+              "bytes": 1356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F194_065_00.HTB",
+              "field": "F194_065_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F194_065_00.HTB",
+              "sha256": "0ffc94644cd632995ec3387fdf7495663bc3b6089740431fbc6426df07a53ee5",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_194_065_00.BF",
+              "field": "F194_065_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_194_065_00.BF",
+              "sha256": "992f970264b2d3ea4a7f1f493a3f876473a732ded1e9556916defd28e3ac547e",
+              "bytes": 132359
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/194_065_00.flow",
+            "sha256": "9a2f79656167bb581aca6ee65a9bc8abf0d9790b705e62253bf649e6992f44ad"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 92,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 101,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 109,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 144,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 175,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 277,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 312,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 386,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 424,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 438,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 452,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 464,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 476,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 488,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 500,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 512,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 524,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 536,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 548,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 560,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 572,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 584,
+              "declaration": "void add_motion_CARD_IN()"
+            },
+            {
+              "line": 596,
+              "declaration": "void add_motion_wait()"
+            }
+          ]
+        },
+        {
+          "field": "F195_015_00",
+          "roadmapOffset": 2720,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F195_015_00.FBN",
+              "field": "F195_015_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F195_015_00.FBN",
+              "sha256": "688cf9aa95e3400aa7498f8f8a8ed0175ab7e9e0747c0206931e8f90daae659d",
+              "bytes": 1356
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F195_015_00.HTB",
+              "field": "F195_015_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F195_015_00.HTB",
+              "sha256": "0ffc94644cd632995ec3387fdf7495663bc3b6089740431fbc6426df07a53ee5",
+              "bytes": 352
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_195_015_00.BF",
+              "field": "F195_015_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_195_015_00.BF",
+              "sha256": "0e3f99da884d3519ba6d5e857d491e4a0bf42ee70652eef32aeba6473cbbba27",
+              "bytes": 132399
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/195_015_00.flow",
+            "sha256": "da9c20ed1280b4763451d547438797494b23eb01558ab44f970472505c4bab93"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 83,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 94,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 105,
+              "declaration": "void GO_TO_SAFETY()"
+            },
+            {
+              "line": 113,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 148,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 179,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 281,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 316,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 390,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 428,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 442,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 456,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 468,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 480,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 492,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 504,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 516,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 528,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 540,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 552,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 564,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 576,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 588,
+              "declaration": "void add_motion_CARD_IN()"
+            },
+            {
+              "line": 600,
+              "declaration": "void add_motion_wait()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_190_61_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F192_061_00",
+          "roadmapOffset": 2560,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F192_061_00.FBN",
+              "field": "F192_061_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F192_061_00.FBN",
+              "sha256": "3ba8f453ed8835f57b464a8869d1f688f2758c787f21e6e809012f1191ac2d02",
+              "bytes": 588
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F192_061_00.HTB",
+              "field": "F192_061_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F192_061_00.HTB",
+              "sha256": "1511a841552dccd9fd9200e7b2d75d47c5f7d853ef26c043e4061f03a0b02ac8",
+              "bytes": 288
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_192_061_00.BF",
+              "field": "F192_061_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_192_061_00.BF",
+              "sha256": "9a25f8ff6bab51baa88309b9b8a078a53cc1a3232719f3fe1904455b06fd0c3a",
+              "bytes": 19841
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/192_061_00.flow",
+            "sha256": "1a265bbc061c38f56ca82d0ce55af47e352f23baa77577893c745f790d61b5a9"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 41,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 49,
+              "declaration": "void GO_TO_161_01()"
+            },
+            {
+              "line": 83,
+              "declaration": "void GO_TO_161_01_GENERIC()"
+            },
+            {
+              "line": 118,
+              "declaration": "void D08_01_e437_011_START()"
+            },
+            {
+              "line": 185,
+              "declaration": "void FadeOutAreaChange()"
+            },
+            {
+              "line": 193,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 228,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 259,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 361,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 396,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 470,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 508,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 522,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 536,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 548,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 560,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 572,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 584,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 596,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 608,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 620,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 632,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 644,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 656,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_190_62_0",
+      "classification": "senza-associazione-roadmap-uso-non-dimostrato",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Trovare selettore risorsa negli eventi/configurazioni nativi"
+    },
+    {
+      "code": "RMAP_192_62_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F192_062_00",
+          "roadmapOffset": 2576,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F192_062_00.FBN",
+              "field": "F192_062_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F192_062_00.FBN",
+              "sha256": "b7397b6eda002fdc8440898aaf13d0a0d6e3fef97f3054124b80407398c595c2",
+              "bytes": 996
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F192_062_00.HTB",
+              "field": "F192_062_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F192_062_00.HTB",
+              "sha256": "f4a45c22ae9981e9edd2f28cfcde66a657f2bd334f7f318e6529b1c2a3aa8ed2",
+              "bytes": 224
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_192_062_00.BF",
+              "field": "F192_062_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_192_062_00.BF",
+              "sha256": "8a8f8be5534ad1642ca50164af3d8cb8d16be6bf6eb268a57d7613965f12630f",
+              "bytes": 18486
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/192_062_00.flow",
+            "sha256": "78d59ad0374606c22b7c47c84636ff7a5a64c4e43ecc198fa0d605092830b349"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 41,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 48,
+              "declaration": "void GO_TO_NEXT_SECTION()"
+            },
+            {
+              "line": 78,
+              "declaration": "void FadeOutAreaChange()"
+            },
+            {
+              "line": 86,
+              "declaration": "void AT_D_e512_040()"
+            },
+            {
+              "line": 99,
+              "declaration": "void event_member_setup()"
+            },
+            {
+              "line": 134,
+              "declaration": "void event_member_release()"
+            },
+            {
+              "line": 165,
+              "declaration": "void _choice_member()"
+            },
+            {
+              "line": 267,
+              "declaration": "void _check_fix_member()"
+            },
+            {
+              "line": 302,
+              "declaration": "void _make_handle()"
+            },
+            {
+              "line": 376,
+              "declaration": "void _release_handle()"
+            },
+            {
+              "line": 414,
+              "declaration": "void motion_wait()"
+            },
+            {
+              "line": 428,
+              "declaration": "void motion_event_wait()"
+            },
+            {
+              "line": 442,
+              "declaration": "void add_motion_CONSOLE()"
+            },
+            {
+              "line": 454,
+              "declaration": "void add_motion_TAKE()"
+            },
+            {
+              "line": 466,
+              "declaration": "void add_motion_GIMMICK_TAKE()"
+            },
+            {
+              "line": 478,
+              "declaration": "void add_motion_GIMMICK_PUT()"
+            },
+            {
+              "line": 490,
+              "declaration": "void add_motion_DOOR_OPEN()"
+            },
+            {
+              "line": 502,
+              "declaration": "void add_motion_DOOR_NOT_OPEN()"
+            },
+            {
+              "line": 514,
+              "declaration": "void add_motion_DOOR_KICK()"
+            },
+            {
+              "line": 526,
+              "declaration": "void add_motion_SWITCH()"
+            },
+            {
+              "line": 538,
+              "declaration": "void add_motion_SWITCH_NONE()"
+            },
+            {
+              "line": 550,
+              "declaration": "void add_motion_SWITCH_L()"
+            },
+            {
+              "line": 562,
+              "declaration": "void add_motion_SWITCH_L_NONE()"
+            },
+            {
+              "line": 574,
+              "declaration": "void add_motion_CARD_IN()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    },
+    {
+      "code": "RMAP_195_11_0",
+      "classification": "campo-associato-titolo-mappa-non-risolto",
+      "unusedProven": false,
+      "canonicalMapTitle": null,
+      "group": "Memento - aree fisse",
+      "fields": [
+        {
+          "field": "F195_011_00",
+          "roadmapOffset": 2736,
+          "sources": {
+            "fbn": {
+              "archive": "BASE",
+              "path": "FIELD/DATA/F195_011_00.FBN",
+              "field": "F195_011_00",
+              "kind": "FBN",
+              "file": "campi-completi/originali/BASE/FIELD/DATA/F195_011_00.FBN",
+              "sha256": "c1b4055e406ffd815c2c2a2509245d8d43d18906ccf61c2c9ea49ba7a5192827",
+              "bytes": 992
+            },
+            "htb": {
+              "archive": "BASE",
+              "path": "FIELD/HIT/F195_011_00.HTB",
+              "field": "F195_011_00",
+              "kind": "HTB",
+              "file": "campi-completi/originali/BASE/FIELD/HIT/F195_011_00.HTB",
+              "sha256": "ec336a4940bb14dcd0586656eb35d7fbc82d231ca9a27354984f3ce4f4c56833",
+              "bytes": 416
+            },
+            "bf": {
+              "archive": "IT",
+              "path": "FIELD/HIT/FHIT_195_011_00.BF",
+              "field": "F195_011_00",
+              "kind": "BF",
+              "file": "campi-completi/originali/IT/FIELD/HIT/FHIT_195_011_00.BF",
+              "sha256": "f6925e46d67445721e7f1bdeda7f3d12ccb32bd8c0b72e51a5618440d019bc12",
+              "bytes": 67789
+            }
+          },
+          "script": {
+            "file": "campi-completi/scripts/195_011_00.flow",
+            "sha256": "15505ffedadb6ac40f6e770b124bb0fb79cc0019f5245f7e10a5eb00375e69bf"
+          },
+          "menuLabels": [],
+          "scriptProcedures": [
+            {
+              "line": 107,
+              "declaration": "void GO_TO_PREV_SECTION()"
+            },
+            {
+              "line": 115,
+              "declaration": "void QUEST_BOSS()"
+            },
+            {
+              "line": 135,
+              "declaration": "void EX_SE_SET()"
+            },
+            {
+              "line": 152,
+              "declaration": "void e512_085_START()"
+            },
+            {
+              "line": 167,
+              "declaration": "void CHECK_CONSOLE()"
+            },
+            {
+              "line": 209,
+              "declaration": "void dungeon_return_calendar()"
+            },
+            {
+              "line": 217,
+              "declaration": "void dungeon_return()"
+            },
+            {
+              "line": 362,
+              "declaration": "void dungeon_exit_time_set()"
+            },
+            {
+              "line": 369,
+              "declaration": "void dungeon_start_format()"
+            },
+            {
+              "line": 447,
+              "declaration": "void DUNGEON_START_SAVE()"
+            },
+            {
+              "line": 462,
+              "declaration": "void result_counter_clear()"
+            },
+            {
+              "line": 469,
+              "declaration": "void MVP_CHOICE()"
+            },
+            {
+              "line": 476,
+              "declaration": "void LEAVE_ACTION()"
+            },
+            {
+              "line": 549,
+              "declaration": "void LEAVE_ADVANCE_ACTION()"
+            },
+            {
+              "line": 583,
+              "declaration": "void LEAVE_BACK_ACTION()"
+            },
+            {
+              "line": 617,
+              "declaration": "void LEAVE_ADVANCE_ACTION_E()"
+            },
+            {
+              "line": 654,
+              "declaration": "void LEAVE_BACK_ACTION_E()"
+            },
+            {
+              "line": 691,
+              "declaration": "void LEAVE_NEXT_ACTION_E()"
+            },
+            {
+              "line": 728,
+              "declaration": "void LEAVE_PREV_ACTION_E()"
+            },
+            {
+              "line": 765,
+              "declaration": "void position_rotate()"
+            },
+            {
+              "line": 787,
+              "declaration": "void D_QUEST_NPC_NO_GET()"
+            },
+            {
+              "line": 1088,
+              "declaration": "void SET_QUEST_NPC_MAIN()"
+            },
+            {
+              "line": 1167,
+              "declaration": "void D_QUEST_START_EV_01()"
+            },
+            {
+              "line": 1229,
+              "declaration": "void D_QUEST_START_EV_02()"
+            }
+          ]
+        }
+      ],
+      "dormantNameEvidence": null,
+      "nextEvidence": "Nome diretto del campo/layer mancante; i menu e le procedure sotto non autorizzano nome universale per la texture"
+    }
+  ],
+  "summary": {
+    "roots": 12,
+    "unresolvedMaps": 59,
+    "noRoadmapAssociation": 33,
+    "referencedWithoutTitle": 26,
+    "unusedProven": 0,
+    "newCanonicalMapTitles": 0
+  },
+  "catalogSources": [
+    {
+      "file": "C:/Repository/project-p5r-main/data/seed/citta.json",
+      "sha256": "581c101fecf8e42cc84f3f0e0c3b6334fce30d267fe3a64daea75a9aaa0760eb"
+    },
+    {
+      "file": "C:/Repository/project-p5r-main/data/seed/dungeon.json",
+      "sha256": "c8ed062eb5d3acf66266d926030ee8945b231d73ffcf20e266930b66101bd2f7"
+    }
+  ]
+}

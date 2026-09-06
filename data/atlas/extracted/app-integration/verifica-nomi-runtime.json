@@ -1,0 +1,173 @@
+[
+  {
+    "key": "nativo-rmap-001-12-0",
+    "oldName": "Banchina della metropolitana — RMAP_001_12_0",
+    "newName": "Banchina della metropolitana",
+    "oldPath": "shibuya-banchina-della-metropolitana-rmap-001-12-0",
+    "status": "renamed-verified",
+    "newPath": "shibuya-banchina-della-metropolitana",
+    "imageSha256": "85891e77e8d8aff29fa4eb53e15b30d7539f501be5a92c2963eccb3f345a141b"
+  },
+  {
+    "key": "nativo-rmap-001-1-0",
+    "oldName": "Piazza della stazione — RMAP_001_1_0",
+    "newName": "Piazza della stazione",
+    "oldPath": "shibuya-piazza-della-stazione-rmap-001-1-0",
+    "status": "renamed-verified",
+    "newPath": "shibuya-piazza-della-stazione",
+    "imageSha256": "5fa4c36711b0e633f85a8c66c1522d6c31c4588fc35770c964d144e2c83ff2b6"
+  },
+  {
+    "key": "nativo-rmap-001-2-0",
+    "oldName": "Sottopasso — RMAP_001_2_0",
+    "newName": "Sottopasso",
+    "oldPath": "shibuya-sottopasso-rmap-001-2-0",
+    "status": "renamed-verified",
+    "newPath": "shibuya-sottopasso",
+    "imageSha256": "55c76ecbfb3f7890fe71cc8d7fb232ef0a671e6b76d16dbe5ebcacbf99aff19b"
+  },
+  {
+    "key": "nativo-rmap-001-3-0",
+    "oldName": "Central Street — RMAP_001_3_0",
+    "newName": "Central Street",
+    "oldPath": "shibuya-central-street-rmap-001-3-0",
+    "status": "renamed-verified",
+    "newPath": "shibuya-central-street",
+    "imageSha256": "948a8fabbea5f314fd46462443be1a0d5169b419c4a1fe8e72c96bc3acc3687f"
+  },
+  {
+    "key": "nativo-rmap-001-4-0",
+    "oldName": "Centro comm. sotterraneo — RMAP_001_4_0",
+    "newName": "Centro comm. sotterraneo",
+    "oldPath": "shibuya-centro-comm-sotterraneo-rmap-001-4-0",
+    "status": "renamed-verified",
+    "newPath": "shibuya-centro-comm-sotterraneo",
+    "imageSha256": "0bb6147855046244cc57bdc3fe8fdba0f5875509b62ed8728a942d8bfd013f55"
+  },
+  {
+    "key": "nativo-rmap-001-5-0",
+    "oldName": "Tornello della linea Ginza — RMAP_001_5_0",
+    "newName": "Tornello della linea Ginza",
+    "oldPath": "shibuya-tornello-della-linea-ginza-rmap-001-5-0",
+    "status": "renamed-verified",
+    "newPath": "shibuya-tornello-della-linea-ginza",
+    "imageSha256": "912bd580f9416aeb985fb6a57f6628251501aad3f6fce68b9a25f80bbf703e58"
+  },
+  {
+    "key": "nativo-rmap-002-0-0",
+    "oldName": "Edificio principale 1P / Edificio laboratori 1P — RMAP_002_0_0",
+    "newName": "Edificio principale 1P / Edificio laboratori 1P",
+    "oldPath": "shujin-academy-scuola-edificio-principale-1p-edificio-laboratori-1p-rmap-002-0-0",
+    "status": "renamed-verified",
+    "newPath": "shujin-academy-scuola-edificio-principale-1p-edificio-laboratori-1p",
+    "imageSha256": "a07aaef0c860007eeff918aed39ddc67ed329f636ddc8261e74e7a4fc3dd5366"
+  },
+  {
+    "key": "nativo-rmap-002-0-1",
+    "oldName": "Edificio principale 2P / Edificio laboratori 2P — RMAP_002_0_1",
+    "newName": "Edificio principale 2P / Edificio laboratori 2P",
+    "oldPath": "shujin-academy-scuola-edificio-principale-2p-edificio-laboratori-2p-rmap-002-0-1",
+    "status": "renamed-verified",
+    "newPath": "shujin-academy-scuola-edificio-principale-2p-edificio-laboratori-2p",
+    "imageSha256": "b38b62b07ee36a3e01dd491da7acee23da5d82baea3fd3c0086d2559bbfe0c8a"
+  },
+  {
+    "key": "nativo-rmap-002-0-2",
+    "oldName": "Edificio principale 3P / Edificio laboratori 3P — RMAP_002_0_2",
+    "newName": "Edificio principale 3P / Edificio laboratori 3P",
+    "oldPath": "shujin-academy-scuola-edificio-principale-3p-edificio-laboratori-3p-rmap-002-0-2",
+    "status": "renamed-verified",
+    "newPath": "shujin-academy-scuola-edificio-principale-3p-edificio-laboratori-3p",
+    "imageSha256": "639de6370a4d0fb9cf4e7bc9a0a5bee96d60cd47cbc84be96495d181402e9e24"
+  },
+  {
+    "key": "nativo-rmap-002-1-0",
+    "oldName": "Cancello della scuola — RMAP_002_1_0",
+    "newName": "Cancello della scuola",
+    "oldPath": "shujin-academy-scuola-cancello-della-scuola-rmap-002-1-0",
+    "status": "renamed-verified",
+    "newPath": "shujin-academy-scuola-cancello-della-scuola",
+    "imageSha256": "66b526065eba24fe5b2cd71acec4c140adea50fd03e76a43586ec30320982ec3"
+  },
+  {
+    "key": "nativo-rmap-002-5-0",
+    "oldName": "Tetto — RMAP_002_5_0",
+    "newName": "Tetto",
+    "oldPath": "shujin-academy-scuola-tetto-rmap-002-5-0",
+    "status": "renamed-verified",
+    "newPath": "shujin-academy-scuola-tetto",
+    "imageSha256": "da0b7b52bd1b6b0bd219a3138e6dc7d1de4350b09fd1bcef0b894525837b06fb"
+  },
+  {
+    "key": "nativo-rmap-005-1-0",
+    "oldName": "Quartiere dello shopping — RMAP_005_1_0",
+    "newName": "Quartiere dello shopping",
+    "oldPath": "kichijoji-quartiere-dello-shopping-rmap-005-1-0",
+    "status": "renamed-verified",
+    "newPath": "kichijoji-quartiere-dello-shopping",
+    "imageSha256": "269c8e8264f711b2f69ec095144f57c2d26272b2a61a733d4e37142560213ecd"
+  },
+  {
+    "key": "nativo-rmap-006-1-0",
+    "oldName": "Quartiere a luci rosse — RMAP_006_1_0",
+    "newName": "Quartiere a luci rosse",
+    "oldPath": "shinjuku-quartiere-a-luci-rosse-rmap-006-1-0",
+    "status": "renamed-verified",
+    "newPath": "shinjuku-quartiere-a-luci-rosse",
+    "imageSha256": "8c625031c93dfc1d9df18b50d6e2d8c2197fba9b12d1e587026f0783c5c14c33"
+  },
+  {
+    "key": "nativo-rmap-007-1-0",
+    "oldName": "Electric Town — RMAP_007_1_0",
+    "newName": "Electric Town",
+    "oldPath": "akihabara-electric-town-rmap-007-1-0",
+    "status": "renamed-verified",
+    "newPath": "akihabara-electric-town",
+    "imageSha256": "3fb43efee300d3032ffb4aa9e15817cdd1a0ca41523c0ea546c12027db764d93"
+  },
+  {
+    "key": "nativo-rmap-009-2-0",
+    "oldName": "Vicoli — RMAP_009_2_0",
+    "newName": "Vicoli",
+    "oldPath": "yongen-jaya-vicoli-rmap-009-2-0",
+    "status": "renamed-verified",
+    "newPath": "yongen-jaya-vicoli",
+    "imageSha256": "3372cdb02c3c1820f979bad535402ecbbd5c660ff24195007bbbdd927a970f70"
+  },
+  {
+    "key": "nativo-rmap-010-4-0",
+    "oldName": "Cappella — RMAP_010_4_0",
+    "newName": "Cappella",
+    "oldPath": "risorse-native-010-chiesa-cappella-rmap-010-4-0",
+    "status": "renamed-verified",
+    "newPath": "risorse-native-010-chiesa-cappella",
+    "imageSha256": "5ef472c4c0cd2f70280e8ec3e0a431245561babd1f5376d9de25d83100b8eae2"
+  },
+  {
+    "key": "nativo-rmap-011-4-0",
+    "oldName": "Banchina della metropolitana — RMAP_011_4_0",
+    "newName": "Banchina della metropolitana",
+    "oldPath": "risorse-native-011-aoyama-itchome-banchina-della-metropolitana-rmap-011-4-0",
+    "status": "renamed-verified",
+    "newPath": "risorse-native-011-aoyama-itchome-banchina-della-metropolitana",
+    "imageSha256": "edb443283e8b1e0709e16ccc7d622e951d76a4917da05cfb09c5a05d4000cd2b"
+  },
+  {
+    "key": "nativo-rmap-011-6-0",
+    "oldName": "Banchina della metropolitana — RMAP_011_6_0",
+    "newName": "Banchina della metropolitana",
+    "oldPath": "yongen-jaya-banchina-della-metropolitana-rmap-011-6-0",
+    "status": "renamed-verified",
+    "newPath": "yongen-jaya-banchina-della-metropolitana",
+    "imageSha256": "ab05a05e503dd94af5bfbf46e7cc3be9389f6ad5655fec1d801782c0d24127a4"
+  },
+  {
+    "key": "nativo-rmap-012-29-0",
+    "oldName": "Cantiere dello stadio — RMAP_012_29_0",
+    "newName": "Cantiere dello stadio",
+    "oldPath": "risorse-native-012-seaside-park-cantiere-dello-stadio-rmap-012-29-0",
+    "status": "renamed-verified",
+    "newPath": "risorse-native-012-seaside-park-cantiere-dello-stadio",
+    "imageSha256": "2e121e21a61dde69b09f504e60af2f0284ce1f27190df1ba978dacd1937f8624"
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "path": "FIELD/FTD/FLDACTIONNAME.FTD",
+    "offset": 43420672,
+    "size": 1076,
+    "extracted_size": 1808,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDARCANANAME.FTD",
+    "offset": 43422208,
+    "size": 160,
+    "extracted_size": 160,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDASSISTLISTNAME_SOCIAL.FTD",
+    "offset": 43422720,
+    "size": 208,
+    "extracted_size": 208,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDASSISTLISTNAME_TRAIN.FTD",
+    "offset": 43423232,
+    "size": 96,
+    "extracted_size": 96,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDCHECKNAME.FTD",
+    "offset": 43423744,
+    "size": 4192,
+    "extracted_size": 9008,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDDNGCHECKNAME.FTD",
+    "offset": 43428352,
+    "size": 3776,
+    "extracted_size": 9568,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDKFECHECKNAME.FTD",
+    "offset": 43432448,
+    "size": 412,
+    "extracted_size": 496,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDNPCNAME.FTD",
+    "offset": 43432960,
+    "size": 4788,
+    "extracted_size": 11008,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPARAMUPFUNCNAME.FTD",
+    "offset": 43438080,
+    "size": 876,
+    "extracted_size": 2912,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDPLACENAME.FTD",
+    "offset": 43439104,
+    "size": 6704,
+    "extracted_size": 17744,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+    "offset": 43446272,
+    "size": 1300,
+    "extracted_size": 4208,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/FTD/FLDSCRIPTNAME.FTD",
+    "offset": 43447808,
+    "size": 1480,
+    "extracted_size": 2576,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/FLDWHOLEMAPTABLE.FTD",
+    "offset": 52524032,
+    "size": 5988,
+    "extracted_size": 106832,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/FLDWHOLEMAPTABLEDNG.FTD",
+    "offset": 52530176,
+    "size": 1924,
+    "extracted_size": 12416,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/LMAP/FLDLMAPLOCKEDCORPNAME.FTD",
+    "offset": 52704256,
+    "size": 384,
+    "extracted_size": 1648,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/LMAP/FLDLMAPSTATION.FTD",
+    "offset": 52704768,
+    "size": 4068,
+    "extracted_size": 15024,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/MISSION_LIST/MISSION_LIST.TBL",
+    "offset": 52922880,
+    "size": 16576,
+    "extracted_size": 68972,
+    "attr": ""
+  },
+  {
+    "path": "FIELD/PANEL/ROADMAP/ROADMAP.TBL",
+    "offset": 52939776,
+    "size": 10056,
+    "extracted_size": 45944,
+    "attr": ""
+  }
+]

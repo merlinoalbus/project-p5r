@@ -1,0 +1,23 @@
+{
+  "status": "PASS-diagnostic-calculation",
+  "pointsChecked": 321,
+  "fields": [
+    {
+      "field": "F001_003_00",
+      "triggers": 32,
+      "entrances": 61
+    },
+    {
+      "field": "F005_001_00",
+      "triggers": 81,
+      "entrances": 54
+    },
+    {
+      "field": "F009_002_00",
+      "triggers": 35,
+      "entrances": 58
+    }
+  ],
+  "cases": 6,
+  "scope": "Formula arithmetic and raw coverage; visual semantics require independent review."
+}

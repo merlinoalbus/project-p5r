@@ -1,0 +1,22 @@
+// Decompiled by Atlus Script Tools
+const int Dummy                            = 0;
+const int EV_MOVE_57_11_MENU               = 1;
+const int EV_MOVE_57_11_SEL                = 2;
+const int EV_MOVE_57_11_IPPAN              = 3;
+const int EV_MOVE_57_11_VIP                = 4;
+const int EV_MOVE_57_11_BOSS               = 5;
+const int EV_MOVE_57_11_BOSS_BATTL         = 6;
+const int EV_MOVE_57_11_CAN                = 7;
+const int EV_57_011_SETUMEI                = 8;
+const int EV_57_011_Balancer               = 9;
+const int D157_011_miniEV_01_mes01         = 10;
+const int D157_011_miniEV_01_mes02         = 11;
+const int D157_011_miniEV_01_mes03         = 12;
+const int D157_011_miniEV_01_mes04         = 13;
+const int D157_011_miniEV_02_mes01         = 14;
+const int D157_011_miniEV_02_mes02         = 15;
+const int D157_011_miniEV_02_mes03         = 16;
+const int D157_011_miniEV_02_mes04         = 17;
+const int D157_011_miniEV_02_mes05         = 18;
+const int EV_57_011_SAFE_EVENT             = 19;
+const int EV_57_011_DEBUG                  = 20;

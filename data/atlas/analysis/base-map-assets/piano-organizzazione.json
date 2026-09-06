@@ -1,0 +1,422 @@
+{
+  "merges": {
+    "nativo-archivio-001": "citta-shibuya",
+    "nativo-archivio-002": "citta-shujin-academy",
+    "nativo-archivio-190": "dungeon-mementos",
+    "nativo-archivio-192": "dungeon-mementos",
+    "nativo-archivio-195": "dungeon-mementos"
+  },
+  "updates": {
+    "nativo-archivio-010": {
+      "nome": "Chiesa di Kanda",
+      "tipo": "luogo",
+      "genitore": "citta-kanda-jinbocho",
+      "entita": {
+        "tipo": "luogo",
+        "chiave": "kanda-jinbocho/chiesa-kanda"
+      }
+    },
+    "nativo-archivio-011": {
+      "nome": "Aoyama-Itchome",
+      "tipo": "quartiere",
+      "genitore": "tokyo"
+    },
+    "nativo-archivio-012": {
+      "nome": "Seaside Park",
+      "tipo": "luogo",
+      "genitore": "citta-odaiba"
+    },
+    "nativo-archivio-022": {
+      "nome": "Covo dei Ladri",
+      "tipo": "luogo",
+      "genitore": null
+    },
+    "nativo-archivio-160": {
+      "nome": "Mondo del clifoto",
+      "tipo": "generica",
+      "genitore": "dungeon-iweleth"
+    },
+    "nativo-archivio-161": {
+      "nome": "Profondità dei Memento",
+      "tipo": "generica",
+      "genitore": "dungeon-iweleth"
+    }
+  },
+  "presentationPatches": [
+    {
+      "chiave": "nativo-rmap-022-1-0",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 0
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-1",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 1
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-2",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 2
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-3",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 3
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-4",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 4
+      }
+    },
+    {
+      "chiave": "nativo-rmap-153-3-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 1P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_003_00-texpack-25",
+          "nome": "Museo, 2P",
+          "campo": "F153_003_00",
+          "texpack": 25
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-5-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_005_00-texpack-27",
+          "nome": "Giardino centrale",
+          "campo": "F153_005_00",
+          "texpack": 27
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-6-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_006_00-texpack-28",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_006_00",
+          "texpack": 28
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-6-1",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_006_00-texpack-28",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_006_00",
+          "texpack": 28
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-9-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-9-1",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-9-2",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Galleria",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-154-5-0",
+      "contesti": [
+        {
+          "id": "f154_051_00-texpack-139",
+          "nome": "Ufficio riciclaggio",
+          "campo": "F154_051_00",
+          "texpack": 139
+        },
+        {
+          "id": "f154_005_00-texpack-34",
+          "nome": "Caveau sotterraneo",
+          "campo": "F154_005_00",
+          "texpack": 34
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-156-10-0",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Interscambio",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_010_00-texpack-65",
+          "nome": "Produzione armamenti",
+          "campo": "F156_010_00",
+          "texpack": 65
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-156-12-0",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Linea di smaltimento",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_012_00-texpack-67",
+          "nome": "Fabbrica centrale",
+          "campo": "F156_012_00",
+          "texpack": 67
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-156-9-0",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Linea di produzione",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_009_00-texpack-64",
+          "nome": "Linea di smaltimento",
+          "campo": "F156_009_00",
+          "texpack": 64
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-10-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio superiore tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_010_00-texpack-91",
+          "nome": "Ponte piscina",
+          "campo": "F159_010_00",
+          "texpack": 91
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-10-1",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio superiore tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_010_00-texpack-91",
+          "nome": "Ponte piscina",
+          "campo": "F159_010_00",
+          "texpack": 91
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-3-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio mezzavia tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_003_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_003_00",
+          "texpack": 86
+        },
+        {
+          "id": "f159_004_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_004_00",
+          "texpack": 86
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-3-1",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio mezzavia tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_003_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_003_00",
+          "texpack": 86
+        },
+        {
+          "id": "f159_004_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_004_00",
+          "texpack": 86
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-6-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Ponte laterale",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-6-1",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio inferiore babordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-6-2",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio inferiore babordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-7-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_007_00-texpack-88",
+          "nome": "Ponte di poppa",
+          "campo": "F159_007_00",
+          "texpack": 88
+        }
+      ]
+    }
+  ]
+}

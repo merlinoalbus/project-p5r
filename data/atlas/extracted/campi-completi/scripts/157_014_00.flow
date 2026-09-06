@@ -1,0 +1,82 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("157_014_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void MOVE_157_014()
+{
+    int var1;
+    int var0;
+    // bit id (536870912) + (2252) = 8396
+    
+    if (BIT_CHK((0x20000000 + 2252)) == 0)
+    {
+        var1 = (var1 + 1);
+    }
+
+    MSG_WND_DSP();
+    MSG(EV_MOVE_57_14_MENU, 0);
+    SEL_MASK(var1);
+    var0 = SEL(EV_MOVE_57_14_SEL);
+    
+    if (var0 == 0)
+    {
+        MSG(EV_MOVE_57_14_BOSS_BATTL, 0);
+        MSG_WND_CLS();
+        FADEOUT(1, 10);
+        FADE_SYNC();
+        CALL_FIELD(157, 18, 0, 0);
+    }
+    else if (var0 == 1)
+    {
+        MSG(EV_MOVE_57_14_HIGH, 0);
+        MSG_WND_CLS();
+        FADEOUT(1, 10);
+        FADE_SYNC();
+        CALL_FIELD(157, 11, 0, 0);
+    }
+    else if (var0 == 2)
+    {
+        MSG(EV_MOVE_57_14_VIP, 0);
+        MSG_WND_CLS();
+        FADEOUT(1, 10);
+        FADE_SYNC();
+        CALL_FIELD(157, 6, 0, 0);
+    }
+    else if (var0 == 3)
+    {
+        MSG(EV_MOVE_57_14_IPPAN, 0);
+        MSG_WND_CLS();
+        FADEOUT(1, 10);
+        FADE_SYNC();
+        CALL_FIELD(157, 4, 3, 0);
+    }
+    else if (var0 == 4)
+    {
+        MSG(EV_MOVE_57_14_CAN, 0);
+        MSG_WND_CLS();
+    }
+
+}
+
+
+// Procedure Index: 1
+void SETUMEI_EVEMT_157_14()
+{
+    MSG_WND_DSP();
+    MSG(F157_014_SETUMEI, 0);
+    MSG_WND_CLS();
+}
+

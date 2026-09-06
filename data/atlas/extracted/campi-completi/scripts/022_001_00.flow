@@ -1,0 +1,658 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("022_001_00.msg");
+
+// 
+// Script-level variable definitions
+// 
+
+int sVar10;
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void Penthouse_TV()
+{
+    int var0;
+    int var1;
+    var0 = 2002;
+    var1 = 1;
+    Fld_FadeOut_CutChange();
+    ZEAL_TEX_READ(var1, var0);
+    ZEAL_TEX_SYNC(var1);
+    ZEAL_TEX_DISP(var1, 1);
+    WAIT(10);
+    // bit id (0) + (0) = 0
+    
+    if (BIT_CHK((0 + 0)) == 1)
+    {
+        FADEIN(5, 20);
+        FADE_SYNC();
+    }
+    else 
+    {
+        Fld_FadeIn_Default();
+    }
+
+    PAD_TRIG(13);
+    SYNC();
+    Fld_FadeOut_CutChange();
+    ZEAL_TEX_FREE(var1, 1);
+    WAIT(10);
+    // bit id (0) + (0) = 0
+    
+    if (BIT_CHK((0 + 0)) == 1)
+    {
+        FADEIN(5, 20);
+        FADE_SYNC();
+    }
+    else 
+    {
+        Fld_FadeIn_Default();
+    }
+
+    return;
+}
+
+
+// Procedure Index: 1
+void MyPalace_Daifugou()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(15);
+    }
+
+    CALL_DAIFUGOU();
+    return;
+}
+
+
+// Procedure Index: 2
+void MyPalace_Video()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(15);
+    }
+
+    START_VIDEO_VIEWER();
+    return;
+}
+
+
+// Procedure Index: 3
+void MyPalace_Sound()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(15);
+    }
+
+    START_SOUND_VIEWER();
+    return;
+}
+
+
+// Procedure Index: 4
+void MyPalace_Image()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(15);
+    }
+
+    START_IMAGE_VIEWER();
+    return;
+}
+
+
+// Procedure Index: 5
+void MyPalace_Award_School()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(25);
+    }
+
+    START_AWARD_VIEWER2(0);
+    return;
+}
+
+
+// Procedure Index: 6
+void MyPalace_Award_Coop()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(25);
+    }
+
+    START_AWARD_VIEWER2(1);
+    return;
+}
+
+
+// Procedure Index: 7
+void MyPalace_Award_Battle()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(25);
+    }
+
+    START_AWARD_VIEWER2(2);
+    return;
+}
+
+
+// Procedure Index: 8
+void MyPalace_Award_Phantom()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(25);
+    }
+
+    START_AWARD_VIEWER2(3);
+    return;
+}
+
+
+// Procedure Index: 9
+void MyPalace_Palace_Maker()
+{
+    
+    if (FLD_SET_TRANSFORM(0) == 1)
+    {
+        WAIT(15);
+    }
+
+    START_PALACE_MAKER();
+    
+    if (GET_SYS_SCRIPT_FLAG(29) == 0)
+    {
+        FLD_NPC_SET_NAMEID(340, 292);
+    }
+    else 
+    {
+        FLD_NPC_SET_NAMEID(340, 291);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 10
+void MyPalace_Chara_Change_HERO()
+{
+    FLD_SET_TRANSFORM(1);
+    return;
+}
+
+
+// Procedure Index: 11
+void MyPalace_Chara_Change_RYUJI()
+{
+    FLD_SET_TRANSFORM(2);
+    return;
+}
+
+
+// Procedure Index: 12
+void MyPalace_Chara_Change_MORGANA()
+{
+    FLD_SET_TRANSFORM(3);
+    return;
+}
+
+
+// Procedure Index: 13
+void MyPalace_Chara_Change_ANNE()
+{
+    FLD_SET_TRANSFORM(4);
+    return;
+}
+
+
+// Procedure Index: 14
+void MyPalace_Chara_Change_YUSUKE()
+{
+    FLD_SET_TRANSFORM(5);
+    return;
+}
+
+
+// Procedure Index: 15
+void MyPalace_Chara_Change_MAKOTO()
+{
+    FLD_SET_TRANSFORM(6);
+    return;
+}
+
+
+// Procedure Index: 16
+void MyPalace_Chara_Change_HARU()
+{
+    FLD_SET_TRANSFORM(7);
+    return;
+}
+
+
+// Procedure Index: 17
+void MyPalace_Chara_Change_FUTABA()
+{
+    FLD_SET_TRANSFORM(8);
+    return;
+}
+
+
+// Procedure Index: 18
+void MyPalace_Chara_Change_AKECHI()
+{
+    FLD_SET_TRANSFORM(9);
+    return;
+}
+
+
+// Procedure Index: 19
+void MyPalace_Chara_Change_YOSIZAWA()
+{
+    FLD_SET_TRANSFORM(10);
+    return;
+}
+
+
+// Procedure Index: 20
+void Leave_MyPalace()
+{
+    int var2;
+    MSG_WND_DSP();
+    MSG_MIND(MSG_001, 0);
+    var2 = SEL(SEL_002);
+    MSG_WND_CLS();
+    
+    if (var2 == 0)
+    {
+        FADEOUT(43, 40);
+        CALL_BKUP_FIELD();
+    }
+    else 
+    {
+        sVar10 = 180;
+        Position_TurnBack();
+        sVar10 = 0;
+        FLD_ROT_CAMERA(0, 20);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 21
+void Stairs_Shortcut_1()
+{
+    int var3;
+    var3 = FLD_PC_GET_RESHND(0);
+    FLD_REQ_SCN_CHANGE(11);
+    FLD_MODEL_SET_POS(var3, 506);
+    FLD_ROT_CAMERA(0, 0);
+    FADEIN(0, 40);
+    sVar10 = 230;
+    Position_TurnBack();
+    sVar10 = 0;
+    return;
+}
+
+
+// Procedure Index: 22
+void Stairs_Shortcut_2()
+{
+    int var4;
+    var4 = FLD_PC_GET_RESHND(0);
+    FLD_REQ_SCN_CHANGE(11);
+    FLD_MODEL_SET_POS(var4, 507);
+    FLD_ROT_CAMERA(0, 0);
+    FADEIN(0, 40);
+    sVar10 = 200;
+    Position_TurnBack();
+    sVar10 = 0;
+    return;
+}
+
+
+// Procedure Index: 23
+void Stairs_Shortcut_3()
+{
+    int var5;
+    var5 = FLD_PC_GET_RESHND(0);
+    FLD_REQ_SCN_CHANGE(11);
+    FLD_MODEL_SET_POS(var5, 508);
+    FLD_ROT_CAMERA(0, 0);
+    FADEIN(0, 40);
+    sVar10 = 355;
+    Position_TurnBack();
+    sVar10 = 0;
+    return;
+}
+
+
+// Procedure Index: 24
+void Stairs_Shortcut_4()
+{
+    int var6;
+    var6 = FLD_PC_GET_RESHND(0);
+    FLD_REQ_SCN_CHANGE(11);
+    FLD_MODEL_SET_POS(var6, 509);
+    FLD_ROT_CAMERA(0, 0);
+    FADEIN(0, 40);
+    sVar10 = 35;
+    Position_TurnBack();
+    sVar10 = 0;
+    return;
+}
+
+
+// Procedure Index: 25
+void LL_item_text()
+{
+    int var7;
+    // bit id (1073741824) + (379) = 12155
+    
+    if (BIT_CHK((0x40000000 + 379)) == 1)
+    {
+        var7 = FLD_MY_PALACE_GET_ITEM(11);
+        
+        if (var7 == 30)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(30, 10);
+            MSG_WND_CLS();
+        }
+        else if (var7 == 34)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(34, 11);
+            MSG_WND_CLS();
+        }
+        else if (var7 == 35)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(35, 12);
+            MSG_WND_CLS();
+        }
+
+    }
+
+    return;
+}
+
+
+// Procedure Index: 26
+void S_item_text_1()
+{
+    int var8;
+    // bit id (1073741824) + (370) = 12146
+    
+    if (BIT_CHK((0x40000000 + 370)) == 1)
+    {
+        var8 = FLD_MY_PALACE_GET_ITEM(2);
+        
+        if (var8 == 1)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(1, 13);
+            MSG_WND_CLS();
+        }
+        else if (var8 == 3)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(3, 14);
+            MSG_WND_CLS();
+        }
+        else if (var8 == 5)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(5, 15);
+            MSG_WND_CLS();
+        }
+        else if (var8 == 7)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(7, 0x10);
+            MSG_WND_CLS();
+        }
+        else if (var8 == 9)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(9, 17);
+            MSG_WND_CLS();
+        }
+        else if (var8 == 10)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(10, 18);
+            MSG_WND_CLS();
+        }
+        else if (var8 == 11)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(11, 19);
+            MSG_WND_CLS();
+        }
+
+    }
+
+    return;
+}
+
+
+// Procedure Index: 27
+void S_item_text_2()
+{
+    int var9;
+    // bit id (1073741824) + (371) = 12147
+    
+    if (BIT_CHK((0x40000000 + 371)) == 1)
+    {
+        var9 = FLD_MY_PALACE_GET_ITEM(3);
+        
+        if (var9 == 1)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(1, 13);
+            MSG_WND_CLS();
+        }
+        else if (var9 == 3)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(3, 14);
+            MSG_WND_CLS();
+        }
+        else if (var9 == 5)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(5, 15);
+            MSG_WND_CLS();
+        }
+        else if (var9 == 7)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(7, 0x10);
+            MSG_WND_CLS();
+        }
+        else if (var9 == 9)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(9, 17);
+            MSG_WND_CLS();
+        }
+        else if (var9 == 10)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(10, 18);
+            MSG_WND_CLS();
+        }
+        else if (var9 == 11)
+        {
+            MSG_WND_DSP();
+            MYP_CONF_OBJECT(11, 19);
+            MSG_WND_CLS();
+        }
+
+    }
+
+    return;
+}
+
+
+// Procedure Index: 28
+void MyPalace_Rakugaki()
+{
+    MSG_WND_DSP();
+    MSG_MIND(Rakugaki_MSG, 0);
+    MSG_WND_CLS();
+    return;
+}
+
+
+// Procedure Index: 29
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 30
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 31
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 32
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 33
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 34
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 35
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 36
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 37
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 38
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 39
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 40
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 41
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 42
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 43
+void Position_TurnBack()
+{
+    int var11;
+    var11 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_DIR_TRANSLATE(var11, sVar10, 200, 0);
+    FLD_MODEL_SYNC_TRANSLATE(var11);
+    FLD_UNIT_SET_WAIT(var11);
+}
+

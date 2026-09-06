@@ -1,0 +1,184 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("157_002_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D00_BATTLE_EV01()
+{
+    int var0;
+    int var1;
+    var0 = 45;
+    // bit id (536870912) + (2592) = 8736
+    BIT_ON((0x20000000 + 2592));
+    WAIT(5);
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(-90.5454f, 911.0321f, 723.7785f, -0.0911f, -0.0225f, -0.0021f, 0.9956f, 3);
+    FLD_PC_MODEL_SET_POS(1);
+    var1 = FLD_PC_GET_RESHND(0);
+    MDL_ANIM(var1, 0, 1, 10, 1.00f);
+    WAIT(3);
+    MSG_WND_DSP();
+    MSG(EV_02_TALK_01, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(EV_02_TALK_01_02, 0);
+    MSG_WND_CLS();
+    FLD_SUMMON_ENEMY(0, 0);
+    FLD_SUMMON_ENEMY(0, 1);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_LOCK_INTERP(-72.1904f, 867.914f, 421.4302f, -0.16f, -0.0322f, -0.0052f, 0.9866f, 15);
+    WAIT(60);
+    MSG_WND_DSP();
+    MSG(EV_02_TALK_01_03, 0);
+    MSG_WND_CLS();
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_LOCK_INTERP(-487.9207f, 955.6445f, 858.3948f, -0.1449f, -0.3325f, -0.0518f, 0.9305f, 0);
+    MSG_WND_DSP();
+    MSG(EV_02_TALK_01_04, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(EV_02_TALK_01_05, 0);
+    MSG_WND_CLS();
+    FLD_EFFECT_START(0);
+    FLD_CAMERA_LOCK_INTERP(-16.7232f, 849.1348f, 613.103f, -0.0636f, 0.0509f, 0.0032f, 0.9967f, 3);
+    MSG_WND_DSP();
+    MSG(EV_02_TALK_01_06, 0);
+    MSG_WND_CLS();
+    FADEOUT(1, 5);
+    FADE_SYNC();
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    CALL_BATTLE(var0);
+    WAIT_BATTLE();
+    CALL_FIELD(157, 2, 2, 0);
+    return;
+}
+
+
+// Procedure Index: 1
+void AC_02_OUT()
+{
+    FADEOUT(1, 10);
+    FADE_SYNC();
+    WAIT(15);
+    // bit id (536870912) + (2590) = 8734
+    BIT_ON((0x20000000 + 2590));
+    // bit id (536870912) + (5) = 6149
+    BIT_OFF((0x20000000 + 5));
+    // bit id (536870912) + (35) = 6179
+    BIT_OFF((0x20000000 + 35));
+    SET_COUNT(130, 0);
+    // bit id (536870912) + (3501) = 9645
+    BIT_OFF((0x20000000 + 3501));
+    // bit id (536870912) + (3502) = 9646
+    BIT_OFF((0x20000000 + 3502));
+    // bit id (536870912) + (3503) = 9647
+    BIT_OFF((0x20000000 + 3503));
+    // bit id (536870912) + (3504) = 9648
+    BIT_OFF((0x20000000 + 3504));
+    // bit id (536870912) + (3505) = 9649
+    BIT_OFF((0x20000000 + 3505));
+    // bit id (536870912) + (3506) = 9650
+    BIT_OFF((0x20000000 + 3506));
+    // bit id (536870912) + (3507) = 9651
+    BIT_OFF((0x20000000 + 3507));
+    // bit id (536870912) + (3508) = 9652
+    BIT_OFF((0x20000000 + 3508));
+    WAIT(1);
+    END_ANIME();
+    return;
+}
+
+
+// Procedure Index: 2
+void END_ANIME()
+{
+    FADEIN(0, 10);
+    FADE_SYNC();
+    MOVIE_PLAY(2);
+    MOVIE_SYNC();
+    FADEOUT(1, 10);
+    FADE_SYNC();
+    BGM_STOP(0);
+    CALL_EVENT(101, 1);
+    CALL_EVENT(102, 1);
+    CALL_CALENDAR();
+}
+
+
+// Procedure Index: 3
+void PINPOINT_MES_001()
+{
+    SET_COUNT(130, 1);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 4
+void PINPOINT_MES_002()
+{
+    SET_COUNT(130, 2);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 5
+void PINPOINT_MES_003()
+{
+    SET_COUNT(130, 3);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 6
+void PINPOINT_MES_004()
+{
+    SET_COUNT(130, 4);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 7
+void PINPOINT_MES_005()
+{
+    SET_COUNT(130, 5);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 8
+void PINPOINT_MES_006()
+{
+    SET_COUNT(130, 6);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 9
+void PINPOINT_MES_007()
+{
+    SET_COUNT(130, 7);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 10
+void PINPOINT_MES_008()
+{
+    FLD_CAMERA_UNLOCK();
+    SET_COUNT(130, 8);
+    FLD_START_SUPPORT_MSG();
+}
+

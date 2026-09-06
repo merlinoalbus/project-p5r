@@ -1,0 +1,655 @@
+{
+  "scope": "Tre risorse urbane con suffisso tecnico; sola analisi degli estratti esistenti.",
+  "summary": {
+    "resources": 3,
+    "newCertifiedBindings": 0,
+    "newCertifiedSpecificNames": 0
+  },
+  "resources": [
+    {
+      "code": "RMAP_001_2_1",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-001-2-1",
+        "nome": "Sottopasso — RMAP_001_2_1",
+        "genitore_chiave": "citta-shibuya"
+      },
+      "priorStatus": "resource-layer-outside-all-declared-layer-counts",
+      "textureRecords": [
+        {
+          "offset": 25992,
+          "rawHex": "01000200010000001f85bb41ffffffff0000e64300004844000096440000c8440000fa440000164500002f4500004845ffffffff0000000000000000000000000000000000000000",
+          "major": 1,
+          "minor": 2,
+          "sub": 0,
+          "layerCount": 1,
+          "group": 148,
+          "sentinel": false,
+          "floats": [
+            {
+              "offset": 8,
+              "rawHex": "1f85bb41",
+              "value": 23.440000534057617,
+              "finite": true
+            },
+            {
+              "offset": 16,
+              "rawHex": "0000e643",
+              "value": 460.0,
+              "finite": true
+            },
+            {
+              "offset": 20,
+              "rawHex": "00004844",
+              "value": 800.0,
+              "finite": true
+            },
+            {
+              "offset": 24,
+              "rawHex": "00009644",
+              "value": 1200.0,
+              "finite": true
+            },
+            {
+              "offset": 28,
+              "rawHex": "0000c844",
+              "value": 1600.0,
+              "finite": true
+            },
+            {
+              "offset": 32,
+              "rawHex": "0000fa44",
+              "value": 2000.0,
+              "finite": true
+            },
+            {
+              "offset": 36,
+              "rawHex": "00001645",
+              "value": 2400.0,
+              "finite": true
+            },
+            {
+              "offset": 40,
+              "rawHex": "00002f45",
+              "value": 2800.0,
+              "finite": true
+            },
+            {
+              "offset": 44,
+              "rawHex": "00004845",
+              "value": 3200.0,
+              "finite": true
+            }
+          ],
+          "rawFlag12": "ffffffff",
+          "rawFlag48": "ffffffff",
+          "layers": [
+            {
+              "layer": 0,
+              "indexOffset": 26044,
+              "elementIndex": 0,
+              "elementOffset": 0,
+              "elementRawHex": "0000000000000000ffffffff00000000",
+              "groupTitle": {
+                "index": 0,
+                "offset": 896,
+                "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                "text": "???",
+                "unknownOffsets": []
+              },
+              "areaTitle": {
+                "index": 0,
+                "offset": 896,
+                "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                "text": "???",
+                "unknownOffsets": []
+              }
+            }
+          ]
+        }
+      ],
+      "sameNumberFields": [
+        {
+          "id": "F001_002_00",
+          "major": 1,
+          "minor": 2,
+          "sub": 0,
+          "cursor": [
+            188,
+            429
+          ],
+          "texpack": 148,
+          "mode": 3,
+          "offset": 2768,
+          "textures": [
+            {
+              "major": 1,
+              "minor": 2,
+              "sub": 0,
+              "layers": 1,
+              "offset": 25992
+            }
+          ],
+          "place": {
+            "offset": 192,
+            "group": {
+              "index": 4,
+              "offset": 2420,
+              "title": "Shibuya"
+            },
+            "floors": [
+              {
+                "index": 56,
+                "offset": 3604,
+                "title": "Sottopasso"
+              },
+              {
+                "index": 49,
+                "offset": 3396,
+                "title": "Banchina della metropolitana"
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              }
+            ]
+          },
+          "title": "Sottopasso",
+          "group": "Shibuya"
+        },
+        {
+          "id": "F001_002_01",
+          "major": 1,
+          "minor": 2,
+          "sub": 1,
+          "cursor": [
+            188,
+            429
+          ],
+          "texpack": 152,
+          "mode": 3,
+          "offset": 2784,
+          "textures": [
+            {
+              "major": 1,
+              "minor": 12,
+              "sub": 0,
+              "layers": 1,
+              "offset": 26568
+            }
+          ],
+          "place": {
+            "offset": 192,
+            "group": {
+              "index": 4,
+              "offset": 2420,
+              "title": "Shibuya"
+            },
+            "floors": [
+              {
+                "index": 56,
+                "offset": 3604,
+                "title": "Sottopasso"
+              },
+              {
+                "index": 49,
+                "offset": 3396,
+                "title": "Banchina della metropolitana"
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              }
+            ]
+          },
+          "title": "Banchina della metropolitana",
+          "group": "Shibuya"
+        }
+      ],
+      "actualRoadmapUsersOfTextureGroups": [
+        "F001_002_00"
+      ],
+      "specificLayerSelected": false,
+      "image": {
+        "file": "outputs\\mappe-p5r\\png\\BASE\\FIELD\\PANEL\\ROADMAP\\RMAP_001_2_1.png",
+        "sha256": "b2eae8d7296c54fd1e5f5767401a40bc5aece8743abc7bfd00bcd25c4c35b043",
+        "observation": "Corridoi, più scale, simbolo yen e icona bevanda; nessun titolo di luogo scritto."
+      },
+      "scriptEvidence": [
+        {
+          "file": "outputs\\mappe-p5r\\campi-completi\\scripts\\001_002_00.flow",
+          "sha256": "cf5079944f346078abf0d088d601ff19491531af5cbddd4e217c187fad6f0036",
+          "mapRelatedCalls": [
+            {
+              "line": 658,
+              "text": "CALL_LMAP(38);"
+            },
+            {
+              "line": 659,
+              "text": "FLD_PANEL_MAP_PROC_SYNC(0);"
+            },
+            {
+              "line": 675,
+              "text": "CALL_LMAP(50);"
+            },
+            {
+              "line": 679,
+              "text": "CALL_LMAP(51);"
+            },
+            {
+              "line": 683,
+              "text": "CALL_LMAP(52);"
+            },
+            {
+              "line": 687,
+              "text": "CALL_LMAP(65);"
+            },
+            {
+              "line": 690,
+              "text": "FLD_PANEL_MAP_PROC_SYNC(0);"
+            }
+          ]
+        },
+        {
+          "file": "outputs\\mappe-p5r\\campi-completi\\scripts\\001_002_01.flow",
+          "sha256": "913d158a4e2b4b44b08c14f021733b0740d5fcc2f9ee80eeef92703a3a1f2fa1",
+          "mapRelatedCalls": [
+            {
+              "line": 667,
+              "text": "FLD_PLACENAME_TEX(1, 2, 0, 80);"
+            }
+          ]
+        }
+      ],
+      "proven": "La texture esiste e il suo record/catalogo è individuato. Sono provati i nomi e i selettori dei campi riportati, non il binding con questa immagine.",
+      "unproven": "Titolo specifico e utilizzo nel gioco della risorsa; equivalenza con altro layer o stanza; eventuale selettore alternativo non presente nei dati analizzati.",
+      "organizationProposal": {
+        "display": "Planimetria (nome non verificato)",
+        "parent": "Conservare gerarchia corrente; nessun nuovo raggruppamento o spostamento certificato.",
+        "specificNameMustRemainCandidate": "Sottopasso",
+        "approvedMutation": false
+      }
+    },
+    {
+      "code": "RMAP_002_6_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-002-6-0",
+        "nome": "Aula — RMAP_002_6_0",
+        "genitore_chiave": "citta-shujin-academy"
+      },
+      "priorStatus": "texpack-exists-but-no-roadmap-field",
+      "textureRecords": [
+        {
+          "offset": 27216,
+          "rawHex": "02000600010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0000000000000000000000000000000000000000",
+          "major": 2,
+          "minor": 6,
+          "sub": 0,
+          "layerCount": 1,
+          "group": 156,
+          "sentinel": false,
+          "floats": [
+            {
+              "offset": 8,
+              "rawHex": "1f85bb41",
+              "value": 23.440000534057617,
+              "finite": true
+            },
+            {
+              "offset": 16,
+              "rawHex": "0000c843",
+              "value": 400.0,
+              "finite": true
+            },
+            {
+              "offset": 20,
+              "rawHex": "00004844",
+              "value": 800.0,
+              "finite": true
+            },
+            {
+              "offset": 24,
+              "rawHex": "00009644",
+              "value": 1200.0,
+              "finite": true
+            },
+            {
+              "offset": 28,
+              "rawHex": "0000c844",
+              "value": 1600.0,
+              "finite": true
+            },
+            {
+              "offset": 32,
+              "rawHex": "0000fa44",
+              "value": 2000.0,
+              "finite": true
+            },
+            {
+              "offset": 36,
+              "rawHex": "00001645",
+              "value": 2400.0,
+              "finite": true
+            },
+            {
+              "offset": 40,
+              "rawHex": "00002f45",
+              "value": 2800.0,
+              "finite": true
+            },
+            {
+              "offset": 44,
+              "rawHex": "00004845",
+              "value": 3200.0,
+              "finite": true
+            }
+          ],
+          "rawFlag12": "ffffffff",
+          "rawFlag48": "ffffffff",
+          "layers": [
+            {
+              "layer": 0,
+              "indexOffset": 27268,
+              "elementIndex": 0,
+              "elementOffset": 0,
+              "elementRawHex": "0000000000000000ffffffff00000000",
+              "groupTitle": {
+                "index": 0,
+                "offset": 896,
+                "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                "text": "???",
+                "unknownOffsets": []
+              },
+              "areaTitle": {
+                "index": 0,
+                "offset": 896,
+                "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                "text": "???",
+                "unknownOffsets": []
+              }
+            }
+          ]
+        }
+      ],
+      "sameNumberFields": [
+        {
+          "id": "F002_006_00",
+          "major": 2,
+          "minor": 6,
+          "sub": 0,
+          "cursor": [
+            323,
+            504
+          ],
+          "texpack": 154,
+          "mode": 10,
+          "offset": 3024,
+          "textures": [
+            {
+              "major": 2,
+              "minor": 0,
+              "sub": 0,
+              "layers": 3,
+              "offset": 26856
+            },
+            {
+              "major": 2,
+              "minor": 5,
+              "sub": 0,
+              "layers": 1,
+              "offset": 26928
+            }
+          ],
+          "place": {
+            "offset": 304,
+            "group": {
+              "index": 2,
+              "offset": 2372,
+              "title": "Shujin Academy"
+            },
+            "floors": [
+              {
+                "index": 32,
+                "offset": 3044,
+                "title": "Aula"
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              }
+            ]
+          },
+          "title": "Aula",
+          "group": "Shujin Academy"
+        }
+      ],
+      "actualRoadmapUsersOfTextureGroups": [],
+      "specificLayerSelected": true,
+      "image": {
+        "file": "outputs\\mappe-p5r\\png\\BASE\\FIELD\\PANEL\\ROADMAP\\RMAP_002_6_0.png",
+        "sha256": "7772e7b06837c45323da3485e7b545530a08947f06b638ec351de36e30c728fa",
+        "observation": "Due corridoi uniti, scale, due WC e indicazione2-D. Non la sola sagoma di un’aula."
+      },
+      "scriptEvidence": [
+        {
+          "file": "outputs\\mappe-p5r\\campi-completi\\scripts\\002_006_00.flow",
+          "sha256": "470a88081541058909af73fda84cceacf7b49836c01b6ea2e91d405495e3f343",
+          "mapRelatedCalls": []
+        }
+      ],
+      "proven": "La texture esiste e il suo record/catalogo è individuato. Sono provati i nomi e i selettori dei campi riportati, non il binding con questa immagine.",
+      "unproven": "Titolo specifico e utilizzo nel gioco della risorsa; equivalenza con altro layer o stanza; eventuale selettore alternativo non presente nei dati analizzati.",
+      "organizationProposal": {
+        "display": "Planimetria (nome non verificato)",
+        "parent": "Conservare gerarchia corrente; nessun nuovo raggruppamento o spostamento certificato.",
+        "specificNameMustRemainCandidate": "Aula",
+        "approvedMutation": false
+      }
+    },
+    {
+      "code": "RMAP_002_8_0",
+      "beforeExactDatabase": {
+        "chiave": "nativo-rmap-002-8-0",
+        "nome": "Biblioteca — RMAP_002_8_0",
+        "genitore_chiave": "citta-shujin-academy"
+      },
+      "priorStatus": "texpack-exists-but-no-roadmap-field",
+      "textureRecords": [
+        {
+          "offset": 27360,
+          "rawHex": "02000800010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0000000000000000000000000000000000000000",
+          "major": 2,
+          "minor": 8,
+          "sub": 0,
+          "layerCount": 1,
+          "group": 157,
+          "sentinel": false,
+          "floats": [
+            {
+              "offset": 8,
+              "rawHex": "1f85bb41",
+              "value": 23.440000534057617,
+              "finite": true
+            },
+            {
+              "offset": 16,
+              "rawHex": "0000c843",
+              "value": 400.0,
+              "finite": true
+            },
+            {
+              "offset": 20,
+              "rawHex": "00004844",
+              "value": 800.0,
+              "finite": true
+            },
+            {
+              "offset": 24,
+              "rawHex": "00009644",
+              "value": 1200.0,
+              "finite": true
+            },
+            {
+              "offset": 28,
+              "rawHex": "0000c844",
+              "value": 1600.0,
+              "finite": true
+            },
+            {
+              "offset": 32,
+              "rawHex": "0000fa44",
+              "value": 2000.0,
+              "finite": true
+            },
+            {
+              "offset": 36,
+              "rawHex": "00001645",
+              "value": 2400.0,
+              "finite": true
+            },
+            {
+              "offset": 40,
+              "rawHex": "00002f45",
+              "value": 2800.0,
+              "finite": true
+            },
+            {
+              "offset": 44,
+              "rawHex": "00004845",
+              "value": 3200.0,
+              "finite": true
+            }
+          ],
+          "rawFlag12": "ffffffff",
+          "rawFlag48": "ffffffff",
+          "layers": [
+            {
+              "layer": 0,
+              "indexOffset": 27412,
+              "elementIndex": 0,
+              "elementOffset": 0,
+              "elementRawHex": "0000000000000000ffffffff00000000",
+              "groupTitle": {
+                "index": 0,
+                "offset": 896,
+                "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                "text": "???",
+                "unknownOffsets": []
+              },
+              "areaTitle": {
+                "index": 0,
+                "offset": 896,
+                "rawHex": "000000000000000400000001000000003f3f3f00000000000000000000000000",
+                "text": "???",
+                "unknownOffsets": []
+              }
+            }
+          ]
+        }
+      ],
+      "sameNumberFields": [
+        {
+          "id": "F002_008_00",
+          "major": 2,
+          "minor": 8,
+          "sub": 0,
+          "cursor": [
+            323,
+            504
+          ],
+          "texpack": 154,
+          "mode": 18,
+          "offset": 3040,
+          "textures": [
+            {
+              "major": 2,
+              "minor": 0,
+              "sub": 0,
+              "layers": 3,
+              "offset": 26856
+            },
+            {
+              "major": 2,
+              "minor": 5,
+              "sub": 0,
+              "layers": 1,
+              "offset": 26928
+            }
+          ],
+          "place": {
+            "offset": 320,
+            "group": {
+              "index": 2,
+              "offset": 2372,
+              "title": "Shujin Academy"
+            },
+            "floors": [
+              {
+                "index": 27,
+                "offset": 2948,
+                "title": "Biblioteca"
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              }
+            ]
+          },
+          "title": "Biblioteca",
+          "group": "Shujin Academy"
+        }
+      ],
+      "actualRoadmapUsersOfTextureGroups": [],
+      "specificLayerSelected": true,
+      "image": {
+        "file": "outputs\\mappe-p5r\\png\\BASE\\FIELD\\PANEL\\ROADMAP\\RMAP_002_8_0.png",
+        "sha256": "1416b8b6e2332ed24850a54f9077ffe07728a6858057a0d1ff2e048044a37acc",
+        "observation": "Due corridoi uniti, scale, WC e icona libro. Non la sola sagoma di una biblioteca."
+      },
+      "scriptEvidence": [
+        {
+          "file": "outputs\\mappe-p5r\\campi-completi\\scripts\\002_008_00.flow",
+          "sha256": "760ae775ce8c4e35a3dec71c5eb2700f397be31845c23ee6d08f0ff7eeb7aeb1",
+          "mapRelatedCalls": []
+        }
+      ],
+      "proven": "La texture esiste e il suo record/catalogo è individuato. Sono provati i nomi e i selettori dei campi riportati, non il binding con questa immagine.",
+      "unproven": "Titolo specifico e utilizzo nel gioco della risorsa; equivalenza con altro layer o stanza; eventuale selettore alternativo non presente nei dati analizzati.",
+      "organizationProposal": {
+        "display": "Planimetria (nome non verificato)",
+        "parent": "Conservare gerarchia corrente; nessun nuovo raggruppamento o spostamento certificato.",
+        "specificNameMustRemainCandidate": "Biblioteca",
+        "approvedMutation": false
+      }
+    }
+  ],
+  "keyFinding": "F002006 eF002008 esistono nei ROADMAP ma selezionano154, non156/157. F00100201 seleziona152→00112_0, non0012_1. Il suffisso numerico non equivale a divisione del campo.",
+  "sources": [
+    {
+      "file": "outputs\\mappe-p5r\\mondo_metadati.json",
+      "sha256": "080e569dbcb203e01ae1d6d325831ada3e2e7dbc6e4701ec1e755784808df2f6"
+    },
+    {
+      "file": "outputs\\mappe-p5r\\mondo_texpack_evidenze.json",
+      "sha256": "e14eecee8e1af87409de11645be63b6ba48fbde421a3e690847df8700f6eaf94"
+    }
+  ],
+  "limitations": [
+    "Non provata assenza di un loader alternativo nel gioco.",
+    "Non decodificata semantica mode10/18: non usarla per attribuire titoli a texture.",
+    "Nessuna nuova decompilazione, nessuna mutazione app/DB, nessuna connessione o pin."
+  ]
+}

@@ -1,0 +1,633 @@
+[
+  {
+    "id": 198,
+    "place": "shibuya/big-bang-burger",
+    "before": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 198,
+      "mappaChiave": "shibuya",
+      "tipo": "ristorante",
+      "tipoNome": "Ristorante",
+      "colore": "#a16207",
+      "nome": "Big Bang Burger",
+      "descrizione": "Fast food con sfida hamburger gigante (Big Bang Challenge).",
+      "x": 81.2,
+      "y": 46.2,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "shibuya/big-bang-burger"
+      },
+      "soloPosizione": false,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 8,
+      "origine": "seed",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "shibuya/big-bang-burger",
+          "quartiere": "shibuya",
+          "tipo": "ristorante",
+          "nome": "Big Bang Burger",
+          "cosaOffre": "Fast food con sfida hamburger gigante (Big Bang Challenge).",
+          "quando": null
+        },
+        "negozio": {
+          "chiave": "big-bang-burger",
+          "nome": "Big Bang Burger",
+          "tipo": "cibo",
+          "articoli": [
+            {
+              "chiave": "big-bang-burger/big-bang-burger",
+              "nome": "Big Bang Burger",
+              "categoria": "cibo",
+              "prezzo": 480,
+              "disponibileDal": "dal 18 aprile",
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/patatine-saturnine",
+              "nome": "Patatine saturnine",
+              "categoria": "cibo",
+              "prezzo": 200,
+              "disponibileDal": "dal 18 aprile",
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/insalata-venere",
+              "nome": "Insalata venere",
+              "categoria": "cibo",
+              "prezzo": 300,
+              "disponibileDal": "dal 18 aprile",
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/panino-terrestre",
+              "nome": "Panino terrestre",
+              "categoria": "cibo",
+              "prezzo": 780,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/panino-lunare",
+              "nome": "Panino lunare",
+              "categoria": "cibo",
+              "prezzo": 1180,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/panino-supernova",
+              "nome": "Panino supernova",
+              "categoria": "cibo",
+              "prezzo": 1300,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/sfida-comet-burger",
+              "nome": "Sfida Comet Burger",
+              "categoria": "altro",
+              "prezzo": 1200,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/sfida-gravity-burger",
+              "nome": "Sfida Gravity Burger",
+              "categoria": "altro",
+              "prezzo": 1500,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/sfida-cosmo-tower-burger",
+              "nome": "Sfida Cosmo Tower Burger",
+              "categoria": "altro",
+              "prezzo": 1800,
+              "disponibileDal": null,
+              "comprato": false
+            }
+          ]
+        }
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-05T22:02:40.942Z"
+    },
+    "payload": {
+      "mappa": "nativo-rmap-001-3-0",
+      "x": 48.53647225167872,
+      "y": 35.36246250209329,
+      "nome": "Big Bang Burger",
+      "tipo": "ristorante",
+      "soloPosizione": true
+    },
+    "evidence": {
+      "field": "F001_003_00",
+      "trigger": 11,
+      "target": "F010_019_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          248.50673792859502,
+          362.1116160214352
+        ]
+      },
+      "nearestYellowDistance": 2.4957591816815388
+    },
+    "canvas": [
+      512,
+      1024
+    ],
+    "after": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 198,
+      "mappaChiave": "shibuya-central-street",
+      "tipo": "ristorante",
+      "tipoNome": "Ristorante",
+      "colore": "#a16207",
+      "nome": "Big Bang Burger",
+      "descrizione": "Fast food con sfida hamburger gigante (Big Bang Challenge).",
+      "x": 48.53647225167872,
+      "y": 35.36246250209329,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "shibuya/big-bang-burger"
+      },
+      "soloPosizione": true,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 8,
+      "origine": "utente",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "shibuya/big-bang-burger",
+          "quartiere": "shibuya",
+          "tipo": "ristorante",
+          "nome": "Big Bang Burger",
+          "cosaOffre": "Fast food con sfida hamburger gigante (Big Bang Challenge).",
+          "quando": null
+        },
+        "negozio": {
+          "chiave": "big-bang-burger",
+          "nome": "Big Bang Burger",
+          "tipo": "cibo",
+          "articoli": [
+            {
+              "chiave": "big-bang-burger/big-bang-burger",
+              "nome": "Big Bang Burger",
+              "categoria": "cibo",
+              "prezzo": 480,
+              "disponibileDal": "dal 18 aprile",
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/patatine-saturnine",
+              "nome": "Patatine saturnine",
+              "categoria": "cibo",
+              "prezzo": 200,
+              "disponibileDal": "dal 18 aprile",
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/insalata-venere",
+              "nome": "Insalata venere",
+              "categoria": "cibo",
+              "prezzo": 300,
+              "disponibileDal": "dal 18 aprile",
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/panino-terrestre",
+              "nome": "Panino terrestre",
+              "categoria": "cibo",
+              "prezzo": 780,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/panino-lunare",
+              "nome": "Panino lunare",
+              "categoria": "cibo",
+              "prezzo": 1180,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/panino-supernova",
+              "nome": "Panino supernova",
+              "categoria": "cibo",
+              "prezzo": 1300,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/sfida-comet-burger",
+              "nome": "Sfida Comet Burger",
+              "categoria": "altro",
+              "prezzo": 1200,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/sfida-gravity-burger",
+              "nome": "Sfida Gravity Burger",
+              "categoria": "altro",
+              "prezzo": 1500,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "big-bang-burger/sfida-cosmo-tower-burger",
+              "nome": "Sfida Cosmo Tower Burger",
+              "categoria": "altro",
+              "prezzo": 1800,
+              "disponibileDal": null,
+              "comprato": false
+            }
+          ]
+        }
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-06T01:19:33.311Z"
+    }
+  },
+  {
+    "id": 201,
+    "place": "shibuya/protein-lovers",
+    "before": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 201,
+      "mappaChiave": "shibuya",
+      "tipo": "attivita",
+      "tipoNome": "Attività",
+      "colore": "#facc15",
+      "nome": "Palestra Protein Lovers",
+      "descrizione": "Allenamento a pagamento (2.000¥/visita) che aumenta HP e SP massimi progressivamente (da +3HP/+2SP fino a +9HP/+7SP).",
+      "x": 84.7,
+      "y": 53.8,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "shibuya/protein-lovers"
+      },
+      "soloPosizione": false,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 7,
+      "origine": "seed",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "shibuya/protein-lovers",
+          "quartiere": "shibuya",
+          "tipo": "servizio",
+          "nome": "Palestra Protein Lovers",
+          "cosaOffre": "Allenamento a pagamento (2.000¥/visita) che aumenta HP e SP massimi progressivamente (da +3HP/+2SP fino a +9HP/+7SP).",
+          "quando": null
+        },
+        "negozio": null
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-05T22:02:40.942Z"
+    },
+    "payload": {
+      "mappa": "nativo-rmap-001-3-0",
+      "x": 57.03798832528122,
+      "y": 37.71224232294736,
+      "nome": "Palestra Protein Lovers",
+      "tipo": "attivita",
+      "soloPosizione": true
+    },
+    "evidence": {
+      "field": "F001_003_00",
+      "trigger": 21,
+      "target": "F010_005_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          292.03450022543984,
+          386.17336138698096
+        ]
+      },
+      "nearestYellowDistance": 0.17676095737283504
+    },
+    "canvas": [
+      512,
+      1024
+    ],
+    "after": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 201,
+      "mappaChiave": "shibuya-central-street",
+      "tipo": "attivita",
+      "tipoNome": "Attività",
+      "colore": "#facc15",
+      "nome": "Palestra Protein Lovers",
+      "descrizione": "Allenamento a pagamento (2.000¥/visita) che aumenta HP e SP massimi progressivamente (da +3HP/+2SP fino a +9HP/+7SP).",
+      "x": 57.03798832528122,
+      "y": 37.71224232294736,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "shibuya/protein-lovers"
+      },
+      "soloPosizione": true,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 7,
+      "origine": "utente",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "shibuya/protein-lovers",
+          "quartiere": "shibuya",
+          "tipo": "servizio",
+          "nome": "Palestra Protein Lovers",
+          "cosaOffre": "Allenamento a pagamento (2.000¥/visita) che aumenta HP e SP massimi progressivamente (da +3HP/+2SP fino a +9HP/+7SP).",
+          "quando": null
+        },
+        "negozio": null
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-06T01:19:33.314Z"
+    }
+  },
+  {
+    "id": null,
+    "place": "kichijoji/penguin-sniper",
+    "before": null,
+    "payload": {
+      "mappa": "nativo-rmap-005-1-0",
+      "x": 36.766551616037,
+      "y": 9.1218221411833,
+      "nome": "Freccette e biliardo",
+      "tipo": "attivita",
+      "soloPosizione": true,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "kichijoji/penguin-sniper"
+      },
+      "collezionabile": false
+    },
+    "evidence": {
+      "field": "F005_001_00",
+      "trigger": 3,
+      "target": "F005_002_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          376.48948854821884,
+          93.40745872571699
+        ]
+      },
+      "nearestYellowDistance": 17.56184493123012
+    },
+    "canvas": [
+      1024,
+      1024
+    ],
+    "after": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 395,
+      "mappaChiave": "kichijoji-quartiere-dello-shopping",
+      "tipo": "attivita",
+      "tipoNome": "Attività",
+      "colore": "#facc15",
+      "nome": "Freccette e biliardo",
+      "descrizione": "",
+      "x": 36.766551616037,
+      "y": 9.1218221411833,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "kichijoji/penguin-sniper"
+      },
+      "soloPosizione": true,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 0,
+      "origine": "utente",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "kichijoji/penguin-sniper",
+          "quartiere": "kichijoji",
+          "tipo": "attivita",
+          "nome": "Penguin Sniper (Freccette e Biliardo)",
+          "cosaOffre": "Biliardo e freccette (\"Penguin Sniper\"); punto d'incontro abituale per Akechi.",
+          "quando": null
+        },
+        "negozio": {
+          "chiave": "penguin-sniper",
+          "nome": "Penguin Sniper",
+          "tipo": "altro",
+          "articoli": [
+            {
+              "chiave": "penguin-sniper/partita-a-freccette",
+              "nome": "Partita a freccette",
+              "categoria": "altro",
+              "prezzo": 800,
+              "disponibileDal": null,
+              "comprato": false
+            },
+            {
+              "chiave": "penguin-sniper/partita-a-biliardo",
+              "nome": "Partita a biliardo",
+              "categoria": "altro",
+              "prezzo": 0,
+              "disponibileDal": null,
+              "comprato": false
+            }
+          ]
+        }
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-06T01:19:33.317Z"
+    }
+  },
+  {
+    "id": null,
+    "place": "kichijoji/jazz-jin",
+    "before": null,
+    "payload": {
+      "mappa": "nativo-rmap-005-1-0",
+      "x": 54.8153583252272,
+      "y": 21.031537828254777,
+      "nome": "Jazz Club",
+      "tipo": "attivita",
+      "soloPosizione": true,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "kichijoji/jazz-jin"
+      },
+      "collezionabile": false
+    },
+    "evidence": {
+      "field": "F005_001_00",
+      "trigger": 4,
+      "target": "F005_003_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          561.3092692503266,
+          215.3629473613289
+        ]
+      },
+      "nearestYellowDistance": 2.3831004388419714
+    },
+    "canvas": [
+      1024,
+      1024
+    ],
+    "after": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 396,
+      "mappaChiave": "kichijoji-quartiere-dello-shopping",
+      "tipo": "attivita",
+      "tipoNome": "Attività",
+      "colore": "#facc15",
+      "nome": "Jazz Club",
+      "descrizione": "",
+      "x": 54.8153583252272,
+      "y": 21.031537828254777,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "kichijoji/jazz-jin"
+      },
+      "soloPosizione": true,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 0,
+      "origine": "utente",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "kichijoji/jazz-jin",
+          "quartiere": "kichijoji",
+          "tipo": "attivita",
+          "nome": "Jazz Club (Jazz Jin)",
+          "cosaOffre": "Locale jazz dove invitare un membro del party a bere cocktail: aumenta punti Affetto, modifica statistiche di combattimento, insegna nuove abilità (soprattutto la domenica).",
+          "quando": "sera"
+        },
+        "negozio": null
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-06T01:19:33.319Z"
+    }
+  },
+  {
+    "id": 389,
+    "place": "yongen-jaya/batting-cage-yongen",
+    "before": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 389,
+      "mappaChiave": "yongen-jaya",
+      "tipo": "attivita",
+      "tipoNome": "Attività",
+      "colore": "#facc15",
+      "nome": "Gabbie di Battuta",
+      "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
+      "x": 50.6,
+      "y": 54.9,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "yongen-jaya/batting-cage-yongen"
+      },
+      "soloPosizione": false,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 7,
+      "origine": "seed",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "yongen-jaya/batting-cage-yongen",
+          "quartiere": "yongen-jaya",
+          "tipo": "attivita",
+          "nome": "Gabbie di Battuta",
+          "cosaOffre": "Minigioco di battuta per aumentare la dote Perizia.",
+          "quando": null
+        },
+        "negozio": null
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-05T22:02:40.948Z"
+    },
+    "payload": {
+      "mappa": "nativo-rmap-009-2-0",
+      "x": 35.874329893079945,
+      "y": 26.82202185799666,
+      "nome": "Gabbie di battuta",
+      "tipo": "attivita",
+      "soloPosizione": true
+    },
+    "evidence": {
+      "field": "F009_002_00",
+      "trigger": 6,
+      "target": "F009_003_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          367.35313810513867,
+          274.6575038258858
+        ]
+      },
+      "nearestYellowDistance": 2.7052303150227357
+    },
+    "canvas": [
+      1024,
+      1024
+    ],
+    "after": {
+      "destinazione": null,
+      "destinazioneNonDisponibile": false,
+      "id": 389,
+      "mappaChiave": "yongen-jaya-vicoli",
+      "tipo": "attivita",
+      "tipoNome": "Attività",
+      "colore": "#facc15",
+      "nome": "Gabbie di battuta",
+      "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
+      "x": 35.874329893079945,
+      "y": 26.82202185799666,
+      "riferimento": {
+        "tipo": "luogo",
+        "chiave": "yongen-jaya/batting-cage-yongen"
+      },
+      "soloPosizione": true,
+      "collezionabile": false,
+      "condizioni": [],
+      "ordine": 7,
+      "origine": "utente",
+      "raccolto": false,
+      "dettaglio": {
+        "tipo": "luogo",
+        "luogo": {
+          "chiave": "yongen-jaya/batting-cage-yongen",
+          "quartiere": "yongen-jaya",
+          "tipo": "attivita",
+          "nome": "Gabbie di Battuta",
+          "cosaOffre": "Minigioco di battuta per aumentare la dote Perizia.",
+          "quando": null
+        },
+        "negozio": null
+      },
+      "immagini": [],
+      "updatedAt": "2026-09-06T01:19:33.322Z"
+    }
+  }
+]

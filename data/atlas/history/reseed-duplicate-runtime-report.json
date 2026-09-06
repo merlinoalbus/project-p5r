@@ -1,0 +1,50 @@
+{
+  "pass": true,
+  "database": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\runtime-atlante\\project-p5r.db",
+  "backup": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\runtime-atlante\\project-p5r.db.before-duplicate-repair.db",
+  "kept": {
+    "id": 389,
+    "mappa_chiave": "nativo-rmap-009-2-0",
+    "tipo": "attivita",
+    "nome": "Gabbie di battuta",
+    "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
+    "x": 35.874329893079945,
+    "y": 26.82202185799666,
+    "riferimento_tipo": "luogo",
+    "riferimento_chiave": "yongen-jaya/batting-cage-yongen",
+    "collezionabile": 0,
+    "ordine": 7,
+    "origine": "utente",
+    "updated_at": "2026-09-06T01:19:33.322Z",
+    "condizioni_json": null,
+    "seed_identita_json": "{\"tipo\":\"attivita\",\"nome\":\"Gabbie di Battuta\",\"x\":50.6,\"y\":54.9,\"riferimento\":{\"tipo\":\"luogo\",\"chiave\":\"yongen-jaya/batting-cage-yongen\"}}",
+    "solo_posizione": 1,
+    "area_guida_chiave": null,
+    "ruolo_guida": null
+  },
+  "removed": {
+    "id": 397,
+    "mappa_chiave": "citta-yongen-jaya",
+    "tipo": "attivita",
+    "nome": "Gabbie di Battuta",
+    "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
+    "x": 50.6,
+    "y": 54.9,
+    "riferimento_tipo": "luogo",
+    "riferimento_chiave": "yongen-jaya/batting-cage-yongen",
+    "collezionabile": 0,
+    "ordine": 7,
+    "origine": "seed",
+    "updated_at": "2026-09-06T02:22:51.168Z",
+    "condizioni_json": null,
+    "seed_identita_json": null,
+    "solo_posizione": 0,
+    "area_guida_chiave": null,
+    "ruolo_guida": null
+  },
+  "dependentReferencesChecked": [
+    "spillo_partita.spillo_id",
+    "spillo_immagine.spillo_id",
+    "spillo_destinazione.spillo_id"
+  ]
+}

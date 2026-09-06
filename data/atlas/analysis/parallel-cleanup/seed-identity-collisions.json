@@ -1,0 +1,413 @@
+{
+  "checkedAt": "2026-09-06T02:29:56.494843+00:00",
+  "database": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\runtime-atlante\\project-p5r.db",
+  "readOnly": true,
+  "scope": "Pacchetti espliciti letti da caricaSeed: mappe-editor.json e tutti i mappe/*.json ordinati; non il catalogo sintetizzato da sincronizzaMappe.",
+  "identityDefinition": "tipo,nome,x,y,riferimento(tipo,chiave); x/y clamp0..100. Mappa non inclusa. Tutti i riferimenti mappa del campione sono già chiavi normalizzate.",
+  "sources": [
+    {
+      "file": "data/seed/mappe-editor.json",
+      "sha256": "8a660a04572c7ffa1f9f7dd0c4374044770d774b34126be150219c9084945880",
+      "maps": 0,
+      "pins": 0
+    },
+    {
+      "file": "data/seed/mappe/atlante-base.json",
+      "sha256": "73af84c29f7354c208bcc41106efed36cb9c02d200cad23b8a06a138f010a1d1",
+      "maps": 308,
+      "pins": 0
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "sha256": "ae035d339472e74690f4baa62b19ce4325b42701d56dc3a98432cf272a4dc7f7",
+      "maps": 1,
+      "pins": 17
+    },
+    {
+      "file": "data/seed/mappe/yongen-java-banchina-della-metropolitana.json",
+      "sha256": "945f1570d5072ff90f2b488234b651a761b1b2e667bdd8fbe2eb5ad52584f867",
+      "maps": 1,
+      "pins": 2
+    }
+  ],
+  "summary": {
+    "files": 4,
+    "maps": 310,
+    "pins": 19,
+    "distinctIdentities": 19,
+    "collisions": 0,
+    "sourceMatches389": 1,
+    "dbHistoricalMatches389": 1,
+    "dbHistoricalUserMatches389": 1
+  },
+  "target389": {
+    "id": 389,
+    "mappa_chiave": "nativo-rmap-009-2-0",
+    "tipo": "attivita",
+    "nome": "Gabbie di battuta",
+    "descrizione": "Minigioco di battuta per aumentare la dote Perizia.",
+    "x": 35.874329893079945,
+    "y": 26.82202185799666,
+    "riferimento_tipo": "luogo",
+    "riferimento_chiave": "yongen-jaya/batting-cage-yongen",
+    "collezionabile": 0,
+    "ordine": 7,
+    "origine": "utente",
+    "updated_at": "2026-09-06T01:19:33.322Z",
+    "condizioni_json": null,
+    "seed_identita_json": "{\"tipo\":\"attivita\",\"nome\":\"Gabbie di Battuta\",\"x\":50.6,\"y\":54.9,\"riferimento\":{\"tipo\":\"luogo\",\"chiave\":\"yongen-jaya/batting-cage-yongen\"}}",
+    "solo_posizione": 1,
+    "area_guida_chiave": null,
+    "ruolo_guida": null
+  },
+  "targetHistoricalIdentity": {
+    "tipo": "attivita",
+    "nome": "Gabbie di Battuta",
+    "x": 50.6,
+    "y": 54.9,
+    "riferimento": {
+      "tipo": "luogo",
+      "chiave": "yongen-jaya/batting-cage-yongen"
+    }
+  },
+  "matchingSources": [
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 14,
+      "identity": {
+        "tipo": "attivita",
+        "nome": "Gabbie di Battuta",
+        "x": 50.6,
+        "y": 54.9,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/batting-cage-yongen"
+        }
+      },
+      "matches389": true
+    }
+  ],
+  "matchingDatabaseRows": [
+    {
+      "id": 389,
+      "mappa_chiave": "nativo-rmap-009-2-0",
+      "origine": "utente",
+      "seed_identita_json": "{\"tipo\":\"attivita\",\"nome\":\"Gabbie di Battuta\",\"x\":50.6,\"y\":54.9,\"riferimento\":{\"tipo\":\"luogo\",\"chiave\":\"yongen-jaya/batting-cage-yongen\"}}"
+    }
+  ],
+  "collisions": [],
+  "allSourcePins": [
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 0,
+      "identity": {
+        "tipo": "attivita",
+        "nome": "Café Leblanc",
+        "x": 62,
+        "y": 52,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/leblanc"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 1,
+      "identity": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Banchina della metropolitana",
+        "x": 88.3,
+        "y": 6.8,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "yongen-java-banchina-della-metropolitana"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 2,
+      "identity": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Banchina della metropolitana",
+        "x": 76.8,
+        "y": 83.4,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "yongen-java-banchina-della-metropolitana"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 3,
+      "identity": {
+        "tipo": "dialogo",
+        "nome": "Poliziotto Dialogo",
+        "x": 43.6,
+        "y": 65.2,
+        "riferimento": null
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 4,
+      "identity": {
+        "tipo": "distributore",
+        "nome": "Distributore",
+        "x": 84.2,
+        "y": 63.9,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/distributore-tabaccaio"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 5,
+      "identity": {
+        "tipo": "nota",
+        "nome": "Uomo indisposto",
+        "x": 35.9,
+        "y": 65.6,
+        "riferimento": null
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 6,
+      "identity": {
+        "tipo": "nota",
+        "nome": "Ascolta",
+        "x": 18.3,
+        "y": 35.7,
+        "riferimento": null
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 7,
+      "identity": {
+        "tipo": "casa",
+        "nome": "Casa di Sojiro Sakura",
+        "x": 20.6,
+        "y": 12.5,
+        "riferimento": null
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 8,
+      "identity": {
+        "tipo": "nota",
+        "nome": "Ascolta",
+        "x": 31,
+        "y": 14.7,
+        "riferimento": null
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 9,
+      "identity": {
+        "tipo": "confidente",
+        "nome": "Clinica Medica Takemi",
+        "x": 46,
+        "y": 90.4,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/clinica-takemi"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 10,
+      "identity": {
+        "tipo": "terme",
+        "nome": "Bagno pubblico (Terme Yongen-Jaya)",
+        "x": 87.2,
+        "y": 60.6,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/bagno-pubblico"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 11,
+      "identity": {
+        "tipo": "negozio",
+        "nome": "Negozio di articoli usati Yumenoshima",
+        "x": 53,
+        "y": 79.7,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/negozio-usato-yumenoshima"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 12,
+      "identity": {
+        "tipo": "negozio",
+        "nome": "Supermercato Muramasa",
+        "x": 43,
+        "y": 48.3,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/super-muramasa"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 13,
+      "identity": {
+        "tipo": "distributore",
+        "nome": "Distributore automatico (Tabaccaio)",
+        "x": 55.1,
+        "y": 62.4,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/distributore-tabaccaio"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 14,
+      "identity": {
+        "tipo": "attivita",
+        "nome": "Gabbie di Battuta",
+        "x": 50.6,
+        "y": 54.9,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/batting-cage-yongen"
+        }
+      },
+      "matches389": true
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 15,
+      "identity": {
+        "tipo": "cinema",
+        "nome": "Cinema di Yongen-Jaya",
+        "x": 21.2,
+        "y": 66.6,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/cinema-yongen"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/citta-yongen-jaya.json",
+      "mapIndex": 0,
+      "map": "citta-yongen-jaya",
+      "pinIndex": 16,
+      "identity": {
+        "tipo": "lavanderia",
+        "nome": "Lavanderia",
+        "x": 78.4,
+        "y": 65.3,
+        "riferimento": {
+          "tipo": "luogo",
+          "chiave": "yongen-jaya/lavanderia-yongen"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/yongen-java-banchina-della-metropolitana.json",
+      "mapIndex": 0,
+      "map": "yongen-java-banchina-della-metropolitana",
+      "pinIndex": 0,
+      "identity": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Vicoli",
+        "x": 75.2,
+        "y": 22.1,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "citta-yongen-jaya"
+        }
+      },
+      "matches389": false
+    },
+    {
+      "file": "data/seed/mappe/yongen-java-banchina-della-metropolitana.json",
+      "mapIndex": 0,
+      "map": "yongen-java-banchina-della-metropolitana",
+      "pinIndex": 1,
+      "identity": {
+        "tipo": "passaggio",
+        "nome": "Yongen-Java Vicoli",
+        "x": 80.8,
+        "y": 28.5,
+        "riferimento": {
+          "tipo": "mappa",
+          "chiave": "citta-yongen-jaya"
+        }
+      },
+      "matches389": false
+    }
+  ],
+  "counterexampleRisk": "La chiave storica esclude la mappa: due pacchetti con spilli identici su mappe diverse collidono. Nessun controesempio presente negli attuali19 spilli; la salvaguardia deve contare occorrenze su tutti i pacchetti e richiedere un solo erede utente.",
+  "duplicate397StillPresent": 0
+}

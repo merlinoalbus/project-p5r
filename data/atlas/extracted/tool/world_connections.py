@@ -1,0 +1,157 @@
+"""Estrae evidenze delle destinazioni; non certifica percorsi pedonali."""
+from pathlib import Path
+import argparse
+import json
+import math
+import re
+import struct
+from extract_maps import Archive, GAME, sha
+from world_metadata import title_table
+
+
+def blocks(data):
+    """Blocchi FBN/HTB con dimensioni comprensive dell'intestazione."""
+    pos = 0
+    result = []
+    while pos < len(data):
+        if len(data)-pos < 16:
+            raise ValueError('Intestazione troncata')
+        kind, version, size, offset = struct.unpack_from('>4I', data, pos)
+        if size < 16 or pos+size > len(data) or offset not in (0,16):
+            raise ValueError('Dimensione/offset blocco non valido')
+        if offset:
+            if size < 32:
+                raise ValueError('Lista troncata')
+            count, a, b, c = struct.unpack_from('>4I', data, pos+16)
+            if a or b or c:
+                raise ValueError('Intestazione lista sconosciuta')
+            result.append((kind, pos+32, count, data[pos+32:pos+size]))
+        pos += size
+    return result
+
+
+def positions(data, kind, stride):
+    result = []
+    for typ, offset, count, body in blocks(data):
+        if typ != kind:
+            continue
+        if len(body) != count*stride:
+            raise ValueError('Dimensione record FBN inattesa')
+        for i in range(count):
+            xyz = struct.unpack_from('>3f', body, i*stride+8)
+            if not all(math.isfinite(x) for x in xyz):
+                raise ValueError('Coordinate non finite')
+            row = dict(index=i, offset=offset+i*stride, xyz=list(xyz))
+            if kind == 4:
+                row['entranceId'] = struct.unpack_from('>h',body,i*stride+32)[0]
+            result.append(row)
+    return result
+
+
+def hits(data):
+    result = []
+    for kind, offset, count, body in blocks(data):
+        if kind != 5:
+            raise ValueError('HTB con tipo inatteso')
+        # Alcuni archivi includono allineamento zero al termine della lista.
+        if len(body) < count*60 or any(body[count*60:]):
+            raise ValueError('Dimensione record HTB inattesa')
+        for i in range(count):
+            p = i*60
+            flags = struct.unpack_from('<6I', body, p)
+            name, proc, prompt = struct.unpack_from('<3H', body, p+26)
+            result.append(dict(index=i,offset=offset+p,enableFlags=list(flags[:3]),
+                disableFlags=list(flags[3:]),hitType=body[p+25],nameId=name,
+                procedureIndex=proc,promptType=prompt))
+    return result
+
+
+def procedures(source):
+    """Mantiene ogni corpo completo, incluse diramazioni e chiamate indirette."""
+    starts = list(re.finditer(r'// Procedure Index: (\d+)\s+\w+\s+(\w+)\([^\n]*\)\s*\{', source))
+    result = {}
+    for i, m in enumerate(starts):
+        end = starts[i+1].start() if i+1<len(starts) else len(source)
+        body = source[m.end()-1:end].strip()
+        # Rimuove commenti e stringhe soltanto per riconoscere chiamate reali.
+        masked = re.sub(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"',lambda x:' '*(len(x[0])),body)
+        calls = []
+        for call in re.finditer(r'\bCALL_FIELD\s*\(', masked):
+            cursor=call.end(); depth=1
+            while cursor<len(masked) and depth:
+                depth += (masked[cursor]=='(')-(masked[cursor]==')')
+                cursor += 1
+            if depth:
+                raise ValueError('Chiamata troncata')
+            args=body[call.end():cursor-1].strip()
+            literal = re.fullmatch(r'\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(-?\d+)\s*',args)
+            values=list(map(int,literal.groups())) if literal else None
+            calls.append(dict(arguments=args,literalArguments=values,
+                line=source[:m.end()-1+call.start()].count('\n')+1,
+                status='destinazione-nel-codice' if values else 'argomenti-da-risolvere'))
+        key=int(m[1])
+        if key in result: raise ValueError('Indice procedura duplicato')
+        result[key]=dict(index=key,name=m[2],line=source[:m.start()].count('\n')+1,body=body,calls=calls)
+    return result
+
+
+def main(out, scripts, cpk=GAME):
+    out, scripts=Path(out),Path(scripts)
+    metadata=json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
+    titles=title_table((out/'metadati_originali/IT/FIELD/FTD/FLDPLACENAME.FTD').read_bytes())
+    sources={}; resources={}
+    wanted=set()
+    for f in metadata['fields']:
+        key=f'{f["major"]:03d}_{f["minor"]:03d}_{f["sub"]:02d}'
+        wanted.update((f'FIELD/DATA/F{key}.FBN',f'FIELD/HIT/F{key}.HTB',f'FIELD/HIT/FHIT_{key}.BF'))
+    for archive in ('BASE','IT'):
+        a=Archive(Path(cpk)/(archive+'.CPK'))
+        try:
+            for e in a.entries:
+                if e['path'] not in wanted: continue
+                b=a.read(e); dest=out/'connessioni_originali'/archive/e['path']
+                dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(b)
+                resources[e['path']]=b
+                sources[e['path']]=dict(archive=archive,path=e['path'],file=dest.relative_to(out).as_posix(),sha256=sha(b))
+        finally: a.f.close()
+    rows=[]
+    for f in metadata['fields']:
+        key=f'{f["major"]:03d}_{f["minor"]:03d}_{f["sub"]:02d}'
+        paths=dict(fbn=f'FIELD/DATA/F{key}.FBN',htb=f'FIELD/HIT/F{key}.HTB',bf=f'FIELD/HIT/FHIT_{key}.BF')
+        row=dict(field=f['id'],sources={k:sources.get(v) for k,v in paths.items()},triggers=[],entrances=[],procedures=[])
+        fb=resources.get(paths['fbn']);hb=resources.get(paths['htb']);bf=resources.get(paths['bf'])
+        pos=positions(fb,1,100) if fb else []
+        row['triggerPositions']=pos
+        row['entrances']=positions(fb,4,36) if fb else []
+        flow=scripts/(key+'.flow');procs={}
+        if bf and flow.exists():
+            if (scripts/(key+'.BF')).read_bytes()!=bf:
+                raise ValueError('Script decodificato da sorgente diversa: '+key)
+            raw=flow.read_bytes();procs=procedures(raw.decode('utf-8-sig'))
+            dest=out/'connessioni_script'/(key+'.flow');dest.parent.mkdir(exist_ok=True);dest.write_bytes(raw)
+            row['script']=dict(file=dest.relative_to(out).as_posix(),sha256=sha(raw))
+        else: row['script']=None
+        hit_rows=hits(hb) if hb else []
+        row['positionAssociation']='indice-parallelo' if len(pos)==len(hit_rows) else 'conteggi-diversi-da-verificare'
+        for h in hit_rows:
+            h['position']=pos[h['index']] if len(pos)==len(hit_rows) else None
+            h['label']=titles[h['nameId']]['title'] if h['promptType']==11 and h['nameId']<len(titles) else None
+            h['procedureResolved']=h['procedureIndex'] in procs
+            h['procedureStatus']='sentinella-65535' if h['procedureIndex']==65535 else ('risolta' if h['procedureResolved'] else 'mancante')
+            row['triggers'].append(h)
+        row['procedures']=list(procs.values())
+        row['triggerCountFbn']=len(pos)
+        rows.append(row)
+    result=dict(schemaVersion=1,fields=rows,limits=[
+        'Le chiamate sono evidenze nel codice, non collegamenti navigabili certificati.',
+        'I corpi delle procedure conservano condizioni e chiamate indirette ancora da interpretare.',
+        'Le coordinate XYZ non sono coordinate della planimetria.',
+        'Le etichette prompt diverse da GO restano identificate dalla tabella e dall indice nativi.'])
+    (out/'mondo_connessioni_evidenze.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
+    print('CAMPI',len(rows),'HTB',sum(bool(r['sources']['htb']) for r in rows),'SCRIPT',sum(bool(r['script']) for r in rows),
+        'CHIAMATE',sum(len(p['calls']) for r in rows for p in r['procedures']))
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser();p.add_argument('out');p.add_argument('--scripts',required=True);p.add_argument('--cpk',default=str(GAME))
+    a=p.parse_args();main(a.out,a.scripts,a.cpk)

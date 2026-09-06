@@ -1,0 +1,83 @@
+{
+  "createdAt": "2026-09-06T04:48:02.370652+00:00",
+  "files": [
+    {
+      "documento": "collegamenti-globali.md",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\parallel-cleanup\\connessioni-globali.md",
+      "bytes": 1209,
+      "sha256": "e5a1c132cedb4d2b8cd6237091d7f63f37c641189207e3abb0fe2e12d566fa52"
+    },
+    {
+      "documento": "collegamenti-globali.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\parallel-cleanup\\connessioni-globali.json",
+      "bytes": 3379391,
+      "sha256": "b7623f6d37480aa5da066b2708d0c220ed409500bda0c1508f500be4cd90e355"
+    },
+    {
+      "documento": "coordinate-pin-native.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\mondo_metadati.json",
+      "bytes": 588733,
+      "sha256": "080e569dbcb203e01ae1d6d325831ada3e2e7dbc6e4701ec1e755784808df2f6"
+    },
+    {
+      "documento": "chiamate-cambio-campo.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\campi-completi\\connessioni.json",
+      "bytes": 22823002,
+      "sha256": "506d6546ca14adf36daa2143cbb71cb04eb3ed9b088b81adc44f9c6ee629b9c2"
+    },
+    {
+      "documento": "cinque-pin-applicati.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\app-integration\\pin-luoghi-verificati.json",
+      "bytes": 18982,
+      "sha256": "e34f9d2588cca1d6ec5f5dbaeec500644866ecede20947cded2ed180e038ee2c"
+    },
+    {
+      "documento": "organizzazione-da-completare.md",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\backend-organization\\organization-backlog.md",
+      "bytes": 4061,
+      "sha256": "8ae43c043874fbf5fcf2aeb2ac3595690ddd615caacd051e862a6bd2afc79c81"
+    },
+    {
+      "documento": "censimento-organizzazione.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\backend-organization\\organization-backlog-evidence.json",
+      "bytes": 242096,
+      "sha256": "b4859719f22a78cdf6b197577ac4815387b244f9b4cf84ee8691266f6c7d3f76"
+    },
+    {
+      "documento": "confronto-scuola-sottopasso.md",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\backend-organization\\urban-visual-associations.md",
+      "bytes": 4729,
+      "sha256": "1f1e5fee03b56e60b9eee7e748a4a0db95b1a63f091e66000e37cd4d1f3ec0d5"
+    },
+    {
+      "documento": "confronto-immagini-misure.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\backend-organization\\urban-visual-matrix.json",
+      "bytes": 3838,
+      "sha256": "6e4a3a8b547a7219585ccf0ad294bec7f4d0236fdec65d3483c00ba56ee66a04"
+    },
+    {
+      "documento": "destinazioni-senza-planimetria.md",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\parallel-cleanup\\luoghi-senza-planimetria.md",
+      "bytes": 2105,
+      "sha256": "734ae1c60841b897abe0e7022ca8efff4a251cc527b0341913baace5d8ec577a"
+    },
+    {
+      "documento": "destinazioni-senza-planimetria.json",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\parallel-cleanup\\luoghi-senza-planimetria.json",
+      "bytes": 25402,
+      "sha256": "c33cd7413b2f195dc6acfe1a94d55bee016f1441d8e8311f75804f4498e27870"
+    },
+    {
+      "documento": "nomi-residui.md",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\parallel-cleanup\\nomi-residui-approfondimento.md",
+      "bytes": 4020,
+      "sha256": "22627add5f0603983c529d923b0fde703c13d69bc85fc21916477d38185d4170"
+    },
+    {
+      "documento": "proposta-raggruppamenti.md",
+      "fonte": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\parallel-cleanup\\omonimi-presentazione-ui.md",
+      "bytes": 4027,
+      "sha256": "92a684d40b2f3c7ed923a1f91c95cce3c34a16224ec516e3e294bf82c2e53e20"
+    }
+  ]
+}

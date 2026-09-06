@@ -1,0 +1,1134 @@
+[
+  {
+    "code": "RMAP_151_2_1",
+    "group": "Palazzo di Kamoshida",
+    "verifiedTitle": "Vecchio castello 2P",
+    "previousTitle": "Vecchio castello 2P",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Palazzo di Kamoshida",
+        "title": "Vecchio castello 2P",
+        "texpack_offset": 720,
+        "texpack_group": 5,
+        "texelem_index": 7,
+        "group_title_index": 1,
+        "area_title_index": 16,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 944,
+          "rawHex": "50616c617a7a6f206469204b616d6f7368696461",
+          "text": "Palazzo di Kamoshida"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1664,
+          "rawHex": "5665636368696f2063617374656c6c6f203250",
+          "text": "Vecchio castello 2P"
+        },
+        "texpackRawHex": "97000200030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200600070007000000000000000000000000000000",
+        "texelemRawHex": "06000000010010000e02002058029501"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F151_002_00",
+        "roadmapOffset": 64,
+        "mode": 3,
+        "texpack": 5,
+        "cursor": [
+          617,
+          528
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 2,
+            "sub": 0,
+            "layers": 3,
+            "offset": 720
+          }
+        ]
+      },
+      {
+        "field": "F151_003_00",
+        "roadmapOffset": 80,
+        "mode": 3,
+        "texpack": 5,
+        "cursor": [
+          215,
+          528
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 2,
+            "sub": 0,
+            "layers": 3,
+            "offset": 720
+          }
+        ]
+      },
+      {
+        "field": "F151_014_00",
+        "roadmapOffset": 240,
+        "mode": 3,
+        "texpack": 5,
+        "cursor": [
+          213,
+          528
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 2,
+            "sub": 0,
+            "layers": 3,
+            "offset": 720
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_151_2_1.png",
+      "sha256": "e647c24f4e90ea8dc1c90f19f932a8097dded114e6196320ab6a025ddd2e2c4a",
+      "rgbaSha256": "b74fa932397c378c69d4ad0e37c55f64fca2fda45c43c5c168ddd1a94a715a82",
+      "width": 2048,
+      "height": 2048,
+      "alphaBounds": [
+        25,
+        3,
+        1236,
+        795
+      ],
+      "visibleRgbaSha256": "35480698fdb452ae8dd8769f0dee0bb4a5d658076a61f0e03961a48508dcdb1b",
+      "visibleSize": [
+        1211,
+        792
+      ]
+    },
+    "nativeIconSource": "ICON_151_2.BIN",
+    "nativePinCount": 12,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_151_3_0",
+      "RMAP_151_4_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-151-2-1",
+      "nome": "Vecchio castello 2P",
+      "tipo": "area",
+      "genitore_chiave": "dungeon-kamoshida",
+      "ordine": 40,
+      "immagine_chiave": "nativo-rmap-151-2-1",
+      "asset": null,
+      "larghezza": 2048,
+      "altezza": 2048,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.701Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-151-2-1",
+          "mappa_chiave": "nativo-rmap-151-2-1"
+        },
+        {
+          "chiave": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-2-1",
+          "mappa_chiave": "nativo-rmap-151-2-1"
+        },
+        {
+          "chiave": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-2-1",
+          "mappa_chiave": "nativo-rmap-151-2-1"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  },
+  {
+    "code": "RMAP_151_3_0",
+    "group": "Palazzo di Kamoshida",
+    "verifiedTitle": "Vecchio castello 2P",
+    "previousTitle": "Vecchio castello 2P",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Palazzo di Kamoshida",
+        "title": "Vecchio castello 2P",
+        "texpack_offset": 864,
+        "texpack_group": 6,
+        "texelem_index": 7,
+        "group_title_index": 1,
+        "area_title_index": 16,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 944,
+          "rawHex": "50616c617a7a6f206469204b616d6f7368696461",
+          "text": "Palazzo di Kamoshida"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1664,
+          "rawHex": "5665636368696f2063617374656c6c6f203250",
+          "text": "Vecchio castello 2P"
+        },
+        "texpackRawHex": "97000300010000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200700000000000000000000000000000000000000",
+        "texelemRawHex": "06000000010010000e02002058029501"
+      },
+      {
+        "group": "???",
+        "title": "???",
+        "texpack_offset": 20016,
+        "texpack_group": 137,
+        "texelem_index": 0,
+        "group_title_index": 0,
+        "area_title_index": 0,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 912,
+          "rawHex": "3f3f3f",
+          "text": "???"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 912,
+          "rawHex": "3f3f3f",
+          "text": "???"
+        },
+        "texpackRawHex": "97000300010000001f85bb415b0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845f70100200000000000000000000000000000000000000000",
+        "texelemRawHex": "0000000000000000ffffffff00000000"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F151_051_00",
+        "roadmapOffset": 32,
+        "mode": 2,
+        "texpack": 137,
+        "cursor": [
+          2,
+          2
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 1,
+            "sub": 0,
+            "layers": 1,
+            "offset": 19800
+          },
+          {
+            "major": 152,
+            "minor": 1,
+            "sub": 0,
+            "layers": 2,
+            "offset": 19872
+          },
+          {
+            "major": 151,
+            "minor": 2,
+            "sub": 0,
+            "layers": 1,
+            "offset": 19944
+          },
+          {
+            "major": 151,
+            "minor": 3,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20016
+          },
+          {
+            "major": 151,
+            "minor": 5,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20088
+          },
+          {
+            "major": 151,
+            "minor": 5,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20160
+          },
+          {
+            "major": 151,
+            "minor": 7,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20232
+          },
+          {
+            "major": 151,
+            "minor": 11,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20304
+          },
+          {
+            "major": 150,
+            "minor": 1,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20376
+          }
+        ]
+      },
+      {
+        "field": "F151_015_00",
+        "roadmapOffset": 256,
+        "mode": 3,
+        "texpack": 6,
+        "cursor": [
+          1038,
+          605
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 3,
+            "sub": 0,
+            "layers": 1,
+            "offset": 864
+          }
+        ]
+      },
+      {
+        "field": "F152_051_00",
+        "roadmapOffset": 288,
+        "mode": 2,
+        "texpack": 137,
+        "cursor": [
+          2,
+          2
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 1,
+            "sub": 0,
+            "layers": 1,
+            "offset": 19800
+          },
+          {
+            "major": 152,
+            "minor": 1,
+            "sub": 0,
+            "layers": 2,
+            "offset": 19872
+          },
+          {
+            "major": 151,
+            "minor": 2,
+            "sub": 0,
+            "layers": 1,
+            "offset": 19944
+          },
+          {
+            "major": 151,
+            "minor": 3,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20016
+          },
+          {
+            "major": 151,
+            "minor": 5,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20088
+          },
+          {
+            "major": 151,
+            "minor": 5,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20160
+          },
+          {
+            "major": 151,
+            "minor": 7,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20232
+          },
+          {
+            "major": 151,
+            "minor": 11,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20304
+          },
+          {
+            "major": 150,
+            "minor": 1,
+            "sub": 0,
+            "layers": 1,
+            "offset": 20376
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_151_3_0.png",
+      "sha256": "e647c24f4e90ea8dc1c90f19f932a8097dded114e6196320ab6a025ddd2e2c4a",
+      "rgbaSha256": "b74fa932397c378c69d4ad0e37c55f64fca2fda45c43c5c168ddd1a94a715a82",
+      "width": 2048,
+      "height": 2048,
+      "alphaBounds": [
+        25,
+        3,
+        1236,
+        795
+      ],
+      "visibleRgbaSha256": "35480698fdb452ae8dd8769f0dee0bb4a5d658076a61f0e03961a48508dcdb1b",
+      "visibleSize": [
+        1211,
+        792
+      ]
+    },
+    "nativeIconSource": "ICON_151_3.BIN",
+    "nativePinCount": 12,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_151_2_1",
+      "RMAP_151_4_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-151-3-0",
+      "nome": "Vecchio castello 2P",
+      "tipo": "area",
+      "genitore_chiave": "dungeon-kamoshida",
+      "ordine": 42,
+      "immagine_chiave": "nativo-rmap-151-3-0",
+      "asset": null,
+      "larghezza": 2048,
+      "altezza": 2048,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.701Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-151-3-0",
+          "mappa_chiave": "nativo-rmap-151-3-0"
+        },
+        {
+          "chiave": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-3-0",
+          "mappa_chiave": "nativo-rmap-151-3-0"
+        },
+        {
+          "chiave": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-3-0",
+          "mappa_chiave": "nativo-rmap-151-3-0"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  },
+  {
+    "code": "RMAP_151_4_0",
+    "group": "Palazzo di Kamoshida",
+    "verifiedTitle": "Vecchio castello 2P",
+    "previousTitle": "Vecchio castello 2P",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Palazzo di Kamoshida",
+        "title": "Vecchio castello 2P",
+        "texpack_offset": 1008,
+        "texpack_group": 7,
+        "texelem_index": 7,
+        "group_title_index": 1,
+        "area_title_index": 16,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 944,
+          "rawHex": "50616c617a7a6f206469204b616d6f7368696461",
+          "text": "Palazzo di Kamoshida"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1664,
+          "rawHex": "5665636368696f2063617374656c6c6f203250",
+          "text": "Vecchio castello 2P"
+        },
+        "texpackRawHex": "97000400030000001f85bb41ffffffff0000e143000096440000c8440000e1440000fa440000164500002f4500004845f70100200700090009000000000000000000000000000000",
+        "texelemRawHex": "06000000010010000e02002058029501"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F151_004_00",
+        "roadmapOffset": 96,
+        "mode": 3,
+        "texpack": 7,
+        "cursor": [
+          1038,
+          611
+        ],
+        "textureRecords": [
+          {
+            "major": 151,
+            "minor": 4,
+            "sub": 0,
+            "layers": 3,
+            "offset": 1008
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_151_4_0.png",
+      "sha256": "e647c24f4e90ea8dc1c90f19f932a8097dded114e6196320ab6a025ddd2e2c4a",
+      "rgbaSha256": "b74fa932397c378c69d4ad0e37c55f64fca2fda45c43c5c168ddd1a94a715a82",
+      "width": 2048,
+      "height": 2048,
+      "alphaBounds": [
+        25,
+        3,
+        1236,
+        795
+      ],
+      "visibleRgbaSha256": "35480698fdb452ae8dd8769f0dee0bb4a5d658076a61f0e03961a48508dcdb1b",
+      "visibleSize": [
+        1211,
+        792
+      ]
+    },
+    "nativeIconSource": "ICON_151_4.BIN",
+    "nativePinCount": 12,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_151_2_1",
+      "RMAP_151_3_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-151-4-0",
+      "nome": "Vecchio castello 2P",
+      "tipo": "area",
+      "genitore_chiave": "dungeon-kamoshida",
+      "ordine": 43,
+      "immagine_chiave": "nativo-rmap-151-4-0",
+      "asset": null,
+      "larghezza": 2048,
+      "altezza": 2048,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.701Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-151-4-0",
+          "mappa_chiave": "nativo-rmap-151-4-0"
+        },
+        {
+          "chiave": "risorse-native-151-palazzo-di-kamoshida-vecchio-castello-2p-rmap-151-4-0",
+          "mappa_chiave": "nativo-rmap-151-4-0"
+        },
+        {
+          "chiave": "palazzo-di-kamoshida-vecchio-castello-2p-nativo-rmap-151-4-0",
+          "mappa_chiave": "nativo-rmap-151-4-0"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  },
+  {
+    "code": "RMAP_155_4_0",
+    "group": "Palazzo di Futaba",
+    "verifiedTitle": "Camera del Santuario 1P",
+    "previousTitle": "Camera del Santuario 1P",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Palazzo di Futaba",
+        "title": "Camera del Santuario 1P",
+        "texpack_offset": 6840,
+        "texpack_group": 47,
+        "texelem_index": 75,
+        "group_title_index": 4,
+        "area_title_index": 80,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1088,
+          "rawHex": "50616c617a7a6f20646920467574616261",
+          "text": "Palazzo di Futaba"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 4224,
+          "rawHex": "43616d6572612064656c2053616e74756172696f203150",
+          "text": "Camera del Santuario 1P"
+        },
+        "texpackRawHex": "9b000400020000001f85bb41ffffffff0000914300004844000096440000c8440000fa440000164500002f4500004845ffffffff4b004c0000000000000000000000000000000000",
+        "texelemRawHex": "2f00000004005000010600202b02c201"
+      },
+      {
+        "group": "???",
+        "title": "???",
+        "texpack_offset": 22032,
+        "texpack_group": 140,
+        "texelem_index": 0,
+        "group_title_index": 0,
+        "area_title_index": 0,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 912,
+          "rawHex": "3f3f3f",
+          "text": "???"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 912,
+          "rawHex": "3f3f3f",
+          "text": "???"
+        },
+        "texpackRawHex": "9b000400020000001f85bb415e0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff0000000000000000000000000000000000000000",
+        "texelemRawHex": "0000000000000000ffffffff00000000"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F155_051_00",
+        "roadmapOffset": 768,
+        "mode": 2,
+        "texpack": 140,
+        "cursor": [
+          2,
+          2
+        ],
+        "textureRecords": [
+          {
+            "major": 155,
+            "minor": 1,
+            "sub": 0,
+            "layers": 1,
+            "offset": 21744
+          },
+          {
+            "major": 155,
+            "minor": 2,
+            "sub": 0,
+            "layers": 2,
+            "offset": 21816
+          },
+          {
+            "major": 155,
+            "minor": 2,
+            "sub": 0,
+            "layers": 2,
+            "offset": 21888
+          },
+          {
+            "major": 155,
+            "minor": 2,
+            "sub": 0,
+            "layers": 2,
+            "offset": 21960
+          },
+          {
+            "major": 155,
+            "minor": 4,
+            "sub": 0,
+            "layers": 2,
+            "offset": 22032
+          },
+          {
+            "major": 155,
+            "minor": 9,
+            "sub": 0,
+            "layers": 3,
+            "offset": 22104
+          },
+          {
+            "major": 150,
+            "minor": 1,
+            "sub": 0,
+            "layers": 1,
+            "offset": 22176
+          }
+        ]
+      },
+      {
+        "field": "F155_004_00",
+        "roadmapOffset": 832,
+        "mode": 3,
+        "texpack": 47,
+        "cursor": [
+          314,
+          686
+        ],
+        "textureRecords": [
+          {
+            "major": 155,
+            "minor": 4,
+            "sub": 0,
+            "layers": 2,
+            "offset": 6840
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_155_4_0.png",
+      "sha256": "033af5038c67a2640aacdcd7829a558d15c3bc6ebad119c2ab6a8ca087c767b4",
+      "rgbaSha256": "c9bc708bc181d36a8a56ad787aa5cdacb9a1c38efba14c82645f4bb4bd223433",
+      "width": 2048,
+      "height": 2048,
+      "alphaBounds": [
+        43,
+        76,
+        1524,
+        900
+      ],
+      "visibleRgbaSha256": "1f53274fad25c0f42525f8dc78468eb43b8c5ccd4337d0aeee2e815bae422a16",
+      "visibleSize": [
+        1481,
+        824
+      ]
+    },
+    "nativeIconSource": "ICON_155_4.BIN",
+    "nativePinCount": 9,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_155_6_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-155-4-0",
+      "nome": "Camera del Santuario 1P",
+      "tipo": "area",
+      "genitore_chiave": "dungeon-futaba",
+      "ordine": 133,
+      "immagine_chiave": "nativo-rmap-155-4-0",
+      "asset": null,
+      "larghezza": 2048,
+      "altezza": 2048,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.701Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-155-4-0",
+          "mappa_chiave": "nativo-rmap-155-4-0"
+        },
+        {
+          "chiave": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-1p-rmap-155-4-0",
+          "mappa_chiave": "nativo-rmap-155-4-0"
+        },
+        {
+          "chiave": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-1p-nativo-rmap-155-4-0",
+          "mappa_chiave": "nativo-rmap-155-4-0"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  },
+  {
+    "code": "RMAP_155_6_0",
+    "group": "Palazzo di Futaba",
+    "verifiedTitle": "Camera del Santuario 1P",
+    "previousTitle": "Camera del Santuario 1P",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Palazzo di Futaba",
+        "title": "Camera del Santuario 1P",
+        "texpack_offset": 7128,
+        "texpack_group": 49,
+        "texelem_index": 75,
+        "group_title_index": 4,
+        "area_title_index": 80,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1088,
+          "rawHex": "50616c617a7a6f20646920467574616261",
+          "text": "Palazzo di Futaba"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 4224,
+          "rawHex": "43616d6572612064656c2053616e74756172696f203150",
+          "text": "Camera del Santuario 1P"
+        },
+        "texpackRawHex": "9b000600030000001f85bb41ffffffff0080d4440060864500409c450000c8440000fa440000164500002f4500004845ffffffff4b004c004d000000000000000000000000000000",
+        "texelemRawHex": "2f00000004005000010600202b02c201"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F155_006_00",
+        "roadmapOffset": 864,
+        "mode": 3,
+        "texpack": 49,
+        "cursor": [
+          714,
+          690
+        ],
+        "textureRecords": [
+          {
+            "major": 155,
+            "minor": 6,
+            "sub": 0,
+            "layers": 3,
+            "offset": 7128
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_155_6_0.png",
+      "sha256": "033af5038c67a2640aacdcd7829a558d15c3bc6ebad119c2ab6a8ca087c767b4",
+      "rgbaSha256": "c9bc708bc181d36a8a56ad787aa5cdacb9a1c38efba14c82645f4bb4bd223433",
+      "width": 2048,
+      "height": 2048,
+      "alphaBounds": [
+        43,
+        76,
+        1524,
+        900
+      ],
+      "visibleRgbaSha256": "1f53274fad25c0f42525f8dc78468eb43b8c5ccd4337d0aeee2e815bae422a16",
+      "visibleSize": [
+        1481,
+        824
+      ]
+    },
+    "nativeIconSource": "ICON_155_6.BIN",
+    "nativePinCount": 9,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_155_4_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-155-6-0",
+      "nome": "Camera del Santuario 1P",
+      "tipo": "area",
+      "genitore_chiave": "dungeon-futaba",
+      "ordine": 139,
+      "immagine_chiave": "nativo-rmap-155-6-0",
+      "asset": null,
+      "larghezza": 2048,
+      "altezza": 2048,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.701Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-155-6-0",
+          "mappa_chiave": "nativo-rmap-155-6-0"
+        },
+        {
+          "chiave": "risorse-native-155-palazzo-di-futaba-camera-del-santuario-1p-rmap-155-6-0",
+          "mappa_chiave": "nativo-rmap-155-6-0"
+        },
+        {
+          "chiave": "palazzo-di-futaba-piramide-dellira-pyramid-of-wrath-camera-del-santuario-1p-nativo-rmap-155-6-0",
+          "mappa_chiave": "nativo-rmap-155-6-0"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  },
+  {
+    "code": "RMAP_161_4_0",
+    "group": "Profondità dei Memento",
+    "verifiedTitle": "Vuoto cavernoso",
+    "previousTitle": "Vuoto cavernoso",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Profondità dei Memento",
+        "title": "Vuoto cavernoso",
+        "texpack_offset": 15768,
+        "texpack_group": 109,
+        "texelem_index": 143,
+        "group_title_index": 8,
+        "area_title_index": 153,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1280,
+          "rawHex": "50726f666f6e646974849520646569204d656d656e746f",
+          "text": "Profondità dei Memento"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 7120,
+          "rawHex": "56756f746f2063617665726e6f736f",
+          "text": "Vuoto cavernoso"
+        },
+        "texpackRawHex": "a1000400010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff8f00900090000000000000000000000000000000",
+        "texelemRawHex": "6d000000080099008c080020bb00bb00"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F161_004_00",
+        "roadmapOffset": 2096,
+        "mode": 3,
+        "texpack": 109,
+        "cursor": [
+          206,
+          206
+        ],
+        "textureRecords": [
+          {
+            "major": 161,
+            "minor": 4,
+            "sub": 0,
+            "layers": 1,
+            "offset": 15768
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_161_4_0.png",
+      "sha256": "0fe093a4bd12330933eae962b361deffde0ce93acc245e4fdc6fa53aee0ce8f0",
+      "rgbaSha256": "d51c1dc3fe271edf62b42bfdea10da3de5fe72ecbff5a7bb64a3d13809bb7dc1",
+      "width": 512,
+      "height": 512,
+      "alphaBounds": [
+        116,
+        115,
+        299,
+        348
+      ],
+      "visibleRgbaSha256": "af9853779eee6f74f80135a7eee11c3a5fc6b8ce74fb0915a8d0ab31099ed7c4",
+      "visibleSize": [
+        183,
+        233
+      ]
+    },
+    "nativeIconSource": "ICON_161_4.BIN",
+    "nativePinCount": 2,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_161_7_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-161-4-0",
+      "nome": "Vuoto cavernoso",
+      "tipo": "area",
+      "genitore_chiave": "nativo-archivio-161",
+      "ordine": 249,
+      "immagine_chiave": "nativo-rmap-161-4-0",
+      "asset": null,
+      "larghezza": 512,
+      "altezza": 512,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.704Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-161-4-0",
+          "mappa_chiave": "nativo-rmap-161-4-0"
+        },
+        {
+          "chiave": "risorse-native-161-profondita-dei-memento-vuoto-cavernoso-rmap-161-4-0",
+          "mappa_chiave": "nativo-rmap-161-4-0"
+        },
+        {
+          "chiave": "risorse-native-161-profondita-dei-memento-vuoto-cavernoso-nativo-rmap-161-4-0",
+          "mappa_chiave": "nativo-rmap-161-4-0"
+        },
+        {
+          "chiave": "dedalo-di-iweleth-profondita-dei-memento-vuoto-cavernoso-nativo-rmap-161-4-0",
+          "mappa_chiave": "nativo-rmap-161-4-0"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  },
+  {
+    "code": "RMAP_161_7_0",
+    "group": "Profondità dei Memento",
+    "verifiedTitle": "Vuoto cavernoso",
+    "previousTitle": "Vuoto cavernoso",
+    "status": "titolo-native-verificato",
+    "titleEvidence": [
+      {
+        "group": "Profondità dei Memento",
+        "title": "Vuoto cavernoso",
+        "texpack_offset": 16200,
+        "texpack_group": 112,
+        "texelem_index": 146,
+        "group_title_index": 8,
+        "area_title_index": 156,
+        "groupTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 1280,
+          "rawHex": "50726f666f6e646974849520646569204d656d656e746f",
+          "text": "Profondità dei Memento"
+        },
+        "areaTitleRecord": {
+          "subfile": "fld_texpack_title.ftd",
+          "offset": 7248,
+          "rawHex": "56756f746f2063617665726e6f736f",
+          "text": "Vuoto cavernoso"
+        },
+        "texpackRawHex": "a1000700010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff9200000000000000000000000000000000000000",
+        "texelemRawHex": "7000000008009c008f080020bb00bb00"
+      }
+    ],
+    "fieldNameEvidence": [],
+    "dormantNameEvidence": null,
+    "fields": [
+      {
+        "field": "F161_007_00",
+        "roadmapOffset": 2144,
+        "mode": 3,
+        "texpack": 112,
+        "cursor": [
+          206,
+          206
+        ],
+        "textureRecords": [
+          {
+            "major": 161,
+            "minor": 7,
+            "sub": 0,
+            "layers": 1,
+            "offset": 16200
+          }
+        ]
+      }
+    ],
+    "image": {
+      "file": "png/BASE/FIELD/PANEL/ROADMAP/RMAP_161_7_0.png",
+      "sha256": "0fe093a4bd12330933eae962b361deffde0ce93acc245e4fdc6fa53aee0ce8f0",
+      "rgbaSha256": "d51c1dc3fe271edf62b42bfdea10da3de5fe72ecbff5a7bb64a3d13809bb7dc1",
+      "width": 512,
+      "height": 512,
+      "alphaBounds": [
+        116,
+        115,
+        299,
+        348
+      ],
+      "visibleRgbaSha256": "af9853779eee6f74f80135a7eee11c3a5fc6b8ce74fb0915a8d0ab31099ed7c4",
+      "visibleSize": [
+        183,
+        233
+      ]
+    },
+    "nativeIconSource": "ICON_161_7.BIN",
+    "nativePinCount": 2,
+    "requiredEvidence": [],
+    "mergeApproved": false,
+    "identicalImagePeers": [
+      "RMAP_161_4_0"
+    ],
+    "live": {
+      "chiave": "nativo-rmap-161-7-0",
+      "nome": "Vuoto cavernoso",
+      "tipo": "area",
+      "genitore_chiave": "nativo-archivio-161",
+      "ordine": 255,
+      "immagine_chiave": "nativo-rmap-161-7-0",
+      "asset": null,
+      "larghezza": 512,
+      "altezza": 512,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "origine": "utente",
+      "note": "",
+      "updated_at": "2026-09-06T01:14:56.704Z"
+    },
+    "dependencies": {
+      "pins": [],
+      "incomingReferences": [],
+      "destinations": [],
+      "aliases": [
+        {
+          "chiave": "nativo-rmap-161-7-0",
+          "mappa_chiave": "nativo-rmap-161-7-0"
+        },
+        {
+          "chiave": "risorse-native-161-profondita-dei-memento-vuoto-cavernoso-rmap-161-7-0",
+          "mappa_chiave": "nativo-rmap-161-7-0"
+        },
+        {
+          "chiave": "risorse-native-161-profondita-dei-memento-vuoto-cavernoso-nativo-rmap-161-7-0",
+          "mappa_chiave": "nativo-rmap-161-7-0"
+        },
+        {
+          "chiave": "dedalo-di-iweleth-profondita-dei-memento-vuoto-cavernoso-nativo-rmap-161-7-0",
+          "mappa_chiave": "nativo-rmap-161-7-0"
+        }
+      ],
+      "entities": [],
+      "children": [],
+      "quarterIngress": []
+    }
+  }
+]

@@ -1,0 +1,20 @@
+// Decompiled by Atlus Script Tools
+const int DUMMY_MSG                        = 0;
+const int YESNO_SEL                        = 1;
+const int MSG_LAST_GREETING_BOARD_         = 2;
+const int MSG_LAST_GREETING_AD_POS         = 3;
+const int MSG_LAST_GREETING_AD_POS_2       = 4;
+const int MSG_LAST_GREETING_PAMPHL         = 5;
+const int MSG_LAST_GREETING_place          = 6;
+const int MSG_LAST_GREETING_etc            = 7;
+const int MSG_BOARD_YONCHA_MORU            = 8;
+const int MSG_BOARD_YONCHA                 = 9;
+const int MSG_AD_POSTER_01_MORU            = 10;
+const int MSG_AD_POSTER_01                 = 11;
+const int MSG_AD_POSTER_02_MORU            = 12;
+const int MSG_AD_POSTER_02                 = 13;
+const int MSG_PAMPHLET_MORU                = 14;
+const int MSG_PAMPHLET                     = 15;
+const int MND_E10410100_NG_TRAIN_0         = 16;
+const int MND_E10920200_NG_OUT_000         = 17;
+const int MND_E12710200_NG_OUT_000         = 18;

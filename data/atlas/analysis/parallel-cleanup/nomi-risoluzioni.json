@@ -1,0 +1,4353 @@
+{
+  "scope": "Risoluzioni aggiuntive per gli83 casi censiti; nessuna implementazione o nuova estrazione",
+  "sources": {
+    "nomi-varianti.json": "e6ea9fd16ce7757d14a60fddd8df068e0f9edc7cbebdef7e3dc8cf3c630c17b2",
+    "originali/IT/FIELD/PANEL/FLDWHOLEMAPTABLEDNG.FTD": "d2d24513edee8a3ce7048f556079dd51457bf622e62bac4ac52c40f309a88884"
+  },
+  "summary": {
+    "irrisolto": 59,
+    "identita-comune-verificata-layer-non-nominati": 5,
+    "nomi-contestuali-verificati": 19
+  },
+  "maps": [
+    {
+      "code": "RMAP_001_2_1",
+      "previousTitle": "Sottopasso",
+      "group": "Shibuya",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_002_6_0",
+      "previousTitle": "Aula",
+      "group": "Shujin Academy",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Verificare associazione texture al campo: FLDPLACENO contiene nome corrispondente major/minor ma ROADMAP non usa questa risorsa; identita del campo non prova utilizzo della texture."
+      ]
+    },
+    {
+      "code": "RMAP_002_8_0",
+      "previousTitle": "Biblioteca",
+      "group": "Shujin Academy",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Verificare associazione texture al campo: FLDPLACENO contiene nome corrispondente major/minor ma ROADMAP non usa questa risorsa; identita del campo non prova utilizzo della texture."
+      ]
+    },
+    {
+      "code": "RMAP_022_1_0",
+      "previousTitle": "Covo dei Ladri · livello grafico 1",
+      "group": "Covo dei Ladri",
+      "status": "identita-comune-verificata-layer-non-nominati",
+      "contexts": [],
+      "canonicalTitle": "Covo dei Ladri",
+      "sourceEvidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F022_001_00",
+          "placeRecord": {
+            "offset": 2056,
+            "rawHex": "000000d000000000",
+            "indices": [
+              0,
+              208,
+              0,
+              0
+            ],
+            "group": {
+              "index": 0,
+              "offset": 2340,
+              "rawHex": "4e554c4c00",
+              "text": "NULL",
+              "status": "null",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 208,
+                "offset": 6900,
+                "rawHex": "436f766f20646569204c6164726900",
+                "text": "Covo dei Ladri",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          },
+          "variantCandidate": {
+            "index": 208,
+            "offset": 6900,
+            "rawHex": "436f766f20646569204c6164726900",
+            "text": "Covo dei Ladri",
+            "status": "valido",
+            "unknownOffsets": []
+          },
+          "roadmap": {
+            "id": "F022_001_00",
+            "major": 22,
+            "minor": 1,
+            "sub": 0,
+            "cursor": [
+              400,
+              400
+            ],
+            "texpack": 165,
+            "mode": 3,
+            "offset": 3312,
+            "textures": [
+              {
+                "major": 22,
+                "minor": 1,
+                "sub": 0,
+                "layers": 5,
+                "offset": 28512
+              }
+            ],
+            "place": {
+              "offset": 2056,
+              "group": {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              "floors": [
+                {
+                  "index": 208,
+                  "offset": 6900,
+                  "title": "Covo dei Ladri"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                }
+              ]
+            },
+            "title": "Covo dei Ladri",
+            "group": "NULL"
+          }
+        }
+      ],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Determinare significato dei cinque layer del Covo dal selettore livelli; identita comune Covo dei Ladri verificata, titoli singoli non presenti."
+      ],
+      "displayPolicy": "Un solo luogo Covo dei Ladri con cinque immagini/layer conservati. Non chiamarli piani o assegnare nomi di stanze senza prova."
+    },
+    {
+      "code": "RMAP_022_1_1",
+      "previousTitle": "Covo dei Ladri · livello grafico 2",
+      "group": "Covo dei Ladri",
+      "status": "identita-comune-verificata-layer-non-nominati",
+      "contexts": [],
+      "canonicalTitle": "Covo dei Ladri",
+      "sourceEvidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F022_001_00",
+          "placeRecord": {
+            "offset": 2056,
+            "rawHex": "000000d000000000",
+            "indices": [
+              0,
+              208,
+              0,
+              0
+            ],
+            "group": {
+              "index": 0,
+              "offset": 2340,
+              "rawHex": "4e554c4c00",
+              "text": "NULL",
+              "status": "null",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 208,
+                "offset": 6900,
+                "rawHex": "436f766f20646569204c6164726900",
+                "text": "Covo dei Ladri",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          },
+          "variantCandidate": {
+            "index": 208,
+            "offset": 6900,
+            "rawHex": "436f766f20646569204c6164726900",
+            "text": "Covo dei Ladri",
+            "status": "valido",
+            "unknownOffsets": []
+          },
+          "roadmap": {
+            "id": "F022_001_00",
+            "major": 22,
+            "minor": 1,
+            "sub": 0,
+            "cursor": [
+              400,
+              400
+            ],
+            "texpack": 165,
+            "mode": 3,
+            "offset": 3312,
+            "textures": [
+              {
+                "major": 22,
+                "minor": 1,
+                "sub": 0,
+                "layers": 5,
+                "offset": 28512
+              }
+            ],
+            "place": {
+              "offset": 2056,
+              "group": {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              "floors": [
+                {
+                  "index": 208,
+                  "offset": 6900,
+                  "title": "Covo dei Ladri"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                }
+              ]
+            },
+            "title": "Covo dei Ladri",
+            "group": "NULL"
+          }
+        }
+      ],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Determinare significato dei cinque layer del Covo dal selettore livelli; identita comune Covo dei Ladri verificata, titoli singoli non presenti."
+      ],
+      "displayPolicy": "Un solo luogo Covo dei Ladri con cinque immagini/layer conservati. Non chiamarli piani o assegnare nomi di stanze senza prova."
+    },
+    {
+      "code": "RMAP_022_1_2",
+      "previousTitle": "Covo dei Ladri · livello grafico 3",
+      "group": "Covo dei Ladri",
+      "status": "identita-comune-verificata-layer-non-nominati",
+      "contexts": [],
+      "canonicalTitle": "Covo dei Ladri",
+      "sourceEvidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F022_001_00",
+          "placeRecord": {
+            "offset": 2056,
+            "rawHex": "000000d000000000",
+            "indices": [
+              0,
+              208,
+              0,
+              0
+            ],
+            "group": {
+              "index": 0,
+              "offset": 2340,
+              "rawHex": "4e554c4c00",
+              "text": "NULL",
+              "status": "null",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 208,
+                "offset": 6900,
+                "rawHex": "436f766f20646569204c6164726900",
+                "text": "Covo dei Ladri",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          },
+          "variantCandidate": {
+            "index": 208,
+            "offset": 6900,
+            "rawHex": "436f766f20646569204c6164726900",
+            "text": "Covo dei Ladri",
+            "status": "valido",
+            "unknownOffsets": []
+          },
+          "roadmap": {
+            "id": "F022_001_00",
+            "major": 22,
+            "minor": 1,
+            "sub": 0,
+            "cursor": [
+              400,
+              400
+            ],
+            "texpack": 165,
+            "mode": 3,
+            "offset": 3312,
+            "textures": [
+              {
+                "major": 22,
+                "minor": 1,
+                "sub": 0,
+                "layers": 5,
+                "offset": 28512
+              }
+            ],
+            "place": {
+              "offset": 2056,
+              "group": {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              "floors": [
+                {
+                  "index": 208,
+                  "offset": 6900,
+                  "title": "Covo dei Ladri"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                }
+              ]
+            },
+            "title": "Covo dei Ladri",
+            "group": "NULL"
+          }
+        }
+      ],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Determinare significato dei cinque layer del Covo dal selettore livelli; identita comune Covo dei Ladri verificata, titoli singoli non presenti."
+      ],
+      "displayPolicy": "Un solo luogo Covo dei Ladri con cinque immagini/layer conservati. Non chiamarli piani o assegnare nomi di stanze senza prova."
+    },
+    {
+      "code": "RMAP_022_1_3",
+      "previousTitle": "Covo dei Ladri · livello grafico 4",
+      "group": "Covo dei Ladri",
+      "status": "identita-comune-verificata-layer-non-nominati",
+      "contexts": [],
+      "canonicalTitle": "Covo dei Ladri",
+      "sourceEvidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F022_001_00",
+          "placeRecord": {
+            "offset": 2056,
+            "rawHex": "000000d000000000",
+            "indices": [
+              0,
+              208,
+              0,
+              0
+            ],
+            "group": {
+              "index": 0,
+              "offset": 2340,
+              "rawHex": "4e554c4c00",
+              "text": "NULL",
+              "status": "null",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 208,
+                "offset": 6900,
+                "rawHex": "436f766f20646569204c6164726900",
+                "text": "Covo dei Ladri",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          },
+          "variantCandidate": {
+            "index": 208,
+            "offset": 6900,
+            "rawHex": "436f766f20646569204c6164726900",
+            "text": "Covo dei Ladri",
+            "status": "valido",
+            "unknownOffsets": []
+          },
+          "roadmap": {
+            "id": "F022_001_00",
+            "major": 22,
+            "minor": 1,
+            "sub": 0,
+            "cursor": [
+              400,
+              400
+            ],
+            "texpack": 165,
+            "mode": 3,
+            "offset": 3312,
+            "textures": [
+              {
+                "major": 22,
+                "minor": 1,
+                "sub": 0,
+                "layers": 5,
+                "offset": 28512
+              }
+            ],
+            "place": {
+              "offset": 2056,
+              "group": {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              "floors": [
+                {
+                  "index": 208,
+                  "offset": 6900,
+                  "title": "Covo dei Ladri"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                }
+              ]
+            },
+            "title": "Covo dei Ladri",
+            "group": "NULL"
+          }
+        }
+      ],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Determinare significato dei cinque layer del Covo dal selettore livelli; identita comune Covo dei Ladri verificata, titoli singoli non presenti."
+      ],
+      "displayPolicy": "Un solo luogo Covo dei Ladri con cinque immagini/layer conservati. Non chiamarli piani o assegnare nomi di stanze senza prova."
+    },
+    {
+      "code": "RMAP_022_1_4",
+      "previousTitle": "Covo dei Ladri · livello grafico 5",
+      "group": "Covo dei Ladri",
+      "status": "identita-comune-verificata-layer-non-nominati",
+      "contexts": [],
+      "canonicalTitle": "Covo dei Ladri",
+      "sourceEvidence": [
+        {
+          "file": "campi-completi/identita.json",
+          "field": "F022_001_00",
+          "placeRecord": {
+            "offset": 2056,
+            "rawHex": "000000d000000000",
+            "indices": [
+              0,
+              208,
+              0,
+              0
+            ],
+            "group": {
+              "index": 0,
+              "offset": 2340,
+              "rawHex": "4e554c4c00",
+              "text": "NULL",
+              "status": "null",
+              "unknownOffsets": []
+            },
+            "variants": [
+              {
+                "index": 208,
+                "offset": 6900,
+                "rawHex": "436f766f20646569204c6164726900",
+                "text": "Covo dei Ladri",
+                "status": "valido",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              },
+              {
+                "index": 0,
+                "offset": 2340,
+                "rawHex": "4e554c4c00",
+                "text": "NULL",
+                "status": "null",
+                "unknownOffsets": []
+              }
+            ]
+          },
+          "variantCandidate": {
+            "index": 208,
+            "offset": 6900,
+            "rawHex": "436f766f20646569204c6164726900",
+            "text": "Covo dei Ladri",
+            "status": "valido",
+            "unknownOffsets": []
+          },
+          "roadmap": {
+            "id": "F022_001_00",
+            "major": 22,
+            "minor": 1,
+            "sub": 0,
+            "cursor": [
+              400,
+              400
+            ],
+            "texpack": 165,
+            "mode": 3,
+            "offset": 3312,
+            "textures": [
+              {
+                "major": 22,
+                "minor": 1,
+                "sub": 0,
+                "layers": 5,
+                "offset": 28512
+              }
+            ],
+            "place": {
+              "offset": 2056,
+              "group": {
+                "index": 0,
+                "offset": 2340,
+                "title": "NULL"
+              },
+              "floors": [
+                {
+                  "index": 208,
+                  "offset": 6900,
+                  "title": "Covo dei Ladri"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                },
+                {
+                  "index": 0,
+                  "offset": 2340,
+                  "title": "NULL"
+                }
+              ]
+            },
+            "title": "Covo dei Ladri",
+            "group": "NULL"
+          }
+        }
+      ],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Determinare significato dei cinque layer del Covo dal selettore livelli; identita comune Covo dei Ladri verificata, titoli singoli non presenti."
+      ],
+      "displayPolicy": "Un solo luogo Covo dei Ladri con cinque immagini/layer conservati. Non chiamarli piani o assegnare nomi di stanze senza prova."
+    },
+    {
+      "code": "RMAP_150_3_0",
+      "previousTitle": "Area 003",
+      "group": "Luogo 150",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_150_3_1",
+      "previousTitle": "Area 003",
+      "group": "Luogo 150",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_151_0_0",
+      "previousTitle": "Area 000",
+      "group": "Palazzo di Kamoshida",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_151_0_1",
+      "previousTitle": "Area 000",
+      "group": "Palazzo di Kamoshida",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_151_16_0",
+      "previousTitle": "Area 016",
+      "group": "Palazzo di Kamoshida",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_152_11_0",
+      "previousTitle": "Area 011",
+      "group": "Palazzo di Kamoshida",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_152_11_1",
+      "previousTitle": "Area 011",
+      "group": "Palazzo di Kamoshida",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_152_5_0",
+      "previousTitle": "Area 005",
+      "group": "Palazzo di Kamoshida",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_153_10_0",
+      "previousTitle": "Area 010",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_11_0",
+      "previousTitle": "Area 011",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_12_0",
+      "previousTitle": "Area 012",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_13_0",
+      "previousTitle": "Area 013",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_3_0",
+      "previousTitle": "Area 003",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Museo, 1P",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Museo, 1P",
+              "texpack_offset": 20664,
+              "texpack_group": 138,
+              "texelem_index": 22,
+              "group_title_index": 2,
+              "area_title_index": 31,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2288,
+                "rawHex": "4d7573656f2c203150",
+                "text": "Museo, 1P"
+              },
+              "texpackRawHex": "99000300010000001f85bb415c0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a10300201600000000000000000000000000000000000000",
+              "texelemRawHex": "1800000002001f00850300202c016801"
+            }
+          ]
+        },
+        {
+          "field": "F153_003_00",
+          "roadmapOffset": 432,
+          "texpack": 25,
+          "title": "Museo, 2P",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Museo, 2P",
+              "texpack_offset": 3600,
+              "texpack_group": 25,
+              "texelem_index": 23,
+              "group_title_index": 2,
+              "area_title_index": 32,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2320,
+                "rawHex": "4d7573656f2c203250",
+                "text": "Museo, 2P"
+              },
+              "texpackRawHex": "99000300040000001f85bb41ffffffff0000964400c0a8440000fa440080094500c00f450000164500002f4500004845a10300201700180019001a00000000000000000000000000",
+              "texelemRawHex": "1900000002002000860300203a02a401"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Stanza della mostra 2",
+          "field": "F153_003_00",
+          "offset": 2464,
+          "rawHex": "5374616e7a612064656c6c61206d6f7374726120320000000000000000000000000000000000000000990003000000030005000a00020080",
+          "selector16bitBE": [
+            153,
+            3,
+            0,
+            3,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Museo, 2P",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_153_4_0",
+      "previousTitle": "Area 004",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_153_5_0",
+      "previousTitle": "Area 005",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Museo, 2P",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Museo, 2P",
+              "texpack_offset": 20808,
+              "texpack_group": 138,
+              "texelem_index": 23,
+              "group_title_index": 2,
+              "area_title_index": 32,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2320,
+                "rawHex": "4d7573656f2c203250",
+                "text": "Museo, 2P"
+              },
+              "texpackRawHex": "99000500010000001f85bb415e0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a10300201700000000000000000000000000000000000000",
+              "texelemRawHex": "1900000002002000860300203a02a401"
+            }
+          ]
+        },
+        {
+          "field": "F153_005_00",
+          "roadmapOffset": 464,
+          "texpack": 27,
+          "title": "Giardino centrale",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Giardino centrale",
+              "texpack_offset": 3888,
+              "texpack_group": 27,
+              "texelem_index": 27,
+              "group_title_index": 2,
+              "area_title_index": 34,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2384,
+                "rawHex": "4769617264696e6f2063656e7472616c65",
+                "text": "Giardino centrale"
+              },
+              "texpackRawHex": "99000500010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f4500004845a10300201b00000000000000000000000000000000000000",
+              "texelemRawHex": "1b0000000200220088030020b4004a01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Giardino centrale",
+          "field": "F153_005_00",
+          "offset": 2520,
+          "rawHex": "4769617264696e6f2063656e7472616c65000000000000000000000000000000000000000000000000990005000000050005000a00020080",
+          "selector16bitBE": [
+            153,
+            5,
+            0,
+            5,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Giardino centrale",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_153_5_1",
+      "previousTitle": "Area 005",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_6_0",
+      "previousTitle": "Area 006",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Museo, 2P",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Museo, 2P",
+              "texpack_offset": 20880,
+              "texpack_group": 138,
+              "texelem_index": 24,
+              "group_title_index": 2,
+              "area_title_index": 32,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2320,
+                "rawHex": "4d7573656f2c203250",
+                "text": "Museo, 2P"
+              },
+              "texpackRawHex": "99000600020000001f85bb415f0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a00300201800190000000000000000000000000000000000",
+              "texelemRawHex": "1900000102002000860300203a02a401"
+            }
+          ]
+        },
+        {
+          "field": "F153_006_00",
+          "roadmapOffset": 480,
+          "texpack": 28,
+          "title": "Sala del Tesoro - Atrio",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Atrio",
+              "texpack_offset": 4032,
+              "texpack_group": 28,
+              "texelem_index": 28,
+              "group_title_index": 2,
+              "area_title_index": 35,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2432,
+                "rawHex": "53616c612064656c205465736f726f202d20417472696f",
+                "text": "Sala del Tesoro - Atrio"
+              },
+              "texpackRawHex": "99000600020000001f85bb41ffffffff0000484400004844000096440000c8440000fa440000164500002f4500004845a00300201c001d0000000000000000000000000000000000",
+              "texelemRawHex": "1c000000020023008903002086018601"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Sala del Tesoro",
+          "field": "F153_006_00",
+          "offset": 2576,
+          "rawHex": "53616c612064656c205465736f726f0000000000000000000000000000000000000000000000000000990006000000060005000a00020080",
+          "selector16bitBE": [
+            153,
+            6,
+            0,
+            6,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala del Tesoro - Atrio",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_153_6_1",
+      "previousTitle": "Area 006",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Museo, 2P",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Museo, 2P",
+              "texpack_offset": 20880,
+              "texpack_group": 138,
+              "texelem_index": 25,
+              "group_title_index": 2,
+              "area_title_index": 32,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2320,
+                "rawHex": "4d7573656f2c203250",
+                "text": "Museo, 2P"
+              },
+              "texpackRawHex": "99000600020000001f85bb415f0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a00300201800190000000000000000000000000000000000",
+              "texelemRawHex": "1900000202002000860300203a02a401"
+            }
+          ]
+        },
+        {
+          "field": "F153_006_00",
+          "roadmapOffset": 480,
+          "texpack": 28,
+          "title": "Sala del Tesoro - Atrio",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Atrio",
+              "texpack_offset": 4032,
+              "texpack_group": 28,
+              "texelem_index": 29,
+              "group_title_index": 2,
+              "area_title_index": 35,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2432,
+                "rawHex": "53616c612064656c205465736f726f202d20417472696f",
+                "text": "Sala del Tesoro - Atrio"
+              },
+              "texpackRawHex": "99000600020000001f85bb41ffffffff0000484400004844000096440000c8440000fa440000164500002f4500004845a00300201c001d0000000000000000000000000000000000",
+              "texelemRawHex": "1c000001020023008903002086018601"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Sala del Tesoro",
+          "field": "F153_006_00",
+          "offset": 2576,
+          "rawHex": "53616c612064656c205465736f726f0000000000000000000000000000000000000000000000000000990006000000060005000a00020080",
+          "selector16bitBE": [
+            153,
+            6,
+            0,
+            6,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala del Tesoro - Atrio",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_153_8_0",
+      "previousTitle": "Area 008",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_8_1",
+      "previousTitle": "Area 008",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_8_2",
+      "previousTitle": "Area 008",
+      "group": "Palazzo di Madarame",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_153_9_0",
+      "previousTitle": "Area 009",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Sala del Tesoro - Atrio",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Atrio",
+              "texpack_offset": 21024,
+              "texpack_group": 138,
+              "texelem_index": 28,
+              "group_title_index": 2,
+              "area_title_index": 35,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2432,
+                "rawHex": "53616c612064656c205465736f726f202d20417472696f",
+                "text": "Sala del Tesoro - Atrio"
+              },
+              "texpackRawHex": "99000900030000001f85bb41610a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a00300201c001d001e000000000000000000000000000000",
+              "texelemRawHex": "1c000000020023008903002086018601"
+            },
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Atrio",
+              "texpack_offset": 21096,
+              "texpack_group": 138,
+              "texelem_index": 28,
+              "group_title_index": 2,
+              "area_title_index": 35,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2432,
+                "rawHex": "53616c612064656c205465736f726f202d20417472696f",
+                "text": "Sala del Tesoro - Atrio"
+              },
+              "texpackRawHex": "99000900030000001f85bb41620a0020000048c30000c8c20000c8430000c8440000fa440000164500002f4500004845a00300201c001d001e000000000000000000000000000000",
+              "texelemRawHex": "1c000000020023008903002086018601"
+            }
+          ]
+        },
+        {
+          "field": "F153_009_00",
+          "roadmapOffset": 512,
+          "texpack": 30,
+          "title": "Sala del Tesoro",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro",
+              "texpack_offset": 4320,
+              "texpack_group": 30,
+              "texelem_index": 34,
+              "group_title_index": 2,
+              "area_title_index": 37,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2528,
+                "rawHex": "53616c612064656c205465736f726f",
+                "text": "Sala del Tesoro"
+              },
+              "texpackRawHex": "99000900030000001f85bb41ffffffff000016440000c8440000fa4400400345008009450000164500002f4500004845a00300202200230024000000000000000000000000000000",
+              "texelemRawHex": "1e000000020025008c03002076024a01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Sala principale",
+          "field": "F153_009_00",
+          "offset": 2688,
+          "rawHex": "53616c61207072696e636970616c650000000000000000000000000000000000000000000000000000990009000000080005000a00020080",
+          "selector16bitBE": [
+            153,
+            9,
+            0,
+            8,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala del Tesoro",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_153_9_1",
+      "previousTitle": "Area 009",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Sala del Tesoro - Atrio",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Atrio",
+              "texpack_offset": 21024,
+              "texpack_group": 138,
+              "texelem_index": 29,
+              "group_title_index": 2,
+              "area_title_index": 35,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2432,
+                "rawHex": "53616c612064656c205465736f726f202d20417472696f",
+                "text": "Sala del Tesoro - Atrio"
+              },
+              "texpackRawHex": "99000900030000001f85bb41610a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a00300201c001d001e000000000000000000000000000000",
+              "texelemRawHex": "1c000001020023008903002086018601"
+            },
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Atrio",
+              "texpack_offset": 21096,
+              "texpack_group": 138,
+              "texelem_index": 29,
+              "group_title_index": 2,
+              "area_title_index": 35,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2432,
+                "rawHex": "53616c612064656c205465736f726f202d20417472696f",
+                "text": "Sala del Tesoro - Atrio"
+              },
+              "texpackRawHex": "99000900030000001f85bb41620a0020000048c30000c8c20000c8430000c8440000fa440000164500002f4500004845a00300201c001d001e000000000000000000000000000000",
+              "texelemRawHex": "1c000001020023008903002086018601"
+            }
+          ]
+        },
+        {
+          "field": "F153_009_00",
+          "roadmapOffset": 512,
+          "texpack": 30,
+          "title": "Sala del Tesoro",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro",
+              "texpack_offset": 4320,
+              "texpack_group": 30,
+              "texelem_index": 35,
+              "group_title_index": 2,
+              "area_title_index": 37,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2528,
+                "rawHex": "53616c612064656c205465736f726f",
+                "text": "Sala del Tesoro"
+              },
+              "texpackRawHex": "99000900030000001f85bb41ffffffff000016440000c8440000fa4400400345008009450000164500002f4500004845a00300202200230024000000000000000000000000000000",
+              "texelemRawHex": "1e000001020025008d03002076024a01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Sala principale",
+          "field": "F153_009_00",
+          "offset": 2688,
+          "rawHex": "53616c61207072696e636970616c650000000000000000000000000000000000000000000000000000990009000000080005000a00020080",
+          "selector16bitBE": [
+            153,
+            9,
+            0,
+            8,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala del Tesoro",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_153_9_2",
+      "previousTitle": "Area 009",
+      "group": "Palazzo di Madarame",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F153_051_00",
+          "roadmapOffset": 384,
+          "texpack": 138,
+          "title": "Sala del Tesoro - Galleria",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Galleria",
+              "texpack_offset": 21024,
+              "texpack_group": 138,
+              "texelem_index": 30,
+              "group_title_index": 2,
+              "area_title_index": 36,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2480,
+                "rawHex": "53616c612064656c205465736f726f202d2047616c6c65726961",
+                "text": "Sala del Tesoro - Galleria"
+              },
+              "texpackRawHex": "99000900030000001f85bb41610a00200000c84300004844000096440000c8440000fa440000164500002f4500004845a00300201c001d001e000000000000000000000000000000",
+              "texelemRawHex": "1d000002020024008a030020e0010e01"
+            },
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro - Galleria",
+              "texpack_offset": 21096,
+              "texpack_group": 138,
+              "texelem_index": 30,
+              "group_title_index": 2,
+              "area_title_index": 36,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2480,
+                "rawHex": "53616c612064656c205465736f726f202d2047616c6c65726961",
+                "text": "Sala del Tesoro - Galleria"
+              },
+              "texpackRawHex": "99000900030000001f85bb41620a0020000048c30000c8c20000c8430000c8440000fa440000164500002f4500004845a00300201c001d001e000000000000000000000000000000",
+              "texelemRawHex": "1d000002020024008a030020e0010e01"
+            }
+          ]
+        },
+        {
+          "field": "F153_009_00",
+          "roadmapOffset": 512,
+          "texpack": 30,
+          "title": "Sala del Tesoro",
+          "records": [
+            {
+              "group": "Palazzo di Madarame",
+              "title": "Sala del Tesoro",
+              "texpack_offset": 4320,
+              "texpack_group": 30,
+              "texelem_index": 36,
+              "group_title_index": 2,
+              "area_title_index": 37,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 992,
+                "rawHex": "50616c617a7a6f206469204d61646172616d65",
+                "text": "Palazzo di Madarame"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 2528,
+                "rawHex": "53616c612064656c205465736f726f",
+                "text": "Sala del Tesoro"
+              },
+              "texpackRawHex": "99000900030000001f85bb41ffffffff000016440000c8440000fa4400400345008009450000164500002f4500004845a00300202200230024000000000000000000000000000000",
+              "texelemRawHex": "1e000002020025008d03002076024a01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Sala principale",
+          "field": "F153_009_00",
+          "offset": 2688,
+          "rawHex": "53616c61207072696e636970616c650000000000000000000000000000000000000000000000000000990009000000080005000a00020080",
+          "selector16bitBE": [
+            153,
+            9,
+            0,
+            8,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala del Tesoro",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_154_12_0",
+      "previousTitle": "Area 012",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_12_1",
+      "previousTitle": "Area 012",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_12_2",
+      "previousTitle": "Area 012",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_13_0",
+      "previousTitle": "Area 013",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_13_1",
+      "previousTitle": "Area 013",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_13_2",
+      "previousTitle": "Area 013",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_15_0",
+      "previousTitle": "Area 015",
+      "group": "Palazzo di Kaneshiro",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_154_5_0",
+      "previousTitle": "Area 005",
+      "group": "Palazzo di Kaneshiro",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F154_051_00",
+          "roadmapOffset": 544,
+          "texpack": 139,
+          "title": "Ufficio riciclaggio",
+          "records": [
+            {
+              "group": "Palazzo di Kaneshiro",
+              "title": "Ufficio riciclaggio",
+              "texpack_offset": 21528,
+              "texpack_group": 139,
+              "texelem_index": 49,
+              "group_title_index": 3,
+              "area_title_index": 54,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1040,
+                "rawHex": "50616c617a7a6f206469204b616e65736869726f",
+                "text": "Palazzo di Kaneshiro"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 3136,
+                "rawHex": "5566666963696f2072696369636c616767696f",
+                "text": "Ufficio riciclaggio"
+              },
+              "texpackRawHex": "9a000500010000001f85bb41600a00200000c84300004844000096440000c8440000fa440000164500002f45000048451d0500203100000000000000000000000000000000000000",
+              "texelemRawHex": "2a000001030036007004002000030e01"
+            }
+          ]
+        },
+        {
+          "field": "F154_005_00",
+          "roadmapOffset": 608,
+          "texpack": 34,
+          "title": "Caveau sotterraneo",
+          "records": [
+            {
+              "group": "Palazzo di Kaneshiro",
+              "title": "Caveau sotterraneo",
+              "texpack_offset": 4896,
+              "texpack_group": 34,
+              "texelem_index": 52,
+              "group_title_index": 3,
+              "area_title_index": 58,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1040,
+                "rawHex": "50616c617a7a6f206469204b616e65736869726f",
+                "text": "Palazzo di Kaneshiro"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 3328,
+                "rawHex": "43617665617520736f7474657272616e656f",
+                "text": "Caveau sotterraneo"
+              },
+              "texpackRawHex": "9a000500020000001f85bb41ffffffff000096c300004843000096440000c8440000fa440000164500002f45000048451d0500203400330000000000000000000000000000000000",
+              "texelemRawHex": "2200000003003a007204002000030003"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Caveau sotterraneo",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_155_10_0",
+      "previousTitle": "Area 010",
+      "group": "Palazzo di Futaba",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_155_2_2",
+      "previousTitle": "Area 002",
+      "group": "Palazzo di Futaba",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_155_2_3",
+      "previousTitle": "Area 002",
+      "group": "Palazzo di Futaba",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_155_3_2",
+      "previousTitle": "Area 003",
+      "group": "Palazzo di Futaba",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_156_10_0",
+      "previousTitle": "Area 010",
+      "group": "Palazzo di Okumura",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F156_051_00",
+          "roadmapOffset": 992,
+          "texpack": 141,
+          "title": "Interscambio",
+          "records": [
+            {
+              "group": "Palazzo di Okumura",
+              "title": "Interscambio",
+              "texpack_offset": 22896,
+              "texpack_group": 141,
+              "texelem_index": 92,
+              "group_title_index": 5,
+              "area_title_index": 100,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1136,
+                "rawHex": "50616c617a7a6f206469204f6b756d757261",
+                "text": "Palazzo di Okumura"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 5120,
+                "rawHex": "496e7465727363616d62696f",
+                "text": "Interscambio"
+              },
+              "texpackRawHex": "9c000a00020000001f85bb41610a00200000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff5c005d0000000000000000000000000000000000",
+              "texelemRawHex": "3d0000000500640049080020c2017701"
+            }
+          ]
+        },
+        {
+          "field": "F156_010_00",
+          "roadmapOffset": 1152,
+          "texpack": 65,
+          "title": "Produzione armamenti",
+          "records": [
+            {
+              "group": "Palazzo di Okumura",
+              "title": "Produzione armamenti",
+              "texpack_offset": 9432,
+              "texpack_group": 65,
+              "texelem_index": 93,
+              "group_title_index": 5,
+              "area_title_index": 102,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1136,
+                "rawHex": "50616c617a7a6f206469204f6b756d757261",
+                "text": "Palazzo di Okumura"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 5184,
+                "rawHex": "50726f64757a696f6e652061726d616d656e7469",
+                "text": "Produzione armamenti"
+              },
+              "texpackRawHex": "9c000a00030000001f85bb41ffffffff008054440000af440000e1440000c8440000fa440000164500002f45000048451c0700205d005e005f000000000000000000000000000000",
+              "texelemRawHex": "41000000050066004a0800202c01a401"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Produzione armamenti",
+          "field": "F156_010_00",
+          "offset": 6172,
+          "rawHex": "50726f64757a696f6e652061726d616d656e74690000000000000000000000000000000000000000009c000a000000080005000a00020080",
+          "selector16bitBE": [
+            156,
+            10,
+            0,
+            8,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Produzione armamenti",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_156_11_2",
+      "previousTitle": "Area 011",
+      "group": "Palazzo di Okumura",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_156_11_3",
+      "previousTitle": "Area 011",
+      "group": "Palazzo di Okumura",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_156_12_0",
+      "previousTitle": "Area 012",
+      "group": "Palazzo di Okumura",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F156_051_00",
+          "roadmapOffset": 992,
+          "texpack": 141,
+          "title": "Linea di smaltimento",
+          "records": [
+            {
+              "group": "Palazzo di Okumura",
+              "title": "Linea di smaltimento",
+              "texpack_offset": 22752,
+              "texpack_group": 141,
+              "texelem_index": 89,
+              "group_title_index": 5,
+              "area_title_index": 98,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1136,
+                "rawHex": "50616c617a7a6f206469204f6b756d757261",
+                "text": "Palazzo di Okumura"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 5024,
+                "rawHex": "4c696e656120646920736d616c74696d656e746f",
+                "text": "Linea di smaltimento"
+              },
+              "texpackRawHex": "9c000c00010000001f85bb415f0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff5900000000000000000000000000000000000000",
+              "texelemRawHex": "40000000050062004608002094027701"
+            }
+          ]
+        },
+        {
+          "field": "F156_012_00",
+          "roadmapOffset": 1184,
+          "texpack": 67,
+          "title": "Fabbrica centrale",
+          "records": [
+            {
+              "group": "Palazzo di Okumura",
+              "title": "Fabbrica centrale",
+              "texpack_offset": 9720,
+              "texpack_group": 67,
+              "texelem_index": 90,
+              "group_title_index": 5,
+              "area_title_index": 99,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1136,
+                "rawHex": "50616c617a7a6f206469204f6b756d757261",
+                "text": "Palazzo di Okumura"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 5072,
+                "rawHex": "46616262726963612063656e7472616c65",
+                "text": "Fabbrica centrale"
+              },
+              "texpackRawHex": "9c000c00010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f45000048451c0700205a00000000000000000000000000000000000000",
+              "texelemRawHex": "430000000500630047080020e100e100"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Fabbrica centrale",
+          "field": "F156_012_00",
+          "offset": 6060,
+          "rawHex": "46616262726963612063656e7472616c650000000000000000000000000000000000000000000000009c000c000000060005000a00020080",
+          "selector16bitBE": [
+            156,
+            12,
+            0,
+            6,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Fabbrica centrale",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_156_9_0",
+      "previousTitle": "Area 009",
+      "group": "Palazzo di Okumura",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F156_051_00",
+          "roadmapOffset": 992,
+          "texpack": 141,
+          "title": "Linea di produzione",
+          "records": [
+            {
+              "group": "Palazzo di Okumura",
+              "title": "Linea di produzione",
+              "texpack_offset": 22680,
+              "texpack_group": 141,
+              "texelem_index": 88,
+              "group_title_index": 5,
+              "area_title_index": 97,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1136,
+                "rawHex": "50616c617a7a6f206469204f6b756d757261",
+                "text": "Palazzo di Okumura"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 4976,
+                "rawHex": "4c696e65612064692070726f64757a696f6e65",
+                "text": "Linea di produzione"
+              },
+              "texpackRawHex": "9c000900010000001f85bb415e0a00200000c84300004844000096440000c8440000fa440000164500002f4500004845ffffffff5800000000000000000000000000000000000000",
+              "texelemRawHex": "3f0000000500610045080020e0010e01"
+            }
+          ]
+        },
+        {
+          "field": "F156_009_00",
+          "roadmapOffset": 1136,
+          "texpack": 64,
+          "title": "Linea di smaltimento",
+          "records": [
+            {
+              "group": "Palazzo di Okumura",
+              "title": "Linea di smaltimento",
+              "texpack_offset": 9288,
+              "texpack_group": 64,
+              "texelem_index": 89,
+              "group_title_index": 5,
+              "area_title_index": 98,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1136,
+                "rawHex": "50616c617a7a6f206469204f6b756d757261",
+                "text": "Palazzo di Okumura"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 5024,
+                "rawHex": "4c696e656120646920736d616c74696d656e746f",
+                "text": "Linea di smaltimento"
+              },
+              "texpackRawHex": "9c000900010000001f85bb41ffffffff0000c84300004844000096440000c8440000fa440000164500002f45000048451c0700205900580000000000000000000000000000000000",
+              "texelemRawHex": "40000000050062004608002094027701"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Linea di smaltimento",
+          "field": "F156_009_00",
+          "offset": 6004,
+          "rawHex": "4c696e656120646920736d616c74696d656e746f0000000000000000000000000000000000000000009c0009000000050005000a00020080",
+          "selector16bitBE": [
+            156,
+            9,
+            0,
+            5,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Linea di smaltimento",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_156_9_1",
+      "previousTitle": "Area 009",
+      "group": "Palazzo di Okumura",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_157_17_0",
+      "previousTitle": "Area 017",
+      "group": "Palazzo di Niijima",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_157_3_0",
+      "previousTitle": "Area 003",
+      "group": "Palazzo di Niijima",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_157_3_1",
+      "previousTitle": "Area 003",
+      "group": "Palazzo di Niijima",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_157_5_1",
+      "previousTitle": "Area 005",
+      "group": "Palazzo di Niijima",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_157_7_1",
+      "previousTitle": "Area 007",
+      "group": "Palazzo di Niijima",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_159_10_0",
+      "previousTitle": "Area 010",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Corridoio superiore tribordo",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Corridoio superiore tribordo",
+              "texpack_offset": 24048,
+              "texpack_group": 143,
+              "texelem_index": 130,
+              "group_title_index": 7,
+              "area_title_index": 135,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6432,
+                "rawHex": "436f727269646f696f207375706572696f726520747269626f72646f",
+                "text": "Corridoio superiore tribordo"
+              },
+              "texpackRawHex": "9f000a00020000001f85bb415c0a00200000c8c20000c843000096440000c8440000fa440000164500002f45000048450d0c00208200810000000000000000000000000000000000",
+              "texelemRawHex": "6000000007008700030c0020a302c201"
+            }
+          ]
+        },
+        {
+          "field": "F159_010_00",
+          "roadmapOffset": 1664,
+          "texpack": 91,
+          "title": "Ponte piscina",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Ponte piscina",
+              "texpack_offset": 13176,
+              "texpack_group": 91,
+              "texelem_index": 128,
+              "group_title_index": 7,
+              "area_title_index": 134,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6400,
+                "rawHex": "506f6e74652070697363696e61",
+                "text": "Ponte piscina"
+              },
+              "texpackRawHex": "9f000a00020000001f85bb41ffffffff0080a2450080bb45000096440000c8440000fa440000164500002f4500004845ffffffff80007f0000000000000000000000000000000000",
+              "texelemRawHex": "5b00000007008600020c00200d022c01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Ponte piscina",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_10_1",
+      "previousTitle": "Area 010",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Corridoio superiore tribordo",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Corridoio superiore tribordo",
+              "texpack_offset": 24048,
+              "texpack_group": 143,
+              "texelem_index": 129,
+              "group_title_index": 7,
+              "area_title_index": 135,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6432,
+                "rawHex": "436f727269646f696f207375706572696f726520747269626f72646f",
+                "text": "Corridoio superiore tribordo"
+              },
+              "texpackRawHex": "9f000a00020000001f85bb415c0a00200000c8c20000c843000096440000c8440000fa440000164500002f45000048450d0c00208200810000000000000000000000000000000000",
+              "texelemRawHex": "6000000107008700030c0020a302c201"
+            }
+          ]
+        },
+        {
+          "field": "F159_010_00",
+          "roadmapOffset": 1664,
+          "texpack": 91,
+          "title": "Ponte piscina",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Ponte piscina",
+              "texpack_offset": 13176,
+              "texpack_group": 91,
+              "texelem_index": 127,
+              "group_title_index": 7,
+              "area_title_index": 134,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6400,
+                "rawHex": "506f6e74652070697363696e61",
+                "text": "Ponte piscina"
+              },
+              "texpackRawHex": "9f000a00020000001f85bb41ffffffff0080a2450080bb45000096440000c8440000fa440000164500002f4500004845ffffffff80007f0000000000000000000000000000000000",
+              "texelemRawHex": "5b00000107008600020c00200d022c01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Ponte piscina",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_15_0",
+      "previousTitle": "Area 015",
+      "group": "Palazzo di Shido",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_159_16_0",
+      "previousTitle": "Area 016",
+      "group": "Palazzo di Shido",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_159_3_0",
+      "previousTitle": "Area 003",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Corridoio mezzavia tribordo",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Corridoio mezzavia tribordo",
+              "texpack_offset": 23976,
+              "texpack_group": 143,
+              "texelem_index": 125,
+              "group_title_index": 7,
+              "area_title_index": 133,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6352,
+                "rawHex": "436f727269646f696f206d657a7a6176696120747269626f72646f",
+                "text": "Corridoio mezzavia tribordo"
+              },
+              "texpackRawHex": "9f000300020000001f85bb415a0a00200000c84300004844000096440000c8440000fa440000164500002f45000048450d0c00207d007e0000000000000000000000000000000000",
+              "texelemRawHex": "5f00000007008500010c00203a02a302"
+            }
+          ]
+        },
+        {
+          "field": "F159_003_00",
+          "roadmapOffset": 1568,
+          "texpack": 86,
+          "title": "Passaggio e salone centrale",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Passaggio e salone centrale",
+              "texpack_offset": 12456,
+              "texpack_group": 86,
+              "texelem_index": 122,
+              "group_title_index": 7,
+              "area_title_index": 132,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6304,
+                "rawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65",
+                "text": "Passaggio e salone centrale"
+              },
+              "texpackRawHex": "9f000300020000001f85bb41ffffffff00409c4400401c45000096440000c8440000fa440000164500002f45000048450d0c00207a007b0000000000000000000000000000000000",
+              "texelemRawHex": "5600000007008400000c0020a2034201"
+            }
+          ]
+        },
+        {
+          "field": "F159_004_00",
+          "roadmapOffset": 1584,
+          "texpack": 86,
+          "title": "Passaggio e salone centrale",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Passaggio e salone centrale",
+              "texpack_offset": 12456,
+              "texpack_group": 86,
+              "texelem_index": 122,
+              "group_title_index": 7,
+              "area_title_index": 132,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6304,
+                "rawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65",
+                "text": "Passaggio e salone centrale"
+              },
+              "texpackRawHex": "9f000300020000001f85bb41ffffffff00409c4400401c45000096440000c8440000fa440000164500002f45000048450d0c00207a007b0000000000000000000000000000000000",
+              "texelemRawHex": "5600000007008400000c0020a2034201"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Passaggio centrale",
+          "field": "F159_003_00",
+          "offset": 8028,
+          "rawHex": "50617373616767696f2063656e7472616c6500000000000000000000000000000000000000000000009f0003000000010005000a00020080",
+          "selector16bitBE": [
+            159,
+            3,
+            0,
+            1,
+            5,
+            10,
+            2,
+            128
+          ]
+        },
+        {
+          "text": "Sala centrale",
+          "field": "F159_003_00",
+          "offset": 8420,
+          "rawHex": "53616c612063656e7472616c65000000000000000000000000000000000000000000000000000000009f0003000000080005000a00020080",
+          "selector16bitBE": [
+            159,
+            3,
+            0,
+            8,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Passaggio e salone centrale",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_3_1",
+      "previousTitle": "Area 003",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Corridoio mezzavia tribordo",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Corridoio mezzavia tribordo",
+              "texpack_offset": 23976,
+              "texpack_group": 143,
+              "texelem_index": 126,
+              "group_title_index": 7,
+              "area_title_index": 133,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6352,
+                "rawHex": "436f727269646f696f206d657a7a6176696120747269626f72646f",
+                "text": "Corridoio mezzavia tribordo"
+              },
+              "texpackRawHex": "9f000300020000001f85bb415a0a00200000c84300004844000096440000c8440000fa440000164500002f45000048450d0c00207d007e0000000000000000000000000000000000",
+              "texelemRawHex": "5f00000107008500010c00203a02a302"
+            }
+          ]
+        },
+        {
+          "field": "F159_003_00",
+          "roadmapOffset": 1568,
+          "texpack": 86,
+          "title": "Passaggio e salone centrale",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Passaggio e salone centrale",
+              "texpack_offset": 12456,
+              "texpack_group": 86,
+              "texelem_index": 123,
+              "group_title_index": 7,
+              "area_title_index": 132,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6304,
+                "rawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65",
+                "text": "Passaggio e salone centrale"
+              },
+              "texpackRawHex": "9f000300020000001f85bb41ffffffff00409c4400401c45000096440000c8440000fa440000164500002f45000048450d0c00207a007b0000000000000000000000000000000000",
+              "texelemRawHex": "5600000107008400000c0020a2034201"
+            }
+          ]
+        },
+        {
+          "field": "F159_004_00",
+          "roadmapOffset": 1584,
+          "texpack": 86,
+          "title": "Passaggio e salone centrale",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Passaggio e salone centrale",
+              "texpack_offset": 12456,
+              "texpack_group": 86,
+              "texelem_index": 123,
+              "group_title_index": 7,
+              "area_title_index": 132,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6304,
+                "rawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65",
+                "text": "Passaggio e salone centrale"
+              },
+              "texpackRawHex": "9f000300020000001f85bb41ffffffff00409c4400401c45000096440000c8440000fa440000164500002f45000048450d0c00207a007b0000000000000000000000000000000000",
+              "texelemRawHex": "5600000107008400000c0020a2034201"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Passaggio centrale",
+          "field": "F159_003_00",
+          "offset": 8028,
+          "rawHex": "50617373616767696f2063656e7472616c6500000000000000000000000000000000000000000000009f0003000000010005000a00020080",
+          "selector16bitBE": [
+            159,
+            3,
+            0,
+            1,
+            5,
+            10,
+            2,
+            128
+          ]
+        },
+        {
+          "text": "Sala centrale",
+          "field": "F159_003_00",
+          "offset": 8420,
+          "rawHex": "53616c612063656e7472616c65000000000000000000000000000000000000000000000000000000009f0003000000080005000a00020080",
+          "selector16bitBE": [
+            159,
+            3,
+            0,
+            8,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Passaggio e salone centrale",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_6_0",
+      "previousTitle": "Area 006",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Ponte laterale",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Ponte laterale",
+              "texpack_offset": 24192,
+              "texpack_group": 143,
+              "texelem_index": 137,
+              "group_title_index": 7,
+              "area_title_index": 140,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6656,
+                "rawHex": "506f6e7465206c61746572616c65",
+                "text": "Ponte laterale"
+              },
+              "texpackRawHex": "9f000600040000001f85bb415e0a00200000c8c20000c843000096440000c8440000fa440000164500002f45000048450d0c00208900880087008600000000000000000000000000",
+              "texelemRawHex": "5c00000007008c00080c00200d02a401"
+            }
+          ]
+        },
+        {
+          "field": "F159_006_00",
+          "roadmapOffset": 1600,
+          "texpack": 87,
+          "title": "Sala intrattenimento 2P",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Sala intrattenimento 2P",
+              "texpack_offset": 12600,
+              "texpack_group": 87,
+              "texelem_index": 134,
+              "group_title_index": 7,
+              "area_title_index": 137,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6512,
+                "rawHex": "53616c6120696e7472617474656e696d656e746f203250",
+                "text": "Sala intrattenimento 2P"
+              },
+              "texpackRawHex": "9f000600040000001f85bb41ffffffff0000964300c08f44002005450080224500002f450000164500002f4500004845ffffffff8600860085008500000000000000000000000000",
+              "texelemRawHex": "5700000107008900050c00202c012c01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala intrattenimento 2P",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_6_1",
+      "previousTitle": "Area 006",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Corridoio inferiore babordo",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Corridoio inferiore babordo",
+              "texpack_offset": 24192,
+              "texpack_group": 143,
+              "texelem_index": 136,
+              "group_title_index": 7,
+              "area_title_index": 139,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6608,
+                "rawHex": "436f727269646f696f20696e666572696f7265206261626f72646f",
+                "text": "Corridoio inferiore babordo"
+              },
+              "texpackRawHex": "9f000600040000001f85bb415e0a00200000c8c20000c843000096440000c8440000fa440000164500002f45000048450d0c00208900880087008600000000000000000000000000",
+              "texelemRawHex": "6100000107008b00070c002076027602"
+            }
+          ]
+        },
+        {
+          "field": "F159_006_00",
+          "roadmapOffset": 1600,
+          "texpack": 87,
+          "title": "Sala intrattenimento 2P",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Sala intrattenimento 2P",
+              "texpack_offset": 12600,
+              "texpack_group": 87,
+              "texelem_index": 134,
+              "group_title_index": 7,
+              "area_title_index": 137,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6512,
+                "rawHex": "53616c6120696e7472617474656e696d656e746f203250",
+                "text": "Sala intrattenimento 2P"
+              },
+              "texpackRawHex": "9f000600040000001f85bb41ffffffff0000964300c08f44002005450080224500002f450000164500002f4500004845ffffffff8600860085008500000000000000000000000000",
+              "texelemRawHex": "5700000107008900050c00202c012c01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala intrattenimento 2P",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_6_2",
+      "previousTitle": "Area 006",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Corridoio inferiore babordo",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Corridoio inferiore babordo",
+              "texpack_offset": 24192,
+              "texpack_group": 143,
+              "texelem_index": 135,
+              "group_title_index": 7,
+              "area_title_index": 139,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6608,
+                "rawHex": "436f727269646f696f20696e666572696f7265206261626f72646f",
+                "text": "Corridoio inferiore babordo"
+              },
+              "texpackRawHex": "9f000600040000001f85bb415e0a00200000c8c20000c843000096440000c8440000fa440000164500002f45000048450d0c00208900880087008600000000000000000000000000",
+              "texelemRawHex": "6100000007008b00070c002076027602"
+            }
+          ]
+        },
+        {
+          "field": "F159_006_00",
+          "roadmapOffset": 1600,
+          "texpack": 87,
+          "title": "Sala intrattenimento 2P",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Sala intrattenimento 2P",
+              "texpack_offset": 12600,
+              "texpack_group": 87,
+              "texelem_index": 133,
+              "group_title_index": 7,
+              "area_title_index": 137,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6512,
+                "rawHex": "53616c6120696e7472617474656e696d656e746f203250",
+                "text": "Sala intrattenimento 2P"
+              },
+              "texpackRawHex": "9f000600040000001f85bb41ffffffff0000964300c08f44002005450080224500002f450000164500002f4500004845ffffffff8600860085008500000000000000000000000000",
+              "texelemRawHex": "5700000307008900050c00202c012c01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Sala intrattenimento 2P",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_7_0",
+      "previousTitle": "Area 007",
+      "group": "Palazzo di Shido",
+      "status": "nomi-contestuali-verificati",
+      "contexts": [
+        {
+          "field": "F159_051_00",
+          "roadmapOffset": 1520,
+          "texpack": 143,
+          "title": "Sala intrattenimento 2P",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Sala intrattenimento 2P",
+              "texpack_offset": 24120,
+              "texpack_group": 143,
+              "texelem_index": 133,
+              "group_title_index": 7,
+              "area_title_index": 137,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6512,
+                "rawHex": "53616c6120696e7472617474656e696d656e746f203250",
+                "text": "Sala intrattenimento 2P"
+              },
+              "texpackRawHex": "9f000700020000001f85bb415d0a00200000c84300004844000096440000c8440000fa440000164500002f45000048450d0c00208500840000000000000000000000000000000000",
+              "texelemRawHex": "5700000307008900050c00202c012c01"
+            }
+          ]
+        },
+        {
+          "field": "F159_007_00",
+          "roadmapOffset": 1616,
+          "texpack": 88,
+          "title": "Ponte di poppa",
+          "records": [
+            {
+              "group": "Palazzo di Shido",
+              "title": "Ponte di poppa",
+              "texpack_offset": 12744,
+              "texpack_group": 88,
+              "texelem_index": 132,
+              "group_title_index": 7,
+              "area_title_index": 136,
+              "groupTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 1232,
+                "rawHex": "50616c617a7a6f20646920536869646f",
+                "text": "Palazzo di Shido"
+              },
+              "areaTitleRecord": {
+                "subfile": "fld_texpack_title.ftd",
+                "offset": 6480,
+                "rawHex": "506f6e746520646920706f707061",
+                "text": "Ponte di poppa"
+              },
+              "texpackRawHex": "9f000700020000001f85bb41ffffffff00c0284500c05a45000096440000c8440000fa440000164500002f4500004845ffffffff8400830000000000000000000000000000000000",
+              "texelemRawHex": "5800000007008800040c00200e010e01"
+            }
+          ]
+        }
+      ],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [
+        {
+          "text": "Ponte di poppa",
+          "field": "F159_007_00",
+          "offset": 8252,
+          "rawHex": "506f6e746520646920706f7070610000000000000000000000000000000000000000000000000000009f0007000000040005000a00020080",
+          "selector16bitBE": [
+            159,
+            7,
+            0,
+            4,
+            5,
+            10,
+            2,
+            128
+          ]
+        }
+      ],
+      "nextEvidence": [],
+      "matchingFieldContextTitle": "Ponte di poppa",
+      "displayPolicy": "Mostrare il titolo del contesto FIELD selezionato. Nel catalogo per risorsa conservare tutti i titoli contestuali; non eleggere il primo record a nome universale."
+    },
+    {
+      "code": "RMAP_159_8_0",
+      "previousTitle": "Area 008",
+      "group": "Palazzo di Shido",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_160_10_0",
+      "previousTitle": "Area 010",
+      "group": "Mondo del clifoto",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_160_10_1",
+      "previousTitle": "Area 010",
+      "group": "Mondo del clifoto",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_160_4_1",
+      "previousTitle": "Area 004",
+      "group": "Mondo del clifoto",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_160_4_2",
+      "previousTitle": "Area 004",
+      "group": "Mondo del clifoto",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_161_2_1",
+      "previousTitle": "Area 002",
+      "group": "Profondità dei Memento",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_161_2_2",
+      "previousTitle": "Area 002",
+      "group": "Profondità dei Memento",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_161_4_1",
+      "previousTitle": "Area 004",
+      "group": "Profondità dei Memento",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_161_4_2",
+      "previousTitle": "Area 004",
+      "group": "Profondità dei Memento",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_161_6_1",
+      "previousTitle": "Area 006",
+      "group": "Profondità dei Memento",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_190_1_0",
+      "previousTitle": "Area 001",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_190_2_0",
+      "previousTitle": "Area 002",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_190_3_0",
+      "previousTitle": "Area 003",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_190_51_0",
+      "previousTitle": "Area 051",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_190_61_0",
+      "previousTitle": "Area 061",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_190_62_0",
+      "previousTitle": "Area 062",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Individuare selettore della risorsa DDS negli script/eventi o configurazione nativa: nessun campo ROADMAP associato. Non assegnare il nome del campo con stesso codice."
+      ]
+    },
+    {
+      "code": "RMAP_192_62_0",
+      "previousTitle": "Area 062",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    },
+    {
+      "code": "RMAP_195_11_0",
+      "previousTitle": "Area 011",
+      "group": "Memento - aree fisse",
+      "status": "irrisolto",
+      "contexts": [],
+      "canonicalTitle": null,
+      "sourceEvidence": [],
+      "menuEvidence": [],
+      "nextEvidence": [
+        "Titolo assente/ambiguo in fld_texpack_title.ftd: correlare i campi indicati con intestazioni di salvataggio/eventi e selettore layer nativo; conservare riferimento originale."
+      ]
+    }
+  ],
+  "menuRecords": [
+    {
+      "text": "Cancello del castello",
+      "field": "F151_001_00",
+      "offset": 1172,
+      "rawHex": "43616e63656c6c6f2064656c2063617374656c6c6f0000000000000000000000000000000000000000970001000000320005000a00020080",
+      "selector16bitBE": [
+        151,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Prigione sotterranea",
+      "field": "F152_001_00",
+      "offset": 1284,
+      "rawHex": "50726967696f6e6520736f7474657272616e65610000000000000000000000000000000000000000009800010000000b0005000a00020080",
+      "selector16bitBE": [
+        152,
+        1,
+        0,
+        11,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Edificio ovest 1P",
+      "field": "F151_014_00",
+      "offset": 1340,
+      "rawHex": "456469666963696f206f7665737420315000000000000000000000000000000000000000000000000097000e000000010005000a00020080",
+      "selector16bitBE": [
+        151,
+        14,
+        0,
+        1,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala centrale 2P",
+      "field": "F151_002_01",
+      "offset": 1396,
+      "rawHex": "53616c612063656e7472616c6520325000000000000000000000000000000000000000000000000000970002000100020005000a00020080",
+      "selector16bitBE": [
+        151,
+        2,
+        1,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Edificio est 3P",
+      "field": "F151_004_01",
+      "offset": 1452,
+      "rawHex": "456469666963696f206573742033500000000000000000000000000000000000000000000000000000970004000100030005000a00020080",
+      "selector16bitBE": [
+        151,
+        4,
+        1,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Edificio est, dépendance",
+      "field": "F151_005_00",
+      "offset": 1508,
+      "rawHex": "456469666963696f206573742c2064849e70656e64616e636500000000000000000000000000000000970005000000040005000a00020080",
+      "selector16bitBE": [
+        151,
+        5,
+        0,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Torre centrale",
+      "field": "F151_007_00",
+      "offset": 1564,
+      "rawHex": "546f7272652063656e7472616c65000000000000000000000000000000000000000000000000000000970007000000150005000a00020080",
+      "selector16bitBE": [
+        151,
+        7,
+        0,
+        21,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala del trono",
+      "field": "F151_011_00",
+      "offset": 1620,
+      "rawHex": "53616c612064656c2074726f6e6f00000000000000000000000000000000000000000000000000000097000b000000160005000a00020080",
+      "selector16bitBE": [
+        151,
+        11,
+        0,
+        22,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Entrata del Museo",
+      "field": "F153_001_00",
+      "offset": 2296,
+      "rawHex": "456e74726174612064656c204d7573656f000000000000000000000000000000000000000000000000990001000000320005000a00020080",
+      "selector16bitBE": [
+        153,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Stanza della mostra 1",
+      "field": "F153_012_00",
+      "offset": 2408,
+      "rawHex": "5374616e7a612064656c6c61206d6f737472612031000000000000000000000000000000000000000099000c000000020005000a00020080",
+      "selector16bitBE": [
+        153,
+        12,
+        0,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Stanza della mostra 2",
+      "field": "F153_003_00",
+      "offset": 2464,
+      "rawHex": "5374616e7a612064656c6c61206d6f7374726120320000000000000000000000000000000000000000990003000000030005000a00020080",
+      "selector16bitBE": [
+        153,
+        3,
+        0,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Giardino centrale",
+      "field": "F153_005_00",
+      "offset": 2520,
+      "rawHex": "4769617264696e6f2063656e7472616c65000000000000000000000000000000000000000000000000990005000000050005000a00020080",
+      "selector16bitBE": [
+        153,
+        5,
+        0,
+        5,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala del Tesoro",
+      "field": "F153_006_00",
+      "offset": 2576,
+      "rawHex": "53616c612064656c205465736f726f0000000000000000000000000000000000000000000000000000990006000000060005000a00020080",
+      "selector16bitBE": [
+        153,
+        6,
+        0,
+        6,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala principale",
+      "field": "F153_009_00",
+      "offset": 2688,
+      "rawHex": "53616c61207072696e636970616c650000000000000000000000000000000000000000000000000000990009000000080005000a00020080",
+      "selector16bitBE": [
+        153,
+        9,
+        0,
+        8,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala principale superiore",
+      "field": "F153_009_01",
+      "offset": 2744,
+      "rawHex": "53616c61207072696e636970616c65207375706572696f726500000000000000000000000000000000990009000100090005000a00020080",
+      "selector16bitBE": [
+        153,
+        9,
+        1,
+        9,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Entrata della banca",
+      "field": "F154_001_00",
+      "offset": 3420,
+      "rawHex": "456e74726174612064656c6c612062616e6361000000000000000000000000000000000000000000009a0001000000320005000a00020080",
+      "selector16bitBE": [
+        154,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio del banchiere",
+      "field": "F154_003_01",
+      "offset": 3644,
+      "rawHex": "436f727269646f696f2064656c2062616e6368696572650000000000000000000000000000000000009a0003000100030005000a00020080",
+      "selector16bitBE": [
+        154,
+        3,
+        1,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ufficio",
+      "field": "F154_014_00",
+      "offset": 3812,
+      "rawHex": "5566666963696f000000000000000000000000000000000000000000000000000000000000000000009a000e000000060005000a00020080",
+      "selector16bitBE": [
+        154,
+        14,
+        0,
+        6,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Caveau",
+      "field": "F154_005_01",
+      "offset": 3868,
+      "rawHex": "43617665617500000000000000000000000000000000000000000000000000000000000000000000009a0005000100070005000a00020080",
+      "selector16bitBE": [
+        154,
+        5,
+        1,
+        7,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Entrata della piramide",
+      "field": "F155_001_00",
+      "offset": 4544,
+      "rawHex": "456e74726174612064656c6c6120706972616d696465000000000000000000000000000000000000009b0001000000320005000a00020080",
+      "selector16bitBE": [
+        155,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Inizio del corridoio",
+      "field": "F155_002_01",
+      "offset": 4712,
+      "rawHex": "496e697a696f2064656c20636f727269646f696f0000000000000000000000000000000000000000009b0002000100020005000a00020080",
+      "selector16bitBE": [
+        155,
+        2,
+        1,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Metà corridoio",
+      "field": "F155_002_01",
+      "offset": 4768,
+      "rawHex": "4d6574849520636f727269646f696f00000000000000000000000000000000000000000000000000009b0002000100030005000a00020080",
+      "selector16bitBE": [
+        155,
+        2,
+        1,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Fine del corridoio",
+      "field": "F155_002_01",
+      "offset": 4824,
+      "rawHex": "46696e652064656c20636f727269646f696f00000000000000000000000000000000000000000000009b0002000100040005000a00020080",
+      "selector16bitBE": [
+        155,
+        2,
+        1,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Camera del Santuario ovest",
+      "field": "F155_004_00",
+      "offset": 4880,
+      "rawHex": "43616d6572612064656c2053616e74756172696f206f766573740000000000000000000000000000009b0004000000050005000a00020080",
+      "selector16bitBE": [
+        155,
+        4,
+        0,
+        5,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Camera del Santuario est",
+      "field": "F155_004_00",
+      "offset": 4992,
+      "rawHex": "43616d6572612064656c2053616e74756172696f2065737400000000000000000000000000000000009b0004000000070005000a00020080",
+      "selector16bitBE": [
+        155,
+        4,
+        0,
+        7,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Entrata laterale",
+      "field": "F156_001_00",
+      "offset": 5668,
+      "rawHex": "456e7472617461206c61746572616c65000000000000000000000000000000000000000000000000009c0001000000320005000a00020080",
+      "selector16bitBE": [
+        156,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoi del complesso",
+      "field": "F156_003_00",
+      "offset": 5780,
+      "rawHex": "436f727269646f692064656c20636f6d706c6573736f000000000000000000000000000000000000009c0003000000010005000a00020080",
+      "selector16bitBE": [
+        156,
+        3,
+        0,
+        1,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Caserma",
+      "field": "F156_013_00",
+      "offset": 5836,
+      "rawHex": "43617365726d61000000000000000000000000000000000000000000000000000000000000000000009c000d000000020005000a00020080",
+      "selector16bitBE": [
+        156,
+        13,
+        0,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Dintorni del complesso",
+      "field": "F156_004_00",
+      "offset": 5892,
+      "rawHex": "44696e746f726e692064656c20636f6d706c6573736f000000000000000000000000000000000000009c0004000000030005000a00020080",
+      "selector16bitBE": [
+        156,
+        4,
+        0,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Linea esportazioni",
+      "field": "F156_007_00",
+      "offset": 5948,
+      "rawHex": "4c696e6561206573706f7274617a696f6e6900000000000000000000000000000000000000000000009c0007000000040005000a00020080",
+      "selector16bitBE": [
+        156,
+        7,
+        0,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Linea di smaltimento",
+      "field": "F156_009_00",
+      "offset": 6004,
+      "rawHex": "4c696e656120646920736d616c74696d656e746f0000000000000000000000000000000000000000009c0009000000050005000a00020080",
+      "selector16bitBE": [
+        156,
+        9,
+        0,
+        5,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Fabbrica centrale",
+      "field": "F156_012_00",
+      "offset": 6060,
+      "rawHex": "46616262726963612063656e7472616c650000000000000000000000000000000000000000000000009c000c000000060005000a00020080",
+      "selector16bitBE": [
+        156,
+        12,
+        0,
+        6,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Interscambio",
+      "field": "F156_006_00",
+      "offset": 6116,
+      "rawHex": "496e7465727363616d62696f00000000000000000000000000000000000000000000000000000000009c0006000000070005000a00020080",
+      "selector16bitBE": [
+        156,
+        6,
+        0,
+        7,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Produzione armamenti",
+      "field": "F156_010_00",
+      "offset": 6172,
+      "rawHex": "50726f64757a696f6e652061726d616d656e74690000000000000000000000000000000000000000009c000a000000080005000a00020080",
+      "selector16bitBE": [
+        156,
+        10,
+        0,
+        8,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Entrata del casinò",
+      "field": "F157_001_00",
+      "offset": 6792,
+      "rawHex": "456e74726174612064656c20636173696e84a7000000000000000000000000000000000000000000009d0001000000320005000a00020080",
+      "selector16bitBE": [
+        157,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Piano terra",
+      "field": "F157_004_00",
+      "offset": 6904,
+      "rawHex": "5069616e6f2074657272610000000000000000000000000000000000000000000000000000000000009d0004000000010005000a00020080",
+      "selector16bitBE": [
+        157,
+        4,
+        0,
+        1,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio",
+      "field": "F157_005_00",
+      "offset": 6960,
+      "rawHex": "436f727269646f696f00000000000000000000000000000000000000000000000000000000000000009d0005000000020005000a00020080",
+      "selector16bitBE": [
+        157,
+        5,
+        0,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Piano riservato ai soci",
+      "field": "F157_006_00",
+      "offset": 7016,
+      "rawHex": "5069616e6f2072697365727661746f20616920736f63690000000000000000000000000000000000009d0006000000030005000a00020080",
+      "selector16bitBE": [
+        157,
+        6,
+        0,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Area dadi",
+      "field": "F157_008_00",
+      "offset": 7072,
+      "rawHex": "41726561206461646900000000000000000000000000000000000000000000000000000000000000009d0008000000040005000a00020080",
+      "selector16bitBE": [
+        157,
+        8,
+        0,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Piano delle puntate alte",
+      "field": "F157_011_00",
+      "offset": 7128,
+      "rawHex": "5069616e6f2064656c6c652070756e7461746520616c746500000000000000000000000000000000009d000b000000050005000a00020080",
+      "selector16bitBE": [
+        157,
+        11,
+        0,
+        5,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Oscura Dimora",
+      "field": "F157_012_00",
+      "offset": 7184,
+      "rawHex": "4f73637572612044696d6f7261000000000000000000000000000000000000000000000000000000009d000c000000060005000a00020080",
+      "selector16bitBE": [
+        157,
+        12,
+        0,
+        6,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Obiettivo dell'oscurità",
+      "field": "F157_013_00",
+      "offset": 7240,
+      "rawHex": "4f626965747469766f2064656c6c276f736375726974849500000000000000000000000000000000009d000d000000070005000a00020080",
+      "selector16bitBE": [
+        157,
+        13,
+        0,
+        7,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Arena combattimenti",
+      "field": "F157_015_00",
+      "offset": 7296,
+      "rawHex": "4172656e6120636f6d62617474696d656e7469000000000000000000000000000000000000000000009d000f000000080005000a00020080",
+      "selector16bitBE": [
+        157,
+        15,
+        0,
+        8,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ponte anteriore",
+      "field": "F159_001_00",
+      "offset": 7916,
+      "rawHex": "506f6e746520616e746572696f726500000000000000000000000000000000000000000000000000009f0001000000320005000a00020080",
+      "selector16bitBE": [
+        159,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Passaggio centrale",
+      "field": "F159_003_00",
+      "offset": 8028,
+      "rawHex": "50617373616767696f2063656e7472616c6500000000000000000000000000000000000000000000009f0003000000010005000a00020080",
+      "selector16bitBE": [
+        159,
+        3,
+        0,
+        1,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio mezzavia tribordo",
+      "field": "F159_020_00",
+      "offset": 8084,
+      "rawHex": "436f727269646f696f206d657a7a6176696120747269626f72646f00000000000000000000000000009f0014000000020005000a00020080",
+      "selector16bitBE": [
+        159,
+        20,
+        0,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ponte piscina",
+      "field": "F159_010_01",
+      "offset": 8140,
+      "rawHex": "506f6e74652070697363696e61000000000000000000000000000000000000000000000000000000009f000a000100030005000a00020080",
+      "selector16bitBE": [
+        159,
+        10,
+        1,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio superiore tribordo",
+      "field": "F159_025_01",
+      "offset": 8196,
+      "rawHex": "436f727269646f696f207375706572696f726520747269626f72646f000000000000000000000000009f0019000100070005000a00020080",
+      "selector16bitBE": [
+        159,
+        25,
+        1,
+        7,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ponte di poppa",
+      "field": "F159_007_00",
+      "offset": 8252,
+      "rawHex": "506f6e746520646920706f7070610000000000000000000000000000000000000000000000000000009f0007000000040005000a00020080",
+      "selector16bitBE": [
+        159,
+        7,
+        0,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala intrattenimento",
+      "field": "F159_006_01",
+      "offset": 8308,
+      "rawHex": "53616c6120696e7472617474656e696d656e746f0000000000000000000000000000000000000000009f0006000100050005000a00020080",
+      "selector16bitBE": [
+        159,
+        6,
+        1,
+        5,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ponte laterale",
+      "field": "F159_011_00",
+      "offset": 8364,
+      "rawHex": "506f6e7465206c61746572616c650000000000000000000000000000000000000000000000000000009f000b000000060005000a00020080",
+      "selector16bitBE": [
+        159,
+        11,
+        0,
+        6,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala centrale",
+      "field": "F159_003_00",
+      "offset": 8420,
+      "rawHex": "53616c612063656e7472616c65000000000000000000000000000000000000000000000000000000009f0003000000080005000a00020080",
+      "selector16bitBE": [
+        159,
+        3,
+        0,
+        8,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Profondità dei Memento",
+      "field": "F161_001_00",
+      "offset": 9040,
+      "rawHex": "50726f666f6e646974849520646569204d656d656e746f000000000000000000000000000000000000a10001000000320005000a00020080",
+      "selector16bitBE": [
+        161,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio superiore",
+      "field": "F161_003_00",
+      "offset": 9152,
+      "rawHex": "436f727269646f696f207375706572696f726500000000000000000000000000000000000000000000a10003000000030005000a00020080",
+      "selector16bitBE": [
+        161,
+        3,
+        0,
+        3,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio di mezzo",
+      "field": "F161_006_00",
+      "offset": 9208,
+      "rawHex": "436f727269646f696f206469206d657a7a6f0000000000000000000000000000000000000000000000a10006000000010005000a00020080",
+      "selector16bitBE": [
+        161,
+        6,
+        0,
+        1,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio inferiore",
+      "field": "F161_008_00",
+      "offset": 9264,
+      "rawHex": "436f727269646f696f20696e666572696f726500000000000000000000000000000000000000000000a10008000000040005000a00020080",
+      "selector16bitBE": [
+        161,
+        8,
+        0,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio sul fondo",
+      "field": "F161_010_00",
+      "offset": 9320,
+      "rawHex": "436f727269646f696f2073756c20666f6e646f00000000000000000000000000000000000000000000a1000a000000020005000a00020080",
+      "selector16bitBE": [
+        161,
+        10,
+        0,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Piazza Stazione Shibuya",
+      "field": "F160_001_00",
+      "offset": 9432,
+      "rawHex": "5069617a7a61205374617a696f6e652053686962757961000000000000000000000000000000000000a000010000000a0005000a00020080",
+      "selector16bitBE": [
+        160,
+        1,
+        0,
+        10,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Entrata del santuario",
+      "field": "F160_006_00",
+      "offset": 9488,
+      "rawHex": "456e74726174612064656c2073616e74756172696f0000000000000000000000000000000000000000a000060000000b0005000a00020080",
+      "selector16bitBE": [
+        160,
+        6,
+        0,
+        11,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ingresso",
+      "field": "F162_001_00",
+      "offset": 11288,
+      "rawHex": "496e67726573736f000000000000000000000000000000000000000000000000000000000000000000a20001000000320005000a00020080",
+      "selector16bitBE": [
+        162,
+        1,
+        0,
+        50,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala d'ingresso",
+      "field": "F162_002_03",
+      "offset": 11400,
+      "rawHex": "53616c61206427696e67726573736f0000000000000000000000000000000000000000000000000000a20002000300080005000a00020080",
+      "selector16bitBE": [
+        162,
+        2,
+        3,
+        8,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Corridoio",
+      "field": "F162_003_00",
+      "offset": 11456,
+      "rawHex": "436f727269646f696f0000000000000000000000000000000000000000000000000000000000000000a20003000000010005000a00020080",
+      "selector16bitBE": [
+        162,
+        3,
+        0,
+        1,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala monitoraggio",
+      "field": "F162_012_01",
+      "offset": 11512,
+      "rawHex": "53616c61206d6f6e69746f72616767696f000000000000000000000000000000000000000000000000a2000c000100050005000a00020080",
+      "selector16bitBE": [
+        162,
+        12,
+        1,
+        5,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ripostiglio Ala ricerche",
+      "field": "F162_016_00",
+      "offset": 11568,
+      "rawHex": "5269706f737469676c696f20416c612072696365726368650000000000000000000000000000000000a20010000000070005000a00020080",
+      "selector16bitBE": [
+        162,
+        16,
+        0,
+        7,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala visite",
+      "field": "F162_009_00",
+      "offset": 11624,
+      "rawHex": "53616c6120766973697465000000000000000000000000000000000000000000000000000000000000a20009000000020005000a00020080",
+      "selector16bitBE": [
+        162,
+        9,
+        0,
+        2,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Sala di supporto",
+      "field": "F162_015_00",
+      "offset": 11680,
+      "rawHex": "53616c6120646920737570706f72746f00000000000000000000000000000000000000000000000000a2000f000000040005000a00020080",
+      "selector16bitBE": [
+        162,
+        15,
+        0,
+        4,
+        5,
+        10,
+        2,
+        128
+      ]
+    },
+    {
+      "text": "Ripost. Corr. del Crepuscolo",
+      "field": "F162_011_02",
+      "offset": 11736,
+      "rawHex": "5269706f73742e20436f72722e2064656c20437265707573636f6c6f00000000000000000000000000a2000b000200090005000a00020080",
+      "selector16bitBE": [
+        162,
+        11,
+        2,
+        9,
+        5,
+        10,
+        2,
+        128
+      ]
+    }
+  ],
+  "rules": [
+    "La tabella menu nomina destinazioni precise spesso safe-room, non sempre intera planimetria. I nomi menu sono prove di contesto, non sostituzioni automatiche.",
+    "Il nome associato al campo con major/minor uguale alla risorsa non cancella i nomi usati in altri texpack.",
+    "Le risorse senza campo non diventano luoghi attivi dalla sola presenza nel DDS."
+  ],
+  "unresolvedClasses": {
+    "noResourceReference": [
+      "RMAP_001_2_1",
+      "RMAP_002_6_0",
+      "RMAP_002_8_0",
+      "RMAP_151_0_0",
+      "RMAP_151_0_1",
+      "RMAP_152_11_0",
+      "RMAP_152_11_1",
+      "RMAP_153_10_0",
+      "RMAP_153_11_0",
+      "RMAP_153_12_0",
+      "RMAP_153_13_0",
+      "RMAP_153_5_1",
+      "RMAP_153_8_0",
+      "RMAP_153_8_1",
+      "RMAP_153_8_2",
+      "RMAP_155_10_0",
+      "RMAP_155_2_2",
+      "RMAP_155_2_3",
+      "RMAP_155_3_2",
+      "RMAP_156_11_2",
+      "RMAP_156_11_3",
+      "RMAP_156_9_1",
+      "RMAP_157_7_1",
+      "RMAP_159_15_0",
+      "RMAP_159_16_0",
+      "RMAP_160_4_1",
+      "RMAP_160_4_2",
+      "RMAP_161_2_1",
+      "RMAP_161_2_2",
+      "RMAP_161_4_1",
+      "RMAP_161_4_2",
+      "RMAP_161_6_1",
+      "RMAP_190_62_0"
+    ],
+    "referencedWithoutTitle": [
+      "RMAP_150_3_0",
+      "RMAP_150_3_1",
+      "RMAP_151_16_0",
+      "RMAP_152_5_0",
+      "RMAP_153_4_0",
+      "RMAP_154_12_0",
+      "RMAP_154_12_1",
+      "RMAP_154_12_2",
+      "RMAP_154_13_0",
+      "RMAP_154_13_1",
+      "RMAP_154_13_2",
+      "RMAP_154_15_0",
+      "RMAP_157_17_0",
+      "RMAP_157_3_0",
+      "RMAP_157_3_1",
+      "RMAP_157_5_1",
+      "RMAP_159_8_0",
+      "RMAP_160_10_0",
+      "RMAP_160_10_1",
+      "RMAP_190_1_0",
+      "RMAP_190_2_0",
+      "RMAP_190_3_0",
+      "RMAP_190_51_0",
+      "RMAP_190_61_0",
+      "RMAP_192_62_0",
+      "RMAP_195_11_0"
+    ]
+  }
+}

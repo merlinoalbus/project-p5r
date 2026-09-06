@@ -1,0 +1,22 @@
+{
+  "pass": true,
+  "contexts": [
+    {
+      "id": "f153_051_00-texpack-138",
+      "nome": null,
+      "campo": "F153_051_00",
+      "texpack": 138
+    },
+    {
+      "id": "f153_004_00-texpack-26",
+      "nome": "Ripostiglio",
+      "campo": "F153_004_00",
+      "texpack": 26
+    }
+  ],
+  "persistentName": "Area 004 — RMAP_153_4_0",
+  "defaultTitle": "Palazzo di Madarame (Museo) — Planimetria",
+  "knownTitle": "Ripostiglio",
+  "unknownTitle": "Palazzo di Madarame (Museo) — Planimetria",
+  "unknownState": "senza-titolo"
+}

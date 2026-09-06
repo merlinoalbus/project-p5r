@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "fields": 209,
+  "maps": 301,
+  "pins": 1429,
+  "passes": [
+    "syntax, source hashes, identity and images",
+    "independent binary fields and pin bytes",
+    "determinism and malformed input"
+  ],
+  "metadataSha256": "080e569dbcb203e01ae1d6d325831ada3e2e7dbc6e4701ec1e755784808df2f6",
+  "scope": "Raw metadata only; not a navigability certification"
+}

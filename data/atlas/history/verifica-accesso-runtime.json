@@ -1,0 +1,71 @@
+[
+  {
+    "entita": {
+      "tipo": "negozio",
+      "chiave": "untouchable"
+    },
+    "esito": "unica",
+    "destinazioni": [
+      {
+        "mappa": "shibuya",
+        "nomeMappa": "Shibuya",
+        "spillo": 207,
+        "nomeSpillo": "Untouchable",
+        "centro": null,
+        "provenienze": [
+          {
+            "tipo": "negozio",
+            "chiave": "untouchable",
+            "criterio": "riferimento-spillo"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "entita": {
+      "tipo": "articolo",
+      "chiave": "untouchable/kogatana-nera"
+    },
+    "esito": "unica",
+    "destinazioni": [
+      {
+        "mappa": "shibuya",
+        "nomeMappa": "Shibuya",
+        "spillo": 207,
+        "nomeSpillo": "Untouchable",
+        "centro": null,
+        "provenienze": [
+          {
+            "tipo": "negozio",
+            "chiave": "untouchable",
+            "criterio": "riferimento-spillo"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "entita": {
+      "tipo": "luogo",
+      "chiave": "shibuya/untouchable"
+    },
+    "esito": "unica",
+    "destinazioni": [
+      {
+        "mappa": "shibuya",
+        "nomeMappa": "Shibuya",
+        "spillo": 207,
+        "nomeSpillo": "Untouchable",
+        "centro": null,
+        "provenienze": [
+          {
+            "tipo": "negozio",
+            "chiave": "untouchable",
+            "criterio": "riferimento-spillo"
+          }
+        ]
+      }
+    ]
+  }
+]

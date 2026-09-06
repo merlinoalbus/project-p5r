@@ -1,0 +1,1848 @@
+{
+  "scope": "17 ROADMAP-associated resources within the 50 unresolved resources; existing extractions only",
+  "priorReport": {
+    "file": "work/parallel-cleanup/nomi-residui-approfondimento.json",
+    "sha256": "cb99270fefe716069b9b0630fb4d64168b2636ab6642334fde2a165f32e9e743"
+  },
+  "summary": {
+    "resources": 17,
+    "fields": 25,
+    "flowFilesScanned": 227,
+    "placeNameCalls": 40,
+    "dynamicPlaceNameCalls": 0,
+    "callsFor190or192": 0,
+    "resourcesWithGraphicalCandidates": 4,
+    "newCertifiedNames": 0
+  },
+  "findings": [
+    {
+      "candidate": "PLC_192_062_00",
+      "text": "Sala del Graal",
+      "verdict": "not-demonstrable-in-inspected-sources",
+      "evidence": "No FLD_PLACENAME_TEX call with major 192 in 227 scripts; 192_062_00.flow only exposes CALL_AT_DUNGEON among place/dungeon naming-related calls. No implementation of native texture loader in decompiled FlowScript.",
+      "missing": "Native default place-card loader or explicit lookup connecting current field192/62 to PLC19206200. CALL_AT_DUNGEON destination alone does not select a place texture."
+    },
+    {
+      "candidate": "PLC_190_001_01",
+      "text": "Dedalo di Chomranut / Area 1",
+      "verdict": "not-demonstrable-in-inspected-sources",
+      "evidence": "No FLD_PLACENAME_TEX call with major190. RMAP1901_0 field is F19000100, whereas PLC third selector is01 and sibling cards02/03 exist.",
+      "missing": "Mementos section/area to place-card selector mapping; third selector cannot be equated to field division or floor without code/table proof."
+    }
+  ],
+  "counterexampleToOverclaim": {
+    "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+    "procedure": "D_AREA_NAME_EFFECT",
+    "line": 1381,
+    "statement": "FLD_PLACENAME_TEX(151, 0x10, 0, -1);",
+    "guards": "GET_MAJOR()==151, GET_MINOR()==16, GET_POS_INDEX() in [0,1], initial skip bit not set",
+    "limitation": "The helper is defined but not called by name elsewhere in this source file; this proves a selector expression, not execution/reachability nor implementation of the native file loader. It does not prove binding for unrelated 190/192 cards."
+  },
+  "resources": [
+    {
+      "code": "RMAP_152_5_0",
+      "key": "nativo-rmap-152-5-0",
+      "fields": [
+        "F152_005_00"
+      ],
+      "candidates": [
+        {
+          "field": "F152_005_00",
+          "file": "outputs/mappe-p5r/png/IT/FIELD/PANEL/PLACE_PICT/PLC_152_005_00.png",
+          "sha256": "836cd58ed2c4802900fc6f3d82d5b3cacaa136445dd1015198da8ec3aa0f2ee8",
+          "text": "Vecchio castello / Canale sotterraneo",
+          "visuallyRead": true,
+          "binding": "filename-only",
+          "selectorEqualsFieldDivision": true
+        }
+      ],
+      "status": "graphical-label-candidate-binding-missing",
+      "fieldScriptsPresent": [
+        {
+          "field": "F152_005_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_154_13_0",
+      "key": "nativo-rmap-154-13-0",
+      "fields": [
+        "F154_013_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F154_013_00",
+          "present": false
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_154_13_1",
+      "key": "nativo-rmap-154-13-1",
+      "fields": [
+        "F154_013_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F154_013_00",
+          "present": false
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_154_13_2",
+      "key": "nativo-rmap-154-13-2",
+      "fields": [
+        "F154_013_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F154_013_00",
+          "present": false
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_157_17_0",
+      "key": "nativo-rmap-157-17-0",
+      "fields": [
+        "F157_017_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F157_017_00",
+          "present": false
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_157_3_0",
+      "key": "nativo-rmap-157-3-0",
+      "fields": [
+        "F157_003_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F157_003_00",
+          "present": false
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_157_3_1",
+      "key": "nativo-rmap-157-3-1",
+      "fields": [
+        "F157_003_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F157_003_00",
+          "present": false
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_157_5_1",
+      "key": "nativo-rmap-157-5-1",
+      "fields": [
+        "F157_051_00",
+        "F157_052_00"
+      ],
+      "candidates": [
+        {
+          "field": "F157_051_00",
+          "file": "outputs/mappe-p5r/png/IT/FIELD/PANEL/PLACE_PICT/PLC_157_051_00.png",
+          "sha256": "e1bbbe7a7626fdfbabee7e9e8d80a08345779c02d47a9d504b2082d2ad26582d",
+          "text": "Casinò / Safe Room",
+          "visuallyRead": true,
+          "binding": "filename-only",
+          "selectorEqualsFieldDivision": true
+        }
+      ],
+      "status": "graphical-label-candidate-binding-missing",
+      "fieldScriptsPresent": [
+        {
+          "field": "F157_051_00",
+          "present": true
+        },
+        {
+          "field": "F157_052_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_160_10_0",
+      "key": "nativo-rmap-160-10-0",
+      "fields": [
+        "F160_010_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F160_010_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_160_10_1",
+      "key": "nativo-rmap-160-10-1",
+      "fields": [
+        "F160_010_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F160_010_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_190_1_0",
+      "key": "nativo-rmap-190-1-0",
+      "fields": [
+        "F190_001_00"
+      ],
+      "candidates": [
+        {
+          "field": "F190_001_00",
+          "file": "outputs/mappe-p5r/png/IT/FIELD/PANEL/PLACE_PICT/PLC_190_001_01.png",
+          "sha256": "523f2f99c89f118916606ff7d850c41a63f1530a9bddde53b2b98ae5a39eece7",
+          "text": "Dedalo di Chomranut / Area 1",
+          "visuallyRead": true,
+          "binding": "filename-only",
+          "selectorEqualsFieldDivision": false
+        },
+        {
+          "field": "F190_001_00",
+          "file": "outputs/mappe-p5r/png/IT/FIELD/PANEL/PLACE_PICT/PLC_190_001_02.png",
+          "sha256": "a5cdd905c434372ac6a6689374f48586092eb247b04e414039204fa19b30fe25",
+          "text": null,
+          "visuallyRead": false,
+          "binding": "filename-only",
+          "selectorEqualsFieldDivision": false
+        },
+        {
+          "field": "F190_001_00",
+          "file": "outputs/mappe-p5r/png/IT/FIELD/PANEL/PLACE_PICT/PLC_190_001_03.png",
+          "sha256": "e0eeaeded8efb6283fb685aee47ff146b6330632db6a303896084e437ac7d707",
+          "text": null,
+          "visuallyRead": false,
+          "binding": "filename-only",
+          "selectorEqualsFieldDivision": false
+        }
+      ],
+      "status": "graphical-label-candidate-binding-missing",
+      "fieldScriptsPresent": [
+        {
+          "field": "F190_001_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_190_2_0",
+      "key": "nativo-rmap-190-2-0",
+      "fields": [
+        "F191_011_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F191_011_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_190_3_0",
+      "key": "nativo-rmap-190-3-0",
+      "fields": [
+        "F191_061_00",
+        "F192_011_00",
+        "F193_011_00",
+        "F193_061_00",
+        "F194_011_00",
+        "F194_061_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F191_061_00",
+          "present": true
+        },
+        {
+          "field": "F192_011_00",
+          "present": true
+        },
+        {
+          "field": "F193_011_00",
+          "present": true
+        },
+        {
+          "field": "F193_061_00",
+          "present": true
+        },
+        {
+          "field": "F194_011_00",
+          "present": true
+        },
+        {
+          "field": "F194_061_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_190_51_0",
+      "key": "nativo-rmap-190-51-0",
+      "fields": [
+        "F191_065_00",
+        "F192_015_00",
+        "F193_015_00",
+        "F193_065_00",
+        "F194_015_00",
+        "F194_065_00",
+        "F195_015_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F191_065_00",
+          "present": true
+        },
+        {
+          "field": "F192_015_00",
+          "present": true
+        },
+        {
+          "field": "F193_015_00",
+          "present": true
+        },
+        {
+          "field": "F193_065_00",
+          "present": true
+        },
+        {
+          "field": "F194_015_00",
+          "present": true
+        },
+        {
+          "field": "F194_065_00",
+          "present": true
+        },
+        {
+          "field": "F195_015_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_190_61_0",
+      "key": "nativo-rmap-190-61-0",
+      "fields": [
+        "F192_061_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F192_061_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_192_62_0",
+      "key": "nativo-rmap-192-62-0",
+      "fields": [
+        "F192_062_00"
+      ],
+      "candidates": [
+        {
+          "field": "F192_062_00",
+          "file": "outputs/mappe-p5r/png/IT/FIELD/PANEL/PLACE_PICT/PLC_192_062_00.png",
+          "sha256": "0e99018353295da8dd313bec253391121d4aa05c2b9681f84bc0f8be4a1d77ef",
+          "text": "Sala del Graal",
+          "visuallyRead": true,
+          "binding": "filename-only",
+          "selectorEqualsFieldDivision": true
+        }
+      ],
+      "status": "graphical-label-candidate-binding-missing",
+      "fieldScriptsPresent": [
+        {
+          "field": "F192_062_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    },
+    {
+      "code": "RMAP_195_11_0",
+      "key": "nativo-rmap-195-11-0",
+      "fields": [
+        "F195_011_00"
+      ],
+      "candidates": [],
+      "status": "no-same-field-graphical-label-in-extracted-place-pict",
+      "fieldScriptsPresent": [
+        {
+          "field": "F195_011_00",
+          "present": true
+        }
+      ],
+      "approvedNames": [],
+      "missing": "Loader/selector mapping from runtime field context to PLACE_PICT; file-number correspondence is insufficient."
+    }
+  ],
+  "calls": [
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_002_01.flow",
+      "line": 667,
+      "procedure": "SUB_GATE_OUT_1STDAY",
+      "arguments": [
+        1,
+        2,
+        0,
+        80
+      ],
+      "statement": "FLD_PLACENAME_TEX(1, 2, 0, 80);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1247,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1251,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        1,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 1, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1257,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        2,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 2, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1264,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        3,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 3, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1273,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        14,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 14, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1282,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        4,
+        2,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 4, 2, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1291,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        4,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 4, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1300,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        5,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 5, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1309,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        6,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 6, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1318,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        7,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 7, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1327,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        7,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 7, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1336,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        9,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 9, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1345,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1354,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        11,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 11, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1363,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        12,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 12, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1372,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 13, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1381,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        151,
+        16,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(151, 0x10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1395,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        152,
+        1,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(152, 1, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1404,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        152,
+        2,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(152, 2, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1413,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        152,
+        4,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(152, 4, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "line": 1422,
+      "procedure": "D_AREA_NAME_EFFECT",
+      "arguments": [
+        152,
+        6,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(152, 6, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_007_00.flow",
+      "line": 1227,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_007_00.flow",
+      "line": 1235,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_007_00.flow",
+      "line": 1245,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 13, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_009_00.flow",
+      "line": 574,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_009_00.flow",
+      "line": 582,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_009_00.flow",
+      "line": 592,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 13, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_010_00.flow",
+      "line": 1011,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_010_00.flow",
+      "line": 1019,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_010_00.flow",
+      "line": 1029,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 13, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_012_00.flow",
+      "line": 827,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_012_00.flow",
+      "line": 835,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_012_00.flow",
+      "line": 845,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 13, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_013_00.flow",
+      "line": 1572,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_013_00.flow",
+      "line": 1580,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_013_00.flow",
+      "line": 1590,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 13, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_015_00.flow",
+      "line": 970,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        0,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 0, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_015_00.flow",
+      "line": 978,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        10,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 10, 0, -1);"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_015_00.flow",
+      "line": 988,
+      "procedure": "D06_AREA_NAME_EFFECT",
+      "arguments": [
+        157,
+        13,
+        0,
+        -1
+      ],
+      "statement": "FLD_PLACENAME_TEX(157, 13, 0, -1);"
+    }
+  ],
+  "sources": [
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/000_001_00.flow",
+      "sha256": "e8ce443df2098eb939a7c3caee1e992d3b53c1a3d8073730fe69bc19ec6b4887"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_001_00.flow",
+      "sha256": "66af0dc92d83ef6b81ff5c27e8b7cff81106466cf946a66fd42ed1cb4d0fda31"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_002_00.flow",
+      "sha256": "cf5079944f346078abf0d088d601ff19491531af5cbddd4e217c187fad6f0036"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_002_01.flow",
+      "sha256": "913d158a4e2b4b44b08c14f021733b0740d5fcc2f9ee80eeef92703a3a1f2fa1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_003_00.flow",
+      "sha256": "ff47f970bdbfacd29903b2515a7dfa70058d429c07474785ace70b6f956edf2f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_004_00.flow",
+      "sha256": "1edb7ebf3bfe95830c82223a3a43b2e7f1efb59e95a456f11c46142f6b8580e5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_005_00.flow",
+      "sha256": "ec11a581a3f44c1ddfaafac4959dfa736c94eb3bf1d93cde1a65b94ecfeca21e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/001_006_00.flow",
+      "sha256": "16dbbabae45468da177368f3c6ae7f31acdc85612fb7df083c176a1c947a2020"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_001_00.flow",
+      "sha256": "7b4ab4b42efc94d502f5a00c4d66197ac64ef0f8271d5a7958b82453f6fa6a32"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_002_00.flow",
+      "sha256": "10e636b355d0266716b8b11058cd2264538e71c507be5ec21bec0084fbabb3cc"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_002_01.flow",
+      "sha256": "414d99443aa387cd7c4fee6f269f03c4f80fc2b50e6b958f8e042ff685fef17a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_002_02.flow",
+      "sha256": "7d107d1d40f0b039a675ce32118f9964f6a578ae62b95c9450c874663481f854"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_003_00.flow",
+      "sha256": "649a26d599e22a40770e57d33e7d3b5f6afa53e3913a54f8ea1b47fe7efde20f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_003_01.flow",
+      "sha256": "2a374452bd899225408f9f52014e2292631edc3117c3c50e75bb22da4a6af768"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_003_02.flow",
+      "sha256": "e7c5394a3cde4691d926ee29adb07a3a95dd6addef287ab588799f5cb025756a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_004_00.flow",
+      "sha256": "14e74708c77fac65250ac53fae392e390f87798b9d95650c0af5ca3d43f888b4"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_005_00.flow",
+      "sha256": "c0057d6f8a5d4bec81725063707d38565f5f6c706db74c43081e62963cb1065f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_006_00.flow",
+      "sha256": "470a88081541058909af73fda84cceacf7b49836c01b6ea2e91d405495e3f343"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_008_00.flow",
+      "sha256": "760ae775ce8c4e35a3dec71c5eb2700f397be31845c23ee6d08f0ff7eeb7aeb1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_010_00.flow",
+      "sha256": "9b488e0f4381593a906af602e0750af9f4daba6ee9573a5acec02a272c706efb"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/002_012_00.flow",
+      "sha256": "6dff2a5240e459d2180b63864d153719252cd0db0a1169db599e4fe7fec51d76"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/003_002_00.flow",
+      "sha256": "01812a9bd3eb804e5fc78688d1d5a63725854e1b9ba2da7ab080378e88464934"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/003_002_01.flow",
+      "sha256": "fde98c2e20228c48104dfe9560ff2a6dc6cb3777f86d4ffe650fec1d3e3636af"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/003_010_00.flow",
+      "sha256": "132104861d312ac4bc4cd2b736c45f42074d6c0c8e3e6dd205eca3ba09a086e9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/005_001_00.flow",
+      "sha256": "dbbf185067bb074d2a82874a8f1e94a72f7d9190642caf715244fb77e2a95ba5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/005_002_00.flow",
+      "sha256": "e538240617bca3e58ea3ac42a3d03104cdb5e2eca342fdbf6724319a438bfcb5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/006_001_00.flow",
+      "sha256": "371e230f8f1a8ccdc9b580631b9afcede9ecca3e4785bfcd446753a0949574c6"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/006_011_00.flow",
+      "sha256": "c6b5422b6b78cd3fefe6d519f35d9c0d73587f73b0cc0b9a064f590f10c4668c"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/007_001_00.flow",
+      "sha256": "f918c818c2a9a486bb9d8826b64df20c1cb7d3b800082ceb962ddf7a826ccfbc"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/008_001_00.flow",
+      "sha256": "6bc7826a71a35e54fbc406c3a8a7f454e88fb32df8b761201128e045611ad913"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/009_001_00.flow",
+      "sha256": "5138f07faf997f7ed5db7006846fb6db7e9b5cf5edf4e5843003afc59f5e48c1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/009_002_00.flow",
+      "sha256": "2c00c361a56c5acd58f51dc4ff799eb09847da73e376c17a51d41b699ce349eb"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/009_003_00.flow",
+      "sha256": "a2097d654be6530918d54415e587762caf683660b64c371183699bf97183151b"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_001_00.flow",
+      "sha256": "e132e60b705a1e23d948a0a0952bafdf06c3b563728eb527a2932e164817a337"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_002_00.flow",
+      "sha256": "98361167052a6edba0f82e17035aa0893ffe203a7302e2203c5fd4e97bd91e04"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_003_00.flow",
+      "sha256": "4abb9b86c286c64d2c49d6712bd0bec7119dcb0b2dec32f667fa0fd8e1752a74"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_004_00.flow",
+      "sha256": "c7f0a32ac9a2a2517ba8c57b75c7e41f03583dfee0f3940ce2f6ad4ba3ccb817"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_011_00.flow",
+      "sha256": "e2250be4ec9e0f5421ca44de087fbab8b3b6371cd0e07ea8de37e152ab36c233"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_012_00.flow",
+      "sha256": "cb375ee5237892dd2b2b2ef1abf964febddf88d2e80ca043933a81de00d160d9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/010_018_00.flow",
+      "sha256": "49d73d063a7654748a1876112dc7277b830500ee2cec5aea0ab774c5f7e3e8ee"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/011_002_00.flow",
+      "sha256": "fb63c9e62ce1e57f1843b95e7a3be7433655d0570147bb854077c40cf3e2550f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/011_003_00.flow",
+      "sha256": "af0193ce56a4f48c7a796294be51312a3ac42f1128348ba3cb54d48f22dc1b01"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/011_004_00.flow",
+      "sha256": "d8195e8f2f4e372cae038e8b1c749e430d4173eef8ca30b5619425cba100d38f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/011_006_00.flow",
+      "sha256": "d7d94b00814d30f1dc95ca9735f994b6dbdf5a944b183b4250b25a954d1b5467"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/012_029_00.flow",
+      "sha256": "f19ae5ee0eb91f15a36a6800779902a2905a5d45a64bafb2f1e090a2333b620e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/021_001_00.flow",
+      "sha256": "c4ace7a2214a1ce6347c9824143cd3193f37289d32a83b93e2c41f1baab99f52"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/022_001_00.flow",
+      "sha256": "b08ef41794f200cf206d6db5e92ef529499c926f2d8b536c5f3c5d86d2211c98"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/120_001_00.flow",
+      "sha256": "1360b749a13352511696d5dd4325667efe96f706d43bf6a59cb4d6d4a5c4b2b6"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/121_001_00.flow",
+      "sha256": "adc26a09eb3ab06750f5f1f65f7ebd5079379a862b6ceae2ad5938a95e544cd3"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/150_002_00.flow",
+      "sha256": "e696ee9885c7ba61dd5f1dd14d844a1b3b618da268ab1a21e236a6b6d51f3316"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/150_003_00.flow",
+      "sha256": "aa2a8d2ce7dddd3b17b4ec303e81695d717a00e7f735a373a2f559f1e84e2474"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_001_00.flow",
+      "sha256": "205391cbfa9a15819598997096dda730b747454b0f9ea200ad04aca663a3fbaa"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_002_00.flow",
+      "sha256": "c49c5effa6b79b9628071b547dccd64811f80c2cd8a7f3c2528c77c304af61d3"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_003_00.flow",
+      "sha256": "7b49ab19468ae2ed48f8a8689edc09618c34e7f93f8830832b4f69393f388d1f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_004_00.flow",
+      "sha256": "5e2a90655aea882832fa742c18509f51830a46d38bf2ed5d01767a870290809a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_005_00.flow",
+      "sha256": "fb70fc3b5d1d84e5607a23a8d71ee541ab6fa4101ccf2afdd5999d627ace483b"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_006_00.flow",
+      "sha256": "5bafe894617202a0149de33d14867a8f7ef1f038303e791fe2d71535f5bb1e38"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_007_00.flow",
+      "sha256": "aaebd00d56ec3072966c9503ea6e07be9c1b5385e3a0fd2b982790da5ac1a46a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_009_00.flow",
+      "sha256": "2bae55f4007241ff3ab4cdda500d4e38c2084f2b9d4ad923ddccb22d51d9cf36"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_010_00.flow",
+      "sha256": "f5aba9c08680e0c215291748ca11cfa0aa90331463cfbdafceb7a8bc716a3b81"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_011_00.flow",
+      "sha256": "f123f19aeb657b3b1420db949ba773648e5d8d706259d075781870efac2c90e3"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_012_00.flow",
+      "sha256": "62d3a6325d81f9a314b4023d4699d21b5280df260cc202589266b97b75a16144"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_013_00.flow",
+      "sha256": "ebbb2888e8a5e96c0f184f1d546db1fc4659daf1cb190933dbc8b3c066e3fcdb"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_014_00.flow",
+      "sha256": "948240f787b470a74580a8de74279836cdb1fb274551814d5eed6c40f1acde5e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_015_00.flow",
+      "sha256": "6621a764e9fd8a62f536ee19f00e7c082708b740cc21867097679cdad0786b90"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_016_00.flow",
+      "sha256": "efe99199abc6f593e50e21e9e2cc87760499734dee60b4d78a1c89ff026626f5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_019_00.flow",
+      "sha256": "39c3896b0f06a88839750948cefe9a5dff0b53a4c7770d4a655d33f71a364ac8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/151_051_00.flow",
+      "sha256": "d847f551e2bed93564df03a260748aef01c0304ef96cfdb25f67e7f7cc2027d7"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/152_001_00.flow",
+      "sha256": "5bedfb19dae536e3a543ac821c234c5d428c8803778e68541a1ca87f21c5edc0"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/152_002_00.flow",
+      "sha256": "9cd33f710eb5a7d0750f8855f77b933a598b307e9987a36b18ff27ca011ef36d"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/152_004_00.flow",
+      "sha256": "3c8b6b17f50f4a04609262bff0f5ffea206e5c2d4bce5d5fa5386a65e10bffe5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/152_005_00.flow",
+      "sha256": "728d130f908a657bcae0a122dd40b11332c9c311d330d7cc98a6514d1db9f0ae"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/152_006_00.flow",
+      "sha256": "6ff97e2b5a4e0e533ef341ed1554660f5cd2132aabdd590523162816a5a962c0"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/152_051_00.flow",
+      "sha256": "fb28fb15976b2c04b7e98af982757ef9a2bae3a80fd1f96aa363ab27d925e299"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_001_00.flow",
+      "sha256": "b84d9febe5674f11a6f114f9dca2e824efa273e1cc30bf2ac7372bea01c31b59"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_002_00.flow",
+      "sha256": "4cd1b6b8d386717491d71ae083acc9ff572abcf7f093a868636ec142af286593"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_003_00.flow",
+      "sha256": "708068725f15831084ac8b06809d47783a630d43bb950cb7eed094b7ca68501a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_005_00.flow",
+      "sha256": "15a9de9468882f2ecc4bc0c05502ad434a29dcac3b784253bcd294950348ad24"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_006_00.flow",
+      "sha256": "483678da03bf1bc1fecb01131b52502d6e2a41c595190254959019beccba8f9d"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_007_00.flow",
+      "sha256": "40a3f67d59e239164d3aede9d27f4cd6e0660e184292fd320f518e04e328a7a9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_008_00.flow",
+      "sha256": "3ff37597ed01f42460936e983ddd5d74684813fb4e2bf3db339ed87d69624d2f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_009_00.flow",
+      "sha256": "154bfee35f30556517afec97941554a0105288d14f2036e11d4f993704e9e826"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_011_00.flow",
+      "sha256": "68a2c7db66037cfd26e00aa847fac3bc012a02ec20879e83e1a2651361ff7559"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_012_00.flow",
+      "sha256": "a78ee9519435cc4ba3696a8f92d4b9d9f8e6844bc639def8144c3d905c302e1e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/153_051_00.flow",
+      "sha256": "44e3b8a16c1a400c133ee429149e14f96b0571b3f9b1e6bae4270f03343b6353"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_001_00.flow",
+      "sha256": "b3c6eeb59b8521ad048cbb7d36c14ba417e0e6d49077aed692083e1c2f1c9f1f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_002_00.flow",
+      "sha256": "2924d3ec40960d1219794d17f6770d152c7476f38c0544f9792d67c59ac5ff11"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_003_00.flow",
+      "sha256": "6fd6aa7bc4d5cf4da70fad633c4df99a2a890e2ca9bcf06da3d4622622907f87"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_004_00.flow",
+      "sha256": "0b0754718a5ba01000e682d3a90226e6e1855e46dc41656bef0af2853c854b9e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_005_00.flow",
+      "sha256": "32efa14eac46af0cb6d9586633ac914de913c05a4ce936f61e0002d114494b03"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_007_00.flow",
+      "sha256": "2d142cabc4ebd1e1c4193257fc28b29b08e22980b3ec2bdd4e57691b8157986e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_008_00.flow",
+      "sha256": "162d501a597b13f74f4617ea227186de2c9595ea001e65ee1bfd5ab1beddf268"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_009_00.flow",
+      "sha256": "4bf17f826fc00f524a651ec2d1992d19dbb3f596e9b1fcfcf49518f339baf2d1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_010_00.flow",
+      "sha256": "41b1523341015d588bcd6edd80c0366ad65b4e94870b67ce674092cbb9685c7c"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_011_00.flow",
+      "sha256": "4f19418c2f0e3b9a96af902cdb57530c5c0e7f0b12270b9a070c5aaed1fdb34e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_014_00.flow",
+      "sha256": "b495527bfce7b8817fb1ccac6163b24c1778e4eaaf9d04d5b48c60ac9b9e8e88"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_015_00.flow",
+      "sha256": "4062b7ea4f3f1e63115c82c017a3e85f336ec64da07730a7315a98e31cb87e18"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_016_00.flow",
+      "sha256": "7058106509891c87b43d4172941d7ef7b9a817c299f42d634e41726d5e4ebaf9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/154_051_00.flow",
+      "sha256": "2c2eb0777af703d05b64c6c0a024ac489f4332b58eb61b9fa936dc8e9c8a2f06"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_001_00.flow",
+      "sha256": "2210e15aba5d3b6883c422518c62df7bea8ddba7f4d06ce5734b4a1515d01576"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_002_00.flow",
+      "sha256": "ba4e2361ff6f6fafb2dcdf68fd82f544e31cb5ed1fcd962bf085db63f823ff5e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_003_00.flow",
+      "sha256": "94848535ded3d6063c3eaefb8b667364a102708d6c471d5d9ed34fbaaf640967"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_004_00.flow",
+      "sha256": "01161a74a81fdc8c990ccc6340d1bc88c6317e2ca2e75b46ce5b96e62f407464"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_005_00.flow",
+      "sha256": "25b3fa2b90be07eeb00adc31a530eff5760ec097551fc897dbba1c0a71a0b597"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_006_00.flow",
+      "sha256": "701cd0b8769fb0f51dda2252baec8f4e48334fbf0fde33c2b8d141286d1fc8cb"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_007_00.flow",
+      "sha256": "4f56b106fe5c11597d5697e9a535aba83808c1b95a722528eb3e9b0d7ee8ea22"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_008_00.flow",
+      "sha256": "898dfe2350b2f5a587e531378bbd99bece90428ef8b80c57abc695156bcc3cd4"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_009_00.flow",
+      "sha256": "41c06450db623d9979f25f675a9f49d3ba45f74ed5d437a1b7ea5e35786abcdb"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_010_00.flow",
+      "sha256": "b7816f42536531ebf57ff06b6f62186a14a3261c0f9acfb95147cea9c7d1c21e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_011_00.flow",
+      "sha256": "57944dd429fd5672448452a08e8b1cb64b91bc0489300868fa2a841a50eca394"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_013_00.flow",
+      "sha256": "f61f1be9a399e9815fed540e7b8c98da3b6014cc56dc4eb8e6375d61c25dae56"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/155_051_00.flow",
+      "sha256": "6d6866b3094fc875bcea120d4bb74312b7071af78db8fea29667799e0f50c875"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_001_00.flow",
+      "sha256": "27356fe697cfc7bb3fccb46a64a66aa0b6e8d9c2702e563f5513d62dcb04d08e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_002_00.flow",
+      "sha256": "1237e6c3ffd0791429ae1e25d2101f7352fc0b130459af4e5c5f5b123e1f1c48"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_003_00.flow",
+      "sha256": "2aa819c1d7e072c748336d0386545ea1a0634a56b4f4d774ec690915b842bb64"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_004_00.flow",
+      "sha256": "cab24b1883c4205387f24f5cb4ac68eb1a1e4ba52da9e973e372ce051d198118"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_005_00.flow",
+      "sha256": "10bd4b3b5e8906ca26ee17b71ec0e3d3119a73bc1c61f3f87d48869863b095ad"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_006_00.flow",
+      "sha256": "f54267e143f2aa82450b45dbf1fc7293cdb23ace0cc559ba4413e63d3a3e1ad9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_007_00.flow",
+      "sha256": "2bae91f82fddc8db782085a087a0ff03d7fbe422e33af50d6d5418ac3580af6a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_008_00.flow",
+      "sha256": "ad3ecc3c5265248fe03ca5289d91e54fa0c8e09adac6b29596a6ccdb71e572cc"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_009_00.flow",
+      "sha256": "3fdca093141039b8fa25fbbaf4959a065e7522416831a959c0ae461bf9bc40e1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_010_00.flow",
+      "sha256": "2f0ca6256e48167c8c57da587281cd69465bc85624237ecd39013047c492971f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_011_00.flow",
+      "sha256": "60f7dd71653ef1684ad24c6276c065ca6f699131e1b3a881e7b216b942113f39"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_012_00.flow",
+      "sha256": "79c52b3392dbea6c48f92b9c7bf591fc563a74e928e4de4f791438a617c9ecda"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_013_00.flow",
+      "sha256": "e5b6d816587e87ee1812543c4efaaba027dc1449448273fedb3fbe15e936ebe1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/156_051_00.flow",
+      "sha256": "91245d3ce13e36e02c660c2bfdc8630feb54a117487623e9883939ff129fb524"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_001_00.flow",
+      "sha256": "e871d2a905ffdd358553aaff8efbf8a8b7749e547f46eedc0a5a93f78ce2d347"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_002_00.flow",
+      "sha256": "882ea4100761109c55737402cf3041562a9f013f3e037e353ba1daefd3d05500"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_004_00.flow",
+      "sha256": "23787628c5473665c80039412700ce1d33a71efa4e7d91d2f59745de402917aa"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_005_00.flow",
+      "sha256": "8e3109c4a916ef3441f72172faf6a37784db24978ff6f4ea7632bd72ac8dd9ad"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_006_00.flow",
+      "sha256": "0945356d3f08fca87c96e91422aae04a737bdf9463ff03ffa50eeb63b981c5d3"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_007_00.flow",
+      "sha256": "ce1200cf65d500c87f3f683fd712fbbf87aee72dd4a0ce591b588510e0495ce4"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_008_00.flow",
+      "sha256": "20dcf93e3a5a1fb9a4f08f56d2b734a6820bf044ef671e222269543f3f0603d8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_009_00.flow",
+      "sha256": "0a13a6c1da035489ec91ab60c975a3677ce74f9255126112268732cdcf84ec3b"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_010_00.flow",
+      "sha256": "56d9023ca503cac255bc3201a336193633aa46c99ad9d4713bdf31e04c3ee85d"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_011_00.flow",
+      "sha256": "cafccdfaac28a20d04772b885e51dd2532f7022695531c7987f29075b8fa6bf6"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_012_00.flow",
+      "sha256": "aaaedb13a7f6f06fe49225175ea0f733671e5ad6ae7b716ef7dcca714e369576"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_013_00.flow",
+      "sha256": "870659a5a56c247cc64d947a878199145c7228c4c0bf2aad7e1389b272f12f22"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_014_00.flow",
+      "sha256": "80168af52b4d9c8b9c4e94d4b08b515f9eda641bf4e5627fdad93d0557362813"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_015_00.flow",
+      "sha256": "0ceb634c7dd384d705321717502db03fe5e47167b8ed84cc20a654c8a9b40daa"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_016_00.flow",
+      "sha256": "499e8a09873bf7e7c5b6ef095c5cc1e7225df13ee65c8a4a7ecf4fbe0ba0f0fd"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_018_00.flow",
+      "sha256": "64ff40625f4846da0ad3d1048da0c9c2e5a950bc1e3e7c3f18dbe83ec786f441"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_051_00.flow",
+      "sha256": "42709b10607f9fa07758837a70cc0e74abc9f5764fbd274ea1e97433adb82926"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/157_052_00.flow",
+      "sha256": "44647ddc569d28489f58871c7a886bd3d1871d04ae0045b2251ce10abe398937"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_001_00.flow",
+      "sha256": "f52190b65bb8a8911ca2ef322f71614032101ee29bfb5ff18b072cf6feae2d5e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_002_00.flow",
+      "sha256": "7e5fd419b6a92ee080afde41719597cfaa43865fb3c238a7d2bdfbe0cb48fe39"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_003_00.flow",
+      "sha256": "b8bd7ceba2626ed55e999a3581cde41f3b23d6b732648eba016b9f5e8cb15e26"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_004_00.flow",
+      "sha256": "4c30ae1c7742f7650dd0fa6f18d5944f4e8c105cd29569f31905b510eed28ec8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_005_00.flow",
+      "sha256": "3633a6c0bf749591211b169cae731168786a42caaded5df343be4b4c97c56ab1"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_006_00.flow",
+      "sha256": "65d2f5e1448eae04df5b9a5fa375974f531bc3fc22a54f077eb8415a12893c5e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_007_00.flow",
+      "sha256": "8d838345be775c4d440984793420fade5d71aa775901df5591e19724c1cde65f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_008_00.flow",
+      "sha256": "2b644551376559a5d33b55a59ebe4a43ce8f423554fd881b0da6977e280b18cc"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_009_00.flow",
+      "sha256": "52e822721dccad361e756d30e0f83f5835eef2ff921209c4ada46e1c90bf40ea"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_010_00.flow",
+      "sha256": "1861851dcdd07df9539c4837680ef8652cc3a1fb4c5f01b47c00b94d78477191"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_011_00.flow",
+      "sha256": "33adf937c497a14ee4487d5eb775e127fba61bb98234444323173ff8e1b0ce3e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_012_00.flow",
+      "sha256": "373bace3ea427263e73a19717d74d0c07898f6396c4d27c1f8cb70e9247efb93"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_013_00.flow",
+      "sha256": "1535a9e371f4c5810234f77150eae3c856955957974f0d56265e7ddfce64d631"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_020_00.flow",
+      "sha256": "7d96ec9782fc6d49af255df6631cbdc9614cb50a7289198802af0fd007464912"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_025_00.flow",
+      "sha256": "2c11f4966052753a63adfb1e5bb3c045e935fc599bae69a096b05bd0f2d14ad6"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_030_00.flow",
+      "sha256": "56ccdd42691bc0b0effafa05996929981c573f1b39a831f86b0e3d96c1419d7c"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_035_00.flow",
+      "sha256": "bb561054caeb13f2eadc4522df01a9f7c05eccc8138891cf0872e1766b27e05f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/159_051_00.flow",
+      "sha256": "df34a3e4e31c350e1a6bc383f9aa4989a26d17de5336138040bb72e0d6aa7741"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_001_00.flow",
+      "sha256": "47ec283e20d8cd597fcd14e9356d5cff2ea0df9c931b25d5cce03172b1acd31e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_002_00.flow",
+      "sha256": "778d02c4dd217646780fbac2d55710fca23ec5893cf94d63d9f14c271a855e47"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_003_00.flow",
+      "sha256": "c90456fb80558c0f92b38c8ac8144aac8469d477e6635f12937d73392b2896b8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_004_00.flow",
+      "sha256": "552daa99abef4e772b692eb4743197b4ff7caeea6ecc77e176c2b29dfeed7121"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_005_00.flow",
+      "sha256": "ee43f8a95e2effd2fd3c80e07b16a17de65b3814e1f64fe33f2cb21528a450cf"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_006_00.flow",
+      "sha256": "726bcda81591d4bbab9cbe9fe45a2f28936565fa80ce6e46f95f1171c28689bf"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_007_00.flow",
+      "sha256": "b8d0508fa02cd47a88ce692474d8ee3cb63c67d738346385c0036dde918a1bf4"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/160_010_00.flow",
+      "sha256": "41908ce61f757e4627a86537a43bd57bfd730497139c736d22933a5a503a638e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_001_00.flow",
+      "sha256": "a8346c39901106847accaccdfa78e3ca3fa7059a25f77c12391eccb366348a0e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_002_00.flow",
+      "sha256": "52b987dd2425f5ea3d44b79d4fe33334bda8db0ee242b7431a76b5afe8b0f524"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_003_00.flow",
+      "sha256": "78105d2f338b51c4af692fbcbcdb9ef407bf83a15e854a7fbb19efea841f420b"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_004_00.flow",
+      "sha256": "2cfc702504ed03082579cb605b90bff7ebd5c431a46d018419a00b56f614053d"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_005_00.flow",
+      "sha256": "d6117cc64515794dccb2438f257c1afe682bc644022ffb510d811c676a556d88"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_006_00.flow",
+      "sha256": "7d5e9dee54e30c41d8702d47d5754110dc175e01f44279fab886029252192b0f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_007_00.flow",
+      "sha256": "a7d2c7f50cce903289d271c591668a1b1792d8d62f409ad3f93c633386f40a02"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_008_00.flow",
+      "sha256": "924d2cf59cc36f0c57f158c770e99f72f3bfeebbcd3ecb0a659e5927a77e79dc"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_009_00.flow",
+      "sha256": "ac9018be22b9802ff6fa7ecb6fbc3ec0bfe686427f123f32a63e424ef0a70568"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_010_00.flow",
+      "sha256": "e3bd15b7c42796a534009648c95b8eb841541da28fc962e142072aea0bcbd0c5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_011_00.flow",
+      "sha256": "d7a020a5755fc93de536128a033db72bf7edb2d61b3eff921c6a1c67a94d33ab"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/161_051_00.flow",
+      "sha256": "9d56c87aebcf1f8b79cf106179d67b6c12c0f3591b3aba5da907a317180c0bf0"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_001_00.flow",
+      "sha256": "f121e5955a71d023d7be795e78e33d96a2c6e265ab389c78e87f43811724118b"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_002_00.flow",
+      "sha256": "09708efc847d8fc0227aa59311058e9f449ad44484de2f142a8652fa2b59877c"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_003_00.flow",
+      "sha256": "202eab37314154fc5f38ad7ef75eeafb2e2a489a1c0da72e17ad69e74473584f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_004_00.flow",
+      "sha256": "484e4bd3b2ad7bc212e5ebeb78ea2a4841e9607f76139cd711443fbfb2bebac4"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_005_00.flow",
+      "sha256": "9ce4e94007f38dcd1c0d08450d452bf68a4ba4240bfd13fbcba020592a4c0972"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_007_00.flow",
+      "sha256": "a96bb13cc741db025390b9a9a5fb4cf82d3699cbe8d2afaf50337b6561511fe5"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_009_00.flow",
+      "sha256": "961c91e56d18a465c3a2262d8473a5c1807ceb7894545d7a42d6c1d85d0b7562"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_010_00.flow",
+      "sha256": "26b17e6269686508748ddb8629549bcd2a1772c72faac4e45e298d2c33400a9a"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_011_00.flow",
+      "sha256": "91cce8c3a565a8769e5a22691d0906912dce9279d4c417e5a0ba5db9bc8720c8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_012_00.flow",
+      "sha256": "b9c5401c6e010f12ca8ad314b8e1770a1f9852753ccb4cefeb5555508a1c1319"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_014_00.flow",
+      "sha256": "aecc01079c8a9fd6a29810e8eaf61070a25ec4a57651ad158e2ff49eac72d7f4"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_015_00.flow",
+      "sha256": "a3298c9c1e574a539332ffc61067740edeb99140d00badaed98f68d49e3973aa"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_016_00.flow",
+      "sha256": "8e045ca13953bad9f9813025574272e8e1456b263d1919fd80d7fcaaf0be02e6"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_051_00.flow",
+      "sha256": "3ee8c8de640bb79d8d31ea8346a7297e7afde0b025a92eb038a3b7b7b29a3e6c"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/162_052_00.flow",
+      "sha256": "b256e5d2a78b50091b1ed44b44057fab81372e239a1e653ec259162e886a97ce"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/190_001_00.flow",
+      "sha256": "87223b16691bc3d9379d20a1091f5aa04118485788c5f535d6fa0d459dae6b82"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/190_051_00.flow",
+      "sha256": "d2a316048417771a7bbf6c3bc4e09b4fe9e4ed9d249be3ebdd477180bdb6d904"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_011_00.flow",
+      "sha256": "76b9e744c51f7685679c68c0bf59abcc4ee51287c61bb6cbe70247f97856d57f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_021_00.flow",
+      "sha256": "a9adabbb8579511d3c55b403582cab2c398eb385f11863e2613b97074270ebd2"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_025_00.flow",
+      "sha256": "9499686f1b5928e7cfd8025c58c89037db819ed5680349ffb73dae791e1f565d"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_050_00.flow",
+      "sha256": "d6953a5f36f28cecfca705ced7f594995d8c2c5486a75ca44015a9fba4be70f8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_061_00.flow",
+      "sha256": "f200153dcca4e47a278bc9876a8a92aa28efc4f859e1252bf7516c865f7a0f15"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_065_00.flow",
+      "sha256": "2358a380e9f3f801f5dd289b05ca059dde1018f3821a4fc18b8ceb3560988010"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/191_071_00.flow",
+      "sha256": "377d4242f07a2d01ab8d68e904316898d2653c70b7387b9f6fafff0cebf52f34"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/192_011_00.flow",
+      "sha256": "93d4c4092489849884ef39741ad1191bceddb3ada4998a26cbe647d21525a4c3"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/192_015_00.flow",
+      "sha256": "50d1e9593bd813867a1a32a01696f937aaece5259f7eeb1d0a7c7e903e557a10"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/192_021_00.flow",
+      "sha256": "315f0d9ef2d2fcb26999094669529155aab25c6c0120682ef54f738ae8e6101e"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/192_061_00.flow",
+      "sha256": "1a265bbc061c38f56ca82d0ce55af47e352f23baa77577893c745f790d61b5a9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/192_062_00.flow",
+      "sha256": "78d59ad0374606c22b7c47c84636ff7a5a64c4e43ecc198fa0d605092830b349"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/193_011_00.flow",
+      "sha256": "ac66abea87905049424c1371f86093fce5680fbe01a5842bc706c706fa7a5283"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/193_015_00.flow",
+      "sha256": "af1907721a776434ef7ac9afc44d15c0c4846ffb184abc8eccffc4dad1d9ca25"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/193_021_00.flow",
+      "sha256": "54ec7afd7749d7b0b4de1440144e600767906e7053fb951246a52f06957cf984"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/193_061_00.flow",
+      "sha256": "10a628119f23d42a008adead354e669045d3f6a855f8841057ac619aa98c9b6f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/193_065_00.flow",
+      "sha256": "bb28059eb6d1ed726c9c53649bc3fa824c8cd05566df9968d7b44d8900bbc600"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/193_071_00.flow",
+      "sha256": "4a89e850dcfcc6ef0c050d9efbec5e91b1305c70c02c199c998c2e0b0a0e1945"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_011_00.flow",
+      "sha256": "23e7092e3d5de0894e708bac3c0c1eaf2e00caf0172b025a55fa84c8836afa66"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_015_00.flow",
+      "sha256": "28167d9f936f2e327de7e09131eeba57750c4aaaee76f02bb6502e1f29d8090b"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_021_00.flow",
+      "sha256": "0ba10f3321ca88798d072735153b38ab41f5488153b078482d549f18a1e0d234"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_061_00.flow",
+      "sha256": "0a8ff824ccc24c98d3df59573572bcbb40ad90f01f9c435bb1ec60e08c0af6a8"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_065_00.flow",
+      "sha256": "9a2f79656167bb581aca6ee65a9bc8abf0d9790b705e62253bf649e6992f44ad"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_071_00.flow",
+      "sha256": "9ecd53731d02494ff639b8323a56c5c36c32a800a13fd16d67d13fd065f081a9"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/194_073_00.flow",
+      "sha256": "1f4e47b17b1cdcb9d5821e48936ac3be60e800f9c2b5fc8525088b5e2584686f"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/195_011_00.flow",
+      "sha256": "15505ffedadb6ac40f6e770b124bb0fb79cc0019f5245f7e10a5eb00375e69bf"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/195_015_00.flow",
+      "sha256": "da9c20ed1280b4763451d547438797494b23eb01558ab44f970472505c4bab93"
+    },
+    {
+      "file": "outputs/mappe-p5r/campi-completi/scripts/195_021_00.flow",
+      "sha256": "9e0b9819fa9fa71a6e48f282ea9b88704bde9669abb7c0fb87bb580d61776d33"
+    }
+  ],
+  "limitations": [
+    "Absence in 227 extracted field scripts does not exclude default engine behavior or scripts outside this corpus.",
+    "No executable loader disassembly or runtime trace available in inspected evidence.",
+    "No mass decompilation or extraction performed. No names, app code or database changed.",
+    "Previously validated 190-row FLDDNGPLACENO decoding reused, not repeated."
+  ]
+}

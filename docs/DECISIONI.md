@@ -110,3 +110,6 @@ Nome visibile locale (Piano 0); ricerca con percorso (Shibuya › Castello Imper
 
 ### Ingresso da Città
 Confermato dall’utente: mappa e punto iniziale per quartiere. La scelta è visuale nella pagina del quartiere, con ricerca del percorso completo, tocco sull’immagine e coordinate accessibili da tastiera. Si può regolare l’ingrandimento e ripristinare il comportamento predefinito.
+
+### 2026-09-06 — Un solo mondo di mappe e luoghi
+L'utente richiede che Mappe, Palazzi e Dedali, Città, negozi e inventario siano accessi allo stesso atlante. Si introduce una risoluzione comune delle associazioni esatte, preservando identità interne, alias, ingressi configurati e dati personali. I casi multipli restano scelte esplicite; l'assenza di un'associazione non autorizza a inventare un pin. La ricostruzione dai dati originali e la sostituzione verificata delle mappe restano attività aperte.

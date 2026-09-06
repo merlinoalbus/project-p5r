@@ -1,0 +1,22 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("154_004_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D03_MOVE_154_005()
+{
+    CALL_FIELD(154, 5, 0, 0);
+}
+

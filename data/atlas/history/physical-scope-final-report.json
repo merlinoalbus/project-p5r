@@ -1,0 +1,19 @@
+{
+  "pass": true,
+  "results": [
+    {
+      "database": "work/organization-final-copy.db",
+      "native": 301,
+      "cityRestored": 24,
+      "emblemsExcluded": 10,
+      "platform": true
+    },
+    {
+      "database": "work/organization-fresh-install.db",
+      "native": 301,
+      "cityRestored": 24,
+      "emblemsExcluded": 10,
+      "platform": true
+    }
+  ]
+}

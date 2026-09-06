@@ -1,0 +1,245 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("157_016_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D06_157_16_minimap_00()
+{
+    // bit id (536870912) + (2501) = 8645
+    BIT_ON((0x20000000 + 2501));
+}
+
+
+// Procedure Index: 1
+void D06_157_16_minimap_01()
+{
+    // bit id (536870912) + (2299) = 8443
+    BIT_ON((0x20000000 + 2299));
+}
+
+
+// Procedure Index: 2
+void miniMAP_LR_SET()
+{
+    // bit id (536870912) + (3015) = 9159
+    BIT_ON((0x20000000 + 3015));
+}
+
+
+// Procedure Index: 3
+void CardOpen()
+{
+    int var0;
+    var0 = FLD_OBJ_CNV_RESHND(2);
+    FLD_MODEL_ANIM(var0, 1, 0, 0, 1.00f);
+    MDL_ANIM_SYNC(var0);
+    MDL_ANIM(var0, 2, 0, 0, 1.00f);
+    FLD_OBJ_MODEL_COLLIS(var0, 0);
+    FLD_OBJ_MODEL_COLLIS(var0, 1);
+}
+
+
+// Procedure Index: 4
+void D06_16_YOKOKUJOU_EVENT()
+{
+    return;
+}
+
+
+// Procedure Index: 5
+void RouletteDoor_Open()
+{
+    int var1;
+    int var2;
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(35.3515f, 1313.214f, 1675.387f, -0.0102f, 0.9898f, 0.1041f, 0.0969f, 0);
+    var1 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_SET_TRANSLATE(var1, -328.5287f, 1000.80f, 2019.11f, 0);
+    FLD_MODEL_SET_ROTATE(var1, 0, 0, 0, 0);
+    MDL_ANIM(var1, 0, 1, 0, 1.00f);
+    FLD_PTY_MODEL_SET_STD_POS();
+    FADEIN(5, 20);
+    FADE_SYNC();
+    var2 = FLD_OBJ_CNV_RESHND(4);
+    FLD_MODEL_ANIM(var2, 1, 0, 0, 1.00f);
+    MDL_ANIM_SYNC(var2);
+    MDL_ANIM(var2, 2, 0, 0, 1.00f);
+    FLD_OBJ_MODEL_COLLIS(var2, 0);
+    FLD_OBJ_MODEL_COLLIS(var2, 1);
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    FLD_CAMERA_UNLOCK();
+    // bit id (536870912) + (2228) = 8372
+    BIT_ON((0x20000000 + 2228));
+    FADEIN(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 6
+void POKER_MAE()
+{
+    
+    if (GET_COUNT(150) < 56050)
+    {
+        SET_COUNT(150, 56050);
+    }
+
+    Fld_FadeOut_CallEvent();
+    CALL_EVENT(384, 101);
+    // bit id (536870912) + (2214) = 8358
+    BIT_ON((0x20000000 + 2214));
+    
+    if (GET_COUNT(150) < 56100)
+    {
+        SET_COUNT(150, 56100);
+    }
+
+    CALL_FIELD(157, 0x10, 2, 0);
+}
+
+
+// Procedure Index: 7
+void Boss_Floor_Move()
+{
+    int var3;
+    var3 = FLD_SCRIPT_READ(157, 0x10, 130);
+    FLD_SCRIPT_READ_SYNC(var3);
+    FLD_SCRIPT_EXEC(var3, 0);
+    FLD_SCRIPT_FREE(var3);
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 49)) == 1)
+    {
+        FADEOUT(3, 10);
+        FADE_SYNC();
+        FLD_START_BOSS(48);
+    }
+
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 11
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 14
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 18
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 19
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 20
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 21
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+

@@ -1,0 +1,163 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("006_011_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 1
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 2
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 3
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 4
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 5
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 6
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 7
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 11
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 14
+void SUB_MoruShowFace()
+{
+    int var0;
+    int var1;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var0 = FLD_PC_GET_CURRENT_RESHND(0);
+        var1 = MDL_GET_ITEM_RESHND(var0, 2);
+        MDL_ANIM(var1, 50, 0, 0, 1.00f);
+        MDL_ANIM_NEXT(var1, 51, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 15
+void SUB_MoruReturnBag()
+{
+    int var2;
+    int var3;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var2 = FLD_PC_GET_CURRENT_RESHND(0);
+        var3 = MDL_GET_ITEM_RESHND(var2, 2);
+        MDL_ANIM(var3, 52, 0, 5, 1.00f);
+        MDL_ANIM_NEXT(var3, 0, 1, 0, 1.00f);
+    }
+
+    return;
+}
+

@@ -1,4 +1,10 @@
+import { calcolaCollezioniImmagini } from './collezioniImmagini.js';
+import { isDeepStrictEqual } from 'node:util';
+import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
+import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe.js';
 import path from 'node:path';
+import type { DestinazioneSpillo } from '../../../shared/types.js';
+import { leggiDestinazioneSpillo, salvaDestinazioneSpillo, verificaDestinazioneSpillo } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { slug } from '../../../shared/slug.js';
 // ============================================================
@@ -20,7 +26,7 @@ import { creaZip, type VoceZip } from '../../utils/zip.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
-interface RigaSpillo { id: number; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null }
+interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null }
 
 function rigaMappa(chiave: string): RigaMappa {
   const r = prepared('SELECT * FROM mappa WHERE chiave = ?').get(idMappa(chiave)) as RigaMappa | undefined;
@@ -46,11 +52,26 @@ function immagineDi(r: RigaMappa): { chiave: string; createdAt: string } | null 
   return null;
 }
 
-function riassunto(r: RigaMappa): MappaRiassuntoDto {
+function presentazioneMappa(chiave: string): Pick<MappaRiassuntoDto, 'contesti' | 'gruppoImmagini'> {
+  if(!prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get())return {};
+  const r=prepared('SELECT contesti_json,gruppo_immagini_json FROM mappa_presentazione WHERE mappa_chiave=?').get(chiave) as {contesti_json:string;gruppo_immagini_json:string|null}|undefined;
+  return r?{contesti:JSON.parse(r.contesti_json),...(r.gruppo_immagini_json?{gruppoImmagini:JSON.parse(r.gruppo_immagini_json)}:{})}:{};
+}
+
+// Illustrazioni editoriali documentate in docs/grafica/prompt-immagini.md �19.
+const ILLUSTRAZIONI_EDITORIALI = new Set(["mappe/citta-ikebukuro", "mappe/citta-harajuku", "mappe/citta-ueno", "mappe/citta-inokashira-park", "mappe/citta-shinagawa", "mappe/citta-nakano", "mappe/citta-ogikubo", "mappe/citta-yokohama-chinatown", "mappe/citta-maihama", "mappe/citta-roppongi", "mappe/citta-tsukishima", "mappe/citta-meiji-shrine", "mappe/citta-ichigaya", "mappe/citta-suidobashi", "mappe/citta-asakusa", "mappe/citta-mementos"]);
+function collezioniImmagini(){
+ const righe=prepared('SELECT * FROM mappa').all() as RigaMappa[];
+ return calcolaCollezioniImmagini(righe.map(r=>({chiave:r.chiave,genitore:r.genitore_chiave,nome:r.nome,ordine:r.ordine,...presentazioneMappa(r.chiave),fisica:!!immagineDi(r)||!!(r.asset&&!ILLUSTRAZIONI_EDITORIALI.has(r.asset)&&(r.larghezza??0)>0&&(r.altezza??0)>0)})));
+}
+function riassunto(r: RigaMappa, collezioni=collezioniImmagini()): MappaRiassuntoDto {
   const c = conteggi(r.chiave);
   const img = immagineDi(r);
   return {
+    ...presentazioneMappa(r.chiave),
+    ...(collezioni.has(r.chiave)?{immagineCollezione:collezioni.get(r.chiave)}:{}),
     chiave: chiaveMappa(r.chiave), nome: r.nome, nomeCompleto:nomePercorso(r.chiave), tipo: r.tipo, genitore: r.genitore_chiave?chiaveMappa(r.genitore_chiave):null, ordine: r.ordine,
+    genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as {nome:string}|undefined)?.nome ?? null : null,
     immagineUrl: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null,
     asset: assetPredefinitoMappa(chiaveMappa(r.chiave)), assetOriginale:r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
     origine: r.origine, numeroSpilli: c.spilli, numeroFigli: c.figli, updatedAt: r.updated_at,
@@ -59,7 +80,8 @@ function riassunto(r: RigaMappa): MappaRiassuntoDto {
 
 /** Albero completo (piatto, con genitore): radici prima, poi per ordine. */
 export function elencaMappe(): MappaRiassuntoDto[] {
-  return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, nome').all() as RigaMappa[]).map(riassunto);
+  const collezioni=collezioniImmagini();
+  return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, nome').all() as RigaMappa[]).map(r=>riassunto(r,collezioni));
 }
 
 function percorsoDi(r: RigaMappa): Array<{ chiave: string; nome: string }> {
@@ -89,11 +111,12 @@ function dettaglioRiferimento(tipo: TipoRiferimento | null, chiave: string | nul
       const stato = partitaId ? (prepared('SELECT stato FROM punto_partita WHERE partita_id = ? AND punto_chiave = ?').get(partitaId, chiave) as { stato: string } | undefined)?.stato ?? null : null;
       return { tipo: 'punto', punto: { chiave: p.chiave, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dungeon: p.dungeon_chiave, area: p.area_chiave, stato } };
     }
+    case 'attivita':
     case 'luogo': {
       const l = prepared('SELECT chiave, quartiere_chiave, tipo, nome, cosa_offre, quando, negozio FROM luogo WHERE chiave = ?').get(chiave) as { chiave: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; quando: string | null; negozio: string | null } | undefined;
       if (!l) return null;
       const negozio = l.negozio ? negozioDettaglio(l.negozio, partitaId) : null;
-      return { tipo: 'luogo', luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando }, negozio };
+      return { tipo, luogo: { chiave: l.chiave, quartiere: l.quartiere_chiave, tipo: l.tipo, nome: l.nome, cosaOffre: l.cosa_offre, quando: l.quando }, negozio };
     }
     case 'negozio': {
       const n = negozioDettaglio(chiave, partitaId);
@@ -165,7 +188,8 @@ function identitaSpillo(s: { tipo: string; nome: string; x: number; y: number; r
   return JSON.stringify({ tipo: s.tipo, nome: s.nome, x: s.x, y: s.y, riferimento: s.riferimento ? { tipo: s.riferimento.tipo, chiave: s.riferimento.chiave } : null });
 }
 
-function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
+type DettagliSpillo = Omit<SpilloDto, 'mappaChiave' | 'x' | 'y' | 'destinazione' | 'destinazioneNonDisponibile'>;
+function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo {
   const dettaglio = dettaglioRiferimento(r.riferimento_tipo, r.riferimento_chiave, ctx.partitaId);
   let raccolto = ctx.raccolti?.has(r.id) ?? false;
   // Un punto di dungeon già gestito nella Guida (ottenuto/esaurito) conta come raccolto anche sulla mappa.
@@ -175,25 +199,40 @@ function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const disponibilita = ctx.st ? valutaRequisiti(perValutazione, ctx.st) : undefined;
+  const esitoVisibilita = ctx.st ? valutaRequisiti(perValutazione, ctx.st) : undefined;
+  const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
-    id: r.id, mappaChiave: chiaveMappa(r.mappa_chiave), tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
-    nome: r.nome, descrizione: r.descrizione, x: r.x, y: r.y,
+    id: r.id, tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
+    nome: r.nome, descrizione: r.descrizione,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
-    collezionabile: r.collezionabile === 1, condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
+    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
+}
+
+function spilloDto(r: RigaSpillo, ctx: ContestoSpilli = {}): SpilloDto {
+  if(!r.mappa_chiave)throw httpErrors.conflict('contenuto-guida','Il contenuto non ha una posizione geografica.');
+  return { ...dettagliSpillo(r,ctx), ...leggiDestinazioneSpillo(r.id),mappaChiave:chiaveMappa(r.mappa_chiave),x:r.x,y:r.y };
+}
+function elementoSpilloDto(r:RigaSpillo,ctx:ContestoSpilli={}):SpilloDto|SchedaContenutoGuidaDto {
+  return r.area_guida_chiave?{...dettagliSpillo(r,ctx),areaGuida:r.area_guida_chiave}:spilloDto(r,ctx);
+}
+export function schedeContenutiGuida(partitaId?:number):Map<number,SchedaContenutoGuidaDto> {
+  const ctx=contestoSpilli(partitaId);
+  const righe=prepared('SELECT * FROM spillo WHERE area_guida_chiave IS NOT NULL ORDER BY id').all() as RigaSpillo[];
+  return new Map(righe.map(r=>[r.id,{...dettagliSpillo(r,ctx),areaGuida:r.area_guida_chiave!}]));
 }
 
 /** Mappa con percorso, figli, spilli (con stato della partita e dettagli delle entità collegate). */
 export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
   const r = rigaMappa(chiave);
   chiave = r.chiave;
-  const figli = (prepared('SELECT * FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(chiave) as RigaMappa[]).map(riassunto);
+  const collezioni=collezioniImmagini();
+  const figli = (prepared('SELECT * FROM mappa WHERE genitore_chiave = ? ORDER BY ordine, nome').all(chiave) as RigaMappa[]).map(r=>riassunto(r,collezioni));
   const ctx = contestoSpilli(partitaId);
   const spilli = (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(chiave) as RigaSpillo[]).map((s) => spilloDto(s, ctx));
   const immagine = immagineDi(r);
   return {
-    ...riassunto(r), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
+    ...riassunto(r,collezioni), larghezza: r.larghezza, altezza: r.altezza, note: r.note,
     immagineUrl: immagine ? `/api/immagini/mappa/${encodeURIComponent(immagine.chiave)}/file?v=${encodeURIComponent(immagine.createdAt)}` : null,
     percorso: percorsoDi(r).map(p=>({...p,chiave:chiaveMappa(p.chiave)})), figli, spilli,
     genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as { nome: string } | undefined)?.nome ?? null : null,
@@ -202,8 +241,8 @@ export function dettaglioMappa(chiave: string, partitaId?: number): MappaDto {
 
 /** Mappa collegata a un'entità della guida (quartiere, area…), se esiste. */
 export function mappaPerEntita(tipo: string, chiave: string): MappaRiassuntoDto | null {
-  const r = prepared('SELECT * FROM mappa WHERE entita_tipo = ? AND entita_chiave = ? ORDER BY origine DESC LIMIT 1').get(tipo, chiave) as RigaMappa | undefined;
-  return r ? riassunto(r) : null;
+  const righe = prepared('SELECT m.* FROM mappa m WHERE (m.entita_tipo=? AND m.entita_chiave=?) OR EXISTS(SELECT 1 FROM mappa_entita e WHERE e.mappa_chiave=m.chiave AND e.entita_tipo=? AND e.entita_chiave=?) ORDER BY m.chiave').all(tipo,chiave,tipo,chiave) as RigaMappa[];
+  return righe.length===1 ? riassunto(righe[0]) : null;
 }
 
 // ---- Editor ----
@@ -340,7 +379,7 @@ export function dimensioniImmagine(b: Buffer): { larghezza: number; altezza: num
   return null;
 }
 
-export interface DatiSpillo { tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
+export interface DatiSpillo { soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; tipo?: TipoSpillo; nome?: string; descrizione?: string; x?: number; y?: number; riferimento?: { tipo: TipoRiferimento; chiave: string } | null; collezionabile?: boolean; ordine?: number; condizioni?: RequisitoSpillo[] | null }
 
 /**
  * Le chiavi citate dalle condizioni devono essere calcolabili dall'app: Palazzo esistente (non i Mementos), Confidente e richiesta della
@@ -392,34 +431,46 @@ function verificaRiferimento(rif: { tipo: TipoRiferimento; chiave: string } | nu
 }
 
 export function creaSpillo(mappaChiave: string, dati: DatiSpillo & { tipo: TipoSpillo; nome: string; x: number; y: number }): SpilloDto {
+  return getDb().transaction(() => {
   mappaChiave=rigaMappa(mappaChiave).chiave;
   if (!(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento);
   verificaCondizioni(dati.condizioni);
+  const destinazione = verificaDestinazioneSpillo(dati.destinazione);
   const adesso = nowIso();
   const info = prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at, condizioni_json)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'utente', ?, ?)`).run(mappaChiave, dati.tipo, dati.nome, dati.descrizione ?? '', dati.x, dati.y, dati.riferimento?.tipo ?? null, dati.riferimento?.chiave ?? null,
     (dati.collezionabile ?? DEFINIZIONI_SPILLO[dati.tipo].collezionabile) ? 1 : 0, dati.ordine ?? 0, adesso, jsonCondizioni(dati.condizioni));
+  prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
+  salvaDestinazioneSpillo(Number(info.lastInsertRowid), destinazione);
   prepared("UPDATE mappa SET updated_at = ? WHERE chiave = ?").run(adesso, mappaChiave);
   return spilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(Number(info.lastInsertRowid)) as RigaSpillo);
+  })();
 }
 
-export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }): SpilloDto {
+export function aggiornaSpillo(id: number, dati: DatiSpillo & { mappa?: string }): SpilloDto | SchedaContenutoGuidaDto {
+  return getDb().transaction(() => {
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
+
+  if(r.area_guida_chiave && ['x','y','mappa','destinazione'].some(k=>Object.prototype.hasOwnProperty.call(dati,k)))throw httpErrors.badRequest('contenuto-non-spaziale','Una scheda guida non accetta coordinate o destinazioni.');
   if (dati.tipo && !(TIPI_SPILLO as readonly string[]).includes(dati.tipo)) throw httpErrors.badRequest('tipo-non-valido', 'Tipo di spillo non ammesso.');
   if (dati.mappa) dati={...dati,mappa:rigaMappa(dati.mappa).chiave};
   if(dati.riferimento?.tipo==='mappa')dati={...dati,riferimento:{...dati.riferimento,chiave:rigaMappa(dati.riferimento.chiave).chiave}};
   verificaRiferimento(dati.riferimento);
   verificaCondizioni(dati.condizioni);
+  const destinazione = verificaDestinazioneSpillo(dati.destinazione);
   // uno spillo del seed modificato diventa dell'utente: si ricorda com'era, così il reseed non ne reinserisce una copia
   const identitaSeed = r.seed_identita_json ?? (r.origine === 'seed' ? identitaSpillo({ tipo: r.tipo, nome: r.nome, x: r.x, y: r.y, riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_chiave } : null }) : null);
   prepared(`UPDATE spillo SET mappa_chiave = ?, tipo = ?, nome = ?, descrizione = ?, x = ?, y = ?, riferimento_tipo = ?, riferimento_chiave = ?, collezionabile = ?, ordine = ?, origine = 'utente', updated_at = ?, condizioni_json = ?, seed_identita_json = ? WHERE id = ?`).run(
     dati.mappa ?? r.mappa_chiave, dati.tipo ?? r.tipo, dati.nome ?? r.nome, dati.descrizione ?? r.descrizione, dati.x ?? r.x, dati.y ?? r.y,
     dati.riferimento === undefined ? r.riferimento_tipo : dati.riferimento?.tipo ?? null, dati.riferimento === undefined ? r.riferimento_chiave : dati.riferimento?.chiave ?? null,
     dati.collezionabile === undefined ? r.collezionabile : dati.collezionabile ? 1 : 0, dati.ordine ?? r.ordine, nowIso(), dati.condizioni === undefined ? r.condizioni_json : jsonCondizioni(dati.condizioni), identitaSeed, id);
-  return spilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo);
+  if (dati.soloPosizione !== undefined) prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(dati.soloPosizione ? 1 : 0, id);
+  salvaDestinazioneSpillo(id, destinazione);
+  return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo);
+  })();
 }
 
 export function eliminaSpillo(id: number): void {
@@ -428,10 +479,11 @@ export function eliminaSpillo(id: number): void {
 }
 
 /** Stato «raccolto» di uno spillo per partita (in uso normale; per gli spilli collegati a un punto aggiorna anche lo stato del punto nella Guida). */
-export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: boolean): SpilloDto {
+export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: boolean): SpilloDto | SchedaContenutoGuidaDto {
   if (!prepared('SELECT 1 FROM partita WHERE id = ?').get(partitaId)) throw httpErrors.notFound('partita-non-trovata', `La partita ${partitaId} non esiste.`);
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${spilloId} non esiste.`);
+
   const adesso = nowIso();
   getDb().transaction(() => {
     prepared(`INSERT INTO spillo_partita (partita_id, spillo_id, raccolto, updated_at) VALUES (?, ?, ?, ?)
@@ -442,7 +494,7 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
     }
     prepared('UPDATE partita SET updated_at = ? WHERE id = ?').run(adesso, partitaId);
   })();
-  return spilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId));
+  return elementoSpilloDto(prepared('SELECT * FROM spillo WHERE id = ?').get(spilloId) as RigaSpillo, contestoSpilli(partitaId));
 }
 
 // ---- Immagini degli spilli (schermate di riferimento) ----
@@ -450,11 +502,12 @@ export function impostaRaccolto(partitaId: number, spilloId: number, raccolto: b
 function rigaSpillo(id: number): RigaSpillo {
   const r = prepared('SELECT * FROM spillo WHERE id = ?').get(id) as RigaSpillo | undefined;
   if (!r) throw httpErrors.notFound('spillo-non-trovato', `Lo spillo ${id} non esiste.`);
+
   return r;
 }
 
 /** Aggiunge una schermata allo spillo (file nell'istanza, ambito «spillo»); restituisce lo spillo aggiornato. */
-export function aggiungiImmagineSpillo(spilloId: number, mime: string, contenuto: Buffer, didascalia = ''): SpilloDto {
+export function aggiungiImmagineSpillo(spilloId: number, mime: string, contenuto: Buffer, didascalia = ''): SpilloDto | SchedaContenutoGuidaDto {
   const r = rigaSpillo(spilloId);
   const chiave = `${spilloId}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
   salvaImmagine('spillo', chiave, mime, contenuto);
@@ -462,24 +515,24 @@ export function aggiungiImmagineSpillo(spilloId: number, mime: string, contenuto
   const ordine = (prepared('SELECT COALESCE(MAX(ordine), -1) + 1 AS n FROM spillo_immagine WHERE spillo_id = ?').get(spilloId) as { n: number }).n;
   prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, ?, NULL, ?, ?)').run(spilloId, ordine, chiave, didascalia.slice(0, 300), adesso);
   prepared("UPDATE spillo SET updated_at = ? WHERE id = ?").run(adesso, spilloId);
-  return spilloDto(rigaSpillo(r.id));
+  return elementoSpilloDto(rigaSpillo(r.id));
 }
 
-export function aggiornaImmagineSpillo(id: number, dati: { didascalia?: string; ordine?: number }): SpilloDto {
+export function aggiornaImmagineSpillo(id: number, dati: { didascalia?: string; ordine?: number }): SpilloDto | SchedaContenutoGuidaDto {
   const i = prepared('SELECT * FROM spillo_immagine WHERE id = ?').get(id) as RigaImmagineSpillo | undefined;
   if (!i) throw httpErrors.notFound('immagine-non-trovata', `L'immagine ${id} non esiste.`);
   prepared('UPDATE spillo_immagine SET didascalia = ?, ordine = ?, updated_at = ? WHERE id = ?').run((dati.didascalia ?? i.didascalia).slice(0, 300), dati.ordine ?? i.ordine, nowIso(), id);
-  return spilloDto(rigaSpillo(i.spillo_id));
+  return elementoSpilloDto(rigaSpillo(i.spillo_id));
 }
 
-export function eliminaImmagineSpillo(id: number): SpilloDto {
+export function eliminaImmagineSpillo(id: number): SpilloDto | SchedaContenutoGuidaDto {
   const i = prepared('SELECT * FROM spillo_immagine WHERE id = ?').get(id) as RigaImmagineSpillo | undefined;
   if (!i) throw httpErrors.notFound('immagine-non-trovata', `L'immagine ${id} non esiste.`);
   getDb().transaction(() => {
     prepared('DELETE FROM spillo_immagine WHERE id = ?').run(id);
     if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
   })();
-  return spilloDto(rigaSpillo(i.spillo_id));
+  return elementoSpilloDto(rigaSpillo(i.spillo_id));
 }
 
 // ---- Ricerca delle entità collegabili (editor) ----
@@ -538,10 +591,12 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   if(radice)radice=rigaMappa(radice).chiave;
   const ammesse = radice ? new Set(discendentiDi(radice)) : null;
   const mappe: EsportazioneMappeDto['mappe'] = (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[]).filter((m) => !ammesse || ammesse.has(m.chiave)).map((m) => ({
+    ...presentazioneMappa(m.chiave),
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
-      tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, collezionabile: s.collezionabile === 1, ordine: s.ordine,
+      ...leggiDestinazioneSpillo(s.id),
+      tipo: s.tipo, nome: s.nome, descrizione: s.descrizione, x: s.x, y: s.y, riferimento: s.riferimento_tipo && s.riferimento_chiave ? { tipo: s.riferimento_tipo, chiave: s.riferimento_chiave } : null, soloPosizione: s.solo_posizione === 1, collezionabile: s.collezionabile === 1, ordine: s.ordine,
       ...(condizioniDiRiga(s.condizioni_json).length > 0 ? { condizioni: condizioniDiRiga(s.condizioni_json) } : {}),
       // schermate: asset del repository oppure file dell'istanza in base64 (sempre inclusi: il pacchetto è completo)
       immagini: (prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(s.id) as RigaImmagineSpillo[]).flatMap((i): Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> => {
@@ -580,17 +635,76 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   return { versione: 1, esportato: nowIso(), mappe, immagini, ...(ingressi.length?{ingressi}:{}), ...(stati.length?{stati}:{}), ...(provenienze.length > 0 ? { provenienze } : {}) };
 }
 
+/** Un reseed identico conserva ID, raccolte, schermate e destinazioni del pin. */
+function spilloInvariatoNelSeed(r: RigaSpillo, s: EsportazioneMappeDto['mappe'][number]['spilli'][number]): boolean {
+  if (r.tipo!==s.tipo || r.nome!==s.nome || r.descrizione!==(s.descrizione??'') || r.x!==s.x || r.y!==s.y || r.riferimento_tipo!==(s.riferimento?.tipo??null) || r.riferimento_chiave!==(s.riferimento?.chiave??null) || r.collezionabile!==(s.collezionabile?1:0) || r.ordine!==(s.ordine??0) || r.solo_posizione!==(s.soloPosizione?1:0)) return false;
+  if (JSON.stringify(condizioniDiRiga(r.condizioni_json))!==JSON.stringify(normalizzaCondizioniSpillo(s.condizioni??[]))) return false;
+  // A destination absent from the seed does not erase an arrival configured in the instance.
+  if (s.destinazione!==undefined || s.destinazioneNonDisponibile!==undefined) {
+    const attuale=leggiDestinazioneSpillo(r.id);
+    if(JSON.stringify(attuale.destinazione??null)!==JSON.stringify(s.destinazione??null) || !!attuale.destinazioneNonDisponibile!==!!s.destinazioneNonDisponibile)return false;
+  }
+  const immagini=prepared('SELECT * FROM spillo_immagine WHERE spillo_id=? ORDER BY ordine,id').all(r.id) as RigaImmagineSpillo[];
+  return (s.immagini??[]).every(v=>immagini.some(i=>{if(i.didascalia!==(v.didascalia??''))return false;if(i.asset)return i.asset===(v.asset??null);const b=i.immagine_chiave?base64Immagine('spillo',i.immagine_chiave):null;return !!b&&b.mime===v.mime&&b.base64===v.base64;}));
+}
+
+/** Rettifiche editoriali certificate: nessun campo personale o identità storica viene riscritto. */
+export function rettificaNomiSpilliSeed(mappa?: string, spilli?: EsportazioneMappeDto['mappe'][number]['spilli']): number[] {
+  const modificati: number[] = [];
+  for (const rettifica of RETTIFICHE_NOMI_SEED) {
+    if (mappa !== undefined && rettifica.mappa !== mappa) continue;
+    if (spilli && spilli.filter(s=>isDeepStrictEqual(Object.fromEntries(Object.entries(s).filter(([,v])=>v!==undefined)),rettifica.dopo)).length!==1) continue;
+    const candidati=(prepared("SELECT * FROM spillo WHERE mappa_chiave=? AND origine='seed'").all(rettifica.mappa) as RigaSpillo[]).filter(r=>spilloInvariatoNelSeed(r,rettifica.prima));
+    if(candidati.length!==1)continue;
+    const r=candidati[0];
+    prepared('UPDATE spillo SET nome=?,descrizione=? WHERE id=?').run(rettifica.dopo.nome,rettifica.dopo.descrizione,r.id);
+    modificati.push(r.id);
+  }
+  return modificati;
+}
+function identitaRettificata(identita:string): {identita:string;mappa?:string} {
+  const r=RETTIFICHE_NOMI_SEED.find(r=>identitaSpillo({...r.prima,riferimento:r.prima.riferimento??null})===identita);
+  return r?{identita:identitaSpillo({...r.dopo,riferimento:r.dopo.riferimento??null}),mappa:r.mappa}:{identita};
+}
+
 export interface EsitoImportazione { mappe: number; spilli: number; immagini: number; saltate: string[]; /** Condizioni scartate perché citano chiavi assenti dalla Guida. */ condizioniScartate: number }
 
 /** Importa un pacchetto (o il seed): per chiave, con `sovrascrivi` sostituisce mappe e spilli esistenti; altrimenti salta le mappe già presenti
  * (il seed aggiorna solo le mappe di origine seed, sostituendo i soli spilli di origine seed e conservando quelli dell'utente). */
-export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi?: boolean; origine?: 'seed' | 'utente' } = {}): EsitoImportazione {
+export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi?: boolean; origine?: 'seed' | 'utente'; pacchettiSeed?: readonly EsportazioneMappeDto[] } = {}): EsitoImportazione {
   if (!pacchetto || pacchetto.versione !== 1 || !Array.isArray(pacchetto.mappe)) throw httpErrors.badRequest('pacchetto-non-valido', 'Pacchetto delle mappe non riconosciuto (versione 1 attesa).');
   pacchetto=structuredClone(pacchetto);
   for(const m of pacchetto.mappe){m.chiave=idMappa(m.chiave);if(m.assetOriginale)m.asset=m.assetOriginale;if(m.genitore)m.genitore=idMappa(m.genitore);for(const s of m.spilli??[])if(s.riferimento?.tipo==='mappa')s.riferimento.chiave=idMappa(s.riferimento.chiave);}
+  const incoming = new Set(pacchetto.mappe.filter(m => chiaveValida(m.chiave) && (TIPI_MAPPA as readonly string[]).includes(m.tipo)).map(m => m.chiave));
+  for (const m of pacchetto.mappe) for (const s of m.spilli ?? []) {
+    if (s.soloPosizione !== undefined && typeof s.soloPosizione !== 'boolean') throw httpErrors.badRequest('posizione-non-valida', 'Il campo soloPosizione deve essere booleano.');
+    if (s.destinazioneNonDisponibile !== undefined && typeof s.destinazioneNonDisponibile !== 'boolean') throw httpErrors.badRequest('destinazione-non-valida', 'Stato della destinazione non valido.');
+    if (s.destinazioneNonDisponibile && s.destinazione) throw httpErrors.badRequest('destinazione-non-valida', 'Una destinazione non può essere presente e invalidata.');
+    s.destinazione = verificaDestinazioneSpillo(s.destinazione, incoming);
+  }
   const origine = opz.origine ?? 'utente';
   const esito: EsitoImportazione = { mappe: 0, spilli: 0, immagini: 0, saltate: [], condizioniScartate: 0 };
   getDb().transaction(() => {
+    // Uno spostamento conserva l'identità originale, non la mappa corrente.
+    // Il fallback richiede una sola sorgente nell'intero seed e un solo erede utente.
+    const identitaSpostate = new Set<string>();
+    if (origine === 'seed' && !opz.sovrascrivi) {
+      const occorrenze = new Map<string, number>();
+      const sorgenti = new Map<string,string>();
+      const rettificheAttive = new Set<string>();
+      for (const pacco of opz.pacchettiSeed ?? [pacchetto]) for (const mappa of pacco.mappe) for (const s of mappa.spilli ?? []) {
+        const riferimento = s.riferimento?.tipo === 'mappa' ? { ...s.riferimento, chiave: idMappa(s.riferimento.chiave) } : s.riferimento ?? null;
+        const identita = identitaSpillo({ tipo:s.tipo, nome:s.nome, x:Math.min(100,Math.max(0,s.x)), y:Math.min(100,Math.max(0,s.y)), riferimento });
+        occorrenze.set(identita, (occorrenze.get(identita) ?? 0) + 1);
+        sorgenti.set(identita,idMappa(mappa.chiave));
+        if(RETTIFICHE_NOMI_SEED.some(r=>r.mappa===idMappa(mappa.chiave)&&isDeepStrictEqual(Object.fromEntries(Object.entries(s).filter(([,v])=>v!==undefined)),r.dopo)))rettificheAttive.add(identita);
+      }
+      const eredi = prepared("SELECT seed_identita_json FROM spillo WHERE origine='utente' AND seed_identita_json IS NOT NULL").all() as Array<{seed_identita_json:string}>;
+      const conteggioEredi=new Map<string,number>();
+      for(const r of eredi){const v=identitaRettificata(r.seed_identita_json);const identita=v.mappa&&(sorgenti.get(v.identita)!==v.mappa||!rettificheAttive.has(v.identita))?r.seed_identita_json:v.identita;conteggioEredi.set(identita,(conteggioEredi.get(identita)??0)+1);}
+      for (const [identita,n] of conteggioEredi) if (n===1&&occorrenze.get(identita)===1) identitaSpostate.add(identita);
+    }
+    const arrivi: Array<{id:number; valore:DestinazioneSpillo|null|undefined; invalidata:boolean}> = [];
     const adesso = nowIso();
     const statiSchema=z.array(z.object({chiave:z.string().regex(/^[a-z0-9-]{1,120}$/),nome:z.string().min(1).max(160),categoria:z.enum(['evento','attivita','oggetto','grado','contatore','quartiere']),unita:z.string().max(40)})).max(10000);
     const letti=statiSchema.safeParse(pacchetto.stati??[]);
@@ -611,25 +725,43 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
           larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at`)
         .run(m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null, origine, m.note ?? '', adesso);
+      if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
+        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative()}).nullable()});
+        const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});
+        if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
+        prepared('INSERT INTO mappa_presentazione VALUES(?,?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json,gruppo_immagini_json=excluded.gruppo_immagini_json').run(m.chiave,JSON.stringify(v.data.contesti),v.data.gruppo?JSON.stringify(v.data.gruppo):null);
+      }
       // Con «sovrascrivi» la mappa viene sostituita per intero; altrimenti (seed sopra seed) si rimpiazzano solo gli spilli della stessa
       // origine, così gli spilli aggiunti dall'utente su una mappa del seed sopravvivono al reseed.
+      if(origine==='seed'&&!opz.sovrascrivi)rettificaNomiSpilliSeed(m.chiave,m.spilli??[]);
+      const invariati = new Map<number, number>();
+      if (origine === 'seed' && !opz.sovrascrivi) {
+        const presenti=prepared("SELECT * FROM spillo WHERE mappa_chiave=? AND origine='seed' ORDER BY id").all(m.chiave) as RigaSpillo[];
+        const usati=new Set<number>();
+        (m.spilli??[]).forEach((s,i)=>{const r=presenti.find(r=>!usati.has(r.id)&&spilloInvariatoNelSeed(r,s));if(r){invariati.set(i,r.id);usati.add(r.id);}});
+      }
       const daTogliere = (opz.sovrascrivi ? prepared('SELECT id FROM spillo WHERE mappa_chiave = ?').all(m.chiave) : prepared('SELECT id FROM spillo WHERE mappa_chiave = ? AND origine = ?').all(m.chiave, origine)) as Array<{ id: number }>;
       for (const { id } of daTogliere) {
+        if ([...invariati.values()].includes(id)) continue;
         for (const i of prepared('SELECT immagine_chiave FROM spillo_immagine WHERE spillo_id = ?').all(id) as Array<{ immagine_chiave: string | null }>) if (i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave)) eliminaImmagine('spillo', i.immagine_chiave);
         prepared('DELETE FROM spillo WHERE id = ?').run(id);
       }
       // spilli del seed che l'utente ha modificato (ora `utente`, con l'identità di allora): il pacchetto non li reinserisce
       const identitaUtente = new Set(opz.sovrascrivi ? [] : (prepared("SELECT seed_identita_json FROM spillo WHERE mappa_chiave = ? AND origine = 'utente' AND seed_identita_json IS NOT NULL").all(m.chiave) as Array<{ seed_identita_json: string }>).map((r) => r.seed_identita_json));
-      for (const s of m.spilli ?? []) {
+      for (const [indiceSpillo, s] of (m.spilli ?? []).entries()) {
+        if (invariati.has(indiceSpillo)) continue;
         if (!(TIPI_SPILLO as readonly string[]).includes(s.tipo)) continue;
         const x = Math.min(100, Math.max(0, s.x)); const y = Math.min(100, Math.max(0, s.y));
-        if (identitaUtente.has(identitaSpillo({ tipo: s.tipo, nome: s.nome, x, y, riferimento: s.riferimento ?? null }))) continue;
+        const identita = identitaSpillo({ tipo: s.tipo, nome: s.nome, x, y, riferimento: s.riferimento ?? null });
+        if (identitaUtente.has(identita) || identitaSpostate.has(identita)) continue;
         // le condizioni con chiavi assenti dalla Guida si scartano (contate nell'esito), come l'API le rifiuta: mai uno spillo nascosto per sempre
         const { valide, scartate } = condizioniConChiaviEsistenti(s.condizioni);
         esito.condizioniScartate += scartate.length;
         const info = prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at, condizioni_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
           .run(m.chiave, s.tipo, s.nome, s.descrizione ?? '', x, y, s.riferimento?.tipo ?? null, s.riferimento?.chiave ?? null, s.collezionabile ? 1 : 0, s.ordine ?? 0, origine, adesso, jsonCondizioni(valide));
+        prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(s.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
         const spilloId = Number(info.lastInsertRowid);
+        arrivi.push({id:spilloId,valore:s.destinazione,invalidata:s.destinazioneNonDisponibile??false});
         (s.immagini ?? []).forEach((img, ordine) => {
           if (img.asset) {
             prepared('INSERT INTO spillo_immagine (spillo_id, ordine, immagine_chiave, asset, didascalia, updated_at) VALUES (?, ?, NULL, ?, ?, ?)').run(spilloId, ordine, img.asset, (img.didascalia ?? '').slice(0, 300), adesso);
@@ -647,6 +779,7 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
     for (const m of pacchetto.mappe) {
       if (m.genitore && !esito.saltate.includes(m.chiave) && prepared('SELECT 1 FROM mappa WHERE chiave = ?').get(m.genitore)) prepared('UPDATE mappa SET genitore_chiave = ? WHERE chiave = ?').run(m.genitore, m.chiave);
     }
+    for (const arrivo of arrivi) salvaDestinazioneSpillo(arrivo.id, verificaDestinazioneSpillo(arrivo.valore), arrivo.invalidata);
     sincronizzaPercorsiMappe(getDb());
     if(pacchetto.ingressi?.length && prepared("SELECT 1 FROM sqlite_master WHERE name='quartiere_ingresso'").get()) {
       const ingressi=z.array(z.object({quartiere:z.string().min(1).max(80),mappa:z.string().min(1).max(200),x:z.number().min(0).max(100),y:z.number().min(0).max(100),zoom:z.number().min(1).max(6)})).max(1000).safeParse(pacchetto.ingressi);

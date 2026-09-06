@@ -1,0 +1,24 @@
+// Decompiled by Atlus Script Tools
+const int Dummy                            = 0;
+const int D03_07_BUTA_01_KICKBACK_         = 1;
+const int D03_07_BUTA_01_KICKBACK__2       = 2;
+const int D03_07_SHUTTER_STOPPER_0         = 3;
+const int D03_07_SHUTTER_OPEN01            = 4;
+const int D03_07_SHUTTER_OPEN02            = 5;
+const int D03_07_SHUTTER_OPEN03            = 6;
+const int D03_07_SHUTTER_OPEN04            = 7;
+const int D03_07_SHUTTER_OPEN05            = 8;
+const int D03_07_SHUTTER_OPEN06            = 9;
+const int D03_07_SHUTTER_OPEN07            = 10;
+const int mini_EV_e259_502_mes01           = 11;
+const int mini_EV_e259_502_mes02           = 12;
+const int mini_EV_e259_502_mes03           = 13;
+const int mini_EV_e259_502_mes04           = 14;
+const int mini_EV_e259_502_mes07           = 15;
+const int mini_EV_e259_502_mes08           = 16;
+const int mini_EV_e259_502_mes09           = 17;
+const int mini_EV_e259_502_01_mes0         = 18;
+const int mini_EV_e259_502_01_mes0_2       = 19;
+const int mini_EV_e259_502_01_mes0_3       = 20;
+const int mini_EV_e259_502_01_mes0_4       = 21;
+const int mini_EV_e259_502_01_mes0_5       = 22;

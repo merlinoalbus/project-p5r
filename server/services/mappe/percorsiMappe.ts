@@ -23,6 +23,12 @@ export function sincronizzaPercorsiMappe(db:AppDatabase):void {
   const nodi=db.prepare('SELECT chiave,nome,tipo,genitore_chiave FROM mappa').all() as Nodo[];
   const indice=new Map(nodi.map(n=>[n.chiave,n]));
   const usati=new Map<string,string>();
+  const nomiBase=new Map<string,number>();
+  for (const n of nodi) {
+    const catena:Nodo[]=[];let c:Nodo|undefined=n;const visti=new Set<string>();
+    while(c){if(visti.has(c.chiave))throw httpErrors.badRequest('gerarchia-ciclica','La gerarchia delle mappe contiene un ciclo.');visti.add(c.chiave);catena.unshift(c);c=c.genitore_chiave?indice.get(c.genitore_chiave):undefined;}
+    const base=catena.filter(c=>c.tipo!=='citta'||c===n).map(c=>slug(c.nome)).join('-');nomiBase.set(base,(nomiBase.get(base)??0)+1);
+  }
   const piano=nodi.map(n=>{
     const catena:Nodo[]=[];let corrente:Nodo|undefined=n;const visti=new Set<string>();
     while(corrente){
@@ -31,7 +37,10 @@ export function sincronizzaPercorsiMappe(db:AppDatabase):void {
       corrente=corrente.genitore_chiave?indice.get(corrente.genitore_chiave):undefined;
     }
     const significativi=catena.filter(c=>c.tipo!=='citta'||c===n);
-    const chiave=significativi.map(c=>slug(c.nome)).join('-');
+    let chiave=significativi.map(c=>slug(c.nome)).join('-');
+    // Le varianti native possono condividere il nome del luogo. L'identità è nell'URL, mai nel titolo.
+    const aliasBase=db.prepare('SELECT mappa_chiave FROM mappa_alias WHERE chiave=?').get(chiave) as {mappa_chiave:string}|undefined;
+    if (/^nativo-rmap-\d+-\d+-\d+$/.test(n.chiave) && ((nomiBase.get(chiave)??0)>1 || (aliasBase && aliasBase.mappa_chiave!==n.chiave))) chiave=chiave+'-'+n.chiave;
     if(!chiave||chiave.length>180)throw httpErrors.badRequest('percorso-troppo-lungo','Il percorso della mappa supera 180 caratteri o non contiene un nome utilizzabile. Abbrevia uno dei nomi.');
     if(usati.has(chiave)&&usati.get(chiave)!==n.chiave)throw httpErrors.conflict('nome-mappa-duplicato','Due mappe producono lo stesso percorso: '+significativi.map(c=>c.nome).join(' › ')+'. Scegli nomi distinti.');
     usati.set(chiave,n.chiave);

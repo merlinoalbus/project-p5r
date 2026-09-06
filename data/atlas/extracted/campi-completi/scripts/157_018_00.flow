@@ -1,0 +1,24 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("157_018_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void BOSS_TEST()
+{
+    MSG_WND_DSP();
+    MSG(BOSS_TEST_MES, 0);
+    MSG_WND_CLS();
+}
+

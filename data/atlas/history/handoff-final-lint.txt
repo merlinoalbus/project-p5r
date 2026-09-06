@@ -1,0 +1,4 @@
+
+> project-p5r@0.1.0 lint
+> eslint .
+

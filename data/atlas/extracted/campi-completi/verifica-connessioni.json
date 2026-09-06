@@ -1,0 +1,9 @@
+{
+  "status": "PASS-evidence-coverage",
+  "fields": 848,
+  "rawRecordsChecked": 12121,
+  "callsIndependentlyCounted": 2546,
+  "explicitParseFailures": [],
+  "oldFieldsUnchanged": 209,
+  "scope": "Evidence extraction only; no operational navigation claim."
+}

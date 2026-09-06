@@ -1,0 +1,12 @@
+{
+  "result": "PASS",
+  "maps": 301,
+  "pixelComparisons": 301,
+  "portableUrbanImages": 7,
+  "groups": 12,
+  "statusCounts": {
+    "riferimento-roadmap": 268,
+    "risorsa-senza-campo": 33
+  },
+  "packageSha256": "361b33e76cb867669182f2a3e2a8905e662818a765b8615f54f554d80bbc3782"
+}

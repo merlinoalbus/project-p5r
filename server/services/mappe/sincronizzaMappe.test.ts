@@ -26,7 +26,7 @@ describe('sincronizzaMappe: riclassificazione degli spilli di seed', () => {
     // simulo il dato lasciato da una versione precedente del registro
     db.prepare("UPDATE spillo SET tipo = 'nota', collezionabile = 1 WHERE id = ?").run(enigma.id);
     // uno spillo dell'utente sullo stesso punto non deve essere riclassificato
-    const mappa = (db.prepare('SELECT mappa_chiave FROM spillo WHERE id = ?').get(enigma.id) as { mappa_chiave: string }).mappa_chiave;
+    const mappa = 'tokyo'; // User-owned spatial note remains separate from nonspatial guide ownership.
     const utente = db.prepare(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at)
       VALUES (?, 'nota', 'Mio appunto', '', 10, 10, 'punto', ?, 0, 99, 'utente', '2026-01-01T00:00:00.000Z')`).run(mappa, enigma.riferimento_chiave);
 

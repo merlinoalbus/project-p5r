@@ -231,5 +231,12 @@ Confronto automatico di tutte le 900 azioni di `data/seed/percorso.json` con le 
 - Completato e validato: condizioni procedurali condivise, naming mappe gerarchico, editor in quattro sezioni, ingresso quartieri con mappa/punto/zoom.
 - Completati e validati: 16 asset mancanti, PNG 128×128 RGBA; test applicativi 400/400 prima dell’integrazione parallela dell’atlante. Runtime verificato su istanza isolata.
 
+## Mondo navigabile unico (2026-09-06)
+- Validato: risoluzione comune entità → mappa/pin, incluse provenienza, alternative, alias e articoli → negozio.
+- Da completare: associazioni native, importazione delle planimetrie estratte, collegamenti reali, semantica e condizioni dei pin, accessi dalle pagine Mappe/Palazzi e Dedali/Città/Negozi e inventario, migrazione protetta e collaudo completo. Il mondo unificato non è ancora consegnato.
 
-L’atlante unico è in lavorazione separata; non è incluso in questa consegna.
+- Validato: servizio comune di accesso al mondo, incluso luogo ↔ negozio e articolo → negozio, con regressioni e runtime isolato.
+- Validato: accessi principali unificati nelle pagine, conservazione schede/editor/ingressi, protezione risposte tardive. La sostituzione delle mappe correnti con dati nativi resta aperta.
+- Planimetrie native: pacchetto portabile di 301 canvas verificati pixel per pixel, importazione isolata di 301 immagini e 21 gruppi di risorse, zero mappe saltate; 7 viste urbane conservate a parte. Staging validato; collegamenti fisici e condizioni narrative ancora da integrare.
+- Importatore: validato il limite di 64 MB sulla sola POST di importazione, prima del limite globale di 5 MB; 27 test, typecheck, lint e build superati.
+- Requisiti del mondo: accessibilità e interazioni devono seguire giorno, fascia, meteo, avanzamento, confidenti e Persona della partita attiva. Il livello delle Persona non è ancora tra i requisiti delle mappe. La rigenerazione di un vecchio pin al riavvio, osservata nell’istanza isolata, deve essere risolta prima della migrazione definitiva.

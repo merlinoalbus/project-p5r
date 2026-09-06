@@ -1,0 +1,68 @@
+{
+  "status": "PASS-diagnostic-consistency-only",
+  "fields": 6,
+  "triggersChecked": 137,
+  "goTriggers": 12,
+  "sourcesChecked": 12,
+  "appEdgesGenerated": 0,
+  "exceptionsRetained": [
+    {
+      "field": "F002_002_02",
+      "trigger": 1,
+      "reason": "Roof trigger Y=1078.219 lies about 358 above third-floor corridor Y=720. Nearest yellow aperture is unrelated. Landing/floor rendering remains unverified."
+    },
+    {
+      "fields": [
+        "F002_003_00",
+        "F002_003_01",
+        "F002_003_02"
+      ],
+      "trigger": 0,
+      "reason": "Reverse door centers lie 10.26 to 10.57px right of yellow aperture across three floors. Retain discrepancy; no snapping or exact doorway-center claim."
+    }
+  ],
+  "statistics": [
+    {
+      "factor": 1,
+      "partition": "hypothesis-input",
+      "count": 4,
+      "within12Pixels": 0,
+      "meanNearestDistance": 39.57586497339492
+    },
+    {
+      "factor": 1,
+      "partition": "holdout",
+      "count": 8,
+      "within12Pixels": 0,
+      "meanNearestDistance": 38.81626007679806
+    },
+    {
+      "factor": 1.5,
+      "partition": "hypothesis-input",
+      "count": 4,
+      "within12Pixels": 4,
+      "meanNearestDistance": 1.1464082599716405
+    },
+    {
+      "factor": 1.5,
+      "partition": "holdout",
+      "count": 8,
+      "within12Pixels": 7,
+      "meanNearestDistance": 22.43625873489319
+    },
+    {
+      "factor": 2,
+      "partition": "hypothesis-input",
+      "count": 4,
+      "within12Pixels": 0,
+      "meanNearestDistance": 43.919620076815264
+    },
+    {
+      "factor": 2,
+      "partition": "holdout",
+      "count": 8,
+      "within12Pixels": 0,
+      "meanNearestDistance": 60.960680288033124
+    }
+  ]
+}

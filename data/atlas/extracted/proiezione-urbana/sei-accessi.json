@@ -1,0 +1,83 @@
+{
+  "status": "screening-not-door-center-certification",
+  "cases": [
+    {
+      "field": "F001_003_00",
+      "trigger": 8,
+      "target": "F003_010_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          166.89321280908263,
+          316.14683247905435
+        ]
+      },
+      "nearestYellowDistance": 5.8950417292874855
+    },
+    {
+      "field": "F001_003_00",
+      "trigger": 11,
+      "target": "F010_019_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          248.50673792859502,
+          362.1116160214352
+        ]
+      },
+      "nearestYellowDistance": 2.4957591816815388
+    },
+    {
+      "field": "F001_003_00",
+      "trigger": 21,
+      "target": "F010_005_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          292.03450022543984,
+          386.17336138698096
+        ]
+      },
+      "nearestYellowDistance": 0.17676095737283504
+    },
+    {
+      "field": "F005_001_00",
+      "trigger": 3,
+      "target": "F005_002_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          376.48948854821884,
+          93.40745872571699
+        ]
+      },
+      "nearestYellowDistance": 17.56184493123012
+    },
+    {
+      "field": "F005_001_00",
+      "trigger": 4,
+      "target": "F005_003_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          561.3092692503266,
+          215.3629473613289
+        ]
+      },
+      "nearestYellowDistance": 2.3831004388419714
+    },
+    {
+      "field": "F009_002_00",
+      "trigger": 6,
+      "target": "F009_003_00",
+      "projection": {
+        "factor": 1.5,
+        "xy": [
+          367.35313810513867,
+          274.6575038258858
+        ]
+      },
+      "nearestYellowDistance": 2.7052303150227357
+    }
+  ]
+}

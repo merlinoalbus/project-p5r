@@ -1,0 +1,5417 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("159_010_00.msg");
+
+// 
+// Script-level variable definitions
+// 
+
+int sVar174;
+float sfVar0;
+float sfVar1;
+float sfVar2;
+float sfVar3;
+float sfVar4;
+float sfVar5;
+float sfVar6;
+float sfVar7;
+float sfVar15;
+float sfVar16;
+float sfVar17;
+float sfVar18;
+float sfVar19;
+float sfVar20;
+float sfVar21;
+float sfVar8;
+float sfVar9;
+float sfVar10;
+float sfVar11;
+float sfVar12;
+float sfVar13;
+float sfVar14;
+float sfVar22;
+float sfVar23;
+float sfVar24;
+float sfVar25;
+float sfVar26;
+float sfVar27;
+float sfVar28;
+int sVar18;
+float sfVar35;
+float sfVar33;
+float sfVar34;
+float sfVar31;
+float sfVar30;
+float sfVar29;
+int sVar1;
+int sVar2;
+int sVar3;
+int sVar22;
+int sVar0;
+int sVar25;
+int sVar24;
+int sVar55;
+int sVar54;
+float sfVar77;
+float sfVar59;
+float sfVar60;
+float sfVar61;
+float sfVar69;
+float sfVar70;
+int sVar56;
+int sVar57;
+int sVar58;
+int sVar59;
+int sVar60;
+int sVar61;
+int sVar29;
+int sVar37;
+int sVar30;
+int sVar46;
+int sVar47;
+int sVar48;
+int sVar31;
+int sVar26;
+int sVar23;
+int sVar27;
+int sVar28;
+int sVar21;
+int sVar42;
+int sVar35;
+int sVar36;
+float sfVar63;
+float sfVar65;
+float sfVar67;
+float sfVar68;
+float sfVar71;
+float sfVar72;
+float sfVar58;
+int sVar39;
+int sVar41;
+float sfVar64;
+int sVar40;
+int sVar38;
+int sVar32;
+int sVar51;
+int sVar50;
+int sVar33;
+float sfVar78;
+int sVar53;
+int sVar135;
+int sVar136;
+int sVar34;
+int sVar154;
+float sfVar87;
+float sfVar66;
+float sfVar88;
+float sfVar80;
+float sfVar90;
+float sfVar81;
+float sfVar82;
+int sVar157;
+int sVar159;
+int sVar161;
+int sVar153;
+int sVar155;
+float sfVar92;
+float sfVar83;
+float sfVar62;
+int sVar158;
+int sVar160;
+float sfVar89;
+float sfVar91;
+int sVar45;
+int sVar44;
+int sVar43;
+int sVar178;
+int sVar179;
+int sVar180;
+int sVar181;
+float sfVar73;
+float sfVar74;
+int sVar173;
+int sVar177;
+int sVar176;
+int sVar175;
+int sVar150;
+int sVar163;
+int sVar187;
+int sVar188;
+int sVar189;
+int sVar198;
+int sVar197;
+int sVar203;
+int sVar208;
+int sVar209;
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D159_10_ELEVATOR_A_SWITCH()
+{
+    sVar174 = 2;
+    D07_ELEVATOR_SWITCH();
+    // bit id (536870912) + (2742) = 8886
+    BIT_ON((0x20000000 + 2742));
+    FLD_SET_LOCAL_COUNT((49152 + 33), 1);
+    return;
+}
+
+
+// Procedure Index: 1
+void D159_10_ELEVATOR_A_GOTO()
+{
+    int var4;
+    int var5;
+    int var6;
+    var4 = 159;
+    var5 = 20;
+    var6 = 1;
+    sVar174 = 2;
+    sVar175 = var4;
+    sVar176 = var5;
+    sVar177 = var6;
+    D07_ELEVATOR_GOTO_LOWER_FLOOR();
+    CALL_FIELD(159, 20, 1, 0);
+    return;
+}
+
+
+// Procedure Index: 2
+void D07_159_10_minimap_00()
+{
+    // bit id (536870912) + (2937) = 9081
+    BIT_ON((0x20000000 + 2937));
+}
+
+
+// Procedure Index: 3
+void D07_159_10_minimap_01()
+{
+    // bit id (536870912) + (2878) = 9022
+    BIT_ON((0x20000000 + 2878));
+}
+
+
+// Procedure Index: 4
+void D07_159_10_minimap_02()
+{
+    // bit id (536870912) + (2879) = 9023
+    BIT_ON((0x20000000 + 2879));
+}
+
+
+// Procedure Index: 5
+void D07_159_10_minimap_03()
+{
+    // bit id (536870912) + (2880) = 9024
+    BIT_ON((0x20000000 + 2880));
+}
+
+
+// Procedure Index: 6
+void D07_159_10_minimap_04()
+{
+    // bit id (536870912) + (2881) = 9025
+    BIT_ON((0x20000000 + 2881));
+}
+
+
+// Procedure Index: 7
+void D07_159_10_R_TBOX_minimap_01()
+{
+    int var7;
+    // bit id (536870912) + (2995) = 9139
+    BIT_ON((0x20000000 + 2995));
+    var7 = 26;
+    FLD_SET_LOCAL_COUNT((49152 + 15), var7);
+    FLD_START_SUPPORT_MSG();
+}
+
+
+// Procedure Index: 8
+void D07_SAFETY_ROOM_03_SET()
+{
+    int var8;
+    int var9;
+    int var10;
+    var8 = (0x20000000 + 2670);
+    var9 = (0x20000000 + 2943);
+    BIT_ON(var8);
+    
+    if (BIT_CHK(var9) == 1)
+    {
+        var10 = 66;
+    }
+    else 
+    {
+        var10 = 65;
+    }
+
+    FLD_SET_LOCAL_COUNT((49152 + 15), var10);
+    FLD_START_SUPPORT_MSG();
+    return;
+}
+
+
+// Procedure Index: 9
+void D07_02_e409_031_START()
+{
+    int var11;
+    // bit id (536870912) + (2763) = 8907
+    BIT_ON((0x20000000 + 2763));
+    SET_COUNT(151, 31050);
+    var11 = FLD_SCRIPT_READ(159, 10, 110);
+    FLD_SCRIPT_READ_SYNC(var11);
+    FLD_SCRIPT_EXEC(var11, 0);
+    FLD_SCRIPT_FREE(var11);
+    SET_COUNT(151, 31100);
+    return;
+}
+
+
+// Procedure Index: 10
+void D159_10_c_01_START()
+{
+    int var12;
+    FLD_LOCAL_FLAG_ON((49152 + 18));
+    var12 = FLD_SCRIPT_READ(159, 10, 120);
+    FLD_SCRIPT_READ_SYNC(var12);
+    FLD_SCRIPT_EXEC(var12, 0);
+    FLD_SCRIPT_FREE(var12);
+    FLD_LOCAL_FLAG_OFF((49152 + 18));
+    FLD_LOCAL_FLAG_ON((49152 + 2));
+    // bit id (536870912) + (2765) = 8909
+    // bit id (536870912) + (2766) = 8910
+    // bit id (536870912) + (2766) = 8910
+    
+    if ((BIT_CHK((0x20000000 + 2765)) == 1) && (BIT_CHK((0x20000000 + 2766)) == 0))
+    {
+        BIT_ON((0x20000000 + 2766));
+        SET_COUNT(151, 33000);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 11
+void D159_10_c_02_START()
+{
+    int var13;
+    FLD_LOCAL_FLAG_ON((49152 + 19));
+    var13 = FLD_SCRIPT_READ(159, 10, 120);
+    FLD_SCRIPT_READ_SYNC(var13);
+    FLD_SCRIPT_EXEC(var13, 0);
+    FLD_SCRIPT_FREE(var13);
+    FLD_LOCAL_FLAG_OFF((49152 + 19));
+    FLD_LOCAL_FLAG_ON((49152 + 3));
+    return;
+}
+
+
+// Procedure Index: 12
+void D159_10_L_01_START()
+{
+    int var14;
+    FLD_LOCAL_FLAG_ON((49152 + 20));
+    var14 = FLD_SCRIPT_READ(159, 10, 120);
+    FLD_SCRIPT_READ_SYNC(var14);
+    FLD_SCRIPT_EXEC(var14, 0);
+    FLD_SCRIPT_FREE(var14);
+    FLD_LOCAL_FLAG_OFF((49152 + 20));
+    FLD_LOCAL_FLAG_ON((49152 + 4));
+    return;
+}
+
+
+// Procedure Index: 13
+void D159_10_c_03_START()
+{
+    int var15;
+    FLD_LOCAL_FLAG_ON((49152 + 26));
+    var15 = FLD_SCRIPT_READ(159, 10, 120);
+    FLD_SCRIPT_READ_SYNC(var15);
+    FLD_SCRIPT_EXEC(var15, 0);
+    FLD_SCRIPT_FREE(var15);
+    FLD_LOCAL_FLAG_OFF((49152 + 26));
+    FLD_LOCAL_FLAG_ON((49152 + 10));
+    return;
+}
+
+
+// Procedure Index: 14
+void D07_02_e409_037_START()
+{
+    int var16;
+    FLD_LOCAL_FLAG_ON((49152 + 26));
+    var16 = FLD_SCRIPT_READ(159, 10, 110);
+    FLD_SCRIPT_READ_SYNC(var16);
+    FLD_SCRIPT_EXEC(var16, 0);
+    FLD_SCRIPT_FREE(var16);
+    FLD_LOCAL_FLAG_OFF((49152 + 26));
+    FLD_LOCAL_FLAG_ON((49152 + 10));
+    SET_COUNT(151, 33100);
+    // bit id (536870912) + (2768) = 8912
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 48)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 48));
+        BIT_ON((0x20000000 + 2768));
+        FLD_HIT_SET_TYPE(7, 9, 13);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 15
+void D07_02_e409_040_START()
+{
+    int var17;
+    // bit id (536870912) + (2767) = 8911
+    // bit id (536870912) + (2767) = 8911
+    // bit id (536870912) + (2760) = 8904
+    
+    if (BIT_CHK((0x20000000 + 2767)) == 0)
+    {
+        BIT_ON((0x20000000 + 2767));
+        BIT_ON((0x20000000 + 2760));
+        SET_COUNT(151, 33350);
+        Fld_FadeOut_CallEvent();
+        CALL_EVENT(409, 40);
+        FLD_START_BOSS(54);
+        return;
+    }
+    else 
+    {
+        var17 = FLD_SCRIPT_READ(159, 10, 130);
+        FLD_SCRIPT_READ_SYNC(var17);
+        FLD_SCRIPT_EXEC(var17, 0);
+        FLD_SCRIPT_FREE(var17);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 16
+void DUCT_159_010_A_IN()
+{
+    // bit id (536870912) + (2768) = 8912
+    // bit id (536870912) + (2705) = 8849
+    
+    if (BIT_CHK((0x20000000 + 2768)) == 1)
+    {
+        DUCT_159_010_A_IN_OPEN();
+    }
+    else if ((BIT_CHK((0x20000000 + 2705)) == 1) && (GET_COUNT(151) < 33000))
+    {
+        D159_10_c_03_START();
+    }
+    else 
+    {
+        D07_02_e409_037_START();
+    }
+
+}
+
+
+// Procedure Index: 17
+void DUCT_159_010_A_IN_OPEN()
+{
+    sfVar0 = -863.00f;
+    sfVar1 = 4800.00f;
+    sfVar2 = -1939.00f;
+    sfVar3 = -90;
+    sfVar4 = -1023.00f;
+    sfVar5 = 4846.00f;
+    sfVar6 = -1939.00f;
+    sfVar7 = -90;
+    sfVar15 = -916.793f;
+    sfVar16 = 4902.591f;
+    sfVar17 = -1931.786f;
+    sfVar18 = 0.0022f;
+    sfVar19 = 0.7059f;
+    sfVar20 = -0.0022f;
+    sfVar21 = 0.7083f;
+    sfVar8 = -1089.574f;
+    sfVar9 = 4892.698f;
+    sfVar10 = -1938.339f;
+    sfVar11 = -0.0164f;
+    sfVar12 = 0.7053f;
+    sfVar13 = 0.0164f;
+    sfVar14 = 0.7085f;
+    sfVar22 = -1307.623f;
+    sfVar23 = 4882.585f;
+    sfVar24 = -1939.349f;
+    sfVar25 = -0.0164f;
+    sfVar26 = 0.7053f;
+    sfVar27 = 0.0164f;
+    sfVar28 = 0.7085f;
+    SYS_ratwalk_in();
+}
+
+
+// Procedure Index: 18
+void DUCT_159_010_A_OUT()
+{
+    sfVar0 = -863.00f;
+    sfVar1 = 4800.00f;
+    sfVar2 = -1939.00f;
+    sfVar3 = -90;
+    sfVar4 = -1023.00f;
+    sfVar5 = 4846.00f;
+    sfVar6 = -1939.00f;
+    sfVar7 = -90;
+    sfVar15 = -1032.948f;
+    sfVar16 = 4929.083f;
+    sfVar17 = -1931.823f;
+    sfVar18 = -0.0891f;
+    sfVar19 = -0.7243f;
+    sfVar20 = -0.0954f;
+    sfVar21 = 0.677f;
+    sfVar8 = -765.399f;
+    sfVar9 = 4887.53f;
+    sfVar10 = -1955.133f;
+    sfVar11 = -0.053f;
+    sfVar12 = -0.6545f;
+    sfVar13 = -0.0461f;
+    sfVar14 = 0.7528f;
+    sfVar22 = -674.1744f;
+    sfVar23 = 4949.543f;
+    sfVar24 = -2101.762f;
+    sfVar25 = -0.0521f;
+    sfVar26 = 0.8888f;
+    sfVar27 = 0.1044f;
+    sfVar28 = 0.4432f;
+    SYS_ratwalk_out();
+}
+
+
+// Procedure Index: 19
+void DUCT_159_010_B_IN()
+{
+    sfVar0 = -1909.751f;
+    sfVar1 = 4800.00f;
+    sfVar2 = -1485.855f;
+    sfVar3 = 180;
+    sfVar4 = -1903.815f;
+    sfVar5 = 4844.968f;
+    sfVar6 = -1675.154f;
+    sfVar7 = 180;
+    sfVar15 = -1909.057f;
+    sfVar16 = 4912.047f;
+    sfVar17 = -1479.333f;
+    sfVar18 = -0.0323f;
+    sfVar19 = 0.0073f;
+    sfVar20 = 0.0002f;
+    sfVar21 = 0.9995f;
+    sfVar8 = -1905.736f;
+    sfVar9 = 4911.211f;
+    sfVar10 = -1558.828f;
+    sfVar11 = -0.0009f;
+    sfVar12 = 0.9991f;
+    sfVar13 = 0.0324f;
+    sfVar14 = 0.0277f;
+    sfVar22 = -1722.526f;
+    sfVar23 = 4985.759f;
+    sfVar24 = -1375.761f;
+    sfVar25 = -0.1988f;
+    sfVar26 = 0.4561f;
+    sfVar27 = 0.1053f;
+    sfVar28 = 0.861f;
+    SYS_ratwalk_in();
+}
+
+
+// Procedure Index: 20
+void DUCT_159_010_B_OUT()
+{
+    sfVar0 = -1909.751f;
+    sfVar1 = 4800.00f;
+    sfVar2 = -1485.855f;
+    sfVar3 = 180;
+    sfVar4 = -1903.815f;
+    sfVar5 = 4844.968f;
+    sfVar6 = -1675.154f;
+    sfVar7 = 180;
+    sfVar15 = -1909.057f;
+    sfVar16 = 4912.047f;
+    sfVar17 = -1479.333f;
+    sfVar18 = -0.0323f;
+    sfVar19 = 0.0073f;
+    sfVar20 = 0.0002f;
+    sfVar21 = 0.9995f;
+    sfVar8 = -1905.736f;
+    sfVar9 = 4911.211f;
+    sfVar10 = -1558.828f;
+    sfVar11 = -0.0009f;
+    sfVar12 = 0.9991f;
+    sfVar13 = 0.0324f;
+    sfVar14 = 0.0277f;
+    sfVar22 = -1722.526f;
+    sfVar23 = 4985.759f;
+    sfVar24 = -1375.761f;
+    sfVar25 = -0.1988f;
+    sfVar26 = 0.4561f;
+    sfVar27 = 0.1053f;
+    sfVar28 = 0.861f;
+    SYS_ratwalk_out();
+}
+
+
+// Procedure Index: 21
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 22
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 23
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 24
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 25
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 26
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 27
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 28
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 29
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 30
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 31
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 32
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 33
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 34
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 35
+void Gimmick_clear_EXP()
+{
+    return;
+}
+
+
+// Procedure Index: 36
+void SYS_ratwalk_in()
+{
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar0, sfVar1, sfVar2, 5);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar3, 0, 5);
+    
+    if (FLD_CHECK_MOUSE() == 0)
+    {
+        MDL_ANIM(sVar18, 19, 1, 7, 1.00f);
+    }
+    else 
+    {
+        MDL_ANIM(sVar18, 0, 1, 5, 1.00f);
+    }
+
+    FLD_WAIT(10);
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(sfVar15, sfVar16, sfVar17, sfVar18, sfVar19, sfVar20, sfVar21, 10);
+    FLD_WAIT(10);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar4, sfVar5, sfVar6, 0);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar7, 0, 0);
+    FLD_MODEL_SET_VISIBLE(sVar18, 0, 5);
+    FLD_SET_SUBJECT_MODE(1);
+    FLD_ROT_CAMERA(0, 0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_INTERP(15);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_MODEL_SET_VISIBLE(sVar18, 1, 0);
+}
+
+
+// Procedure Index: 37
+void SYS_ratwalk_in_upper()
+{
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+    FLD_WAIT(5);
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(sfVar15, sfVar16, sfVar17, sfVar18, sfVar19, sfVar20, sfVar21, 15);
+    FLD_WAIT(10);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar4, sfVar5, sfVar6, 0);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar7, 0, 0);
+    FLD_MODEL_SET_VISIBLE(sVar18, 0, 0);
+    FLD_SET_SUBJECT_MODE(1);
+    FLD_ROT_CAMERA(0, 0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_INTERP(15);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_MODEL_SET_VISIBLE(sVar18, 1, 0);
+}
+
+
+// Procedure Index: 38
+void SYS_ratwalk_out()
+{
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_PTY_MODEL_SET_VISIBLE(0, 0);
+    
+    if (sfVar3 < 0)
+    {
+        sfVar3 = (180 + sfVar3);
+    }
+    else 
+    {
+        sfVar3 = (180 - sfVar3);
+    }
+
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(sfVar8, sfVar9, sfVar10, sfVar11, sfVar12, sfVar13, sfVar14, 10);
+    FLD_WAIT(10);
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar0, sfVar1, sfVar2, 0);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar3, 0, 0);
+    
+    if (FLD_CHECK_MOUSE() == 0)
+    {
+        MDL_ANIM(sVar18, 19, 1, 0, 1.00f);
+    }
+
+    FLD_MODEL_SET_VISIBLE(sVar18, 0, 0);
+    FLD_SET_SUBJECT_MODE(0);
+    FLD_WAIT(10);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_LOCK_INTERP(sfVar22, sfVar23, sfVar24, sfVar25, sfVar26, sfVar27, sfVar28, 15);
+    FLD_MODEL_SET_VISIBLE(sVar18, 1, 10);
+    FLD_WAIT(10);
+    MDL_ANIM(sVar18, 0, 1, 5, 1.00f);
+    FLD_PTY_MODEL_SET_VISIBLE(1, 10);
+    FLD_WAIT(5);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_CAMERA_SET_FIXED(sfVar22, sfVar23, sfVar24, sfVar25, sfVar26, sfVar27, sfVar28);
+}
+
+
+// Procedure Index: 39
+void SYS_ratwalk_IN_move_setup()
+{
+    float fVar39;
+    float fVar41;
+    float fVar40;
+    float fVar42;
+    float fVar36;
+    float fVar37;
+    float fVar38;
+    
+    if (FLD_CHECK_MOUSE())
+    {
+        sfVar15 = 20;
+        sfVar16 = 20;
+        sfVar17 = 0;
+        fVar39 = 200;
+    }
+    else 
+    {
+        sfVar15 = 0;
+        sfVar16 = 50;
+        sfVar17 = 0;
+        fVar39 = 300;
+    }
+
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+    fVar41 = 0;
+    
+    if (sfVar7 == 90)
+    {
+        fVar40 = 1;
+        fVar42 = 0;
+        sfVar3 = 270;
+        sfVar7 = 90;
+        sfVar18 = 0;
+        sfVar19 = 0.70f;
+        sfVar20 = 0;
+        sfVar21 = 0.70f;
+        fVar36 = -sfVar17;
+        fVar37 = sfVar16;
+        fVar38 = sfVar15;
+    }
+    else if (sfVar7 == 180)
+    {
+        fVar40 = 0;
+        fVar42 = 1;
+        sfVar3 = 180;
+        sfVar7 = 0;
+        sfVar18 = 0;
+        sfVar19 = 0;
+        sfVar20 = 0;
+        sfVar21 = 1;
+        fVar36 = -sfVar15;
+        fVar37 = sfVar16;
+        fVar38 = -sfVar17;
+    }
+    else if (sfVar7 == 270)
+    {
+        fVar40 = -1;
+        fVar42 = 0;
+        sfVar3 = 90;
+        sfVar7 = 270;
+        sfVar18 = 0;
+        sfVar19 = -0.70f;
+        sfVar20 = 0;
+        sfVar21 = 0.70f;
+        fVar36 = sfVar17;
+        fVar37 = sfVar16;
+        fVar38 = -sfVar15;
+    }
+    else 
+    {
+        fVar40 = 0;
+        fVar42 = -1;
+        sfVar3 = 0;
+        sfVar7 = 180;
+        sfVar18 = 0;
+        sfVar19 = 1;
+        sfVar20 = 0;
+        sfVar21 = 0;
+        fVar36 = sfVar15;
+        fVar37 = sfVar16;
+        fVar38 = sfVar17;
+    }
+
+    FLD_SET_DUCT_POS(sfVar4, sfVar5, sfVar6, sfVar7, 0);
+    sfVar0 = FLD_GET_DUCT_POS(0);
+    sfVar1 = FLD_GET_DUCT_POS(1);
+    sfVar2 = FLD_GET_DUCT_POS(2);
+    
+    if (sfVar34 == 0)
+    {
+        sfVar34 = 50;
+    }
+
+    
+    if (FLD_CHECK_MOUSE() == 0)
+    {
+        sfVar0 = (sfVar0 + (fVar40 * sfVar34));
+        
+        if (sfVar35 == 0)
+        {
+            sfVar1 = (sfVar1 + (fVar41 * sfVar34));
+        }
+        else 
+        {
+            sfVar1 = sfVar35;
+        }
+
+        sfVar2 = (sfVar2 + (fVar42 * sfVar34));
+    }
+    else 
+    {
+        sfVar0 = (sfVar0 + (fVar40 * sfVar34));
+        sfVar2 = (sfVar2 + (fVar42 * sfVar34));
+    }
+
+    sfVar15 = ((sfVar4 + (fVar40 * fVar39)) + fVar36);
+    sfVar16 = ((sfVar5 + (fVar41 * fVar39)) + fVar37);
+    sfVar17 = ((sfVar6 + (fVar42 * fVar39)) + fVar38);
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar0, sfVar1, sfVar2, 5);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar3, 0, 5);
+    FLD_UNIT_SET_WALK(sVar18);
+    FLD_MODEL_SYNC_TRANSLATE(sVar18);
+    FLD_MODEL_SYNC_ROTATE(sVar18);
+    FLD_UNIT_SET_WAIT(sVar18);
+    
+    if (FLD_CHECK_MOUSE() == 0)
+    {
+        MDL_ANIM(sVar18, 19, 1, 7, 1.00f);
+    }
+    else 
+    {
+        MDL_ANIM(sVar18, 0, 1, 5, 1.00f);
+    }
+
+    FLD_WAIT(10);
+    return;
+}
+
+
+// Procedure Index: 40
+void SYS_ratwalk_IN_move_camera()
+{
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(sfVar15, sfVar16, sfVar17, sfVar18, sfVar19, sfVar20, sfVar21, 10);
+    FLD_CAMERA_SYNC_INTERP();
+    return;
+}
+
+
+// Procedure Index: 41
+void SYS_ratwalk_IN_move_unit()
+{
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar4, sfVar5, sfVar6, 0);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar3, 0, 0);
+    FLD_MODEL_SET_VISIBLE(sVar18, 0, 5);
+    FLD_SET_SUBJECT_MODE(1);
+    return;
+}
+
+
+// Procedure Index: 42
+void SYS_ratwalk_IN_move_camera2()
+{
+    FLD_ROT_CAMERA(0, 0);
+    FLD_CAMERA_INTERP(15);
+    return;
+}
+
+
+// Procedure Index: 43
+void SYS_ratwalk_IN_move_end()
+{
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    FLD_MODEL_SET_VISIBLE(sVar18, 1, 0);
+    return;
+}
+
+
+// Procedure Index: 44
+void SYS_ratwalk_IN_auto()
+{
+    SYS_ratwalk_IN_start();
+    SYS_ratwalk_IN_move_camera2();
+    SYS_ratwalk_IN_end();
+    SYS_ratwalk_param_reset();
+    return;
+}
+
+
+// Procedure Index: 45
+void SYS_ratwalk_IN_start()
+{
+    SYS_ratwalk_IN_move_setup();
+    SYS_ratwalk_IN_move_camera();
+    SYS_ratwalk_IN_move_unit();
+}
+
+
+// Procedure Index: 46
+void SYS_ratwalk_IN_end()
+{
+    SYS_ratwalk_IN_move_end();
+}
+
+
+// Procedure Index: 47
+void SYS_ratwalk_OUT_move_setup()
+{
+    float fVar47;
+    float fVar46;
+    float fVar48;
+    float fVar43;
+    float fVar44;
+    float fVar45;
+    
+    if (FLD_CHECK_MOUSE())
+    {
+        sfVar8 = 0;
+        sfVar9 = 30;
+        sfVar10 = 0;
+    }
+    else 
+    {
+        sfVar8 = 0;
+        sfVar9 = 50;
+        sfVar10 = 0;
+    }
+
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+    fVar47 = 0;
+    
+    if (sfVar7 == 90)
+    {
+        fVar46 = 1;
+        fVar48 = 0;
+        sfVar3 = 270;
+        sfVar7 = 90;
+        sfVar11 = 0;
+        sfVar12 = -0.70f;
+        sfVar13 = 0;
+        sfVar14 = 0.70f;
+        fVar43 = -sfVar10;
+        fVar44 = sfVar9;
+        fVar45 = sfVar8;
+    }
+    else if (sfVar7 == 180)
+    {
+        fVar46 = 0;
+        fVar48 = 1;
+        sfVar3 = 180;
+        sfVar7 = 0;
+        sfVar11 = 0;
+        sfVar12 = 1;
+        sfVar13 = 0;
+        sfVar14 = 0;
+        fVar43 = -sfVar8;
+        fVar44 = sfVar9;
+        fVar45 = -sfVar10;
+    }
+    else if (sfVar7 == 270)
+    {
+        fVar46 = -1;
+        fVar48 = 0;
+        sfVar3 = 90;
+        sfVar7 = 270;
+        sfVar11 = 0;
+        sfVar12 = 0.70f;
+        sfVar13 = 0;
+        sfVar14 = 0.70f;
+        fVar43 = sfVar10;
+        fVar44 = sfVar9;
+        fVar45 = -sfVar8;
+    }
+    else 
+    {
+        fVar46 = 0;
+        fVar48 = -1;
+        sfVar3 = 0;
+        sfVar7 = 180;
+        sfVar11 = 0;
+        sfVar12 = 0;
+        sfVar13 = 0;
+        sfVar14 = 1;
+        fVar43 = sfVar8;
+        fVar44 = sfVar9;
+        fVar45 = sfVar10;
+    }
+
+    
+    if (FLD_CHECK_MOUSE())
+    {
+        
+        if (sfVar33 == 0)
+        {
+            sfVar33 = 100;
+        }
+
+    }
+    else if (sfVar33 == 0)
+    {
+        sfVar33 = 200;
+    }
+
+    FLD_SET_DUCT_POS(sfVar4, sfVar5, sfVar6, sfVar7, 0);
+    sfVar0 = (FLD_GET_DUCT_POS(0) + (fVar46 * sfVar33));
+    
+    if (sfVar35 == 0)
+    {
+        sfVar1 = (FLD_GET_DUCT_POS(1) + (fVar47 * sfVar33));
+    }
+    else 
+    {
+        sfVar1 = sfVar35;
+    }
+
+    sfVar2 = (FLD_GET_DUCT_POS(2) + (fVar48 * sfVar33));
+    sfVar8 = ((sfVar4 + (fVar46 * 100)) + fVar43);
+    sfVar9 = ((sfVar5 + (fVar47 * 100)) + fVar44);
+    sfVar10 = ((sfVar6 + (fVar48 * 100)) + fVar45);
+    return;
+}
+
+
+// Procedure Index: 48
+void SYS_ratwalk_OUT_move_camera()
+{
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(sfVar8, sfVar9, sfVar10, sfVar11, sfVar12, sfVar13, sfVar14, 10);
+    FLD_CAMERA_SYNC_INTERP();
+    return;
+}
+
+
+// Procedure Index: 49
+void SYS_ratwalk_OUT_move_unit()
+{
+    FLD_MODEL_SET_TRANSLATE(sVar18, sfVar0, sfVar1, sfVar2, 0);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, sfVar7, 0, 0);
+    FLD_MODEL_SET_VISIBLE(sVar18, 0, 0);
+    
+    if (FLD_CHECK_MOUSE() == 0)
+    {
+        MDL_ANIM(sVar18, 19, 1, 0, 1.00f);
+    }
+
+    FLD_SET_SUBJECT_MODE(0);
+    FLD_MODEL_SET_VISIBLE(sVar18, 1, 10);
+    return;
+}
+
+
+// Procedure Index: 50
+void SYS_ratwalk_OUT_move_camera2()
+{
+    FLD_ROT_CAMERA(0, 0);
+    FLD_CAMERA_INTERP(15);
+    return;
+}
+
+
+// Procedure Index: 51
+void SYS_ratwalk_OUT_move_end()
+{
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_CAMERA_UNLOCK();
+    MDL_ANIM(sVar18, 0, 1, 5, 1.00f);
+    FLD_PTY_MODEL_SET_VISIBLE(1, 10);
+    FLD_WAIT(5);
+    FLD_MODEL_SET_VISIBLE(sVar18, 1, 0);
+    return;
+}
+
+
+// Procedure Index: 52
+void SYS_ratwalk_OUT_auto()
+{
+    int var20;
+    
+    if (FLD_CHECK_MOUSE() && (sfVar33 == 0))
+    {
+        sfVar33 = 150;
+    }
+
+    SYS_ratwalk_OUT_start();
+    SYS_ratwalk_OUT_move_camera2();
+    
+    if (FLD_CHECK_MOUSE() && (var20 == 1))
+    {
+        FLD_CAMERA_SYNC_INTERP();
+        FLD_SET_MOUSE(0);
+        SYS_ratwalk_OUT_move_camera2();
+    }
+
+    SYS_ratwalk_OUT_end();
+    SYS_ratwalk_param_reset();
+    var20 = 1;
+    return;
+}
+
+
+// Procedure Index: 53
+void SYS_ratwalk_OUT_start()
+{
+    SYS_ratwalk_OUT_move_setup();
+    SYS_ratwalk_OUT_move_camera();
+    SYS_ratwalk_OUT_move_unit();
+}
+
+
+// Procedure Index: 54
+void SYS_ratwalk_OUT_end()
+{
+    SYS_ratwalk_OUT_move_end();
+}
+
+
+// Procedure Index: 55
+void SYS_ratwalk_param_reset()
+{
+    sfVar34 = 0;
+    sfVar33 = 0;
+    sfVar35 = 0;
+}
+
+
+// Procedure Index: 56
+void SYS_quake_s()
+{
+    CAMERA_QUAKE_2_START(10, 0.90f, 0.70f, 0.00f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 57
+void SYS_quake_s_loop()
+{
+    CAMERA_QUAKE_2_START(5, 0.90f, 0.00f, 0.20f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 58
+void SYS_quake_m()
+{
+    CAMERA_QUAKE_2_START(23, 0.90f, 0.80f, 0.00f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 59
+void SYS_quake_m_loop()
+{
+    CAMERA_QUAKE_2_START(13, 0.70f, 0.00f, 0.20f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 60
+void SYS_quake_l()
+{
+    CAMERA_QUAKE_2_START(35, 0.80f, 0.90f, 0.00f, 0.40f, 1);
+    return;
+}
+
+
+// Procedure Index: 61
+void SYS_quake_l_loop()
+{
+    CAMERA_QUAKE_2_START(25, 0.60f, 0.00f, 0.20f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 62
+void SYS_quake_ll()
+{
+    CAMERA_QUAKE_2_START(45, 0.80f, 1.00f, 0.00f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 63
+void SYS_quake_ll_loop()
+{
+    CAMERA_QUAKE_2_START(35, 0.50f, 0.00f, 0.20f, 0.50f, 1);
+    return;
+}
+
+
+// Procedure Index: 64
+void SYS_quake_stop()
+{
+    CAMERA_QUAKE_2_STOP(0);
+    return;
+}
+
+
+// Procedure Index: 65
+void SYS_elevator_move_OUT()
+{
+    int var19;
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_ADD_TRANSLATE(sVar18, sfVar29, sfVar30, sfVar31, var19);
+    
+    if (sVar1 >= 0)
+    {
+        FLD_MODEL_ADD_TRANSLATE(sVar1, sfVar29, sfVar30, sfVar31, var19);
+    }
+
+    
+    if (sVar2 >= 0)
+    {
+        FLD_MODEL_ADD_TRANSLATE(sVar2, sfVar29, sfVar30, sfVar31, var19);
+    }
+
+    
+    if (sVar3 >= 0)
+    {
+        FLD_MODEL_ADD_TRANSLATE(sVar3, sfVar29, sfVar30, sfVar31, var19);
+    }
+
+}
+
+
+// Procedure Index: 66
+void SYS_elevator_move_IN()
+{
+    sVar18 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_ADD_TRANSLATE(sVar18, sfVar29, (sfVar30 * -1), sfVar31, 0);
+    
+    if (sVar1 >= 0)
+    {
+        FLD_MODEL_ADD_TRANSLATE(sVar1, sfVar29, (sfVar30 * -1), sfVar31, 0);
+    }
+
+    
+    if (sVar2 >= 0)
+    {
+        FLD_MODEL_ADD_TRANSLATE(sVar2, sfVar29, (sfVar30 * -1), sfVar31, 0);
+    }
+
+    
+    if (sVar3 >= 0)
+    {
+        FLD_MODEL_ADD_TRANSLATE(sVar3, sfVar29, (sfVar30 * -1), sfVar31, 0);
+    }
+
+    SYNC();
+    SYS_elevator_move_OUT();
+}
+
+
+// Procedure Index: 67
+void PARTY_shadow_SET()
+{
+    
+    if (sVar1 > 0)
+    {
+        FLD_MODEL_SET_TRANSLATE(sVar1, sfVar29, sfVar30, sfVar31, 0);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        FLD_MODEL_SET_TRANSLATE(sVar2, sfVar29, sfVar30, sfVar31, 0);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        FLD_MODEL_SET_TRANSLATE(sVar3, sfVar29, sfVar30, sfVar31, 0);
+    }
+
+    FLD_PTY_MODEL_SET_VISIBLE(0, 0);
+}
+
+
+// Procedure Index: 68
+void PARTY_shadow_IN()
+{
+    float fVar49;
+    float fVar50;
+    float fVar51;
+    float fVar52;
+    float fVar53;
+    float fVar54;
+    float fVar55;
+    float fVar56;
+    float fVar57;
+    
+    if (sVar1 > 0)
+    {
+        fVar49 = FLD_MODEL_GET_X_TRANSLATE(sVar1);
+        fVar50 = FLD_MODEL_GET_Y_TRANSLATE(sVar1);
+        fVar51 = FLD_MODEL_GET_Z_TRANSLATE(sVar1);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        fVar52 = FLD_MODEL_GET_X_TRANSLATE(sVar2);
+        fVar53 = FLD_MODEL_GET_Y_TRANSLATE(sVar2);
+        fVar54 = FLD_MODEL_GET_Z_TRANSLATE(sVar2);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        fVar55 = FLD_MODEL_GET_X_TRANSLATE(sVar3);
+        fVar56 = FLD_MODEL_GET_Y_TRANSLATE(sVar3);
+        fVar57 = FLD_MODEL_GET_Z_TRANSLATE(sVar3);
+    }
+
+    FLD_PTY_MODEL_SET_STD_POS();
+    
+    if (sVar1 > 0)
+    {
+        sfVar29 = FLD_MODEL_GET_X_TRANSLATE(sVar1);
+        sfVar30 = FLD_MODEL_GET_Y_TRANSLATE(sVar1);
+        sfVar31 = FLD_MODEL_GET_Z_TRANSLATE(sVar1);
+        FLD_MODEL_SET_TRANSLATE(sVar1, fVar49, fVar50, fVar51, 0);
+        FLD_MODEL_SET_VISIBLE(sVar1, 1, 0);
+        FLD_PC_COVER_RUN(sVar1, sfVar29, sfVar30, sfVar31);
+    }
+
+    FLD_WAIT(5);
+    
+    if (sVar2 > 0)
+    {
+        sfVar29 = FLD_MODEL_GET_X_TRANSLATE(sVar2);
+        sfVar30 = FLD_MODEL_GET_Y_TRANSLATE(sVar2);
+        sfVar31 = FLD_MODEL_GET_Z_TRANSLATE(sVar2);
+        FLD_MODEL_SET_TRANSLATE(sVar2, fVar52, fVar53, fVar54, 0);
+        FLD_MODEL_SET_VISIBLE(sVar2, 1, 0);
+        FLD_PC_COVER_RUN(sVar2, sfVar29, sfVar30, sfVar31);
+    }
+
+    FLD_WAIT(5);
+    
+    if (sVar3 > 0)
+    {
+        sfVar29 = FLD_MODEL_GET_X_TRANSLATE(sVar3);
+        sfVar30 = FLD_MODEL_GET_Y_TRANSLATE(sVar3);
+        sfVar31 = FLD_MODEL_GET_Z_TRANSLATE(sVar3);
+        FLD_MODEL_SET_TRANSLATE(sVar3, fVar55, fVar56, fVar57, 0);
+        FLD_MODEL_SET_VISIBLE(sVar3, 1, 0);
+        FLD_PC_COVER_RUN(sVar3, sfVar29, sfVar30, sfVar31);
+    }
+
+    FLD_WAIT(5);
+    FLD_PTY_MODEL_SET_VISIBLE(1, 0);
+}
+
+
+// Procedure Index: 69
+void PLAYER_PINPOINT_SET()
+{
+    float fVar32;
+    sVar18 = FLD_PC_GET_RESHND(0);
+    MDL_ANIM(sVar18, 1, 1, 3, 1.00f);
+    FLD_MODEL_WALK_TRANSLATE(sVar18, sfVar29, sfVar30, sfVar31);
+    FLD_MODEL_SET_ROTATE(sVar18, 0, fVar32, 0, -1);
+    FLD_MODEL_SYNC_TRANSLATE(sVar18);
+    FLD_MODEL_SYNC_ROTATE(sVar18);
+    MDL_ANIM(sVar18, 0, 1, 3, 1.00f);
+}
+
+
+// Procedure Index: 70
+void SimpleEventStartPack()
+{
+    int var65;
+    int var62;
+    int var63;
+    int var64;
+    
+    if (sVar22 == 0)
+    {
+        sVar22 = 5;
+    }
+
+    FADEOUT(sVar22, 10);
+    FADE_SYNC();
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    
+    if (sVar1 <= 0)
+    {
+        sVar1 = -1;
+    }
+
+    
+    if (sVar2 <= 0)
+    {
+        sVar2 = -1;
+    }
+
+    
+    if (sVar3 <= 0)
+    {
+        sVar3 = -1;
+    }
+
+    
+    if (sVar1 <= 10)
+    {
+        sVar46 = sVar1;
+    }
+
+    
+    if (sVar2 <= 10)
+    {
+        sVar47 = sVar2;
+    }
+
+    
+    if (sVar3 <= 10)
+    {
+        sVar48 = sVar3;
+    }
+
+    
+    if (sVar1 <= 10)
+    {
+        event_member_setup();
+    }
+
+    
+    if (sVar25 != 0)
+    {
+        FLD_MODEL_SET_POS(sVar0, sVar25);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, FLD_POS_GET_ROT(sVar25), 0, 0);
+    }
+    else if (sVar31 != 0)
+    {
+        var65 = sVar31;
+        sVar51 = -1;
+        MoveToFrontObj();
+    }
+
+    FLD_MODEL_ADJUST_GROUND(sVar0);
+    
+    if (sVar28 != 0)
+    {
+        FLD_SWITCH_SET_POS(sVar28, 0, 0);
+    }
+
+    SYNC();
+    sVar30 = FLD_CAMERA_GET_FOVY();
+    
+    if (sVar24 == 0)
+    {
+        FLD_PTY_MODEL_SET_STD_POS();
+    }
+    else if (sVar24 == 1)
+    {
+        FLD_PTY_MODEL_SET_RND_POS();
+    }
+    else if (sVar24 == 2)
+    {
+        FLD_PTY_MODEL_SET_LINE_POS();
+    }
+
+    SYNC();
+    SetUpTalkPosition();
+    
+    if ((sVar0 >= 0) && (sVar55 != 0))
+    {
+        var62 = sVar0;
+        var63 = sVar54;
+        var64 = sVar55;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var62);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var62);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var62);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var62);
+        sfVar69 = (var64 * SIN((sfVar77 + var63)));
+        sfVar70 = (var64 * COS((sfVar77 + var63)));
+        FLD_MODEL_SET_TRANSLATE(var62, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar55 = 0;
+        sVar54 = 0;
+    }
+
+    
+    if ((sVar1 >= 0) && (sVar56 != 0))
+    {
+        var62 = sVar1;
+        var63 = sVar57;
+        var64 = sVar56;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var62);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var62);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var62);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var62);
+        sfVar69 = (var64 * SIN((sfVar77 + var63)));
+        sfVar70 = (var64 * COS((sfVar77 + var63)));
+        FLD_MODEL_SET_TRANSLATE(var62, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar56 = 0;
+        sVar57 = 0;
+    }
+
+    PUT(sVar2);
+    PUT(sVar58);
+    
+    if ((sVar2 >= 0) && (sVar58 != 0))
+    {
+        var62 = sVar2;
+        var63 = sVar59;
+        var64 = sVar58;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var62);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var62);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var62);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var62);
+        sfVar69 = (var64 * SIN((sfVar77 + var63)));
+        sfVar70 = (var64 * COS((sfVar77 + var63)));
+        FLD_MODEL_SET_TRANSLATE(var62, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar58 = 0;
+        sVar59 = 0;
+    }
+
+    
+    if ((sVar3 >= 0) && (sVar60 != 0))
+    {
+        var62 = sVar3;
+        var63 = sVar61;
+        var64 = sVar60;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var62);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var62);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var62);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var62);
+        sfVar69 = (var64 * SIN((sfVar77 + var63)));
+        sfVar70 = (var64 * COS((sfVar77 + var63)));
+        FLD_MODEL_SET_TRANSLATE(var62, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar60 = 0;
+        sVar61 = 0;
+    }
+
+    FLD_ALLY_SET_WAIT(sVar23);
+    
+    if (sVar26 != 0)
+    {
+        FLD_ALLY_SET_ORIENT_ROT(sVar26);
+    }
+
+    
+    if (sVar27 != 0)
+    {
+        FLD_SET_PARTY_LOOKAT(sVar27, 0);
+    }
+
+    
+    if (sVar29 == 1)
+    {
+        FLD_PTY_MODEL_SET_VISIBLE(0, 0);
+        FLD_PTY_MODEL_SYNC_VISIBLE();
+    }
+
+    AllCameraLockRelease();
+    FLD_CAMERA_INTERP_ASYNC(1);
+    
+    if (sVar37 == 0)
+    {
+        
+        if (var65 > 0)
+        {
+            FLD_ROT_CAMERA(15, 1);
+        }
+        else 
+        {
+            FLD_ROT_CAMERA(0, 1);
+        }
+
+    }
+    else if (sVar37 == 1)
+    {
+        FLD_ROT_CAMERA(180, 1);
+    }
+
+    FLD_CAMERA_LOCK();
+    ResetEventPackProperty();
+    FLD_WAIT(10);
+}
+
+
+// Procedure Index: 71
+void SimpleEventEndPack()
+{
+    int var66;
+    int var67;
+    int var68;
+    
+    if (sVar22 == 0)
+    {
+        sVar22 = 5;
+    }
+
+    FADEOUT(sVar22, 10);
+    FADE_SYNC();
+    
+    if (sVar0 <= 0)
+    {
+        sVar0 = FLD_PC_GET_RESHND(0);
+    }
+
+    
+    if (sVar25 != 0)
+    {
+        FLD_MODEL_SET_POS(sVar0, sVar25);
+        FLD_MODEL_SET_ROTATE(sVar0, 0, FLD_POS_GET_ROT(sVar25), 0, 0);
+    }
+
+    
+    if (sVar42 == 0)
+    {
+        FLD_MODEL_ADJUST_GROUND(sVar0);
+    }
+
+    
+    if (sVar24 == 0)
+    {
+        FLD_PTY_MODEL_SET_STD_POS();
+    }
+    else if (sVar24 == 1)
+    {
+        FLD_PTY_MODEL_SET_RND_POS();
+    }
+    else if (sVar24 == 2)
+    {
+        FLD_PTY_MODEL_SET_LINE_POS();
+    }
+
+    SYNC();
+    event_member_release();
+    
+    if ((sVar0 >= 0) && (sVar55 != 0))
+    {
+        var66 = sVar0;
+        var67 = sVar54;
+        var68 = sVar55;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var66);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var66);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var66);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var66);
+        sfVar69 = (var68 * SIN((sfVar77 + var67)));
+        sfVar70 = (var68 * COS((sfVar77 + var67)));
+        FLD_MODEL_SET_TRANSLATE(var66, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar55 = 0;
+        sVar54 = 0;
+    }
+
+    sVar1 = FLD_PC_GET_RESHND(1);
+    
+    if ((sVar1 >= 0) && (sVar56 != 0))
+    {
+        var66 = sVar1;
+        var67 = sVar57;
+        var68 = sVar56;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var66);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var66);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var66);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var66);
+        sfVar69 = (var68 * SIN((sfVar77 + var67)));
+        sfVar70 = (var68 * COS((sfVar77 + var67)));
+        FLD_MODEL_SET_TRANSLATE(var66, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar56 = 0;
+        sVar57 = 0;
+    }
+
+    sVar2 = FLD_PC_GET_RESHND(2);
+    
+    if ((sVar2 >= 0) && (sVar58 != 0))
+    {
+        var66 = sVar2;
+        var67 = sVar59;
+        var68 = sVar58;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var66);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var66);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var66);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var66);
+        sfVar69 = (var68 * SIN((sfVar77 + var67)));
+        sfVar70 = (var68 * COS((sfVar77 + var67)));
+        FLD_MODEL_SET_TRANSLATE(var66, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar58 = 0;
+        sVar59 = 0;
+    }
+
+    sVar3 = FLD_PC_GET_RESHND(3);
+    
+    if ((sVar3 >= 0) && (sVar60 != 0))
+    {
+        var66 = sVar3;
+        var67 = sVar61;
+        var68 = sVar60;
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(var66);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(var66);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(var66);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(var66);
+        sfVar69 = (var68 * SIN((sfVar77 + var67)));
+        sfVar70 = (var68 * COS((sfVar77 + var67)));
+        FLD_MODEL_SET_TRANSLATE(var66, (sfVar59 + sfVar69), sfVar60, (sfVar61 + sfVar70), 0);
+        sVar60 = 0;
+        sVar61 = 0;
+    }
+
+    SYNC();
+    
+    if (sVar29 == 1)
+    {
+        FLD_PTY_MODEL_SET_VISIBLE(1, 0);
+        FLD_PTY_MODEL_SYNC_VISIBLE();
+        sVar29 = 0;
+    }
+
+    FLD_RESET_PARTY_LOOKAT(0);
+    FLD_ALLY_SET_WAIT(0);
+    FLD_CAMERA_SYNC_INTERP();
+    AllCameraLockRelease();
+    
+    if (sVar37 == 0)
+    {
+        FLD_ROT_CAMERA(0, 1);
+    }
+    else if (sVar37 == 1)
+    {
+        FLD_ROT_CAMERA(180, 1);
+    }
+
+    FLD_CAMERA_INTERP_ASYNC(15);
+    
+    if (sVar30 > 0)
+    {
+        FLD_CAMERA_FOVY_INTERP(sVar30, 0);
+        sVar30 = 0;
+    }
+
+    FLD_SET_BUTTON_HIT_DISABLE(20);
+    FLD_SMP_EVENT_END(0);
+    ResetEventPackProperty();
+    ResetEndPackProperty();
+    FLD_WAIT(9);
+}
+
+
+// Procedure Index: 72
+void LeaveStartPack()
+{
+    int var52;
+    int var69;
+    FLD_SMP_EVENT_BEGIN(0);
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    
+    if ((sVar1 <= 0) && (sVar29 == 0))
+    {
+        sVar1 = -1;
+    }
+
+    
+    if ((sVar2 <= 0) && (sVar29 == 0))
+    {
+        sVar2 = -1;
+    }
+
+    
+    if ((sVar3 <= 0) && (sVar29 == 0))
+    {
+        sVar3 = -1;
+    }
+
+    
+    if ((sVar1 <= 10) && (sVar29 == 0))
+    {
+        sVar46 = sVar1;
+    }
+
+    
+    if ((sVar2 <= 10) && (sVar29 == 0))
+    {
+        sVar47 = sVar2;
+    }
+
+    
+    if ((sVar3 <= 10) && (sVar29 == 0))
+    {
+        sVar48 = sVar3;
+    }
+
+    
+    if ((sVar1 <= 10) && (sVar29 == 0))
+    {
+        event_member_setup();
+    }
+
+    
+    if (sVar29 == 1)
+    {
+        FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+    }
+    else if ((sVar24 >= 0) && (sVar21 == 1))
+    {
+        FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+        FLD_PTY_MODEL_SYNC_VISIBLE();
+    }
+
+    
+    if (sVar25 != 0)
+    {
+        PartyWaitDisable();
+        PartyMoveToPos();
+    }
+    else if (sVar31 != 0)
+    {
+        sVar26 = sVar31;
+        
+        if (var52 == 0)
+        {
+            MoveToFrontObj();
+        }
+        else 
+        {
+            PartyMoveToObj();
+        }
+
+    }
+
+    sVar30 = FLD_CAMERA_GET_FOVY();
+    
+    if (sVar21 == 1)
+    {
+        
+        if (sVar24 == 0)
+        {
+            FLD_PTY_MODEL_SET_STD_POS();
+        }
+        else if (sVar24 == 1)
+        {
+            FLD_PTY_MODEL_SET_RND_POS();
+        }
+        else if (sVar24 == 2)
+        {
+            FLD_PTY_MODEL_SET_LINE_POS();
+        }
+
+    }
+
+    
+    if ((sVar24 >= 0) && (sVar29 == 0))
+    {
+        FLD_PTY_MODEL_SET_VISIBLE(1, 15);
+    }
+
+    
+    if (sVar23 == 1)
+    {
+        FLD_MODEL_ANIM(sVar0, 58, 1, 10, 1.00f);
+        
+        if (sVar1 > 0)
+        {
+            FLD_MODEL_ANIM(sVar1, 12, 0, 10, 1.00f);
+        }
+
+        
+        if (sVar2 > 0)
+        {
+            FLD_MODEL_ANIM(sVar2, 12, 0, 10, 1.00f);
+        }
+
+        
+        if (sVar3 > 0)
+        {
+            FLD_MODEL_ANIM(sVar3, 12, 0, 10, 1.00f);
+        }
+
+        WAIT(10);
+        FLD_ALLY_SET_WAIT(sVar23);
+    }
+
+    
+    if (sVar26 != 0)
+    {
+        var69 = FLD_MODEL_GET_DIFF_Y_ANGLE(sVar0, sVar26);
+        
+        if ((var69 >= 25) || (var69 <= -25))
+        {
+            FLD_MODEL_UNIT_POINT_ROTATE(sVar0, FLD_MODEL_GET_X_TRANSLATE(sVar26), FLD_MODEL_GET_Y_TRANSLATE(sVar26), FLD_MODEL_GET_Z_TRANSLATE(sVar26), 0);
+            FLD_ROTATE_END_ANIM(sVar0, 0, 1, 15, 1.00f);
+        }
+        else 
+        {
+            FLD_MODEL_ORIENT_ROTATE(sVar0, sVar26, 10);
+        }
+
+        sVar31 = sVar26;
+        PartyRotToObj();
+        FLD_MODEL_SYNC_ROTATE(sVar0);
+    }
+
+    
+    if (sVar27 != 0)
+    {
+        FLD_SET_PARTY_LOOKAT(sVar27, 2);
+    }
+
+    
+    if (FLD_CAMERA_CHECK_LOCK() == 0)
+    {
+        FLD_CAMERA_LOCK();
+    }
+
+    ResetEventPackProperty();
+}
+
+
+// Procedure Index: 73
+void LeaveEndPack()
+{
+    int var71;
+    int var70;
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    
+    if (sVar46 > 0)
+    {
+        
+        if (FLD_PC_GET_CURRENT_RESHND(1) != FLD_PC_ID_GET_RESHND(sVar46))
+        {
+            sVar46 = FLD_PC_GET_RESHND(1);
+            FLD_MODEL_SET_VISIBLE(sVar1, 0, 10);
+            var71 = sVar1;
+            var70 = 1;
+        }
+        else 
+        {
+            sVar46 = 0;
+        }
+
+    }
+
+    
+    if (sVar47 > 0)
+    {
+        
+        if (FLD_PC_GET_CURRENT_RESHND(2) != FLD_PC_ID_GET_RESHND(sVar47))
+        {
+            sVar47 = FLD_PC_GET_RESHND(2);
+            FLD_MODEL_SET_VISIBLE(sVar2, 0, 10);
+            var71 = sVar2;
+            var70 = 1;
+        }
+        else 
+        {
+            sVar47 = 0;
+        }
+
+    }
+
+    
+    if (sVar48 > 0)
+    {
+        
+        if (FLD_PC_GET_CURRENT_RESHND(3) != FLD_PC_ID_GET_RESHND(sVar48))
+        {
+            sVar48 = FLD_PC_GET_RESHND(3);
+            FLD_MODEL_SET_VISIBLE(sVar3, 0, 10);
+            var71 = sVar3;
+            var70 = 1;
+        }
+        else 
+        {
+            sVar48 = 0;
+        }
+
+    }
+
+    
+    if (var70 == 1)
+    {
+        FLD_MODEL_SYNC_VISIBLE(var71);
+        event_member_release();
+        
+        if (sVar46 > 0)
+        {
+            FLD_MODEL_SET_VISIBLE(sVar46, 0, 0);
+            FLD_MODEL_SET_VISIBLE(sVar46, 1, 30);
+        }
+
+        
+        if (sVar47 > 0)
+        {
+            FLD_MODEL_SET_VISIBLE(sVar47, 0, 0);
+            FLD_MODEL_SET_VISIBLE(sVar47, 1, 30);
+        }
+
+        
+        if (sVar48 > 0)
+        {
+            FLD_MODEL_SET_VISIBLE(sVar48, 0, 0);
+            FLD_MODEL_SET_VISIBLE(sVar48, 1, 30);
+        }
+
+    }
+
+    
+    if (sVar29 == 1)
+    {
+        
+        if (sVar24 == 0)
+        {
+            FLD_PTY_MODEL_SET_STD_POS();
+        }
+        else if (sVar24 == 1)
+        {
+            FLD_PTY_MODEL_SET_RND_POS();
+        }
+        else if (sVar24 == 2)
+        {
+            FLD_PTY_MODEL_SET_LINE_POS();
+        }
+
+        FLD_PTY_MODEL_SET_VISIBLE(1, 15);
+        FLD_PTY_MODEL_SYNC_VISIBLE();
+        sVar29 = 0;
+    }
+
+    FLD_CAMERA_INTERP_ASYNC(20);
+    
+    if ((FLD_CAMERA_GET_FOVY() != sVar30) && (sVar30 > 0))
+    {
+        FLD_CAMERA_FOVY_INTERP(sVar30, 15);
+        FLD_CAMERA_SYNC_INTERP();
+    }
+
+    AllCameraLockRelease();
+    FLD_RESET_PARTY_LOOKAT(1);
+    FLD_SET_BUTTON_HIT_DISABLE(20);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_SMP_EVENT_END(0);
+    ResetEventPackProperty();
+    ResetEndPackProperty();
+}
+
+
+// Procedure Index: 74
+void FadeInPack()
+{
+    FADEIN(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 75
+void AllCameraLockRelease()
+{
+    _243:
+    
+    if (FLD_CAMERA_CHECK_LOCK() == 1)
+    {
+        FLD_CAMERA_UNLOCK();
+        goto _243;
+    }
+
+}
+
+
+// Procedure Index: 76
+void ResetEventPackProperty()
+{
+    sVar25 = 0;
+    sVar23 = 0;
+    sVar24 = 0;
+    sVar26 = 0;
+    sVar27 = 0;
+    sVar28 = 0;
+    sVar21 = 0;
+    sVar22 = 0;
+    sVar42 = 0;
+}
+
+
+// Procedure Index: 77
+void ResetEndPackProperty()
+{
+    sVar46 = 0;
+    sVar47 = 0;
+    sVar48 = 0;
+    sVar1 = 0;
+    sVar2 = 0;
+    sVar3 = 0;
+}
+
+
+// Procedure Index: 78
+void LookBackTranselate()
+{
+    int var72;
+    var72 = FLD_MODEL_GET_Y_ROTATE(sVar0);
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    
+    if (sVar35 == 0)
+    {
+        sVar35 = 200;
+    }
+
+    FLD_MODEL_DIR_TRANSLATE(sVar0, (var72 + 180), sVar35, 101);
+    WAIT(10);
+    sVar35 = 200;
+    return;
+}
+
+
+// Procedure Index: 79
+void OffsetTranslatePos()
+{
+    
+    if (sVar25 != 0)
+    {
+        FLD_PC_OFS_TRANSLATE(FLD_POS_GET_X_POS(sVar25), FLD_POS_GET_Y_POS(sVar25), FLD_POS_GET_Z_POS(sVar25), 1);
+    }
+
+    sVar25 = 0;
+    return;
+}
+
+
+// Procedure Index: 80
+void OffsetTranslateRotPC()
+{
+    int var73;
+    int var75;
+    int var76;
+    int var74;
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    var73 = FLD_MODEL_GET_Y_ROTATE(sVar0);
+    
+    if (sVar35 == 0)
+    {
+        sVar35 = 200;
+    }
+
+    var75 = 0;
+    _251:
+    
+    if (var75 < 4)
+    {
+        var76 = FLD_PC_GET_CURRENT_RESHND(var75);
+        
+        if (var76 >= 0)
+        {
+            var74 = MDL_GET_ANIM(var76);
+            FLD_MODEL_DIR_TRANSLATE(var76, var73, sVar35, 101);
+            FLD_TRANS_END_ANIM(var76, var74, 1, 8, 1.00f);
+            
+            if (var75 == 1)
+            {
+                FLD_WAIT(4);
+            }
+            else if (var75 == 2)
+            {
+                FLD_WAIT(2);
+            }
+
+        }
+
+        var75 = (var75 + 1);
+        goto _251;
+    }
+
+    sVar35 = 200;
+    return;
+}
+
+
+// Procedure Index: 81
+void OffsetWalkToRotPC()
+{
+    int var78;
+    int var80;
+    int var81;
+    int var79;
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    var78 = FLD_MODEL_GET_Y_ROTATE(sVar0);
+    
+    if (sVar35 == 0)
+    {
+        sVar35 = 200;
+    }
+
+    var80 = 0;
+    _260:
+    
+    if (var80 < 4)
+    {
+        var81 = FLD_PC_GET_CURRENT_RESHND(var80);
+        
+        if (var81 >= 0)
+        {
+            var79 = MDL_GET_ANIM(var81);
+            FLD_MODEL_DIR_TRANSLATE(var81, var78, sVar35, 100);
+            FLD_TRANS_END_ANIM(var81, var79, 1, 5, 1.00f);
+        }
+
+        var80 = (var80 + 1);
+        goto _260;
+    }
+
+    sVar35 = 200;
+    return;
+}
+
+
+// Procedure Index: 82
+void OffsetTranslateRotVal()
+{
+    int var82;
+    int var83;
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    
+    if (sVar35 == 0)
+    {
+        sVar35 = 200;
+    }
+
+    var82 = 0;
+    _266:
+    
+    if (var82 < 4)
+    {
+        var83 = FLD_PC_GET_CURRENT_RESHND(var82);
+        
+        if (var83 >= 0)
+        {
+            FLD_MODEL_DIR_TRANSLATE(var83, sVar33, sVar35, 101);
+            FLD_TRANS_END_ANIM(var83, 0, 1, 5, 1.00f);
+        }
+
+        var82 = (var82 + 1);
+        goto _266;
+    }
+
+    sVar33 = 0;
+    sVar35 = 200;
+    return;
+}
+
+
+// Procedure Index: 83
+void PartyRotToObjZeroFrame()
+{
+    int var84;
+    int var85;
+    
+    if (sVar31 == 0)
+    {
+        return;
+    }
+
+    var84 = 1;
+    _272:
+    
+    if (var84 < 4)
+    {
+        var85 = FLD_PC_GET_CURRENT_RESHND(var84);
+        
+        if (var85 >= 0)
+        {
+            FLD_MODEL_ORIENT_ROTATE(var85, sVar31, 0);
+        }
+
+        var84 = (var84 + 1);
+        goto _272;
+    }
+
+    sVar31 = 0;
+    return;
+}
+
+
+// Procedure Index: 84
+void PlayerRotToObj()
+{
+    int var86;
+    int var87;
+    
+    if (sVar31 != 0)
+    {
+        var86 = FLD_MODEL_GET_DIFF_Y_ANGLE(sVar0, sVar31);
+        var87 = MDL_GET_ANIM(sVar0);
+        
+        if ((var86 >= 25) || (var86 <= -25))
+        {
+            FLD_MODEL_UNIT_POINT_ROTATE(sVar0, FLD_MODEL_GET_X_TRANSLATE(sVar31), FLD_MODEL_GET_Y_TRANSLATE(sVar31), FLD_MODEL_GET_Z_TRANSLATE(sVar31), 100);
+        }
+        else 
+        {
+            FLD_MODEL_ORIENT_ROTATE(sVar0, sVar31, 10);
+        }
+
+    }
+
+    sVar31 = 0;
+}
+
+
+// Procedure Index: 85
+void PartyRotToObj()
+{
+    int var92;
+    int var93;
+    int var94;
+    int var88;
+    int var91;
+    int var89;
+    int var90;
+    
+    if (sVar31 == 0)
+    {
+        return;
+    }
+
+    var92 = FLD_MODEL_GET_X_TRANSLATE(sVar31);
+    var93 = FLD_MODEL_GET_Y_TRANSLATE(sVar31);
+    var94 = FLD_MODEL_GET_Z_TRANSLATE(sVar31);
+    var88 = 1;
+    _282:
+    
+    if (var88 < 4)
+    {
+        var91 = FLD_PC_GET_CURRENT_RESHND(var88);
+        
+        if (var91 >= 0)
+        {
+            var89 = FLD_MODEL_GET_DIFF_Y_ANGLE(var91, sVar31);
+            var90 = MDL_GET_ANIM(var91);
+            
+            if ((var89 >= 25) || (var89 <= -25))
+            {
+                FLD_MODEL_UNIT_POINT_ROTATE(var91, var92, var93, var94, 100);
+            }
+            else 
+            {
+                FLD_MODEL_ORIENT_ROTATE(var91, sVar31, 10);
+            }
+
+        }
+
+        var88 = (var88 + 1);
+        goto _282;
+    }
+
+    sVar31 = 0;
+    return;
+}
+
+
+// Procedure Index: 86
+void PartyAndPalyerRotToObj()
+{
+    int var95;
+    var95 = sVar31;
+    PlayerRotToObj();
+    sVar31 = var95;
+    PartyRotToObj();
+}
+
+
+// Procedure Index: 87
+void SetPartyWait()
+{
+    int var96;
+    int var97;
+    var96 = 0;
+    _288:
+    
+    if (var96 < 4)
+    {
+        var97 = FLD_PC_GET_CURRENT_RESHND(var96);
+        
+        if (var97 >= 0)
+        {
+            FLD_UNIT_SET_WAIT(var97);
+        }
+
+        var96 = (var96 + 1);
+        goto _288;
+    }
+
+}
+
+
+// Procedure Index: 88
+void PartyWaitDisable()
+{
+    int var98;
+    int var99;
+    var98 = 0;
+    _292:
+    
+    if (var98 < 4)
+    {
+        var99 = FLD_PC_GET_CURRENT_RESHND(var98);
+        
+        if (var99 >= 0)
+        {
+            FLD_UNIT_WAIT_DISABLE(var99);
+        }
+
+        var98 = (var98 + 1);
+        goto _292;
+    }
+
+}
+
+
+// Procedure Index: 89
+void CameraLookOBJ()
+{
+    
+    if (sVar31 != 0)
+    {
+        
+        if (sVar36 == 0)
+        {
+            sVar36 = 10;
+        }
+        else if ((sVar36 == 1) || (sVar36 == -1))
+        {
+            sVar36 = 0;
+        }
+
+        FLD_CAMERA_LOCK();
+        FLD_ROT_OBJ_CAMERA(sVar31, 3);
+        FLD_CAMERA_LOOKAT_INTERP(FLD_MODEL_GET_X_TRANSLATE(sVar31), FLD_MODEL_GET_Y_TRANSLATE(sVar31), FLD_MODEL_GET_Z_TRANSLATE(sVar31), sVar36);
+        FLD_CAMERA_SYNC_INTERP();
+        FLD_CAMERA_UNLOCK();
+    }
+
+    sVar31 = 0;
+    sVar32 = 0;
+    sVar36 = 0;
+    return;
+}
+
+
+// Procedure Index: 90
+void CameraNearOBJ()
+{
+    
+    if (sVar31 != 0)
+    {
+        
+        if (sVar36 == 0)
+        {
+            sVar36 = 20;
+        }
+        else if ((sVar36 == 1) || (sVar36 == -1))
+        {
+            sVar36 = 0;
+        }
+
+        sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(sVar0);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(sVar0);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(sVar0);
+        sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar31);
+        sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar31);
+        sfVar67 = (sfVar59 - sfVar63);
+        sfVar68 = (sfVar61 - sfVar65);
+        
+        if ((sfVar67 != 0) || (sfVar68 != 0))
+        {
+            sfVar71 = (sfVar67 / SQRT(((sfVar67 * sfVar67) + (sfVar68 * sfVar68))));
+            sfVar72 = (sfVar68 / SQRT(((sfVar67 * sfVar67) + (sfVar68 * sfVar68))));
+        }
+        else 
+        {
+            sfVar71 = 100;
+            sfVar72 = 0;
+        }
+
+        sfVar69 = sfVar71;
+        sfVar70 = sfVar72;
+        
+        if (sVar40 != 0)
+        {
+            sfVar71 = ((sfVar69 * COS(-sVar40)) - (sfVar70 * SIN(-sVar40)));
+            sfVar72 = ((sfVar69 * SIN(-sVar40)) + (sfVar70 * COS(-sVar40)));
+            sVar40 = 0;
+        }
+
+        FLD_CAMERA_LOCK();
+        FLD_CAMERA_TUMBLE_INTERP((sfVar59 + ((sfVar71 * sfVar58) * 100)), ((sfVar60 + 250) + sVar39), (sfVar61 + ((sfVar72 * sfVar58) * 100)), sfVar63, (FLD_MODEL_GET_Y_TRANSLATE(sVar31) + sVar38), sfVar65, sVar36);
+        
+        if (sVar41 == 0)
+        {
+            FLD_CAMERA_SYNC_INTERP();
+        }
+        else 
+        {
+            sVar41 = 0;
+        }
+
+        sVar38 = 0;
+        sVar39 = 0;
+        sfVar58 = 0;
+        sVar36 = 0;
+    }
+
+}
+
+
+// Procedure Index: 91
+void CameraNearPostion()
+{
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if ((sVar36 == 1) || (sVar36 == -1))
+    {
+        sVar36 = 0;
+    }
+
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    
+    if (sVar37 == 1)
+    {
+        sVar37 = 0;
+        sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar0);
+        sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar0);
+        sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar0);
+        sfVar59 = sVar43;
+        sfVar60 = sVar44;
+        sfVar61 = sVar45;
+    }
+    else 
+    {
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(sVar0);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(sVar0);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(sVar0);
+        sfVar63 = sVar43;
+        sfVar64 = sVar44;
+        sfVar65 = sVar45;
+    }
+
+    sfVar67 = (sfVar59 - sfVar63);
+    sfVar68 = (sfVar61 - sfVar65);
+    
+    if ((sfVar67 != 0) || (sfVar68 != 0))
+    {
+        sfVar71 = (sfVar67 / SQRT(((sfVar67 * sfVar67) + (sfVar68 * sfVar68))));
+        sfVar72 = (sfVar68 / SQRT(((sfVar67 * sfVar67) + (sfVar68 * sfVar68))));
+    }
+    else 
+    {
+        sfVar71 = 100;
+        sfVar72 = 0;
+    }
+
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_TUMBLE_INTERP((sfVar59 + ((sfVar71 * sfVar58) * 100)), ((sfVar60 + 250) + sVar39), (sfVar61 + ((sfVar72 * sfVar58) * 100)), sfVar63, sVar44, sfVar65, sVar36);
+    
+    if (sVar41 == 0)
+    {
+        FLD_CAMERA_SYNC_INTERP();
+    }
+    else 
+    {
+        sVar41 = 0;
+    }
+
+    sVar39 = 0;
+    sfVar58 = 0;
+    sVar36 = 0;
+}
+
+
+// Procedure Index: 92
+void CameraFrontToOBJ()
+{
+    float fVar75;
+    float fVar76;
+    
+    if (sVar31 != 0)
+    {
+        
+        if (sVar36 == 0)
+        {
+            sVar36 = 20;
+        }
+        else if ((sVar36 == 1) || (sVar36 == -1))
+        {
+            sVar36 = 0;
+        }
+
+        sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar31);
+        sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar31);
+        sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar31);
+        sfVar77 = -FLD_MODEL_GET_Y_ROTATE(sVar31);
+        
+        if (sfVar77 < 0)
+        {
+            sfVar77 = (360 + sfVar77);
+        }
+
+        sfVar67 = 0;
+        sfVar68 = 1;
+        sfVar69 = ((sfVar67 * COS((sfVar77 - sVar40))) - (sfVar68 * SIN((sfVar77 - sVar40))));
+        sfVar70 = ((sfVar67 * SIN((sfVar77 - sVar40))) + (sfVar68 * COS((sfVar77 - sVar40))));
+        FLD_CAMERA_LOCK();
+        
+        if (sfVar73 > 0)
+        {
+            fVar75 = ((sfVar67 * COS((sfVar77 - sfVar74))) - (sfVar68 * SIN((sfVar77 - sfVar74))));
+            fVar76 = ((sfVar67 * SIN((sfVar77 - sfVar74))) + (sfVar68 * COS((sfVar77 - sfVar74))));
+        }
+
+        FLD_CAMERA_TUMBLE_INTERP((sfVar63 + ((sfVar69 * (2 + sfVar58)) * 100)), ((sfVar64 + 250) + sVar39), (sfVar65 + ((sfVar70 * (2 + sfVar58)) * 100)), (sfVar63 + (fVar75 * sfVar73)), (sfVar64 + sVar38), (sfVar65 + (fVar76 * sfVar73)), sVar36);
+        
+        if (sVar41 == 0)
+        {
+            FLD_CAMERA_SYNC_INTERP();
+        }
+        else 
+        {
+            sVar41 = 0;
+        }
+
+        sVar38 = 0;
+        sVar39 = 0;
+        sVar40 = 0;
+        sfVar58 = 0;
+        sVar36 = 0;
+        sfVar73 = 0;
+        sfVar74 = 0;
+    }
+
+}
+
+
+// Procedure Index: 93
+void PartyLookAtPos()
+{
+    int var100;
+    int var101;
+    int var102;
+    
+    if (sVar31 < 0)
+    {
+        return;
+    }
+
+    var100 = FLD_MODEL_GET_X_TRANSLATE(sVar31);
+    var101 = FLD_MODEL_GET_Y_TRANSLATE(sVar31);
+    var102 = FLD_MODEL_GET_Z_TRANSLATE(sVar31);
+    
+    if (sVar38 == 0)
+    {
+        sVar38 = 150;
+    }
+
+    FLD_SET_PARTY_LOOKAT_POS(2, var100, (var101 + sVar38), var102);
+    sVar38 = 0;
+}
+
+
+// Procedure Index: 94
+void LookAtHandlePos()
+{
+    int var103;
+    int var104;
+    int var105;
+    
+    if ((sVar31 < 0) || (sVar32 < 0))
+    {
+        return;
+    }
+
+    var103 = FLD_MODEL_GET_X_TRANSLATE(sVar31);
+    var104 = FLD_MODEL_GET_Y_TRANSLATE(sVar31);
+    var105 = FLD_MODEL_GET_Z_TRANSLATE(sVar31);
+    
+    if (sVar38 == 0)
+    {
+        sVar38 = 150;
+    }
+
+    MDL_SET_LOOKAT_POS(sVar32, var103, (var104 + sVar38), var105, 2);
+    sVar38 = 0;
+}
+
+
+// Procedure Index: 95
+void MoveToPos()
+{
+    int var106;
+    
+    if ((sVar25 == 0) || (sVar32 == 0))
+    {
+        return;
+    }
+
+    
+    if (sVar51 == 1)
+    {
+        var106 = 100;
+    }
+    else 
+    {
+        var106 = 101;
+    }
+
+    FLD_MODEL_DST_TRANSLATE(sVar32, FLD_POS_GET_X_POS(sVar25), FLD_POS_GET_Y_POS(sVar25), FLD_POS_GET_Z_POS(sVar25), FLD_POS_GET_ROT(sVar25), var106);
+    
+    if (sVar50 == 0)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar32);
+    }
+
+    sVar25 = 0;
+    sVar32 = 0;
+    sVar50 = 0;
+}
+
+
+// Procedure Index: 96
+void PartyMoveToPos()
+{
+    int var107;
+    int var108;
+    int var109;
+    
+    if (sVar25 == 0)
+    {
+        return;
+    }
+
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    sfVar63 = FLD_POS_GET_X_POS(sVar25);
+    sfVar65 = FLD_POS_GET_Z_POS(sVar25);
+    sfVar78 = FLD_POS_GET_ROT(sVar25);
+    
+    if (sfVar78 < 0)
+    {
+        sfVar78 = (360 + sfVar78);
+    }
+
+    
+    if (sVar51 == 1)
+    {
+        var107 = 100;
+    }
+    else 
+    {
+        var107 = 101;
+    }
+
+    
+    if (sVar23 == 1)
+    {
+        var107 = var107;
+    }
+
+    FLD_MODEL_DST_TRANSLATE(sVar0, sfVar63, FLD_POS_GET_Y_POS(sVar25), sfVar65, FLD_POS_GET_ROT(sVar25), var107);
+    var108 = 1;
+    _354:
+    
+    if (var108 < 4)
+    {
+        var109 = FLD_PC_GET_CURRENT_RESHND(var108);
+        
+        if (var109 >= 0)
+        {
+            sfVar69 = ((100 * 2.00f) * SIN(((sfVar78 + 90) + (45 * var108))));
+            sfVar70 = ((100 * 2.00f) * COS(((sfVar78 + 90) + (45 * var108))));
+            FLD_MODEL_DST_TRANSLATE(var109, (sfVar63 + sfVar69), FLD_POS_GET_Y_POS(sVar25), (sfVar65 + sfVar70), FLD_POS_GET_ROT(sVar25), var107);
+            
+            if (sVar23 == 1)
+            {
+                
+                if (var108 == 0)
+                {
+                    FLD_TRANS_END_ANIM(var109, 58, 1, 5, 1.00f);
+                }
+                else 
+                {
+                    FLD_TRANS_END_ANIM(var109, 12, 1, 5, 1.00f);
+                }
+
+            }
+
+        }
+
+        var108 = (var108 + 1);
+        goto _354;
+    }
+
+    
+    if (sVar50 == 0)
+    {
+        var108 = 0;
+        _362:
+        
+        if (var108 < 4)
+        {
+            var109 = FLD_PC_GET_CURRENT_RESHND(var108);
+            
+            if (var109 >= 0)
+            {
+                FLD_MODEL_SYNC_TRANSLATE(var109);
+            }
+
+            var108 = (var108 + 1);
+            goto _362;
+        }
+
+    }
+
+    sVar25 = 0;
+    sVar32 = 0;
+    sVar50 = 0;
+    return;
+}
+
+
+// Procedure Index: 97
+void PartyMoveToObj()
+{
+    int var110;
+    int var112;
+    int var113;
+    int var114;
+    int var111;
+    int var115;
+    int var116;
+    
+    if (sVar31 == 0)
+    {
+        return;
+    }
+
+    
+    if (sVar51 == 1)
+    {
+        var110 = 100;
+    }
+    else 
+    {
+        var110 = 101;
+    }
+
+    var112 = sVar23;
+    var113 = sVar51;
+    sVar50 = 1;
+    var114 = sVar31;
+    var111 = sVar35;
+    MoveToFrontObj();
+    sVar51 = var113;
+    sVar23 = var112;
+    sVar31 = var114;
+    sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+    sfVar63 = (FLD_MODEL_GET_X_TRANSLATE(sVar31) + (var111 * SIN((sfVar77 + sVar33))));
+    sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar31);
+    sfVar65 = (FLD_MODEL_GET_Z_TRANSLATE(sVar31) + (var111 * COS((sfVar77 + sVar33))));
+    sfVar77 = (FLD_MODEL_GET_Y_ROTATE(sVar31) + 180);
+    
+    if (sfVar77 < 0)
+    {
+        sfVar77 = (360 + sfVar77);
+    }
+
+    sfVar67 = 0;
+    sfVar68 = 1;
+    
+    if (sVar51 == 1)
+    {
+        var110 = 100;
+    }
+    else 
+    {
+        var110 = 101;
+    }
+
+    var115 = 1;
+    _376:
+    
+    if (var115 < 4)
+    {
+        var116 = FLD_PC_GET_CURRENT_RESHND(var115);
+        
+        if (var116 >= 0)
+        {
+            sfVar69 = ((100 * 2.00f) * SIN(((sfVar77 + 90) + (45 * var115))));
+            sfVar70 = ((100 * 2.00f) * COS(((sfVar77 + 90) + (45 * var115))));
+            FLD_MODEL_DST_TRANSLATE(var116, (sfVar63 + sfVar69), sfVar64, (sfVar65 + sfVar70), sfVar77, var110);
+            
+            if (sVar23 == 1)
+            {
+                
+                if (var115 == 0)
+                {
+                    FLD_TRANS_END_ANIM(var116, 58, 1, 5, 1.00f);
+                }
+                else 
+                {
+                    FLD_TRANS_END_ANIM(var116, 12, 1, 5, 1.00f);
+                }
+
+            }
+
+        }
+
+        var115 = (var115 + 1);
+        goto _376;
+    }
+
+    
+    if (sVar50 == 0)
+    {
+        var115 = 0;
+        _384:
+        
+        if (var115 < 4)
+        {
+            var116 = FLD_PC_GET_CURRENT_RESHND(var115);
+            
+            if (var116 >= 0)
+            {
+                FLD_MODEL_SYNC_TRANSLATE(var116);
+            }
+
+            var115 = (var115 + 1);
+            goto _384;
+        }
+
+    }
+
+    sVar25 = 0;
+    sVar32 = 0;
+    sVar50 = 0;
+    return;
+}
+
+
+// Procedure Index: 98
+void MoveCoverRunToPosPerty()
+{
+    int var119;
+    int var118;
+    int var121;
+    int var122;
+    int var123;
+    int var117;
+    int var120;
+    int var124;
+    
+    if (sVar53 == 0)
+    {
+        return;
+    }
+
+    var119 = 0;
+    
+    if (FLD_POS_GET_X_POS(sVar53) == 0.00f)
+    {
+        return;
+    }
+    else 
+    {
+        var119 = 1;
+    }
+
+    var118 = sVar53;
+    var121 = FLD_POS_GET_X_POS(var118);
+    var122 = FLD_POS_GET_Y_POS(var118);
+    var123 = FLD_POS_GET_Z_POS(var118);
+    sfVar78 = FLD_POS_GET_ROT(var118);
+    sVar0 = FLD_PC_GET_RESHND(0);
+    FLD_PTY_MODEL_SET_VISIBLE(0, 5);
+    FLD_MODEL_SET_VISIBLE(sVar0, 0, 5);
+    sfVar71 = COS(sfVar78);
+    sfVar67 = sfVar71;
+    sfVar72 = SIN(sfVar78);
+    sfVar68 = sfVar72;
+    _394:
+    
+    if (var119 == 1)
+    {
+        var117 = 0;
+        _396:
+        
+        if (var117 < 4)
+        {
+            var120 = FLD_PC_GET_CURRENT_RESHND(var117);
+            
+            if (var120 >= 0)
+            {
+                var124 = var120;
+                sfVar67 = sfVar71;
+                sfVar68 = sfVar72;
+                sfVar69 = 0;
+                sfVar70 = 0;
+                
+                if (var117 > 0)
+                {
+                    sfVar69 = ((sfVar67 * COS((90 + (45 * var117)))) - (sfVar68 * SIN((90 + (45 * var117)))));
+                    sfVar70 = ((sfVar67 * SIN((90 + (45 * var117)))) + (sfVar68 * COS((90 + (45 * var117)))));
+                    sfVar69 = ((sfVar69 * 100) * 1.50f);
+                    sfVar70 = ((sfVar70 * 100) * 1.50f);
+                }
+
+                FLD_PC_COVER_RUN(var120, (var121 + sfVar69), var122, (var123 + sfVar70));
+            }
+
+            var117 = (var117 + 1);
+            goto _396;
+        }
+
+        FLD_PC_SYNC_COVER_RUN(var124);
+        var118 = (var118 + 1);
+        var121 = FLD_POS_GET_X_POS(var118);
+        var122 = FLD_POS_GET_Y_POS(var118);
+        var123 = FLD_POS_GET_Z_POS(var118);
+        
+        if (((var121 == 0) && (var123 == 0)) && (var123 == 0))
+        {
+            var119 = 0;
+        }
+
+        goto _394;
+    }
+
+    FLD_MODEL_SET_VISIBLE(sVar0, 1, 15);
+    FLD_WAIT(5);
+    FLD_PTY_MODEL_SET_VISIBLE(1, 15);
+    sVar53 = 0;
+    return;
+}
+
+
+// Procedure Index: 99
+void MoveCoverRunToPosOne()
+{
+    int var126;
+    int var125;
+    int var128;
+    int var129;
+    int var130;
+    int var127;
+    
+    if ((sVar53 == 0) || (sVar32 == 0))
+    {
+        return;
+    }
+
+    var126 = 0;
+    
+    if (FLD_POS_GET_X_POS(sVar53) == 0.00f)
+    {
+        return;
+    }
+    else 
+    {
+        var126 = 1;
+    }
+
+    var125 = sVar53;
+    var128 = FLD_POS_GET_X_POS(var125);
+    var129 = FLD_POS_GET_Y_POS(var125);
+    var130 = FLD_POS_GET_Z_POS(var125);
+    var127 = sVar32;
+    FLD_MODEL_SET_VISIBLE(var127, 0, 5);
+    _408:
+    
+    if (var126 == 1)
+    {
+        
+        if (var127 >= 0)
+        {
+            FLD_PC_COVER_RUN(var127, var128, var129, var130);
+        }
+
+        var125 = (var125 + 1);
+        var128 = FLD_POS_GET_X_POS(var125);
+        var129 = FLD_POS_GET_Y_POS(var125);
+        var130 = FLD_POS_GET_Z_POS(var125);
+        FLD_PC_SYNC_COVER_RUN(var127);
+        
+        if (((var128 == 0) && (var130 == 0)) && (var130 == 0))
+        {
+            var126 = 0;
+        }
+
+        goto _408;
+    }
+
+    FLD_MODEL_SET_VISIBLE(var127, 1, 15);
+    sVar53 = 0;
+    sVar32 = 0;
+    return;
+}
+
+
+// Procedure Index: 100
+void AddEventNpc()
+{
+    int var49;
+    int var131;
+    int var132;
+    int var133;
+    
+    if (var49 < 1)
+    {
+        return;
+    }
+
+    var131 = 1;
+    _416:
+    
+    if (var131 < 4)
+    {
+        var132 = FLD_PC_GET_ID(var131);
+        
+        if (var132 == var49)
+        {
+            sVar32 = FLD_PC_ID_GET_RESHND(var132);
+            return;
+        }
+
+        var131 = (var131 + 1);
+        goto _416;
+    }
+
+    var133 = FLD_NPC_MODEL_LOAD_BASE(var49, 50, 0, 51);
+    FLD_MODEL_LOADSYNC(var133);
+    FLD_SET_RESHND_BANK(var133, 7);
+    return;
+}
+
+
+// Procedure Index: 101
+void MoveToFrontObj()
+{
+    float fVar79;
+    int var134;
+    
+    if (sVar51 == 1)
+    {
+        var134 = 100;
+    }
+    else 
+    {
+        var134 = 101;
+    }
+
+    
+    if (sVar31 != 0)
+    {
+        sVar0 = FLD_PC_GET_CURRENT_RESHND(0);
+        sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar31);
+        sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar31);
+        sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar31);
+        sfVar77 = FLD_MODEL_GET_Y_ROTATE(sVar31);
+        fVar79 = FLD_ADJUST_DEG_180(((sfVar77 + sVar34) + 180));
+        
+        if (sVar35 == 0)
+        {
+            sVar35 = 130;
+        }
+
+        sfVar69 = (sVar35 * SIN((sfVar77 + sVar33)));
+        sfVar70 = (sVar35 * COS((sfVar77 + sVar33)));
+        
+        if (sVar51 != -1)
+        {
+            
+            if ((sVar23 == 1) && (sVar51 == 1))
+            {
+                var134 = 0;
+            }
+
+            FLD_MODEL_DST_TRANSLATE(sVar0, (sfVar63 + sfVar69), sfVar64, (sfVar65 + sfVar70), fVar79, var134);
+            
+            if (sVar23 == 1)
+            {
+                FLD_TRANS_END_ANIM(sVar0, 58, 1, 5, 1.00f);
+                sVar23 = 0;
+            }
+
+        }
+        else 
+        {
+            FLD_MODEL_SET_TRANSLATE(sVar0, (sfVar63 + sfVar69), sfVar64, (sfVar65 + sfVar70), 0);
+            FLD_MODEL_SET_ROTATE(sVar0, 0, fVar79, 0, 0.00f);
+        }
+
+        
+        if (sVar50 == 0)
+        {
+            FLD_MODEL_SYNC_TRANSLATE(sVar0);
+        }
+
+        sfVar77 = 0;
+        sVar50 = 0;
+        sVar33 = 0;
+        sVar35 = 0;
+        sVar51 = 0;
+        sVar34 = 0;
+    }
+
+}
+
+
+// Procedure Index: 102
+void SwapPCInSimpleEvent()
+{
+    int var140;
+    int var139;
+    int var138;
+    int var137;
+    
+    if (((sVar135 == sVar136) || (sVar135 <= 0)) || (sVar136 <= 0))
+    {
+        return;
+    }
+
+    
+    if (sVar136 == 1)
+    {
+        var140 = sVar57;
+        var139 = sVar56;
+    }
+    else if (sVar136 == 2)
+    {
+        var140 = sVar59;
+        var139 = sVar58;
+    }
+    else if (sVar136 == 3)
+    {
+        var140 = sVar61;
+        var139 = sVar60;
+    }
+
+    
+    if (sVar135 == 1)
+    {
+        var138 = sVar57;
+        var137 = sVar56;
+        sVar57 = var140;
+        sVar56 = var139;
+    }
+    else if (sVar135 == 2)
+    {
+        var138 = sVar59;
+        var137 = sVar58;
+        sVar59 = var140;
+        sVar58 = var139;
+    }
+    else if (sVar135 == 3)
+    {
+        var138 = sVar61;
+        var137 = sVar60;
+        sVar61 = var140;
+        sVar60 = var139;
+    }
+
+    
+    if (sVar136 == 1)
+    {
+        sVar57 = var138;
+        sVar56 = var137;
+    }
+    else if (sVar136 == 2)
+    {
+        sVar59 = var138;
+        sVar58 = var137;
+    }
+    else if (sVar136 == 3)
+    {
+        sVar61 = var138;
+        sVar60 = var137;
+    }
+
+}
+
+
+// Procedure Index: 103
+void SetUpTalkPosition()
+{
+    int var147;
+    int var141;
+    int var142;
+    int var143;
+    int var144;
+    int var146;
+    int var145;
+    var147 = 0;
+    var141 = 0;
+    _448:
+    
+    if (var141 < 4)
+    {
+        var142 = FLD_PC_GET_CURRENT_RESHND(var141);
+        
+        if (FLD_PC_ID_CHECK_RESHND(var142, 3) == 1)
+        {
+            var143 = var141;
+        }
+        else if (FLD_PC_ID_CHECK_RESHND(var142, 2) == 1)
+        {
+            var144 = var141;
+        }
+
+        var141 = (var141 + 1);
+        
+        if (var142 > 0)
+        {
+            var147 = (var147 + 1);
+        }
+
+        goto _448;
+    }
+
+    PUTS("--molganaIn");
+    PUT(var143);
+    PUTS("--ryujiIn");
+    PUT(var144);
+    PUTS("--partyInNum");
+    PUT(var147);
+    
+    if (sVar24 == 0)
+    {
+        
+        if (var147 == 4)
+        {
+            
+            if ((var144 > 0) && (var143 > 0))
+            {
+                
+                if (var143 == 1)
+                {
+                    var146 = sVar57;
+                    var145 = sVar56;
+                    sVar57 = sVar61;
+                    sVar56 = sVar60;
+                    sVar61 = var146;
+                    sVar60 = var145;
+                }
+                else if (var143 == 2)
+                {
+                    var146 = sVar59;
+                    var145 = sVar58;
+                    sVar59 = sVar61;
+                    sVar58 = sVar60;
+                    sVar61 = var146;
+                    sVar60 = var145;
+                }
+
+            }
+            else if (var143 > 0)
+            {
+                
+                if (var143 == 1)
+                {
+                    var146 = sVar57;
+                    var145 = sVar56;
+                    sVar57 = sVar61;
+                    sVar56 = sVar60;
+                    sVar61 = var146;
+                    sVar60 = var145;
+                }
+                else if (var143 == 2)
+                {
+                    var146 = sVar59;
+                    var145 = sVar58;
+                    sVar59 = sVar61;
+                    sVar58 = sVar60;
+                    sVar61 = var146;
+                    sVar60 = var145;
+                }
+
+            }
+
+        }
+        else if ((var147 == 3) && (var143 > 0))
+        {
+            
+            if ((var144 > 0) && (var143 > 0))
+            {
+                
+                if (var143 == 1)
+                {
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+                else if (var143 == 2)
+                {
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+
+            }
+            else if (var143 > 0)
+            {
+                
+                if (var143 == 1)
+                {
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+                else if (var143 == 2)
+                {
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+
+            }
+
+        }
+
+    }
+    else if (sVar24 == 2)
+    {
+        
+        if (var147 == 4)
+        {
+            
+            if ((var144 > 0) && (var143 > 0))
+            {
+                
+                if (var143 == 1)
+                {
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+                else if (var143 == 2)
+                {
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+
+            }
+            else if (var143 > 0)
+            {
+                
+                if (var143 == 1)
+                {
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+                else if (var143 == 2)
+                {
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+
+            }
+
+        }
+        else if ((var147 == 3) && (var143 > 0))
+        {
+            
+            if ((var144 > 0) && (var143 > 0))
+            {
+                
+                if (var143 == 1)
+                {
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+                else if (var143 == 2)
+                {
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+
+            }
+            else if (var143 > 0)
+            {
+                
+                if (var143 == 1)
+                {
+                    sVar135 = 1;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+                else if (var143 == 2)
+                {
+                    sVar135 = 2;
+                    sVar136 = 3;
+                    SwapPCInSimpleEvent();
+                }
+
+            }
+
+        }
+
+    }
+
+}
+
+
+// Procedure Index: 104
+void MoveDirOne()
+{
+    int var148;
+    int var149;
+    
+    if (sVar32 <= 0)
+    {
+        return;
+    }
+
+    
+    if (sVar35 == 0)
+    {
+        sVar35 = 300;
+    }
+
+    var148 = MDL_GET_ANIM(sVar32);
+    FLD_MODEL_ADD_ROTATE(sVar32, 0, sVar34, 0, 0);
+    var149 = FLD_MODEL_GET_Y_ROTATE(sVar32);
+    
+    if (var149 < 0)
+    {
+        var149 = (360 + var149);
+    }
+
+    var149 = (var149 + sVar34);
+    sfVar69 = SIN(var149);
+    sfVar70 = COS(var149);
+    FLD_MODEL_ANIM(sVar32, 1, 1, 8, 1.00f);
+    FLD_MODEL_ADD_TRANSLATE(sVar32, (sfVar69 * sVar35), 0, (sfVar70 * sVar35), sVar36);
+    FLD_TRANS_END_ANIM(sVar32, var148, 1, 5, 1.00f);
+    
+    if (sVar50 == 0)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar32);
+    }
+
+    sVar50 = 0;
+    sVar34 = 0;
+    return;
+}
+
+
+// Procedure Index: 105
+void MODEL_RELATE_TRANSLATE_POLAR()
+{
+    
+    if ((sVar155 <= 0) || (sVar154 <= 0))
+    {
+        return;
+    }
+
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    
+    if (sfVar87 <= 0)
+    {
+        sfVar87 = 110;
+    }
+
+    sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar155);
+    sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar155);
+    sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar155);
+    sfVar66 = FLD_MODEL_GET_Y_ROTATE(sVar155);
+    sfVar67 = (sfVar87 * SIN(sfVar66));
+    sfVar68 = (sfVar87 * COS(sfVar66));
+    sfVar69 = ((sfVar67 * COS(sfVar88)) - (sfVar68 * SIN(sfVar88)));
+    sfVar70 = ((sfVar67 * SIN(sfVar88)) + (sfVar68 * COS(sfVar88)));
+    sfVar80 = (sfVar63 + sfVar69);
+    sfVar81 = (sfVar64 + sfVar90);
+    sfVar82 = (sfVar65 + sfVar70);
+    FLD_MODEL_SET_TRANSLATE(sVar154, sfVar80, sfVar81, sfVar82, sVar36);
+    FLD_MODEL_POINT_ROTATE(sVar154, sfVar80, sfVar81, sfVar82, -1);
+    
+    if (sVar157 == 1)
+    {
+        FLD_UNIT_SET_WALK(sVar154);
+    }
+    else if (sVar157 == 2)
+    {
+        FLD_UNIT_SET_RUN(sVar154);
+    }
+
+    
+    if (sVar159 == 1)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_WAIT(sVar154);
+        
+        if (sVar161 == 1)
+        {
+            FLD_MODEL_ORIENT_ROTATE(sVar154, sVar155, -1);
+            FLD_MODEL_SYNC_ROTATE(sVar154);
+        }
+
+    }
+    else if (sVar159 == 2)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_EVT_WAIT(sVar154);
+        
+        if (sVar161 == 1)
+        {
+            FLD_MODEL_ORIENT_ROTATE(sVar154, sVar155, -1);
+            FLD_MODEL_SYNC_ROTATE(sVar154);
+        }
+
+    }
+
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 106
+void MODEL_POS_TRANSLATE_POLAR()
+{
+    int var164;
+    
+    if ((sVar153 < 0) || (sVar154 <= 0))
+    {
+        return;
+    }
+
+    var164 = -1;
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+        var164 = 0;
+    }
+
+    
+    if (sfVar87 <= 0)
+    {
+        sfVar87 = 110;
+    }
+
+    sfVar63 = FLD_POS_GET_X_POS(sVar153);
+    sfVar64 = FLD_POS_GET_Y_POS(sVar153);
+    sfVar65 = FLD_POS_GET_Z_POS(sVar153);
+    sfVar66 = FLD_POS_GET_ROT(sVar153);
+    sfVar67 = (sfVar87 * SIN(sfVar66));
+    sfVar68 = (sfVar87 * COS(sfVar66));
+    sfVar69 = ((sfVar67 * COS(sfVar88)) - (sfVar68 * SIN(sfVar88)));
+    sfVar70 = ((sfVar67 * SIN(sfVar88)) + (sfVar68 * COS(sfVar88)));
+    sfVar80 = (sfVar63 + sfVar69);
+    sfVar81 = (sfVar64 + sfVar90);
+    sfVar82 = (sfVar65 + sfVar70);
+    FLD_MODEL_SET_TRANSLATE(sVar154, sfVar80, sfVar81, sfVar82, sVar36);
+    FLD_MODEL_POINT_ROTATE(sVar154, sfVar80, sfVar81, sfVar82, var164);
+    
+    if (sVar157 == 1)
+    {
+        FLD_UNIT_SET_WALK(sVar154);
+    }
+    else if (sVar157 == 2)
+    {
+        FLD_UNIT_SET_RUN(sVar154);
+    }
+
+    
+    if (sVar159 == 1)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_WAIT(sVar154);
+        
+        if (sVar161 == 1)
+        {
+            FLD_MODEL_SYNC_ROTATE(sVar154);
+            FLD_MODEL_POINT_ROTATE(sVar154, sfVar63, sfVar64, sfVar65, -1);
+            FLD_MODEL_SYNC_ROTATE(sVar154);
+        }
+
+    }
+    else if (sVar159 == 2)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_EVT_WAIT(sVar154);
+        
+        if (sVar161 == 1)
+        {
+            FLD_MODEL_SYNC_ROTATE(sVar154);
+            FLD_MODEL_POINT_ROTATE(sVar154, sfVar63, sfVar64, sfVar65, -1);
+            FLD_MODEL_SYNC_ROTATE(sVar154);
+        }
+
+    }
+
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 107
+void MODEL_TRANSLATE_POLAR()
+{
+    
+    if (sVar154 <= 0)
+    {
+        return;
+    }
+
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    
+    if (sfVar87 <= 0)
+    {
+        sfVar87 = 110;
+    }
+
+    sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar154);
+    sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar154);
+    sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar154);
+    
+    if (sVar161 == 0)
+    {
+        sfVar66 = (FLD_MODEL_GET_Y_ROTATE(sVar154) - sfVar88);
+    }
+    else if (sVar161 == 1)
+    {
+        sfVar66 = sfVar92;
+    }
+
+    sfVar67 = (sfVar87 * SIN(sfVar66));
+    sfVar68 = (sfVar87 * COS(sfVar66));
+    sfVar80 = (sfVar63 + sfVar67);
+    sfVar81 = (sfVar64 + sfVar90);
+    sfVar82 = (sfVar65 + sfVar68);
+    FLD_MODEL_SET_TRANSLATE(sVar154, sfVar80, sfVar81, sfVar82, sVar36);
+    FLD_MODEL_POINT_ROTATE(sVar154, sfVar80, sfVar81, sfVar82, -1);
+    
+    if (sVar157 == 1)
+    {
+        FLD_UNIT_SET_WALK(sVar154);
+    }
+    else if (sVar157 == 2)
+    {
+        FLD_UNIT_SET_RUN(sVar154);
+    }
+
+    
+    if (sVar159 == 1)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_WAIT(sVar154);
+    }
+    else if (sVar159 == 2)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_EVT_WAIT(sVar154);
+    }
+
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 108
+void MODEL_GOTO_POS()
+{
+    
+    if ((sVar153 < 0) || (sVar154 <= 0))
+    {
+        return;
+    }
+
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    sfVar63 = FLD_POS_GET_X_POS(sVar153);
+    sfVar64 = FLD_POS_GET_Y_POS(sVar153);
+    sfVar65 = FLD_POS_GET_Z_POS(sVar153);
+    sfVar66 = FLD_POS_GET_ROT(sVar153);
+    FLD_MODEL_SET_TRANSLATE(sVar154, sfVar63, sfVar64, sfVar65, sVar36);
+    FLD_MODEL_POINT_ROTATE(sVar154, sfVar63, sfVar64, sfVar65, -1);
+    
+    if (sVar157 == 1)
+    {
+        FLD_UNIT_SET_WALK(sVar154);
+    }
+    else if (sVar157 == 2)
+    {
+        FLD_UNIT_SET_RUN(sVar154);
+    }
+
+    
+    if (sVar159 == 1)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_WAIT(sVar154);
+    }
+    else if (sVar159 == 2)
+    {
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        FLD_UNIT_SET_EVT_WAIT(sVar154);
+    }
+
+}
+
+
+// Procedure Index: 109
+void MODEL_SET_POSITION_POLAR()
+{
+    
+    if (sVar154 <= 0)
+    {
+        PUTS("対象となるモデルが設定されていません");
+        return;
+    }
+
+    
+    if ((sVar155 <= 0) && (sVar153 <= 0))
+    {
+        PUTS("基準となるPOSまたはOBJが設定されていません");
+        return;
+    }
+
+    
+    if (sfVar87 <= 0)
+    {
+        sfVar87 = 110;
+    }
+
+    
+    if (sVar155 > 0)
+    {
+        sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar155);
+        sfVar64 = FLD_MODEL_GET_Y_TRANSLATE(sVar155);
+        sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar155);
+        sfVar66 = FLD_MODEL_GET_Y_ROTATE(sVar155);
+    }
+    else if (sVar153 > 0)
+    {
+        sfVar63 = FLD_POS_GET_X_POS(sVar153);
+        sfVar64 = FLD_POS_GET_Y_POS(sVar153);
+        sfVar65 = FLD_POS_GET_Z_POS(sVar153);
+        sfVar66 = FLD_POS_GET_ROT(sVar153);
+    }
+
+    sfVar67 = (sfVar87 * SIN(sfVar66));
+    sfVar68 = (sfVar87 * COS(sfVar66));
+    sfVar69 = ((sfVar67 * COS(sfVar88)) - (sfVar68 * SIN(sfVar88)));
+    sfVar70 = ((sfVar67 * SIN(sfVar88)) + (sfVar68 * COS(sfVar88)));
+    sfVar80 = (sfVar63 + sfVar69);
+    sfVar81 = (sfVar64 + sfVar90);
+    sfVar82 = (sfVar65 + sfVar70);
+    sfVar83 = ((sfVar66 - sfVar88) - 180);
+    FLD_MODEL_SET_TRANSLATE(sVar154, sfVar80, sfVar81, sfVar82, 0);
+    
+    if (sVar161 == 1)
+    {
+        FLD_MODEL_SET_ROTATE(sVar154, 0, sfVar92, 0, 0);
+    }
+    else 
+    {
+        FLD_MODEL_POINT_ROTATE(sVar154, sfVar63, sfVar64, sfVar65, 0);
+    }
+
+    FLD_MODEL_SYNC_TRANSLATE(sVar154);
+    FLD_MODEL_SYNC_ROTATE(sVar154);
+    
+    if (sVar159 == 1)
+    {
+        FLD_UNIT_SET_WAIT(sVar154);
+    }
+    else if (sVar159 == 2)
+    {
+        FLD_UNIT_SET_EVT_WAIT(sVar154);
+    }
+
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 110
+void MODEL_DEFAULT_SET_POS()
+{
+    
+    if ((sVar25 <= 0) || (sVar154 <= 0))
+    {
+        return;
+    }
+
+    sfVar80 = (FLD_POS_GET_X_POS(sVar25) + sfVar89);
+    sfVar81 = (FLD_POS_GET_Y_POS(sVar25) + sfVar90);
+    sfVar82 = (FLD_POS_GET_Z_POS(sVar25) + sfVar91);
+    sfVar83 = (FLD_POS_GET_ROT(sVar25) - sfVar88);
+    FLD_MODEL_SET_TRANSLATE(sVar154, sfVar80, sfVar81, sfVar82, 0);
+    FLD_MODEL_SET_ROTATE(sVar154, 0, sfVar83, 0, 0);
+    FLD_MODEL_SYNC_TRANSLATE(sVar154);
+    FLD_MODEL_SYNC_ROTATE(sVar154);
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 111
+void MODEL_MOVE_THROUGH_POS()
+{
+    int var165;
+    int var166;
+    
+    if ((sVar25 <= 0) || (sVar154 <= 0))
+    {
+        return;
+    }
+
+    var165 = sVar25;
+    sfVar59 = FLD_POS_GET_X_POS(var165);
+    sfVar60 = FLD_POS_GET_Y_POS(var165);
+    sfVar61 = FLD_POS_GET_Z_POS(var165);
+    
+    if (((sfVar59 == 0) && (sfVar60 == 0)) && (sfVar61 == 0))
+    {
+        return;
+    }
+
+    
+    if (sVar157 == 1)
+    {
+        sVar157 = 0;
+    }
+    else if (sVar157 == 2)
+    {
+        sVar157 = 1;
+    }
+    else 
+    {
+        sVar157 = 1;
+    }
+
+    var166 = 1;
+    _592:
+    
+    if (var166 == 1)
+    {
+        sfVar80 = sfVar59;
+        sfVar81 = sfVar60;
+        sfVar82 = sfVar61;
+        var165 = (var165 + 1);
+        sfVar59 = FLD_POS_GET_X_POS(var165);
+        sfVar60 = FLD_POS_GET_Y_POS(var165);
+        sfVar61 = FLD_POS_GET_Z_POS(var165);
+        
+        if (((sfVar59 == 0) && (sfVar60 == 0)) && (sfVar61 == 0))
+        {
+            var166 = 0;
+            sVar157 = (sVar157 + 100);
+        }
+        else 
+        {
+            var166 = 1;
+        }
+
+        FLD_MODEL_UNIT_TRANSLATE(sVar154, sfVar80, sfVar81, sfVar82, sVar157);
+        FLD_MODEL_SYNC_TRANSLATE(sVar154);
+        goto _592;
+    }
+
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 112
+void SET_MODEL_WALK_SPEED()
+{
+    float fVar93;
+    fVar93 = (sfVar87 / 100);
+    sVar36 = (fVar93 * 15);
+    return;
+}
+
+
+// Procedure Index: 113
+void MODEL_ROTATE_TO_OBJECT()
+{
+    
+    if (sVar154 <= 0)
+    {
+        return;
+    }
+    else 
+    {
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(sVar154);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(sVar154);
+        sfVar62 = FLD_MODEL_GET_Y_ROTATE(sVar154);
+    }
+
+    
+    if (sVar155 != 0)
+    {
+        sfVar63 = FLD_MODEL_GET_X_TRANSLATE(sVar155);
+        sfVar65 = FLD_MODEL_GET_Z_TRANSLATE(sVar155);
+    }
+    else 
+    {
+        sfVar63 = FLD_POS_GET_X_POS(sVar25);
+        sfVar65 = FLD_POS_GET_Z_POS(sVar25);
+    }
+
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    sfVar67 = (sfVar63 - sfVar59);
+    sfVar68 = (sfVar65 - sfVar61);
+    
+    if (sfVar88 != 0)
+    {
+        sfVar69 = ((sfVar67 * COS(sfVar88)) - (sfVar68 * SIN(sfVar88)));
+        sfVar70 = ((sfVar67 * SIN(sfVar88)) + (sfVar68 * COS(sfVar88)));
+    }
+    else 
+    {
+        sfVar69 = sfVar67;
+        sfVar70 = sfVar68;
+    }
+
+    sfVar80 = (sfVar69 + sfVar63);
+    sfVar82 = (sfVar70 + sfVar65);
+    sfVar81 = sfVar90;
+    FLD_MODEL_POINT_ROTATE(sVar154, sfVar80, sfVar81, sfVar82, sVar36);
+    
+    if (sVar158 == 1)
+    {
+        FLD_UNIT_SET_WALK(sVar154);
+    }
+    else if (sVar158 == 2)
+    {
+        FLD_UNIT_SET_RUN(sVar154);
+    }
+
+    
+    if (sVar160 == 1)
+    {
+        FLD_MODEL_SYNC_ROTATE(sVar154);
+        FLD_UNIT_SET_EVT_WAIT(sVar154);
+    }
+
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 114
+void MDL_LOOKAT_Y_CORRECTION()
+{
+    int var167;
+    int var168;
+    int var169;
+    
+    if ((sVar154 <= 0) || (sVar155 <= 0))
+    {
+        return;
+    }
+    else 
+    {
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(sVar155);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(sVar155);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(sVar155);
+        sfVar62 = FLD_MODEL_GET_Y_ROTATE(sVar155);
+    }
+
+    var167 = sfVar59;
+    var168 = (sfVar60 + sfVar90);
+    var169 = sfVar61;
+    MDL_SET_LOOKAT_POS(sVar154, var167, var168, var169, 1);
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 115
+void MDL_LOOK_DOWN()
+{
+    int var170;
+    int var171;
+    int var172;
+    
+    if (sVar154 <= 0)
+    {
+        return;
+    }
+    else 
+    {
+        sfVar59 = FLD_MODEL_GET_X_TRANSLATE(sVar154);
+        sfVar60 = FLD_MODEL_GET_Y_TRANSLATE(sVar154);
+        sfVar61 = FLD_MODEL_GET_Z_TRANSLATE(sVar154);
+        sfVar62 = FLD_MODEL_GET_Y_ROTATE(sVar154);
+    }
+
+    
+    if (sfVar90 <= 0)
+    {
+        sfVar90 = 120;
+    }
+
+    var170 = (sfVar59 + (100 * SIN(sfVar62)));
+    var171 = (sfVar60 + sfVar90);
+    var172 = (sfVar61 + (100 * COS(sfVar62)));
+    MDL_SET_LOOKAT_POS(sVar154, var170, var171, var172, 1);
+    MDL_VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 116
+void MDL_VARIABLE_INITIALIZATION()
+{
+    sVar153 = 0;
+    sVar154 = 0;
+    sVar155 = 0;
+    sVar31 = 0;
+    sVar25 = 0;
+    sfVar87 = 0;
+    sfVar88 = 0;
+    sfVar90 = 0;
+    sfVar92 = 0;
+    sVar157 = 0;
+    sVar158 = 0;
+    sVar159 = 0;
+    sVar160 = 0;
+    sVar161 = 0;
+    sVar36 = 0;
+}
+
+
+// Procedure Index: 117
+void CameraToPos()
+{
+    sfVar63 = FLD_POS_GET_X_POS(sVar25);
+    sfVar64 = (FLD_POS_GET_Y_POS(sVar25) + sfVar90);
+    sfVar65 = FLD_POS_GET_Z_POS(sVar25);
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    FLD_CAMERA_LOOKAT_INTERP(sfVar63, sfVar64, sfVar65, sVar36);
+    sVar25 = 0;
+    sfVar90 = 0;
+    sVar36 = 0;
+}
+
+
+// Procedure Index: 118
+void CameraToPosCart()
+{
+    
+    if (sVar25 == 0)
+    {
+        return;
+    }
+
+    sfVar63 = (FLD_POS_GET_X_POS(sVar25) + sfVar89);
+    sfVar64 = (FLD_POS_GET_Y_POS(sVar25) + sfVar90);
+    sfVar65 = (FLD_POS_GET_Z_POS(sVar25) + sfVar91);
+    
+    if (((sVar43 == 0) && (sVar44 == 0)) && (sVar45 == 0))
+    {
+        sVar43 = 100;
+        sVar44 = 0;
+        sVar45 = 100;
+    }
+
+    sfVar59 = (sfVar63 + sVar43);
+    sfVar60 = (sfVar64 + sVar44);
+    sfVar61 = (sfVar65 + sVar45);
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    FLD_CAMERA_TUMBLE_INTERP(sfVar59, sfVar60, sfVar61, sfVar63, sfVar64, sfVar65, sVar36);
+    sVar25 = 0;
+    sfVar89 = 0;
+    sfVar90 = 0;
+    sfVar91 = 0;
+    sVar43 = 0;
+    sVar44 = 0;
+    sVar45 = 0;
+    sVar36 = 0;
+}
+
+
+// Procedure Index: 119
+void CameraToPosPolar()
+{
+    
+    if (sVar25 == 0)
+    {
+        return;
+    }
+
+    sfVar63 = (FLD_POS_GET_X_POS(sVar25) + sfVar89);
+    sfVar64 = (FLD_POS_GET_Y_POS(sVar25) + sfVar90);
+    sfVar65 = (FLD_POS_GET_Z_POS(sVar25) + sfVar91);
+    sfVar67 = (sfVar87 * SIN(sfVar88));
+    sfVar68 = (sfVar87 * COS(sfVar88));
+    sfVar59 = (sfVar63 + sfVar67);
+    sfVar60 = (sfVar64 + sVar44);
+    sfVar61 = (sfVar65 + sfVar68);
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    FLD_CAMERA_TUMBLE_INTERP(sfVar59, sfVar60, sfVar61, sfVar63, sfVar64, sfVar65, sVar36);
+    sVar25 = 0;
+    sfVar89 = 0;
+    sfVar90 = 0;
+    sfVar91 = 0;
+    sVar44 = 0;
+    sfVar87 = 0;
+    sfVar88 = 0;
+    sVar36 = 0;
+}
+
+
+// Procedure Index: 120
+void CameraLookAtOBJ()
+{
+    
+    if (sVar31 <= 0)
+    {
+        return;
+    }
+
+    sfVar63 = (FLD_MODEL_GET_X_TRANSLATE(sVar31) + sfVar89);
+    sfVar64 = (FLD_MODEL_GET_Y_TRANSLATE(sVar31) + sfVar90);
+    sfVar65 = (FLD_MODEL_GET_Z_TRANSLATE(sVar31) + sfVar91);
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    FLD_CAMERA_LOOKAT_INTERP(sfVar63, sfVar64, sfVar65, sVar36);
+    
+    if (sVar41 == 0)
+    {
+        FLD_CAMERA_SYNC_INTERP();
+    }
+
+    sVar31 = 0;
+    sfVar89 = 0;
+    sfVar90 = 0;
+    sfVar91 = 0;
+    sVar36 = 0;
+    sVar41 = 0;
+}
+
+
+// Procedure Index: 121
+void CameraLookAtValue()
+{
+    sfVar59 = FLD_CAMERA_GET_X_POS();
+    sfVar60 = FLD_CAMERA_GET_Y_POS();
+    sfVar61 = FLD_CAMERA_GET_Z_POS();
+    sfVar63 = sVar43;
+    sfVar64 = sVar44;
+    sfVar65 = sVar45;
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    FLD_CAMERA_TUMBLE_INTERP(sfVar59, sfVar60, sfVar61, sfVar63, sfVar64, sfVar65, sVar36);
+    
+    if (sVar41 == 0)
+    {
+        FLD_CAMERA_SYNC_INTERP();
+    }
+
+    sVar36 = 0;
+    sVar41 = 0;
+    return;
+}
+
+
+// Procedure Index: 122
+void CameraLookAtDiffValue()
+{
+    sfVar59 = FLD_CAMERA_GET_X_POS();
+    sfVar60 = FLD_CAMERA_GET_Y_POS();
+    sfVar61 = FLD_CAMERA_GET_Z_POS();
+    sfVar63 = (sfVar59 + sfVar89);
+    sfVar64 = (sfVar60 + sfVar90);
+    sfVar65 = (sfVar61 + sfVar91);
+    
+    if (sVar36 == 0)
+    {
+        sVar36 = 20;
+    }
+    else if (sVar36 < 0)
+    {
+        sVar36 = 0;
+    }
+
+    FLD_CAMERA_TUMBLE_INTERP(sfVar59, sfVar60, sfVar61, sfVar63, sfVar64, sfVar65, sVar36);
+    
+    if (sVar41 == 0)
+    {
+        FLD_CAMERA_SYNC_INTERP();
+    }
+
+    sfVar89 = 0;
+    sfVar90 = 0;
+    sfVar91 = 0;
+    sVar36 = 0;
+    sVar41 = 0;
+    return;
+}
+
+
+// Procedure Index: 123
+void D07_ELEVATOR_FROM_UPPER_FLOOR()
+{
+    sVar178 = -100;
+    sVar179 = 150;
+    sVar180 = 400;
+    sVar181 = 35;
+    D07_ELEVATOR_ARRIVE();
+    return;
+}
+
+
+// Procedure Index: 124
+void D07_ELEVATOR_FROM_LOWER_FLOOR()
+{
+    sVar178 = 70;
+    sVar179 = 150;
+    sVar180 = -400;
+    sVar181 = 35;
+    D07_ELEVATOR_ARRIVE();
+    return;
+}
+
+
+// Procedure Index: 125
+void D07_ELEVATOR_GOTO_UPPER_FLOOR()
+{
+    sVar178 = -100;
+    sVar179 = 150;
+    sVar180 = 250;
+    sVar181 = 30;
+    D07_ELEVATOR_GOTO();
+    return;
+}
+
+
+// Procedure Index: 126
+void D07_ELEVATOR_GOTO_LOWER_FLOOR()
+{
+    sVar178 = 70;
+    sVar179 = 150;
+    sVar180 = -300;
+    sVar181 = 30;
+    D07_ELEVATOR_GOTO();
+    return;
+}
+
+
+// Procedure Index: 127
+void D07_ELEVATOR_SWITCH()
+{
+    LeaveStartPack();
+    D07_ELEVATOR_SETUP();
+    FLD_PTY_MODEL_SET_VISIBLE(0, 10);
+    sVar31 = sVar173;
+    sfVar58 = 3.00f;
+    sVar40 = 40;
+    sVar36 = 30;
+    sVar39 = -120;
+    sVar38 = 150;
+    sVar41 = 1;
+    sfVar73 = 100;
+    sfVar74 = 180;
+    CameraFrontToOBJ();
+    FLD_WAIT(3);
+    FLD_SWITCH_ELEVATOR(sVar173, 0);
+    MDL_ANIM_LOOPSYNC(sVar173);
+    FLD_OBJ_MODEL_COLLIS(sVar173, 0);
+    SYNC();
+    FLD_OBJ_MODEL_COLLIS(sVar173, 1);
+    FLD_CAMERA_INTERP_ASYNC(15);
+    FLD_PTY_MODEL_SET_STD_POS();
+    FLD_PTY_MODEL_SET_VISIBLE(1, 10);
+    LeaveEndPack();
+    VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 128
+void D07_ELEVATOR_ARRIVE()
+{
+    D07_ELEVATOR_SETUP();
+    D07_ELEVATOR_PARTY_ATTACH();
+    sVar31 = sVar173;
+    sfVar58 = 3.50f;
+    sVar40 = 20;
+    sVar36 = 0;
+    sVar39 = sVar178;
+    sVar38 = (sVar179 + sVar180);
+    CameraFrontToOBJ();
+    FLD_MODEL_ANIM(sVar173, 1, 0, 0, 1.00f);
+    FLD_WAIT(15);
+    FLD_CAMERA_SYNC_INTERP();
+    sVar31 = sVar173;
+    sfVar58 = 3.50f;
+    sVar40 = 20;
+    sVar36 = sVar181;
+    sVar39 = sVar178;
+    sVar38 = sVar179;
+    sVar41 = 1;
+    CameraFrontToOBJ();
+    FADEIN(5, 20);
+    FADE_SYNC();
+    FLD_MODEL_ANIM_SYNC(sVar173);
+    FLD_MODEL_ANIM(sVar173, 2, 0, 0, 1.00f);
+    D07_ELEVATOR_PARTY_DETACH();
+    sVar154 = sVar0;
+    sfVar87 = 400;
+    sVar36 = 30;
+    sVar157 = 1;
+    MODEL_TRANSLATE_POLAR();
+    FLD_MODEL_SYNC_TRANSLATE(sVar0);
+    SimpleEventEndPack();
+    FLD_MODEL_ADJUST_GROUND(sVar0);
+    FLD_OBJ_MODEL_COLLIS(sVar173, 0);
+    SYNC();
+    FLD_OBJ_MODEL_COLLIS(sVar173, 1);
+    VARIABLE_INITIALIZATION();
+    FADEIN(5, 20);
+    FADE_SYNC();
+    return;
+}
+
+
+// Procedure Index: 129
+void D07_ELEVATOR_GOTO()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+    D07_ELEVATOR_SETUP();
+    D07_ELEVATOR_PARTY_ATTACH();
+    sVar31 = sVar173;
+    sfVar58 = 3.50f;
+    sVar40 = 20;
+    sVar36 = 0;
+    sVar39 = sVar178;
+    sVar38 = sVar179;
+    CameraFrontToOBJ();
+    FLD_SMP_EVENT_BEGIN(0);
+    FADEIN(5, 20);
+    FADE_SYNC();
+    FLD_WAIT(5);
+    FLD_MODEL_ANIM(sVar173, 3, 0, 0, 1.00f);
+    FLD_WAIT(35);
+    FLD_CAMERA_SYNC_INTERP();
+    sVar31 = sVar173;
+    sfVar58 = 3.50f;
+    sVar40 = 20;
+    sVar36 = sVar181;
+    sVar39 = sVar178;
+    sVar38 = (sVar179 + sVar180);
+    sVar41 = 1;
+    CameraFrontToOBJ();
+    FLD_WAIT(25);
+    FLD_REQ_NEXT_SCN_FADE(sVar175, sVar176, sVar177, 0);
+    FLD_CAMERA_SYNC_INTERP();
+    FLD_MODEL_ANIM_SYNC(sVar173);
+    FLD_CAMERA_UNLOCK();
+    FLD_OBJ_MODEL_COLLIS(sVar173, 0);
+    SYNC();
+    FLD_OBJ_MODEL_COLLIS(sVar173, 1);
+    D07_ELEVATOR_PARTY_DETACH();
+    VARIABLE_INITIALIZATION();
+    return;
+}
+
+
+// Procedure Index: 130
+void D07_ELEVATOR_SETUP()
+{
+    sVar0 = FLD_PC_GET_RESHND(0);
+    sVar1 = FLD_PC_GET_RESHND(1);
+    sVar2 = FLD_PC_GET_RESHND(2);
+    sVar3 = FLD_PC_GET_RESHND(3);
+    sVar173 = FLD_OBJ_CNV_RESHND(sVar174);
+    return;
+}
+
+
+// Procedure Index: 131
+void D07_ELEVATOR_PARTY_ATTACH()
+{
+    int var182;
+    var182 = FLD_MODEL_GET_Y_ROTATE(sVar173);
+    FLD_ALLY_SET_WAIT(1);
+    FLD_MODEL_ATTACH_TRANSLATE(sVar0, sVar173, 0);
+    
+    if (sVar1 > 0)
+    {
+        FLD_MODEL_ATTACH_TRANSLATE(sVar1, sVar173, 1);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        FLD_MODEL_ATTACH_TRANSLATE(sVar2, sVar173, 2);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        FLD_MODEL_ATTACH_TRANSLATE(sVar3, sVar173, 3);
+    }
+
+    FLD_MODEL_SET_ROTATE(sVar0, 0, var182, 0, 0);
+    
+    if (sVar1 > 0)
+    {
+        FLD_MODEL_SET_ROTATE(sVar1, 0, var182, 0, 0);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        FLD_MODEL_SET_ROTATE(sVar2, 0, var182, 0, 0);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        FLD_MODEL_SET_ROTATE(sVar3, 0, var182, 0, 0);
+    }
+
+    FLD_UNIT_SET_COLLIS(sVar0, 0);
+    
+    if (sVar1 > 0)
+    {
+        FLD_UNIT_SET_COLLIS(sVar1, 0);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        FLD_UNIT_SET_COLLIS(sVar2, 0);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        FLD_UNIT_SET_COLLIS(sVar3, 0);
+    }
+
+    SYNC();
+    return;
+}
+
+
+// Procedure Index: 132
+void D07_ELEVATOR_PARTY_DETACH()
+{
+    FLD_MODEL_DETACH_TRANSLATE(sVar0);
+    
+    if (sVar1 > 0)
+    {
+        FLD_MODEL_DETACH_TRANSLATE(sVar1);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        FLD_MODEL_DETACH_TRANSLATE(sVar2);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        FLD_MODEL_DETACH_TRANSLATE(sVar3);
+    }
+
+    FLD_UNIT_SET_COLLIS(sVar0, 1);
+    
+    if (sVar1 > 0)
+    {
+        FLD_UNIT_SET_COLLIS(sVar1, 1);
+    }
+
+    
+    if (sVar2 > 0)
+    {
+        FLD_UNIT_SET_COLLIS(sVar2, 1);
+    }
+
+    
+    if (sVar3 > 0)
+    {
+        FLD_UNIT_SET_COLLIS(sVar3, 1);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 133
+void VARIABLE_INITIALIZATION()
+{
+    sVar173 = 0;
+    sVar174 = 0;
+    sVar175 = 0;
+    sVar176 = 0;
+    sVar177 = 0;
+    sVar180 = 0;
+    sVar181 = 0;
+    sVar178 = 0;
+    sVar179 = 0;
+    return;
+}
+
+
+// Procedure Index: 134
+void COMMON_SWITCH_ON()
+{
+    int var183;
+    
+    if (sVar150 <= 0)
+    {
+        return;
+    }
+
+    var183 = FLD_OBJ_CNV_RESHND(sVar150);
+    
+    if (sVar163 == 0)
+    {
+        sfVar58 = 2.00f;
+        sVar38 = 1.00f;
+        sVar41 = 1;
+        sVar40 = 20;
+    }
+
+    sVar31 = var183;
+    CameraFrontToOBJ();
+    sVar29 = 1;
+    LeaveStartPack();
+    FLD_SWITCH_ON(var183);
+    FLD_WAIT(15);
+    GIM_VARIABLE_INITIALIZATION();
+}
+
+
+// Procedure Index: 135
+void GIM_VARIABLE_INITIALIZATION()
+{
+    sVar150 = 0;
+    sVar154 = 0;
+    sVar155 = 0;
+    sVar25 = 0;
+    sVar163 = 0;
+}
+
+
+// Procedure Index: 136
+void event_member_setup()
+{
+    int var184;
+    int var185;
+    int var186;
+    int var190;
+    int var191;
+    var184 = sVar1;
+    var185 = sVar2;
+    var186 = sVar3;
+    _choice_member();
+    var190 = 1;
+    _682:
+    
+    if (var190 < 4)
+    {
+        var191 = FLD_PC_GET_RESHND(var190);
+        
+        if (var191 > 0)
+        {
+            FLD_MODEL_SET_VISIBLE(var191, 0, 0);
+        }
+
+        var190 = (var190 + 1);
+        goto _682;
+    }
+
+    _make_handle();
+    sVar1 = sVar187;
+    sVar2 = sVar188;
+    sVar3 = sVar189;
+}
+
+
+// Procedure Index: 137
+void event_member_release()
+{
+    int var192;
+    int var193;
+    FLD_PTY_RESET_BUF();
+    sVar203 = sVar187;
+    _release_handle();
+    sVar203 = sVar188;
+    _release_handle();
+    sVar203 = sVar189;
+    _release_handle();
+    var192 = 1;
+    _686:
+    
+    if (var192 < 4)
+    {
+        var193 = FLD_PC_GET_RESHND(var192);
+        
+        if (var193 > 0)
+        {
+            FLD_MODEL_SET_VISIBLE(var193, 1, 0);
+        }
+
+        var192 = (var192 + 1);
+        goto _686;
+    }
+
+}
+
+
+// Procedure Index: 138
+void _choice_member()
+{
+    int var194;
+    int var195;
+    
+    if (sVar1 == -1)
+    {
+        sVar1 = 0;
+        var194 = 1;
+        _690:
+        
+        if (var194 < 4)
+        {
+            var195 = FLD_PC_GET_ID(var194);
+            
+            if (var195 != 0)
+            {
+                sVar197 = var195;
+                _check_fix_member();
+                
+                if (sVar198 == 0)
+                {
+                    sVar1 = sVar197;
+                    goto _691;
+                }
+
+            }
+
+            var194 = (var194 + 1);
+            goto _690;
+        }
+
+        _691:
+    }
+
+    
+    if (sVar2 == -1)
+    {
+        sVar2 = 0;
+        var194 = 1;
+        _698:
+        
+        if (var194 < 4)
+        {
+            var195 = FLD_PC_GET_ID(var194);
+            
+            if (var195 != 0)
+            {
+                sVar197 = var195;
+                _check_fix_member();
+                
+                if (sVar198 == 0)
+                {
+                    sVar2 = sVar197;
+                    goto _699;
+                }
+
+            }
+
+            var194 = (var194 + 1);
+            goto _698;
+        }
+
+        _699:
+    }
+
+    
+    if (sVar3 == -1)
+    {
+        sVar3 = 0;
+        var194 = 1;
+        _706:
+        
+        if (var194 < 4)
+        {
+            var195 = FLD_PC_GET_ID(var194);
+            
+            if (var195 != 0)
+            {
+                sVar197 = var195;
+                _check_fix_member();
+                
+                if (sVar198 == 0)
+                {
+                    sVar3 = sVar197;
+                    goto _707;
+                }
+
+            }
+
+            var194 = (var194 + 1);
+            goto _706;
+        }
+
+        _707:
+    }
+
+    return;
+}
+
+
+// Procedure Index: 139
+void _check_fix_member()
+{
+    sVar198 = 0;
+    
+    if ((sVar197 <= 1) || (sVar197 >= 11))
+    {
+        return;
+    }
+
+    
+    if (sVar197 == sVar1)
+    {
+        sVar198 = 1;
+        return;
+    }
+
+    
+    if (sVar197 == sVar2)
+    {
+        sVar198 = 1;
+        return;
+    }
+
+    
+    if (sVar197 == sVar3)
+    {
+        sVar198 = 1;
+        return;
+    }
+
+    return;
+}
+
+
+// Procedure Index: 140
+void _make_handle()
+{
+    int var200;
+    int var201;
+    int var202;
+    int var199;
+    var200 = 50;
+    var201 = 0;
+    var202 = 51;
+    
+    if (FLD_CHECK_MOUSE())
+    {
+        var200 = 99;
+        var202 = 99;
+    }
+
+    sVar187 = -1;
+    
+    if (sVar1 != 0)
+    {
+        var199 = FLD_PC_ID_GET_RESHND(sVar1);
+        sVar187 = var199;
+        
+        if (var199 == -1)
+        {
+            sVar187 = FLD_NPC_MODEL_LOAD_BASE(sVar1, var200, 0, var202);
+            FLD_MODEL_LOADSYNC(sVar187);
+            var201 = (var201 + 1);
+        }
+
+        FLD_MODEL_SET_VISIBLE(sVar187, 1, 0);
+        FLD_PTY_ADD_BUF(sVar187, 0);
+    }
+
+    sVar188 = -1;
+    
+    if (sVar2 != 0)
+    {
+        var199 = FLD_PC_ID_GET_RESHND(sVar2);
+        sVar188 = var199;
+        
+        if (var199 == -1)
+        {
+            sVar188 = FLD_NPC_MODEL_LOAD_BASE(sVar2, var200, 0, var202);
+            FLD_MODEL_LOADSYNC(sVar188);
+            var201 = (var201 + 1);
+        }
+
+        FLD_MODEL_SET_VISIBLE(sVar188, 1, 0);
+        FLD_PTY_ADD_BUF(sVar188, 1);
+    }
+
+    sVar189 = -1;
+    
+    if (sVar3 != 0)
+    {
+        var199 = FLD_PC_ID_GET_RESHND(sVar3);
+        sVar189 = var199;
+        
+        if (var199 == -1)
+        {
+            sVar189 = FLD_NPC_MODEL_LOAD_BASE(sVar3, var200, 0, var202);
+            FLD_MODEL_LOADSYNC(sVar189);
+            var201 = (var201 + 1);
+        }
+
+        FLD_MODEL_SET_VISIBLE(sVar189, 1, 0);
+        FLD_PTY_ADD_BUF(sVar189, 2);
+    }
+
+}
+
+
+// Procedure Index: 141
+void _release_handle()
+{
+    int var204;
+    int var205;
+    
+    if (sVar203 > 0)
+    {
+        var204 = 1;
+        _736:
+        
+        if (var204 < 4)
+        {
+            var205 = FLD_PC_GET_RESHND(var204);
+            
+            if (var205 == sVar203)
+            {
+                goto _737;
+            }
+
+            var204 = (var204 + 1);
+            goto _736;
+        }
+
+        _737:
+        
+        if (var204 == 4)
+        {
+            FLD_MODEL_SET_VISIBLE(sVar203, 0, 0);
+            FLD_MODEL_FREE(sVar203);
+        }
+
+    }
+
+    sVar203 = 0;
+}
+
+
+// Procedure Index: 142
+void motion_wait()
+{
+    int var206;
+    var206 = FLD_PC_GET_RESHND(0);
+    
+    if (MDL_GET_ANIM(var206) != 0)
+    {
+        FLD_MODEL_ANIM(var206, 0, 0, 5, 1.00f);
+    }
+
+}
+
+
+// Procedure Index: 143
+void motion_event_wait()
+{
+    int var207;
+    var207 = FLD_PC_GET_RESHND(0);
+    
+    if (MDL_GET_ANIM(var207) != 58)
+    {
+        FLD_MODEL_ANIM(var207, 58, 0, 5, 1.00f);
+    }
+
+}
+
+
+// Procedure Index: 144
+void add_motion_CONSOLE()
+{
+    int var210;
+    var210 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var210, 57);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 1.00f);
+    sVar209 = 2;
+    return;
+}
+
+
+// Procedure Index: 145
+void add_motion_TAKE()
+{
+    int var211;
+    var211 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var211, 84);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 1.00f);
+    sVar209 = 2;
+    return;
+}
+
+
+// Procedure Index: 146
+void add_motion_GIMMICK_TAKE()
+{
+    int var212;
+    var212 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var212, 86);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 1.00f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 147
+void add_motion_GIMMICK_PUT()
+{
+    int var213;
+    var213 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var213, 87);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 1.00f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 148
+void add_motion_DOOR_OPEN()
+{
+    int var214;
+    var214 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var214, 90);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 0.70f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 149
+void add_motion_DOOR_NOT_OPEN()
+{
+    int var215;
+    var215 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var215, 91);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 0.70f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 150
+void add_motion_DOOR_KICK()
+{
+    int var216;
+    var216 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var216, 92);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 0.70f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 151
+void add_motion_SWITCH()
+{
+    int var217;
+    var217 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var217, 93);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 1.00f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 152
+void add_motion_SWITCH_NONE()
+{
+    int var218;
+    var218 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var218, 94);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 1.00f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 153
+void add_motion_SWITCH_L()
+{
+    int var219;
+    var219 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var219, 96);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 0.70f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 154
+void add_motion_SWITCH_L_NONE()
+{
+    int var220;
+    var220 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var220, 97);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 0.70f);
+    sVar209 = 1;
+    return;
+}
+
+
+// Procedure Index: 155
+void add_motion_CARD_IN()
+{
+    int var221;
+    var221 = FLD_PC_GET_RESHND(0);
+    sVar208 = FLD_MODEL_CLONE_ADDMOTION(var221, 81);
+    FLD_MODEL_ANIM(sVar208, (60 + 0), 0, 3, 0.70f);
+    sVar209 = 2;
+    return;
+}
+
+
+// Procedure Index: 156
+void add_motion_wait()
+{
+    int var222;
+    var222 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_ANIM_SYNC(sVar208);
+    
+    if (sVar209 == 1)
+    {
+        FLD_MODEL_ANIM(sVar208, 0, 1, 5, 1.00f);
+    }
+    else if (sVar209 == 2)
+    {
+        FLD_MODEL_ANIM(sVar208, 58, 1, 5, 1.00f);
+    }
+
+    FLD_MODEL_REVERT_ADDMOTION(var222, sVar208);
+    sVar208 = 0;
+    sVar209 = 0;
+    return;
+}
+
+
+// Procedure Index: 157
+void talk_motion()
+{
+    int var223;
+    int var224;
+    var224 = FLD_PC_ID_GET_RESHND(var223);
+    
+    if (var224 != -1)
+    {
+        FLD_MODEL_TALK_ANIM(var224);
+    }
+
+    return;
+}
+

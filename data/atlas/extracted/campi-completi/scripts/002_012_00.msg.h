@@ -1,0 +1,24 @@
+// Decompiled by Atlus Script Tools
+const int DUMMY_MSG                        = 0;
+const int MSG_KITCHEN_DUMMY                = 1;
+const int YESNO_SEL                        = 2;
+const int MSG_KITCHEN_WOMAN_INFO           = 3;
+const int MSG_KITCHEN_THINK                = 4;
+const int MSG_KITCHEN_THINK_SEL            = 5;
+const int MSG_KITCHEN_WOMAN_START          = 6;
+const int MSG_KITCHEN_INFO_KAMO_BF         = 7;
+const int MSG_KITCHEN_KAMO_BF_MORU         = 8;
+const int MSG_KITCHEN_KAMO_AF_MORU         = 9;
+const int MSG_KITCHEN_INFO_KAMO_AF         = 10;
+const int MSG_KITCHEN_WOMAN_NO             = 11;
+const int MSG_TICKET_START                 = 12;
+const int MSG_TICKET_THINK_SEL             = 13;
+const int MSG_TICKET_BUY                   = 14;
+const int MSG_TICKET_HAVE_TICKET           = 15;
+const int MSG_TICKET_NOMONEY               = 16;
+const int MSG_TICKET_NOT_BUY               = 17;
+const int MSG_KITCHEN_ERROR_MORU           = 18;
+const int MSG_KITCHEN_ERROR                = 19;
+const int MSG_KITCHEN_ERROR_HOUKAG         = 20;
+const int MSG_KITCHEN_ERROR_NULL           = 21;
+const int MND_KFEVT_COMMON_NG              = 22;

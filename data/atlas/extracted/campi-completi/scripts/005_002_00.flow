@@ -1,0 +1,380 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("005_002_00.msg");
+
+// 
+// Script-level variable definitions
+// 
+
+int sVar8;
+int sVar9;
+int sVar10;
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void Main_Darts_Board01()
+{
+    int var0;
+    int var1;
+    var0 = 0;
+    var1 = 0;
+    MSG_WND_DSP();
+    MSG(DUMMY_MSG, 0);
+    var0 = SEL(SEL_CameraSet);
+    MSG_WND_CLS();
+    FLD_CAMERA_LOCK();
+    
+    if (var0 == 0)
+    {
+        FLD_CAMERA_LOCK_INTERP(-56.9576f, 213.1005f, 433.7231f, -0.1942f, -0.4914f, -0.1134f, 0.8414f, 0);
+    }
+    else if (var0 == 1)
+    {
+        FLD_CAMERA_LOCK_INTERP(-44.9436f, 195.8075f, 430.9203f, -0.1794f, -0.5321f, -0.1165f, 0.8192f, 0);
+    }
+    else if (var0 == 2)
+    {
+        FLD_CAMERA_LOCK_INTERP(-70.2943f, 228.1025f, 463.644f, -0.2106f, -0.5051f, -0.1286f, 0.8271f, 0);
+    }
+
+}
+
+
+// Procedure Index: 1
+void Main_Darts_Board02()
+{
+    return;
+}
+
+
+// Procedure Index: 2
+void Main_Darts_Board03()
+{
+    return;
+}
+
+
+// Procedure Index: 3
+void Main_Billiard_Table01()
+{
+    return;
+}
+
+
+// Procedure Index: 4
+void Main_Billiard_Table02()
+{
+    return;
+}
+
+
+// Procedure Index: 5
+void Fld_FadeOut_CallField()
+{
+    FADEOUT(27, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 6
+void Fld_FadeOut_Crowd()
+{
+    FLD_REQ_SCN_CHANGE(0);
+}
+
+
+// Procedure Index: 7
+void Fld_FadeOut_CallEvent()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 8
+void Fld_FadeOut_CallCalendar()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 9
+void Fld_FadeOut_Default()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 10
+void Fld_FadeOut_Wait10()
+{
+    FADEOUT(0, 10);
+    FADE_SYNC();
+    WAIT(10);
+}
+
+
+// Procedure Index: 11
+void Fld_FadeIn_Default()
+{
+    FADEIN(0, 20);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 12
+void Fld_FadeOut_Subway()
+{
+    FADEOUT(8, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 13
+void Fld_FadeOut_Symbol()
+{
+    FADEOUT(15, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 14
+void Fld_FadeOut_Rain()
+{
+    FADEOUT(11, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 15
+void Fld_FadeOut_Cross()
+{
+    FADEOUT(13, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 16
+void Fld_FadeOut_Parallel()
+{
+    FADEOUT(14, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 17
+void Fld_FadeOut_CutChange()
+{
+    FADEOUT(5, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 18
+void Fld_FadeOut_Velvet()
+{
+    FADEOUT(19, 10);
+    FADE_SYNC();
+}
+
+
+// Procedure Index: 19
+void SUB_MoruShowFace()
+{
+    int var2;
+    int var3;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var2 = FLD_PC_GET_CURRENT_RESHND(0);
+        var3 = MDL_GET_ITEM_RESHND(var2, 2);
+        MDL_ANIM(var3, 50, 0, 0, 1.00f);
+        MDL_ANIM_NEXT(var3, 51, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 20
+void SUB_MoruReturnBag()
+{
+    int var4;
+    int var5;
+    
+    if (FLD_CHECK_MORGANA_BAG() == 1)
+    {
+        var4 = FLD_PC_GET_CURRENT_RESHND(0);
+        var5 = MDL_GET_ITEM_RESHND(var4, 2);
+        MDL_ANIM(var5, 52, 0, 5, 1.00f);
+        MDL_ANIM_NEXT(var5, 0, 1, 0, 1.00f);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 21
+void position_rotate()
+{
+    float fVar0;
+    float fVar3;
+    float fVar7;
+    float fVar1;
+    float fVar4;
+    float fVar8;
+    float fVar2;
+    float fVar5;
+    float fVar9;
+    float fVar6;
+    float fVar10;
+    float fVar11;
+    fVar7 = (fVar3 - fVar0);
+    fVar8 = (fVar4 - fVar1);
+    fVar9 = (fVar5 - fVar2);
+    fVar10 = SIN(fVar6);
+    fVar11 = COS(fVar6);
+    fVar3 = ((fVar7 * fVar11) + (fVar9 * fVar10));
+    fVar4 = fVar8;
+    fVar5 = ((fVar9 * fVar11) - (fVar7 * fVar10));
+    fVar3 = (fVar3 + fVar0);
+    fVar4 = (fVar4 + fVar1);
+    fVar5 = (fVar5 + fVar2);
+}
+
+
+// Procedure Index: 22
+void Position_TurnBack()
+{
+    int var7;
+    int var6;
+    var7 = FLD_PC_GET_RESHND(0);
+    FLD_MODEL_DIR_TRANSLATE(var7, var6, 200, 0);
+    FLD_MODEL_SYNC_TRANSLATE(var7);
+    FLD_UNIT_SET_WAIT(var7);
+}
+
+
+// Procedure Index: 23
+void SUB_PhoneRing()
+{
+    int var11;
+    var11 = FLD_PC_GET_RESHND(0);
+    MDL_ICON(var11, 15);
+    FLD_COMSE_PLAY(1048);
+    WAIT(10);
+    RUMBLE_START_S(6, 12, 2, 30);
+    WAIT(30);
+    return;
+}
+
+
+// Procedure Index: 24
+void SUB_PhoneRumble()
+{
+    int var12;
+    var12 = FLD_PC_GET_RESHND(0);
+    MDL_ICON(var12, 18);
+    FLD_COMSE_PLAY(1047);
+    WAIT(10);
+    RUMBLE_START_S(6, 12, 2, 30);
+    WAIT(30);
+    return;
+}
+
+
+// Procedure Index: 25
+void SUB_PhonePickup()
+{
+    sVar8 = 0;
+    FLD_SET_CELLPHONE(1);
+    WAIT(15);
+    sVar8 = 1;
+    return;
+}
+
+
+// Procedure Index: 26
+void SUB_PhoneCall()
+{
+    sVar9 = FLD_PC_GET_RESHND(0);
+    
+    if (FLD_UMBREALLA_CHECK_USE() == 1)
+    {
+        sVar10 = FLD_MODEL_ADDMOTION_LOAD(sVar9, 101);
+    }
+    else 
+    {
+        sVar10 = FLD_MODEL_ADDMOTION_LOAD(sVar9, 1);
+    }
+
+    FLD_MODEL_LOADSYNC(sVar10);
+    FLD_MODEL_COPY_POSE_ANIM(sVar10, sVar9);
+    FLD_MODEL_SET_VISIBLE(sVar9, 0, 0);
+    FLD_MODEL_SET_VISIBLE(sVar10, 1, 0);
+    FLD_CELLPHONE_MODEL_VISIBLE(sVar10, 1);
+    MDL_ANIM(sVar10, (60 + 0), 0, 5, 1.00f);
+    MDL_ANIM_NEXT(sVar10, (60 + 1), 1, 0, 1.00f);
+    sVar8 = 2;
+    WAIT(30);
+    return;
+}
+
+
+// Procedure Index: 27
+void SUB_PhoneTalk()
+{
+    SUB_PhonePickup();
+    SUB_PhoneCall();
+    return;
+}
+
+
+// Procedure Index: 28
+void SUB_PhoneEnd()
+{
+    
+    if (sVar8 == 0)
+    {
+        return;
+    }
+
+    
+    if (sVar8 != 2)
+    {
+        FLD_SET_CELLPHONE(0);
+    }
+    else 
+    {
+        FLD_MODEL_SET_VISIBLE(sVar9, 0, 0);
+        FLD_MODEL_SET_VISIBLE(sVar10, 1, 0);
+        MDL_ANIM(sVar10, (60 + 2), 0, 10, 1.00f);
+        WAIT(65);
+        FLD_CELLPHONE_MODEL_VISIBLE(sVar10, 0);
+        MDL_ANIM_SYNC(sVar10);
+        MDL_ANIM(sVar10, 0, 1, 0, 1.00f);
+        MDL_ANIM_BLENDSYNC(sVar10);
+        FLD_MODEL_COPY_POSE_ANIM(sVar9, sVar10);
+        FLD_MODEL_SET_VISIBLE(sVar9, 1, 0);
+        FLD_MODEL_SET_VISIBLE(sVar10, 0, 0);
+        FLD_MODEL_FREE(sVar10);
+        FLD_SET_CELLPHONE(0);
+    }
+
+    sVar8 = 0;
+    return;
+}
+

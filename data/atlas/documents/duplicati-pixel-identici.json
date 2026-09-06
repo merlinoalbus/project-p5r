@@ -1,0 +1,136 @@
+[
+  {
+    "genitore": "dungeon-kamoshida",
+    "dimensioni": [
+      2048,
+      2048
+    ],
+    "pixelSha256": "b74fa932397c378c69d4ad0e37c55f64fca2fda45c43c5c168ddd1a94a715a82",
+    "mappe": [
+      {
+        "chiave": "nativo-rmap-151-2-1",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-151-3-0",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-151-4-0",
+        "nome": "Vecchio castello 2P",
+        "genitore_chiave": "dungeon-kamoshida",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      }
+    ]
+  },
+  {
+    "genitore": "dungeon-futaba",
+    "dimensioni": [
+      2048,
+      2048
+    ],
+    "pixelSha256": "c9bc708bc181d36a8a56ad787aa5cdacb9a1c38efba14c82645f4bb4bd223433",
+    "mappe": [
+      {
+        "chiave": "nativo-rmap-155-4-0",
+        "nome": "Camera del Santuario 1P",
+        "genitore_chiave": "dungeon-futaba",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-155-6-0",
+        "nome": "Camera del Santuario 1P",
+        "genitore_chiave": "dungeon-futaba",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      }
+    ]
+  },
+  {
+    "genitore": "dungeon-shido",
+    "dimensioni": [
+      2048,
+      2048
+    ],
+    "pixelSha256": "cc94dc2114edcdda29190fd23b237e1b2c9769af10145c6dde1f0e657fc04c21",
+    "mappe": [
+      {
+        "chiave": "nativo-rmap-159-2-3",
+        "nome": "Sala d'ingresso",
+        "genitore_chiave": "dungeon-shido",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-159-3-0",
+        "nome": "Corridoio mezzavia tribordo / Passaggio e salone centrale",
+        "genitore_chiave": "dungeon-shido",
+        "contesti_json": "[{\"id\":\"f159_051_00-texpack-143\",\"nome\":\"Corridoio mezzavia tribordo\",\"campo\":\"F159_051_00\",\"texpack\":143},{\"id\":\"f159_003_00-texpack-86\",\"nome\":\"Passaggio e salone centrale\",\"campo\":\"F159_003_00\",\"texpack\":86},{\"id\":\"f159_004_00-texpack-86\",\"nome\":\"Passaggio e salone centrale\",\"campo\":\"F159_004_00\",\"texpack\":86}]",
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-159-9-0",
+        "nome": "Ristorante",
+        "genitore_chiave": "dungeon-shido",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      }
+    ]
+  },
+  {
+    "genitore": "nativo-archivio-161",
+    "dimensioni": [
+      512,
+      512
+    ],
+    "pixelSha256": "d51c1dc3fe271edf62b42bfdea10da3de5fe72ecbff5a7bb64a3d13809bb7dc1",
+    "mappe": [
+      {
+        "chiave": "nativo-rmap-161-4-0",
+        "nome": "Vuoto cavernoso",
+        "genitore_chiave": "nativo-archivio-161",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-161-7-0",
+        "nome": "Vuoto cavernoso",
+        "genitore_chiave": "nativo-archivio-161",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      }
+    ]
+  },
+  {
+    "genitore": "dungeon-mementos",
+    "dimensioni": [
+      256,
+      1024
+    ],
+    "pixelSha256": "b1f3d9ab299235319df2b8d40fc57304c22ab2f4f8a45bfeb60151131d554ee4",
+    "mappe": [
+      {
+        "chiave": "nativo-rmap-190-61-0",
+        "nome": "Area 061 — RMAP_190_61_0",
+        "genitore_chiave": "dungeon-mementos",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      },
+      {
+        "chiave": "nativo-rmap-190-62-0",
+        "nome": "Area 062 — RMAP_190_62_0",
+        "genitore_chiave": "dungeon-mementos",
+        "contesti_json": null,
+        "gruppo_immagini_json": null
+      }
+    ]
+  }
+]

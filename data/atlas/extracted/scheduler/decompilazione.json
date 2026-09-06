@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "compiler": {
+    "file": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+    "sha256": "d1e9b7aaae1d4ac37705dd5d3a73ffa208f7e7e0377e63c6f85e847c4a698928",
+    "library": "P5R",
+    "encoding": "P5"
+  },
+  "coverage": [
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_01.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_02.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_03.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_04.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_05.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_06.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_07.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_08.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_09.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_10.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_11.BF",
+      "present": true
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_12.BF",
+      "present": true
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_01.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_02.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_03.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_04.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_05.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_06.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_07.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_08.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_09.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_10.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_11.BF",
+      "present": false
+    },
+    {
+      "archive": "IT",
+      "resource": "SCHEDULER/SCHEDULER_12.BF",
+      "present": false
+    }
+  ],
+  "results": [
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_01.BF",
+      "file": "scheduler/BASE/SCHEDULER_01.BF",
+      "sha256": "da3ffd12c4f09e01800d11f3ad8dabb1d5bf2777544e6a8ea5ad34c1d5fe3b46",
+      "bytes": 214012,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_01.flow",
+      "flowSha256": "7c9afaddd0e32a402f845c711c60b5b0357449a007ff9d6878ef3d2bb58d8d11",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_01",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_01.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_01.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_02.BF",
+      "file": "scheduler/BASE/SCHEDULER_02.BF",
+      "sha256": "d2ef69453d6bff2f929b622249c5f4aa760f1057b222ae5d06454590db45c854",
+      "bytes": 206896,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_02.flow",
+      "flowSha256": "5f838bb5713670671e818c1f9e909ffd2a4acef28aaafa8eab8d7e906ba63588",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_02",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_02.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_02.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_03.BF",
+      "file": "scheduler/BASE/SCHEDULER_03.BF",
+      "sha256": "97a4e31e827bbf5adb60f43285494094c2efc2d9a455fea5149a4997dfae236e",
+      "bytes": 198992,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_03.flow",
+      "flowSha256": "cc821c3541a9b5e56fbc7a15216a839f88313c43889ee3f7b49d5d5086c048fd",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_03",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_03.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_03.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_04.BF",
+      "file": "scheduler/BASE/SCHEDULER_04.BF",
+      "sha256": "b3cc59c5a00522ba515ebc2599d62db58f3fa2d070737fef7fe56064b2f114f1",
+      "bytes": 201744,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_04.flow",
+      "flowSha256": "09f0f4bc066ec5d1875ff64e7ecd55a808f9424261e0efccec4a7fa9710c60f4",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_04",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_04.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_04.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_05.BF",
+      "file": "scheduler/BASE/SCHEDULER_05.BF",
+      "sha256": "594bae52d0657ddfd814b24941694cbc860eb2e05e35045ecf64295fc693a4ea",
+      "bytes": 200876,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_05.flow",
+      "flowSha256": "fbb977b99b349f494cf7e16d46e70861b599827776adec007ea6a6b477eb0a6c",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_05",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_05.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_05.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_06.BF",
+      "file": "scheduler/BASE/SCHEDULER_06.BF",
+      "sha256": "0e53300f2c1340e6ff5f24158a44bfccb4c11ff2549e31a3f3a2a923912e753f",
+      "bytes": 199244,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_06.flow",
+      "flowSha256": "146c6612ccd3b04ec570d81281c2a19cb297fc02e9184712494d0c73809ce034",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_06",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_06.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_06.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_07.BF",
+      "file": "scheduler/BASE/SCHEDULER_07.BF",
+      "sha256": "62d00d0f358d4553a8d1d2663e3d92ed7c76c0d6246353d23554b8364355c651",
+      "bytes": 199452,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_07.flow",
+      "flowSha256": "26d4da698cb99067342a388f58d48cc829ef4426706962c5735b2b588f14da2e",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_07",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_07.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_07.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_08.BF",
+      "file": "scheduler/BASE/SCHEDULER_08.BF",
+      "sha256": "0354a7747db60db528f506e1f4e2af9d8fefef7c923a62f00d3a59237387251d",
+      "bytes": 198620,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_08.flow",
+      "flowSha256": "76c6bf0331f46e37d142b3cafb6f120b3a119cfce150763d0c654a9ef37b66ce",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_08",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_08.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_08.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_09.BF",
+      "file": "scheduler/BASE/SCHEDULER_09.BF",
+      "sha256": "df7d244a6d58af05650daae47ce5464eba64550ffb91a048ba20a43700ff77f9",
+      "bytes": 198012,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_09.flow",
+      "flowSha256": "21cec9e91ed60097858684f99b704b64d1ae1dcafb04008508d3cf6321c6fb32",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_09",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_09.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_09.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_10.BF",
+      "file": "scheduler/BASE/SCHEDULER_10.BF",
+      "sha256": "96b2088d7acdac63b19c7a3db7f7c5f801da742d0b4d4f7163e150f5aa26e5aa",
+      "bytes": 200488,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_10.flow",
+      "flowSha256": "fb2e7796883a2c1db73281509f6ca354bd6b0eaf03a636812f2d58a856e5b1fa",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_10",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_10.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_10.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_11.BF",
+      "file": "scheduler/BASE/SCHEDULER_11.BF",
+      "sha256": "978b9090fcc1fccd37a50eedbfd1723b5b3930be3a136cc4bed4b2a0a3c7fe1c",
+      "bytes": 200424,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_11.flow",
+      "flowSha256": "2046c37f9b6d4801442524bd6ed0d9d332ec0ffdfbcb374908c34b60f55cbad1",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_11",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_11.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_11.flow"
+      ]
+    },
+    {
+      "archive": "BASE",
+      "resource": "SCHEDULER/SCHEDULER_12.BF",
+      "file": "scheduler/BASE/SCHEDULER_12.BF",
+      "sha256": "5760fb4cf2ab15b0d46bc6e5c592bdd76ea667003882d1f6086935130fd66629",
+      "bytes": 198856,
+      "exitCode": 0,
+      "success": true,
+      "flow": "scheduler/BASE/SCHEDULER_12.flow",
+      "flowSha256": "d1b2da7cea6b49e5eb8e2ca432a8a19443ef6e3e64da05816c055ad82343f668",
+      "logDirectory": "scheduler/BASE/logs/SCHEDULER_12",
+      "command": [
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\atlus-script-tools\\AtlusScriptCompiler.exe",
+        "-Decompile",
+        "-In",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_12.BF",
+        "-Library",
+        "P5R",
+        "-Encoding",
+        "P5",
+        "-Out",
+        "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\scheduler\\BASE\\SCHEDULER_12.flow"
+      ]
+    }
+  ],
+  "limits": [
+    "File suffix alone is not a proof of date semantics.",
+    "Decompiled sources do not directly map native flags into app conditions."
+  ]
+}

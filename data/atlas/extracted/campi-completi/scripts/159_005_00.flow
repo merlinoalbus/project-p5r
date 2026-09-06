@@ -1,0 +1,43 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("159_005_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void D8_m5_AC_01()
+{
+    return;
+}
+
+
+// Procedure Index: 1
+void D8_m5_AC_02()
+{
+    return;
+}
+
+
+// Procedure Index: 2
+void D8_m5_GMC_01()
+{
+    return;
+}
+
+
+// Procedure Index: 3
+void D8_m5_Chess()
+{
+    return;
+}
+

@@ -1,0 +1,11 @@
+{
+  "status": "PASS-source-coverage",
+  "fields": 848,
+  "sourceResourcesChecked": 1278,
+  "scriptsChecked": 227,
+  "decompiled": 227,
+  "failed": 0,
+  "oldSourceChanges": 0,
+  "oldFieldsLost": 0,
+  "scope": "Union of matching FBN/HTB/FHIT resources in BASE and IT plus ROADMAP; no semantic map or navigation claims."
+}

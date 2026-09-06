@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "dbPath": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\root-name-release\\copy.db",
+  "backup": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\root-name-release\\copy.db.before-organization-073cffc3-7515-4a3c-b0c1-34ea24e4b6db.sqlite",
+  "error": "HttpError: Questo percorso appartiene già a un’altra mappa, anche tra i collegamenti precedenti.",
+  "rolledBack": true
+}

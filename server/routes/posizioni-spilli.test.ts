@@ -1,0 +1,41 @@
+import request from 'supertest';
+import {createApp} from '../bootstrap.js';
+import {initDb,closeDb} from '../db/dbService.js';
+import {runMigrations} from '../db/migrationRunner.js';
+const app=createApp();
+beforeEach(async()=>{runMigrations(initDb(':memory:'));await request(app).post('/api/mappe').send({chiave:'luoghi',nome:'Luoghi',tipo:'luogo'}).expect(201);});
+afterEach(()=>closeDb());
+const crea=(extra:Record<string,unknown>={})=>request(app).post('/api/mappe/luoghi/spilli').send({tipo:'attivita',nome:'Luogo',x:20,y:30,...extra});
+it('conserva posizione su aggiornamento omesso, copia e pacchetto, con default storico falso',async()=>{
+ expect((await crea()).body.data.soloPosizione).toBe(false);
+ const s=(await crea({soloPosizione:true})).body.data;
+ expect(s.soloPosizione).toBe(true);
+ expect((await request(app).put(`/api/mappe/spilli/${s.id}`).send({nome:'Aggiornato'})).body.data.soloPosizione).toBe(true);
+ expect((await crea({...s,nome:'Copia'})).body.data.soloPosizione).toBe(true);
+ const pacchetto=(await request(app).get('/api/mappe/esporta?radice=luoghi')).body.data;
+ expect(pacchetto.mappe[0].spilli.map((p:{soloPosizione:boolean})=>p.soloPosizione)).toEqual([false,true,true]);
+ await request(app).delete('/api/mappe/luoghi').expect(204);
+ await request(app).post('/api/mappe/importa').send({pacchetto}).expect(200);
+ expect((await request(app).get('/api/mappe/luoghi')).body.data.spilli.map((p:{soloPosizione:boolean})=>p.soloPosizione)).toEqual([false,true,true]);
+ const id=(await request(app).get('/api/mappe/luoghi')).body.data.spilli[1].id;
+ expect((await request(app).put(`/api/mappe/spilli/${id}`).send({soloPosizione:false})).body.data.soloPosizione).toBe(false);
+});
+it('mantiene condizioni bloccanti senza dichiarare disponibile una semplice posizione',async()=>{
+ const partita=(await request(app).post('/api/partite').send({nome:'Posizioni'})).body.data.id;
+ const s=(await crea({soloPosizione:true,condizioni:[{tipo:'fascia',fascia:'sera'}]})).body.data;
+ const leggi=async()=> (await request(app).get(`/api/mappe/luoghi?partita=${partita}`)).body.data.spilli[0];
+ expect((await leggi()).disponibilita.stato).toBe('bloccato');
+ await request(app).put(`/api/mappe/spilli/${s.id}`).send({condizioni:[]}).expect(200);
+ expect((await leggi()).disponibilita).toBeUndefined();
+ expect((await request(app).get('/api/mappe/luoghi')).body.data.spilli[0].soloPosizione).toBe(true);
+ await request(app).put(`/api/mappe/spilli/${s.id}`).send({soloPosizione:false}).expect(200);
+ expect((await leggi()).disponibilita.stato).toBe('disponibile');
+});
+it('rifiuta valori non booleani sia in API che nel pacchetto',async()=>{
+ await crea({soloPosizione:'true'}).expect(400);
+ await crea();
+ const pacchetto=(await request(app).get('/api/mappe/esporta?radice=luoghi')).body.data;
+ pacchetto.mappe[0].spilli[0].soloPosizione=1;
+ await request(app).post('/api/mappe/importa').send({pacchetto,sovrascrivi:true}).expect(400);
+ expect((await request(app).get('/api/mappe/luoghi')).body.data.spilli).toHaveLength(1);
+});

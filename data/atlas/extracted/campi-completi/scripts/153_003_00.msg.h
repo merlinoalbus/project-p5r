@@ -1,0 +1,27 @@
+// Decompiled by Atlus Script Tools
+const int D02_02_e200_148_NG_mes01         = 0;
+const int D02_02_e200_148_NG_mes02         = 1;
+const int D02_02_e200_148_NG_mes03         = 2;
+const int mini_EV_e200_150_mes01           = 3;
+const int mini_EV_e200_150_mes02           = 4;
+const int e200_140_mes08                   = 5;
+const int e200_140_mes06                   = 6;
+const int e200_140_mes07                   = 7;
+const int mini_EV_e200_146_mes01           = 8;
+const int mini_EV_e200_146_mes02           = 9;
+const int mini_EV_e200_146_mes03           = 10;
+const int mini_EV_e200_146_mes04           = 11;
+const int mini_EV_e200_146_mes05           = 12;
+const int mini_EV_e200_146_mes06           = 13;
+const int mini_EV_e200_146_mes07           = 14;
+const int mini_EV_e200_146_mes08           = 15;
+const int mini_EV_e200_146_mes09           = 16;
+const int mini_EV_e200_146_mes10           = 17;
+const int D153_003_LOCK_EV02_mes01         = 18;
+const int D153_003_LOCK_EV02_mes02         = 19;
+const int D153_003_LOCK_EV02_mes03         = 20;
+const int D153_003_LOCK_EV02_mes04         = 21;
+const int mini_EV_e200_140_LOCK_me         = 22;
+const int mini_EV_e200_140_LOCK_me_2       = 23;
+const int D02_mi_e207_130_ng_01            = 24;
+const int D02_mi_e207_130_ng_02            = 25;

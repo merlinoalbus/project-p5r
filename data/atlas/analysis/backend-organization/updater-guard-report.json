@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "dbPath": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\backend-organization\\updater-guard.db",
+  "backup": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\backend-organization\\updater-guard.db.before-organization-7e3229e0-2724-4d97-98a8-fa2186c34b66.sqlite",
+  "error": "Error: Radice con coordinate o associazioni da conservare: nativo-archivio-001",
+  "rolledBack": true
+}

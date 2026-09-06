@@ -1,0 +1,3137 @@
+{
+  "version": 1,
+  "mappe": [
+    {
+      "chiave": "nativo-rmap-022-1-0",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 0
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-1",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 1
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-2",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 2
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-3",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 3
+      }
+    },
+    {
+      "chiave": "nativo-rmap-022-1-4",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 4
+      }
+    },
+    {
+      "chiave": "nativo-rmap-153-3-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 1P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_003_00-texpack-25",
+          "nome": "Museo, 2P",
+          "campo": "F153_003_00",
+          "texpack": 25
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-5-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_005_00-texpack-27",
+          "nome": "Giardino centrale",
+          "campo": "F153_005_00",
+          "texpack": 27
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-6-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_006_00-texpack-28",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_006_00",
+          "texpack": 28
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-6-1",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_006_00-texpack-28",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_006_00",
+          "texpack": 28
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-9-0",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-9-1",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-153-9-2",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Galleria",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-154-5-0",
+      "contesti": [
+        {
+          "id": "f154_051_00-texpack-139",
+          "nome": "Ufficio riciclaggio",
+          "campo": "F154_051_00",
+          "texpack": 139
+        },
+        {
+          "id": "f154_005_00-texpack-34",
+          "nome": "Caveau sotterraneo",
+          "campo": "F154_005_00",
+          "texpack": 34
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-156-10-0",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Interscambio",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_010_00-texpack-65",
+          "nome": "Produzione armamenti",
+          "campo": "F156_010_00",
+          "texpack": 65
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-156-12-0",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Linea di smaltimento",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_012_00-texpack-67",
+          "nome": "Fabbrica centrale",
+          "campo": "F156_012_00",
+          "texpack": 67
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-156-9-0",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Linea di produzione",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_009_00-texpack-64",
+          "nome": "Linea di smaltimento",
+          "campo": "F156_009_00",
+          "texpack": 64
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-10-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio superiore tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_010_00-texpack-91",
+          "nome": "Ponte piscina",
+          "campo": "F159_010_00",
+          "texpack": 91
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-10-1",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio superiore tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_010_00-texpack-91",
+          "nome": "Ponte piscina",
+          "campo": "F159_010_00",
+          "texpack": 91
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-3-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio mezzavia tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_003_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_003_00",
+          "texpack": 86
+        },
+        {
+          "id": "f159_004_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_004_00",
+          "texpack": 86
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-3-1",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio mezzavia tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_003_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_003_00",
+          "texpack": 86
+        },
+        {
+          "id": "f159_004_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_004_00",
+          "texpack": 86
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-6-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Ponte laterale",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-6-1",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio inferiore babordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-6-2",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio inferiore babordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ]
+    },
+    {
+      "chiave": "nativo-rmap-159-7-0",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_007_00-texpack-88",
+          "nome": "Ponte di poppa",
+          "campo": "F159_007_00",
+          "texpack": 88
+        }
+      ]
+    }
+  ],
+  "sources": {
+    "censusSha256": "e6ea9fd16ce7757d14a60fddd8df068e0f9edc7cbebdef7e3dc8cf3c630c17b2",
+    "resolutionsSha256": "2c44858c0aee661bb3b9443dd287601665e538a3829cd598d25e0a752cda0168",
+    "roadmapTableSha256": "97b8f1b7d067f23238895eb2dedc207c63b632fc8e83acb4e80e7b2a5f4ee787"
+  },
+  "coverage": {
+    "totalResources": 301,
+    "entryResources": 24,
+    "counts": {
+      "existing-verified-title": 218,
+      "unresolved": 59,
+      "resource-group-member": 5,
+      "contextual-titles": 19
+    }
+  },
+  "entries": [
+    {
+      "key": "nativo-rmap-022-1-0",
+      "kind": "resource-group-member",
+      "resourceGroupKey": "covo-dei-ladri",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 0
+      }
+    },
+    {
+      "key": "nativo-rmap-022-1-1",
+      "kind": "resource-group-member",
+      "resourceGroupKey": "covo-dei-ladri",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 1
+      }
+    },
+    {
+      "key": "nativo-rmap-022-1-2",
+      "kind": "resource-group-member",
+      "resourceGroupKey": "covo-dei-ladri",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 2
+      }
+    },
+    {
+      "key": "nativo-rmap-022-1-3",
+      "kind": "resource-group-member",
+      "resourceGroupKey": "covo-dei-ladri",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 3
+      }
+    },
+    {
+      "key": "nativo-rmap-022-1-4",
+      "kind": "resource-group-member",
+      "resourceGroupKey": "covo-dei-ladri",
+      "gruppoImmagini": {
+        "id": "covo-dei-ladri",
+        "nome": "Covo dei Ladri",
+        "ordine": 4
+      }
+    },
+    {
+      "key": "nativo-rmap-153-3-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 1P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_003_00-texpack-25",
+          "nome": "Museo, 2P",
+          "campo": "F153_003_00",
+          "texpack": 25
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Museo, 1P",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 20664,
+                  "texelemIndex": 22,
+                  "titleIndex": 31,
+                  "titleOffset": 2288,
+                  "titleRawHex": "4d7573656f2c203150"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Museo, 2P",
+          "contexts": [
+            {
+              "field": "F153_003_00",
+              "texpack": 25,
+              "roadmapOffset": 432,
+              "records": [
+                {
+                  "texpackOffset": 3600,
+                  "texelemIndex": 23,
+                  "titleIndex": 32,
+                  "titleOffset": 2320,
+                  "titleRawHex": "4d7573656f2c203250"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-153-5-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_005_00-texpack-27",
+          "nome": "Giardino centrale",
+          "campo": "F153_005_00",
+          "texpack": 27
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Museo, 2P",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 20808,
+                  "texelemIndex": 23,
+                  "titleIndex": 32,
+                  "titleOffset": 2320,
+                  "titleRawHex": "4d7573656f2c203250"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Giardino centrale",
+          "contexts": [
+            {
+              "field": "F153_005_00",
+              "texpack": 27,
+              "roadmapOffset": 464,
+              "records": [
+                {
+                  "texpackOffset": 3888,
+                  "texelemIndex": 27,
+                  "titleIndex": 34,
+                  "titleOffset": 2384,
+                  "titleRawHex": "4769617264696e6f2063656e7472616c65"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-153-6-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_006_00-texpack-28",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_006_00",
+          "texpack": 28
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Museo, 2P",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 20880,
+                  "texelemIndex": 24,
+                  "titleIndex": 32,
+                  "titleOffset": 2320,
+                  "titleRawHex": "4d7573656f2c203250"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala del Tesoro - Atrio",
+          "contexts": [
+            {
+              "field": "F153_006_00",
+              "texpack": 28,
+              "roadmapOffset": 480,
+              "records": [
+                {
+                  "texpackOffset": 4032,
+                  "texelemIndex": 28,
+                  "titleIndex": 35,
+                  "titleOffset": 2432,
+                  "titleRawHex": "53616c612064656c205465736f726f202d20417472696f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-153-6-1",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Museo, 2P",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_006_00-texpack-28",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_006_00",
+          "texpack": 28
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Museo, 2P",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 20880,
+                  "texelemIndex": 25,
+                  "titleIndex": 32,
+                  "titleOffset": 2320,
+                  "titleRawHex": "4d7573656f2c203250"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala del Tesoro - Atrio",
+          "contexts": [
+            {
+              "field": "F153_006_00",
+              "texpack": 28,
+              "roadmapOffset": 480,
+              "records": [
+                {
+                  "texpackOffset": 4032,
+                  "texelemIndex": 29,
+                  "titleIndex": 35,
+                  "titleOffset": 2432,
+                  "titleRawHex": "53616c612064656c205465736f726f202d20417472696f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-153-9-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Sala del Tesoro - Atrio",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 21024,
+                  "texelemIndex": 28,
+                  "titleIndex": 35,
+                  "titleOffset": 2432,
+                  "titleRawHex": "53616c612064656c205465736f726f202d20417472696f"
+                },
+                {
+                  "texpackOffset": 21096,
+                  "texelemIndex": 28,
+                  "titleIndex": 35,
+                  "titleOffset": 2432,
+                  "titleRawHex": "53616c612064656c205465736f726f202d20417472696f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala del Tesoro",
+          "contexts": [
+            {
+              "field": "F153_009_00",
+              "texpack": 30,
+              "roadmapOffset": 512,
+              "records": [
+                {
+                  "texpackOffset": 4320,
+                  "texelemIndex": 34,
+                  "titleIndex": 37,
+                  "titleOffset": 2528,
+                  "titleRawHex": "53616c612064656c205465736f726f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-153-9-1",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Atrio",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Sala del Tesoro - Atrio",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 21024,
+                  "texelemIndex": 29,
+                  "titleIndex": 35,
+                  "titleOffset": 2432,
+                  "titleRawHex": "53616c612064656c205465736f726f202d20417472696f"
+                },
+                {
+                  "texpackOffset": 21096,
+                  "texelemIndex": 29,
+                  "titleIndex": 35,
+                  "titleOffset": 2432,
+                  "titleRawHex": "53616c612064656c205465736f726f202d20417472696f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala del Tesoro",
+          "contexts": [
+            {
+              "field": "F153_009_00",
+              "texpack": 30,
+              "roadmapOffset": 512,
+              "records": [
+                {
+                  "texpackOffset": 4320,
+                  "texelemIndex": 35,
+                  "titleIndex": 37,
+                  "titleOffset": 2528,
+                  "titleRawHex": "53616c612064656c205465736f726f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-153-9-2",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f153_051_00-texpack-138",
+          "nome": "Sala del Tesoro - Galleria",
+          "campo": "F153_051_00",
+          "texpack": 138
+        },
+        {
+          "id": "f153_009_00-texpack-30",
+          "nome": "Sala del Tesoro",
+          "campo": "F153_009_00",
+          "texpack": 30
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Sala del Tesoro - Galleria",
+          "contexts": [
+            {
+              "field": "F153_051_00",
+              "texpack": 138,
+              "roadmapOffset": 384,
+              "records": [
+                {
+                  "texpackOffset": 21024,
+                  "texelemIndex": 30,
+                  "titleIndex": 36,
+                  "titleOffset": 2480,
+                  "titleRawHex": "53616c612064656c205465736f726f202d2047616c6c65726961"
+                },
+                {
+                  "texpackOffset": 21096,
+                  "texelemIndex": 30,
+                  "titleIndex": 36,
+                  "titleOffset": 2480,
+                  "titleRawHex": "53616c612064656c205465736f726f202d2047616c6c65726961"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala del Tesoro",
+          "contexts": [
+            {
+              "field": "F153_009_00",
+              "texpack": 30,
+              "roadmapOffset": 512,
+              "records": [
+                {
+                  "texpackOffset": 4320,
+                  "texelemIndex": 36,
+                  "titleIndex": 37,
+                  "titleOffset": 2528,
+                  "titleRawHex": "53616c612064656c205465736f726f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-154-5-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f154_051_00-texpack-139",
+          "nome": "Ufficio riciclaggio",
+          "campo": "F154_051_00",
+          "texpack": 139
+        },
+        {
+          "id": "f154_005_00-texpack-34",
+          "nome": "Caveau sotterraneo",
+          "campo": "F154_005_00",
+          "texpack": 34
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Ufficio riciclaggio",
+          "contexts": [
+            {
+              "field": "F154_051_00",
+              "texpack": 139,
+              "roadmapOffset": 544,
+              "records": [
+                {
+                  "texpackOffset": 21528,
+                  "texelemIndex": 49,
+                  "titleIndex": 54,
+                  "titleOffset": 3136,
+                  "titleRawHex": "5566666963696f2072696369636c616767696f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Caveau sotterraneo",
+          "contexts": [
+            {
+              "field": "F154_005_00",
+              "texpack": 34,
+              "roadmapOffset": 608,
+              "records": [
+                {
+                  "texpackOffset": 4896,
+                  "texelemIndex": 52,
+                  "titleIndex": 58,
+                  "titleOffset": 3328,
+                  "titleRawHex": "43617665617520736f7474657272616e656f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-156-10-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Interscambio",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_010_00-texpack-65",
+          "nome": "Produzione armamenti",
+          "campo": "F156_010_00",
+          "texpack": 65
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Interscambio",
+          "contexts": [
+            {
+              "field": "F156_051_00",
+              "texpack": 141,
+              "roadmapOffset": 992,
+              "records": [
+                {
+                  "texpackOffset": 22896,
+                  "texelemIndex": 92,
+                  "titleIndex": 100,
+                  "titleOffset": 5120,
+                  "titleRawHex": "496e7465727363616d62696f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Produzione armamenti",
+          "contexts": [
+            {
+              "field": "F156_010_00",
+              "texpack": 65,
+              "roadmapOffset": 1152,
+              "records": [
+                {
+                  "texpackOffset": 9432,
+                  "texelemIndex": 93,
+                  "titleIndex": 102,
+                  "titleOffset": 5184,
+                  "titleRawHex": "50726f64757a696f6e652061726d616d656e7469"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-156-12-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Linea di smaltimento",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_012_00-texpack-67",
+          "nome": "Fabbrica centrale",
+          "campo": "F156_012_00",
+          "texpack": 67
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Linea di smaltimento",
+          "contexts": [
+            {
+              "field": "F156_051_00",
+              "texpack": 141,
+              "roadmapOffset": 992,
+              "records": [
+                {
+                  "texpackOffset": 22752,
+                  "texelemIndex": 89,
+                  "titleIndex": 98,
+                  "titleOffset": 5024,
+                  "titleRawHex": "4c696e656120646920736d616c74696d656e746f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Fabbrica centrale",
+          "contexts": [
+            {
+              "field": "F156_012_00",
+              "texpack": 67,
+              "roadmapOffset": 1184,
+              "records": [
+                {
+                  "texpackOffset": 9720,
+                  "texelemIndex": 90,
+                  "titleIndex": 99,
+                  "titleOffset": 5072,
+                  "titleRawHex": "46616262726963612063656e7472616c65"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-156-9-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f156_051_00-texpack-141",
+          "nome": "Linea di produzione",
+          "campo": "F156_051_00",
+          "texpack": 141
+        },
+        {
+          "id": "f156_009_00-texpack-64",
+          "nome": "Linea di smaltimento",
+          "campo": "F156_009_00",
+          "texpack": 64
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Linea di produzione",
+          "contexts": [
+            {
+              "field": "F156_051_00",
+              "texpack": 141,
+              "roadmapOffset": 992,
+              "records": [
+                {
+                  "texpackOffset": 22680,
+                  "texelemIndex": 88,
+                  "titleIndex": 97,
+                  "titleOffset": 4976,
+                  "titleRawHex": "4c696e65612064692070726f64757a696f6e65"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Linea di smaltimento",
+          "contexts": [
+            {
+              "field": "F156_009_00",
+              "texpack": 64,
+              "roadmapOffset": 1136,
+              "records": [
+                {
+                  "texpackOffset": 9288,
+                  "texelemIndex": 89,
+                  "titleIndex": 98,
+                  "titleOffset": 5024,
+                  "titleRawHex": "4c696e656120646920736d616c74696d656e746f"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-10-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio superiore tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_010_00-texpack-91",
+          "nome": "Ponte piscina",
+          "campo": "F159_010_00",
+          "texpack": 91
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Corridoio superiore tribordo",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 24048,
+                  "texelemIndex": 130,
+                  "titleIndex": 135,
+                  "titleOffset": 6432,
+                  "titleRawHex": "436f727269646f696f207375706572696f726520747269626f72646f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ponte piscina",
+          "contexts": [
+            {
+              "field": "F159_010_00",
+              "texpack": 91,
+              "roadmapOffset": 1664,
+              "records": [
+                {
+                  "texpackOffset": 13176,
+                  "texelemIndex": 128,
+                  "titleIndex": 134,
+                  "titleOffset": 6400,
+                  "titleRawHex": "506f6e74652070697363696e61"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-10-1",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio superiore tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_010_00-texpack-91",
+          "nome": "Ponte piscina",
+          "campo": "F159_010_00",
+          "texpack": 91
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Corridoio superiore tribordo",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 24048,
+                  "texelemIndex": 129,
+                  "titleIndex": 135,
+                  "titleOffset": 6432,
+                  "titleRawHex": "436f727269646f696f207375706572696f726520747269626f72646f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ponte piscina",
+          "contexts": [
+            {
+              "field": "F159_010_00",
+              "texpack": 91,
+              "roadmapOffset": 1664,
+              "records": [
+                {
+                  "texpackOffset": 13176,
+                  "texelemIndex": 127,
+                  "titleIndex": 134,
+                  "titleOffset": 6400,
+                  "titleRawHex": "506f6e74652070697363696e61"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-3-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio mezzavia tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_003_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_003_00",
+          "texpack": 86
+        },
+        {
+          "id": "f159_004_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_004_00",
+          "texpack": 86
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Corridoio mezzavia tribordo",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 23976,
+                  "texelemIndex": 125,
+                  "titleIndex": 133,
+                  "titleOffset": 6352,
+                  "titleRawHex": "436f727269646f696f206d657a7a6176696120747269626f72646f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Passaggio e salone centrale",
+          "contexts": [
+            {
+              "field": "F159_003_00",
+              "texpack": 86,
+              "roadmapOffset": 1568,
+              "records": [
+                {
+                  "texpackOffset": 12456,
+                  "texelemIndex": 122,
+                  "titleIndex": 132,
+                  "titleOffset": 6304,
+                  "titleRawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65"
+                }
+              ]
+            },
+            {
+              "field": "F159_004_00",
+              "texpack": 86,
+              "roadmapOffset": 1584,
+              "records": [
+                {
+                  "texpackOffset": 12456,
+                  "texelemIndex": 122,
+                  "titleIndex": 132,
+                  "titleOffset": 6304,
+                  "titleRawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-3-1",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio mezzavia tribordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_003_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_003_00",
+          "texpack": 86
+        },
+        {
+          "id": "f159_004_00-texpack-86",
+          "nome": "Passaggio e salone centrale",
+          "campo": "F159_004_00",
+          "texpack": 86
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Corridoio mezzavia tribordo",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 23976,
+                  "texelemIndex": 126,
+                  "titleIndex": 133,
+                  "titleOffset": 6352,
+                  "titleRawHex": "436f727269646f696f206d657a7a6176696120747269626f72646f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Passaggio e salone centrale",
+          "contexts": [
+            {
+              "field": "F159_003_00",
+              "texpack": 86,
+              "roadmapOffset": 1568,
+              "records": [
+                {
+                  "texpackOffset": 12456,
+                  "texelemIndex": 123,
+                  "titleIndex": 132,
+                  "titleOffset": 6304,
+                  "titleRawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65"
+                }
+              ]
+            },
+            {
+              "field": "F159_004_00",
+              "texpack": 86,
+              "roadmapOffset": 1584,
+              "records": [
+                {
+                  "texpackOffset": 12456,
+                  "texelemIndex": 123,
+                  "titleIndex": 132,
+                  "titleOffset": 6304,
+                  "titleRawHex": "50617373616767696f20652073616c6f6e652063656e7472616c65"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-6-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Ponte laterale",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Ponte laterale",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 24192,
+                  "texelemIndex": 137,
+                  "titleIndex": 140,
+                  "titleOffset": 6656,
+                  "titleRawHex": "506f6e7465206c61746572616c65"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala intrattenimento 2P",
+          "contexts": [
+            {
+              "field": "F159_006_00",
+              "texpack": 87,
+              "roadmapOffset": 1600,
+              "records": [
+                {
+                  "texpackOffset": 12600,
+                  "texelemIndex": 134,
+                  "titleIndex": 137,
+                  "titleOffset": 6512,
+                  "titleRawHex": "53616c6120696e7472617474656e696d656e746f203250"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-6-1",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio inferiore babordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Corridoio inferiore babordo",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 24192,
+                  "texelemIndex": 136,
+                  "titleIndex": 139,
+                  "titleOffset": 6608,
+                  "titleRawHex": "436f727269646f696f20696e666572696f7265206261626f72646f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala intrattenimento 2P",
+          "contexts": [
+            {
+              "field": "F159_006_00",
+              "texpack": 87,
+              "roadmapOffset": 1600,
+              "records": [
+                {
+                  "texpackOffset": 12600,
+                  "texelemIndex": 134,
+                  "titleIndex": 137,
+                  "titleOffset": 6512,
+                  "titleRawHex": "53616c6120696e7472617474656e696d656e746f203250"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-6-2",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Corridoio inferiore babordo",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_006_00-texpack-87",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_006_00",
+          "texpack": 87
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Corridoio inferiore babordo",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 24192,
+                  "texelemIndex": 135,
+                  "titleIndex": 139,
+                  "titleOffset": 6608,
+                  "titleRawHex": "436f727269646f696f20696e666572696f7265206261626f72646f"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Sala intrattenimento 2P",
+          "contexts": [
+            {
+              "field": "F159_006_00",
+              "texpack": 87,
+              "roadmapOffset": 1600,
+              "records": [
+                {
+                  "texpackOffset": 12600,
+                  "texelemIndex": 133,
+                  "titleIndex": 137,
+                  "titleOffset": 6512,
+                  "titleRawHex": "53616c6120696e7472617474656e696d656e746f203250"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "nativo-rmap-159-7-0",
+      "kind": "contextual-titles",
+      "contesti": [
+        {
+          "id": "f159_051_00-texpack-143",
+          "nome": "Sala intrattenimento 2P",
+          "campo": "F159_051_00",
+          "texpack": 143
+        },
+        {
+          "id": "f159_007_00-texpack-88",
+          "nome": "Ponte di poppa",
+          "campo": "F159_007_00",
+          "texpack": 88
+        }
+      ],
+      "alternatives": [
+        {
+          "title": "Sala intrattenimento 2P",
+          "contexts": [
+            {
+              "field": "F159_051_00",
+              "texpack": 143,
+              "roadmapOffset": 1520,
+              "records": [
+                {
+                  "texpackOffset": 24120,
+                  "texelemIndex": 133,
+                  "titleIndex": 137,
+                  "titleOffset": 6512,
+                  "titleRawHex": "53616c6120696e7472617474656e696d656e746f203250"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Ponte di poppa",
+          "contexts": [
+            {
+              "field": "F159_007_00",
+              "texpack": 88,
+              "roadmapOffset": 1616,
+              "records": [
+                {
+                  "texpackOffset": 12744,
+                  "texelemIndex": 132,
+                  "titleIndex": 136,
+                  "titleOffset": 6480,
+                  "titleRawHex": "506f6e746520646920706f707061"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "resourceGroups": [
+    {
+      "key": "covo-dei-ladri",
+      "title": "Covo dei Ladri",
+      "resourceKeys": [
+        "nativo-rmap-022-1-0",
+        "nativo-rmap-022-1-1",
+        "nativo-rmap-022-1-2",
+        "nativo-rmap-022-1-3",
+        "nativo-rmap-022-1-4"
+      ],
+      "semantics": "image-layers-not-verified-floors",
+      "identityEvidence": {
+        "field": "F022_001_00",
+        "placeRecordOffset": 2056,
+        "titleOffset": 6900,
+        "titleRawHex": "436f766f20646569204c6164726900"
+      }
+    }
+  ],
+  "inventory": [
+    {
+      "key": "nativo-rmap-001-12-0",
+      "code": "RMAP_001_12_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-001-1-0",
+      "code": "RMAP_001_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-001-2-0",
+      "code": "RMAP_001_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-001-2-1",
+      "code": "RMAP_001_2_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-001-3-0",
+      "code": "RMAP_001_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-001-4-0",
+      "code": "RMAP_001_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-001-5-0",
+      "code": "RMAP_001_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-002-0-0",
+      "code": "RMAP_002_0_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-002-0-1",
+      "code": "RMAP_002_0_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-002-0-2",
+      "code": "RMAP_002_0_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-002-1-0",
+      "code": "RMAP_002_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-002-5-0",
+      "code": "RMAP_002_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-002-6-0",
+      "code": "RMAP_002_6_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-002-8-0",
+      "code": "RMAP_002_8_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-005-1-0",
+      "code": "RMAP_005_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-006-1-0",
+      "code": "RMAP_006_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-007-1-0",
+      "code": "RMAP_007_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-009-2-0",
+      "code": "RMAP_009_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-010-4-0",
+      "code": "RMAP_010_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-011-4-0",
+      "code": "RMAP_011_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-011-6-0",
+      "code": "RMAP_011_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-012-29-0",
+      "code": "RMAP_012_29_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-022-1-0",
+      "code": "RMAP_022_1_0",
+      "status": "resource-group-member"
+    },
+    {
+      "key": "nativo-rmap-022-1-1",
+      "code": "RMAP_022_1_1",
+      "status": "resource-group-member"
+    },
+    {
+      "key": "nativo-rmap-022-1-2",
+      "code": "RMAP_022_1_2",
+      "status": "resource-group-member"
+    },
+    {
+      "key": "nativo-rmap-022-1-3",
+      "code": "RMAP_022_1_3",
+      "status": "resource-group-member"
+    },
+    {
+      "key": "nativo-rmap-022-1-4",
+      "code": "RMAP_022_1_4",
+      "status": "resource-group-member"
+    },
+    {
+      "key": "nativo-rmap-150-3-0",
+      "code": "RMAP_150_3_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-150-3-1",
+      "code": "RMAP_150_3_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-151-0-0",
+      "code": "RMAP_151_0_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-151-0-1",
+      "code": "RMAP_151_0_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-151-10-0",
+      "code": "RMAP_151_10_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-10-1",
+      "code": "RMAP_151_10_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-11-0",
+      "code": "RMAP_151_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-11-1",
+      "code": "RMAP_151_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-13-0",
+      "code": "RMAP_151_13_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-16-0",
+      "code": "RMAP_151_16_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-151-1-0",
+      "code": "RMAP_151_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-1-1",
+      "code": "RMAP_151_1_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-2-0",
+      "code": "RMAP_151_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-2-1",
+      "code": "RMAP_151_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-2-2",
+      "code": "RMAP_151_2_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-3-0",
+      "code": "RMAP_151_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-4-0",
+      "code": "RMAP_151_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-4-1",
+      "code": "RMAP_151_4_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-4-2",
+      "code": "RMAP_151_4_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-5-0",
+      "code": "RMAP_151_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-5-1",
+      "code": "RMAP_151_5_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-5-2",
+      "code": "RMAP_151_5_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-6-0",
+      "code": "RMAP_151_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-6-1",
+      "code": "RMAP_151_6_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-6-2",
+      "code": "RMAP_151_6_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-6-3",
+      "code": "RMAP_151_6_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-6-4",
+      "code": "RMAP_151_6_4",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-7-0",
+      "code": "RMAP_151_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-151-9-0",
+      "code": "RMAP_151_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-152-11-0",
+      "code": "RMAP_152_11_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-152-11-1",
+      "code": "RMAP_152_11_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-152-1-0",
+      "code": "RMAP_152_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-152-1-1",
+      "code": "RMAP_152_1_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-152-2-0",
+      "code": "RMAP_152_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-152-2-1",
+      "code": "RMAP_152_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-152-4-0",
+      "code": "RMAP_152_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-152-5-0",
+      "code": "RMAP_152_5_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-152-6-0",
+      "code": "RMAP_152_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-10-0",
+      "code": "RMAP_153_10_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-11-0",
+      "code": "RMAP_153_11_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-12-0",
+      "code": "RMAP_153_12_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-13-0",
+      "code": "RMAP_153_13_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-1-0",
+      "code": "RMAP_153_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-2-0",
+      "code": "RMAP_153_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-2-1",
+      "code": "RMAP_153_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-3-0",
+      "code": "RMAP_153_3_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-153-3-1",
+      "code": "RMAP_153_3_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-3-2",
+      "code": "RMAP_153_3_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-3-3",
+      "code": "RMAP_153_3_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-4-0",
+      "code": "RMAP_153_4_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-5-0",
+      "code": "RMAP_153_5_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-153-5-1",
+      "code": "RMAP_153_5_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-6-0",
+      "code": "RMAP_153_6_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-153-6-1",
+      "code": "RMAP_153_6_1",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-153-7-0",
+      "code": "RMAP_153_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-7-1",
+      "code": "RMAP_153_7_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-7-2",
+      "code": "RMAP_153_7_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-153-8-0",
+      "code": "RMAP_153_8_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-8-1",
+      "code": "RMAP_153_8_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-8-2",
+      "code": "RMAP_153_8_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-153-9-0",
+      "code": "RMAP_153_9_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-153-9-1",
+      "code": "RMAP_153_9_1",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-153-9-2",
+      "code": "RMAP_153_9_2",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-154-10-0",
+      "code": "RMAP_154_10_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-11-0",
+      "code": "RMAP_154_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-11-1",
+      "code": "RMAP_154_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-11-2",
+      "code": "RMAP_154_11_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-12-0",
+      "code": "RMAP_154_12_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-12-1",
+      "code": "RMAP_154_12_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-12-2",
+      "code": "RMAP_154_12_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-13-0",
+      "code": "RMAP_154_13_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-13-1",
+      "code": "RMAP_154_13_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-13-2",
+      "code": "RMAP_154_13_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-14-0",
+      "code": "RMAP_154_14_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-14-1",
+      "code": "RMAP_154_14_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-15-0",
+      "code": "RMAP_154_15_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-154-1-0",
+      "code": "RMAP_154_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-2-0",
+      "code": "RMAP_154_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-2-1",
+      "code": "RMAP_154_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-3-0",
+      "code": "RMAP_154_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-3-1",
+      "code": "RMAP_154_3_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-3-2",
+      "code": "RMAP_154_3_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-5-0",
+      "code": "RMAP_154_5_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-154-5-1",
+      "code": "RMAP_154_5_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-7-0",
+      "code": "RMAP_154_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-7-1",
+      "code": "RMAP_154_7_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-8-0",
+      "code": "RMAP_154_8_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-8-1",
+      "code": "RMAP_154_8_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-9-0",
+      "code": "RMAP_154_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-154-9-1",
+      "code": "RMAP_154_9_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-10-0",
+      "code": "RMAP_155_10_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-155-11-0",
+      "code": "RMAP_155_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-11-1",
+      "code": "RMAP_155_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-11-2",
+      "code": "RMAP_155_11_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-11-3",
+      "code": "RMAP_155_11_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-12-0",
+      "code": "RMAP_155_12_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-12-1",
+      "code": "RMAP_155_12_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-13-0",
+      "code": "RMAP_155_13_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-1-0",
+      "code": "RMAP_155_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-2-0",
+      "code": "RMAP_155_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-2-1",
+      "code": "RMAP_155_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-2-2",
+      "code": "RMAP_155_2_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-155-2-3",
+      "code": "RMAP_155_2_3",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-155-3-0",
+      "code": "RMAP_155_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-3-1",
+      "code": "RMAP_155_3_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-3-2",
+      "code": "RMAP_155_3_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-155-4-0",
+      "code": "RMAP_155_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-4-1",
+      "code": "RMAP_155_4_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-5-0",
+      "code": "RMAP_155_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-5-1",
+      "code": "RMAP_155_5_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-5-2",
+      "code": "RMAP_155_5_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-5-3",
+      "code": "RMAP_155_5_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-6-0",
+      "code": "RMAP_155_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-6-1",
+      "code": "RMAP_155_6_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-6-2",
+      "code": "RMAP_155_6_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-7-0",
+      "code": "RMAP_155_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-7-1",
+      "code": "RMAP_155_7_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-8-0",
+      "code": "RMAP_155_8_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-8-1",
+      "code": "RMAP_155_8_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-8-2",
+      "code": "RMAP_155_8_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-8-3",
+      "code": "RMAP_155_8_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-9-0",
+      "code": "RMAP_155_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-155-9-1",
+      "code": "RMAP_155_9_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-10-0",
+      "code": "RMAP_156_10_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-156-10-1",
+      "code": "RMAP_156_10_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-10-2",
+      "code": "RMAP_156_10_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-11-0",
+      "code": "RMAP_156_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-11-1",
+      "code": "RMAP_156_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-11-2",
+      "code": "RMAP_156_11_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-156-11-3",
+      "code": "RMAP_156_11_3",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-156-12-0",
+      "code": "RMAP_156_12_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-156-13-0",
+      "code": "RMAP_156_13_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-1-0",
+      "code": "RMAP_156_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-2-0",
+      "code": "RMAP_156_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-3-0",
+      "code": "RMAP_156_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-3-1",
+      "code": "RMAP_156_3_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-4-0",
+      "code": "RMAP_156_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-5-0",
+      "code": "RMAP_156_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-6-0",
+      "code": "RMAP_156_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-7-0",
+      "code": "RMAP_156_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-7-1",
+      "code": "RMAP_156_7_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-8-0",
+      "code": "RMAP_156_8_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-156-9-0",
+      "code": "RMAP_156_9_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-156-9-1",
+      "code": "RMAP_156_9_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-157-10-0",
+      "code": "RMAP_157_10_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-10-1",
+      "code": "RMAP_157_10_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-11-0",
+      "code": "RMAP_157_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-11-1",
+      "code": "RMAP_157_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-11-2",
+      "code": "RMAP_157_11_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-12-0",
+      "code": "RMAP_157_12_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-13-0",
+      "code": "RMAP_157_13_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-15-0",
+      "code": "RMAP_157_15_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-16-0",
+      "code": "RMAP_157_16_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-16-1",
+      "code": "RMAP_157_16_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-17-0",
+      "code": "RMAP_157_17_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-157-1-0",
+      "code": "RMAP_157_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-1-1",
+      "code": "RMAP_157_1_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-3-0",
+      "code": "RMAP_157_3_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-157-3-1",
+      "code": "RMAP_157_3_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-157-4-0",
+      "code": "RMAP_157_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-4-1",
+      "code": "RMAP_157_4_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-5-0",
+      "code": "RMAP_157_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-5-1",
+      "code": "RMAP_157_5_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-157-6-0",
+      "code": "RMAP_157_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-7-0",
+      "code": "RMAP_157_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-7-1",
+      "code": "RMAP_157_7_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-157-8-0",
+      "code": "RMAP_157_8_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-8-1",
+      "code": "RMAP_157_8_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-9-0",
+      "code": "RMAP_157_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-157-9-1",
+      "code": "RMAP_157_9_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-10-0",
+      "code": "RMAP_159_10_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-10-1",
+      "code": "RMAP_159_10_1",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-11-0",
+      "code": "RMAP_159_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-11-1",
+      "code": "RMAP_159_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-11-2",
+      "code": "RMAP_159_11_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-11-3",
+      "code": "RMAP_159_11_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-11-4",
+      "code": "RMAP_159_11_4",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-12-0",
+      "code": "RMAP_159_12_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-13-0",
+      "code": "RMAP_159_13_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-15-0",
+      "code": "RMAP_159_15_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-159-16-0",
+      "code": "RMAP_159_16_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-159-1-0",
+      "code": "RMAP_159_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-20-0",
+      "code": "RMAP_159_20_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-20-1",
+      "code": "RMAP_159_20_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-25-0",
+      "code": "RMAP_159_25_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-25-1",
+      "code": "RMAP_159_25_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-2-0",
+      "code": "RMAP_159_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-2-1",
+      "code": "RMAP_159_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-2-2",
+      "code": "RMAP_159_2_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-2-3",
+      "code": "RMAP_159_2_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-2-4",
+      "code": "RMAP_159_2_4",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-2-5",
+      "code": "RMAP_159_2_5",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-30-0",
+      "code": "RMAP_159_30_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-30-1",
+      "code": "RMAP_159_30_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-35-0",
+      "code": "RMAP_159_35_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-3-0",
+      "code": "RMAP_159_3_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-3-1",
+      "code": "RMAP_159_3_1",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-6-0",
+      "code": "RMAP_159_6_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-6-1",
+      "code": "RMAP_159_6_1",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-6-2",
+      "code": "RMAP_159_6_2",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-6-3",
+      "code": "RMAP_159_6_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-7-0",
+      "code": "RMAP_159_7_0",
+      "status": "contextual-titles"
+    },
+    {
+      "key": "nativo-rmap-159-7-1",
+      "code": "RMAP_159_7_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-159-8-0",
+      "code": "RMAP_159_8_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-159-9-0",
+      "code": "RMAP_159_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-160-10-0",
+      "code": "RMAP_160_10_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-160-10-1",
+      "code": "RMAP_160_10_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-160-1-0",
+      "code": "RMAP_160_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-160-2-0",
+      "code": "RMAP_160_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-160-3-0",
+      "code": "RMAP_160_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-160-4-0",
+      "code": "RMAP_160_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-160-4-1",
+      "code": "RMAP_160_4_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-160-4-2",
+      "code": "RMAP_160_4_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-160-5-0",
+      "code": "RMAP_160_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-160-6-0",
+      "code": "RMAP_160_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-10-0",
+      "code": "RMAP_161_10_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-11-0",
+      "code": "RMAP_161_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-1-0",
+      "code": "RMAP_161_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-2-0",
+      "code": "RMAP_161_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-2-1",
+      "code": "RMAP_161_2_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-161-2-2",
+      "code": "RMAP_161_2_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-161-3-0",
+      "code": "RMAP_161_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-4-0",
+      "code": "RMAP_161_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-4-1",
+      "code": "RMAP_161_4_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-161-4-2",
+      "code": "RMAP_161_4_2",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-161-5-0",
+      "code": "RMAP_161_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-6-0",
+      "code": "RMAP_161_6_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-6-1",
+      "code": "RMAP_161_6_1",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-161-7-0",
+      "code": "RMAP_161_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-8-0",
+      "code": "RMAP_161_8_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-161-9-0",
+      "code": "RMAP_161_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-10-0",
+      "code": "RMAP_162_10_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-10-1",
+      "code": "RMAP_162_10_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-11-0",
+      "code": "RMAP_162_11_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-11-1",
+      "code": "RMAP_162_11_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-11-2",
+      "code": "RMAP_162_11_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-12-0",
+      "code": "RMAP_162_12_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-12-1",
+      "code": "RMAP_162_12_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-14-0",
+      "code": "RMAP_162_14_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-14-1",
+      "code": "RMAP_162_14_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-14-2",
+      "code": "RMAP_162_14_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-14-3",
+      "code": "RMAP_162_14_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-15-0",
+      "code": "RMAP_162_15_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-15-1",
+      "code": "RMAP_162_15_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-15-2",
+      "code": "RMAP_162_15_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-16-0",
+      "code": "RMAP_162_16_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-16-1",
+      "code": "RMAP_162_16_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-16-2",
+      "code": "RMAP_162_16_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-16-3",
+      "code": "RMAP_162_16_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-16-4",
+      "code": "RMAP_162_16_4",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-1-0",
+      "code": "RMAP_162_1_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-2-0",
+      "code": "RMAP_162_2_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-2-1",
+      "code": "RMAP_162_2_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-2-2",
+      "code": "RMAP_162_2_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-2-3",
+      "code": "RMAP_162_2_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-3-0",
+      "code": "RMAP_162_3_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-3-1",
+      "code": "RMAP_162_3_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-4-0",
+      "code": "RMAP_162_4_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-5-0",
+      "code": "RMAP_162_5_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-7-0",
+      "code": "RMAP_162_7_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-7-1",
+      "code": "RMAP_162_7_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-9-0",
+      "code": "RMAP_162_9_0",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-9-1",
+      "code": "RMAP_162_9_1",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-9-2",
+      "code": "RMAP_162_9_2",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-9-3",
+      "code": "RMAP_162_9_3",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-162-9-4",
+      "code": "RMAP_162_9_4",
+      "status": "existing-verified-title"
+    },
+    {
+      "key": "nativo-rmap-190-1-0",
+      "code": "RMAP_190_1_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-190-2-0",
+      "code": "RMAP_190_2_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-190-3-0",
+      "code": "RMAP_190_3_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-190-51-0",
+      "code": "RMAP_190_51_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-190-61-0",
+      "code": "RMAP_190_61_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-190-62-0",
+      "code": "RMAP_190_62_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-192-62-0",
+      "code": "RMAP_192_62_0",
+      "status": "unresolved"
+    },
+    {
+      "key": "nativo-rmap-195-11-0",
+      "code": "RMAP_195_11_0",
+      "status": "unresolved"
+    }
+  ]
+}

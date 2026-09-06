@@ -1,0 +1,11 @@
+{
+  "pass": true,
+  "maps": 349,
+  "guideAreas": 116,
+  "preservedPinIds": 387,
+  "nonemptyStateImageDestinationFixtures": true,
+  "oldAliasesRetained": true,
+  "customNameAndNotesRetained": true,
+  "foreignKeyViolations": 0,
+  "nextInsertId": 397
+}

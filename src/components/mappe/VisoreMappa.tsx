@@ -1,3 +1,7 @@
+import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe';
+import { areaImmagine, inquadraturaMappa, type AreaMappa } from '../../utils/inquadraturaMappa';
+import { NavigazioneSpillo } from './NavigazioneSpillo';
+import type { NavigaMappa } from '../../utils/navigazioneMappa';
 // ============================================================
 // VisoreMappa — visore a schermo intero (o incorporato) di una mappa a livelli (Fase 13.2)
 // ============================================================
@@ -44,7 +48,7 @@ interface Props {
   mappa: MappaDto;
   partitaId: number | null;
   /** Apertura di un'altra mappa (percorso, figlie, passaggi). */
-  onNaviga: (chiave: string) => void;
+  onNaviga: NavigaMappa;
   /** Cambio dello stato «raccolto» di uno spillo collezionabile nella partita. */
   onRaccolto?: (spillo: SpilloDto, raccolto: boolean) => Promise<void> | void;
   /** Stato nella Guida di un punto di dungeon collegato allo spillo (ottenuto, esaurito, riaperto). */
@@ -64,6 +68,8 @@ interface Props {
   puntoIniziale?: {x:number;y:number;zoom:number}|null;
   /** Contenuto del pannello laterale al posto di quello predefinito (editor). */
   pannello?: ReactNode;
+  /** Controlli e contenuti accessibili anche nel visore a schermo intero. */
+  contenutiPannello?: ReactNode;
   /** Elemento davanti al percorso nella barra (es. targhetta «Modifica»). */
   intestazione?: ReactNode;
   className?: string;
@@ -122,11 +128,11 @@ function articoloDeterminativo(n: number): string {
   return n === 8 || n === 11 || (n >= 80 && n <= 89) || (n >= 800 && n <= 899) ? 'gli' : 'i';
 }
 
-export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, intestazione, className, selezioneIniziale, puntoIniziale }: Props) {
+export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, etichettaChiudi, incorporato, azioni, editor, pannello, contenutiPannello, intestazione, className, selezioneIniziale, puntoIniziale }: Props) {
   const sugg = useSuggerimenti();
   const tela = useRef<HTMLDivElement | null>(null);
   const [dim, setDim] = useState<Dimensioni>({ w: 0, h: 0 });
-  const [natCaricata, setNatCaricata] = useState<Dimensioni | null>(null);
+  const [natCaricata, setNatCaricata] = useState<(Dimensioni & { src: string; area: AreaMappa | null }) | null>(null);
   const [zoomEsplicito, setZoomEsplicito] = useState<number | null>(null);
   const [panEsplicito, setPanEsplicito] = useState<Punto | null>(null);
   const [tipiNascosti, setTipiNascosti] = useState<Set<TipoSpillo>>(new Set());
@@ -157,11 +163,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   const src = mappa.immagineUrl ?? assetBase ?? assetOriginale ?? null;
 
   // Dimensioni naturali: dal DTO quando note, altrimenti dall'immagine caricata, altrimenti un quadrato di riserva.
-  const nat: Dimensioni = natCaricata ?? (mappa.larghezza && mappa.altezza ? { w: mappa.larghezza, h: mappa.altezza } : { w: DIMENSIONE_RISERVA, h: DIMENSIONE_RISERVA });
-  const zoomMin = dim.w > 0 && dim.h > 0 ? Math.min(dim.w / nat.w, dim.h / nat.h) : 1;
+  const caricata = natCaricata?.src === src ? natCaricata : null;
+  const nat: Dimensioni = caricata ?? (mappa.larghezza && mappa.altezza ? { w: mappa.larghezza, h: mappa.altezza } : { w: DIMENSIONE_RISERVA, h: DIMENSIONE_RISERVA });
+  const fit = inquadraturaMappa(nat, dim, caricata?.area ?? null, mappa.spilli);
+  const zoomMin = fit.zoom;
   const zoomMax = zoomMin * FATTORE_ZOOM_MASSIMO;
   const zoom = zoomEsplicito === null ? zoomMin : limita(zoomEsplicito, zoomMin, zoomMax);
-  const pan: Punto = panEsplicito ?? { x: (dim.w - nat.w * zoom) / 2, y: (dim.h - nat.h * zoom) / 2 };
+  const pan: Punto = panEsplicito ?? fit.pan;
   const selezionatoId = editor ? editor.selezionatoId : selezionatoUso;
   const seleziona = useCallback((id: number | null) => { if (editor) editor.onSeleziona(id); else setSelezionatoUso(id); }, [editor]);
 
@@ -219,13 +227,13 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
     }, 0);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selezioneIniziale, dim.w, dim.h, nat.w, nat.h, mappa.chiave]);
+  }, [selezioneIniziale, dim.w, dim.h, nat.w, nat.h, mappa.chiave, zoomMin]);
   useEffect(() => {
     if (!puntoIniziale || selezioneIniziale || dim.w === 0 || dim.h === 0) return;
     const {x,y,zoom:fattore}=puntoIniziale;
     const id=setTimeout(()=>{const z=stato.current.zoomMin*limita(fattore,1,6);setZoomEsplicito(z);setPanEsplicito({x:dim.w/2-x/100*nat.w*z,y:dim.h/2-y/100*nat.h*z});},0);
     return ()=>clearTimeout(id);
-  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h]);
+  },[puntoIniziale, selezioneIniziale,dim.w,dim.h,nat.w,nat.h,zoomMin]);
   const zoomCentro = (fattore: number) => applicaZoom(zoom * fattore, dim.w / 2, dim.h / 2);
   const centraSu = (s: SpilloDto) => {
     const z = Math.max(zoom, zoomMin * 2.5);
@@ -380,19 +388,20 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
       <div className="visore-mappa__corpo">
         <aside id="visore-mappa-pannello" className="visore-mappa__pannello" hidden={!pannelloAperto} aria-label="Pannello della mappa">
           {pannello ?? <>
+          {contenutiPannello}
           {selezionato && (
             <SchedaSpillo key={selezionato.id} ref={schedaRef} spillo={selezionato} partitaId={partitaId} occupato={occupato} onNaviga={onNaviga} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} onAcquisto={onAcquisto ? cambiaAcquisto : undefined} onChiudi={() => seleziona(null)} onCentra={() => centraSu(selezionato)} />
           )}
           {(mappa.genitore || mappa.figli.length > 0) && (
             <section className="visore-mappa__sezione">
-              <h3 className="visore-mappa__intestazione">Livelli</h3>
+              <h3 className="visore-mappa__intestazione">Luoghi e planimetrie</h3>
               {mappa.genitore && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="indietro" dimensione={20} />} titolo={`Su: ${mappa.genitoreNome ?? mappa.genitore}`} onClick={() => onNaviga(mappa.genitore!)} />}
               {mappa.figli.length > 0 && (
                 <ul className="m-0 p-0 list-none flex flex-col gap-1" aria-label="Mappe figlie">
                   {mappa.figli.map((f) => (
                     <li key={f.chiave}>
                       <button type="button" className="visore-mappa__figlia" onClick={() => onNaviga(f.chiave)}>
-                        <IconaSpillo tipo="passaggio" dimensione={18} />
+                        <IconaAzione chiave="mappa" dimensione={18} />
                         <span className="flex-1 min-w-0 truncate">{f.nome}</span>
                         <span className="text-[11px] text-text-muted">{NOME_TIPO_MAPPA[f.tipo]}{f.numeroSpilli > 0 ? ` · ${f.numeroSpilli}` : ''}</span>
                       </button>
@@ -482,7 +491,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
         >
           <div className="visore-mappa__livello" style={stileLivello}>
             {src ? (
-              <img src={src} alt={`Mappa: ${mappa.nome}`} className="visore-mappa__immagine" draggable={false} onLoad={(e) => { const img = e.currentTarget; if (img.naturalWidth && img.naturalHeight) setNatCaricata({ w: img.naturalWidth, h: img.naturalHeight }); }} />
+              <img src={src} alt={`Mappa: ${mappa.nome}`} className="visore-mappa__immagine" draggable={false} onLoad={(e) => { const img = e.currentTarget; if (img.naturalWidth && img.naturalHeight) setNatCaricata({ src: src!, w: img.naturalWidth, h: img.naturalHeight, area: areaImmagine(img) }); }} />
             ) : (
               <div className="visore-mappa__senza-immagine" role="img" aria-label="Nessuna immagine di base">
                 <IconMappa size={64} />
@@ -537,7 +546,7 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
                   </div>
                 )}
                 <div className="flex flex-wrap gap-1">
-                  {selezionato.dettaglio?.tipo === 'mappa' && selezionato.dettaglio.mappa && <PulsanteVisivo tono="primario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo={`Apri: ${selezionato.dettaglio.mappa.nome}`} onClick={() => onNaviga(selezionato.dettaglio!.mappa!.chiave)} />}
+                  <NavigazioneSpillo spillo={selezionato} partitaId={partitaId} onNaviga={onNaviga}/>
                   {partitaId && <AzioniStato spillo={selezionato} occupato={occupato} onRaccolto={onRaccolto ? cambiaRaccolto : undefined} onStatoPunto={onStatoPunto ? cambiaStatoPunto : undefined} />}
                   {selezionato.dettaglio?.negozio && (
                     <CollegamentoVisivo to={`/guida/negozi/${encodeURIComponent(selezionato.dettaglio.negozio.chiave)}`} tono="primario" compatto icona={<IconaAzione chiave="negozio" dimensione={20} />} titolo="Negozio" dettaglio={`${selezionato.dettaglio.negozio.articoli.filter((a) => a.disponibilita?.stato !== 'bloccato').length} articoli`} />
@@ -576,10 +585,10 @@ export function VisoreMappa({ mappa, partitaId, onNaviga, onRaccolto, onStatoPun
   );
 }
 
-interface PropsAzioni { spillo: SpilloDto; occupato: boolean; onRaccolto?: (spillo: SpilloDto, raccolto: boolean) => Promise<void>; onStatoPunto?: (spillo: SpilloDto, stato: StatoPuntoMappa) => Promise<void> }
+interface PropsAzioni<T extends SpilloDto | SchedaContenutoGuidaDto> { spillo: T; occupato: boolean; onRaccolto?: (spillo: T, raccolto: boolean) => Promise<void>; onStatoPunto?: (spillo: T, stato: StatoPuntoMappa) => Promise<void> }
 
 /** Azioni di stato nella partita: per i punti della Guida «Ottenuto/Esaurito/Riapri» (stessi stati della scheda del Palazzo), altrimenti «Raccolto/Riapri». */
-export function AzioniStato({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni) {
+export function AzioniStato<T extends SpilloDto | SchedaContenutoGuidaDto>({ spillo: s, occupato, onRaccolto, onStatoPunto }: PropsAzioni<T>) {
   const punto = s.dettaglio?.tipo === 'punto' ? s.dettaglio.punto ?? null : null;
   if (punto && onStatoPunto) {
     return (
@@ -596,22 +605,23 @@ export function AzioniStato({ spillo: s, occupato, onRaccolto, onStatoPunto }: P
     : <PulsanteVisivo tono="primario" compatto icona={<IconaAzione chiave="raggiunto" dimensione={20} />} titolo="Raccolto" onClick={() => void onRaccolto(s, true)} disabled={occupato} />;
 }
 
-interface PropsScheda {
+interface PropsScheda<T extends SpilloDto | SchedaContenutoGuidaDto> {
   /** Riferimento alla sezione (scorrimento e fuoco da «Dettagli»). */
   ref?: Ref<HTMLElement>;
-  spillo: SpilloDto;
+  spillo: T;
   partitaId: number | null;
   occupato: boolean;
-  onNaviga: (chiave: string) => void;
-  onRaccolto?: (spillo: SpilloDto, raccolto: boolean) => Promise<void>;
-  onStatoPunto?: (spillo: SpilloDto, stato: StatoPuntoMappa) => Promise<void>;
-  onAcquisto?: (spillo: SpilloDto, articoloChiave: string, fatto: boolean) => Promise<void>;
+  nonSpaziale?: boolean;
+  onNaviga?: NavigaMappa;
+  onRaccolto?: (spillo: T, raccolto: boolean) => Promise<void>;
+  onStatoPunto?: (spillo: T, stato: StatoPuntoMappa) => Promise<void>;
+  onAcquisto?: (spillo: T, articoloChiave: string, fatto: boolean) => Promise<void>;
   onChiudi: () => void;
-  onCentra: () => void;
+  onCentra?: () => void;
 }
 
 /** Scheda dello spillo selezionato: descrizione, entità collegata e azioni. */
-export function SchedaSpillo({ ref, spillo: s, partitaId, occupato, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, onCentra }: PropsScheda) {
+export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ ref, spillo: s, partitaId, occupato, onNaviga, onRaccolto, onStatoPunto, onAcquisto, onChiudi, onCentra, nonSpaziale = false }: PropsScheda<T>) {
   const acquistabile = Boolean(partitaId && onAcquisto);
   const d = s.dettaglio;
   const negozio = d?.negozio ?? null;
@@ -635,13 +645,13 @@ export function SchedaSpillo({ ref, spillo: s, partitaId, occupato, onNaviga, on
       <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
       <GalleriaSpillo immagini={s.immagini} nome={s.nome} />
 
-      {d?.tipo === 'mappa' && d.mappa && <PulsanteVisivo tono="primario" compatto icona={<IconaSpillo tipo="passaggio" dimensione={20} />} titolo={`Apri: ${d.mappa.nome}`} dettaglio={NOME_TIPO_MAPPA[d.mappa.tipo]} onClick={() => onNaviga(d.mappa!.chiave)} />}
+      {!nonSpaziale && onNaviga && "mappaChiave" in s && <NavigazioneSpillo spillo={s} partitaId={partitaId} onNaviga={onNaviga}/>}
       {d?.tipo === 'punto' && d.punto && (
         <p className="m-0 text-[12px] text-text-secondary">
           {d.punto.esauribile ? 'Esauribile · ' : ''}{d.punto.stato ? `Nella Guida: ${d.punto.stato}` : 'Non ancora gestito nella Guida'} · <Link to={`/guida/dungeon/${encodeURIComponent(d.punto.dungeon)}`} className="text-primary">scheda del Palazzo</Link>
         </p>
       )}
-      {d?.tipo === 'luogo' && d.luogo && (
+      {(d?.tipo === 'luogo' || d?.tipo === 'attivita') && d.luogo && (
         <p className="m-0 text-[12px] text-text-secondary">
           {d.luogo.cosaOffre && d.luogo.cosaOffre !== s.descrizione ? `${d.luogo.cosaOffre} · ` : ''}{d.luogo.quando ? `${d.luogo.quando} · ` : ''}<Link to={`/guida/citta/${encodeURIComponent(d.luogo.quartiere)}`} className="text-primary">scheda del quartiere</Link>
         </p>
@@ -684,7 +694,7 @@ export function SchedaSpillo({ ref, spillo: s, partitaId, occupato, onNaviga, on
       {d?.tipo === 'richiesta' && d.richiesta && <CollegamentoVisivo to="/guida/richieste" tono="secondario" compatto icona={<IconaAzione chiave="obiettivo" dimensione={20} />} titolo={d.richiesta.nome} dettaglio={d.richiesta.stato ?? 'richiesta dei Mementos'} />}
 
       <div className="flex flex-wrap gap-1.5">
-        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Centra" onClick={onCentra} />
+        {!nonSpaziale && onCentra && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Centra" onClick={onCentra} />}
         {partitaId && <AzioniStato spillo={s} occupato={occupato} onRaccolto={onRaccolto} onStatoPunto={onStatoPunto} />}
       </div>
       {(s.collezionabile || d?.tipo === 'punto' || negozio) && !partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti raccolti e gli acquisti.</span>}

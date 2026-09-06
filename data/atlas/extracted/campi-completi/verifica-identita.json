@@ -1,0 +1,7 @@
+{
+  "status": "PASS-native-identity-references",
+  "fields": 848,
+  "rawTitleReferencesChecked": 476,
+  "roadmapFieldsUnchanged": 209,
+  "scope": "Native references; candidate variant not canonical floor."
+}

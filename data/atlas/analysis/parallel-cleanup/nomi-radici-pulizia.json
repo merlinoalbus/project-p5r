@@ -1,0 +1,747 @@
+{
+  "checkedAt": "2026-09-06T02:33:35.686155+00:00",
+  "database": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\work\\runtime-atlante\\project-p5r.db",
+  "readOnly": true,
+  "scope": "Nomi di radici/città già identificate; nessuna nuova identificazione delle50 risorse.",
+  "summary": {
+    "rootsInventoried": 38,
+    "mapProposals": 9,
+    "pinTypoProposals": 4
+  },
+  "proposals": [
+    {
+      "entity": "mappa",
+      "key": "citta-shujin-academy",
+      "before": "Shujin Academy (scuola)",
+      "after": "Shujin Academy",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 2,
+          "offset": 2372,
+          "rawHex": "5368756a696e2041636164656d7900",
+          "text": "Shujin Academy",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti della guida",
+        "spilli",
+        "sezioni app"
+      ],
+      "reason": "Titolo nativo esatto; rimuove glossa editoriale e/o forma inglese."
+    },
+    {
+      "entity": "mappa",
+      "key": "dungeon-madarame",
+      "before": "Palazzo di Madarame (Museo)",
+      "after": "Palazzo di Madarame",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 290,
+          "offset": 9108,
+          "rawHex": "50616c617a7a6f206469204d61646172616d6500",
+          "text": "Palazzo di Madarame",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti della guida",
+        "spilli",
+        "sezioni app"
+      ],
+      "reason": "Titolo nativo esatto; rimuove glossa editoriale e/o forma inglese."
+    },
+    {
+      "entity": "mappa",
+      "key": "dungeon-futaba",
+      "before": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+      "after": "Palazzo di Futaba",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 329,
+          "offset": 10132,
+          "rawHex": "50616c617a7a6f2064692046757461626100",
+          "text": "Palazzo di Futaba",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti della guida",
+        "spilli",
+        "sezioni app"
+      ],
+      "reason": "Titolo nativo esatto; rimuove glossa editoriale e/o forma inglese."
+    },
+    {
+      "entity": "mappa",
+      "key": "dungeon-niijima",
+      "before": "Palazzo di Niijima (Sae) — Casinò",
+      "after": "Palazzo di Niijima",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 365,
+          "offset": 11252,
+          "rawHex": "50616c617a7a6f206469204e69696a696d6100",
+          "text": "Palazzo di Niijima",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti della guida",
+        "spilli",
+        "sezioni app"
+      ],
+      "reason": "Titolo nativo esatto; rimuove glossa editoriale e/o forma inglese."
+    },
+    {
+      "entity": "mappa",
+      "key": "dungeon-mementos",
+      "before": "Mementos (i Dedali)",
+      "after": "Memento",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 470,
+          "offset": 14388,
+          "rawHex": "4d656d656e746f00",
+          "text": "Memento",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti della guida",
+        "spilli",
+        "sezioni app"
+      ],
+      "reason": "Titolo nativo esatto; rimuove glossa editoriale e/o forma inglese."
+    },
+    {
+      "entity": "mappa",
+      "key": "yongen-java-banchina-della-metropolitana",
+      "before": "Yongen-Java - Banchina della metropolitana",
+      "after": "Yongen-Jaya - Banchina della metropolitana",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 3,
+          "offset": 2404,
+          "rawHex": "596f6e67656e2d4a61796100",
+          "text": "Yongen-Jaya",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "typo-only",
+      "reason": "Corregge esclusivamente Java→Jaya; non identifica di nuovo la banchina e non cambia la chiave URL."
+    },
+    {
+      "entity": "spillo",
+      "id": 376,
+      "map": "citta-yongen-jaya",
+      "before": "Yongen-Java Banchina della metropolitana",
+      "after": "Yongen-Jaya Banchina della metropolitana",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 3,
+          "offset": 2404,
+          "rawHex": "596f6e67656e2d4a61796100",
+          "text": "Yongen-Jaya",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "typo-only",
+      "reason": "Correzione del nome visualizzato, conservando ID, posizione, riferimento, destinazione e identità seed storica."
+    },
+    {
+      "entity": "spillo",
+      "id": 377,
+      "map": "citta-yongen-jaya",
+      "before": "Yongen-Java Banchina della metropolitana",
+      "after": "Yongen-Jaya Banchina della metropolitana",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 3,
+          "offset": 2404,
+          "rawHex": "596f6e67656e2d4a61796100",
+          "text": "Yongen-Jaya",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "typo-only",
+      "reason": "Correzione del nome visualizzato, conservando ID, posizione, riferimento, destinazione e identità seed storica."
+    },
+    {
+      "entity": "spillo",
+      "id": 392,
+      "map": "yongen-java-banchina-della-metropolitana",
+      "before": "Yongen-Java Vicoli",
+      "after": "Yongen-Jaya Vicoli",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 3,
+          "offset": 2404,
+          "rawHex": "596f6e67656e2d4a61796100",
+          "text": "Yongen-Jaya",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "typo-only",
+      "reason": "Correzione del nome visualizzato, conservando ID, posizione, riferimento, destinazione e identità seed storica."
+    },
+    {
+      "entity": "spillo",
+      "id": 393,
+      "map": "yongen-java-banchina-della-metropolitana",
+      "before": "Yongen-Java Vicoli",
+      "after": "Yongen-Jaya Vicoli",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 3,
+          "offset": 2404,
+          "rawHex": "596f6e67656e2d4a61796100",
+          "text": "Yongen-Jaya",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "typo-only",
+      "reason": "Correzione del nome visualizzato, conservando ID, posizione, riferimento, destinazione e identità seed storica."
+    },
+    {
+      "entity": "mappa",
+      "key": "citta-yokohama-chinatown",
+      "before": "Chinatown (Yokohama)",
+      "after": "Chinatown",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 107,
+          "offset": 4708,
+          "rawHex": "4368696e61746f776e00",
+          "text": "Chinatown",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti e sezioni"
+      ],
+      "reason": "Pulizia nome già identificato. Nessun merge: Suidobashi non diventa Dome Town; ingresso Memento resta separato dal dungeon."
+    },
+    {
+      "entity": "mappa",
+      "key": "citta-suidobashi",
+      "before": "Suidobashi (Dome Town)",
+      "after": "Suidobashi",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 104,
+          "offset": 4660,
+          "rawHex": "537569646f626173686900",
+          "text": "Suidobashi",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti e sezioni"
+      ],
+      "reason": "Pulizia nome già identificato. Nessun merge: Suidobashi non diventa Dome Town; ingresso Memento resta separato dal dungeon."
+    },
+    {
+      "entity": "mappa",
+      "key": "citta-mementos",
+      "before": "Mementos (ingresso)",
+      "after": "Entrata dei Memento",
+      "evidence": {
+        "table": "FLDPLACENAME",
+        "archive": "IT",
+        "record": {
+          "index": 466,
+          "offset": 14292,
+          "rawHex": "456e747261746120646569204d656d656e746f00",
+          "text": "Entrata dei Memento",
+          "status": "valido",
+          "unknownOffsets": []
+        }
+      },
+      "operation": "display-name-only",
+      "preserve": [
+        "chiave",
+        "genitore",
+        "entita",
+        "contenuti e sezioni"
+      ],
+      "reason": "Pulizia nome già identificato. Nessun merge: Suidobashi non diventa Dome Town; ingresso Memento resta separato dal dungeon."
+    }
+  ],
+  "rootInventory": [
+    {
+      "chiave": "citta-akihabara",
+      "nome": "Akihabara",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "akihabara",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-asakusa",
+      "nome": "Asakusa",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "asakusa",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-harajuku",
+      "nome": "Harajuku",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "harajuku",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-ichigaya",
+      "nome": "Ichigaya",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "ichigaya",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-ikebukuro",
+      "nome": "Ikebukuro",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "ikebukuro",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-inokashira-park",
+      "nome": "Parco Inokashira",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "inokashira-park",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-kanda-jinbocho",
+      "nome": "Kanda / Jinbocho",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "kanda-jinbocho",
+      "status": "excluded-other-subtask",
+      "reason": "Equivalenza territoriale fuori scope"
+    },
+    {
+      "chiave": "citta-kichijoji",
+      "nome": "Kichijoji",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "kichijoji",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-maihama",
+      "nome": "Maihama",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "maihama",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-meiji-shrine",
+      "nome": "Santuario Meiji",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "meiji-shrine",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-mementos",
+      "nome": "Mementos (ingresso)",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "mementos",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "citta-nakano",
+      "nome": "Nakano",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "nakano",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-odaiba",
+      "nome": "Odaiba / Seaside Park",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "odaiba",
+      "status": "excluded-other-subtask",
+      "reason": "Equivalenza territoriale fuori scope"
+    },
+    {
+      "chiave": "citta-ogikubo",
+      "nome": "Ogikubo",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "ogikubo",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-roppongi",
+      "nome": "Roppongi",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "roppongi",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-shibuya",
+      "nome": "Shibuya",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "shibuya",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-shinagawa",
+      "nome": "Shinagawa",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "shinagawa",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-shinjuku",
+      "nome": "Shinjuku",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "shinjuku",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-shujin-academy",
+      "nome": "Shujin Academy (scuola)",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "shujin-academy",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "citta-suidobashi",
+      "nome": "Suidobashi (Dome Town)",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "suidobashi",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "citta-tsukishima",
+      "nome": "Tsukishima",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "tsukishima",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-ueno",
+      "nome": "Ueno",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "ueno",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "citta-yokohama-chinatown",
+      "nome": "Chinatown (Yokohama)",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "yokohama-chinatown",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "citta-yongen-jaya",
+      "nome": "Yongen-Jaya",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": "quartiere",
+      "entita_chiave": "yongen-jaya",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-futaba",
+      "nome": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "futaba",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-iweleth",
+      "nome": "Dedalo di Iweleth",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "iweleth",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-kamoshida",
+      "nome": "Palazzo di Kamoshida",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "kamoshida",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-kaneshiro",
+      "nome": "Palazzo di Kaneshiro",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "kaneshiro",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-madarame",
+      "nome": "Palazzo di Madarame (Museo)",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "madarame",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-maruki",
+      "nome": "Palazzo di Maruki",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "maruki",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-mementos",
+      "nome": "Mementos (i Dedali)",
+      "tipo": "dedalo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "mementos",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-niijima",
+      "nome": "Palazzo di Niijima (Sae) — Casinò",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "niijima",
+      "status": "proposed-cleanup",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-okumura",
+      "nome": "Palazzo di Okumura",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "okumura",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "dungeon-shido",
+      "nome": "Palazzo di Shido",
+      "tipo": "palazzo",
+      "genitore_chiave": null,
+      "entita_tipo": "dungeon",
+      "entita_chiave": "shido",
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "nativo-archivio-011",
+      "nome": "Aoyama-Itchome",
+      "tipo": "quartiere",
+      "genitore_chiave": "tokyo",
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "nativo-archivio-022",
+      "nome": "Covo dei Ladri",
+      "tipo": "luogo",
+      "genitore_chiave": null,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    },
+    {
+      "chiave": "nativo-archivio-150",
+      "nome": "Risorse native 150 — Luogo 150",
+      "tipo": "generica",
+      "genitore_chiave": null,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "status": "excluded-other-subtask",
+      "reason": "Identificazione residua fuori scope"
+    },
+    {
+      "chiave": "tokyo",
+      "nome": "Tokyo",
+      "tipo": "citta",
+      "genitore_chiave": null,
+      "entita_tipo": null,
+      "entita_chiave": null,
+      "status": "keep-current-no-editorial-cleanup-proposed",
+      "reason": null
+    }
+  ],
+  "sources": [
+    {
+      "file": "C:\\Users\\rober\\Documents\\Codex\\2026-09-05\\al\\outputs\\mappe-p5r\\mondo_etichette.json",
+      "sha256": "ba93b04e2d5e896cd72f7bbf9e75d4fd82f659af97024c5449203db0d43e363e"
+    },
+    {
+      "file": "C:\\Repository\\project-p5r-main\\data\\seed\\citta.json",
+      "sha256": "581c101fecf8e42cc84f3f0e0c3b6334fce30d267fe3a64daea75a9aaa0760eb"
+    },
+    {
+      "file": "C:\\Repository\\project-p5r-main\\data\\seed\\dungeon.json",
+      "sha256": "c8ed062eb5d3acf66266d926030ee8945b231d73ffcf20e266930b66101bd2f7"
+    },
+    {
+      "file": "C:\\Repository\\project-p5r-main\\data\\seed\\mappe\\citta-yongen-jaya.json",
+      "sha256": "ae035d339472e74690f4baa62b19ce4325b42701d56dc3a98432cf272a4dc7f7"
+    },
+    {
+      "file": "C:\\Repository\\project-p5r-main\\data\\seed\\mappe\\yongen-java-banchina-della-metropolitana.json",
+      "sha256": "945f1570d5072ff90f2b488234b651a761b1b2e667bdd8fbe2eb5ad52584f867"
+    }
+  ],
+  "implementationConstraints": [
+    "Proposte, non modifiche approvate/applicate.",
+    "Sincronizzare nomi display nei cataloghi citta/dungeon e pacchetti pertinenti quando presenti, altrimenti il reseed ripristina la glossa.",
+    "Nessuna eliminazione di sezioni, dati guida, alias, identificativi o collegamenti.",
+    "Yongen-Java nelle chiavi resta invariato: qui si propone solo correzione del testo visibile.",
+    "Non modificare seed_identita_json degli spilli durante la pulizia: serve al riconoscimento dopo reseed.",
+    "Titoli nativi presenti non autorizzano equivalenze tra luoghi o rinomine dei50 residui."
+  ]
+}

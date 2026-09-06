@@ -1,0 +1,40 @@
+{
+  "mappe": [
+    {
+      "chiave": "citta-shujin-academy",
+      "nome": "Shujin Academy"
+    },
+    {
+      "chiave": "dungeon-madarame",
+      "nome": "Palazzo di Madarame"
+    },
+    {
+      "chiave": "dungeon-futaba",
+      "nome": "Palazzo di Futaba"
+    },
+    {
+      "chiave": "dungeon-niijima",
+      "nome": "Palazzo di Niijima"
+    },
+    {
+      "chiave": "dungeon-mementos",
+      "nome": "Memento"
+    },
+    {
+      "chiave": "yongen-java-banchina-della-metropolitana",
+      "nome": "Banchina della metropolitana di Yongen-Jaya"
+    },
+    {
+      "chiave": "citta-yokohama-chinatown",
+      "nome": "Chinatown"
+    },
+    {
+      "chiave": "citta-suidobashi",
+      "nome": "Suidobashi"
+    },
+    {
+      "chiave": "citta-mementos",
+      "nome": "Entrata dei Memento"
+    }
+  ]
+}

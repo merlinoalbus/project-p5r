@@ -1,0 +1,117 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("152_005_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_151_13()
+{
+    int var0;
+    FLD_LOCAL_FLAG_ON((49152 + 48));
+    var0 = FLD_SCRIPT_READ(152, 5, 10);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    FLD_LOCAL_FLAG_OFF((49152 + 48));
+    CALL_FIELD(151, 13, 1, 0);
+}
+
+
+// Procedure Index: 1
+void D01_152_05_minimap_00()
+{
+    // bit id (536870912) + (4630) = 10774
+    BIT_ON((0x20000000 + 4630));
+}
+
+
+// Procedure Index: 2
+void D01_152_05_minimap_01()
+{
+    // bit id (536870912) + (4631) = 10775
+    BIT_ON((0x20000000 + 4631));
+}
+
+
+// Procedure Index: 3
+void D01_152_05_CHECK01_START()
+{
+    int var1;
+    var1 = FLD_SCRIPT_READ(152, 5, 110);
+    FLD_SCRIPT_READ_SYNC(var1);
+    FLD_SCRIPT_EXEC(var1, 0);
+    FLD_SCRIPT_FREE(var1);
+    // bit id (536870912) + (5046) = 11190
+    BIT_ON((0x20000000 + 5046));
+    // bit id (536870912) + (324) = 6468
+    BIT_ON((0x20000000 + 324));
+}
+
+
+// Procedure Index: 4
+void D01_04_EX03_BTL_START()
+{
+    int var2;
+    int var3;
+    FLD_LOCAL_FLAG_ON((49152 + 0));
+    var2 = FLD_SCRIPT_READ(152, 5, 100);
+    FLD_SCRIPT_READ_SYNC(var2);
+    FLD_SCRIPT_EXEC(var2, 0);
+    FLD_SCRIPT_FREE(var2);
+    FLD_LOCAL_FLAG_OFF((49152 + 0));
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 0x10)) == 1)
+    {
+        FLD_LOCAL_FLAG_OFF((49152 + 0x10));
+        var3 = FLD_PC_GET_RESHND(0);
+        FLD_MODEL_POINT_ROTATE(var3, -1825.001f, -799.9999f, 549.9979f, 10);
+        FLD_UNIT_SET_WALK(var3);
+        WAIT(10);
+        FLD_MODEL_SET_TRANSLATE(var3, -1825.001f, -799.9999f, 549.9979f, 15);
+        FLD_MODEL_SYNC_TRANSLATE(var3);
+        FLD_UNIT_SET_WAIT(var3);
+        return;
+    }
+
+    FLD_LOCAL_FLAG_ON((49152 + 1));
+    FLD_LOCAL_FLAG_ON((49152 + 17));
+    var2 = FLD_SCRIPT_READ(152, 5, 100);
+    FLD_SCRIPT_READ_SYNC(var2);
+    FLD_SCRIPT_EXEC(var2, 0);
+    FLD_SCRIPT_FREE(var2);
+    FLD_LOCAL_FLAG_OFF((49152 + 1));
+    // bit id (536870912) + (323) = 6467
+    BIT_ON((0x20000000 + 323));
+    FLD_START_BOSS(12);
+    return;
+}
+
+
+// Procedure Index: 5
+void D01_152_005_EX_GUIDE()
+{
+    
+    if (FLD_LOCAL_FLAG_CHK((49152 + 3)) == 0)
+    {
+        SET_COUNT(130, 27);
+        FLD_START_SUPPORT_MSG();
+        FLD_LOCAL_FLAG_ON((49152 + 3));
+    }
+    else 
+    {
+        return;
+    }
+
+}
+

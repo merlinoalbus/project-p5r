@@ -1,0 +1,309 @@
+﻿group,title,code,file,naming
+Akihabara,Mappa generale illustrata del quartiere,MAP_L_AKIBA,mappe_luoghi/Akihabara/Akihabara - Mappa generale illustrata - MAP_L_AKIBA.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Akihabara,Electric Town,RMAP_007_1_0,mappe_luoghi/Akihabara/Akihabara - Electric Town - RMAP_007_1_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Aoyama-Itchome,Mappa generale illustrata del quartiere,MAP_L_AOYAMA,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Mappa generale illustrata - MAP_L_AOYAMA.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Aoyama-Itchome,Area 000,RMAP_002_0_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Area 000 - RMAP_002_0_0.png,codice conservato; nome area assente o ambiguo
+Aoyama-Itchome,Area 000,RMAP_002_0_1,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Area 000 - RMAP_002_0_1.png,codice conservato; nome area assente o ambiguo
+Aoyama-Itchome,Area 000,RMAP_002_0_2,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Area 000 - RMAP_002_0_2.png,codice conservato; nome area assente o ambiguo
+Aoyama-Itchome,Cancello della scuola,RMAP_002_1_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Cancello della scuola - RMAP_002_1_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Aoyama-Itchome,Area 005,RMAP_002_5_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Area 005 - RMAP_002_5_0.png,codice conservato; nome area assente o ambiguo
+Aoyama-Itchome,Aula,RMAP_002_6_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Aula - RMAP_002_6_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Aoyama-Itchome,Area 008,RMAP_002_8_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Area 008 - RMAP_002_8_0.png,codice conservato; nome area assente o ambiguo
+Aoyama-Itchome,Binario stazione Aoyama-Itchome,RMAP_011_4_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Binario stazione Aoyama-Itchome - RMAP_011_4_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Aoyama-Itchome,Area 006,RMAP_011_6_0,mappe_luoghi/Aoyama-Itchome/Aoyama-Itchome - Area 006 - RMAP_011_6_0.png,codice conservato; nome area assente o ambiguo
+Kanda,Mappa generale illustrata del quartiere,MAP_L_KANDA,mappe_luoghi/Kanda/Kanda - Mappa generale illustrata - MAP_L_KANDA.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Kanda,Chiesa,RMAP_010_4_0,mappe_luoghi/Kanda/Kanda - Chiesa - RMAP_010_4_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Kichijoji,Mappa generale illustrata del quartiere,MAP_L_KICHIJOJI,mappe_luoghi/Kichijoji/Kichijoji - Mappa generale illustrata - MAP_L_KICHIJOJI.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Kichijoji,Galleria,RMAP_005_1_0,mappe_luoghi/Kichijoji/Kichijoji - Galleria - RMAP_005_1_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Luogo 012,Area 029,RMAP_012_29_0,mappe_luoghi/Luogo 012/Luogo 012 - Area 029 - RMAP_012_29_0.png,codice conservato; nome area assente o ambiguo
+Luogo 022,Area 001,RMAP_022_1_0,mappe_luoghi/Luogo 022/Luogo 022 - Area 001 - RMAP_022_1_0.png,codice conservato; nome area assente o ambiguo
+Luogo 022,Area 001,RMAP_022_1_1,mappe_luoghi/Luogo 022/Luogo 022 - Area 001 - RMAP_022_1_1.png,codice conservato; nome area assente o ambiguo
+Luogo 022,Area 001,RMAP_022_1_2,mappe_luoghi/Luogo 022/Luogo 022 - Area 001 - RMAP_022_1_2.png,codice conservato; nome area assente o ambiguo
+Luogo 022,Area 001,RMAP_022_1_3,mappe_luoghi/Luogo 022/Luogo 022 - Area 001 - RMAP_022_1_3.png,codice conservato; nome area assente o ambiguo
+Luogo 022,Area 001,RMAP_022_1_4,mappe_luoghi/Luogo 022/Luogo 022 - Area 001 - RMAP_022_1_4.png,codice conservato; nome area assente o ambiguo
+Luogo 150,Area 003,RMAP_150_3_0,mappe_luoghi/Luogo 150/Luogo 150 - Area 003 - RMAP_150_3_0.png,codice conservato; nome area assente o ambiguo
+Luogo 150,Area 003,RMAP_150_3_1,mappe_luoghi/Luogo 150/Luogo 150 - Area 003 - RMAP_150_3_1.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 001,RMAP_190_1_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 001 - RMAP_190_1_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 002,RMAP_190_2_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 002 - RMAP_190_2_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 003,RMAP_190_3_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 003 - RMAP_190_3_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 051,RMAP_190_51_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 051 - RMAP_190_51_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 061,RMAP_190_61_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 061 - RMAP_190_61_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 062,RMAP_190_62_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 062 - RMAP_190_62_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 062,RMAP_192_62_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 062 - RMAP_192_62_0.png,codice conservato; nome area assente o ambiguo
+Memento - aree fisse,Area 011,RMAP_195_11_0,mappe_luoghi/Memento - aree fisse/Memento - aree fisse - Area 011 - RMAP_195_11_0.png,codice conservato; nome area assente o ambiguo
+Mondo del clifoto,Piazza Stazione Shibuya,RMAP_160_1_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Piazza Stazione Shibuya - RMAP_160_1_0.png,tabella ROADMAP
+Mondo del clifoto,Cammino per il Santo Graal,RMAP_160_2_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Cammino per il Santo Graal - RMAP_160_2_0.png,tabella ROADMAP
+Mondo del clifoto,Cammino per il Santo Graal,RMAP_160_3_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Cammino per il Santo Graal - RMAP_160_3_0.png,tabella ROADMAP
+Mondo del clifoto,Cammino per il Santo Graal,RMAP_160_4_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Cammino per il Santo Graal - RMAP_160_4_0.png,tabella ROADMAP
+Mondo del clifoto,Area 004,RMAP_160_4_1,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Area 004 - RMAP_160_4_1.png,codice conservato; nome area assente o ambiguo
+Mondo del clifoto,Area 004,RMAP_160_4_2,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Area 004 - RMAP_160_4_2.png,codice conservato; nome area assente o ambiguo
+Mondo del clifoto,Cammino per il Santo Graal,RMAP_160_5_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Cammino per il Santo Graal - RMAP_160_5_0.png,tabella ROADMAP
+Mondo del clifoto,Entrata del santuario,RMAP_160_6_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Entrata del santuario - RMAP_160_6_0.png,tabella ROADMAP
+Mondo del clifoto,Area 010,RMAP_160_10_0,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Area 010 - RMAP_160_10_0.png,codice conservato; nome area assente o ambiguo
+Mondo del clifoto,Area 010,RMAP_160_10_1,mappe_luoghi/Mondo del clifoto/Mondo del clifoto - Area 010 - RMAP_160_10_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Futaba,Entrata della piramide,RMAP_155_1_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Entrata della piramide - RMAP_155_1_0.png,tabella ROADMAP
+Palazzo di Futaba,Corridoio principale,RMAP_155_2_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Corridoio principale - RMAP_155_2_0.png,tabella ROADMAP
+Palazzo di Futaba,Corridoio principale,RMAP_155_2_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Corridoio principale - RMAP_155_2_1.png,tabella ROADMAP
+Palazzo di Futaba,Area 002,RMAP_155_2_2,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Area 002 - RMAP_155_2_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Futaba,Area 002,RMAP_155_2_3,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Area 002 - RMAP_155_2_3.png,codice conservato; nome area assente o ambiguo
+Palazzo di Futaba,Camera del Rimorso 1P,RMAP_155_3_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Rimorso 1P - RMAP_155_3_0.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Rimorso 2P,RMAP_155_3_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Rimorso 2P - RMAP_155_3_1.png,tabella ROADMAP
+Palazzo di Futaba,Area 003,RMAP_155_3_2,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Area 003 - RMAP_155_3_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Futaba,Camera del Santuario 1P,RMAP_155_4_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Santuario 1P - RMAP_155_4_0.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Santuario 2P,RMAP_155_4_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Santuario 2P - RMAP_155_4_1.png,tabella ROADMAP
+Palazzo di Futaba,Caverna sotterranea 1P,RMAP_155_5_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Caverna sotterranea 1P - RMAP_155_5_0.png,tabella ROADMAP
+Palazzo di Futaba,Caverna sotterranea 1P,RMAP_155_5_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Caverna sotterranea 1P - RMAP_155_5_1.png,tabella ROADMAP
+Palazzo di Futaba,Caverna sotterranea 2P,RMAP_155_5_2,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Caverna sotterranea 2P - RMAP_155_5_2.png,tabella ROADMAP
+Palazzo di Futaba,Caverna sotterranea 2P,RMAP_155_5_3,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Caverna sotterranea 2P - RMAP_155_5_3.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Santuario 1P,RMAP_155_6_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Santuario 1P - RMAP_155_6_0.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Santuario 2P,RMAP_155_6_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Santuario 2P - RMAP_155_6_1.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Santuario 2P,RMAP_155_6_2,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Santuario 2P - RMAP_155_6_2.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Rigetto 1P,RMAP_155_7_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Rigetto 1P - RMAP_155_7_0.png,tabella ROADMAP
+Palazzo di Futaba,Camera del Rigetto 2P,RMAP_155_7_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera del Rigetto 2P - RMAP_155_7_1.png,tabella ROADMAP
+Palazzo di Futaba,Camera dei Sarcofagi 1P,RMAP_155_8_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera dei Sarcofagi 1P - RMAP_155_8_0.png,tabella ROADMAP
+Palazzo di Futaba,Camera dei Sarcofagi 1P,RMAP_155_8_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera dei Sarcofagi 1P - RMAP_155_8_1.png,tabella ROADMAP
+Palazzo di Futaba,Camera dei Sarcofagi 2P,RMAP_155_8_2,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera dei Sarcofagi 2P - RMAP_155_8_2.png,tabella ROADMAP
+Palazzo di Futaba,Camera dei Sarcofagi 2P,RMAP_155_8_3,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera dei Sarcofagi 2P - RMAP_155_8_3.png,tabella ROADMAP
+Palazzo di Futaba,Camera della Vacuità 1P,RMAP_155_9_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera della Vacuita 1P - RMAP_155_9_0.png,tabella ROADMAP
+Palazzo di Futaba,Camera della Vacuità 2P,RMAP_155_9_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Camera della Vacuita 2P - RMAP_155_9_1.png,tabella ROADMAP
+Palazzo di Futaba,Area 010,RMAP_155_10_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Area 010 - RMAP_155_10_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Futaba,Passaggio sotterraneo 1F,RMAP_155_11_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Passaggio sotterraneo 1F - RMAP_155_11_0.png,tabella ROADMAP
+Palazzo di Futaba,Passaggio sotterraneo 1F,RMAP_155_11_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Passaggio sotterraneo 1F - RMAP_155_11_1.png,tabella ROADMAP
+Palazzo di Futaba,Passaggio sotterraneo 2F,RMAP_155_11_2,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Passaggio sotterraneo 2F - RMAP_155_11_2.png,tabella ROADMAP
+Palazzo di Futaba,Passaggio sotterraneo 2F,RMAP_155_11_3,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Passaggio sotterraneo 2F - RMAP_155_11_3.png,tabella ROADMAP
+Palazzo di Futaba,Corridoio principale,RMAP_155_12_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Corridoio principale - RMAP_155_12_0.png,tabella ROADMAP
+Palazzo di Futaba,Corridoio principale,RMAP_155_12_1,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Corridoio principale - RMAP_155_12_1.png,tabella ROADMAP
+Palazzo di Futaba,Città nel deserto,RMAP_155_13_0,mappe_luoghi/Palazzo di Futaba/Palazzo di Futaba - Citta nel deserto - RMAP_155_13_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Area 000,RMAP_151_0_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Area 000 - RMAP_151_0_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kamoshida,Area 000,RMAP_151_0_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Area 000 - RMAP_151_0_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kamoshida,Cancello del castello,RMAP_151_1_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Cancello del castello - RMAP_151_1_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Cancello del castello,RMAP_151_1_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Cancello del castello - RMAP_151_1_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 1P,RMAP_151_2_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 1P - RMAP_151_2_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 2P,RMAP_151_2_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 2P - RMAP_151_2_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 2P,RMAP_151_2_2,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 2P - RMAP_151_2_2.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 2P,RMAP_151_3_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 2P - RMAP_151_3_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 2P,RMAP_151_4_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 2P - RMAP_151_4_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 3P,RMAP_151_4_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 3P - RMAP_151_4_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 3P,RMAP_151_4_2,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 3P - RMAP_151_4_2.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 3P,RMAP_151_5_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 3P - RMAP_151_5_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 3P,RMAP_151_5_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 3P - RMAP_151_5_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Vecchio castello 3P,RMAP_151_5_2,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Vecchio castello 3P - RMAP_151_5_2.png,tabella ROADMAP
+Palazzo di Kamoshida,Tetto,RMAP_151_6_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Tetto - RMAP_151_6_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Tetto,RMAP_151_6_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Tetto - RMAP_151_6_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Tetto,RMAP_151_6_2,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Tetto - RMAP_151_6_2.png,tabella ROADMAP
+Palazzo di Kamoshida,Tetto,RMAP_151_6_3,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Tetto - RMAP_151_6_3.png,tabella ROADMAP
+Palazzo di Kamoshida,Tetto,RMAP_151_6_4,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Tetto - RMAP_151_6_4.png,tabella ROADMAP
+Palazzo di Kamoshida,Torre: Livello inferiore,RMAP_151_7_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Torre- Livello inferiore - RMAP_151_7_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Torre: Livello di mezzo,RMAP_151_9_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Torre- Livello di mezzo - RMAP_151_9_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Torre: Livello superiore,RMAP_151_10_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Torre- Livello superiore - RMAP_151_10_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Torre: Livello superiore,RMAP_151_10_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Torre- Livello superiore - RMAP_151_10_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Torre: Sala del trono,RMAP_151_11_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Torre- Sala del trono - RMAP_151_11_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Torre: Sala del trono,RMAP_151_11_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Torre- Sala del trono - RMAP_151_11_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Stanza segreta,RMAP_151_13_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Stanza segreta - RMAP_151_13_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Area 016,RMAP_151_16_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Area 016 - RMAP_151_16_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kamoshida,Prigione sotterranea 1P,RMAP_152_1_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Prigione sotterranea 1P - RMAP_152_1_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Prigione sotterranea 1P,RMAP_152_1_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Prigione sotterranea 1P - RMAP_152_1_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Prigione sotterranea 2P,RMAP_152_2_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Prigione sotterranea 2P - RMAP_152_2_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Prigione sotterranea 2P,RMAP_152_2_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Prigione sotterranea 2P - RMAP_152_2_1.png,tabella ROADMAP
+Palazzo di Kamoshida,Passaggio sotterraneo,RMAP_152_4_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Passaggio sotterraneo - RMAP_152_4_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Area 005,RMAP_152_5_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Area 005 - RMAP_152_5_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kamoshida,Palestra dell'amore,RMAP_152_6_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Palestra dell-amore - RMAP_152_6_0.png,tabella ROADMAP
+Palazzo di Kamoshida,Area 011,RMAP_152_11_0,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Area 011 - RMAP_152_11_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kamoshida,Area 011,RMAP_152_11_1,mappe_luoghi/Palazzo di Kamoshida/Palazzo di Kamoshida - Area 011 - RMAP_152_11_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Entrata della banca,RMAP_154_1_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Entrata della banca - RMAP_154_1_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Sala d'ingresso 1P,RMAP_154_2_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Sala d-ingresso 1P - RMAP_154_2_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Sala d'ingresso 2P,RMAP_154_2_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Sala d-ingresso 2P - RMAP_154_2_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Corridoio banchieri,RMAP_154_3_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Corridoio banchieri - RMAP_154_3_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Corridoio banchieri,RMAP_154_3_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Corridoio banchieri - RMAP_154_3_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Corridoio banchieri,RMAP_154_3_2,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Corridoio banchieri - RMAP_154_3_2.png,tabella ROADMAP
+Palazzo di Kaneshiro,Area 005,RMAP_154_5_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 005 - RMAP_154_5_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Caveau sotterraneo,RMAP_154_5_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau sotterraneo - RMAP_154_5_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Caveau 1P,RMAP_154_7_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau 1P - RMAP_154_7_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Caveau 1P,RMAP_154_7_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau 1P - RMAP_154_7_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Caveau 2P,RMAP_154_8_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau 2P - RMAP_154_8_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Caveau 2P,RMAP_154_8_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau 2P - RMAP_154_8_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Caveau 3P,RMAP_154_9_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau 3P - RMAP_154_9_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Caveau 3P,RMAP_154_9_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Caveau 3P - RMAP_154_9_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Centro del caveau,RMAP_154_10_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Centro del caveau - RMAP_154_10_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Ufficio riciclaggio,RMAP_154_11_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Ufficio riciclaggio - RMAP_154_11_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Ufficio riciclaggio,RMAP_154_11_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Ufficio riciclaggio - RMAP_154_11_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Ufficio riciclaggio,RMAP_154_11_2,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Ufficio riciclaggio - RMAP_154_11_2.png,tabella ROADMAP
+Palazzo di Kaneshiro,Area 012,RMAP_154_12_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 012 - RMAP_154_12_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Area 012,RMAP_154_12_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 012 - RMAP_154_12_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Area 012,RMAP_154_12_2,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 012 - RMAP_154_12_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Area 013,RMAP_154_13_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 013 - RMAP_154_13_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Area 013,RMAP_154_13_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 013 - RMAP_154_13_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Area 013,RMAP_154_13_2,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 013 - RMAP_154_13_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Kaneshiro,Ufficio riciclaggio,RMAP_154_14_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Ufficio riciclaggio - RMAP_154_14_0.png,tabella ROADMAP
+Palazzo di Kaneshiro,Ufficio riciclaggio,RMAP_154_14_1,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Ufficio riciclaggio - RMAP_154_14_1.png,tabella ROADMAP
+Palazzo di Kaneshiro,Area 015,RMAP_154_15_0,mappe_luoghi/Palazzo di Kaneshiro/Palazzo di Kaneshiro - Area 015 - RMAP_154_15_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Entrata del Museo,RMAP_153_1_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Entrata del Museo - RMAP_153_1_0.png,tabella ROADMAP
+Palazzo di Madarame,"Museo, 1P",RMAP_153_2_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Museo- 1P - RMAP_153_2_0.png,tabella ROADMAP
+Palazzo di Madarame,"Museo, 1P",RMAP_153_2_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Museo- 1P - RMAP_153_2_1.png,tabella ROADMAP
+Palazzo di Madarame,Area 003,RMAP_153_3_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 003 - RMAP_153_3_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,"Museo, 2P",RMAP_153_3_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Museo- 2P - RMAP_153_3_1.png,tabella ROADMAP
+Palazzo di Madarame,"Museo, 2P",RMAP_153_3_2,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Museo- 2P - RMAP_153_3_2.png,tabella ROADMAP
+Palazzo di Madarame,"Museo, 2P",RMAP_153_3_3,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Museo- 2P - RMAP_153_3_3.png,tabella ROADMAP
+Palazzo di Madarame,Area 004,RMAP_153_4_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 004 - RMAP_153_4_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 005,RMAP_153_5_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 005 - RMAP_153_5_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 005,RMAP_153_5_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 005 - RMAP_153_5_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 006,RMAP_153_6_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 006 - RMAP_153_6_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 006,RMAP_153_6_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 006 - RMAP_153_6_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Sala del Tesoro - Galleria,RMAP_153_7_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Sala del Tesoro - Galleria - RMAP_153_7_0.png,tabella ROADMAP
+Palazzo di Madarame,Sala del Tesoro - Galleria,RMAP_153_7_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Sala del Tesoro - Galleria - RMAP_153_7_1.png,tabella ROADMAP
+Palazzo di Madarame,Sala del Tesoro - Galleria,RMAP_153_7_2,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Sala del Tesoro - Galleria - RMAP_153_7_2.png,tabella ROADMAP
+Palazzo di Madarame,Area 008,RMAP_153_8_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 008 - RMAP_153_8_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 008,RMAP_153_8_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 008 - RMAP_153_8_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 008,RMAP_153_8_2,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 008 - RMAP_153_8_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 009,RMAP_153_9_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 009 - RMAP_153_9_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 009,RMAP_153_9_1,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 009 - RMAP_153_9_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 009,RMAP_153_9_2,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 009 - RMAP_153_9_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 010,RMAP_153_10_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 010 - RMAP_153_10_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 011,RMAP_153_11_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 011 - RMAP_153_11_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 012,RMAP_153_12_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 012 - RMAP_153_12_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Madarame,Area 013,RMAP_153_13_0,mappe_luoghi/Palazzo di Madarame/Palazzo di Madarame - Area 013 - RMAP_153_13_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Maruki,Ingresso,RMAP_162_1_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ingresso - RMAP_162_1_0.png,tabella ROADMAP
+Palazzo di Maruki,Sala d'ingresso,RMAP_162_2_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala d-ingresso - RMAP_162_2_0.png,tabella ROADMAP
+Palazzo di Maruki,Sala d'ingresso,RMAP_162_2_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala d-ingresso - RMAP_162_2_1.png,tabella ROADMAP
+Palazzo di Maruki,Sala d'ingresso,RMAP_162_2_2,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala d-ingresso - RMAP_162_2_2.png,tabella ROADMAP
+Palazzo di Maruki,Sala d'ingresso,RMAP_162_2_3,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala d-ingresso - RMAP_162_2_3.png,tabella ROADMAP
+Palazzo di Maruki,Corridoio,RMAP_162_3_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Corridoio - RMAP_162_3_0.png,tabella ROADMAP
+Palazzo di Maruki,Corridoio,RMAP_162_3_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Corridoio - RMAP_162_3_1.png,tabella ROADMAP
+Palazzo di Maruki,Percorso di prova,RMAP_162_4_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Percorso di prova - RMAP_162_4_0.png,tabella ROADMAP
+Palazzo di Maruki,Modello psi-cognitivo Eden,RMAP_162_5_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Modello psi-cognitivo Eden - RMAP_162_5_0.png,tabella ROADMAP
+Palazzo di Maruki,Auditorium,RMAP_162_7_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Auditorium - RMAP_162_7_0.png,tabella ROADMAP
+Palazzo di Maruki,Auditorium,RMAP_162_7_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Auditorium - RMAP_162_7_1.png,tabella ROADMAP
+Palazzo di Maruki,Sala visite,RMAP_162_9_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala visite - RMAP_162_9_0.png,tabella ROADMAP
+Palazzo di Maruki,Sala visite,RMAP_162_9_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala visite - RMAP_162_9_1.png,tabella ROADMAP
+Palazzo di Maruki,Sala visite,RMAP_162_9_2,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala visite - RMAP_162_9_2.png,tabella ROADMAP
+Palazzo di Maruki,Sala visite,RMAP_162_9_3,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala visite - RMAP_162_9_3.png,tabella ROADMAP
+Palazzo di Maruki,Sala visite,RMAP_162_9_4,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala visite - RMAP_162_9_4.png,tabella ROADMAP
+Palazzo di Maruki,Modello psi-cognitivo Eden,RMAP_162_10_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Modello psi-cognitivo Eden - RMAP_162_10_0.png,tabella ROADMAP
+Palazzo di Maruki,Modello psi-cognitivo Eden,RMAP_162_10_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Modello psi-cognitivo Eden - RMAP_162_10_1.png,tabella ROADMAP
+Palazzo di Maruki,Corridoio del Crepuscolo,RMAP_162_11_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Corridoio del Crepuscolo - RMAP_162_11_0.png,tabella ROADMAP
+Palazzo di Maruki,Corridoio del Crepuscolo,RMAP_162_11_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Corridoio del Crepuscolo - RMAP_162_11_1.png,tabella ROADMAP
+Palazzo di Maruki,Corridoio del Crepuscolo,RMAP_162_11_2,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Corridoio del Crepuscolo - RMAP_162_11_2.png,tabella ROADMAP
+Palazzo di Maruki,Sala di controllo,RMAP_162_12_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala di controllo - RMAP_162_12_0.png,tabella ROADMAP
+Palazzo di Maruki,Sala di controllo,RMAP_162_12_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala di controllo - RMAP_162_12_1.png,tabella ROADMAP
+Palazzo di Maruki,Ripostiglio,RMAP_162_14_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ripostiglio - RMAP_162_14_0.png,tabella ROADMAP
+Palazzo di Maruki,Ripostiglio,RMAP_162_14_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ripostiglio - RMAP_162_14_1.png,tabella ROADMAP
+Palazzo di Maruki,Ripostiglio,RMAP_162_14_2,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ripostiglio - RMAP_162_14_2.png,tabella ROADMAP
+Palazzo di Maruki,Ripostiglio,RMAP_162_14_3,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ripostiglio - RMAP_162_14_3.png,tabella ROADMAP
+Palazzo di Maruki,Sala di supporto,RMAP_162_15_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala di supporto - RMAP_162_15_0.png,tabella ROADMAP
+Palazzo di Maruki,Sala di supporto,RMAP_162_15_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala di supporto - RMAP_162_15_1.png,tabella ROADMAP
+Palazzo di Maruki,Sala di supporto,RMAP_162_15_2,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Sala di supporto - RMAP_162_15_2.png,tabella ROADMAP
+Palazzo di Maruki,Ala ricerca,RMAP_162_16_0,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ala ricerca - RMAP_162_16_0.png,tabella ROADMAP
+Palazzo di Maruki,Ala ricerca,RMAP_162_16_1,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ala ricerca - RMAP_162_16_1.png,tabella ROADMAP
+Palazzo di Maruki,Ala ricerca,RMAP_162_16_2,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ala ricerca - RMAP_162_16_2.png,tabella ROADMAP
+Palazzo di Maruki,Ala ricerca,RMAP_162_16_3,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ala ricerca - RMAP_162_16_3.png,tabella ROADMAP
+Palazzo di Maruki,Ala ricerca,RMAP_162_16_4,mappe_luoghi/Palazzo di Maruki/Palazzo di Maruki - Ala ricerca - RMAP_162_16_4.png,tabella ROADMAP
+Palazzo di Niijima,Entrata del casinò,RMAP_157_1_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Entrata del casino - RMAP_157_1_0.png,tabella ROADMAP
+Palazzo di Niijima,Entrata del casinò,RMAP_157_1_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Entrata del casino - RMAP_157_1_1.png,tabella ROADMAP
+Palazzo di Niijima,Area 003,RMAP_157_3_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area 003 - RMAP_157_3_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Niijima,Area 003,RMAP_157_3_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area 003 - RMAP_157_3_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Niijima,Piano terra,RMAP_157_4_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Piano terra - RMAP_157_4_0.png,tabella ROADMAP
+Palazzo di Niijima,Piano terra,RMAP_157_4_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Piano terra - RMAP_157_4_1.png,tabella ROADMAP
+Palazzo di Niijima,Area riservata allo staff,RMAP_157_5_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area riservata allo staff - RMAP_157_5_0.png,tabella ROADMAP
+Palazzo di Niijima,Area 005,RMAP_157_5_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area 005 - RMAP_157_5_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Niijima,Lobby piano riservato ai soci,RMAP_157_6_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Lobby piano riservato ai soci - RMAP_157_6_0.png,tabella ROADMAP
+Palazzo di Niijima,Area dadi,RMAP_157_7_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area dadi - RMAP_157_7_0.png,tabella ROADMAP
+Palazzo di Niijima,Area 007,RMAP_157_7_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area 007 - RMAP_157_7_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Niijima,Area riservata allo staff,RMAP_157_8_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area riservata allo staff - RMAP_157_8_0.png,tabella ROADMAP
+Palazzo di Niijima,Area riservata allo staff,RMAP_157_8_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area riservata allo staff - RMAP_157_8_1.png,tabella ROADMAP
+Palazzo di Niijima,Stanza slot machine,RMAP_157_9_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Stanza slot machine - RMAP_157_9_0.png,tabella ROADMAP
+Palazzo di Niijima,Stanza slot machine,RMAP_157_9_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Stanza slot machine - RMAP_157_9_1.png,tabella ROADMAP
+Palazzo di Niijima,Stanza slot machine,RMAP_157_10_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Stanza slot machine - RMAP_157_10_0.png,tabella ROADMAP
+Palazzo di Niijima,Stanza slot machine,RMAP_157_10_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Stanza slot machine - RMAP_157_10_1.png,tabella ROADMAP
+Palazzo di Niijima,Lobby piano puntate alte,RMAP_157_11_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Lobby piano puntate alte - RMAP_157_11_0.png,tabella ROADMAP
+Palazzo di Niijima,Lobby piano puntate alte,RMAP_157_11_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Lobby piano puntate alte - RMAP_157_11_1.png,tabella ROADMAP
+Palazzo di Niijima,Lobby piano puntate alte,RMAP_157_11_2,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Lobby piano puntate alte - RMAP_157_11_2.png,tabella ROADMAP
+Palazzo di Niijima,Oscura Dimora,RMAP_157_12_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Oscura Dimora - RMAP_157_12_0.png,tabella ROADMAP
+Palazzo di Niijima,Oscura Dimora,RMAP_157_13_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Oscura Dimora - RMAP_157_13_0.png,tabella ROADMAP
+Palazzo di Niijima,Arena combattimenti,RMAP_157_15_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Arena combattimenti - RMAP_157_15_0.png,tabella ROADMAP
+Palazzo di Niijima,Direzione,RMAP_157_16_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Direzione - RMAP_157_16_0.png,tabella ROADMAP
+Palazzo di Niijima,Direzione,RMAP_157_16_1,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Direzione - RMAP_157_16_1.png,tabella ROADMAP
+Palazzo di Niijima,Area 017,RMAP_157_17_0,mappe_luoghi/Palazzo di Niijima/Palazzo di Niijima - Area 017 - RMAP_157_17_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Entrata laterale,RMAP_156_1_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Entrata laterale - RMAP_156_1_0.png,tabella ROADMAP
+Palazzo di Okumura,Corridoi del complesso,RMAP_156_2_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Corridoi del complesso - RMAP_156_2_0.png,tabella ROADMAP
+Palazzo di Okumura,Corridoi del complesso,RMAP_156_3_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Corridoi del complesso - RMAP_156_3_0.png,tabella ROADMAP
+Palazzo di Okumura,Corridoi del complesso,RMAP_156_3_1,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Corridoi del complesso - RMAP_156_3_1.png,tabella ROADMAP
+Palazzo di Okumura,Dintorni del complesso,RMAP_156_4_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Dintorni del complesso - RMAP_156_4_0.png,tabella ROADMAP
+Palazzo di Okumura,Interscambio,RMAP_156_5_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Interscambio - RMAP_156_5_0.png,tabella ROADMAP
+Palazzo di Okumura,Interscambio,RMAP_156_6_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Interscambio - RMAP_156_6_0.png,tabella ROADMAP
+Palazzo di Okumura,Linea esportazioni,RMAP_156_7_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Linea esportazioni - RMAP_156_7_0.png,tabella ROADMAP
+Palazzo di Okumura,Linea esportazioni,RMAP_156_7_1,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Linea esportazioni - RMAP_156_7_1.png,tabella ROADMAP
+Palazzo di Okumura,Linea di produzione,RMAP_156_8_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Linea di produzione - RMAP_156_8_0.png,tabella ROADMAP
+Palazzo di Okumura,Area 009,RMAP_156_9_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Area 009 - RMAP_156_9_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Area 009,RMAP_156_9_1,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Area 009 - RMAP_156_9_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Area 010,RMAP_156_10_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Area 010 - RMAP_156_10_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Produzione armamenti,RMAP_156_10_1,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Produzione armamenti - RMAP_156_10_1.png,tabella ROADMAP
+Palazzo di Okumura,Produzione armamenti,RMAP_156_10_2,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Produzione armamenti - RMAP_156_10_2.png,tabella ROADMAP
+Palazzo di Okumura,Manutenzione armamenti,RMAP_156_11_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Manutenzione armamenti - RMAP_156_11_0.png,tabella ROADMAP
+Palazzo di Okumura,Manutenzione armamenti,RMAP_156_11_1,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Manutenzione armamenti - RMAP_156_11_1.png,tabella ROADMAP
+Palazzo di Okumura,Area 011,RMAP_156_11_2,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Area 011 - RMAP_156_11_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Area 011,RMAP_156_11_3,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Area 011 - RMAP_156_11_3.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Area 012,RMAP_156_12_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Area 012 - RMAP_156_12_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Okumura,Caserma,RMAP_156_13_0,mappe_luoghi/Palazzo di Okumura/Palazzo di Okumura - Caserma - RMAP_156_13_0.png,tabella ROADMAP
+Palazzo di Shido,Ponte anteriore,RMAP_159_1_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte anteriore - RMAP_159_1_0.png,tabella ROADMAP
+Palazzo di Shido,Sala d'ingresso,RMAP_159_2_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala d-ingresso - RMAP_159_2_0.png,tabella ROADMAP
+Palazzo di Shido,Sala d'ingresso,RMAP_159_2_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala d-ingresso - RMAP_159_2_1.png,tabella ROADMAP
+Palazzo di Shido,Sala d'ingresso,RMAP_159_2_2,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala d-ingresso - RMAP_159_2_2.png,tabella ROADMAP
+Palazzo di Shido,Sala d'ingresso,RMAP_159_2_3,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala d-ingresso - RMAP_159_2_3.png,tabella ROADMAP
+Palazzo di Shido,Sala d'ingresso,RMAP_159_2_4,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala d-ingresso - RMAP_159_2_4.png,tabella ROADMAP
+Palazzo di Shido,Sala d'ingresso,RMAP_159_2_5,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala d-ingresso - RMAP_159_2_5.png,tabella ROADMAP
+Palazzo di Shido,Area 003,RMAP_159_3_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 003 - RMAP_159_3_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Area 003,RMAP_159_3_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 003 - RMAP_159_3_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Area 006,RMAP_159_6_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 006 - RMAP_159_6_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Area 006,RMAP_159_6_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 006 - RMAP_159_6_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Area 006,RMAP_159_6_2,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 006 - RMAP_159_6_2.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Sala intrattenimento 2P,RMAP_159_6_3,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala intrattenimento 2P - RMAP_159_6_3.png,tabella ROADMAP
+Palazzo di Shido,Area 007,RMAP_159_7_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 007 - RMAP_159_7_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Ponte di poppa,RMAP_159_7_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte di poppa - RMAP_159_7_1.png,tabella ROADMAP
+Palazzo di Shido,Area 008,RMAP_159_8_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 008 - RMAP_159_8_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Ristorante,RMAP_159_9_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ristorante - RMAP_159_9_0.png,tabella ROADMAP
+Palazzo di Shido,Area 010,RMAP_159_10_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 010 - RMAP_159_10_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Area 010,RMAP_159_10_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 010 - RMAP_159_10_1.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Ponte laterale,RMAP_159_11_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte laterale - RMAP_159_11_0.png,tabella ROADMAP
+Palazzo di Shido,Ponte laterale,RMAP_159_11_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte laterale - RMAP_159_11_1.png,tabella ROADMAP
+Palazzo di Shido,Ponte laterale,RMAP_159_11_2,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte laterale - RMAP_159_11_2.png,tabella ROADMAP
+Palazzo di Shido,Ponte laterale,RMAP_159_11_3,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte laterale - RMAP_159_11_3.png,tabella ROADMAP
+Palazzo di Shido,Ponte laterale,RMAP_159_11_4,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Ponte laterale - RMAP_159_11_4.png,tabella ROADMAP
+Palazzo di Shido,Aula magna,RMAP_159_12_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Aula magna - RMAP_159_12_0.png,tabella ROADMAP
+Palazzo di Shido,Sala macchine,RMAP_159_13_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Sala macchine - RMAP_159_13_0.png,tabella ROADMAP
+Palazzo di Shido,Area 015,RMAP_159_15_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 015 - RMAP_159_15_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Area 016,RMAP_159_16_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Area 016 - RMAP_159_16_0.png,codice conservato; nome area assente o ambiguo
+Palazzo di Shido,Corridoio mezzavia tribordo,RMAP_159_20_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio mezzavia tribordo - RMAP_159_20_0.png,tabella ROADMAP
+Palazzo di Shido,Corridoio mezzavia tribordo,RMAP_159_20_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio mezzavia tribordo - RMAP_159_20_1.png,tabella ROADMAP
+Palazzo di Shido,Corridoio superiore tribordo,RMAP_159_25_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio superiore tribordo - RMAP_159_25_0.png,tabella ROADMAP
+Palazzo di Shido,Corridoio superiore tribordo,RMAP_159_25_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio superiore tribordo - RMAP_159_25_1.png,tabella ROADMAP
+Palazzo di Shido,Corridoio inferiore babordo,RMAP_159_30_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio inferiore babordo - RMAP_159_30_0.png,tabella ROADMAP
+Palazzo di Shido,Corridoio inferiore babordo,RMAP_159_30_1,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio inferiore babordo - RMAP_159_30_1.png,tabella ROADMAP
+Palazzo di Shido,Corridoio mezzavia babordo,RMAP_159_35_0,mappe_luoghi/Palazzo di Shido/Palazzo di Shido - Corridoio mezzavia babordo - RMAP_159_35_0.png,tabella ROADMAP
+Profondità dei Memento,Entrata,RMAP_161_1_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Entrata - RMAP_161_1_0.png,tabella ROADMAP
+Profondità dei Memento,Corridoio della prigione,RMAP_161_2_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_2_0.png,tabella ROADMAP
+Profondità dei Memento,Area 002,RMAP_161_2_1,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Area 002 - RMAP_161_2_1.png,codice conservato; nome area assente o ambiguo
+Profondità dei Memento,Area 002,RMAP_161_2_2,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Area 002 - RMAP_161_2_2.png,codice conservato; nome area assente o ambiguo
+Profondità dei Memento,Corridoio della prigione,RMAP_161_3_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_3_0.png,tabella ROADMAP
+Profondità dei Memento,Vuoto cavernoso,RMAP_161_4_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Vuoto cavernoso - RMAP_161_4_0.png,tabella ROADMAP
+Profondità dei Memento,Area 004,RMAP_161_4_1,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Area 004 - RMAP_161_4_1.png,codice conservato; nome area assente o ambiguo
+Profondità dei Memento,Area 004,RMAP_161_4_2,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Area 004 - RMAP_161_4_2.png,codice conservato; nome area assente o ambiguo
+Profondità dei Memento,Corridoio della prigione,RMAP_161_5_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_5_0.png,tabella ROADMAP
+Profondità dei Memento,Corridoio della prigione,RMAP_161_6_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_6_0.png,tabella ROADMAP
+Profondità dei Memento,Area 006,RMAP_161_6_1,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Area 006 - RMAP_161_6_1.png,codice conservato; nome area assente o ambiguo
+Profondità dei Memento,Vuoto cavernoso,RMAP_161_7_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Vuoto cavernoso - RMAP_161_7_0.png,tabella ROADMAP
+Profondità dei Memento,Corridoio della prigione,RMAP_161_8_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_8_0.png,tabella ROADMAP
+Profondità dei Memento,Corridoio della prigione,RMAP_161_9_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_9_0.png,tabella ROADMAP
+Profondità dei Memento,Corridoio della prigione,RMAP_161_10_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Corridoio della prigione - RMAP_161_10_0.png,tabella ROADMAP
+Profondità dei Memento,Santuario,RMAP_161_11_0,mappe_luoghi/Profondita dei Memento/Profondita dei Memento - Santuario - RMAP_161_11_0.png,tabella ROADMAP
+Shibuya,Mappa generale illustrata del quartiere,MAP_L_SHIBUYA,mappe_luoghi/Shibuya/Shibuya - Mappa generale illustrata - MAP_L_SHIBUYA.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Shibuya,Piazza della stazione,RMAP_001_1_0,mappe_luoghi/Shibuya/Shibuya - Piazza della stazione - RMAP_001_1_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Shibuya,Sottopasso,RMAP_001_2_0,mappe_luoghi/Shibuya/Shibuya - Sottopasso - RMAP_001_2_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Shibuya,Sottopasso,RMAP_001_2_1,mappe_luoghi/Shibuya/Shibuya - Sottopasso - RMAP_001_2_1.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Shibuya,Central Street,RMAP_001_3_0,mappe_luoghi/Shibuya/Shibuya - Central Street - RMAP_001_3_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Shibuya,Area 004,RMAP_001_4_0,mappe_luoghi/Shibuya/Shibuya - Area 004 - RMAP_001_4_0.png,codice conservato; nome area assente o ambiguo
+Shibuya,Area 005,RMAP_001_5_0,mappe_luoghi/Shibuya/Shibuya - Area 005 - RMAP_001_5_0.png,codice conservato; nome area assente o ambiguo
+Shibuya,Area 012,RMAP_001_12_0,mappe_luoghi/Shibuya/Shibuya - Area 012 - RMAP_001_12_0.png,codice conservato; nome area assente o ambiguo
+Shinjuku,Mappa generale illustrata del quartiere,MAP_L_SHINJUKU,mappe_luoghi/Shinjuku/Shinjuku - Mappa generale illustrata - MAP_L_SHINJUKU.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Shinjuku,Quartiere a luci rosse,RMAP_006_1_0,mappe_luoghi/Shinjuku/Shinjuku - Quartiere a luci rosse - RMAP_006_1_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"
+Yongen-Jaya,Mappa generale illustrata del quartiere,MAP_L_YONCHA,mappe_luoghi/Yongen-Jaya/Yongen-Jaya - Mappa generale illustrata - MAP_L_YONCHA.png,Codice quartiere nel nome archivio; nome italiano della stazione
+Yongen-Jaya,Vicoli,RMAP_009_2_0,mappe_luoghi/Yongen-Jaya/Yongen-Jaya - Vicoli - RMAP_009_2_0.png,"tabella italiana dei luoghi, campo major/minor e spawn 0"

@@ -1,0 +1,19 @@
+// Decompiled by Atlus Script Tools
+const int Dummy                            = 0;
+const int YESNO_SEL                        = 1;
+const int GIMMIC_SEL                       = 2;
+const int D04_155_007_EV01_mes00           = 3;
+const int D04_155_007_EV01_mes01           = 4;
+const int D04_155_007_EV01_mes02           = 5;
+const int D04_155_007_EV01_mes03           = 6;
+const int D04_155_007_GIMMIC_mes00         = 7;
+const int D04_155_007_GIMMIC_mes01         = 8;
+const int D04_155_007_GIMMIC_mes02         = 9;
+const int D04_155_007_GIMMIC_mes03         = 10;
+const int D04_155_007_GIMMIC_mes04         = 11;
+const int D04_155_007_GIMMIC_mes05         = 12;
+const int D04_07_floor_trap_start          = 13;
+const int D04_07_floor_trap_01             = 14;
+const int D04_07_floor_trap_02             = 15;
+const int D04_07_floor_trap_03             = 16;
+const int D04_07_floor_trap_end            = 17;

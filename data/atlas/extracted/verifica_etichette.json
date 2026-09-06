@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "interactions": 4525,
+  "statuses": {
+    "null": 1078,
+    "tipo-non-risolto": 1715,
+    "valido": 1731,
+    "indice-fuori-intervallo": 1
+  },
+  "passes": [
+    "Sintassi, copertura, riferimenti e hash",
+    "Rilettura indipendente offset e payload, regressione GO",
+    "Codifica, input malformati e determinismo"
+  ],
+  "scope": "Etichette native; nessuna nuova associazione navigabile certificata"
+}

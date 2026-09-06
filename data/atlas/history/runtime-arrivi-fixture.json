@@ -1,0 +1,26 @@
+{
+  "source": "verifica-navigazione-arrivi",
+  "pins": [
+    {
+      "id": 395,
+      "name": "Verifica evento al secondo piano",
+      "destination": {
+        "mappa": "shujin-academy-scuola-edificio-principale-2p-edificio-laboratori-2p-rmap-002-0-1",
+        "x": 30,
+        "y": 60,
+        "zoom": 2.5
+      }
+    },
+    {
+      "id": 396,
+      "name": "Verifica scorciatoia locale",
+      "destination": {
+        "mappa": "verifica-navigazione-arrivi",
+        "x": 70,
+        "y": 30,
+        "zoom": 3
+      }
+    }
+  ],
+  "scope": "UI-only fixture; not certified game connections. Delete after validation."
+}

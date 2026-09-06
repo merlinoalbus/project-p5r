@@ -29,7 +29,7 @@ describe('DungeonPage', () => {
     getDungeons.mockResolvedValue([dungeon({}), dungeon({ chiave: 'madarame', ordine: 2, nome: 'Palazzo di Madarame (Museo)', sovrano: 'Ichiryusai Madarame', arcanaSovrano: 'Emperor', arcanaSovranoNome: 'Imperatore', gestiti: null, date: { sblocco: '16 maggio (Lunedì)', scadenza: '5 giugno', furtoConsigliato: '' } })]);
     render(<MemoryRouter><DungeonPage /></MemoryRouter>);
     const kamoshida = await screen.findByRole('link', { name: 'Palazzo di Kamoshida, Suguru Kamoshida' });
-    expect(kamoshida).toHaveAttribute('href', '/guida/dungeon/kamoshida');
+    expect(kamoshida).toHaveAttribute('href', '/guida/mondo/dungeon/kamoshida');
     expect(getDungeons).toHaveBeenCalledWith(1);
     // anello di avanzamento: 29 su 58 = 50%
     expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');

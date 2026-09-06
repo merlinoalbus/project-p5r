@@ -542,3 +542,10 @@ Spilli, Mappa, Collegamenti e File espongono gli strumenti per attività. I cont
 
 ### Ingresso dei quartieri (039)
 quartiere_ingresso conserva mappa interna, x/y percentuali e fattore di ingrandimento 1–6. Il quartiere espone percorso attuale e ingresso; il menu Città e i pin di Tokyo aprono la pagina del quartiere, che centra il visore sul punto configurato. Rinomina conserva la destinazione; eliminazione della destinazione e ripristino esplicito tornano alla mappa del quartiere adattata alla finestra. Il backup completo e i pacchetti delle mappe comprendono la configurazione; importazioni senza sovrascrittura preservano ingressi esistenti.
+
+## Atlante unico — integrazione in corso (2026-09-06)
+Il servizio accessoMondoService risolve entità della guida verso mappe e pin registrati tramite GET /api/mappe/accesso/:tipo/:chiave. Restituisce destinazione unica, scelta multipla o associazione assente, con provenienza. Gli articoli passano dal negozio e dal legame strutturato luogo.negozio; gli ingressi configurati valgono soltanto per il quartiere. Le chiavi pubbliche seguono percorsi e alias esistenti. Non assegna coordinate o destinazioni per somiglianza dei nomi.
+
+Gli accessi principali di Città, Palazzi e Dedali e Negozi e inventario usano /guida/mondo/:tipo/:chiave: destinazione unica → stesso VisoreMappa, alternative → scelta esplicita. Le schede restano approfondimenti e sono sempre raggiungibili anche in caso di associazione assente o errore. Il visore riceve spillo oppure terna valida x/y/zoom, mantenendo priorità al pin.
+
+L’importatore JSON accetta fino a 64 MB tramite un parser montato in bootstrap sulla sola POST /api/mappe/importa prima del parser globale da 5 MB. Gli altri endpoint e metodi mantengono il limite globale. Verificati payload valido oltre 5 MB, JSON malformato e rifiuto oltre 64 MB senza inserimenti.

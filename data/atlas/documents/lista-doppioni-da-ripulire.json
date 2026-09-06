@@ -1,0 +1,1378 @@
+{
+  "criterio": "Una voce per etichetta tra immagini sorelle come richiesto; non dedup tra genitori diversi. Nessuna modifica DB ancora.",
+  "gruppi": [
+    {
+      "genitore": "citta-shibuya",
+      "nome": "Sottopasso",
+      "mantieni": "nativo-rmap-001-2-0",
+      "rimuovi": [
+        "nativo-rmap-001-2-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-001-2-0",
+        "nativo-rmap-001-2-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-001-2-0": 0,
+        "nativo-rmap-001-2-1": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-022",
+      "nome": "Covo dei Ladri",
+      "mantieni": "nativo-rmap-022-1-0",
+      "rimuovi": [
+        "nativo-rmap-022-1-1",
+        "nativo-rmap-022-1-2",
+        "nativo-rmap-022-1-3",
+        "nativo-rmap-022-1-4"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-022-1-0",
+        "nativo-rmap-022-1-1",
+        "nativo-rmap-022-1-2",
+        "nativo-rmap-022-1-3",
+        "nativo-rmap-022-1-4"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-022-1-0": 0,
+        "nativo-rmap-022-1-1": 0,
+        "nativo-rmap-022-1-2": 0,
+        "nativo-rmap-022-1-3": 0,
+        "nativo-rmap-022-1-4": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-150",
+      "nome": "Area riservata allo staff",
+      "mantieni": "nativo-rmap-150-3-0",
+      "rimuovi": [
+        "nativo-rmap-150-3-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-150-3-0",
+        "nativo-rmap-150-3-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-150-3-0": 0,
+        "nativo-rmap-150-3-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Area 000",
+      "mantieni": "nativo-rmap-151-0-0",
+      "rimuovi": [
+        "nativo-rmap-151-0-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-0-0",
+        "nativo-rmap-151-0-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-0-0": 0,
+        "nativo-rmap-151-0-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Torre: Livello superiore",
+      "mantieni": "nativo-rmap-151-10-0",
+      "rimuovi": [
+        "nativo-rmap-151-10-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-10-0",
+        "nativo-rmap-151-10-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-10-0": 0,
+        "nativo-rmap-151-10-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Torre: Sala del trono",
+      "mantieni": "nativo-rmap-151-11-0",
+      "rimuovi": [
+        "nativo-rmap-151-11-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-11-0",
+        "nativo-rmap-151-11-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-11-0": 0,
+        "nativo-rmap-151-11-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Cancello del castello",
+      "mantieni": "nativo-rmap-151-1-0",
+      "rimuovi": [
+        "nativo-rmap-151-1-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-1-0",
+        "nativo-rmap-151-1-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-1-0": 0,
+        "nativo-rmap-151-1-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Vecchio castello 2P",
+      "mantieni": "nativo-rmap-151-2-1",
+      "rimuovi": [
+        "nativo-rmap-151-2-2",
+        "nativo-rmap-151-3-0",
+        "nativo-rmap-151-4-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-2-1",
+        "nativo-rmap-151-2-2",
+        "nativo-rmap-151-3-0",
+        "nativo-rmap-151-4-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-2-1": 0,
+        "nativo-rmap-151-2-2": 0,
+        "nativo-rmap-151-3-0": 0,
+        "nativo-rmap-151-4-0": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Vecchio castello 3P",
+      "mantieni": "nativo-rmap-151-4-1",
+      "rimuovi": [
+        "nativo-rmap-151-4-2",
+        "nativo-rmap-151-5-0",
+        "nativo-rmap-151-5-1",
+        "nativo-rmap-151-5-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-4-1",
+        "nativo-rmap-151-4-2",
+        "nativo-rmap-151-5-0",
+        "nativo-rmap-151-5-1",
+        "nativo-rmap-151-5-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-4-1": 0,
+        "nativo-rmap-151-4-2": 0,
+        "nativo-rmap-151-5-0": 0,
+        "nativo-rmap-151-5-1": 0,
+        "nativo-rmap-151-5-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Tetto",
+      "mantieni": "nativo-rmap-151-6-0",
+      "rimuovi": [
+        "nativo-rmap-151-6-1",
+        "nativo-rmap-151-6-2",
+        "nativo-rmap-151-6-3",
+        "nativo-rmap-151-6-4"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-151-6-0",
+        "nativo-rmap-151-6-1",
+        "nativo-rmap-151-6-2",
+        "nativo-rmap-151-6-3",
+        "nativo-rmap-151-6-4"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-151-6-0": 0,
+        "nativo-rmap-151-6-1": 0,
+        "nativo-rmap-151-6-2": 0,
+        "nativo-rmap-151-6-3": 0,
+        "nativo-rmap-151-6-4": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Area 011",
+      "mantieni": "nativo-rmap-152-11-0",
+      "rimuovi": [
+        "nativo-rmap-152-11-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-152-11-0",
+        "nativo-rmap-152-11-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-152-11-0": 0,
+        "nativo-rmap-152-11-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Prigione sotterranea 1P",
+      "mantieni": "nativo-rmap-152-1-0",
+      "rimuovi": [
+        "nativo-rmap-152-1-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-152-1-0",
+        "nativo-rmap-152-1-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-152-1-0": 0,
+        "nativo-rmap-152-1-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kamoshida",
+      "nome": "Prigione sotterranea 2P",
+      "mantieni": "nativo-rmap-152-2-0",
+      "rimuovi": [
+        "nativo-rmap-152-2-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-152-2-0",
+        "nativo-rmap-152-2-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-152-2-0": 0,
+        "nativo-rmap-152-2-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-madarame",
+      "nome": "Museo, 1P",
+      "mantieni": "nativo-rmap-153-2-0",
+      "rimuovi": [
+        "nativo-rmap-153-2-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-153-2-0",
+        "nativo-rmap-153-2-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-153-2-0": 0,
+        "nativo-rmap-153-2-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-madarame",
+      "nome": "Museo, 2P",
+      "mantieni": "nativo-rmap-153-3-1",
+      "rimuovi": [
+        "nativo-rmap-153-3-2",
+        "nativo-rmap-153-3-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-153-3-1",
+        "nativo-rmap-153-3-2",
+        "nativo-rmap-153-3-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-153-3-1": 0,
+        "nativo-rmap-153-3-2": 0,
+        "nativo-rmap-153-3-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-madarame",
+      "nome": "Museo, 2P / Sala del Tesoro - Atrio",
+      "mantieni": "nativo-rmap-153-6-0",
+      "rimuovi": [
+        "nativo-rmap-153-6-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-153-6-0",
+        "nativo-rmap-153-6-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-153-6-0": 0,
+        "nativo-rmap-153-6-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-madarame",
+      "nome": "Sala del Tesoro - Galleria",
+      "mantieni": "nativo-rmap-153-7-0",
+      "rimuovi": [
+        "nativo-rmap-153-7-1",
+        "nativo-rmap-153-7-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-153-7-0",
+        "nativo-rmap-153-7-1",
+        "nativo-rmap-153-7-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-153-7-0": 0,
+        "nativo-rmap-153-7-1": 0,
+        "nativo-rmap-153-7-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-madarame",
+      "nome": "Area 008",
+      "mantieni": "nativo-rmap-153-8-0",
+      "rimuovi": [
+        "nativo-rmap-153-8-1",
+        "nativo-rmap-153-8-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-153-8-0",
+        "nativo-rmap-153-8-1",
+        "nativo-rmap-153-8-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-153-8-0": 0,
+        "nativo-rmap-153-8-1": 0,
+        "nativo-rmap-153-8-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-madarame",
+      "nome": "Sala del Tesoro / Sala del Tesoro - Atrio",
+      "mantieni": "nativo-rmap-153-9-0",
+      "rimuovi": [
+        "nativo-rmap-153-9-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-153-9-0",
+        "nativo-rmap-153-9-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-153-9-0": 0,
+        "nativo-rmap-153-9-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kaneshiro",
+      "nome": "Ufficio riciclaggio",
+      "mantieni": "nativo-rmap-154-11-0",
+      "rimuovi": [
+        "nativo-rmap-154-11-1",
+        "nativo-rmap-154-11-2",
+        "nativo-rmap-154-12-0",
+        "nativo-rmap-154-12-1",
+        "nativo-rmap-154-12-2",
+        "nativo-rmap-154-14-0",
+        "nativo-rmap-154-14-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-154-11-0",
+        "nativo-rmap-154-11-1",
+        "nativo-rmap-154-11-2",
+        "nativo-rmap-154-12-0",
+        "nativo-rmap-154-12-1",
+        "nativo-rmap-154-12-2",
+        "nativo-rmap-154-14-0",
+        "nativo-rmap-154-14-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-154-11-0": 0,
+        "nativo-rmap-154-11-1": 0,
+        "nativo-rmap-154-11-2": 0,
+        "nativo-rmap-154-12-0": 0,
+        "nativo-rmap-154-12-1": 0,
+        "nativo-rmap-154-12-2": 0,
+        "nativo-rmap-154-14-0": 0,
+        "nativo-rmap-154-14-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kaneshiro",
+      "nome": "Area 013",
+      "mantieni": "nativo-rmap-154-13-0",
+      "rimuovi": [
+        "nativo-rmap-154-13-1",
+        "nativo-rmap-154-13-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-154-13-0",
+        "nativo-rmap-154-13-1",
+        "nativo-rmap-154-13-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-154-13-0": 0,
+        "nativo-rmap-154-13-1": 0,
+        "nativo-rmap-154-13-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kaneshiro",
+      "nome": "Corridoio banchieri",
+      "mantieni": "nativo-rmap-154-3-0",
+      "rimuovi": [
+        "nativo-rmap-154-3-1",
+        "nativo-rmap-154-3-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-154-3-0",
+        "nativo-rmap-154-3-1",
+        "nativo-rmap-154-3-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-154-3-0": 0,
+        "nativo-rmap-154-3-1": 0,
+        "nativo-rmap-154-3-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kaneshiro",
+      "nome": "Caveau 1P",
+      "mantieni": "nativo-rmap-154-7-0",
+      "rimuovi": [
+        "nativo-rmap-154-7-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-154-7-0",
+        "nativo-rmap-154-7-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-154-7-0": 0,
+        "nativo-rmap-154-7-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kaneshiro",
+      "nome": "Caveau 2P",
+      "mantieni": "nativo-rmap-154-8-0",
+      "rimuovi": [
+        "nativo-rmap-154-8-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-154-8-0",
+        "nativo-rmap-154-8-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-154-8-0": 0,
+        "nativo-rmap-154-8-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-kaneshiro",
+      "nome": "Caveau 3P",
+      "mantieni": "nativo-rmap-154-9-0",
+      "rimuovi": [
+        "nativo-rmap-154-9-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-154-9-0",
+        "nativo-rmap-154-9-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-154-9-0": 0,
+        "nativo-rmap-154-9-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Passaggio sotterraneo 1F",
+      "mantieni": "nativo-rmap-155-11-0",
+      "rimuovi": [
+        "nativo-rmap-155-11-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-11-0",
+        "nativo-rmap-155-11-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-11-0": 0,
+        "nativo-rmap-155-11-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Passaggio sotterraneo 2F",
+      "mantieni": "nativo-rmap-155-11-2",
+      "rimuovi": [
+        "nativo-rmap-155-11-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-11-2",
+        "nativo-rmap-155-11-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-11-2": 0,
+        "nativo-rmap-155-11-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Corridoio principale",
+      "mantieni": "nativo-rmap-155-12-0",
+      "rimuovi": [
+        "nativo-rmap-155-12-1",
+        "nativo-rmap-155-2-0",
+        "nativo-rmap-155-2-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-12-0",
+        "nativo-rmap-155-12-1",
+        "nativo-rmap-155-2-0",
+        "nativo-rmap-155-2-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-12-0": 0,
+        "nativo-rmap-155-12-1": 0,
+        "nativo-rmap-155-2-0": 0,
+        "nativo-rmap-155-2-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Area 002",
+      "mantieni": "nativo-rmap-155-2-2",
+      "rimuovi": [
+        "nativo-rmap-155-2-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-2-2",
+        "nativo-rmap-155-2-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-2-2": 0,
+        "nativo-rmap-155-2-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Camera del Santuario 1P",
+      "mantieni": "nativo-rmap-155-4-0",
+      "rimuovi": [
+        "nativo-rmap-155-6-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-4-0",
+        "nativo-rmap-155-6-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-4-0": 0,
+        "nativo-rmap-155-6-0": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Camera del Santuario 2P",
+      "mantieni": "nativo-rmap-155-4-1",
+      "rimuovi": [
+        "nativo-rmap-155-6-1",
+        "nativo-rmap-155-6-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-4-1",
+        "nativo-rmap-155-6-1",
+        "nativo-rmap-155-6-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-4-1": 0,
+        "nativo-rmap-155-6-1": 0,
+        "nativo-rmap-155-6-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Caverna sotterranea 1P",
+      "mantieni": "nativo-rmap-155-5-0",
+      "rimuovi": [
+        "nativo-rmap-155-5-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-5-0",
+        "nativo-rmap-155-5-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-5-0": 0,
+        "nativo-rmap-155-5-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Caverna sotterranea 2P",
+      "mantieni": "nativo-rmap-155-5-2",
+      "rimuovi": [
+        "nativo-rmap-155-5-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-5-2",
+        "nativo-rmap-155-5-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-5-2": 0,
+        "nativo-rmap-155-5-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Camera dei Sarcofagi 1P",
+      "mantieni": "nativo-rmap-155-8-0",
+      "rimuovi": [
+        "nativo-rmap-155-8-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-8-0",
+        "nativo-rmap-155-8-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-8-0": 0,
+        "nativo-rmap-155-8-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-futaba",
+      "nome": "Camera dei Sarcofagi 2P",
+      "mantieni": "nativo-rmap-155-8-2",
+      "rimuovi": [
+        "nativo-rmap-155-8-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-155-8-2",
+        "nativo-rmap-155-8-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-155-8-2": 0,
+        "nativo-rmap-155-8-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-okumura",
+      "nome": "Produzione armamenti",
+      "mantieni": "nativo-rmap-156-10-1",
+      "rimuovi": [
+        "nativo-rmap-156-10-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-156-10-1",
+        "nativo-rmap-156-10-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-156-10-1": 0,
+        "nativo-rmap-156-10-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-okumura",
+      "nome": "Manutenzione armamenti",
+      "mantieni": "nativo-rmap-156-11-0",
+      "rimuovi": [
+        "nativo-rmap-156-11-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-156-11-0",
+        "nativo-rmap-156-11-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-156-11-0": 0,
+        "nativo-rmap-156-11-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-okumura",
+      "nome": "Area 011",
+      "mantieni": "nativo-rmap-156-11-2",
+      "rimuovi": [
+        "nativo-rmap-156-11-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-156-11-2",
+        "nativo-rmap-156-11-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-156-11-2": 0,
+        "nativo-rmap-156-11-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-okumura",
+      "nome": "Corridoi del complesso",
+      "mantieni": "nativo-rmap-156-2-0",
+      "rimuovi": [
+        "nativo-rmap-156-3-0",
+        "nativo-rmap-156-3-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-156-2-0",
+        "nativo-rmap-156-3-0",
+        "nativo-rmap-156-3-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-156-2-0": 0,
+        "nativo-rmap-156-3-0": 0,
+        "nativo-rmap-156-3-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-okumura",
+      "nome": "Interscambio",
+      "mantieni": "nativo-rmap-156-5-0",
+      "rimuovi": [
+        "nativo-rmap-156-6-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-156-5-0",
+        "nativo-rmap-156-6-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-156-5-0": 0,
+        "nativo-rmap-156-6-0": 0
+      }
+    },
+    {
+      "genitore": "dungeon-okumura",
+      "nome": "Linea esportazioni",
+      "mantieni": "nativo-rmap-156-7-0",
+      "rimuovi": [
+        "nativo-rmap-156-7-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-156-7-0",
+        "nativo-rmap-156-7-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-156-7-0": 0,
+        "nativo-rmap-156-7-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Stanza slot machine",
+      "mantieni": "nativo-rmap-157-10-0",
+      "rimuovi": [
+        "nativo-rmap-157-10-1",
+        "nativo-rmap-157-9-0",
+        "nativo-rmap-157-9-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-10-0",
+        "nativo-rmap-157-10-1",
+        "nativo-rmap-157-9-0",
+        "nativo-rmap-157-9-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-10-0": 0,
+        "nativo-rmap-157-10-1": 0,
+        "nativo-rmap-157-9-0": 0,
+        "nativo-rmap-157-9-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Lobby piano puntate alte",
+      "mantieni": "nativo-rmap-157-11-0",
+      "rimuovi": [
+        "nativo-rmap-157-11-1",
+        "nativo-rmap-157-11-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-11-0",
+        "nativo-rmap-157-11-1",
+        "nativo-rmap-157-11-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-11-0": 0,
+        "nativo-rmap-157-11-1": 0,
+        "nativo-rmap-157-11-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Oscura Dimora",
+      "mantieni": "nativo-rmap-157-12-0",
+      "rimuovi": [
+        "nativo-rmap-157-13-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-12-0",
+        "nativo-rmap-157-13-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-12-0": 0,
+        "nativo-rmap-157-13-0": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Direzione",
+      "mantieni": "nativo-rmap-157-16-0",
+      "rimuovi": [
+        "nativo-rmap-157-16-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-16-0",
+        "nativo-rmap-157-16-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-16-0": 0,
+        "nativo-rmap-157-16-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Entrata del casinò",
+      "mantieni": "nativo-rmap-157-1-0",
+      "rimuovi": [
+        "nativo-rmap-157-1-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-1-0",
+        "nativo-rmap-157-1-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-1-0": 0,
+        "nativo-rmap-157-1-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Area 003",
+      "mantieni": "nativo-rmap-157-3-0",
+      "rimuovi": [
+        "nativo-rmap-157-3-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-3-0",
+        "nativo-rmap-157-3-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-3-0": 0,
+        "nativo-rmap-157-3-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Piano terra",
+      "mantieni": "nativo-rmap-157-4-0",
+      "rimuovi": [
+        "nativo-rmap-157-4-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-4-0",
+        "nativo-rmap-157-4-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-4-0": 0,
+        "nativo-rmap-157-4-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-niijima",
+      "nome": "Area riservata allo staff",
+      "mantieni": "nativo-rmap-157-5-0",
+      "rimuovi": [
+        "nativo-rmap-157-8-0",
+        "nativo-rmap-157-8-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-157-5-0",
+        "nativo-rmap-157-8-0",
+        "nativo-rmap-157-8-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-157-5-0": 0,
+        "nativo-rmap-157-8-0": 0,
+        "nativo-rmap-157-8-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Corridoio superiore tribordo / Ponte piscina",
+      "mantieni": "nativo-rmap-159-10-0",
+      "rimuovi": [
+        "nativo-rmap-159-10-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-10-0",
+        "nativo-rmap-159-10-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-10-0": 0,
+        "nativo-rmap-159-10-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Ponte laterale",
+      "mantieni": "nativo-rmap-159-11-0",
+      "rimuovi": [
+        "nativo-rmap-159-11-1",
+        "nativo-rmap-159-11-2",
+        "nativo-rmap-159-11-3",
+        "nativo-rmap-159-11-4"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-11-0",
+        "nativo-rmap-159-11-1",
+        "nativo-rmap-159-11-2",
+        "nativo-rmap-159-11-3",
+        "nativo-rmap-159-11-4"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-11-0": 0,
+        "nativo-rmap-159-11-1": 0,
+        "nativo-rmap-159-11-2": 0,
+        "nativo-rmap-159-11-3": 0,
+        "nativo-rmap-159-11-4": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Corridoio mezzavia tribordo",
+      "mantieni": "nativo-rmap-159-20-0",
+      "rimuovi": [
+        "nativo-rmap-159-20-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-20-0",
+        "nativo-rmap-159-20-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-20-0": 0,
+        "nativo-rmap-159-20-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Corridoio superiore tribordo",
+      "mantieni": "nativo-rmap-159-25-0",
+      "rimuovi": [
+        "nativo-rmap-159-25-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-25-0",
+        "nativo-rmap-159-25-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-25-0": 0,
+        "nativo-rmap-159-25-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Sala d'ingresso",
+      "mantieni": "nativo-rmap-159-2-0",
+      "rimuovi": [
+        "nativo-rmap-159-2-1",
+        "nativo-rmap-159-2-2",
+        "nativo-rmap-159-2-3",
+        "nativo-rmap-159-2-4",
+        "nativo-rmap-159-2-5"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-2-0",
+        "nativo-rmap-159-2-1",
+        "nativo-rmap-159-2-2",
+        "nativo-rmap-159-2-3",
+        "nativo-rmap-159-2-4",
+        "nativo-rmap-159-2-5"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-2-0": 0,
+        "nativo-rmap-159-2-1": 0,
+        "nativo-rmap-159-2-2": 0,
+        "nativo-rmap-159-2-3": 0,
+        "nativo-rmap-159-2-4": 0,
+        "nativo-rmap-159-2-5": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Corridoio inferiore babordo",
+      "mantieni": "nativo-rmap-159-30-0",
+      "rimuovi": [
+        "nativo-rmap-159-30-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-30-0",
+        "nativo-rmap-159-30-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-30-0": 0,
+        "nativo-rmap-159-30-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Corridoio mezzavia tribordo / Passaggio e salone centrale",
+      "mantieni": "nativo-rmap-159-3-0",
+      "rimuovi": [
+        "nativo-rmap-159-3-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-3-0",
+        "nativo-rmap-159-3-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-3-0": 0,
+        "nativo-rmap-159-3-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-shido",
+      "nome": "Corridoio inferiore babordo / Sala intrattenimento 2P",
+      "mantieni": "nativo-rmap-159-6-1",
+      "rimuovi": [
+        "nativo-rmap-159-6-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-159-6-1",
+        "nativo-rmap-159-6-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-159-6-1": 0,
+        "nativo-rmap-159-6-2": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-160",
+      "nome": "Area 010",
+      "mantieni": "nativo-rmap-160-10-0",
+      "rimuovi": [
+        "nativo-rmap-160-10-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-160-10-0",
+        "nativo-rmap-160-10-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-160-10-0": 0,
+        "nativo-rmap-160-10-1": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-160",
+      "nome": "Cammino per il Santo Graal",
+      "mantieni": "nativo-rmap-160-2-0",
+      "rimuovi": [
+        "nativo-rmap-160-3-0",
+        "nativo-rmap-160-4-0",
+        "nativo-rmap-160-5-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-160-2-0",
+        "nativo-rmap-160-3-0",
+        "nativo-rmap-160-4-0",
+        "nativo-rmap-160-5-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-160-2-0": 0,
+        "nativo-rmap-160-3-0": 0,
+        "nativo-rmap-160-4-0": 0,
+        "nativo-rmap-160-5-0": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-160",
+      "nome": "Area 004",
+      "mantieni": "nativo-rmap-160-4-1",
+      "rimuovi": [
+        "nativo-rmap-160-4-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-160-4-1",
+        "nativo-rmap-160-4-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-160-4-1": 0,
+        "nativo-rmap-160-4-2": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-161",
+      "nome": "Corridoio della prigione",
+      "mantieni": "nativo-rmap-161-10-0",
+      "rimuovi": [
+        "nativo-rmap-161-2-0",
+        "nativo-rmap-161-3-0",
+        "nativo-rmap-161-5-0",
+        "nativo-rmap-161-6-0",
+        "nativo-rmap-161-8-0",
+        "nativo-rmap-161-9-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-161-10-0",
+        "nativo-rmap-161-2-0",
+        "nativo-rmap-161-3-0",
+        "nativo-rmap-161-5-0",
+        "nativo-rmap-161-6-0",
+        "nativo-rmap-161-8-0",
+        "nativo-rmap-161-9-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-161-10-0": 0,
+        "nativo-rmap-161-2-0": 0,
+        "nativo-rmap-161-3-0": 0,
+        "nativo-rmap-161-5-0": 0,
+        "nativo-rmap-161-6-0": 0,
+        "nativo-rmap-161-8-0": 0,
+        "nativo-rmap-161-9-0": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-161",
+      "nome": "Area 002",
+      "mantieni": "nativo-rmap-161-2-1",
+      "rimuovi": [
+        "nativo-rmap-161-2-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-161-2-1",
+        "nativo-rmap-161-2-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-161-2-1": 0,
+        "nativo-rmap-161-2-2": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-161",
+      "nome": "Vuoto cavernoso",
+      "mantieni": "nativo-rmap-161-4-0",
+      "rimuovi": [
+        "nativo-rmap-161-7-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-161-4-0",
+        "nativo-rmap-161-7-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-161-4-0": 0,
+        "nativo-rmap-161-7-0": 0
+      }
+    },
+    {
+      "genitore": "nativo-archivio-161",
+      "nome": "Area 004",
+      "mantieni": "nativo-rmap-161-4-1",
+      "rimuovi": [
+        "nativo-rmap-161-4-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-161-4-1",
+        "nativo-rmap-161-4-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-161-4-1": 0,
+        "nativo-rmap-161-4-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "Modello psi-cognitivo Eden",
+      "mantieni": "nativo-rmap-162-10-0",
+      "rimuovi": [
+        "nativo-rmap-162-10-1",
+        "nativo-rmap-162-5-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-10-0",
+        "nativo-rmap-162-10-1",
+        "nativo-rmap-162-5-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-10-0": 0,
+        "nativo-rmap-162-10-1": 0,
+        "nativo-rmap-162-5-0": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "Corridoio del Crepuscolo",
+      "mantieni": "nativo-rmap-162-11-0",
+      "rimuovi": [
+        "nativo-rmap-162-11-1",
+        "nativo-rmap-162-11-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-11-0",
+        "nativo-rmap-162-11-1",
+        "nativo-rmap-162-11-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-11-0": 0,
+        "nativo-rmap-162-11-1": 0,
+        "nativo-rmap-162-11-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "??? Sala di controllo",
+      "mantieni": "nativo-rmap-162-12-0",
+      "rimuovi": [
+        "nativo-rmap-162-12-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-12-0",
+        "nativo-rmap-162-12-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-12-0": 0,
+        "nativo-rmap-162-12-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "??? Ripostiglio",
+      "mantieni": "nativo-rmap-162-14-0",
+      "rimuovi": [
+        "nativo-rmap-162-14-1",
+        "nativo-rmap-162-14-2",
+        "nativo-rmap-162-14-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-14-0",
+        "nativo-rmap-162-14-1",
+        "nativo-rmap-162-14-2",
+        "nativo-rmap-162-14-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-14-0": 0,
+        "nativo-rmap-162-14-1": 0,
+        "nativo-rmap-162-14-2": 0,
+        "nativo-rmap-162-14-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "Sala di supporto",
+      "mantieni": "nativo-rmap-162-15-0",
+      "rimuovi": [
+        "nativo-rmap-162-15-1",
+        "nativo-rmap-162-15-2"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-15-0",
+        "nativo-rmap-162-15-1",
+        "nativo-rmap-162-15-2"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-15-0": 0,
+        "nativo-rmap-162-15-1": 0,
+        "nativo-rmap-162-15-2": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "Ala ricerca",
+      "mantieni": "nativo-rmap-162-16-0",
+      "rimuovi": [
+        "nativo-rmap-162-16-1",
+        "nativo-rmap-162-16-2",
+        "nativo-rmap-162-16-3",
+        "nativo-rmap-162-16-4"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-16-0",
+        "nativo-rmap-162-16-1",
+        "nativo-rmap-162-16-2",
+        "nativo-rmap-162-16-3",
+        "nativo-rmap-162-16-4"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-16-0": 0,
+        "nativo-rmap-162-16-1": 0,
+        "nativo-rmap-162-16-2": 0,
+        "nativo-rmap-162-16-3": 0,
+        "nativo-rmap-162-16-4": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "??? Sala d'ingresso",
+      "mantieni": "nativo-rmap-162-2-0",
+      "rimuovi": [
+        "nativo-rmap-162-2-1",
+        "nativo-rmap-162-2-2",
+        "nativo-rmap-162-2-3"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-2-0",
+        "nativo-rmap-162-2-1",
+        "nativo-rmap-162-2-2",
+        "nativo-rmap-162-2-3"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-2-0": 0,
+        "nativo-rmap-162-2-1": 0,
+        "nativo-rmap-162-2-2": 0,
+        "nativo-rmap-162-2-3": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "??? Corridoio",
+      "mantieni": "nativo-rmap-162-3-0",
+      "rimuovi": [
+        "nativo-rmap-162-3-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-3-0",
+        "nativo-rmap-162-3-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-3-0": 0,
+        "nativo-rmap-162-3-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "??? Auditorium",
+      "mantieni": "nativo-rmap-162-7-0",
+      "rimuovi": [
+        "nativo-rmap-162-7-1"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-7-0",
+        "nativo-rmap-162-7-1"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-7-0": 0,
+        "nativo-rmap-162-7-1": 0
+      }
+    },
+    {
+      "genitore": "dungeon-maruki",
+      "nome": "Sala visite",
+      "mantieni": "nativo-rmap-162-9-0",
+      "rimuovi": [
+        "nativo-rmap-162-9-1",
+        "nativo-rmap-162-9-2",
+        "nativo-rmap-162-9-3",
+        "nativo-rmap-162-9-4"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-162-9-0",
+        "nativo-rmap-162-9-1",
+        "nativo-rmap-162-9-2",
+        "nativo-rmap-162-9-3",
+        "nativo-rmap-162-9-4"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-162-9-0": 0,
+        "nativo-rmap-162-9-1": 0,
+        "nativo-rmap-162-9-2": 0,
+        "nativo-rmap-162-9-3": 0,
+        "nativo-rmap-162-9-4": 0
+      }
+    },
+    {
+      "genitore": "dungeon-mementos",
+      "nome": "Area 062",
+      "mantieni": "nativo-rmap-190-62-0",
+      "rimuovi": [
+        "nativo-rmap-192-62-0"
+      ],
+      "immaginiOriginali": [
+        "nativo-rmap-190-62-0",
+        "nativo-rmap-192-62-0"
+      ],
+      "pinPerImmagine": {
+        "nativo-rmap-190-62-0": 0,
+        "nativo-rmap-192-62-0": 0
+      }
+    }
+  ],
+  "mappePrima": 344,
+  "vociDaRimuovere": 132
+}

@@ -1211,7 +1211,7 @@
   {
    "chiave": "shujin-academy",
    "ordine": 5,
-   "nome": "Shujin Academy (scuola)",
+   "nome": "Shujin Academy",
    "sblocco": null,
    "descrizione": "Liceo Shujin, frequentato dal protagonista, situato ad Aoyama-Itchome. Disponibile fin dall'inizio.",
    "fonte": "https://samurai-gamers.com/persona-5/map-facilities/",
@@ -1641,7 +1641,7 @@
   {
    "chiave": "yokohama-chinatown",
    "ordine": 15,
-   "nome": "Chinatown (Yokohama)",
+   "nome": "Chinatown",
    "sblocco": "lettura del libro \"Chinese Sweets\" (titolo italiano non reperito)",
    "descrizione": "Quartiere cinese di Yokohama, luogo di hangout a tema culinario.",
    "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
@@ -1830,7 +1830,7 @@
   {
    "chiave": "suidobashi",
    "ordine": 21,
-   "nome": "Suidobashi (Dome Town)",
+   "nome": "Suidobashi",
    "sblocco": "10 giugno (evento di trama)",
    "descrizione": "Area di divertimenti presso il Tokyo Dome.",
    "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
@@ -1888,7 +1888,7 @@
   {
    "chiave": "mementos",
    "ordine": 23,
-   "nome": "Mementos (ingresso)",
+   "nome": "Entrata dei Memento",
    "sblocco": null,
    "descrizione": "Dungeon procedurale accessibile dalla metropolitana di Shibuya tramite l'app MetaNav; contiene richieste secondarie e il negozio ambulante di Jose.",
    "fonte": "https://www.allgamestaff.it/persona-5-royal/richieste-nei-memento/",

@@ -1,0 +1,33 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("120_001_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void TestChangeArea_01()
+{
+    FADEOUT(1, 10);
+    FADE_SYNC();
+    CALL_FIELD(20, 1, 1, 0);
+}
+
+
+// Procedure Index: 1
+void TestChangeArea_02()
+{
+    FADEOUT(1, 10);
+    FADE_SYNC();
+    CALL_FIELD(20, 1, 2, 0);
+}
+

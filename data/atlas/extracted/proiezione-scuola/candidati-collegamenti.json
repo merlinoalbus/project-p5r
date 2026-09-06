@@ -1,0 +1,554 @@
+{
+  "status": "candidates-not-importable",
+  "signature": {
+    "candidateOrder": [
+      "major",
+      "minor",
+      "entranceId",
+      "variant"
+    ],
+    "evidence": "Comparison across extracted CALL_FIELD literals and FBN IDs; parameter names in external decompiler library are generic.",
+    "variantFourth": {
+      "literalCalls": 2400,
+      "fieldPresent": 2390,
+      "uniqueEntranceId": 1652,
+      "missingEntranceId": 738,
+      "duplicateEntranceId": 0
+    },
+    "variantThirdAlternative": {
+      "literalCalls": 2400,
+      "fieldPresent": 215,
+      "uniqueEntranceId": 203,
+      "missingEntranceId": 12,
+      "duplicateEntranceId": 0
+    }
+  },
+  "sources": {
+    "mondo_connessioni_evidenze.json": "d5f6e6b155045c0be73078c7a37ddaa0ed809a454251ebb5280159d159f187e9",
+    "proiezione-scuola/evidenze.json": "cb718b4797fe9d388aa77485e34380fdd7cd328131258855b01d3fc8f12999c0",
+    "connessioni_originali/BASE/FIELD/DATA/F002_002_01.FBN": "de8ddf82203949e76d9b8f14b4b098abc3b973e4f359ca5d1692f2ac8b02e64f",
+    "connessioni_originali/BASE/FIELD/HIT/F002_002_01.HTB": "336c73c448bc5d6192231355fbb93d4be0a5b9f8f92682e7b1abcdc99258d57d",
+    "connessioni_originali/IT/FIELD/HIT/FHIT_002_002_01.BF": "00da2d4e2108d388b0c92922e0fa2ca87cf559ecf2f7374e215408b3f17b9b25",
+    "connessioni_script/002_002_01.flow": "414d99443aa387cd7c4fee6f269f03c4f80fc2b50e6b958f8e042ff685fef17a",
+    "connessioni_originali/BASE/FIELD/DATA/F002_003_01.FBN": "3b4543ca04649ec2222da2c8d63c7ed8d985c623bd3e0ea0a00f817f7f0b70ce",
+    "connessioni_originali/BASE/FIELD/HIT/F002_003_01.HTB": "5203b32a182f3335dd1d0d4e78de42834e17a7efd3a738d0f50a879bf9040863",
+    "connessioni_originali/IT/FIELD/HIT/FHIT_002_003_01.BF": "bd009a0bd6ed6dc100254dcaac6b3a482c3ba2e10bc52d1d7c0d15486eb55774",
+    "connessioni_script/002_003_01.flow": "2a374452bd899225408f9f52014e2292631edc3117c3c50e75bb22da4a6af768",
+    "connessioni_originali/BASE/FIELD/DATA/F002_002_02.FBN": "a5a94980c58471da1f27ed17aa157cf36d30346591fd63fc4cbece77b71288d0",
+    "connessioni_originali/BASE/FIELD/HIT/F002_002_02.HTB": "eb2bdd90d754b6331ce31b8f7437ab55ecbaa195b107942a84f2797446de5b8c",
+    "connessioni_originali/IT/FIELD/HIT/FHIT_002_002_02.BF": "2e7c8daac8f73448e70b4859689ec157da747e8af216a2a993e5494a55255927",
+    "connessioni_script/002_002_02.flow": "7d107d1d40f0b039a675ce32118f9964f6a578ae62b95c9450c874663481f854",
+    "connessioni_originali/BASE/FIELD/DATA/F002_003_02.FBN": "08b58161590b2f6e3ffe1691d4cef32bc2f57c4a16c4503b19e92d2d5749492a",
+    "connessioni_originali/BASE/FIELD/HIT/F002_003_02.HTB": "a8ec2318e6ff1f9ad9534901074954d43cb259986dbcbc5b8d5cce4730f3ce2a",
+    "connessioni_originali/IT/FIELD/HIT/FHIT_002_003_02.BF": "772ddd985339a77065308e3136ef2e73ba8c404056ba8e00e49e9d8f998fc43f",
+    "connessioni_script/002_003_02.flow": "e7c5394a3cde4691d926ee29adb07a3a95dd6addef287ab588799f5cb025756a",
+    "connessioni_originali/BASE/FIELD/DATA/F002_006_00.FBN": "e53dd0c8768c06be487eb879a5cd7fd2593f7eaf30068f572c802197f326a937",
+    "connessioni_originali/BASE/FIELD/HIT/F002_006_00.HTB": "1fc17ca472db1d1395c4cd3f00d6eff537c00b0b1bc5084148276ef22119e027",
+    "connessioni_originali/IT/FIELD/HIT/FHIT_002_006_00.BF": "d104b4f2d693e02857fdf7d4f13d6c5f9dcfdbe4fefc36875651e811a146ef12",
+    "connessioni_script/002_006_00.flow": "470a88081541058909af73fda84cceacf7b49836c01b6ea2e91d405495e3f343"
+  },
+  "candidates": [
+    {
+      "sourceField": "F002_002_01",
+      "triggerIndex": 0,
+      "label": "Edificio laboratori 2P",
+      "trigger": {
+        "index": 0,
+        "offset": 32,
+        "enableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "disableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "hitType": 2,
+        "nameId": 25,
+        "procedureIndex": 0,
+        "promptType": 11,
+        "position": {
+          "index": 0,
+          "offset": 48,
+          "xyz": [
+            1312.209716796875,
+            359.99993896484375,
+            -500.1577453613281
+          ]
+        },
+        "label": "Edificio laboratori 2P",
+        "procedureResolved": true,
+        "procedureStatus": "risolta"
+      },
+      "sourceMap": "RMAP_002_0_1",
+      "sourceXY": [
+        406.9724628988558,
+        471.9933190721595
+      ],
+      "rootProcedure": "AC_GOTO_EAST_2F",
+      "call": {
+        "arguments": "2, 3, 0, 1",
+        "literalArguments": [
+          2,
+          3,
+          0,
+          1
+        ],
+        "line": 47,
+        "status": "destinazione-nel-codice"
+      },
+      "destinationField": "F002_003_01",
+      "arrival": {
+        "entranceId": 0,
+        "recordIndex": 0,
+        "offset": 2380,
+        "xyz": [
+          1797.56005859375,
+          360.4144287109375,
+          -513.0990600585938
+        ],
+        "rawHex": "000000010000000144e0b1ec43b4350cc40046573f7fffff00000000b259faa400000000",
+        "map": "RMAP_002_0_1",
+        "xy": [
+          438.0315710945878,
+          471.1651632870224
+        ],
+        "status": "spatial-candidate-review-required",
+        "nativePixel": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "corridorAltitude": 360,
+        "altitudeResidual": 0.4144287109375
+      },
+      "ordinaryBranchConditions": [
+        "BIT_CHK(96) != 1",
+        "BIT_CHK(102) != 1"
+      ],
+      "conditionsStatus": "native-only-not-mapped-to-app",
+      "procedures": [
+        {
+          "index": 0,
+          "name": "AC_GOTO_EAST_2F",
+          "line": 23,
+          "body": "{\r\n    int var0;\r\n    // bit id (0) + (96) = 96\r\n    // bit id (0) + (102) = 102\r\n    \r\n    if (BIT_CHK((0 + 96)) == 1)\r\n    {\r\n        SUB_KFEVT_BldgA2F_BldgB2F();\r\n    }\r\n    else if (BIT_CHK((0 + 102)) == 1)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_BLDG_B_KEEPOUT_000_0, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else \r\n    {\r\n        FLD_CAMERA_LOCK();\r\n        FLD_CAMERA_LOCK_INTERP(859.3499f, 596.4951f, -495.4883f, -0.089f, -0.6953f, -0.0875f, 0.7078f, 0);\r\n        var0 = FLD_OBJ_CNV_RESHND(264);\r\n        FLD_OPEN_ORD_DOOR_FADE(var0, 2, 10);\r\n        FLD_SET_DIVDATA(1);\r\n        CALL_FIELD(2, 3, 0, 1);\r\n    }\r\n\r\n}",
+          "calls": [
+            {
+              "arguments": "2, 3, 0, 1",
+              "literalArguments": [
+                2,
+                3,
+                0,
+                1
+              ],
+              "line": 47,
+              "status": "destinazione-nel-codice"
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "name": "SUB_KFEVT_BldgA2F_BldgB2F",
+          "line": 575,
+          "body": "{\r\n    int var8;\r\n    int var9;\r\n    int var10;\r\n    int var11;\r\n    int var5;\r\n    int var6;\r\n    int var7;\r\n    int var4;\r\n    var8 = 0;\r\n    var9 = 0;\r\n    var10 = 0;\r\n    var11 = 0;\r\n    var5 = GET_COUNT(0x10);\r\n    var6 = (var5 / 100);\r\n    var7 = REM(var5, 1000);\r\n    // bit id (0) + (1248) = 1248\r\n    // bit id (0) + (1250) = 1250\r\n    // bit id (0) + (1249) = 1249\r\n    // bit id (0) + (1251) = 1251\r\n    // bit id (0) + (1250) = 1250\r\n    // bit id (0) + (1249) = 1249\r\n    // bit id (0) + (1251) = 1251\r\n    // bit id (0) + (102) = 102\r\n    // bit id (0) + (1249) = 1249\r\n    // bit id (0) + (1249) = 1249\r\n    // bit id (268435456) + (944) = 4016\r\n    \r\n    if (var6 == 1201)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_E12010100_NG_BLDGA2F, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else if (var6 == 1371)\r\n    {\r\n        \r\n        if (BIT_CHK((0 + 1248)) == 1)\r\n        {\r\n            MSG_WND_DSP();\r\n            MSG(MSG_E13710100_NG_BLDGA2F, 0);\r\n            MSG_WND_CLS();\r\n        }\r\n        else if (BIT_CHK((0 + 1250)) == 1)\r\n        {\r\n            MSG_WND_DSP();\r\n            MSG_MIND(MND_E13710100_NG_BLDGA2F, 0);\r\n            MSG_WND_CLS();\r\n            \r\n            if (BIT_CHK((0 + 1249)) == 1)\r\n            {\r\n                BIT_ON((0 + 1251));\r\n            }\r\n\r\n        }\r\n        else \r\n        {\r\n            FLD_CAMERA_LOCK();\r\n            FLD_CAMERA_LOCK_INTERP(859.3499f, 596.4951f, -495.4883f, -0.089f, -0.6953f, -0.0875f, 0.7078f, 0);\r\n            var4 = FLD_OBJ_CNV_RESHND(264);\r\n            FLD_OPEN_ORD_DOOR_FADE(var4, 2, 10);\r\n            FLD_SET_DIVDATA(1);\r\n            CALL_KF_EVENT(137, 102, 1, 0);\r\n        }\r\n\r\n    }\r\n    else if (var6 == 1372)\r\n    {\r\n        \r\n        if (BIT_CHK((0 + 1250)) == 1)\r\n        {\r\n            MSG_WND_DSP();\r\n            MSG_MIND(MND_E13710100_NG_BLDGA2F, 0);\r\n            MSG_WND_CLS();\r\n            \r\n            if (BIT_CHK((0 + 1249)) == 1)\r\n            {\r\n                BIT_ON((0 + 1251));\r\n            }\r\n\r\n        }\r\n        else \r\n        {\r\n            FLD_CAMERA_LOCK();\r\n            FLD_CAMERA_LOCK_INTERP(859.3499f, 596.4951f, -495.4883f, -0.089f, -0.6953f, -0.0875f, 0.7078f, 0);\r\n            var4 = FLD_OBJ_CNV_RESHND(264);\r\n            FLD_OPEN_ORD_DOOR_FADE(var4, 2, 10);\r\n            FLD_SET_DIVDATA(1);\r\n            CALL_KF_EVENT(137, 202, 1, 0);\r\n        }\r\n\r\n    }\r\n    else if (var6 == 1471)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_E14710100_NG_BLDGA2F, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else if (BIT_CHK((0 + 102)) == 1)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_BLDG_B_KEEPOUT_000_0, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else \r\n    {\r\n        \r\n        if (var6 == 1231)\r\n        {\r\n            var8 = 123;\r\n            var9 = 102;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (var6 == 1272)\r\n        {\r\n            var8 = 127;\r\n            var9 = 203;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (var6 == 1391)\r\n        {\r\n            var8 = 139;\r\n            var9 = 102;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (var6 == 1413)\r\n        {\r\n            \r\n            if (BIT_CHK((0 + 1249)) == 0)\r\n            {\r\n                BIT_ON((0 + 1249));\r\n                FLD_CAMERA_LOCK();\r\n                FLD_CAMERA_LOCK_INTERP(859.3499f, 596.4951f, -495.4883f, -0.089f, -0.6953f, -0.0875f, 0.7078f, 0);\r\n                var4 = FLD_OBJ_CNV_RESHND(264);\r\n                Fld_FadeOut_Symbol();\r\n                CALL_EVENT(141, 1);\r\n                FLD_SET_DIVDATA(1);\r\n                CALL_KF_EVENT(141, 302, 1, 0);\r\n                return;\r\n            }\r\n\r\n            var8 = 141;\r\n            var9 = 302;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (var6 == 2381)\r\n        {\r\n            var8 = 238;\r\n            var9 = 103;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (var6 == 2432)\r\n        {\r\n            var8 = 243;\r\n            var9 = 203;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (var6 == 6541)\r\n        {\r\n            var8 = 654;\r\n            var9 = 103;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n        else if (BIT_CHK((0x10000000 + 944)) == 1)\r\n        {\r\n            var8 = 714;\r\n            var9 = 103;\r\n            var10 = 1;\r\n            var11 = 0;\r\n        }\r\n\r\n        \r\n        if (var8 != 0)\r\n        {\r\n            FLD_CAMERA_LOCK();\r\n            FLD_CAMERA_LOCK_INTERP(859.3499f, 596.4951f, -495.4883f, -0.089f, -0.6953f, -0.0875f, 0.7078f, 0);\r\n            var4 = FLD_OBJ_CNV_RESHND(264);\r\n            FLD_OPEN_ORD_DOOR_FADE(var4, 2, 10);\r\n            FLD_SET_DIVDATA(1);\r\n            CALL_KF_EVENT(var8, var9, var10, var11);\r\n        }\r\n\r\n    }\r\n\r\n    return;\r\n}",
+          "calls": []
+        },
+        {
+          "index": 48,
+          "name": "Fld_FadeOut_Symbol",
+          "line": 2442,
+          "body": "{\r\n    FADEOUT(15, 10);\r\n    FADE_SYNC();\r\n}",
+          "calls": []
+        }
+      ],
+      "externalFunctions": [
+        "BIT_CHK",
+        "BIT_ON",
+        "CALL_EVENT",
+        "CALL_FIELD",
+        "CALL_KF_EVENT",
+        "FADEOUT",
+        "FADE_SYNC",
+        "FLD_CAMERA_LOCK",
+        "FLD_CAMERA_LOCK_INTERP",
+        "FLD_OBJ_CNV_RESHND",
+        "FLD_OPEN_ORD_DOOR_FADE",
+        "FLD_SET_DIVDATA",
+        "GET_COUNT",
+        "MSG",
+        "MSG_MIND",
+        "MSG_WND_CLS",
+        "MSG_WND_DSP",
+        "REM"
+      ],
+      "unresolvedNarrativeEventCalls": true,
+      "appImportable": false
+    },
+    {
+      "sourceField": "F002_002_02",
+      "triggerIndex": 0,
+      "label": "Edificio laboratori 3P",
+      "trigger": {
+        "index": 0,
+        "offset": 32,
+        "enableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "disableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "hitType": 2,
+        "nameId": 26,
+        "procedureIndex": 0,
+        "promptType": 11,
+        "position": {
+          "index": 0,
+          "offset": 48,
+          "xyz": [
+            1325.869873046875,
+            720.0001220703125,
+            -499.9450378417969
+          ]
+        },
+        "label": "Edificio laboratori 3P",
+        "procedureResolved": true,
+        "procedureStatus": "risolta"
+      },
+      "sourceMap": "RMAP_002_0_2",
+      "sourceXY": [
+        407.8466196355516,
+        472.00693090117096
+      ],
+      "rootProcedure": "AC_GOTO_EAST_3F",
+      "call": {
+        "arguments": "2, 3, 0, 2",
+        "literalArguments": [
+          2,
+          3,
+          0,
+          2
+        ],
+        "line": 49,
+        "status": "destinazione-nel-codice"
+      },
+      "destinationField": "F002_003_02",
+      "arrival": {
+        "entranceId": 0,
+        "recordIndex": 0,
+        "offset": 2180,
+        "xyz": [
+          1797.452880859375,
+          720.4144897460938,
+          -512.9464721679688
+        ],
+        "rawHex": "000000010000000144e0ae7e44341a87c4003c933f7fffff00000000b259faa400000000",
+        "map": "RMAP_002_0_2",
+        "xy": [
+          438.0247124513327,
+          471.1749278702443
+        ],
+        "status": "spatial-candidate-review-required",
+        "nativePixel": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "corridorAltitude": 720,
+        "altitudeResidual": 0.41448974609375
+      },
+      "ordinaryBranchConditions": [
+        "BIT_CHK(96) != 1",
+        "BIT_CHK(102) != 1"
+      ],
+      "conditionsStatus": "native-only-not-mapped-to-app",
+      "procedures": [
+        {
+          "index": 0,
+          "name": "AC_GOTO_EAST_3F",
+          "line": 25,
+          "body": "{\r\n    int var0;\r\n    var0 = FLD_OBJ_CNV_RESHND(463);\r\n    // bit id (0) + (96) = 96\r\n    // bit id (0) + (102) = 102\r\n    \r\n    if (BIT_CHK((0 + 96)) == 1)\r\n    {\r\n        SUB_KFEVT_BldgA3F_BldgB3F();\r\n    }\r\n    else if (BIT_CHK((0 + 102)) == 1)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_BLDG_B_KEEPOUT_000_0, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else \r\n    {\r\n        FLD_CAMERA_LOCK();\r\n        FLD_CAMERA_LOCK_INTERP(885.3619f, 953.0046f, -514.6873f, -0.0888f, -0.7112f, -0.0913f, 0.6913f, 0);\r\n        FLD_OPEN_ORD_DOOR_FADE(var0, 2, 10);\r\n        FLD_SET_DIVDATA(2);\r\n        CALL_FIELD(2, 3, 0, 2);\r\n    }\r\n\r\n}",
+          "calls": [
+            {
+              "arguments": "2, 3, 0, 2",
+              "literalArguments": [
+                2,
+                3,
+                0,
+                2
+              ],
+              "line": 49,
+              "status": "destinazione-nel-codice"
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "name": "SUB_KFEVT_BldgA3F_BldgB3F",
+          "line": 588,
+          "body": "{\r\n    int var10;\r\n    int var11;\r\n    int var12;\r\n    int var13;\r\n    int var7;\r\n    int var8;\r\n    int var9;\r\n    int var6;\r\n    var10 = 0;\r\n    var11 = 0;\r\n    var12 = 0;\r\n    var13 = 0;\r\n    var7 = GET_COUNT(0x10);\r\n    var8 = (var7 / 100);\r\n    var9 = REM(var7, 1000);\r\n    // bit id (0) + (1248) = 1248\r\n    // bit id (0) + (1250) = 1250\r\n    // bit id (0) + (1249) = 1249\r\n    // bit id (0) + (1251) = 1251\r\n    // bit id (0) + (1250) = 1250\r\n    // bit id (0) + (1249) = 1249\r\n    // bit id (0) + (1251) = 1251\r\n    // bit id (0) + (102) = 102\r\n    // bit id (268435456) + (944) = 4016\r\n    \r\n    if (var8 == 1371)\r\n    {\r\n        \r\n        if (BIT_CHK((0 + 1248)) == 1)\r\n        {\r\n            MSG_WND_DSP();\r\n            MSG(MSG_E13710100_NG_BldgA3F, 0);\r\n            MSG_WND_CLS();\r\n        }\r\n        else if (BIT_CHK((0 + 1250)) == 1)\r\n        {\r\n            MSG_WND_DSP();\r\n            MSG_MIND(MND_E13710100_NG_BldgA3F, 0);\r\n            MSG_WND_CLS();\r\n            \r\n            if (BIT_CHK((0 + 1249)) == 1)\r\n            {\r\n                BIT_ON((0 + 1251));\r\n            }\r\n\r\n        }\r\n        else \r\n        {\r\n            FLD_CAMERA_LOCK();\r\n            FLD_CAMERA_LOCK_INTERP(885.3619f, 953.0046f, -514.6873f, -0.0888f, -0.7112f, -0.0913f, 0.6913f, 0);\r\n            var6 = FLD_OBJ_CNV_RESHND(463);\r\n            FLD_OPEN_ORD_DOOR_FADE(var6, 2, 10);\r\n            FLD_SET_DIVDATA(2);\r\n            CALL_KF_EVENT(137, 102, 2, 0);\r\n            return;\r\n        }\r\n\r\n    }\r\n    else if (var8 == 1372)\r\n    {\r\n        \r\n        if (BIT_CHK((0 + 1250)) == 1)\r\n        {\r\n            MSG_WND_DSP();\r\n            MSG_MIND(MND_E13710100_NG_BldgA3F, 0);\r\n            MSG_WND_CLS();\r\n            \r\n            if (BIT_CHK((0 + 1249)) == 1)\r\n            {\r\n                BIT_ON((0 + 1251));\r\n            }\r\n\r\n        }\r\n        else \r\n        {\r\n            FLD_CAMERA_LOCK();\r\n            FLD_CAMERA_LOCK_INTERP(885.3619f, 953.0046f, -514.6873f, -0.0888f, -0.7112f, -0.0913f, 0.6913f, 0);\r\n            var6 = FLD_OBJ_CNV_RESHND(463);\r\n            FLD_OPEN_ORD_DOOR_FADE(var6, 2, 10);\r\n            FLD_SET_DIVDATA(2);\r\n            CALL_KF_EVENT(137, 202, 2, 0);\r\n            return;\r\n        }\r\n\r\n    }\r\n    else if ((BIT_CHK((0 + 102)) == 1) && (var8 != 1471))\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_BLDG_B_KEEPOUT_000_0, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else \r\n    {\r\n        \r\n        if (var8 == 1231)\r\n        {\r\n            var10 = 123;\r\n            var11 = 102;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 1272)\r\n        {\r\n            var10 = 127;\r\n            var11 = 203;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 1371)\r\n        {\r\n            var10 = 137;\r\n            var11 = 102;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 1372)\r\n        {\r\n            var10 = 137;\r\n            var11 = 202;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 1391)\r\n        {\r\n            var10 = 139;\r\n            var11 = 102;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 1413)\r\n        {\r\n            var10 = 141;\r\n            var11 = 302;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 1471)\r\n        {\r\n            var10 = 147;\r\n            var11 = 102;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 2381)\r\n        {\r\n            var10 = 238;\r\n            var11 = 103;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (var8 == 2432)\r\n        {\r\n            var10 = 243;\r\n            var11 = 203;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n        else if (BIT_CHK((0x10000000 + 944)) == 1)\r\n        {\r\n            var10 = 714;\r\n            var11 = 103;\r\n            var12 = 2;\r\n            var13 = 0;\r\n        }\r\n\r\n        \r\n        if (var10 != 0)\r\n        {\r\n            FLD_CAMERA_LOCK();\r\n            FLD_CAMERA_LOCK_INTERP(885.3619f, 953.0046f, -514.6873f, -0.0888f, -0.7112f, -0.0913f, 0.6913f, 0);\r\n            var6 = FLD_OBJ_CNV_RESHND(463);\r\n            FLD_OPEN_ORD_DOOR_FADE(var6, 2, 10);\r\n            FLD_SET_DIVDATA(2);\r\n            CALL_KF_EVENT(var10, var11, var12, var13);\r\n        }\r\n\r\n    }\r\n\r\n    return;\r\n}",
+          "calls": []
+        }
+      ],
+      "externalFunctions": [
+        "BIT_CHK",
+        "BIT_ON",
+        "CALL_FIELD",
+        "CALL_KF_EVENT",
+        "FLD_CAMERA_LOCK",
+        "FLD_CAMERA_LOCK_INTERP",
+        "FLD_OBJ_CNV_RESHND",
+        "FLD_OPEN_ORD_DOOR_FADE",
+        "FLD_SET_DIVDATA",
+        "GET_COUNT",
+        "MSG",
+        "MSG_MIND",
+        "MSG_WND_CLS",
+        "MSG_WND_DSP",
+        "REM"
+      ],
+      "unresolvedNarrativeEventCalls": true,
+      "appImportable": false
+    },
+    {
+      "sourceField": "F002_002_01",
+      "triggerIndex": 4,
+      "label": "Aula",
+      "trigger": {
+        "index": 4,
+        "offset": 272,
+        "enableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "disableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "hitType": 2,
+        "nameId": 32,
+        "procedureIndex": 4,
+        "promptType": 11,
+        "position": {
+          "index": 4,
+          "offset": 448,
+          "xyz": [
+            -1646.9130859375,
+            360.0000305175781,
+            -2911.532470703125
+          ]
+        },
+        "label": "Aula",
+        "procedureResolved": true,
+        "procedureStatus": "risolta"
+      },
+      "sourceMap": "RMAP_002_0_1",
+      "sourceXY": [
+        217.60880662878498,
+        317.68180006185867
+      ],
+      "rootProcedure": "AC_GOTO_CLASS_SOUTH",
+      "call": {
+        "arguments": "2, 6, 0, 0",
+        "literalArguments": [
+          2,
+          6,
+          0,
+          0
+        ],
+        "line": 176,
+        "status": "destinazione-nel-codice"
+      },
+      "destinationField": "F002_006_00",
+      "arrival": {
+        "entranceId": 0,
+        "recordIndex": 0,
+        "offset": 780,
+        "xyz": [
+          246.56851196289062,
+          3.0517578125e-05,
+          327.6464538574219
+        ],
+        "rawHex": "00000001000000014376918a3800000043a3d2bfbf708fb100000000beaf1d4300000000",
+        "map": null,
+        "xy": null,
+        "status": "local-transform-unresolved"
+      },
+      "ordinaryBranchConditions": [
+        "BIT_CHK(96) != 1"
+      ],
+      "conditionsStatus": "native-only-not-mapped-to-app",
+      "procedures": [
+        {
+          "index": 4,
+          "name": "AC_GOTO_CLASS_SOUTH",
+          "line": 160,
+          "body": "{\r\n    int var1;\r\n    // bit id (0) + (96) = 96\r\n    \r\n    if (BIT_CHK((0 + 96)) == 1)\r\n    {\r\n        SUB_KFEVT_BldgA2F_MyclassSouth();\r\n    }\r\n    else \r\n    {\r\n        FLD_CAMERA_LOCK();\r\n        FLD_CAMERA_LOCK_INTERP(-1294.276f, 593.2642f, -2667.556f, -0.115f, 0.4775f, 0.0632f, 0.8688f, 0);\r\n        var1 = FLD_OBJ_CNV_RESHND(13);\r\n        FLD_OPEN_ORD_DOOR_FADE(var1, 15, 10);\r\n        CALL_FIELD(2, 6, 0, 0);\r\n    }\r\n\r\n    return;\r\n}",
+          "calls": [
+            {
+              "arguments": "2, 6, 0, 0",
+              "literalArguments": [
+                2,
+                6,
+                0,
+                0
+              ],
+              "line": 176,
+              "status": "destinazione-nel-codice"
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "name": "SUB_KFEVT_BldgA2F_MyclassSouth",
+          "line": 1655,
+          "body": "{\r\n    int var57;\r\n    int var58;\r\n    int var59;\r\n    int var60;\r\n    int var54;\r\n    int var55;\r\n    int var56;\r\n    int var52;\r\n    var57 = 0;\r\n    var58 = 0;\r\n    var59 = 0;\r\n    var60 = 0;\r\n    var54 = GET_COUNT(0x10);\r\n    var55 = (var54 / 100);\r\n    var56 = REM(var54, 1000);\r\n    // bit id (268435456) + (944) = 4016\r\n    \r\n    if (var55 == 1231)\r\n    {\r\n        var57 = 123;\r\n        var58 = 106;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 1272)\r\n    {\r\n        var57 = 127;\r\n        var58 = 206;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 1371)\r\n    {\r\n        var57 = 137;\r\n        var58 = 106;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 1372)\r\n    {\r\n        var57 = 137;\r\n        var58 = 206;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 1391)\r\n    {\r\n        var57 = 139;\r\n        var58 = 106;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 1413)\r\n    {\r\n        var57 = 141;\r\n        var58 = 306;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 2381)\r\n    {\r\n        var57 = 238;\r\n        var58 = 101;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (var55 == 2432)\r\n    {\r\n        var57 = 243;\r\n        var58 = 201;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n    else if (BIT_CHK((0x10000000 + 944)) == 1)\r\n    {\r\n        var57 = 714;\r\n        var58 = 106;\r\n        var59 = 0;\r\n        var60 = 0;\r\n    }\r\n\r\n    \r\n    if (var57 != 0)\r\n    {\r\n        FLD_CAMERA_LOCK();\r\n        FLD_CAMERA_LOCK_INTERP(-1294.276f, 593.2642f, -2667.556f, -0.115f, 0.4775f, 0.0632f, 0.8688f, 0);\r\n        var52 = FLD_OBJ_CNV_RESHND(13);\r\n        FLD_OPEN_ORD_DOOR_FADE(var52, 15, 10);\r\n        CALL_KF_EVENT(var57, var58, var59, var60);\r\n    }\r\n    else if (var55 == 1201)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_E12010100_CHK_Myclas, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else if (var55 == 1471)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_E14710100_CHK_Myclas, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else if (var55 == 6541)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG(MSG_E65410201_CHK_Myclas, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else \r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_COMMON_CHK_Myclass_0, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n\r\n    return;\r\n}",
+          "calls": []
+        }
+      ],
+      "externalFunctions": [
+        "BIT_CHK",
+        "CALL_FIELD",
+        "CALL_KF_EVENT",
+        "FLD_CAMERA_LOCK",
+        "FLD_CAMERA_LOCK_INTERP",
+        "FLD_OBJ_CNV_RESHND",
+        "FLD_OPEN_ORD_DOOR_FADE",
+        "GET_COUNT",
+        "MSG",
+        "MSG_MIND",
+        "MSG_WND_CLS",
+        "MSG_WND_DSP",
+        "REM"
+      ],
+      "unresolvedNarrativeEventCalls": true,
+      "appImportable": false
+    },
+    {
+      "sourceField": "F002_002_01",
+      "triggerIndex": 5,
+      "label": "Aula",
+      "trigger": {
+        "index": 5,
+        "offset": 332,
+        "enableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "disableFlags": [
+          4294967295,
+          4294967295,
+          4294967295
+        ],
+        "hitType": 2,
+        "nameId": 32,
+        "procedureIndex": 5,
+        "promptType": 11,
+        "position": {
+          "index": 5,
+          "offset": 548,
+          "xyz": [
+            -1643.4969482421875,
+            360.00006103515625,
+            -3685.860107421875
+          ]
+        },
+        "label": "Aula",
+        "procedureResolved": true,
+        "procedureStatus": "risolta"
+      },
+      "sourceMap": "RMAP_002_0_1",
+      "sourceXY": [
+        217.82741611795814,
+        268.13011795372415
+      ],
+      "rootProcedure": "AC_GOTO_CLASS_NORTH",
+      "call": {
+        "arguments": "2, 6, 1, 0",
+        "literalArguments": [
+          2,
+          6,
+          1,
+          0
+        ],
+        "line": 199,
+        "status": "destinazione-nel-codice"
+      },
+      "destinationField": "F002_006_00",
+      "arrival": {
+        "entranceId": 1,
+        "recordIndex": 1,
+        "offset": 816,
+        "xyz": [
+          263.44317626953125,
+          0.0,
+          -342.7462158203125
+        ],
+        "rawHex": "00000001000000014383b8ba00000000c3ab5f84bf7a67e0000000003e54e6cd00010000",
+        "map": null,
+        "xy": null,
+        "status": "local-transform-unresolved"
+      },
+      "ordinaryBranchConditions": [
+        "BIT_CHK(96) != 1"
+      ],
+      "conditionsStatus": "native-only-not-mapped-to-app",
+      "procedures": [
+        {
+          "index": 5,
+          "name": "AC_GOTO_CLASS_NORTH",
+          "line": 183,
+          "body": "{\r\n    int var2;\r\n    // bit id (0) + (96) = 96\r\n    \r\n    if (BIT_CHK((0 + 96)) == 1)\r\n    {\r\n        SUB_KFEVT_BldgA2F_MyclassNorth();\r\n    }\r\n    else \r\n    {\r\n        FLD_CAMERA_LOCK();\r\n        FLD_CAMERA_LOCK_INTERP(-1288.149f, 595.5956f, -3839.429f, -0.0807f, 0.8153f, 0.1172f, 0.5613f, 0);\r\n        var2 = FLD_OBJ_CNV_RESHND(14);\r\n        FLD_OPEN_ORD_DOOR_FADE(var2, 15, 10);\r\n        CALL_FIELD(2, 6, 1, 0);\r\n    }\r\n\r\n    return;\r\n}",
+          "calls": [
+            {
+              "arguments": "2, 6, 1, 0",
+              "literalArguments": [
+                2,
+                6,
+                1,
+                0
+              ],
+              "line": 199,
+              "status": "destinazione-nel-codice"
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "name": "SUB_KFEVT_BldgA2F_MyclassNorth",
+          "line": 1777,
+          "body": "{\r\n    int var66;\r\n    int var67;\r\n    int var68;\r\n    int var69;\r\n    int var63;\r\n    int var64;\r\n    int var65;\r\n    int var61;\r\n    var66 = 0;\r\n    var67 = 0;\r\n    var68 = 0;\r\n    var69 = 0;\r\n    var63 = GET_COUNT(0x10);\r\n    var64 = (var63 / 100);\r\n    var65 = REM(var63, 1000);\r\n    // bit id (0) + (1099) = 1099\r\n    // bit id (268435456) + (944) = 4016\r\n    \r\n    if (BIT_CHK((0 + 1099)) == 1)\r\n    {\r\n        var66 = 123;\r\n        var67 = 106;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 1272)\r\n    {\r\n        var66 = 127;\r\n        var67 = 206;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 1371)\r\n    {\r\n        var66 = 137;\r\n        var67 = 106;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 1372)\r\n    {\r\n        var66 = 137;\r\n        var67 = 206;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 1391)\r\n    {\r\n        var66 = 139;\r\n        var67 = 106;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 1413)\r\n    {\r\n        var66 = 141;\r\n        var67 = 306;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 2381)\r\n    {\r\n        var66 = 238;\r\n        var67 = 101;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (var64 == 2432)\r\n    {\r\n        var66 = 243;\r\n        var67 = 201;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n    else if (BIT_CHK((0x10000000 + 944)) == 1)\r\n    {\r\n        var66 = 714;\r\n        var67 = 106;\r\n        var68 = 0;\r\n        var69 = 1;\r\n    }\r\n\r\n    \r\n    if (var66 != 0)\r\n    {\r\n        FLD_CAMERA_LOCK();\r\n        FLD_CAMERA_LOCK_INTERP(-1288.149f, 595.5956f, -3839.429f, -0.0807f, 0.8153f, 0.1172f, 0.5613f, 0);\r\n        var61 = FLD_OBJ_CNV_RESHND(14);\r\n        FLD_OPEN_ORD_DOOR_FADE(var61, 15, 10);\r\n        CALL_KF_EVENT(var66, var67, var68, var69);\r\n    }\r\n    else if (var64 == 1201)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_E12010100_CHK_Myclas, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else if (var64 == 1471)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_E14710100_CHK_Myclas, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else if (var64 == 6541)\r\n    {\r\n        MSG_WND_DSP();\r\n        MSG(MSG_E65410201_CHK_Myclas, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n    else \r\n    {\r\n        MSG_WND_DSP();\r\n        MSG_MIND(MND_COMMON_CHK_Myclass_0, 0);\r\n        MSG_WND_CLS();\r\n    }\r\n\r\n    return;\r\n}",
+          "calls": []
+        }
+      ],
+      "externalFunctions": [
+        "BIT_CHK",
+        "CALL_FIELD",
+        "CALL_KF_EVENT",
+        "FLD_CAMERA_LOCK",
+        "FLD_CAMERA_LOCK_INTERP",
+        "FLD_OBJ_CNV_RESHND",
+        "FLD_OPEN_ORD_DOOR_FADE",
+        "GET_COUNT",
+        "MSG",
+        "MSG_MIND",
+        "MSG_WND_CLS",
+        "MSG_WND_DSP",
+        "REM"
+      ],
+      "unresolvedNarrativeEventCalls": true,
+      "appImportable": false
+    }
+  ]
+}

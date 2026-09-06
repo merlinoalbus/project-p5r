@@ -1,0 +1,8 @@
+from pathlib import Path
+r=Path(r'C:\Repository\project-p5r-main')
+def edit(p,a,b):
+ f=r/p;s=f.read_text(encoding='utf-8');assert a in s,(p,a);f.write_text(s.replace(a,b),encoding='utf-8')
+p='server/services/mappe/percorsiMappe.ts'
+edit(p,'  const usati=new Map<string,string>();','  const usati=new Map<string,string>();\n  const nomiBase=new Map<string,number>();\n  for (const n of nodi) {\n    const catena:Nodo[]=[];let c:Nodo|undefined=n;const visti=new Set<string>();\n    while(c){if(visti.has(c.chiave))throw httpErrors.badRequest(\'gerarchia-ciclica\',\'La gerarchia delle mappe contiene un ciclo.\');visti.add(c.chiave);catena.unshift(c);c=c.genitore_chiave?indice.get(c.genitore_chiave):undefined;}\n    const base=catena.filter(c=>c.tipo!==\'citta\'||c===n).map(c=>slug(c.nome)).join(\'-\');nomiBase.set(base,(nomiBase.get(base)??0)+1);\n  }')
+edit(p,"    const chiave=significativi.map(c=>slug(c.nome)).join('-');", "    let chiave=significativi.map(c=>slug(c.nome)).join('-');\n    // Le varianti native possono condividere il nome del luogo. L'identità è nell'URL, mai nel titolo.\n    const aliasBase=db.prepare('SELECT mappa_chiave FROM mappa_alias WHERE chiave=?').get(chiave) as {mappa_chiave:string}|undefined;\n    if (/^nativo-rmap-\\d+-\\d+-\\d+$/.test(n.chiave) && ((nomiBase.get(chiave)??0)>1 || (aliasBase && aliasBase.mappa_chiave!==n.chiave))) chiave=chiave+'-'+n.chiave;")
+edit('server/services/mappe/sincronizzaMappe.ts','    figlie.forEach((f, i) => {','    figlie.forEach((f, i) => {\n      // Le planimetrie native richiedono ingressi reali: la griglia non è una connessione del gioco.\n      if (f.chiave.startsWith(\'nativo-rmap-\')) return;')

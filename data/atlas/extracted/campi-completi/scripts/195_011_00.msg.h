@@ -1,0 +1,20 @@
+// Decompiled by Atlus Script Tools
+const int dummy_mes                        = 0;
+const int D08_01_e437_005_mes01            = 1;
+const int D08_01_e437_005_mes02            = 2;
+const int D08_01_e437_005_mes03            = 3;
+const int D08_01_e437_005_mes04            = 4;
+const int SCN_LOCK_07_mes01                = 5;
+const int SCN_LOCK_07_mes02                = 6;
+const int SCN_LOCK_07_mes03                = 7;
+const int CHECK_CONSOLE_MES_01_01          = 8;
+const int CHECK_CONSOLE_MES_01_02          = 9;
+const int CHECK_CONSOLE_MES_02_01          = 10;
+const int CHECK_CONSOLE_MES_02_02          = 11;
+const int CHECK_CONSOLE_MES_02_03          = 12;
+const int CHECK_CONSOLE_MES_02_04          = 13;
+const int Joze_imcomplete_stamp            = 14;
+const int Joze_Battle_reinvite             = 15;
+const int SEL_fight_or_flight              = 16;
+const int Joze_Battle_flight               = 17;
+const int Joze_Battle_fight                = 18;

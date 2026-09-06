@@ -12,7 +12,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ getAgenda: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getAgenda: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
@@ -23,12 +23,13 @@ const giorno: PercorsoGiornoDto = {
     { indice: 1, fascia: 'sera', azione: 'Vai da Takemi', tipo: 'confidente', riferimento: { tipo: 'confidente', chiave: 'takemi' }, riferimentoTesto: 'Takemi', rangoAtteso: 3, note: null, fatta: false, effetti: null, stato: { tipo: 'bloccata', motivo: 'Coraggio rango 2 (rango 1 di 2)' }, mappa: null },
   ],
 };
-const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: null, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [],
+const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: null, percorso: [{ chiave, nome }], figli: [],
   spilli: [{ id: 7, mappaChiave: chiave, tipo: 'confidente', tipoNome: 'Confidente', colore: '#ec4899', nome: 'Cortile della Shujin', descrizione: '', x: 30, y: 40, riferimento: null, collezionabile: false, ordine: 0, origine: 'seed', raccolto: false, dettaglio: null, condizioni: [], immagini: [], updatedAt: '' }] });
 
 describe('OggiPartita', () => {
   beforeEach(() => {
     for (const f of Object.values(api)) if ('mockReset' in f) f.mockReset();
+    api.risolviMappa.mockImplementation(async (mappa: string) => ({tipo:'mappa',mappa}));
     api.getAgenda.mockResolvedValue({ giorno: '04-12', eventi: [], azioni: [] });
     api.getPercorsoIndice.mockResolvedValue(indice);
     api.getPercorsoGiorno.mockResolvedValue(giorno);

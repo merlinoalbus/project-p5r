@@ -1,0 +1,328 @@
+{
+  "quarters": [
+    {
+      "chiave": "yongen-jaya",
+      "nome": "Yongen-Jaya",
+      "sblocco": null,
+      "sblocco_data": null
+    },
+    {
+      "chiave": "shibuya",
+      "nome": "Shibuya",
+      "sblocco": null,
+      "sblocco_data": null
+    },
+    {
+      "chiave": "shinjuku",
+      "nome": "Shinjuku",
+      "sblocco": "18 giugno (evento di trama)",
+      "sblocco_data": "06-18"
+    },
+    {
+      "chiave": "kichijoji",
+      "nome": "Kichijoji",
+      "sblocco": "5 giugno (Domenica 6/05, scena di trama con Ryuji Sakamoto subito dopo la confessione di Madarame); esclusivo Persona 5 Royal",
+      "sblocco_data": "06-05"
+    },
+    {
+      "chiave": "akihabara",
+      "nome": "Akihabara",
+      "sblocco": "31 agosto (evento di trama)",
+      "sblocco_data": "08-31"
+    },
+    {
+      "chiave": "shujin-academy",
+      "nome": "Shujin Academy (scuola)",
+      "sblocco": null,
+      "sblocco_data": null
+    },
+    {
+      "chiave": "kanda-jinbocho",
+      "nome": "Kanda / Jinbocho",
+      "sblocco": "Kanda: Confidente Emperor (Yusuke) Rango 5; Jinbocho: Confidente Star (Hifumi) Rango 4",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "ikebukuro",
+      "nome": "Ikebukuro",
+      "sblocco": "1 settembre (lettura libro, forse \"Cieli notturni\") oppure invito di Makoto (Niijima) del 30 luglio dopo il suo Palazzo",
+      "sblocco_data": "09-01"
+    },
+    {
+      "chiave": "harajuku",
+      "nome": "Harajuku",
+      "sblocco": "lettura del libro \"Vague\" (Libreria Taiheido, Shibuya, 700¥) oppure invito di Mishima del 3 agosto",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "ueno",
+      "nome": "Ueno",
+      "sblocco": "Confidente Emperor (Yusuke) Rango 3",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "inokashira-park",
+      "nome": "Parco Inokashira",
+      "sblocco": "Confidente Lovers (Ann) Rango 3",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "odaiba",
+      "nome": "Odaiba / Seaside Park",
+      "sblocco": "1 giugno oppure Confidente Lovers (Ann) Rango 10",
+      "sblocco_data": "06-01"
+    },
+    {
+      "chiave": "shinagawa",
+      "nome": "Shinagawa",
+      "sblocco": "lettura del libro \"Un acquario al giorno\" (Libreria Taiheido, 2.000¥) o invito di Akechi del 28-29 luglio (esclusivo Royal)",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "nakano",
+      "nome": "Nakano",
+      "sblocco": "lettura del libro \"Esplorando Nakano\" (Libreria Taiheido, 2.000¥) o invito di Futaba (Eremita) del 9 ottobre (esclusivo Royal)",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "ogikubo",
+      "nome": "Ogikubo",
+      "sblocco": "Confidente Chariot (Ryuji) Rango 4",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "yokohama-chinatown",
+      "nome": "Chinatown (Yokohama)",
+      "sblocco": "lettura del libro \"Chinese Sweets\" (titolo italiano non reperito)",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "maihama",
+      "nome": "Maihama",
+      "sblocco": "11 ottobre (evento di trama con le Gemelle custodi) o lettura libro \"Theme Park Escort\" (titolo italiano non reperito)",
+      "sblocco_data": "10-11"
+    },
+    {
+      "chiave": "roppongi",
+      "nome": "Roppongi",
+      "sblocco": "sbloccato durante l'infiltrazione al Palazzo di Okumura (circa 19 settembre)",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "tsukishima",
+      "nome": "Tsukishima",
+      "sblocco": "Confidente Chariot (Ryuji) Rango 7",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "meiji-shrine",
+      "nome": "Santuario Meiji",
+      "sblocco": "lettura del libro \"Santuari di Tokyo\" (Libreria Taiheido, 1.800¥) o invito di Ann del 5 agosto",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "ichigaya",
+      "nome": "Ichigaya",
+      "sblocco": "lettura del libro \"Vedetta lacustre\" (Libreria Taiheido, 1.800¥) o invito di Ryuji (data riportata come 6 luglio dalla guida italiana, 3 luglio da fonte secondaria: verificare)",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "suidobashi",
+      "nome": "Suidobashi (Dome Town)",
+      "sblocco": "10 giugno (evento di trama)",
+      "sblocco_data": "06-10"
+    },
+    {
+      "chiave": "asakusa",
+      "nome": "Asakusa",
+      "sblocco": "Confidente Lovers (Ann) Rango 7",
+      "sblocco_data": null
+    },
+    {
+      "chiave": "mementos",
+      "nome": "Mementos (ingresso)",
+      "sblocco": null,
+      "sblocco_data": null
+    }
+  ],
+  "tokyoPins": [
+    {
+      "nome": "Yongen-Jaya",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-yongen-jaya",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Shibuya",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-shibuya",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Shinjuku",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-shinjuku",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Kichijoji",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-kichijoji",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Akihabara",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-akihabara",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Shujin Academy (scuola)",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-shujin-academy",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Kanda / Jinbocho",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-kanda-jinbocho",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Ikebukuro",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-ikebukuro",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Harajuku",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-harajuku",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Ueno",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-ueno",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Parco Inokashira",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-inokashira-park",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Odaiba / Seaside Park",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-odaiba",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Shinagawa",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-shinagawa",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Nakano",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-nakano",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Ogikubo",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-ogikubo",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Chinatown (Yokohama)",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-yokohama-chinatown",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Maihama",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-maihama",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Roppongi",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-roppongi",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Tsukishima",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-tsukishima",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Santuario Meiji",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-meiji-shrine",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Ichigaya",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-ichigaya",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Suidobashi (Dome Town)",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-suidobashi",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Asakusa",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-asakusa",
+      "condizioni_json": null
+    },
+    {
+      "nome": "Mementos (ingresso)",
+      "tipo": "passaggio",
+      "riferimento_tipo": "mappa",
+      "riferimento_chiave": "citta-mementos",
+      "condizioni_json": null
+    }
+  ],
+  "candidate": {
+    "file": "originali/BASE/FIELD/PANEL/LMAP/ROSENZU.GMD",
+    "sha256": "74114eacf3f357272f55f8b7ecada153bea472c2f7770b31946a8f40cb7c2f3e",
+    "containsDDS": false,
+    "usableBackgroundVerified": false
+  },
+  "limits": [
+    "sblocco_data does not capture alternative unlocks through books, confidants or events.",
+    "The candidate GMD has not been rendered or visually verified as the Tokyo background."
+  ]
+}

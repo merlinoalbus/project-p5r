@@ -1,0 +1,75 @@
+{
+  "scope": "Analisi read-only accessibilità e distinguibilità UI delle famiglie omonime; nessun censimento dati duplicato.",
+  "familyCountProvidedByCoordinator": 55,
+  "dataCoverageNotRecensused": true,
+  "findings": [
+    {
+      "file": "src/pages/MappaPage.tsx",
+      "line": 67,
+      "finding": "Selettore delle planimetrie: option identificata da chiave ma testo solo nomePresentazioneMappa; omonimi non distinguibili."
+    },
+    {
+      "file": "src/components/mappe/AlberoLuoghi.tsx",
+      "line": 15,
+      "finding": "Raggruppamento miniature solo per gruppoImmagini; altri link soltanto nome, quindi stessa etichetta per immagini distinte."
+    },
+    {
+      "file": "src/components/mappe/ImmaginiLuogo.tsx",
+      "line": 4,
+      "finding": "Modello già utile: miniature + Immagine i di n + aria-current. Ordinamento senza spareggio su chiave; ordinali ricalcolati dal sottoinsieme passato."
+    },
+    {
+      "file": "src/utils/presentazioneMappa.ts",
+      "line": 31,
+      "finding": "Nome contestuale/neutro corretto ma nessuna disambiguazione tra identità diverse."
+    },
+    {
+      "file": "src/pages/EditorMappaPage.tsx",
+      "line": 323,
+      "finding": "Lista figli via etichettaPlanimetria; parent selector516 stessa funzione; bottone329 usa solo nomePresentazioneMappa."
+    },
+    {
+      "file": "src/components/mappe/DestinazioneSpilloEditor.tsx",
+      "line": 22,
+      "finding": "Dropdown globale usa etichettaPlanimetria senza contesto famiglia."
+    },
+    {
+      "file": "src/components/mappe/IngressoQuartiere.tsx",
+      "line": 20,
+      "finding": "Ricerca e dropdown basati etichettaPlanimetria; filtrare prima di numerare renderebbe ordinale instabile."
+    },
+    {
+      "file": "src/components/mappe/MappaIncorporata.tsx",
+      "line": 73,
+      "finding": "Contenitore mostra nome grezzo e figli nome grezzo; visore presentaMappa non offre selezione sorelle né contesto in pannello."
+    }
+  ],
+  "proposal": {
+    "core": "Un’identità/URL per immagine. Disambiguazione presentativa, mai merge o nuova equivalenza semantica.",
+    "label": "<titolo contestuale o neutro> — immagine i di n",
+    "ordinalDomain": "Collezione delle planimetrie figlie dello stesso genitore verificato; il gruppoImmagini Covo già approvato conserva il proprio dominio esplicito. Non raggruppare per titolo uguale.",
+    "ordering": "ordine persistito, poi chiave stabile come spareggio. Calcolo sull’intera collezione prima di ricerca/filtri; non cambiare ordinali al cambio contesto.",
+    "metadata": "Preferibile indice/totale/idCollezione presentativi identici nei DTO riassunto e dettaglio; tutti i consumatori usano helper unico. Se derivati client, caricare sempre medesimo indice globale; mai dettaglio isolato o lista filtrata.",
+    "thumbnails": "Lista visuale nel pannello del visore e albero espandibile; riuso ImmaginiLuogo adattato senza inventare gruppoImmagini. URL esistente, anteprima originale, etichetta composta, aria-current. Dropdown HTML mantiene etichetta univoca testuale, non immagini dentro option.",
+    "incorporated": "Nel pannello incorporato rendere accessibile la stessa collezione/etichetta; selezione apre URL della mappa già esistente senza inferire passaggio in-game.",
+    "noFakeHierarchy": "Indice significa posizione della risorsa nella raccolta, non piano, stanza, variante narrativa o collegamento fisico."
+  },
+  "acceptance": [
+    "Tutte le chiavi immagine presenti nell’audit backend compaiono esattamente una volta per collezione e restano raggiungibili.",
+    "Per ciascuna famiglia del censimento backend corrente, senza fissare55, etichette accessibili distinte; cardinalità e URL coincidono coi dati prima/dopo.",
+    "Uguale chiave produce medesimo ordinale in albero, pagina, editor, ingressi e incorporata, anche dopo filtro e ordinamento UI.",
+    "Titoli nulli restano neutri; titolo noto scelto solo per contesto esplicito. Cambio contesto conserva identificativo e ordinale.",
+    "Covo5, immagini con nomi multipli19 e omonimi appartenenti a genitori diversi non vengono fusi.",
+    "Anteprima assente non impedisce selezione: etichetta e collegamento restano sufficienti.",
+    "Ricerca non elimina definitivamente membri; reset del filtro ripristina intera collezione."
+  ],
+  "implementationState": "Proposta soltanto, nessun file applicativo modificato; attende gate.",
+  "updatedCensusFromParallelAgent": {
+    "source": "work/backend-organization/organization-backlog.md",
+    "apiNodes": 344,
+    "families": 62,
+    "members": 179,
+    "withoutImageGroup": 169,
+    "independentlyRecounted": false
+  }
+}

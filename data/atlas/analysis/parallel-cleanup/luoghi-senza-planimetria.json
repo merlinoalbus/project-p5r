@@ -1,0 +1,690 @@
+{
+  "checkedAt": "2026-09-06T04:44:44.189728+00:00",
+  "scope": "16 destinazioni richieste; API3103 e DB runtime-atlante read-only.",
+  "provenance": {
+    "file": "C:\\Repository\\project-p5r-main\\docs\\grafica\\prompt-immagini.md",
+    "lines": [
+      281,
+      282,
+      283,
+      284
+    ],
+    "sha256": "038df176502552b79957f28243fc7a36d8a8ca343ebe2ad94fedeb35232c1c1d",
+    "finding": "Il prompt §19 dichiara Piante ILLUSTRATE originali, NON ricalcate da mappe ufficiali né screenshot. Registro generazione elenca ciascun file come completato."
+  },
+  "summary": {
+    "destinations": 16,
+    "existingVerifiedPng": 16,
+    "storedPins": 0,
+    "editorialIllustrations": 16
+  },
+  "destinations": [
+    {
+      "requestedQuarter": "ikebukuro",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-ikebukuro.png",
+      "assetSha256": "459c1eb021078be6ff14c6488813a4ff9e1a923de306029d755a7861a505ec60",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        132
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "ikebukuro",
+        "nome": "Ikebukuro",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/ikebukuro",
+        "assetOriginale": "mappe/citta-ikebukuro",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "ikebukuro"
+        },
+        "numeroSpilli": 0,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "ikebukuro",
+        "name": "Ikebukuro",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "harajuku",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-harajuku.png",
+      "assetSha256": "5dd18b2b96768f60840b25fba27282a3d0a2fabed46011a7af20df6a77649f2c",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        133
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "harajuku",
+        "nome": "Harajuku",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/harajuku",
+        "assetOriginale": "mappe/citta-harajuku",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "harajuku"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "harajuku",
+        "name": "Harajuku",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "ueno",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-ueno.png",
+      "assetSha256": "c65f71f17563f0fbc1dd2b5f420745d775de5f45fe6e0edb27b7681e8a926344",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        134
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "ueno",
+        "nome": "Ueno",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/ueno",
+        "assetOriginale": "mappe/citta-ueno",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "ueno"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "ueno",
+        "name": "Ueno",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "inokashira-park",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-inokashira-park.png",
+      "assetSha256": "0c7788bbf60873887f721bcb3a9531a39b0525d9999f6515934962eeff7d6cda",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        135
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "parco-inokashira",
+        "nome": "Parco Inokashira",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/parco-inokashira",
+        "assetOriginale": "mappe/citta-inokashira-park",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "inokashira-park"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "inokashira-park",
+        "name": "Parco Inokashira",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "shinagawa",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-shinagawa.png",
+      "assetSha256": "10894e3b35cfe0a97fe806a039b9b2e230cf8315ecf55aa7ead1f7f9c59614bf",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        137
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "shinagawa",
+        "nome": "Shinagawa",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/shinagawa",
+        "assetOriginale": "mappe/citta-shinagawa",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "shinagawa"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "shinagawa",
+        "name": "Shinagawa",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "nakano",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-nakano.png",
+      "assetSha256": "449a31cbc1d158f0c5aef3f8fe3a72f64ccbfcd61cc7522b2fa9e5026f3d13a5",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        138
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "nakano",
+        "nome": "Nakano",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/nakano",
+        "assetOriginale": "mappe/citta-nakano",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "nakano"
+        },
+        "numeroSpilli": 0,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "nakano",
+        "name": "Nakano",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "ogikubo",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-ogikubo.png",
+      "assetSha256": "2c857c91691fe155b9b10418956803deec3ee35ef6469702c6598740a5dabdb9",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        139
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "ogikubo",
+        "nome": "Ogikubo",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/ogikubo",
+        "assetOriginale": "mappe/citta-ogikubo",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "ogikubo"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "ogikubo",
+        "name": "Ogikubo",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "yokohama-chinatown",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-yokohama-chinatown.png",
+      "assetSha256": "aa9876d769c7fab03022e2efb4128dcea309505cdabcd8ffc8142d2ed3c61d4c",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        140
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "chinatown-yokohama",
+        "nome": "Chinatown (Yokohama)",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/chinatown-yokohama",
+        "assetOriginale": "mappe/citta-yokohama-chinatown",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "yokohama-chinatown"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "yokohama-chinatown",
+        "name": "Chinatown (Yokohama)",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "maihama",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-maihama.png",
+      "assetSha256": "b5d70591bd95eb2cec3f8071a9b952a1870645340cea9c9486b53d3d6df35b63",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        141
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "maihama",
+        "nome": "Maihama",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/maihama",
+        "assetOriginale": "mappe/citta-maihama",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "maihama"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "maihama",
+        "name": "Maihama",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "roppongi",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-roppongi.png",
+      "assetSha256": "dd1ad60375dfb9372d90901ac2805a07a03de441f8a47b00c964a1c164ea8786",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        142
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "roppongi",
+        "nome": "Roppongi",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/roppongi",
+        "assetOriginale": "mappe/citta-roppongi",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "roppongi"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "roppongi",
+        "name": "Roppongi",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "tsukishima",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-tsukishima.png",
+      "assetSha256": "65f04505a0eab0807ec39047cc0f4aba336375520a8dd27ba4da86cf5c3f4ac9",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        143
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "tsukishima",
+        "nome": "Tsukishima",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/tsukishima",
+        "assetOriginale": "mappe/citta-tsukishima",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "tsukishima"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "tsukishima",
+        "name": "Tsukishima",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "meiji-shrine",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-meiji-shrine.png",
+      "assetSha256": "cac3bc8a4fc13f2b45be1e6e3821b89ff716e77a968dec333fee1388285c82e6",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        144
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "santuario-meiji",
+        "nome": "Santuario Meiji",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/santuario-meiji",
+        "assetOriginale": "mappe/citta-meiji-shrine",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "meiji-shrine"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "meiji-shrine",
+        "name": "Santuario Meiji",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "ichigaya",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-ichigaya.png",
+      "assetSha256": "2456450ef0ab90e8e8c2ab1d122c437f7b3b9342643fbe2aff2bab1bd0899848",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        145
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "ichigaya",
+        "nome": "Ichigaya",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/ichigaya",
+        "assetOriginale": "mappe/citta-ichigaya",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "ichigaya"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "ichigaya",
+        "name": "Ichigaya",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "suidobashi",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-suidobashi.png",
+      "assetSha256": "8415b7785fab91a9fb468af849f0cf0a9ba56a330c063dcc16944fee2c820a12",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        146
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "suidobashi-dome-town",
+        "nome": "Suidobashi (Dome Town)",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/suidobashi-dome-town",
+        "assetOriginale": "mappe/citta-suidobashi",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "suidobashi"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "suidobashi",
+        "name": "Suidobashi (Dome Town)",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "asakusa",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-asakusa.png",
+      "assetSha256": "360c8364de4e89583dd975ceccdacfd04b3ee0a68d8724ea8a6e0853878fab1a",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        147
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "asakusa",
+        "nome": "Asakusa",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/asakusa",
+        "assetOriginale": "mappe/citta-asakusa",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "asakusa"
+        },
+        "numeroSpilli": 1,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "asakusa",
+        "name": "Asakusa",
+        "places": 1
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    },
+    {
+      "requestedQuarter": "mementos",
+      "assetFile": "C:\\Repository\\project-p5r-main\\public\\asset\\mappe\\citta-mementos.png",
+      "assetSha256": "6053e9623c3635d4e04b42d7d13e12e1a11f4c74ad4ee895f876a4ef7aa7c72d",
+      "size": [
+        2048,
+        1536
+      ],
+      "pngVerified": true,
+      "generationLedgerLines": [
+        148
+      ],
+      "classification": "editorial-generated-illustration-not-certified-native-plan",
+      "api": {
+        "chiave": "mementos-ingresso",
+        "nome": "Mementos (ingresso)",
+        "tipo": "quartiere",
+        "genitore": "tokyo",
+        "immagineUrl": null,
+        "asset": "mappe/mementos-ingresso",
+        "assetOriginale": "mappe/citta-mementos",
+        "larghezza": null,
+        "altezza": null,
+        "origine": "seed",
+        "entita": {
+          "tipo": "quartiere",
+          "chiave": "mementos"
+        },
+        "numeroSpilli": 0,
+        "numeroFigli": 0
+      },
+      "database": null,
+      "preservePins": [],
+      "sourceCity": {
+        "key": "mementos",
+        "name": "Mementos (ingresso)",
+        "places": 2
+      },
+      "proposedPresentation": "Destinazione con scheda e illustrazione; planimetria del gioco non disponibile nelle fonti verificate.",
+      "nativeAbsenceClaim": "Non dimostrata assenza assoluta nell’intero gioco; classificazione dell’asset attuale e mancata prova di planimetria di questa destinazione."
+    }
+  ],
+  "proposal": {
+    "classification": "Separare ruolo visivo {planimetriaVerificata,illustrazione,senzaImmagine} dalla semplice presenza/namespace/risoluzione del file.",
+    "storage": "Conservare byte originali, assetOriginale, caricamenti utente, tutti gli IDspillo/coordinate/riferimenti/stati e schede. Non azzerare record per far sparire il visore.",
+    "ui": "Scheda destinazione con immagine illustrativa dichiarata e accesso a luoghi/contenuti; non usare l’illustrazione come prova della geometria del gioco. Se pin già esistenti, restano modificabili/listati con le coordinate originali senza riposizionarli automaticamente.",
+    "userImages": "Un’immagine caricata dall’utente non va sovrascritta né riclassificata solo dal quartiere. La provenienza del file corrente deve restare distinta dall’asset di default.",
+    "acceptance": "16/16 destinazioni accessibili; hash asset invariati;ID e conteggio pin invariati; schede raggiungibili; nessuna immagine editoriale mostrata come planimetria native verificata."
+  },
+  "limits": [
+    "Tentativo di view_image sul primo PNG non riuscito; validità byte verificata con Pillow per tutti16. Classificazione basata sulla provenienza documentata, non su giudizio visivo inventato.",
+    "Nessuna modifica di codice, immagine o database."
+  ]
+}

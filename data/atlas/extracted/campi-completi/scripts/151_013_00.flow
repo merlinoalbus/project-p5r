@@ -1,0 +1,209 @@
+
+// 
+// FlowScript decompiled using Atlus Script Tools
+// 
+
+
+// 
+// Imports
+// 
+
+import("151_013_00.msg");
+
+// 
+// Procedure declarations
+// 
+
+// Procedure Index: 0
+void GOTO_151_02_06()
+{
+    // bit id (536870912) + (597) = 6741
+    // bit id (536870912) + (597) = 6741
+    // bit id (536870912) + (597) = 6741
+    
+    if (BIT_CHK((0x20000000 + 597)) == 1)
+    {
+        BIT_OFF((0x20000000 + 597));
+    }
+    else 
+    {
+        BIT_ON((0x20000000 + 597));
+    }
+
+    CALL_FIELD(151, 2, 6, 0);
+    // bit id (536870912) + (4649) = 10793
+    // bit id (536870912) + (4649) = 10793
+    
+    if (BIT_CHK((0x20000000 + 4649)) == 0)
+    {
+        BIT_ON((0x20000000 + 4649));
+    }
+
+}
+
+
+// Procedure Index: 1
+void EV_UP_GOTO_151_07_01()
+{
+    int var0;
+    FLD_LOCAL_FLAG_ON((49152 + 48));
+    var0 = FLD_SCRIPT_READ(151, 13, 10);
+    FLD_SCRIPT_READ_SYNC(var0);
+    FLD_SCRIPT_EXEC(var0, 0);
+    FLD_SCRIPT_FREE(var0);
+    FLD_LOCAL_FLAG_OFF((49152 + 48));
+    // bit id (536870912) + (515) = 6659
+    BIT_ON((0x20000000 + 515));
+    // bit id (536870912) + (270) = 6414
+    
+    if (BIT_CHK((0x20000000 + 270)) == 1)
+    {
+        CALL_FIELD(151, 7, 1, 0);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 2
+void EV_DOWN_GOTO_152_05_02()
+{
+    int var2;
+    int var3;
+    int var4;
+    int var5;
+    int var6;
+    int var1;
+    int var7;
+    // bit id (536870912) + (4632) = 10776
+    // bit id (536870912) + (583) = 6727
+    
+    if (BIT_CHK((0x20000000 + 4632)) == 0)
+    {
+        FADEOUT(5, 10);
+        FADE_SYNC();
+        FLD_SMP_EVENT_BEGIN(0);
+        var2 = FLD_PC_GET_RESHND(0);
+        var3 = -1;
+        var4 = -1;
+        var5 = -1;
+        FLD_MODEL_SET_TRANSLATE(var2, -427.7324f, -300.00f, -1978.00f, 0);
+        FLD_MODEL_SET_ROTATE(var2, 0, 180.00f, 0, 0);
+        FLD_MODEL_SYNC_TRANSLATE(var2);
+        FLD_PTY_MODEL_SET_STD_POS();
+        FLD_ALLY_SET_WAIT(0);
+        SYNC();
+        FLD_CAMERA_LOCK();
+        FLD_CAMERA_LOCK_INTERP(-418.0537f, -86.6387f, -1537.988f, -0.0437f, 0.00f, -0.00f, 0.999f, 0);
+        FLD_CAMERA_LOCK_SYNC_INTERP();
+        EVT_FAST_PROC_START();
+        FADEIN(0, 20);
+        FADE_SYNC();
+        FLD_WAIT(15);
+        var6 = FLD_MODEL_CLONE_ADDMOTION(var2, 97);
+        FLD_MODEL_ANIM(var6, (60 + 0), 0, 3, 1.00f);
+        var1 = FLD_OBJ_CNV_RESHND(5);
+        FLD_MODEL_ANIM(var1, 6, 0, 0, 1.00f);
+        FLD_MODEL_ANIM_SYNC(var6);
+        FLD_MODEL_ANIM(var6, 0, 1, 5, 1.00f);
+        FLD_MODEL_REVERT_ADDMOTION(var2, var6);
+        FLD_WAIT(15);
+        MDL_ICON(var2, 3);
+        FLD_WAIT(15);
+        MSG_WND_DSP();
+        MSG(D151_013_EV_LOCK_mes01, 0);
+        MSG_WND_CLS();
+        MSG_WND_DSP();
+        MSG(D151_013_EV_LOCK_mes02, 0);
+        MSG_WND_CLS();
+        var1 = FLD_OBJ_CNV_RESHND(5);
+        MDL_ANIM(var1, 0, 0, 20, 1.00f);
+        FADEOUT(5, 10);
+        FADE_SYNC();
+        FLD_SMP_EVENT_END(0);
+        FLD_CAMERA_UNLOCK();
+        FLD_CAMERA_INTERP_ASYNC(0);
+        FLD_WAIT(10);
+        FADEIN(5, 20);
+        FADE_SYNC();
+    }
+    else 
+    {
+        FLD_LOCAL_FLAG_ON((49152 + 48));
+        var7 = FLD_SCRIPT_READ(151, 13, 20);
+        FLD_SCRIPT_READ_SYNC(var7);
+        FLD_SCRIPT_EXEC(var7, 0);
+        FLD_SCRIPT_FREE(var7);
+        FLD_LOCAL_FLAG_OFF((49152 + 48));
+        BIT_ON((0x20000000 + 583));
+        CALL_FIELD(152, 5, 0, 0);
+    }
+
+    return;
+}
+
+
+// Procedure Index: 3
+void D151_13_miniEV03()
+{
+    EVT_FAST_PROC_START();
+    // bit id (536870912) + (342) = 6486
+    BIT_ON((0x20000000 + 342));
+    FLD_SMP_EVENT_BEGIN(0);
+    FLD_CAMERA_LOCK();
+    FLD_CAMERA_LOCK_INTERP(0.0006f, 193.5397f, 1861.928f, -0.00f, 0.9974f, -0.0717f, -0.00f, 30);
+    FLD_WAIT(45);
+    MSG_WND_DSP();
+    MSG(D151_13_miniEV03_mes01, 0);
+    MSG_WND_CLS();
+    MSG_WND_DSP();
+    MSG(D151_13_miniEV03_mes02, 0);
+    MSG_WND_CLS();
+    FLD_CAMERA_INTERP(20);
+    FLD_CAMERA_UNLOCK();
+    FLD_SMP_EVENT_END(0);
+    EVT_FAST_PROC_END();
+}
+
+
+// Procedure Index: 4
+void D151_13_miniEV05()
+{
+    FLD_SMP_EVENT_BEGIN(0);
+    EVT_FAST_PROC_START();
+    FLD_WAIT(15);
+    MSG_WND_DSP();
+    MSG(D151_13_miniEV05_mes01, 0);
+    MSG_WND_CLS();
+    FLD_SMP_EVENT_END(0);
+    EVT_FAST_PROC_END();
+}
+
+
+// Procedure Index: 5
+void D01_151_13_EV_GUIDE01()
+{
+    SET_COUNT(130, 13);
+    FLD_START_SUPPORT_MSG();
+    // bit id (536870912) + (5024) = 11168
+    BIT_ON((0x20000000 + 5024));
+}
+
+
+// Procedure Index: 6
+void D01_151_13_EV_GUIDE02()
+{
+    SET_COUNT(130, 14);
+    FLD_START_SUPPORT_MSG();
+    // bit id (536870912) + (5024) = 11168
+    BIT_ON((0x20000000 + 5024));
+}
+
+
+// Procedure Index: 7
+void D01_151_13_minimap_00()
+{
+    // bit id (536870912) + (515) = 6659
+    BIT_ON((0x20000000 + 515));
+}
+
