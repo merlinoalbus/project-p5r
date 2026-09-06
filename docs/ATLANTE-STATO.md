@@ -276,6 +276,58 @@ Altre due strade cercate e chiuse, perché non le ricerchi di nuovo chi legge:
   1480 file estratti, con hash e dimensione: non contiene l'indice dei CPK, quindi da qui non si
   può nemmeno sapere quali file esistono e non sono stati presi.
 
+### Contare le icone nelle schermate: la strada che funziona
+
+L'utente ha fornito sei schermate delle mappe di Kamoshida, e da lì è nata la strada più diretta
+di tutte. **Copertura da 423 a 523 pin su 1429 (36,6%).**
+
+Il metodo è un vincolo di conteggio, non una somiglianza. Se in una schermata si contano due rombi
+verdi con la S, il tipo di pin che li disegna deve comparire **esattamente due volte** fra i pin
+nativi di quella planimetria; ogni schermata esclude dei candidati, e quando ne resta uno solo
+quello è dimostrato per esclusione di tutti gli altri.
+
+| schermata | rombi «S» | tipi ancora compatibili |
+|---|---|---|
+| Old Castle 1F | 1 | 4, 5, 10, 12, 15, 19, 28 |
+| Old Castle 2F | 1 | 4, 10, 13, 15, 19, 26, 28 |
+| Old Castle 3F | 2 | **4, 17** |
+| Tower: Lower Level | 1 | 4, 10, 14, 15, 19, 26, 28, 30 |
+| Tower: Upper Level | 0 | tutti i tipi assenti da quella mappa |
+| **compatibile con tutte** | | **4** |
+
+Il **tipo 4 è la stanza sicura**: 104 pin che non avevano significato. C'è anche la conferma
+posizionale — il suo pin cade nella stanzetta sopra il pilastro centrale della Torre, esattamente
+dove la schermata mostra il rombo.
+
+**La prova che il metodo vale.** Applicato al forziere, lo stesso vincolo deduce il **tipo 26**,
+che era già dimostrato dalle procedure `R_TBOX`: due strade che non si sono parlate danno lo
+stesso risultato. E dove il conteggio non regge — il lucchetto giallo, per cui nessun tipo è
+compatibile con tutte e cinque le osservazioni — il solutore lo dichiara irrisolto invece di
+aggiustare i conti.
+
+Le osservazioni stanno in `data/atlas/osservazioni-icone.json`, ciascuna con chi l'ha contata: il
+rombo verde è dichiarato dall'utente, gli altri generi li ho contati io leggendo le immagini, e
+questo è scritto nel file perché una deduzione che stona si possa rileggere alla fonte.
+`icon_observations.py` risolve, `verify_icon_observations.py` ricontrolla — soglia, unicità,
+conferme incrociate e generi irrisolti compresi.
+
+**Come si arriva al 100%:** servono **quattro schermate per ogni genere di icona**, meglio della
+mappa d'insieme del Palazzo e a esplorazione completa. I generi che restano e quanto valgono:
+freccia di passaggio ~370 pin (tipi 13, 14, 15, 16, 19), forziere aperto o punto tesoro ~230
+(tipi 17, 5, 28), lucchetto ~110 (tipi 10, 12), altre ~170.
+
+### Due firme grafiche misurate sulle texture
+
+Cercando di fare a meno delle schermate ho provato a leggere la texture sotto ogni pin. Una
+funziona come conferma, l'altra no, e vanno registrate entrambe:
+
+* **il giallo delle porte** — i trattini gialli disegnati sui muri sono le porte, e il tipo 10 vi
+  cade sopra nell'**88%** dei casi mentre nessun altro tipo supera il 26%. Non aggiunge copertura
+  (il tipo 10 era già dimostrato) ma conferma quella strada da un lato del tutto diverso, e
+  smentisce che il tipo 12 sia una porta (9%);
+* **il pettine delle scale** — contare le transizioni opaco/trasparente attorno al pin non
+  discrimina nulla: i valori stanno tutti fra 0,000 e 0,030 senza separazione. Strada chiusa.
+
 ### I 5443 script del gioco, aperti senza decompilatore
 
 Con l'accesso ai CPK installati (`C:\Program Files (x86)\Steam\steamapps\common\P5R`) è caduta
