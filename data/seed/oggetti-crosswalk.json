@@ -7,7 +7,10 @@
   },
   "comeSiRigenera": "npm run oggetti:crosswalk",
   "criterio": "due vie: il nome dell’articolo quando coincide in modo univoco, e la trascrizione della pagina «Elenco dei negozi». Un oggetto venduto in più posti li tiene tutti.",
-  "generato": "2026-09-06",
+  "dipendeDa": {
+    "trascrizione": "6a44087d81064ee995369250ba95d959188d6dc4e0c20255a98e743cbcecfb80",
+    "catalogo": "tabelle negozio e articolo del database, lette al momento della generazione"
+  },
   "abbinamenti": [
     {
       "nome": "Acqua battesimale",

@@ -650,6 +650,53 @@ lint puliti.
 | 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
 | 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
 | 2026-09-06 | Fase 2 (7ª) | **PRONTA PER VERIFICA** — tabella nativa delle parti estratta e verificata dall'eseguibile, 90 tipi su 102 dimostrati, tutti i 1429 pin collocabili posati | in attesa |
+| 2026-09-06 | Fase 3d (5ª) | **PRONTA PER VERIFICA** — «Sulla mappa» usa il risolutore, quattro voci senza posizione dichiarate, crosswalk riproducibile, numeri aggiornati | in attesa |
+
+### Fase 3d (5ª) — i quattro rilievi della quarta verifica
+
+**1. «Sulla mappa» non portava alla mappa.** `CollegamentoMappa` — il componente il cui unico
+compito è portare al posto — usava `schedaAccessoMondo()`, che è l'indirizzo della *scheda*: dalla
+pagina Oggetti si finiva sull'elenco dei negozi. Il difetto era invisibile guardando la pagina (il
+collegamento c'era, il testo era giusto, il click portava da qualche parte) e nessun test ne
+controllava la destinazione. Ora esiste `percorsoAccessoMondo()`, distinta e documentata come tale,
+e il componente usa quella.
+
+Con lo stesso sguardo è emerso un secondo caso in `DungeonPage`: un pulsante con l'icona della
+mappa che diceva «Mappa» e portava alla scheda, mentre la carta del Palazzo sopra portava già alla
+mappa. Lì la destinazione era giusta e sbagliata era la promessa: ora dice «Scheda del Palazzo».
+
+**2. La regressione c'è, e ho controllato che morda.** `CollegamentoMappa.test.tsx` verifica
+l'indirizzo del risolutore, che una chiave di articolo con la barra (`negozio/articolo`) venga
+codificata e ritrovata intera dalla rotta, e che i due indirizzi restino diversi fra loro.
+Rimettendo il difetto, il test fallisce con codice 1: provato.
+
+**3. Le quattro voci senza posizione non ricevono più un invito muto.** Sono
+`Catena di perline`, `Soma` e `Tessera puntate alte` del negozio dentro il Palazzo di Niijima, e
+`Homunculus` del sito di Tanaka, che si apre dal laptop e non è un posto — verificato nel catalogo,
+non supposto. Il comando resta al suo posto (un comando che a volte sparisce è peggio) ma la pagina
+ora dice esplicitamente che la voce non ha una posizione e perché.
+
+**4. Il crosswalk non dipende più dal calendario.** Il campo `generato` portava la data corrente:
+bastava rilanciare il comando il giorno dopo per avere un artefatto diverso senza che nessuna fonte
+fosse cambiata. Al suo posto c'è `dipendeDa`, con l'impronta sha256 della trascrizione. Due
+generazioni consecutive danno file identici: verificato.
+
+**Numeri aggiornati** (la quarta dichiarazione era ferma a prima dell'ampliamento del censimento):
+
+| | quarta dichiarazione | ora |
+|---|---:|---:|
+| voci dell'inventario con accesso | 1321 / 1371 | **1406 / 1460** (96,3%) |
+| con punto preciso | — | **503** (34,5%) |
+| errori del risolutore | — | **0** |
+| abbinamenti del crosswalk | 104 | **121** |
+| esclusi | 249 | **234** |
+
+**Riproduzione:**
+```bash
+npm run oggetti:crosswalk && npm run accesso:copertura
+npx vitest run src/components/mappe/CollegamentoMappa.test.tsx src/pages/AccessoMondoPage.test.tsx
+npm run typecheck && npm run lint && npm test
+```
 
 ### Fase 2 (7ª) — la tabella nativa e i pin da verificare
 

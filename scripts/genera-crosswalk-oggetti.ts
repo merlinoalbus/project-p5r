@@ -18,6 +18,7 @@
 // chiama così, invece, non lo è: la stessa pagina dei negozi vende accessori, armi, libri e DVD,
 // che nella guida hanno pagine loro. Quelli si annotano e basta.
 // ============================================================
+import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { initDb, closeDb, getDb } from '../server/db/dbService.js';
@@ -48,7 +49,8 @@ runMigrations(db);
 
 const guida = JSON.parse(readFileSync(path.join('data', 'seed', 'oggetti-guida.json'), 'utf8')) as OggettiGuidaDto;
 const voci = [...(guida.consumabili ?? []), ...(guida.chiaveEMateriali ?? [])];
-const trascrizione = JSON.parse(readFileSync(path.join('data', 'seed', 'oggetti-negozi.json'), 'utf8')) as Trascrizione;
+const percorsoTrascrizione = path.join('data', 'seed', 'oggetti-negozi.json');
+const trascrizione = JSON.parse(readFileSync(percorsoTrascrizione, 'utf8')) as Trascrizione;
 
 const articoli = getDb().prepare('SELECT chiave, nome, negozio_chiave FROM articolo WHERE nascosto = 0')
   .all() as Array<{ chiave: string; nome: string; negozio_chiave: string }>;
@@ -130,7 +132,14 @@ const esito = {
   fonti: { trascrizione: 'data/seed/oggetti-negozi.json', pagina: trascrizione.fonte },
   comeSiRigenera: 'npm run oggetti:crosswalk',
   criterio: 'due vie: il nome dell’articolo quando coincide in modo univoco, e la trascrizione della pagina «Elenco dei negozi». Un oggetto venduto in più posti li tiene tutti.',
-  generato: new Date().toISOString().slice(0, 10),
+  // Niente data di generazione. Ci stava `new Date()`, e bastava rilanciare il comando il giorno
+  // dopo per ottenere un artefatto diverso senza che nessuna fonte fosse cambiata: la verifica di
+  // riproducibilità sarebbe fallita su una differenza che non significa niente. Da che cosa
+  // dipende questo file lo dicono le fonti e la loro impronta, non il calendario.
+  dipendeDa: {
+    trascrizione: createHash('sha256').update(readFileSync(percorsoTrascrizione)).digest('hex'),
+    catalogo: 'tabelle negozio e articolo del database, lette al momento della generazione',
+  },
   abbinamenti: elenco,
   summary: {
     vociGuida: voci.length, articoli: articoli.length, abbinati: elenco.length,
