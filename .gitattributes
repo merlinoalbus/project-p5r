@@ -19,3 +19,6 @@ data/atlas/original-archives/*.part* binary
 *.TBL binary
 *.dll binary
 *.exe binary
+
+data/atlas/** -text
+tools/p5r-map-export/vendor/** -text
