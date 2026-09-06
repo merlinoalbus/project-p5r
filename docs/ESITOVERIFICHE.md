@@ -127,3 +127,50 @@ separatamente.
 **Decisione:** Fase 1a respinta. Non può essere marcata validata finché i cinque rilievi
 bloccanti non sono corretti e sottoposti a una nuova verifica indipendente. Il resto della Fase
 1 resta fuori perimetro e non è stato valutato.
+
+## Fase 1a — Seconda verifica dopo le correzioni
+
+**Esito: FAIL**  
+**Commit verificato:** `2a5fcc0`  
+**Data verifica:** 6 settembre 2026
+
+### Correzioni confermate
+
+1. Il catalogo copre ancora 301 planimetrie in 149 luoghi e il verificatore passa.
+2. Le copie sono ora esattamente 3: le due copie di Kamoshida e quella di Futaba. La risorsa
+   `nativo-rmap-190-62-0` non viene più accorpata senza record di presentazione.
+3. `nomi-mappe-ufficiali.json` è ora usato: 81 planimetrie ricevono la grafia ufficiale della
+   mappa d'insieme.
+4. Tutte le fonti nominali valorizzate riportano un file e il relativo SHA-256; il verificatore
+   ricontrolla l'impronta del file.
+5. Le etichette tecniche sintetiche precedenti non risultano più assegnate come `nome` ai luoghi
+   senza nome nativo.
+
+### Rilievi ancora bloccanti
+
+1. **Il divieto di numerare gli omonimi non è rispettato.** Tutti i 15 luoghi omonimi hanno una
+   stringa diversa, ma 13 restano distinti tramite numerazione romana:
+   - 6 con `fonteDistinzione = nomi-enumerati-dalla-guida`;
+   - 7 con `fonteDistinzione = ordine-di-attraversamento`, cioè senza distinzione dimostrata né
+     dai vicini né dalla guida.
+   Esempi: `Vuoto cavernoso – Parte I/II`, `Corridoio della prigione – Parte I/V` e
+   `Ufficio riciclaggio – Parte I/II`. Il criterio approvato richiede nomi distintivi verificati
+   e vieta esplicitamente la numerazione. Il verificatore continua a controllare soltanto che le
+   stringhe siano non vuote e univoche, quindi accetta il fallback vietato.
+2. **Otto nomi non hanno ancora un offset di provenienza.** Le tre immagini aggregate
+   `Edificio principale / Edificio laboratori` e le cinque versioni del `Covo dei Ladri`
+   dichiarano `fonte = titolo-roadmap`, file e SHA-256, ma `fonteNome.offset = null` e
+   `fonteNome.indice = null`. Il requisito richiede fonte, offset e impronta per ogni nome; un
+   riferimento al file senza posizione non certifica la stringa. Il verificatore controlla
+   file e hash ma non impone che l'offset sia valorizzato.
+
+### Riproducibilità
+
+- `verify_atlas_identity.py` passa con 301 planimetrie, 149 luoghi, 274 nomi, 3 copie e 298
+  versioni/non-copie.
+- Le correzioni positive sono quindi riproducibili, ma il PASS tecnico del verificatore non
+  copre i due vincoli sopra.
+
+**Decisione:** Fase 1a nuovamente respinta. In applicazione della sequenza di validazione, le
+Fasi 1b, 1c e 1d dichiarate contemporaneamente pronte non vengono ancora valutate: la verifica
+si ferma sulla dipendenza 1a finché i due rilievi residui non sono corretti.
