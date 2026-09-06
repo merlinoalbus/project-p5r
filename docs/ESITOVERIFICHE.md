@@ -813,3 +813,52 @@ può risultare verde. Mancano inoltre asserzioni che impediscano la caduta a zer
 **Decisione:** la ricostruzione dei collegamenti supera il riesame, ma la Fase 2 resta **FAIL**
 perché il commit che la dichiara pronta ha cancellato evidenze native già certificate e ha lasciato
 un rapporto di verifica incoerente. Nessun gate può passare introducendo una regressione di dati.
+
+## Fase 3d — Quarta verifica degli accessi dopo il censimento editoriale
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `ed4ccca`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. Su backup SQLite isolato, `genera-crosswalk-oggetti.ts` produce un file byte-identico a quello
+   versionato: 355 voci della guida, 575 articoli, 121 abbinamenti — 118 per nome dell'articolo e
+   3 per trascrizione — e 234 esclusi. Un controllo indipendente trova zero duplicati, zero negozi
+   inesistenti e zero corrispondenze non univoche.
+2. La copertura dell'inventario corrente è 1.406 accessi su 1.460 voci, 503 con punto preciso e
+   zero errori del risolutore. Il controllo su tutte le 1.460 entità trova zero casi con un pin
+   preciso affiancato da una meta generica e zero pin accompagnati dal criterio
+   `posto-dichiarato`.
+3. La controprova negativa è efficace: su una copia in cui la tabella `mappa` è stata rinominata,
+   lo strumento registra 1.460 errori distinti, dichiara la misura non valida ed esce con codice 1.
+4. Il validatore indipendente riproduce 20 test mirati su 20, inclusi i fallback del risolutore e
+   la superficie di accesso.
+
+### Rilievo bloccante nella UI Oggetti
+
+`OggettiPage.tsx` mostra il comando «Sulla mappa», ma `CollegamentoMappa` usa
+`schedaAccessoMondo()`. Per `articolo` quella funzione produce `/guida/negozi` e per `negozio`
+produce `/guida/negozi/<chiave>`: non invoca la rotta del risolutore
+`/guida/mondo/<tipo>/<chiave>` e quindi il comando non conduce alla mappa.
+
+Manca un test specifico che eserciti il collegamento dalla pagina Oggetti e controlli anche una
+chiave articolo contenente `/`. Inoltre quattro delle 121 voci collegate dal crosswalk non hanno
+oggi alcuna destinazione risolta — `Catena di perline`, `Soma`, `Homunculus` e
+`Tessera puntate alte` — e la UI deve evitare un invito falso oppure dichiarare esplicitamente che
+la posizione non è disponibile.
+
+### Dichiarazione stantia e riproducibilità
+
+La quarta dichiarazione in `ATLANTE-STATO.md` precede l'ampliamento del censimento e non descrive
+più lo stato del commit: 1.321/1.371 deve diventare 1.406/1.460; 104 abbinamenti e 249 esclusi
+devono diventare 121 e 234; anche i conti per articoli, negozi e la vecchia tabella 378/534 vanno
+aggiornati.
+
+Il campo `generato` del crosswalk usa la data corrente: oggi il file è byte-identico, ma una
+rigenerazione in un giorno diverso cambia l'artefatto senza variazioni delle fonti. Occorre rendere
+il campo stabile oppure dichiarare e verificare soltanto la riproducibilità semantica.
+
+**Decisione:** il resolver, il ripiego e il crosswalk superano il controllo di merito, ma la Fase
+3d resta **FAIL** finché «Sulla mappa» non usa davvero il resolver, i quattro casi senza meta non
+sono gestiti, manca la regressione UI e la dichiarazione non viene aggiornata.
