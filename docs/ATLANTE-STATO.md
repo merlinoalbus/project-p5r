@@ -170,8 +170,37 @@ sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due 
 | passo | stato | esito |
 |---|---|---|
 | 2b — riferimento pin↔planimetria | ✅ | `pin_reference.py`: **227 planimetrie su 301 condividono il riferimento**, 1361 pin su 1429 collocabili, 7 esclusi uno per uno, 23 mappe scartate con il motivo, 51 senza pin. `verify_pin_reference.py` passa. |
-| 2a — significato dei tipi nativi | 🟡 urbano fatto, Palazzi rimandati | `pin_semantics.py`: **51 tipi con significato dimostrato** e resa italiana; i 51 dei Palazzi restano **senza significato assegnato**, con tre prove fallite registrate. |
-| 2c — pin nel pacchetto | 🟡 urbano fatto | **80 pin** posati sulle planimetrie native, **42 collegati a un luogo del catalogo**. `verify_pin_semantics.py` passa. |
+| 2a — significato dei tipi nativi | 🟡 **56 tipi su 102** | 51 dal nome interno dello sprite urbano, **5 dalle procedure degli script**: forziere, forziere raro, meccanismo, seme della bramosia, porta. `pin_semantics.py`. |
+| 2c — pin nel pacchetto | 🟡 **405 pin posati** | 80 urbani e 325 nei Palazzi; **42 collegati a un luogo del catalogo**. `verify_pin_semantics.py` ricalcola le prove dagli script e passa. |
+
+### Come il gioco dice che cos'è un pin
+
+Per la città lo dice il **nome interno dello sprite** (blocco dimostrato, 51 tipi). Per i Palazzi
+lo sprite non basta — le loro icone stanno in tratti spezzati del foglio — ma il gioco lo dice nel
+proprio codice: ogni pin condizionale porta la **bandiera** che lo rivela, e negli script esiste la
+procedura che quella bandiera accende. Il nome della procedura è parlante:
+
+| tipo nativo | procedura dominante | segnalino | prova |
+|---|---|---|---|
+| 17 | `D#_#_#_TBOX_minimap_#` | forziere | 122 casi su 122 riconosciuti |
+| 26 | `D#_#_#_R_TBOX_minimap_#` | forziere raro | 32 su 33 |
+| 12 | `D#_GIM_BLUE_SWITCH#` | meccanismo | 57 su 58, e i trigger dicono «Tira leva» 47 volte |
+| 97 | `D#_#_#_SEEDicon_#` | seme della bramosia | 21 su 21 — e la guida conta 21 volontà |
+| 10 | porte (`CheckPasswardDoor`, `MONEY_DOOR_PROC`) | porta | 5 su 6, e i trigger dicono «Apri porta» |
+
+Le due strade sono indipendenti e concordano dove si incontrano.
+
+### Che cosa resta indeterminato, e quanto pesa
+
+| | pin | con significato | posati |
+|---|---|---|---|
+| mappe della città | 288 | 81 | 80 |
+| mappe dei Palazzi | 1141 | 351 | 325 |
+
+I 46 tipi ancora senza significato sono quasi tutti **condivisi fra città e Palazzi** — il più
+pesante è il tipo 19, con 165 occorrenze — e per loro le procedure che accendono la bandiera si
+limitano ad accenderla, senza dire altro. Non li importo: un pin senza significato è peggio di un
+pin assente.
 
 ### Che cosa è successo, e perché la Fase 2 non è tutta qui
 

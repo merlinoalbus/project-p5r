@@ -14,10 +14,28 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 5,
+        "procedureRiconosciute": 1,
+        "famigliaDominante": "SAFETY_ROOM",
+        "casiDellaFamiglia": 1,
+        "confermeDaiTrigger": 0,
+        "quota": 1.0,
+        "procedure": {
+          "D#_#_e#_#_START": 3,
+          "TUTO_WAITING_ROOM": 1,
+          "D#_SAFETY_ROOM_#_SET": 1,
+          "IsUppeerOff": 1
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
     },
     {
       "tipoNativo": 5,
@@ -28,10 +46,33 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 14,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_e#_#_START": 5,
+          "D#_#_#_CONSOLE_ICON": 3,
+          "D#_BIG_SLOT_GAME_DEFAULT": 2,
+          "D#_#_miniEV_point#": 2,
+          "StartBoardCheck": 1
+        },
+        "etichetteDeiTrigger": {
+          "Cinema": 2,
+          "Magazzino audiovisivi": 2,
+          "Apri porta": 2
+        },
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 10,
@@ -42,10 +83,35 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "script": {
+        "pinConBandieraRisolta": 21,
+        "procedureRiconosciute": 6,
+        "famigliaDominante": "DOOR",
+        "casiDellaFamiglia": 5,
+        "confermeDaiTrigger": 5,
+        "quota": 0.833,
+        "procedure": {
+          "D#_#_e#_#_START": 5,
+          "CheckPasswardDoor": 4,
+          "f#_#_DOOR_#_HIT": 3,
+          "FLD_D#_MONEY_DOOR_PROC": 2,
+          "IsUppeerOff": 2
+        },
+        "etichetteDeiTrigger": {
+          "Apri porta": 5,
+          "Magazzino audiovisivi": 4,
+          "Letto sporco": 3,
+          "Vecchio divano": 2,
+          "Vaso due": 1
+        },
+        "tipoSpillo": "porta",
+        "etichetta": "Porta",
+        "stato": "determinato"
+      },
+      "tipoSpillo": "porta",
+      "etichetta": "Porta",
+      "stato": "determinato",
+      "prova": "procedura che accende la bandiera del pin: DOOR in 5 casi su 6 riconosciuti, con 5 conferme dalle etichette dei trigger"
     },
     {
       "tipoNativo": 12,
@@ -56,10 +122,35 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "script": {
+        "pinConBandieraRisolta": 34,
+        "procedureRiconosciute": 58,
+        "famigliaDominante": "(GIM_\\w*SWITCH|_SWITCH|gate_\\w*chenge)",
+        "casiDellaFamiglia": 57,
+        "confermeDaiTrigger": 47,
+        "quota": 0.983,
+        "procedure": {
+          "D#_GIM_BLUE_SWITCH#": 42,
+          "gate_green_chenge": 9,
+          "D#_#_e#_#": 9,
+          "D#_GIM_YELLOW_SWITCH": 5,
+          "D#_#_#_map_HIT#": 2
+        },
+        "etichetteDeiTrigger": {
+          "Tira leva": 47,
+          "Vecchio divano": 2,
+          "Chiama ascensore": 2,
+          "Karaoke": 1,
+          "Apri porta": 1
+        },
+        "tipoSpillo": "meccanismo",
+        "etichetta": "Meccanismo",
+        "stato": "determinato"
+      },
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "stato": "determinato",
+      "prova": "procedura che accende la bandiera del pin: (GIM_\\w*SWITCH|_SWITCH|gate_\\w*chenge) in 57 casi su 58 riconosciuti, con 47 conferme dalle etichette dei trigger"
     },
     {
       "tipoNativo": 13,
@@ -70,10 +161,28 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 9,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 7,
+          "DUCT_#_#_A_A_IN": 2
+        },
+        "etichetteDeiTrigger": {
+          "Sifone per caffè": 2
+        },
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 14,
@@ -84,10 +193,29 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 29,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 27,
+          "D#_#_e#_#_START": 1,
+          "FLD_D#_#_FIRST_ROOM_HIT": 1
+        },
+        "etichetteDeiTrigger": {
+          "Letto sporco": 1
+        },
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 15,
@@ -98,10 +226,29 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 37,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 36,
+          "IsUppeerOff": 2,
+          "GOTO_#_#_#": 1
+        },
+        "etichetteDeiTrigger": {
+          "Sala centrale": 1
+        },
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 16,
@@ -112,10 +259,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 19,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 19
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 17,
@@ -126,10 +288,29 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "script": {
+        "pinConBandieraRisolta": 122,
+        "procedureRiconosciute": 122,
+        "famigliaDominante": "(TBOX|_BOX_)",
+        "casiDellaFamiglia": 122,
+        "confermeDaiTrigger": 0,
+        "quota": 1.0,
+        "procedure": {
+          "D#_#_#_TBOX_minimap_#": 108,
+          "D#_#_#_N_TBOX_#": 7,
+          "D#_#_#_N_BOX_#": 3,
+          "D#_#_#_N_TBOX_SET_#": 2,
+          "D#_FLD_MAP_#_#_TBOX": 1
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": "forziere",
+        "etichetta": "Forziere",
+        "stato": "determinato"
+      },
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere",
+      "stato": "determinato",
+      "prova": "procedura che accende la bandiera del pin: (TBOX|_BOX_) in 122 casi su 122 riconosciuti"
     },
     {
       "tipoNativo": 19,
@@ -140,10 +321,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 20,
@@ -154,10 +336,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 24,
@@ -168,10 +351,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 25,
@@ -182,10 +366,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 26,
@@ -196,10 +381,29 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "script": {
+        "pinConBandieraRisolta": 33,
+        "procedureRiconosciute": 33,
+        "famigliaDominante": "(R_TBOX|RARE_TBOX)",
+        "casiDellaFamiglia": 32,
+        "confermeDaiTrigger": 0,
+        "quota": 0.97,
+        "procedure": {
+          "D#_#_#_R_TBOX_minimap_#": 27,
+          "D#_#_#_R_TBOX_#": 3,
+          "D#_#_#_RARE_TBOX_minimap_#": 2,
+          "IsUppeerOff": 1,
+          "D#_#_#_R_BOX_#": 1
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": "forziere",
+        "etichetta": "Forziere raro",
+        "stato": "determinato"
+      },
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere raro",
+      "stato": "determinato",
+      "prova": "procedura che accende la bandiera del pin: (R_TBOX|RARE_TBOX) in 32 casi su 33 riconosciuti"
     },
     {
       "tipoNativo": 28,
@@ -210,10 +414,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 29,
@@ -224,10 +429,29 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 14,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 13,
+          "EV_UP_GOTO_#_#_#": 1,
+          "IsUppeerOff": 1
+        },
+        "etichetteDeiTrigger": {
+          "Tira leva": 1
+        },
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 30,
@@ -238,10 +462,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 22,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 22
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 32,
@@ -252,10 +491,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 33,
@@ -266,10 +506,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 1,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "MEME_LOCK_CLEAR_#": 1
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 34,
@@ -280,10 +535,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 35,
@@ -294,10 +550,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 36,
@@ -308,10 +565,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 37,
@@ -322,10 +580,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 38,
@@ -336,10 +595,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 1,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 1
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 39,
@@ -350,10 +624,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 2,
+        "procedureRiconosciute": 0,
+        "famigliaDominante": null,
+        "casiDellaFamiglia": 0,
+        "confermeDaiTrigger": 0,
+        "quota": 0.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 2
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 40,
@@ -364,10 +653,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 43,
@@ -378,10 +668,29 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": {
+        "pinConBandieraRisolta": 39,
+        "procedureRiconosciute": 2,
+        "famigliaDominante": "(GIM_\\w*SWITCH|_SWITCH|gate_\\w*chenge)",
+        "casiDellaFamiglia": 2,
+        "confermeDaiTrigger": 0,
+        "quota": 1.0,
+        "procedure": {
+          "D#_#_#_minimap_#": 38,
+          "D#_#_minimap_SWITCH": 1,
+          "D#_#_SWITCH_#": 1
+        },
+        "etichetteDeiTrigger": {
+          "Bagno dei ragazzi": 1
+        },
+        "tipoSpillo": null,
+        "etichetta": null,
+        "stato": "non-determinato"
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
     },
     {
       "tipoNativo": 45,
@@ -392,10 +701,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 46,
@@ -406,9 +716,11 @@
       "sprite": 114,
       "nomeNativo": "アイコン：自販機",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "distributore",
       "etichetta": "Distributore di bevande",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 47,
@@ -419,9 +731,11 @@
       "sprite": 115,
       "nomeNativo": "アイコン：宝くじ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Lotteria",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 48,
@@ -432,9 +746,11 @@
       "sprite": 116,
       "nomeNativo": "アイコン：バイト情報",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "cercalavoro",
       "etichetta": "Bacheca dei lavori",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 49,
@@ -445,9 +761,11 @@
       "sprite": 117,
       "nomeNativo": "アイコン：ジューサーバー",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "distributore",
       "etichetta": "Chiosco dei succhi",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 50,
@@ -458,9 +776,11 @@
       "sprite": 118,
       "nomeNativo": "アイコン：キヨスク",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Chiosco",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 51,
@@ -471,9 +791,11 @@
       "sprite": 119,
       "nomeNativo": "アイコン：本屋",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Libreria",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 52,
@@ -484,9 +806,11 @@
       "sprite": 120,
       "nomeNativo": "アイコン：レンタルDVD",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Noleggio di film",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 53,
@@ -497,9 +821,11 @@
       "sprite": 121,
       "nomeNativo": "アイコン：ファミレス",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Ristorante di famiglia",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 54,
@@ -510,9 +836,11 @@
       "sprite": 122,
       "nomeNativo": "アイコン：牛丼",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Manzo e riso",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 55,
@@ -523,9 +851,11 @@
       "sprite": 123,
       "nomeNativo": "アイコン：ミリタリーショップ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Negozio softair",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 56,
@@ -536,9 +866,11 @@
       "sprite": 124,
       "nomeNativo": "アイコン：ゲーセン",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "sala-giochi",
       "etichetta": "Sala giochi",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 57,
@@ -549,9 +881,11 @@
       "sprite": 125,
       "nomeNativo": "アイコン：コンビニ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Minimarket",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 58,
@@ -562,9 +896,11 @@
       "sprite": 126,
       "nomeNativo": "アイコン：ジム",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Palestra",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 59,
@@ -575,9 +911,11 @@
       "sprite": 127,
       "nomeNativo": "アイコン：ビックバンバーガー",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Big Bang Burger",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 60,
@@ -588,9 +926,11 @@
       "sprite": 128,
       "nomeNativo": "アイコン：ドラッグストア",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Farmacia",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 61,
@@ -601,9 +941,11 @@
       "sprite": 129,
       "nomeNativo": "アイコン：ドンキ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Grande magazzino",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 62,
@@ -614,9 +956,11 @@
       "sprite": 130,
       "nomeNativo": "アイコン：映画館",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "cinema",
       "etichetta": "Cinema",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 63,
@@ -627,9 +971,11 @@
       "sprite": 131,
       "nomeNativo": "アイコン：花屋",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Fioraio",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 64,
@@ -640,9 +986,11 @@
       "sprite": 132,
       "nomeNativo": "アイコン：スーパー",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 65,
@@ -653,9 +1001,11 @@
       "sprite": 133,
       "nomeNativo": "アイコン：スポーツ用品",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Articoli sportivi",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 66,
@@ -666,9 +1016,11 @@
       "sprite": 134,
       "nomeNativo": "アイコン：和風雑貨",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Articoli tradizionali",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 67,
@@ -679,9 +1031,11 @@
       "sprite": 135,
       "nomeNativo": "アイコン：宝石店",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Gioielleria",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 68,
@@ -692,9 +1046,11 @@
       "sprite": 136,
       "nomeNativo": "アイコン：アクセサリー",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Accessori",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 69,
@@ -705,9 +1061,11 @@
       "sprite": 137,
       "nomeNativo": "アイコン：コスメ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Cosmetici",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 70,
@@ -718,9 +1076,11 @@
       "sprite": 138,
       "nomeNativo": "アイコン：パン屋",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Panetteria",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 71,
@@ -731,9 +1091,11 @@
       "sprite": 139,
       "nomeNativo": "アイコン：トイレ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "nota",
       "etichetta": "Servizi igienici",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 72,
@@ -744,9 +1106,11 @@
       "sprite": 140,
       "nomeNativo": "アイコン：教室",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Aula",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 73,
@@ -757,9 +1121,11 @@
       "sprite": 141,
       "nomeNativo": "アイコン：囚人高校",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Scuola",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 74,
@@ -770,9 +1136,11 @@
       "sprite": 142,
       "nomeNativo": "アイコン：バー",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Bar",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 75,
@@ -783,9 +1151,11 @@
       "sprite": 143,
       "nomeNativo": "アイコン：雑貨屋",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Casalinghi",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 76,
@@ -796,9 +1166,11 @@
       "sprite": 144,
       "nomeNativo": "アイコン：レトロゲーム",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Retrogiochi",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 77,
@@ -809,9 +1181,11 @@
       "sprite": 145,
       "nomeNativo": "アイコン：メイドカフェ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Maid café",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 78,
@@ -822,9 +1196,11 @@
       "sprite": 146,
       "nomeNativo": "アイコン：カチャガチャ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Distributori di capsule",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 79,
@@ -835,9 +1211,11 @@
       "sprite": 147,
       "nomeNativo": "アイコン：家電量販店",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Elettronica",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 80,
@@ -848,9 +1226,11 @@
       "sprite": 148,
       "nomeNativo": "アイコン：グッズショップ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Gadget",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 81,
@@ -861,9 +1241,11 @@
       "sprite": 149,
       "nomeNativo": "アイコン：工具店",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Ferramenta",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 82,
@@ -874,9 +1256,11 @@
       "sprite": 150,
       "nomeNativo": "アイコン：銭湯",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "terme",
       "etichetta": "Bagno pubblico",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 83,
@@ -887,9 +1271,11 @@
       "sprite": 151,
       "nomeNativo": "アイコン：ルブラン",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "casa",
       "etichetta": "Café Leblanc",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 84,
@@ -900,9 +1286,11 @@
       "sprite": 152,
       "nomeNativo": "アイコン：コインランドリー",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "lavanderia",
       "etichetta": "Lavanderia automatica",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 85,
@@ -913,9 +1301,11 @@
       "sprite": 153,
       "nomeNativo": "アイコン：バッティング",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Gabbie di battuta",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 86,
@@ -926,9 +1316,11 @@
       "sprite": 154,
       "nomeNativo": "アイコン：リサイクルショップ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Usato",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 87,
@@ -939,9 +1331,11 @@
       "sprite": 155,
       "nomeNativo": "アイコン：診療所",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Clinica",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 88,
@@ -952,9 +1346,11 @@
       "sprite": 156,
       "nomeNativo": "アイコン：文房具",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Cartoleria",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 89,
@@ -965,9 +1361,11 @@
       "sprite": 157,
       "nomeNativo": "アイコン：古着屋",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Abbigliamento usato",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 90,
@@ -978,9 +1376,11 @@
       "sprite": 158,
       "nomeNativo": "アイコン：お寺",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "culto",
       "etichetta": "Tempio",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 91,
@@ -991,9 +1391,11 @@
       "sprite": 159,
       "nomeNativo": "アイコン：ジャズクラブ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Jazz club",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 92,
@@ -1004,9 +1406,11 @@
       "sprite": 160,
       "nomeNativo": "アイコン：パワーストーン",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Pietre",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 93,
@@ -1017,9 +1421,11 @@
       "sprite": 161,
       "nomeNativo": "アイコン：ダーツ",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "attivita",
       "etichetta": "Freccette",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 94,
@@ -1030,9 +1436,11 @@
       "sprite": 162,
       "nomeNativo": "アイコン：お香",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Incensi",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 95,
@@ -1043,9 +1451,11 @@
       "sprite": 163,
       "nomeNativo": "アイコン：揚げ物屋",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Fritti",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 96,
@@ -1056,9 +1466,11 @@
       "sprite": 164,
       "nomeNativo": "スーパー（小）",
       "associazione": "blocco-urbano-dimostrato",
+      "script": null,
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
-      "stato": "determinato"
+      "stato": "determinato",
+      "prova": "nome interno dello sprite del blocco urbano dimostrato"
     },
     {
       "tipoNativo": 97,
@@ -1069,10 +1481,27 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "script": {
+        "pinConBandieraRisolta": 23,
+        "procedureRiconosciute": 21,
+        "famigliaDominante": "SEEDicon",
+        "casiDellaFamiglia": 21,
+        "confermeDaiTrigger": 0,
+        "quota": 1.0,
+        "procedure": {
+          "D#_#_#_SEEDicon_#": 21,
+          "D#_#_#_CHECK#_START": 1,
+          "D#_#_#_ex_battle_START": 1
+        },
+        "etichetteDeiTrigger": {},
+        "tipoSpillo": "seme-bramosia",
+        "etichetta": "Seme della bramosia",
+        "stato": "determinato"
+      },
+      "tipoSpillo": "seme-bramosia",
+      "etichetta": "Seme della bramosia",
+      "stato": "determinato",
+      "prova": "procedura che accende la bandiera del pin: SEEDicon in 21 casi su 21 riconosciuti"
     },
     {
       "tipoNativo": 98,
@@ -1083,10 +1512,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 99,
@@ -1097,10 +1527,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 100,
@@ -1111,10 +1542,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 101,
@@ -1125,10 +1557,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 102,
@@ -1139,10 +1572,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 103,
@@ -1153,10 +1587,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 104,
@@ -1167,10 +1602,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 105,
@@ -1181,10 +1617,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 106,
@@ -1195,10 +1632,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 107,
@@ -1209,10 +1647,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 108,
@@ -1223,10 +1662,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 109,
@@ -1237,10 +1677,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 110,
@@ -1251,10 +1692,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 111,
@@ -1265,10 +1707,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 112,
@@ -1279,10 +1722,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 113,
@@ -1293,10 +1737,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 114,
@@ -1307,10 +1752,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 115,
@@ -1321,10 +1767,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 116,
@@ -1335,10 +1782,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 117,
@@ -1349,10 +1797,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 118,
@@ -1363,10 +1812,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     },
     {
       "tipoNativo": 119,
@@ -1377,10 +1827,11 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "script": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
-      "motivo": "lo sprite di questo tipo nativo non è dimostrato"
+      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
     }
   ],
   "provePalazzi": [
@@ -1400,18 +1851,26 @@
       "dettaglio": "confrontando, su 65 aree, quante volte ciascun tipo nativo compare con quante volte compare ciascun tipo di punto della guida, la correlazione più alta è 0,58 e la maggioranza sta sotto 0,3: è rumore, non una corrispondenza."
     },
     {
-      "prova": "etichetta del trigger nello stesso punto",
-      "esito": "rimandata",
-      "dettaglio": "è la via che resta, e richiede la proiezione delle coordinate dei trigger sulla planimetria: appartiene alla fase dei collegamenti."
+      "prova": "procedura che accende la bandiera del pin",
+      "esito": "riuscita",
+      "dettaglio": "ogni pin condizionale porta la bandiera che lo rivela, e negli script esiste la procedura che la accende con BIT_ON: il suo nome dice che cosa è. Copre i tipi con una famiglia dominante e lascia indeterminati quelli le cui procedure si limitano ad accendere un bit."
+    },
+    {
+      "prova": "etichetta del trigger che chiama quella procedura",
+      "esito": "riuscita come conferma",
+      "dettaglio": "seconda strada indipendente: per il tipo delle leve dice «Tira leva» 47 volte su 53, per quello delle porte «Apri porta». Conferma la prima senza sostituirla."
     }
   ],
   "summary": {
     "tipi": 102,
-    "determinati": 51,
-    "nonDeterminati": 51,
-    "pinDeterminati": 81,
-    "pinNonDeterminati": 1348,
+    "determinati": 56,
+    "nonDeterminati": 46,
+    "pinDeterminati": 432,
+    "pinNonDeterminati": 997,
     "perTipoSpillo": {
+      "porta": 1,
+      "meccanismo": 1,
+      "forziere": 2,
       "distributore": 2,
       "attivita": 7,
       "cercalavoro": 1,
@@ -1423,10 +1882,16 @@
       "terme": 1,
       "casa": 1,
       "lavanderia": 1,
-      "culto": 1
+      "culto": 1,
+      "seme-bramosia": 1
+    },
+    "perProva": {
+      "procedura che accende la bandiera del pin": 5,
+      "nome interno dello sprite del blocco urbano dimostrato": 51
     },
     "motiviNonDeterminati": {
-      "lo sprite di questo tipo nativo non è dimostrato": 51
+      "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 2,
+      "né lo sprite né le procedure che accendono la sua bandiera lo dicono": 44
     }
   },
   "limits": [

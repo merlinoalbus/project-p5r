@@ -17001,51 +17001,139 @@
       "descrizioneVersioni": [
         {
           "chiave": "nativo-rmap-190-1-0",
+          "opachi": 18303,
+          "dimensione": [
+            512,
+            512
+          ],
+          "riquadro": [
+            43,
+            102,
+            200,
+            252
+          ],
           "progressione": 0,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 190/1 livello 0"
+          "etichetta": "tela quadrata, disegno minuto — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-190-2-0",
+          "opachi": 26725,
+          "dimensione": [
+            512,
+            512
+          ],
+          "riquadro": [
+            51,
+            0,
+            288,
+            354
+          ],
           "progressione": 1,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 190/2 livello 0"
+          "etichetta": "tela quadrata, disegno medio — la più estesa"
         },
         {
           "chiave": "nativo-rmap-190-3-0",
+          "opachi": 26721,
+          "dimensione": [
+            512,
+            512
+          ],
+          "riquadro": [
+            52,
+            0,
+            287,
+            357
+          ],
           "progressione": 2,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 190/3 livello 0"
+          "etichetta": "tela quadrata, disegno medio — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-190-51-0",
+          "opachi": 14677,
+          "dimensione": [
+            256,
+            1024
+          ],
+          "riquadro": [
+            78,
+            181,
+            129,
+            496
+          ],
           "progressione": 3,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 190/51 livello 0"
+          "etichetta": "tela alta, disegno minuto"
         },
         {
           "chiave": "nativo-rmap-190-61-0",
+          "opachi": 47177,
+          "dimensione": [
+            256,
+            1024
+          ],
+          "riquadro": [
+            51,
+            109,
+            138,
+            675
+          ],
           "progressione": 4,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 190/61 livello 0"
+          "etichetta": "tela alta, disegno medio — la più estesa"
         },
         {
           "chiave": "nativo-rmap-190-62-0",
+          "opachi": 47177,
+          "dimensione": [
+            256,
+            1024
+          ],
+          "riquadro": [
+            51,
+            109,
+            138,
+            675
+          ],
           "progressione": 5,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 190/62 livello 0"
+          "etichetta": "tela alta, disegno medio — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-192-62-0",
+          "opachi": 311127,
+          "dimensione": [
+            1024,
+            1024
+          ],
+          "riquadro": [
+            47,
+            23,
+            596,
+            885
+          ],
           "progressione": 6,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 192/62 livello 0"
+          "etichetta": "tela quadrata, disegno esteso"
         },
         {
           "chiave": "nativo-rmap-195-11-0",
+          "opachi": 38192,
+          "dimensione": [
+            2048,
+            2048
+          ],
+          "riquadro": [
+            936,
+            811,
+            1108,
+            1192
+          ],
           "progressione": 7,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 195/11 livello 0"
+          "etichetta": "tela quadrata, disegno minuto — la più estesa"
         }
       ],
       "relazioneVersioni": {
@@ -18192,27 +18280,71 @@
       "descrizioneVersioni": [
         {
           "chiave": "nativo-rmap-151-0-0",
+          "opachi": 554574,
+          "dimensione": [
+            2048,
+            2048
+          ],
+          "riquadro": [
+            11,
+            13,
+            1096,
+            1160
+          ],
           "progressione": 0,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 151/0 livello 0"
+          "etichetta": "tela quadrata, disegno medio — la più estesa"
         },
         {
           "chiave": "nativo-rmap-151-0-1",
+          "opachi": 486186,
+          "dimensione": [
+            2048,
+            2048
+          ],
+          "riquadro": [
+            4,
+            4,
+            1093,
+            1462
+          ],
           "progressione": 1,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 151/0 livello 1"
+          "etichetta": "tela quadrata, disegno medio — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-152-11-0",
+          "opachi": 117276,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            44,
+            40,
+            836,
+            707
+          ],
           "progressione": 2,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 152/11 livello 0"
+          "etichetta": "tela larga, disegno minuto — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-152-11-1",
+          "opachi": 119963,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            42,
+            40,
+            836,
+            707
+          ],
           "progressione": 3,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 152/11 livello 1"
+          "etichetta": "tela larga, disegno minuto — la più estesa"
         }
       ],
       "relazioneVersioni": {
@@ -19656,21 +19788,54 @@
       "descrizioneVersioni": [
         {
           "chiave": "nativo-rmap-154-13-0",
+          "opachi": 132781,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            408,
+            272,
+            1052,
+            557
+          ],
           "progressione": 0,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 154/13 livello 0"
+          "etichetta": "tela larga, disegno minuto — la più estesa"
         },
         {
           "chiave": "nativo-rmap-154-13-1",
+          "opachi": 103753,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            416,
+            280,
+            1032,
+            782
+          ],
           "progressione": 1,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 154/13 livello 1"
+          "etichetta": "tela larga, disegno minuto — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-154-13-2",
+          "opachi": 104036,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            416,
+            485,
+            1032,
+            988
+          ],
           "progressione": 2,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 154/13 livello 2"
+          "etichetta": "tela larga, disegno minuto — la seconda per estensione"
         }
       ],
       "relazioneVersioni": {
@@ -20134,45 +20299,122 @@
       "descrizioneVersioni": [
         {
           "chiave": "nativo-rmap-153-8-0",
+          "opachi": 1845,
+          "dimensione": [
+            64,
+            64
+          ],
+          "riquadro": [
+            0,
+            0,
+            64,
+            64
+          ],
           "progressione": 0,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/8 livello 0"
+          "etichetta": "tela quadrata, disegno esteso — la seconda per estensione"
         },
         {
           "chiave": "nativo-rmap-153-8-1",
+          "opachi": 104265,
+          "dimensione": [
+            2048,
+            2048
+          ],
+          "riquadro": [
+            0,
+            170,
+            812,
+            1536
+          ],
           "progressione": 1,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/8 livello 1"
+          "etichetta": "tela quadrata, disegno minuto — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-153-8-2",
+          "opachi": 105903,
+          "dimensione": [
+            2048,
+            2048
+          ],
+          "riquadro": [
+            0,
+            154,
+            812,
+            1536
+          ],
           "progressione": 2,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/8 livello 2"
+          "etichetta": "tela quadrata, disegno minuto — la seconda per estensione"
         },
         {
           "chiave": "nativo-rmap-153-10-0",
+          "opachi": 1596,
+          "dimensione": [
+            64,
+            64
+          ],
+          "riquadro": [
+            0,
+            0,
+            64,
+            25
+          ],
           "progressione": 3,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/10 livello 0"
+          "etichetta": "tela quadrata, disegno esteso — la meno estesa"
         },
         {
           "chiave": "nativo-rmap-153-11-0",
+          "opachi": 1952,
+          "dimensione": [
+            64,
+            64
+          ],
+          "riquadro": [
+            0,
+            0,
+            64,
+            64
+          ],
           "progressione": 4,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/11 livello 0"
+          "etichetta": "tela quadrata, disegno esteso — la più estesa"
         },
         {
           "chiave": "nativo-rmap-153-12-0",
+          "opachi": 110998,
+          "dimensione": [
+            2048,
+            2048
+          ],
+          "riquadro": [
+            566,
+            84,
+            969,
+            519
+          ],
           "progressione": 5,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/12 livello 0"
+          "etichetta": "tela quadrata, disegno minuto — la più estesa"
         },
         {
           "chiave": "nativo-rmap-153-13-0",
+          "opachi": 70118,
+          "dimensione": [
+            1024,
+            2048
+          ],
+          "riquadro": [
+            0,
+            395,
+            872,
+            1536
+          ],
           "progressione": 6,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 153/13 livello 0"
+          "etichetta": "tela alta, disegno minuto"
         }
       ],
       "relazioneVersioni": {
@@ -21250,15 +21492,37 @@
       "descrizioneVersioni": [
         {
           "chiave": "nativo-rmap-157-3-0",
+          "opachi": 221927,
+          "dimensione": [
+            1024,
+            1024
+          ],
+          "riquadro": [
+            148,
+            89,
+            576,
+            896
+          ],
           "progressione": 0,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 157/3 livello 0"
+          "etichetta": "tela quadrata, disegno medio"
         },
         {
           "chiave": "nativo-rmap-157-3-1",
+          "opachi": 232478,
+          "dimensione": [
+            1024,
+            1024
+          ],
+          "riquadro": [
+            148,
+            88,
+            565,
+            896
+          ],
           "progressione": 1,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 157/3 livello 1"
+          "etichetta": "tela quadrata, disegno esteso"
         }
       ],
       "relazioneVersioni": {
@@ -23122,15 +23386,37 @@
       "descrizioneVersioni": [
         {
           "chiave": "nativo-rmap-159-15-0",
+          "opachi": 180860,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            92,
+            67,
+            1045,
+            968
+          ],
           "progressione": 0,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 159/15 livello 0"
+          "etichetta": "tela larga, disegno medio"
         },
         {
           "chiave": "nativo-rmap-159-16-0",
+          "opachi": 53342,
+          "dimensione": [
+            2048,
+            1024
+          ],
+          "riquadro": [
+            71,
+            227,
+            1106,
+            640
+          ],
           "progressione": 1,
           "relazione": "risorsa nativa distinta",
-          "etichetta": "risorsa 159/16 livello 0"
+          "etichetta": "tela larga, disegno minuto"
         }
       ],
       "relazioneVersioni": {

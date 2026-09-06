@@ -1,4 +1,5 @@
 import type { MappaDto, MappaRiassuntoDto } from '../types';
+import { nomeConVersione } from './etichettaVersione';
 type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'gruppoImmagini' | 'genitoreNome'>;
 type RisoluzioneContesto = { stato: 'assente' | 'non-valido' | 'senza-titolo' | 'multiplo'; titolo: null; ids: string[] } | { stato: 'nominato'; titolo: string; ids: string[] };
 
@@ -34,9 +35,10 @@ export function presentaMappa(mappa: MappaDto, selezione?: string | null): Mappa
   const nome = nomePresentazioneMappa(mappa, selezione);
   return { ...mappa, nome, percorso: mappa.percorso.map((p, i) => i === mappa.percorso.length - 1 ? { ...p, nome } : p), figli: mappa.figli.map(f => ({ ...f, nome: nomePresentazioneMappa(f) })) };
 }
-/** Etichetta del selettore con la gerarchia verificata, mai un piano inventato. */
+/** Etichetta del selettore con la gerarchia verificata, mai un piano inventato. La parte che
+ * descrive la versione viene da `etichettaVersione`, la stessa che usano indice e albero. */
 export function etichettaPlanimetria(mappa: MappaRiassuntoDto): string {
   if (mappa.contesti?.some(c => c.nome === null)) return nomePresentazioneMappa(mappa);
-  const nome = mappa.gruppoImmagini ? `${mappa.gruppoImmagini.nome} — immagine ${mappa.gruppoImmagini.ordine + 1}` : nomePresentazioneMappa(mappa);
+  const nome = nomeConVersione(mappa, mappa.gruppoImmagini?.nome ?? nomePresentazioneMappa(mappa));
   return mappa.nomeCompleto?.endsWith(mappa.nome) ? mappa.nomeCompleto.slice(0, -mappa.nome.length) + nome : nome;
 }

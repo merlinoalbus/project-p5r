@@ -733,18 +733,18 @@
    "larghezza": 512,
    "altezza": 512,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/1 livello 0» della stessa zona.",
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno minuto — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 0,
-    "etichetta": "risorsa 190/1 livello 0"
+    "etichetta": "tela quadrata, disegno minuto — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-190-2-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/2 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela quadrata, disegno medio — la più estesa",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 1,
@@ -754,18 +754,29 @@
    "larghezza": 512,
    "altezza": 512,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/2 livello 0» della stessa zona.",
-   "spilli": [],
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno medio — la più estesa» della stessa zona.",
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873598). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.578,
+     "y": 64.453,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 1,
-    "etichetta": "risorsa 190/2 livello 0"
+    "etichetta": "tela quadrata, disegno medio — la più estesa"
    }
   },
   {
    "chiave": "nativo-rmap-190-3-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/3 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela quadrata, disegno medio — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 2,
@@ -775,18 +786,29 @@
    "larghezza": 512,
    "altezza": 512,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/3 livello 0» della stessa zona.",
-   "spilli": [],
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno medio — la meno estesa» della stessa zona.",
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873598). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.578,
+     "y": 11.133,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 2,
-    "etichetta": "risorsa 190/3 livello 0"
+    "etichetta": "tela quadrata, disegno medio — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-190-51-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/51 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela alta, disegno minuto",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 3,
@@ -796,18 +818,18 @@
    "larghezza": 256,
    "altezza": 1024,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/51 livello 0» della stessa zona.",
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela alta, disegno minuto» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 3,
-    "etichetta": "risorsa 190/51 livello 0"
+    "etichetta": "tela alta, disegno minuto"
    }
   },
   {
    "chiave": "nativo-rmap-190-61-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/61 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela alta, disegno medio — la più estesa",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 4,
@@ -817,18 +839,18 @@
    "larghezza": 256,
    "altezza": 1024,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/61 livello 0» della stessa zona.",
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela alta, disegno medio — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 4,
-    "etichetta": "risorsa 190/61 livello 0"
+    "etichetta": "tela alta, disegno medio — la più estesa"
    }
   },
   {
    "chiave": "nativo-rmap-190-62-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/62 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela alta, disegno medio — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 5,
@@ -838,18 +860,18 @@
    "larghezza": 256,
    "altezza": 1024,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/62 livello 0» della stessa zona.",
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela alta, disegno medio — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 5,
-    "etichetta": "risorsa 190/62 livello 0"
+    "etichetta": "tela alta, disegno medio — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-192-62-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 192/62 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela quadrata, disegno esteso",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 6,
@@ -859,18 +881,18 @@
    "larghezza": 1024,
    "altezza": 1024,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 192/62 livello 0» della stessa zona.",
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno esteso» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 6,
-    "etichetta": "risorsa 192/62 livello 0"
+    "etichetta": "tela quadrata, disegno esteso"
    }
   },
   {
    "chiave": "nativo-rmap-195-11-0",
-   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 195/11 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — tela quadrata, disegno minuto — la più estesa",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 7,
@@ -880,13 +902,13 @@
    "larghezza": 2048,
    "altezza": 2048,
    "entita": null,
-   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 195/11 livello 0» della stessa zona.",
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «tela quadrata, disegno minuto — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
     "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 7,
-    "etichetta": "risorsa 195/11 livello 0"
+    "etichetta": "tela quadrata, disegno minuto — la più estesa"
    }
   },
   {
@@ -923,7 +945,28 @@
     "chiave": "iweleth-09-cammino-per-il-santo-graal-parte-i"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874295). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 45.41,
+     "y": 32.715,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874296). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.457,
+     "y": 45.898,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-160-3-0",
@@ -941,7 +984,18 @@
     "chiave": "iweleth-10-cammino-per-il-santo-graal-parte-ii"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874294). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.602,
+     "y": 20.996,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-160-4-0",
@@ -959,7 +1013,18 @@
     "chiave": "iweleth-12-cammino-per-il-santo-graal-parte-iv"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874293). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.555,
+     "y": 20.557,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-160-4-0",
     "nome": "Cammino per il Santo Graal – Parte III",
@@ -1025,7 +1090,28 @@
     "chiave": "iweleth-11-cammino-per-il-santo-graal-parte-iii"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874291). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 42.188,
+     "y": 27.93,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874292). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 28.906,
+     "y": 22.852,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-160-6-0",
@@ -1247,7 +1333,48 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872593). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 45.02,
+     "y": 10.596,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872594). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 56.738,
+     "y": 18.311,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 55.176,
+     "y": 5.566,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871632). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.254,
+     "y": 15.674,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-3-0",
     "nome": "Camera del Rimorso 1P",
@@ -1304,7 +1431,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872595). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 10.4,
+     "y": 33.984,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872608). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.818,
+     "y": 5.371,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-155-4-1",
@@ -1319,7 +1467,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «variante grafica» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872596). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.012,
+     "y": 20.02,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872597). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 25.781,
+     "y": 39.697,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872609). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.893,
+     "y": 25.391,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-4-1",
     "nome": "Camera del Santuario 2P",
@@ -1340,7 +1519,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872596). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.012,
+     "y": 20.02,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872597). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 25.781,
+     "y": 39.697,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872609). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.893,
+     "y": 25.391,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-4-1",
     "nome": "Camera del Santuario 2P",
@@ -1361,7 +1571,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.424,
+     "y": 18.555,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-4-1",
     "nome": "Camera del Santuario 2P",
@@ -1403,7 +1624,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872588). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.973,
+     "y": 36.133,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-5-0",
     "nome": "Caverna sotterranea 1P",
@@ -1466,7 +1698,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872592). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.307,
+     "y": 25.488,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-155-7-1",
@@ -1481,7 +1724,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872591). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.238,
+     "y": 8.789,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872607). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 22.07,
+     "y": 24.17,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.785,
+     "y": 24.902,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-155-8-0",
@@ -1583,7 +1857,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872598). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.258,
+     "y": 6.348,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-155-9-1",
@@ -1628,7 +1913,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872590). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.408,
+     "y": 21.631,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-155-11-0",
     "nome": "Passaggio sotterraneo 1F",
@@ -1729,18 +2025,18 @@
    "larghezza": 2048,
    "altezza": 2048,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 151/0 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno medio — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
     "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 0,
-    "etichetta": "risorsa 151/0 livello 0"
+    "etichetta": "tela quadrata, disegno medio — la più estesa"
    }
   },
   {
    "chiave": "nativo-rmap-151-0-1",
-   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — risorsa 151/0 livello 1",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — tela quadrata, disegno medio — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 1,
@@ -1750,18 +2046,18 @@
    "larghezza": 2048,
    "altezza": 2048,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 151/0 livello 1» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno medio — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
     "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 1,
-    "etichetta": "risorsa 151/0 livello 1"
+    "etichetta": "tela quadrata, disegno medio — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-152-11-0",
-   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — risorsa 152/11 livello 0",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — tela larga, disegno minuto — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 2,
@@ -1771,18 +2067,18 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 152/11 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
     "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 2,
-    "etichetta": "risorsa 152/11 livello 0"
+    "etichetta": "tela larga, disegno minuto — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-152-11-1",
-   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — risorsa 152/11 livello 1",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — tela larga, disegno minuto — la più estesa",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 3,
@@ -1792,13 +2088,13 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 152/11 livello 1» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
     "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 3,
-    "etichetta": "risorsa 152/11 livello 1"
+    "etichetta": "tela larga, disegno minuto — la più estesa"
    }
   },
   {
@@ -1873,7 +2169,58 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871388). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.617,
+     "y": 23.828,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871391). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.191,
+     "y": 23.828,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871387). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 7.178,
+     "y": 21.191,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871482). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.922,
+     "y": 30.42,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 6.104,
+     "y": 25.684,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-151-2-1",
@@ -1888,7 +2235,78 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871389). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 52.49,
+     "y": 28.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871390). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 49.902,
+     "y": 12.012,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871407). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.449,
+     "y": 33.984,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871483). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 5.225,
+     "y": 10.205,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871484). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.324,
+     "y": 22.656,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871487). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 56.494,
+     "y": 13.281,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871406). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.824,
+     "y": 14.844,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-2-1",
     "nome": "Vecchio castello 2P",
@@ -1930,7 +2348,48 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871404). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 50.732,
+     "y": 29.443,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871409). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 84.375,
+     "y": 2.051,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871405). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 68.945,
+     "y": 21.387,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871488). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 57.812,
+     "y": 18.701,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-4-1",
     "nome": "Vecchio castello 3P",
@@ -1951,7 +2410,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871289). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 56.885,
+     "y": 9.131,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-4-1",
     "nome": "Vecchio castello 3P",
@@ -1972,7 +2442,48 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871404). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 8.936,
+     "y": 38.721,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871409). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 42.578,
+     "y": 11.377,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871405). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.148,
+     "y": 30.664,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871488). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.016,
+     "y": 27.979,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-4-1",
     "nome": "Vecchio castello 3P",
@@ -1993,7 +2504,58 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871394). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.539,
+     "y": 41.553,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871395). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.793,
+     "y": 41.553,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871396). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.795,
+     "y": 23.828,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871404). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 8.936,
+     "y": 38.721,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871488). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.016,
+     "y": 27.979,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-4-1",
     "nome": "Vecchio castello 3P",
@@ -2101,7 +2663,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871397). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.432,
+     "y": 10.791,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-6-0",
     "nome": "Tetto",
@@ -2122,7 +2695,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.621,
+     "y": 18.115,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-6-0",
     "nome": "Tetto",
@@ -2143,7 +2727,28 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871410). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.449,
+     "y": 40.723,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875572). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.621,
+     "y": 28.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-151-9-0",
@@ -2158,7 +2763,28 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871392). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.99,
+     "y": 35.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871398). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 30.029,
+     "y": 35.449,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-151-10-0",
@@ -2173,7 +2799,38 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871399). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 48.828,
+     "y": 20.215,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871403). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.129,
+     "y": 31.543,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871393). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 53.027,
+     "y": 39.258,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-10-0",
     "nome": "Torre: Livello superiore",
@@ -2194,7 +2851,38 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871399). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 48.828,
+     "y": 20.215,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871403). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.129,
+     "y": 31.543,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871393). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 53.027,
+     "y": 39.258,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-10-0",
     "nome": "Torre: Livello superiore",
@@ -2215,7 +2903,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871402). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.799,
+     "y": 58.789,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-11-0",
     "nome": "Torre: Sala del trono",
@@ -2250,7 +2949,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871400). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.113,
+     "y": 51.465,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-11-0",
     "nome": "Torre: Sala del trono",
@@ -2318,7 +3028,28 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875924). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.59,
+     "y": 29.297,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875925). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.334,
+     "y": 29.297,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-152-1-0",
     "nome": "Prigione sotterranea 1P",
@@ -2388,7 +3119,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875926). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 31.445,
+     "y": 18.262,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875927). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.457,
+     "y": 24.707,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-152-2-0",
     "nome": "Prigione sotterranea 2P",
@@ -2430,7 +3182,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875928). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 42.139,
+     "y": 36.23,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-152-5-0",
@@ -2445,7 +3208,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 2.93,
+     "y": 13.33,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-152-6-0",
@@ -2475,7 +3249,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871642). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.359,
+     "y": 7.422,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "contesti": [
     {
      "id": "texpack-31-elemento-40",
@@ -2507,7 +3292,98 @@
     "chiave": "kaneshiro-01-sala-d-ingresso"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872187). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.375,
+     "y": 38.086,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872188). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.086,
+     "y": 30.322,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871642). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.506,
+     "y": 41.26,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871644). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.484,
+     "y": 36.426,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875685). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 49.316,
+     "y": 26.27,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875686). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.574,
+     "y": 26.27,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 50.195,
+     "y": 10.889,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875924). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.533,
+     "y": 10.889,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875925). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.533,
+     "y": 14.111,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-154-2-1",
@@ -2522,7 +3398,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871645). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.35,
+     "y": 30.127,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872245). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.311,
+     "y": 25.195,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-154-3-0",
@@ -2537,7 +3434,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «settore d’ingresso» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871647). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 45.508,
+     "y": 7.324,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-3-0",
     "nome": "Corridoio banchieri",
@@ -2572,7 +3480,78 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872190). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 23.73,
+     "y": 26.562,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872208). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 45.996,
+     "y": 18.066,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872193). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.451,
+     "y": 17.725,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871646). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.965,
+     "y": 18.604,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872246). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.26,
+     "y": 21.484,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871650). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 49.658,
+     "y": 21.191,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 52.637,
+     "y": 28.809,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-3-0",
     "nome": "Corridoio banchieri",
@@ -2607,7 +3586,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872191). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 50.391,
+     "y": 11.182,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-3-0",
     "nome": "Corridoio banchieri",
@@ -2642,7 +3632,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «settore d’ingresso» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 50.781,
+     "y": 24.17,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-5-0",
     "nome": "Caveau sotterraneo",
@@ -2722,7 +3723,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872197). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.496,
+     "y": 34.131,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872196). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.963,
+     "y": 11.426,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875702). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.016,
+     "y": 24.268,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-7-0",
     "nome": "Caveau 1P",
@@ -2743,7 +3775,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872198). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.436,
+     "y": 39.16,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-8-0",
     "nome": "Caveau 2P",
@@ -2764,7 +3807,28 @@
    "altezza": 1024,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872209). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.846,
+     "y": 13.477,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875895). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.16,
+     "y": 23.145,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-8-0",
     "nome": "Caveau 2P",
@@ -2785,7 +3849,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875707). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 40.283,
+     "y": 22.9,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875649). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.141,
+     "y": 12.842,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-9-0",
     "nome": "Caveau 3P",
@@ -2806,7 +3891,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872199). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.203,
+     "y": 14.355,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872210). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.818,
+     "y": 30.518,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872203). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 49.609,
+     "y": 21.484,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-9-0",
     "nome": "Caveau 3P",
@@ -2842,7 +3958,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.205,
+     "y": 16.26,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872200). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.229,
+     "y": 35.547,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
     "nome": "Ufficio riciclaggio – Parte I",
@@ -2863,7 +4000,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — seconda per ampiezza» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875927). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.406,
+     "y": 20.02,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
     "nome": "Ufficio riciclaggio – Parte I",
@@ -2884,7 +4032,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura meridionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872030). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 28.857,
+     "y": 16.553,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875926). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.406,
+     "y": 20.02,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
     "nome": "Ufficio riciclaggio – Parte I",
@@ -2905,7 +4074,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872202). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.178,
+     "y": 25.0,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872207). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.936,
+     "y": 10.986,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
     "nome": "Ufficio riciclaggio – Parte I",
@@ -2943,7 +4133,18 @@
     "chiave": "kaneshiro-03-ufficio-riciclaggio"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872201). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.799,
+     "y": 8.35,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
     "nome": "Ufficio riciclaggio – Parte I",
@@ -3026,18 +4227,18 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 154/13 livello 0» della stessa zona.",
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «tela larga, disegno minuto — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-13-0",
     "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
     "ordine": 0,
-    "etichetta": "risorsa 154/13 livello 0"
+    "etichetta": "tela larga, disegno minuto — la più estesa"
    }
   },
   {
    "chiave": "nativo-rmap-154-13-1",
-   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina — risorsa 154/13 livello 1",
+   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina — tela larga, disegno minuto — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1101,
@@ -3047,18 +4248,18 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 154/13 livello 1» della stessa zona.",
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «tela larga, disegno minuto — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-13-0",
     "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
     "ordine": 1,
-    "etichetta": "risorsa 154/13 livello 1"
+    "etichetta": "tela larga, disegno minuto — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-154-13-2",
-   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina — risorsa 154/13 livello 2",
+   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina — tela larga, disegno minuto — la seconda per estensione",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1102,
@@ -3068,13 +4269,13 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 154/13 livello 2» della stessa zona.",
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «tela larga, disegno minuto — la seconda per estensione» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-13-0",
     "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
     "ordine": 2,
-    "etichetta": "risorsa 154/13 livello 2"
+    "etichetta": "tela larga, disegno minuto — la seconda per estensione"
    }
   },
   {
@@ -3137,7 +4338,68 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «variante grafica» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871787). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.383,
+     "y": 39.941,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871807). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 8.643,
+     "y": 39.551,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871788). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.945,
+     "y": 10.156,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871789). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 6.445,
+     "y": 10.156,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871652). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 22.656,
+     "y": 34.131,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871653). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 7.324,
+     "y": 21.191,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-2-0",
     "nome": "Museo, 1P",
@@ -3193,7 +4455,48 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871790). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 57.129,
+     "y": 35.01,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871796). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.723,
+     "y": 16.211,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875622). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.295,
+     "y": 36.035,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 6.689,
+     "y": 16.016,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-3-0",
     "nome": "Museo, 2P",
@@ -3249,7 +4552,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871795). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.025,
+     "y": 19.238,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875623). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.1,
+     "y": 11.865,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-3-0",
     "nome": "Museo, 2P",
@@ -3291,7 +4615,58 @@
    "altezza": 2048,
    "entita": null,
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871791). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.824,
+     "y": 34.814,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871792). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.297,
+     "y": 27.783,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871793). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 51.562,
+     "y": 23.828,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871794). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 68.848,
+     "y": 17.432,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871808). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 69.141,
+     "y": 4.248,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-153-5-0",
@@ -3379,7 +4754,68 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «variante grafica» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871797). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 3.906,
+     "y": 20.508,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871798). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 2.881,
+     "y": 12.842,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871799). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.699,
+     "y": 14.941,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871809). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 13.916,
+     "y": 14.941,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871810). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 7.861,
+     "y": 4.688,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871655). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 28.564,
+     "y": 14.795,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-6-0",
     "nome": "Sala del Tesoro - Atrio",
@@ -3452,7 +4888,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.646,
+     "y": 22.559,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-7-0",
     "nome": "Sala del Tesoro - Galleria",
@@ -3476,7 +4923,28 @@
     "chiave": "madarame-07-sala-del-tesoro-stanza-intermedia-con-safe-room-e-sala-del-t"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871800). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 40.234,
+     "y": 13.916,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871801). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.254,
+     "y": 19.434,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-7-0",
     "nome": "Sala del Tesoro - Galleria",
@@ -3497,7 +4965,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871656). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.523,
+     "y": 22.07,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-7-0",
     "nome": "Sala del Tesoro - Galleria",
@@ -3517,18 +4996,18 @@
    "larghezza": 64,
    "altezza": 64,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/8 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno esteso — la seconda per estensione» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 0,
-    "etichetta": "risorsa 153/8 livello 0"
+    "etichetta": "tela quadrata, disegno esteso — la seconda per estensione"
    }
   },
   {
    "chiave": "nativo-rmap-153-8-1",
-   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/8 livello 1",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — tela quadrata, disegno minuto — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 701,
@@ -3538,18 +5017,18 @@
    "larghezza": 2048,
    "altezza": 2048,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/8 livello 1» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno minuto — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 1,
-    "etichetta": "risorsa 153/8 livello 1"
+    "etichetta": "tela quadrata, disegno minuto — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-153-8-2",
-   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/8 livello 2",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — tela quadrata, disegno minuto — la seconda per estensione",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 702,
@@ -3559,18 +5038,18 @@
    "larghezza": 2048,
    "altezza": 2048,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/8 livello 2» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno minuto — la seconda per estensione» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 2,
-    "etichetta": "risorsa 153/8 livello 2"
+    "etichetta": "tela quadrata, disegno minuto — la seconda per estensione"
    }
   },
   {
    "chiave": "nativo-rmap-153-10-0",
-   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/10 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — tela quadrata, disegno esteso — la meno estesa",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 703,
@@ -3580,18 +5059,18 @@
    "larghezza": 64,
    "altezza": 64,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/10 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno esteso — la meno estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 3,
-    "etichetta": "risorsa 153/10 livello 0"
+    "etichetta": "tela quadrata, disegno esteso — la meno estesa"
    }
   },
   {
    "chiave": "nativo-rmap-153-11-0",
-   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/11 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — tela quadrata, disegno esteso — la più estesa",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 704,
@@ -3601,18 +5080,18 @@
    "larghezza": 64,
    "altezza": 64,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/11 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno esteso — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 4,
-    "etichetta": "risorsa 153/11 livello 0"
+    "etichetta": "tela quadrata, disegno esteso — la più estesa"
    }
   },
   {
    "chiave": "nativo-rmap-153-12-0",
-   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/12 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — tela quadrata, disegno minuto — la più estesa",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 705,
@@ -3622,18 +5101,18 @@
    "larghezza": 2048,
    "altezza": 2048,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/12 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela quadrata, disegno minuto — la più estesa» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 5,
-    "etichetta": "risorsa 153/12 livello 0"
+    "etichetta": "tela quadrata, disegno minuto — la più estesa"
    }
   },
   {
    "chiave": "nativo-rmap-153-13-0",
-   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/13 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — tela alta, disegno minuto",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 706,
@@ -3643,13 +5122,13 @@
    "larghezza": 1024,
    "altezza": 2048,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 153/13 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela alta, disegno minuto» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
     "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 6,
-    "etichetta": "risorsa 153/13 livello 0"
+    "etichetta": "tela alta, disegno minuto"
    }
   },
   {
@@ -3665,7 +5144,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871657). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 20.898,
+     "y": 14.795,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-9-0",
     "nome": "Sala del Tesoro",
@@ -3703,7 +5193,48 @@
     "chiave": "madarame-09-sala-del-tesoro-sala-principale-e-sala-principale-superiore"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871811). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.016,
+     "y": 14.551,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536871803). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 30.078,
+     "y": 25.83,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.234,
+     "y": 14.795,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875640). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 25.488,
+     "y": 4.59,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-9-0",
     "nome": "Sala del Tesoro",
@@ -3812,7 +5343,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875381). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.963,
+     "y": 51.758,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.035,
+     "y": 42.871,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875928). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.137,
+     "y": 47.852,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
     "nome": "Sala d'ingresso",
@@ -3836,7 +5398,28 @@
     "chiave": "maruki-02-sala-d-ingresso"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875924). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.189,
+     "y": 30.078,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875380). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.137,
+     "y": 4.932,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
     "nome": "Sala d'ingresso",
@@ -3878,7 +5461,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875382). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 20.605,
+     "y": 5.615,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875457). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 10.059,
+     "y": 12.061,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-3-0",
     "nome": "Corridoio",
@@ -3926,7 +5530,18 @@
     "chiave": "maruki-03-percorso-di-prova"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875400). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 6.836,
+     "y": 10.425,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-162-5-0",
@@ -4007,7 +5622,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875092). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 3.369,
+     "y": 18.506,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-7-0",
     "nome": "??? Auditorium",
@@ -4031,7 +5657,18 @@
     "chiave": "maruki-05-auditorium"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875395). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 9.473,
+     "y": 4.736,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-7-0",
     "nome": "??? Auditorium",
@@ -4052,7 +5689,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875926). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.822,
+     "y": 66.699,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-9-0",
     "nome": "Sala visite",
@@ -4094,7 +5742,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875384). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.113,
+     "y": 34.668,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-9-0",
     "nome": "Sala visite",
@@ -4139,7 +5798,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875383). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.381,
+     "y": 20.02,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875927). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.66,
+     "y": 18.115,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-9-0",
     "nome": "Sala visite",
@@ -4160,7 +5840,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875385). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.98,
+     "y": 37.402,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-11-0",
     "nome": "Corridoio del Crepuscolo",
@@ -4184,7 +5875,38 @@
     "chiave": "maruki-11-corridoio-del-crepuscolo"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875386). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 30.322,
+     "y": 30.42,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875401). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 9.521,
+     "y": 17.773,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 23.291,
+     "y": 45.703,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-11-0",
     "nome": "Corridoio del Crepuscolo",
@@ -4205,7 +5927,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875342). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.213,
+     "y": 43.652,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-11-0",
     "nome": "Corridoio del Crepuscolo",
@@ -4226,7 +5959,68 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875399). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 52.686,
+     "y": 33.984,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872091). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.77,
+     "y": 17.822,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872092). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.066,
+     "y": 37.305,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872093). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.385,
+     "y": 17.725,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875925). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 57.861,
+     "y": 27.393,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875175). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.385,
+     "y": 12.988,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-12-0",
     "nome": "??? Sala di controllo",
@@ -4250,7 +6044,38 @@
     "chiave": "maruki-07-sala-di-controllo"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875397). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.008,
+     "y": 6.006,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875393). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 40.039,
+     "y": 16.113,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.514,
+     "y": 8.887,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-12-0",
     "nome": "??? Sala di controllo",
@@ -4292,7 +6117,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875388). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 23.291,
+     "y": 23.535,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-14-0",
     "nome": "??? Ripostiglio",
@@ -4316,7 +6152,18 @@
     "chiave": "maruki-06-ripostiglio"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875387). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.24,
+     "y": 23.535,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-14-0",
     "nome": "??? Ripostiglio",
@@ -4358,7 +6205,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875482). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.527,
+     "y": 9.766,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-15-0",
     "nome": "Sala di supporto",
@@ -4403,7 +6261,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875389). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 20.508,
+     "y": 28.32,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-15-0",
     "nome": "Sala di supporto",
@@ -4424,7 +6293,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875390). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 28.564,
+     "y": 18.701,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875453). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.953,
+     "y": 22.119,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-16-0",
     "nome": "Ala ricerca",
@@ -4448,7 +6338,28 @@
     "chiave": "maruki-08-ala-ricerca"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875391). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.797,
+     "y": 14.404,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875454). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.129,
+     "y": 20.02,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-16-0",
     "nome": "Ala ricerca",
@@ -4469,7 +6380,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ristretta» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875455). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 22.705,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875456). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.895,
+     "y": 22.461,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.088,
+     "y": 22.266,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-16-0",
     "nome": "Ala ricerca",
@@ -4490,7 +6432,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875398). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.402,
+     "y": 14.16,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875161). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.346,
+     "y": 19.873,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-16-0",
     "nome": "Ala ricerca",
@@ -4556,7 +6519,18 @@
     "chiave": "niijima-01-entrata-del-casino"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.227,
+     "y": 21.582,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-1-0",
     "nome": "Entrata del casinò",
@@ -4576,18 +6550,18 @@
    "larghezza": 1024,
    "altezza": 1024,
    "entita": null,
-   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 157/3 livello 0» della stessa zona.",
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «tela quadrata, disegno medio» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-3-0",
     "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina",
     "ordine": 0,
-    "etichetta": "risorsa 157/3 livello 0"
+    "etichetta": "tela quadrata, disegno medio"
    }
   },
   {
    "chiave": "nativo-rmap-157-3-1",
-   "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina — risorsa 157/3 livello 1",
+   "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina — tela quadrata, disegno esteso",
    "tipo": "area",
    "genitore": "dungeon-niijima",
    "ordine": 101,
@@ -4597,13 +6571,13 @@
    "larghezza": 1024,
    "altezza": 1024,
    "entita": null,
-   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «risorsa 157/3 livello 1» della stessa zona.",
+   "note": "Nessuna tabella nativa dà un nome a questa zona. Versione «tela quadrata, disegno esteso» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-3-0",
     "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina",
     "ordine": 1,
-    "etichetta": "risorsa 157/3 livello 1"
+    "etichetta": "tela quadrata, disegno esteso"
    }
   },
   {
@@ -4643,7 +6617,48 @@
     "chiave": "niijima-02-piano-terra"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873387). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.008,
+     "y": 36.865,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875849). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 7.812,
+     "y": 17.529,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875924). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 30.273,
+     "y": 22.607,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875925). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.453,
+     "y": 22.607,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-4-0",
     "nome": "Piano terra",
@@ -4664,7 +6679,78 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dai luoghi a cui è collegata. Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873388). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.951,
+     "y": 35.742,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873389). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 55.664,
+     "y": 32.08,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.16,
+     "y": 41.162,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875881). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.484,
+     "y": 41.309,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875882). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.775,
+     "y": 16.748,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875883). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 23.438,
+     "y": 9.961,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875884). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 30.469,
+     "y": 8.35,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-5-0",
     "nome": "Area riservata allo staff (verso Piano terra)",
@@ -4730,7 +6816,28 @@
     "chiave": "niijima-07-area-dadi-parte-i"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875852). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 64.062,
+     "y": 50.293,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875926). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 52.295,
+     "y": 19.922,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-7-0",
     "nome": "Area dadi",
@@ -4772,7 +6879,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dai luoghi a cui è collegata. Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873410). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 7.324,
+     "y": 9.326,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873391). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 31.592,
+     "y": 37.012,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875885). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.008,
+     "y": 38.672,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-8-0",
     "nome": "Area riservata allo staff (verso Area dadi)",
@@ -4796,7 +6934,28 @@
     "chiave": "niijima-04-area-riservata-allo-staff-parte-ii"
    },
    "note": "Zona omonima distinta dai luoghi a cui è collegata.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873397). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.854,
+     "y": 19.922,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873398). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 20.996,
+     "y": 25.391,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-8-0",
     "nome": "Area riservata allo staff (verso Area dadi)",
@@ -4817,7 +6976,28 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873392). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.969,
+     "y": 34.18,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875886). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 13.672,
+     "y": 21.973,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-9-0",
     "nome": "Stanza slot machine",
@@ -4841,7 +7021,38 @@
     "chiave": "niijima-09-stanza-slot-machine-1"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873399). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.818,
+     "y": 29.297,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 2.637,
+     "y": 38.574,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875887). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.354,
+     "y": 26.367,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-9-0",
     "nome": "Stanza slot machine",
@@ -4883,7 +7094,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura orientale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873393). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.48,
+     "y": 24.512,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-9-0",
     "nome": "Stanza slot machine",
@@ -4928,7 +7150,18 @@
     "chiave": "niijima-11-lobby-piano-puntate-alte"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873407). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.129,
+     "y": 23.291,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-11-0",
     "nome": "Lobby piano puntate alte",
@@ -4949,7 +7182,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 31.641,
+     "y": 3.76,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-11-0",
     "nome": "Lobby piano puntate alte",
@@ -4973,7 +7217,68 @@
     "chiave": "niijima-13-oscura-dimora"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873408). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.65,
+     "y": 26.855,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873394). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.004,
+     "y": 11.719,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873395). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.158,
+     "y": 43.262,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873396). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 48.438,
+     "y": 28.613,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875847). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.086,
+     "y": 23.438,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875848). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.09,
+     "y": 38.672,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-12-0",
     "nome": "Oscura Dimora",
@@ -4994,7 +7299,18 @@
    "altezza": 500,
    "entita": null,
    "note": "Versione «inquadratura meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873409). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.0,
+     "y": 36.8,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-12-0",
     "nome": "Oscura Dimora",
@@ -5125,7 +7441,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872989). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.113,
+     "y": 29.541,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872987). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 54.297,
+     "y": 9.814,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 55.078,
+     "y": 33.984,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-2-0",
     "nome": "Corridoi del complesso",
@@ -5146,7 +7493,38 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872988). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.922,
+     "y": 30.469,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875402). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.287,
+     "y": 31.982,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875403). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 52.49,
+     "y": 18.652,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-2-0",
     "nome": "Corridoi del complesso",
@@ -5184,7 +7562,18 @@
     "chiave": "okumura-02-corridoi-del-complesso"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 66.455,
+     "y": 32.031,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-2-0",
     "nome": "Corridoi del complesso",
@@ -5222,7 +7611,28 @@
     "chiave": "okumura-04-dintorni-del-complesso"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872990). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.316,
+     "y": 18.604,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872991). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.514,
+     "y": 34.277,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "contesti": [
     {
      "id": "texpack-59-elemento-85",
@@ -5251,7 +7661,108 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 53.955,
+     "y": 2.197,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872762). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.045,
+     "y": 25.439,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872762). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.074,
+     "y": 21.191,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872762). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.621,
+     "y": 31.152,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872762). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 30.42,
+     "y": 27.197,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872762). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 47.363,
+     "y": 25.684,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872763). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 21.045,
+     "y": 16.211,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872763). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 33.691,
+     "y": 17.285,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872762). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 53.955,
+     "y": 30.42,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872763). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 53.955,
+     "y": 16.602,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 9
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-5-0",
     "nome": "Interscambio",
@@ -5275,7 +7786,208 @@
     "chiave": "okumura-09-interscambio"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872996). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.066,
+     "y": 13.965,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.941,
+     "y": 31.934,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.018,
+     "y": 27.881,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.727,
+     "y": 28.564,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.23,
+     "y": 10.107,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.578,
+     "y": 35.938,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.131,
+     "y": 28.564,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.014,
+     "y": 28.467,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872764). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.941,
+     "y": 21.289,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872765). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.572,
+     "y": 27.881,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 9
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872765). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 43.506,
+     "y": 7.031,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 10
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 25.391,
+     "y": 37.939,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 11
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 31.836,
+     "y": 30.615,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 12
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 44.824,
+     "y": 20.117,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 13
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.67,
+     "y": 25.977,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 14
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.428,
+     "y": 12.354,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 15
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.443,
+     "y": 33.887,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 16
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.602,
+     "y": 26.074,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 17
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 34.18,
+     "y": 7.08,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 18
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872766). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 20.068,
+     "y": 30.029,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 19
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-5-0",
     "nome": "Interscambio",
@@ -5310,7 +8022,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura settentrionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873007). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.191,
+     "y": 19.336,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-7-0",
     "nome": "Linea esportazioni",
@@ -5348,7 +8071,28 @@
     "chiave": "okumura-05-linea-esportazioni"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872992). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 15.43,
+     "y": 61.963,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 23.34,
+     "y": 73.926,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-7-0",
     "nome": "Linea esportazioni",
@@ -5386,7 +8130,18 @@
     "chiave": "okumura-06-linea-di-produzione"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872993). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 6.104,
+     "y": 44.727,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-156-9-0",
@@ -5401,7 +8156,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873008). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 53.711,
+     "y": 20.508,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872994). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 52.539,
+     "y": 30.615,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-9-0",
     "nome": "Linea di smaltimento",
@@ -5474,7 +8250,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione meridionale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873009). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.867,
+     "y": 39.209,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-10-0",
     "nome": "Produzione armamenti",
@@ -5589,7 +8376,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «inquadratura occidentale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872997). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.895,
+     "y": 10.449,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-156-11-0",
     "nome": "Manutenzione armamenti",
@@ -5655,7 +8453,28 @@
     "chiave": "okumura-08-fabbrica-centrale"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872995). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 10.742,
+     "y": 31.25,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.297,
+     "y": 22.949,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "contesti": [
     {
      "id": "texpack-67-elemento-90",
@@ -5687,7 +8506,48 @@
     "chiave": "okumura-03-caserma"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536872998). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 25.732,
+     "y": 2.197,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875404). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.6,
+     "y": 28.76,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875405). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.92,
+     "y": 25.049,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875406). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.164,
+     "y": 15.234,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "contesti": [
     {
      "id": "texpack-68-elemento-84",
@@ -5811,7 +8671,28 @@
     "chiave": "shido-01-passaggio-centrale-sala-d-ingresso"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873890). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.414,
+     "y": 8.203,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873837). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 48.145,
+     "y": 10.156,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-2-0",
     "nome": "Sala d'ingresso",
@@ -5853,7 +8734,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873887). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.699,
+     "y": 11.719,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-2-0",
     "nome": "Sala d'ingresso",
@@ -5874,7 +8766,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873890). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.414,
+     "y": 8.203,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873837). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 48.145,
+     "y": 10.156,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-3-0",
     "nome": "Passaggio e salone centrale",
@@ -6017,7 +8930,18 @@
     "chiave": "shido-08-sala-intrattenimento"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873908). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.902,
+     "y": 22.266,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-6-0",
     "nome": "Sala intrattenimento 2P",
@@ -6087,7 +9011,18 @@
    "altezza": 1024,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873895). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 18.75,
+     "y": 26.855,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-7-0",
     "nome": "Ponte di poppa",
@@ -6178,7 +9113,28 @@
     "chiave": "shido-03-ristorante"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873890). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 24.414,
+     "y": 8.203,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873837). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 48.145,
+     "y": 10.156,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-159-10-0",
@@ -6231,7 +9187,18 @@
     "chiave": "shido-05-ponte-piscina"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873907). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.307,
+     "y": 33.398,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-10-0",
     "nome": "Ponte piscina",
@@ -6301,7 +9268,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura meridionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873909). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.725,
+     "y": 26.66,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-11-0",
     "nome": "Ponte laterale",
@@ -6409,7 +9387,38 @@
     "chiave": "shido-10-ponte-laterale-parte-i"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873900). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.045,
+     "y": 22.021,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875958). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.645,
+     "y": 4.199,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 28.027,
+     "y": 9.912,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-11-0",
     "nome": "Ponte laterale",
@@ -6451,7 +9460,18 @@
     "chiave": "shido-14-sala-macchine"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875924). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.598,
+     "y": 37.402,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-159-15-0",
@@ -6465,18 +9485,18 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 159/15 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno medio» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-15-0",
     "nome": "Palazzo di Shido — Immagini native che nessun campo usa",
     "ordine": 0,
-    "etichetta": "risorsa 159/15 livello 0"
+    "etichetta": "tela larga, disegno medio"
    }
   },
   {
    "chiave": "nativo-rmap-159-16-0",
-   "nome": "Palazzo di Shido — Immagini native che nessun campo usa — risorsa 159/16 livello 0",
+   "nome": "Palazzo di Shido — Immagini native che nessun campo usa — tela larga, disegno minuto",
    "tipo": "area",
    "genitore": "dungeon-shido",
    "ordine": 1101,
@@ -6486,13 +9506,13 @@
    "larghezza": 2048,
    "altezza": 1024,
    "entita": null,
-   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «risorsa 159/16 livello 0» della stessa zona.",
+   "note": "Risorsa grafica nativa che nessun campo del gioco usa. Versione «tela larga, disegno minuto» della stessa zona.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-15-0",
     "nome": "Palazzo di Shido — Immagini native che nessun campo usa",
     "ordine": 1,
-    "etichetta": "risorsa 159/16 livello 0"
+    "etichetta": "tela larga, disegno minuto"
    }
   },
   {
@@ -6508,7 +9528,78 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873891). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 46.484,
+     "y": 7.129,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873892). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.539,
+     "y": 46.875,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873808). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 17.236,
+     "y": 28.662,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873809). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 42.334,
+     "y": 37.939,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873810). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 37.012,
+     "y": 32.617,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873811). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 39.941,
+     "y": 17.969,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873812). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.279,
+     "y": 37.842,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-20-0",
     "nome": "Corridoio mezzavia tribordo",
@@ -6532,7 +9623,18 @@
     "chiave": "shido-04-corridoio-mezzavia-tribordo"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875956). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 3.418,
+     "y": 17.822,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-20-0",
     "nome": "Corridoio mezzavia tribordo",
@@ -6553,7 +9655,98 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «porzione orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873893). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 13.281,
+     "y": 23.34,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873894). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 42.48,
+     "y": 36.035,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873813). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 19.58,
+     "y": 17.871,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873814). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 29.248,
+     "y": 10.693,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873815). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.734,
+     "y": 26.367,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 4
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873816). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 38.965,
+     "y": 17.871,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 5
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873817). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 14.258,
+     "y": 34.131,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 6
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873818). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.67,
+     "y": 26.367,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 7
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873819). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 47.656,
+     "y": 35.645,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 8
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-25-0",
     "nome": "Corridoio superiore tribordo",
@@ -6577,7 +9770,18 @@
     "chiave": "shido-06-corridoio-superiore-tribordo"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere raro",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873910). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 49.072,
+     "y": 4.346,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-25-0",
     "nome": "Corridoio superiore tribordo",
@@ -6598,7 +9802,48 @@
    "altezza": 2048,
    "entita": null,
    "note": "Versione «inquadratura orientale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873822). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 47.119,
+     "y": 42.09,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873823). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 41.357,
+     "y": 27.246,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873825). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.666,
+     "y": 36.963,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873826). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 36.133,
+     "y": 42.871,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-30-0",
     "nome": "Corridoio inferiore babordo",
@@ -6622,7 +9867,48 @@
     "chiave": "shido-09-corridoio-inferiore-babordo"
    },
    "note": "",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873897). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 20.752,
+     "y": 45.605,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873902). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 50.537,
+     "y": 33.301,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873824). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 12.5,
+     "y": 42.041,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    },
+    {
+     "tipo": "seme-bramosia",
+     "nome": "Seme della bramosia",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875957). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.475,
+     "y": 49.023,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 3
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-30-0",
     "nome": "Corridoio inferiore babordo",
@@ -6646,7 +9932,38 @@
     "chiave": "shido-11-corridoio-mezzavia-babordo"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "porta",
+     "nome": "Porta",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873831). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.617,
+     "y": 53.027,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873898). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 35.693,
+     "y": 56.396,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    },
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536873903). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 47.949,
+     "y": 40.137,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 2
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-161-1-0",
@@ -6664,7 +9981,18 @@
     "chiave": "iweleth-01-entrata-profondita-dei-memento"
    },
    "note": "",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 16.211,
+     "y": 41.797,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-161-2-0",
@@ -6679,7 +10007,28 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura occidentale» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874287). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.91,
+     "y": 9.326,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    },
+    {
+     "tipo": "meccanismo",
+     "nome": "Meccanismo",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536875923). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 32.812,
+     "y": 59.863,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 1
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-2-0",
     "nome": "Corridoio della prigione – Parte I",
@@ -6832,7 +10181,18 @@
     "chiave": "iweleth-06-corridoio-della-prigione-parte-iii"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": []
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874288). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 27.93,
+     "y": 10.938,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ]
   },
   {
    "chiave": "nativo-rmap-161-6-0",
@@ -6907,7 +10267,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa. Versione «inquadratura settentrionale — più ampia» della stessa zona.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874289). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 26.855,
+     "y": 21.582,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-8-0",
     "nome": "Corridoio della prigione – Parte V",
@@ -6949,7 +10320,18 @@
    "altezza": 2048,
    "entita": null,
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
-   "spilli": [],
+   "spilli": [
+    {
+     "tipo": "forziere",
+     "nome": "Forziere",
+     "descrizione": "Pin nativo del gioco. Il gioco lo mostra a certe condizioni, che non sono ancora tradotte (bandiera nativa 536874290). Luogo del catalogo non collegato: quartiere o parole di riconoscimento assenti.",
+     "x": 11.035,
+     "y": 54.346,
+     "riferimento": null,
+     "collezionabile": false,
+     "ordine": 0
+    }
+   ],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-8-0",
     "nome": "Corridoio della prigione – Parte V",

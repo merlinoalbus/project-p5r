@@ -511,6 +511,42 @@ def confronta_versioni(out, chiavi):
     return maschere, misure
 
 
+def descrivi_immagini(out, chiavi):
+    """Descrive immagini che non rappresentano una zona nota: com'è la tela, quanto disegno porta.
+
+    Serve dove il gioco non dà un nome e le immagini non sono versioni di uno stesso luogo: dirne
+    la porzione sarebbe falso, e riportarne il codice nativo sarebbe un'etichetta tecnica. Restano
+    la forma e l'estensione, che sono misure e si leggono.
+    """
+    maschere, misure = confronta_versioni(out, chiavi)
+
+    def forma(k):
+        larghezza, altezza = misure[k]['dimensione']
+        rapporto = larghezza/altezza
+        return 'tela larga' if rapporto > 1.4 else 'tela alta' if rapporto < 0.72 else 'tela quadrata'
+
+    def estensione(k):
+        larghezza, altezza = misure[k]['dimensione']
+        quota = misure[k]['opachi']/(larghezza*altezza)
+        return 'disegno esteso' if quota > 0.22 else 'disegno medio' if quota > 0.07 else 'disegno minuto'
+
+    etichette = {k: f'{forma(k)}, {estensione(k)}' for k in chiavi}
+    ORDINALI = ['la più estesa', 'la seconda per estensione', 'la terza per estensione',
+                'la quarta per estensione', 'la quinta per estensione']
+    for testo, quante in collections.Counter(etichette.values()).items():
+        if quante < 2:
+            continue
+        pari = sorted((k for k in chiavi if etichette[k] == testo), key=lambda k: -misure[k]['opachi'])
+        for posto, k in enumerate(pari):
+            etichette[k] = testo + ' — ' + ('la meno estesa' if posto == len(pari)-1
+                                            else ORDINALI[posto] if posto < len(ORDINALI)
+                                            else f'{posto+1}ª per estensione')
+    return [dict(chiave=k, opachi=misure[k]['opachi'], dimensione=misure[k]['dimensione'],
+                 riquadro=misure[k]['riquadro'], progressione=posto,
+                 relazione='risorsa nativa distinta', etichetta=etichette[k])
+            for posto, k in enumerate(chiavi)]
+
+
 def descrivi_versioni(out, catalogo):
     """Assegna a ogni versione un'etichetta parlante, ricavata da ciò che l'immagine mostra."""
     import numpy
@@ -520,12 +556,11 @@ def descrivi_versioni(out, catalogo):
             luogo['descrizioneVersioni'] = []
             continue
         if luogo['statoNome'] != 'nominata':
-            # Sono risorse grafiche senza zona: descriverne la porzione sarebbe una descrizione di
-            # nulla. L'unica identità che hanno è quella nativa, e quella si riporta.
-            luogo['descrizioneVersioni'] = [
-                dict(chiave=k, progressione=posto, relazione='risorsa nativa distinta',
-                     etichetta='risorsa {} livello {}'.format('/'.join(k.split('-')[2:4]), k.split('-')[4]))
-                for posto, k in enumerate(chiavi)]
+            # Sono risorse grafiche che non rappresentano una zona nota: dire «porzione
+            # settentrionale» suggerirebbe che siano parti di uno stesso luogo, e non lo sono.
+            # Si descrive allora l'immagine per quello che è: la forma della tela e quanto disegno
+            # porta. Sono misure, non un codice.
+            luogo['descrizioneVersioni'] = descrivi_immagini(out, chiavi)
             luogo['relazioneVersioni'] = {'risorsa nativa distinta': len(chiavi)}
             continue
         maschere, misure = confronta_versioni(out, chiavi)
