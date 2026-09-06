@@ -1156,3 +1156,49 @@ consumabili.
 
 Baseline: verificatore PASS, 28 test mirati PASS, suite **135 file / 555 test**, typecheck e lint
 PASS. I gate verdi non coprono le mutazioni sopra; la Fase 2 resta **FAIL**.
+
+## Fase 2 — Terza riverifica ristretta della visibilità runtime
+
+**Esito del rilievo 1: FAIL**
+**Commit isolato:** `2ebaf1af5ea6883c62aee70882020f6b44809d3b`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. Una porta nativa reale resta visibile anche se riceve accidentalmente una condizione di
+   presenza.
+2. Una presenza semplice e un gruppo composto soltanto da condizioni di presenza vengono
+   bloccati correttamente quando la presenza manca.
+3. Doti, articoli e progressione non nascondono direttamente il pin.
+4. Il canale `raccolto` non è regredito: i dati conservano 199 consumabili — 128 forzieri,
+   35 forzieri rari, 26 semi della bramosia, 6 tesori e 4 timbri — e la transizione API reale
+   `raccolto=false → true` riesce. Il filtro DOM resta separato dalle condizioni.
+5. Sullo snapshot isolato: 46 test mirati PASS, suite **135 file / 558 test PASS**, typecheck e
+   lint PASS.
+
+### Rilievi bloccanti
+
+1. **I gruppi misti non proiettano la presenza.** `nascondeIlPinCondizione()` applica `every()`
+   all'albero completo. Per `tutte(fascia=sera, dote=3)` il risultato corrente è `ignoto` e
+   visibile sia di giorno con dote 1 sia di giorno con dote 3; la sera resta visibile. Il
+   comportamento richiesto è invece nascosto in entrambi gli stati diurni e visibile in entrambi
+   gli stati serali. Il test aggiunto sancisce esplicitamente l'esito errato con
+   `not.toBe('bloccato')`.
+2. **La protezione dei pin nativi è indiscriminata.** Convertire ogni `bloccato` in `ignoto`
+   quando esiste `nativo_json` protegge porte e strutturali, ma anche negozi ed entità temporanee.
+   Su un pin nativo reale di Akindo con presenza `fascia=sera`, di giorno l'API restituisce
+   `ignoto`; poiché il frontend nasconde soltanto `bloccato`, il negozio resta visibile quando è
+   assente. La provenienza nativa non equivale alla categoria «strutturale sempre visibile».
+
+Il commit non modifica e quindi non chiude gli altri blocker della Fase 2: associazione esatta
+della presenza di negozi, attività e finestre dungeon; mutation coverage del registro dei 199
+collezionabili; mutazione combinata dell'autorità cancelli; determinismo byte-identico
+cross-platform.
+
+### Criterio di chiusura
+
+Proiettare ricorsivamente il solo sottoalbero di presenza preservando la logica dei gruppi;
+sostituire il controllo generico `nativo_json` con una classificazione semantica che protegga
+strutturali e consumabili ma non le entità temporanee; provare la matrice completa
+giorno/sera × dote sufficiente/insufficiente; coprire via API e DOM almeno una porta, un
+consumabile raccolto e un'entità nativa urbana realmente assente. La Fase 2 resta **FAIL**.
