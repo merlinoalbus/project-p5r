@@ -511,3 +511,32 @@ riverifica:
   strutturata o un registro esterno stabile per applicare senza ambiguità la risposta dell'utente;
 * il registro deve ammettere eccezioni puntuali: imporre sempre una corrispondenza globale per tipo
   ricreerebbe il rischio già misurato nelle inferenze geometriche.
+
+## Correzione concreta della regressione nelle evidenze dei collegamenti
+
+La sesta verifica della Fase 2 ha individuato la perdita di tutti gli script e di tutte le
+procedure da `mondo_connessioni_evidenze.json`. La causa operativa è che `world_connections.py`
+usa lo stesso argomento come cartella dei `.flow` e dei `.BF`, mentre le fonti reali sono separate:
+
+* 227 file `.flow` in `campi-completi/scripts/`;
+* 227 file `.BF` in `campi-completi/originali/IT/FIELD/HIT/`, nominati
+  `FHIT_<major>_<minor>_<sub>.BF`.
+
+La soluzione robusta proposta a Claude è rendere esplicite entrambe le sorgenti nella CLI e nella
+funzione produttiva. Per ogni campo, il `.flow` va letto dalla prima cartella e la sua provenienza
+va controllata byte per byte sul `.BF` della seconda cartella, a sua volta confrontato con la
+risorsa estratta dal CPK.
+
+Il verificatore non deve più richiamare il generatore direttamente sulla directory ufficiale:
+deve rigenerare in una directory temporanea, confrontare l'artefatto prodotto con quello versionato
+e soltanto dopo scrivere il proprio rapporto. Poiché il corpus sorgente è fisso, deve inoltre
+respingere almeno ogni discesa sotto gli invarianti già misurati:
+
+* 209 campi;
+* 192 script associati;
+* 15.734 procedure;
+* 2.514 chiamate `CALL_FIELD`;
+* 4.495 trigger con procedura risolta.
+
+In questo modo un comando con una cartella errata fallisce prima di poter sostituire un artefatto
+completo con un JSON formalmente valido ma privo della sua copertura probatoria.
