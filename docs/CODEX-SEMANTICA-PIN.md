@@ -948,6 +948,35 @@ Il gate deve provare almeno:
 4. nessuna flag nativa o procedura di sblocco dei pin dungeon viene usata direttamente come
    condizione di visibilità.
 
+#### Contratto tecnico proposto per non ricadere nello stesso errore
+
+`spillo.condizioni` e `SpilloDto.condizioni` devono essere riservati semanticamente a
+**condizioni di presenza**: sono l'unico insieme che `statoDisponibilitaPartita()` può trasformare
+in `disponibilita` e che il `VisoreMappa` può usare per escludere un pin. Un requisito che spiega
+come aprire, raccogliere, raggiungere o attivare qualcosa non deve poter entrare in quell'insieme.
+
+Se i cancelli nativi sono utili alla guida, la soluzione robusta è un campo distinto — per
+esempio `prerequisiti` o `statoInterazione` — mostrato nella scheda ma ignorato dal filtro di
+presenza. Non basta affidarsi al fatto che oggi `da-configurare` produce uno stato grigio anziché
+rosso: il dato resterebbe classificato come visibilità e una futura configurazione corretta del
+testo lo farebbe sparire.
+
+La suite contiene già prove sintetiche utili ma non sufficienti:
+
+* `server/routes/attivita-mappa.test.ts` dimostra che una fascia giorno/sera cambia la
+  disponibilità di uno spillo;
+* `server/routes/mappe-editor.test.ts` dimostra la valutazione di pioggia e fascia, ma su spilli
+  creati apposta dal test;
+* manca una regressione su un **dato editoriale reale** di Confidente o attività con calendario e
+  meteo, che provi sia la presenza nel momento corretto sia l'assenza in quello scorretto;
+* manca una regressione negativa che vieti condizioni di visibilità su tutti i pin nativi fissi
+  del pacchetto, non soltanto sui due esempi scelti.
+
+Il generatore può quindi pretendere zero `condizioni` per ogni pin proveniente da `ICON_*.BIN` e
+un verificatore indipendente può enumerare l'intero seed: qualsiasi porta, forziere, scala,
+passaggio, leva, stanza sicura o altro elemento fisico con condizioni di presenza deve far
+fallire il gate.
+
 Sul candidato Fase 2 `7d71dae` il gate nominale
 `python tools/p5r-map-export/verifica_tutto.py --solo pin` dà **5/5 PASS**. Due mutazioni isolate
 dimostrano però che il controllo delle copie non copre ancora il proprio contratto:
