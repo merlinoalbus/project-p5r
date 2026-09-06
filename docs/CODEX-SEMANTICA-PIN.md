@@ -605,7 +605,9 @@ eseguibile fino in fondo per due errori puntuali:
 La riverifica deve comprendere una controprova negativa su copia temporanea: cartella `.flow` o
 cartella `.BF` errata deve produrre un fallimento e l'impronta di
 `mondo_connessioni_evidenze.json` ufficiale deve restare identica. Il rapporto deve infine esporre
-anche i 4.495 trigger risolti, non soltanto script, trigger e chiamate.
+e verificare tutti i minimi che proteggono dalla regressione: 209 campi, 192 script, 15.734
+procedure, 2.514 chiamate e 4.495 trigger risolti. Dichiarare soltanto script, trigger complessivi
+e chiamate lascerebbe ancora senza attestazione due delle quantità decisive.
 
 ## Percorso minimo completo per chiudere la Fase 3d
 
