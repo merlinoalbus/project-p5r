@@ -452,3 +452,28 @@ sorgente, senza indicizzarli fuori dai 193 record di `P5MINIMAP_01.SPD`.
 Se occorre convalidare ulteriormente il contratto del draw, il prossimo punto preciso è
 `0x1412ae610`, chiamato a `0x1412a78d1` con `edx=partId`; per l'Atlante, però, il problema
 `nativeType` → `partId` è già risolto e conviene proseguire con estrazione e join SPD.
+
+## Decisione successiva dell'utente — importare i tipi aperti come `nota`
+
+**Conferma ricevuta:** 6 settembre 2026, durante la modifica di `pin_semantics.py` dopo `fe53ead`
+
+L'utente conferma di avere dato direttamente a Claude una decisione successiva rispetto al piano:
+i tipi privi di significato dimostrato devono entrare nell'atlante come segnalini `nota`, marcati
+esplicitamente `da-verificare`, affinché egli possa identificarli sulle schermate del gioco.
+Questa decisione prevale sulla precedente frase «non diventano nota».
+
+Il contratto da riverificare diventa quindi:
+
+1. nessun tipo aperto riceve un significato specifico non dimostrato: il solo tipo ammesso è
+   `nota`, con etichetta inequivocabile «Da identificare (tipo N)»;
+2. ogni nota conserva `nativeType`, diffusione, condizioni e tutte le evidenze disponibili,
+   distinguendo rigorosamente prove, indizi geometrici e proposte;
+3. gli indizi geometrici riportano l'accuratezza misurata e non vengono presentati come risposta;
+4. una prova puntuale valida continua a prevalere sullo stato generico del tipo;
+5. il join `nativeType` → `partId` → nome/ritaglio SPD va incluso nella scheda quando disponibile;
+6. i `partId` 200–206 restano dichiarati senza sorgente grafica finché questa non viene trovata;
+7. l'interfaccia deve rendere immediatamente distinguibili questi pin dai tipi certificati e
+   permettere all'utente di leggere le evidenze necessarie alla verifica manuale.
+
+Codex valuterà l'implementazione secondo questa decisione aggiornata, non secondo il divieto
+precedente ormai superato.
