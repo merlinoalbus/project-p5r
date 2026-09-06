@@ -1040,3 +1040,11 @@ che condividono un quartiere. Se non esiste ancora un pin distinto con riferimen
 dell'entità esatta. Lo stesso principio vale per attività e Confidenti. Servono controprove con
 due negozi nello stesso luogo ma orari/meteo differenti e con ordine delle righe invertito: deve
 sparire soltanto il negozio assente, mai il luogo né l'altro negozio.
+
+Controprova ulteriore sul seed: `negozio.luogo_chiave` contiene la chiave del **quartiere**
+(`shibuya` per Untouchable), mentre il pin riferisce il luogo `shibuya/untouchable`. Il lookup
+`condizioniNegozio.get(r.luogo_chiave)` non collega quindi le condizioni strutturate al pin di
+Untouchable. Il riferimento uno-a-uno già disponibile è `luogo.negozio`, valorizzato con
+`untouchable`: il join deve usare quella relazione esplicita. Il fatto che Untouchable scompaia
+di giorno nel controllo manuale deriva oggi da `luogo.quando = sera`, non prova che
+`negozio.condizioni_json` sia stato trasferito.
