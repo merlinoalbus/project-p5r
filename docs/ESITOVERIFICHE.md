@@ -1487,3 +1487,13 @@ newline finale. Restano però due omissioni da includere prima del commit candid
 Infine il candidato deve aggiungere il comando/test che rigenera due directory temporanee e ne
 confronta tutti gli output byte per byte: la normalizzazione osservata in una sola directory non
 dimostra ancora la riproducibilità end-to-end.
+
+### Integrazione al preflight — output testuali non JSON
+
+La conversione in corso copre i JSON, ma quattro output testuali continuano a passare da
+`Path.write_text()` e quindi restano dipendenti dal sistema operativo: `console.txt` in
+`full_field_sources.py` e `scheduler_evidence.py`, `index.html`/`componenti.html` in
+`render_maps.py`, `LEGGIMI.md` in `app_package.py`. Per chiudere il determinismo multipiattaforma
+la soluzione robusta è usare `scrivi_testo()` anche in questi punti e includerli nella doppia
+rigenerazione. Se qualcuno non fa parte degli artefatti versionati del lotto, va escluso con un
+elenco motivato e il test deve fallire se un file non dichiarato sfugge al confronto.
