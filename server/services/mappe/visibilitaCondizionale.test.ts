@@ -16,12 +16,13 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import path from 'node:path';
-import { closeDb, initDb, getDb } from '../../db/dbService.js';
+import { closeDb, initDb, getDb, prepared } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
+import { dettaglioMappa } from './mappeService.js';
 
 const DIR_SEED = path.join('data', 'seed');
 
@@ -121,6 +122,44 @@ describe('visibilità condizionale dei pin', () => {
         expect(nascondeIlPin(c.tipo)).toBe(true);
       }
     }
+  });
+
+  it('una presenza chiusa in un gruppo continua a nascondere', () => {
+    // il caso che sfuggiva: `gruppo` non è di per sé una presenza, e guardando solo il tipo
+    // esterno una fascia oraria dentro un gruppo smetteva di nascondere — il negozio di sera
+    // ricompariva di giorno
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'fascia', fascia: 'sera' }], testo: 'solo di sera' }],
+      statoVuoto);
+    expect(esito.stato).toBe('bloccato');
+  });
+
+  it('un gruppo che mescola presenza e prerequisito non nasconde', () => {
+    // non è né l'una né l'altra cosa: nel dubbio si mostra, perché mostrare qualcosa di troppo si
+    // corregge guardando mentre nascondere qualcosa che c'è no
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'gruppo', modo: 'tutte', testo: 'misto',
+         condizioni: [{ tipo: 'fascia', fascia: 'sera' }, { tipo: 'articolo', articolo: 'grimaldello' }] }],
+      statoVuoto);
+    expect(esito.stato).not.toBe('bloccato');
+  });
+
+  it('gli elementi fissi dell’atlante non si nascondono nemmeno se qualcuno ci attacca una presenza', () => {
+    // l'invariante del runtime: vale per provenienza, non per tipo di segnalino, e passa sopra a
+    // qualunque strada di scrittura — API, editor, seed o modifica diretta al database
+    const nativo = getDb().prepare("SELECT id, mappa_chiave FROM spillo WHERE nativo_json IS NOT NULL AND tipo = 'porta' LIMIT 1")
+      .get() as { id: number; mappa_chiave: string } | undefined;
+    expect(nativo).toBeTruthy();
+    getDb().prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
+      .run(JSON.stringify([{ tipo: 'fascia', fascia: 'sera' }]), nativo!.id);
+    prepared("INSERT INTO partita (nome, attiva, livello_protagonista, data_gioco, created_at, updated_at) VALUES ('Prova', 1, 1, '04-11', 'x', 'x')").run();
+    const partita = getDb().prepare("SELECT id FROM partita WHERE nome = 'Prova'").get() as { id: number };
+    const mappa = dettaglioMappa(nativo!.mappa_chiave, partita.id);
+    const spillo = mappa.spilli.find((x) => x.id === nativo!.id);
+    expect(spillo).toBeTruthy();
+    expect(spillo!.disponibilita?.stato).not.toBe('bloccato');
+    getDb().prepare('UPDATE spillo SET condizioni_json = NULL WHERE id = ?').run(nativo!.id);
+    getDb().prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
   });
 
   it('un forziere è collezionabile: lo nasconde il filtro dei raccolti, non una condizione', () => {

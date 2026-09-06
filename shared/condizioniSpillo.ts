@@ -80,6 +80,28 @@ export function nascondeIlPin(tipo: string): boolean {
   return (CONDIZIONI_DI_PRESENZA as readonly string[]).includes(tipo);
 }
 
+/** Come sopra, ma guardando dentro i gruppi.
+ *
+ * Guardare solo il tipo esterno lascia passare il caso che conta: `tutte(fascia sera, dote 3)` è
+ * un `gruppo`, e `gruppo` non è nell'elenco delle presenze — quindi una condizione di presenza
+ * chiusa in un gruppo smetteva di nascondere il pin, e il negozio di sera compariva di giorno.
+ *
+ * La regola: un gruppo riguarda la presenza se **tutte** le sue condizioni la riguardano.
+ * Mescolare presenza e prerequisito nello stesso gruppo produce qualcosa che non è né l'una né
+ * l'altro, e nel dubbio si sceglie di non nascondere: mostrare qualcosa di troppo si corregge
+ * guardando, nascondere qualcosa che c'è no. `non` segue la condizione che nega.
+ */
+export function nascondeIlPinCondizione(c: { tipo: string; condizioni?: unknown[]; condizione?: unknown }): boolean {
+  if (c.tipo === 'gruppo') {
+    const figlie = (c.condizioni ?? []) as Array<{ tipo: string }>;
+    return figlie.length > 0 && figlie.every((f) => nascondeIlPinCondizione(f));
+  }
+  if (c.tipo === 'non') {
+    return c.condizione ? nascondeIlPinCondizione(c.condizione as { tipo: string }) : false;
+  }
+  return nascondeIlPin(c.tipo);
+}
+
 export const SCELTE_CONDIZIONE = [
   { chiave: 'data', nome: 'Da una data in avanti' },
   { chiave: 'intervallo', nome: 'Solo in un periodo' },

@@ -1104,3 +1104,55 @@ sensibile a rimozione o alterazione del canale dei cancelli.
 La correzione successiva deve inoltre evitare di ereditare condizioni da un negozio al pin
 generico del luogo condiviso, come documentato nel pre-audit Codex: la presenza va collegata
 all'entità esatta. La Fase 2 resta **FAIL**.
+
+## Fase 2 — Riverifica della presenza ereditata dalle entità
+
+**Esito: FAIL**  
+**Commit isolato:** `bb34646042ac24647a2a691faa40493c842101ac`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+1. Le condizioni negozio non raggiungono l'entità esatta. `negozio.luogo_chiave` contiene il
+   quartiere, mentre `marcatore_luogo.luogo_chiave` usa `<quartiere>/<luogo>`: intersezioni reali
+   **0**. Su 57 negozi con luogo e 32 condizioni non vuote nessuna viene trasferita. Akindo,
+   previsto dal 2 settembre, risulta disponibile il 31 agosto e il 1º settembre. La `Map` resta
+   inoltre last-write-wins: aggiungere per ultimo un negozio fittizio può cambiare arbitrariamente
+   la condizione del pin generico.
+2. Le 30 attività, 22 delle quali con fascia giorno/sera, non vengono lette; i pin con riferimento
+   `attivita` sono zero.
+3. Le dieci finestre dungeon vengono caricate ma applicate a zero pin: le radici dungeon non hanno
+   genitore e il ramo implementato controlla soltanto le mappe figlie.
+
+Le condizioni direttamente presenti sui luoghi funzionano via API, ma non chiudono i tre canali
+mancanti. Typecheck, lint, 5 test mirati e la suite **135 file / 551 test** sono verdi ma
+insufficienti.
+
+## Fase 2 — Riverifica raccolti e gate dei prerequisiti
+
+**Esito complessivo: FAIL — PASS sul solo canale raccolti**  
+**Commit isolato:** `6586b46680811ca5e1bfa428c85394430f46557c`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parte approvata
+
+I dati reali contengono 199 pin collezionabili: 128 forzieri, 35 forzieri rari, 26 semi della
+bramosia, 6 tesori del Palazzo e 4 timbri. L'API reale su un timbro conserva il ciclo
+`false → true → false` e lo stato resta indipendente fra due partite. Il parser corrente legge
+tutti i 37 tipi del registro. Questa parte realizza correttamente la precisazione dell'utente sui
+consumabili.
+
+### Blocker residui
+
+1. La mutazione combinata resta invisibile: eliminando dalla stessa occorrenza la riga di
+   `cancelli-pin.json`, `nativo.cancelli`, `nativo.sbloccoLeggibile` e la frase descrittiva,
+   `verify_pin_semantics.py` termina con exit 0. Manca la ricostruzione dalle sorgenti native.
+2. La protezione dei collezionabili non è completa: trasformare un timbro reale da
+   `collezionabile=true` a `false` lascia verdi sia il verificatore Python sia gli 8 test mirati.
+   Il test copre solo `forziere`.
+3. Il parser del registro accetta qualunque insieme non vuoto e usa `get(..., false)`: una singola
+   definizione non riconosciuta diventerebbe silenziosamente non collezionabile. Deve pretendere
+   uguaglianza completa con `TIPI_SPILLO` e il verificatore deve confrontare ogni pin col registro.
+4. La rigenerazione Windows è semanticamente identica ma non byte-identica per CRLF/LF, confermando
+   il blocker cross-platform già aperto.
+
+Baseline: verificatore PASS, 28 test mirati PASS, suite **135 file / 555 test**, typecheck e lint
+PASS. I gate verdi non coprono le mutazioni sopra; la Fase 2 resta **FAIL**.
