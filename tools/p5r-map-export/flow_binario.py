@@ -140,6 +140,59 @@ def bandiere_accese(dati, indice_bit_on):
     return fuori
 
 
+def chiamate_con_argomenti(dati, indice_comm, quanti):
+    """Ogni chiamata alla funzione `indice_comm`, con i `quanti` valori spinti subito prima.
+
+    La macchina virtuale mette gli argomenti sulla pila e poi chiama; qui si tiene la pila degli
+    ultimi valori spinti e, alla chiamata, si prendono gli ultimi `quanti` nell'ordine in cui sono
+    stati messi. Serve per `CALL_FIELD(maggiore, minore, sub, ingresso)`, che dice dove porta un
+    passaggio.
+    """
+    sez = sezioni(dati)
+    procedure = etichette(dati, sez.get(PROCEDURE))
+    codice = istruzioni(dati, sez.get(ISTRUZIONI))
+    if not procedure or not codice:
+        return []
+    confini = sorted((inizio, nome) for nome, inizio in procedure)
+    fuori = []
+    for n, (inizio, nome) in enumerate(confini):
+        fine = confini[n+1][0] if n + 1 < len(confini) else len(codice)
+        pila = []
+        for op, operando, valore in codice[inizio:fine]:
+            if op in (PUSHI, PUSHIS) and valore is not None:
+                pila.append(valore)
+            elif op == ADD and len(pila) >= 2:
+                b, a = pila.pop(), pila.pop()
+                pila.append((a + b) & 0xffffffff)
+            elif op == COMM:
+                if operando == indice_comm and len(pila) >= quanti:
+                    fuori.append(dict(procedura=nome, argomenti=pila[-quanti:]))
+                pila.clear()
+            elif op != PUSHF:
+                pila.clear()
+    return fuori
+
+
+def indice_di_chiamata(dati_noti, attese, quanti):
+    """Trova l'indice della funzione provandoli tutti su script di risposta nota."""
+    conteggi = {}
+    for indice in range(0, 1024):
+        giusti = 0
+        for dati, attesa in zip(dati_noti, attese):
+            try:
+                trovate = {tuple(c['argomenti']) for c in chiamate_con_argomenti(dati, indice, quanti)}
+            except ValueError:
+                continue
+            if trovate and trovate == attesa:
+                giusti += 1
+        if giusti:
+            conteggi[indice] = giusti
+    if not conteggi:
+        return None, {}
+    migliore = max(conteggi, key=lambda k: conteggi[k])
+    return migliore, conteggi
+
+
 def indice_di_bit_on(dati_noti, attese):
     """Ricava dall'evidenza quale indice della libreria corrisponde a `BIT_ON`.
 

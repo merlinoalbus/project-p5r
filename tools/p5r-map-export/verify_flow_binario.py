@@ -30,6 +30,10 @@ import flow_binario as fb
 PRECISIONE_MINIMA = 0.95
 RICHIAMO_MINIMO = 0.80
 INDICE_BIT_ON = 13
+# `CALL_FIELD(maggiore, minore, sub, ingresso)` dice dove porta un passaggio; l'indice sta molto
+# piu' in alto degli altri e gli argomenti sono spinti al contrario.
+INDICE_CALL_FIELD = 0x1000
+RICHIAMO_DESTINAZIONI = 0.85
 
 
 def main(out):
@@ -78,6 +82,26 @@ def main(out):
     precisione = (trovate_totali - inventate)/max(trovate_totali, 1)
     assert precisione >= PRECISIONE_MINIMA, f'precisione troppo bassa: {precisione:.3f}'
     assert richiamo >= RICHIAMO_MINIMO, f'richiamo troppo basso: {richiamo:.3f}'
+
+    # 3-bis. anche le destinazioni si leggono, e vanno ritrovate negli script noti
+    import re as _re
+    rx = _re.compile(r'CALL_FIELD\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(-?\d+)\s*\)')
+    trovate_dest = attese_dest = 0
+    for d, nome in zip(dati[:40], nomi[:40]):
+        flow = campi/'scripts'/(nome.replace('FHIT_', '').replace('.BF', '') + '.flow')
+        if not flow.exists():
+            continue
+        attesa = {tuple(int(x) & 0xffffffff for x in m.groups())
+                  for m in rx.finditer(flow.read_text(encoding='utf8', errors='replace'))}
+        if not attesa:
+            continue
+        lette = {tuple(reversed(c['argomenti']))
+                 for c in fb.chiamate_con_argomenti(d, INDICE_CALL_FIELD, 4)}
+        attese_dest += len(attesa)
+        trovate_dest += len(attesa & lette)
+    if attese_dest:
+        richiamo_dest = trovate_dest/attese_dest
+        assert richiamo_dest >= RICHIAMO_DESTINAZIONI,             f'troppe destinazioni CALL_FIELD non lette: {richiamo_dest:.1%}'
 
     # 4. le bandiere sono locali, e il file lo deve dire
     percorso = out/'bandiere-script.json'

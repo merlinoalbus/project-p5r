@@ -11,9 +11,10 @@ che stanno dentro le stanze, non superano il 47% sul proprio lato più frequente
 quattro. Che quattro tipi si dividano i quattro lati in modo esclusivo non è una coincidenza che
 capita: è il modo in cui il gioco disegna le uscite.
 
-Questo dà due cose insieme. Il significato — sono passaggi — e la **direzione**, che serve a
-legare fra loro le planimetrie: un passaggio verso destra su una mappa cerca un passaggio verso
-sinistra su quella che le sta accanto.
+Questo dà il significato — sono passaggi — e da che parte del disegno si esce. Non dà la
+destinazione: le planimetrie non sono tessere affiancate, e sapere che si esce a destra non dice
+quale mappa ci sia dall'altra parte. Dove porta un passaggio lo dicono gli script, con
+`CALL_FIELD`.
 """
 from pathlib import Path
 import collections
@@ -30,7 +31,8 @@ MINIMI_PIN = 20
 
 # Per chi usa l'applicazione il pin e' uno solo — un passaggio — e la direzione non cambia che
 # cosa ci si fa sopra: si clicca e si va. Il lato resta pero' scritto nel dato, perche' serve ad
-# accoppiare le uscite fra planimetrie vicine: un'uscita a destra cerca un'entrata a sinistra.
+# sapere da che parte si esce. Attenzione: il lato NON dice quale sia la mappa di arrivo — le
+# planimetrie non sono tessere affiancate, e la destinazione va letta dagli script.
 ETICHETTA = ('passaggio', 'Passaggio')
 LATI = {'alto': ETICHETTA, 'destra': ETICHETTA, 'basso': ETICHETTA, 'sinistra': ETICHETTA}
 
