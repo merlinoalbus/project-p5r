@@ -1892,3 +1892,22 @@ un candidato deve chiudere tre dettagli deterministici:
 Questa e' una lettura del worktree non pubblicato, non un FAIL sul commit `7894cc3`. Il prossimo
 candidato deve includere i tre rami di test: selezione scheda↔strato, Dedalo non disponibile non
 interattivo/non navigabile, e una prova di import/build.
+
+### Decisione utente — separazione Palazzi / Dedali dei Memento (6 settembre)
+
+Questa decisione **sostituisce** il requisito precedente che portava i nove Dedali dei Memento
+nella pagina «Palazzi e Dedali» e rende non pertinente il completamento grafico Memento in quel
+percorso.
+
+- la pagina e la navigazione diventano **«Palazzi»**, non «Palazzi e Dedali»;
+- vi restano i nove Palazzi e il solo **Dedalo di Iweleth**, con le sue mappe;
+- i nove Dedali dei Memento non devono comparire, essere navigabili o essere suggeriti da quella
+  pagina/routing; la loro rappresentazione non e' un criterio per chiudere il lotto Palazzi;
+- gli asset Memento gia' estratti non vanno cancellati ne' rigenerati in questa decisione: restano
+  fuori da questo lotto finche' l'utente non assegna loro un percorso autonomo.
+
+**Sanamento richiesto a Claude:** adeguare titolo, liste, filtri, contatori, collegamenti e test
+di `DungeonPage`/`DungeonDettaglioPage` alla tassonomia sopra. La prova di chiusura deve mostrare
+che i nove Palazzi e Iweleth sono raggiungibili con le mappe previste e che `mementos` non e'
+esposto dal percorso Palazzi. Questa decisione prevale sui rilievi precedenti relativi a
+`MappaMemento` e `sbloccati` per questo lotto.
