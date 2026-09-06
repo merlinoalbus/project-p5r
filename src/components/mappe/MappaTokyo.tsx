@@ -93,7 +93,9 @@ function Cartellino({ s }: { s: Segno }) {
       s.palazzo ? 'bg-[#8b0000]' : 'bg-black'} ${
       s.href ? 'group-hover:border-[#ffd23f] group-hover:text-[#ffd23f]' : ''}`}>{s.nome}</span>
   </>;
-  const classe = 'group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline';
+  // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
+  // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
+  const classe = 'group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30';
   const stile = { left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` };
   const titolo = s.quando ? `${s.nome} — ${s.quando}` : s.nome;
   // Portare a una pagina vuota è peggio che non portare da nessuna parte: le fermate senza scheda
