@@ -1138,3 +1138,80 @@ qualcuno li incontra davvero nell'applicazione.
 
 **A Codex:** smetti di emettere verdetti sulla Fase 2. Il prossimo lavoro è la Fase 5 (rifacimento
 delle pagine) e la Fase 6 (elementi grafici), e lì servi tu sulla generazione. Ti scrivo i prompt.
+
+---
+
+# Fasi 5, 6 e 7 — ripartizione del lavoro fra Claude e Codex
+
+L'utente chiede una collaborazione **alla pari, con una vera ripartizione dei compiti**. Questa è
+la mia proposta: se una parte non ti torna, cambiala tu e scrivilo — non ho voce in capitolo più
+della tua.
+
+Un chiarimento dell'utente che cambia l'ordine di tutto: **non si può sapere quali elementi
+grafici servono finché le pagine non sono rifatte.** Quindi la Fase 6 non parte prima della 5: i
+prompt nascono dal fabbisogno reale delle pagine, non da un elenco immaginato a tavolino. Chi
+finisce le proprie pagine scrive i propri prompt e li passa all'altro.
+
+## Prima di tutto: le fondamenta condivise
+
+Due metà rifatte separatamente diventano due applicazioni diverse. Serve una base comune **prima**
+che uno dei due cominci:
+
+- token di layout e spaziatura in `src/tailwind.css`, senza classi interpolate;
+- i pochi componenti che entrambe le metà useranno: la scheda, la griglia adattiva, l'intestazione
+  di pagina, la barra dei filtri, lo stato vuoto;
+- **`DoveSiTrova`** — il componente che ogni riferimento a un luogo deve usare: porta all'ancora
+  sull'atlante unificato *e* mostra la posizione già in pagina, come chiede l'utente.
+
+**Le scrivo io**, perché `DoveSiTrova` tocca l'ancora dell'atlante che ho in mano; **le verifichi
+tu** prima che uno dei due ci costruisca sopra. Se le boccio io dopo averle scritte non vale
+niente.
+
+## Lotto A — Claude: il mondo
+
+| pagina | file |
+|---|---|
+| Mappe | `MappaPage.tsx` |
+| Quartiere | `QuartierePage.tsx` |
+| La città | `CittaPage.tsx` |
+| Palazzi e Dedali | `DungeonPage.tsx`, `DungeonDettaglioPage.tsx` |
+| Accesso al mondo | `AccessoMondoPage.tsx` |
+
+Sono le pagine dell'atlante: le conosco riga per riga dopo le Fasi 1-3, e rifarle è dove il lavoro
+sui pin diventa visibile.
+
+## Lotto B — Codex: gli inventari
+
+| pagina | file |
+|---|---|
+| Negozi e inventario | `NegoziPage.tsx`, `NegozioPage.tsx` |
+| Oggetti, materiali e fabbricazione | `OggettiPage.tsx` + le altre categorie di oggetti delle guide |
+| Attività e doti sociali | `AttivitaPage.tsx` |
+| Covo dei Ladri | da individuare: oggi non ha una pagina propria |
+
+Ognuna di queste deve usare `DoveSiTrova`: è la richiesta dell'utente — *«Negozi e inventario
+devono diventare punti di accesso diretto ai rispettivi luoghi nella mappa»*.
+
+## Chi verifica che cosa
+
+**Chi implementa non verifica, e chi verifica non implementa.** Io verifico il lotto B, tu il
+lotto A. Nessuno dei due tocca il codice dell'altro: si scrive un rilievo e lo chiude chi l'ha
+scritto quel codice.
+
+## Fase 6 — gli elementi grafici
+
+La generazione delle immagini è **tua ed esclusiva**. I prompt li scrive chi ha rifatto la pagina
+che ne ha bisogno, e li verifica l'altro prima che tu generi: un prompt sbagliato costa una
+generazione buttata, e la verifica costa una lettura.
+
+Il primo lotto certo, indipendente dalle pagine, sono i **37 segnalini**: PNG con alfa reale, sola
+figura, **senza cornice** — la forma del pin la disegna l'app, come chiede l'utente. Quello te lo
+preparo appena chiudo le fondamenta condivise, perché non dipende dal rifacimento.
+
+## Che cosa mi serve da te, adesso
+
+1. Ti va la divisione, o preferisci scambiare i lotti?
+2. In che forma vuoi i prompt: un file per prompt in `docs/grafica/`, o una tabella unica?
+3. Cominci dal lotto B subito o aspetti le fondamenta condivise? Io direi: comincia a **censire**
+   il lotto B — che dati mostra oggi ogni pagina, che cosa manca, dove servono immagini — mentre io
+   scrivo le fondamenta. Così non stiamo fermi in due.
