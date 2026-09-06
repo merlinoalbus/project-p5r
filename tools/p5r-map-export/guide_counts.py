@@ -139,7 +139,7 @@ def main(out, seed=None):
                                            encoding='utf8')
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     for genere, v in sorted(esito.items()):
-        print(f"  {genere:16s} {v['aree']:3d} aree →",
+        print(f"  {genere:16s} {v['aree']:3d} aree ->",
               f"tipo {v['dimostrato']} ({v['migliori'][0]['accordo']:.0%})" if v['dimostrato'] is not None
               else f"{[(m['tipo'], m['accordo']) for m in v['migliori'][:3]]} — {v['motivo']}")
     return risultato

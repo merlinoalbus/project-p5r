@@ -144,11 +144,16 @@ def main(out):
                 if distanza > DISTANZA_ABBINAMENTO:
                     esiti['trigger troppo lontano da ogni pin'] += 1
                     continue
-                scelta = next((d for d in destinazioni
-                               if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti),
-                              None)
-                if not scelta:
+                # La procedura puo' portare a piu' posti: in quel caso quale sia il buono non si
+                # sa, e prendere il primo dell'elenco sarebbe sceglierlo a caso. Si lascia perdere.
+                buone = [d for d in destinazioni
+                         if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti]
+                mete = {tuple(d[:3]) for d in buone}
+                if len(mete) != 1:
+                    if mete:
+                        esiti['procedura con piu’ mete, lasciata senza'] += 1
                     continue
+                scelta = buone[0]
                 precedente = assegnati.get(vicino[0])
                 if precedente and precedente[1] <= distanza:
                     continue

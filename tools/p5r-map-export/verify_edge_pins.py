@@ -91,6 +91,63 @@ def main(out, radice=None):
           coperti, 'pin;', 'lati:', ', '.join(f"{v['lato']} ({dati['tipi'][str(t)]['quotaLato']:.0%})"
                                               for t, v in sorted(dimostrati.items())),
           f'— il migliore dei tipi interni si ferma al {massimo:.0%}')
+    collegati, irrisolti = controlla_collegamenti(out)
+    if collegati or irrisolti:
+        print('OK contabilita’ dei collegamenti:', collegati, 'pin portano a una mappa e',
+              irrisolti, 'restano senza, nessuno scelto fra piu’ mete')
+
+
+def controlla_collegamenti(out):
+    """I collegamenti devono essere solo quelli non ambigui, e i conti devono chiudere.
+
+    Ricostruisce per ogni pin collegato le mete valide del suo campo e rifiuta ogni assegnazione
+    che avrebbe potuto sceglierne più d'una: oggi non capita, ma se un domani i dati cambiassero
+    un trigger ambiguo potrebbe vincere, e allora il collegamento porterebbe altrove.
+    """
+    import re
+    percorso = out/'collegamenti-mappe.json'
+    if not percorso.exists():
+        return 0, 0
+    dati = json.loads(percorso.read_text(encoding='utf8'))
+    bordo = {int(k) for k in json.loads((out/'pin-di-bordo.json').read_text(encoding='utf8'))['tipiDimostrati']}
+    meta = {m['code']: m for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']}
+    riferimento = {r['chiave']: r for r in
+                   json.loads((out/'riferimento-pin.json').read_text(encoding='utf8'))['mappe']}
+    chiamate = json.loads((out/'collegamenti-script.json').read_text(encoding='utf8'))['chiamate']
+    per_campo = collections.defaultdict(set)
+    for c in chiamate:
+        t = re.search(r'(\d{3})_(\d{3})_(\d{2})', c['script'])
+        if t:
+            for d in c['destinazioni']:
+                per_campo['F%s_%s_%s' % t.groups()].add(tuple(d[:3]))
+
+    collegamenti = dati['collegamenti']
+    chiavi = [(r['partenza'], r['indicePin']) for r in collegamenti]
+    assert len(set(chiavi)) == len(chiavi), 'lo stesso pin compare in piu’ collegamenti'
+    for r in collegamenti:
+        codice = 'RMAP_%03d_%d_%d' % tuple(int(x) for x in r['partenza'].split('-')[2:])
+        mappa = meta[codice]
+        assert mappa['pins'][r['indicePin']]['nativeType'] in bordo,             f'collegamento su un pin che non e’ un passaggio: {r["partenza"]}'
+        if r['modo'] == 'meta unica della planimetria':
+            mete = set()
+            for campo in mappa['fields']:
+                mete |= {m for m in per_campo.get(campo, set())
+                         if m != tuple(int(x) for x in codice.split('_')[1:])}
+            mete = {m for m in mete if 'RMAP_%03d_%d_%d' % m in meta}
+            assert len(mete) == 1,                 f'dichiarato «meta unica» ma le mete sono {len(mete)}: {r["partenza"]}'
+
+    # contabilita': ogni pin di passaggio o e' collegato o e' dichiarato irrisolto
+    candidati = 0
+    for codice, mappa in meta.items():
+        chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in codice.split('_')[1:])
+        rif = riferimento.get(chiave)
+        if not rif or rif['esito'] != 'condiviso':
+            continue
+        candidati += sum(1 for i in rif['collocabili'] if mappa['pins'][i]['nativeType'] in bordo)
+    irrisolti = dati['summary']['esiti'].get('pin di passaggio senza destinazione', 0)
+    assert len(collegamenti) + irrisolti == candidati,         (f'i conti non chiudono: {len(collegamenti)} collegati piu’ {irrisolti} irrisolti '
+         f'non fanno {candidati} pin di passaggio')
+    return len(collegamenti), irrisolti
 
 
 if __name__ == '__main__':

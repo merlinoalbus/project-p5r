@@ -408,12 +408,12 @@
         "etichetta": "Passaggio",
         "lato": "alto",
         "pin": 66,
-        "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 14,
@@ -488,12 +488,12 @@
         "etichetta": "Passaggio",
         "lato": "destra",
         "pin": 71,
-        "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 15,
@@ -570,12 +570,12 @@
         "etichetta": "Passaggio",
         "lato": "basso",
         "pin": 66,
-        "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 16,
@@ -646,12 +646,12 @@
         "etichetta": "Passaggio",
         "lato": "sinistra",
         "pin": 59,
-        "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 17,

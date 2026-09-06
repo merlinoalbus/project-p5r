@@ -107,7 +107,7 @@ def main(out, radice=None):
         json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     for genere, voce in sorted(esito.items()):
-        print(f"  {genere}: {voce['osservazioni']} osservazioni →",
+        print(f"  {genere}: {voce['osservazioni']} osservazioni ->",
               f"tipo {voce['dimostrato']} dimostrato" if voce['dimostrato'] is not None
               else f"{voce['compatibili'][:8]} ({voce['motivo']})")
     return risultato
