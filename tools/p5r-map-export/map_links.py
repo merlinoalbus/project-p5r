@@ -22,6 +22,8 @@ sull'immagine. Dove la proiezione manca, il collegamento c'è lo stesso ma senza
 sulla mappa, non su un punto.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import collections
 import json
 import re
@@ -261,8 +263,7 @@ def main(out):
                 'non è deducibile dai conteggi: quei pin restano senza collegamento.',
                 'Il grafo delle risorse dice quali planimetrie sono collegate, non da quale pin: '
                 'è materiale per il seguito, non un collegamento pronto.'])
-    (out/'collegamenti-mappe.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2),
-                                               encoding='utf8')
+    scrivi_json(out/'collegamenti-mappe.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 

@@ -135,12 +135,19 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     const giorni = colonneLuogo.includes('giorni') ? 'l.giorni' : "'' AS giorni";
     // Le condizioni gia' strutturate dei negozi, per luogo: sono la fonte migliore che abbiamo,
     // perche' qualcuno le ha gia' tradotte una volta invece di lasciarle come frase.
+    // Il legame fra un negozio e il luogo dove sta e' `luogo.negozio`, non `negozio.luogo_chiave`:
+    // quest'ultimo contiene il **quartiere** («shibuya»), mentre le chiavi dei luoghi sono
+    // `<quartiere>/<luogo>`. Averli confusi rendeva la giunzione vuota — zero corrispondenze su 57
+    // negozi — e la condizione non arrivava a nessun pin senza che niente segnalasse il difetto.
     const condizioniNegozio = new Map<string, string>();
     if (tabelle.has('negozio')) {
       const colonneNegozio = (db.prepare("SELECT name FROM pragma_table_info('negozio')").all() as Array<{ name: string }>).map((c) => c.name);
-      if (colonneNegozio.includes('condizioni_json') && colonneNegozio.includes('luogo_chiave')) {
-        for (const n of db.prepare("SELECT luogo_chiave, condizioni_json FROM negozio WHERE luogo_chiave IS NOT NULL AND condizioni_json IS NOT NULL").all() as Array<{ luogo_chiave: string; condizioni_json: string }>) {
-          condizioniNegozio.set(n.luogo_chiave, n.condizioni_json);
+      const colonneLuoghi = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
+      if (colonneNegozio.includes('condizioni_json') && colonneLuoghi.includes('negozio')) {
+        for (const n of db.prepare(`SELECT l.chiave AS luogo, n.condizioni_json
+          FROM luogo l JOIN negozio n ON n.chiave = l.negozio
+          WHERE n.condizioni_json IS NOT NULL`).all() as Array<{ luogo: string; condizioni_json: string }>) {
+          condizioniNegozio.set(n.luogo, n.condizioni_json);
         }
       }
     }

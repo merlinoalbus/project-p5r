@@ -30,6 +30,8 @@ dirlo è giusto. Metterci un «da configurare» a tutti faceva sembrare condizio
 per lo più non lo è, e nascondeva i pochi casi che contano davvero.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import collections
 import json
 import re
@@ -99,7 +101,13 @@ def trigger_per_bandiera(con):
     return fuori
 
 
-def main(out):
+def calcola(out):
+    """Il conto, senza scrivere niente.
+
+    Sta separato dalla scrittura apposta: un verificatore deve poter rifare il calcolo senza
+    toccare l'artefatto ufficiale. Rigenerarlo per confrontarlo con se stesso non prova nulla, e
+    se il comando riceve un percorso sbagliato distrugge quello buono — e' gia' successo.
+    """
     out = Path(out)
     con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
     meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']
@@ -162,8 +170,12 @@ def main(out):
                 'negli script di campo: sono oggetti del motore, e per loro un cancello negli '
                 'script non esiste. Che non ne abbiano non è un buco dell’estrazione.',
                 'Un cancello dice che qualcosa deve essere avvenuto, non quando: la data non c’è.'])
-    (out/'cancelli-pin.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2),
-                                         encoding='utf8')
+    return risultato
+
+
+def main(out):
+    risultato = calcola(out)
+    scrivi_json(Path(out)/'cancelli-pin.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 

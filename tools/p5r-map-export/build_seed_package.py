@@ -14,6 +14,8 @@ Prende il catalogo di identità (`atlante-identita.json`) e ne fa un pacchetto n
   omonima di un'altra dello stesso gruppo.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import collections
 import json
 import re
@@ -129,8 +131,20 @@ def collezionabili_del_registro(radice):
     fuori = {}
     for m in re.finditer(r"'?([a-z0-9-]+)'?\s*:\s*\{[^}]*collezionabile:\s*(true|false)", testo):
         fuori[m.group(1)] = m.group(2) == 'true'
-    if not fuori:
-        raise ValueError('registro dei segnalini non leggibile: collezionabilità sconosciuta')
+    # Non basta averne trovati «alcuni»: una definizione scritta in una forma che la lettura non
+    # riconosce diventerebbe silenziosamente non collezionabile, e un forziere resterebbe sulla
+    # mappa senza poterlo spuntare. Si pretende l'elenco intero.
+    elenco = re.search(r'TIPI_SPILLO\s*=\s*\[(.*?)\]', testo, re.S)
+    if not elenco:
+        raise ValueError('registro dei segnalini non leggibile: elenco dei tipi non trovato')
+    tipi = set(re.findall(r"'([a-z0-9-]+)'", elenco.group(1)))
+    mancanti = sorted(tipi - set(fuori))
+    if mancanti:
+        raise ValueError('il registro dichiara tipi di cui non si legge la collezionabilità: '
+                         + ', '.join(mancanti))
+    in_piu = sorted(set(fuori) - tipi)
+    if in_piu:
+        raise ValueError('lette definizioni per tipi che il registro non elenca: ' + ', '.join(in_piu))
     return fuori
 
 
@@ -423,7 +437,7 @@ def main(out, seed, destinazione):
     catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin, condizionati = costruisci(out, seed)
     pin_nativi = sum(len(m['pins']) for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps'])
     pacchetto = dict(versione=1, mappe=mappe)
-    destinazione.write_text(json.dumps(pacchetto, ensure_ascii=False, indent=1), encoding='utf8')
+    scrivi_json(destinazione, pacchetto, indent=1)
     aree_spaiate = [a['nome'] for v in aree_per_dungeon.values() for a in v if not a.get('preso')]
     rapporto = dict(
         pacchetto=destinazione.name, mappe=len(mappe), luoghi=len(luoghi),
@@ -440,8 +454,7 @@ def main(out, seed, destinazione):
         areeGuidaSenzaPlanimetria=len(aree_spaiate),
         perGenitore=dict(collections.Counter(m['genitore'] for m in mappe)))
     print(json.dumps(rapporto, ensure_ascii=False, indent=1))
-    (out/'pacchetto-seed-rapporto.json').write_text(
-        json.dumps(dict(rapporto, areeSpaiate=sorted(aree_spaiate)), ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'pacchetto-seed-rapporto.json', dict(rapporto, areeSpaiate=sorted(aree_spaiate)))
     return rapporto
 
 

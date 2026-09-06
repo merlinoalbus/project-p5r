@@ -129,8 +129,21 @@ def main(out, seed=None):
     tabella_ok = 0
     da_verificare_nel_pacchetto = [0]
     con_prerequisito = [0]
-    cancelli = {(r['mappa'], r['indicePin']): r for r in json.loads(
+    import build_seed_package as bsp
+    collezionabili = bsp.collezionabili_del_registro(radice)
+    # I cancelli si **ricalcolano dalle sorgenti native**, non si leggono dall'artefatto.
+    # Confrontare il pacchetto con `cancelli-pin.json` non prova nulla se qualcuno li altera
+    # insieme: la mutazione combinata passava, ed e' il caso che conta. Qui si rifa' il conto da
+    # `connessioni.json` e si pretende che l'artefatto lo riproduca, prima ancora di usarlo.
+    import cancelli_pin as cp
+    rifatti = {(r['mappa'], r['indicePin']): r for r in cp.calcola(out)['pin']}
+    salvati = {(r['mappa'], r['indicePin']): r for r in json.loads(
         (out/'cancelli-pin.json').read_text(encoding='utf8'))['pin']}
+    assert set(rifatti) == set(salvati),         (f'l’artefatto dei cancelli non coincide con il ricalcolo: {len(salvati)} righe contro '
+         f'{len(rifatti)} ricostruite dalle sorgenti native')
+    for k, atteso in rifatti.items():
+        assert salvati[k]['rese'] == atteso['rese'] and salvati[k]['cancelli'] == atteso['cancelli'],             f'la riga dei cancelli di {k} non e’ quella che le sorgenti native producono'
+    cancelli = rifatti
     parti = {r['tipoNativo']: r for r in json.loads(
         (out/'tabella-parti-pin.json').read_text(encoding='utf8'))['tipi']}
     # La tabella nativa si ricontrolla dall'eseguibile, non dall'artefatto: e' la sola sorgente
@@ -337,6 +350,11 @@ def main(out, seed=None):
             else:
                 assert not nat.get('sbloccoLeggibile') and not nat.get('cancelli'),                     (f'lo spillo di {m["chiave"]} dichiara un prerequisito che cancelli-pin.json '
                      'non conosce')
+            # Collezionabile secondo il registro, pin per pin. Un forziere che entra non
+            # collezionabile resta sulla mappa anche dopo averlo aperto e non si puo' spuntare:
+            # e' un difetto che il conteggio non vede, perche' il pin c'e' ed e' al posto giusto.
+            assert bool(s['collezionabile']) == bool(collezionabili.get(s['tipo'], False)),                 (f'collezionabilita’ diversa da quella del registro per «{s["tipo"]}» su '
+                 f'{m["chiave"]}: il registro dice {collezionabili.get(s["tipo"])}')
             # Le prove native devono arrivare nel pacchetto come dato, non come frase. Per gli
             # spilli di un tipo ancora da identificare sono l'unica cosa che rende possibile la
             # verifica manuale: se sparissero, resterebbe un pin muto e nessuno se ne accorgerebbe,

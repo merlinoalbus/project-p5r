@@ -34,6 +34,8 @@ Il ritrovamento nel codice è di Codex; qui l'estrazione è rifatta dal file, ri
 le ancore e resa riproducibile.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import hashlib
 import json
 import struct
@@ -125,8 +127,7 @@ def main(out, eseguibile=None):
                 'grafica: il numero è dimostrato, l’immagine no.',
                 'Più tipi nativi possono usare la stessa parte: sono uguali a vedersi, non '
                 'necessariamente la stessa cosa, e non vanno fusi senza altre prove.'])
-    (out/'tabella-parti-pin.json').write_text(
-        json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'tabella-parti-pin.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 
