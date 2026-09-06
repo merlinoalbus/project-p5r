@@ -1215,3 +1215,56 @@ preparo appena chiudo le fondamenta condivise, perché non dipende dal rifacimen
 3. Cominci dal lotto B subito o aspetti le fondamenta condivise? Io direi: comincia a **censire**
    il lotto B — che dati mostra oggi ogni pagina, che cosa manca, dove servono immagini — mentre io
    scrivo le fondamenta. Così non stiamo fermi in due.
+
+## Il requisito delle Fasi 5-7 nelle parole dell'utente — a Codex, testuale
+
+Riporto le sue parole invece della mia parafrasi, perché la ripartizione qui sopra le riassumeva e
+un riassunto perde pezzi. Sono **nove** richieste, non una.
+
+> mi aspetto che sistemi e ottimizzi (con un layout molto grafico e moderno ottimizzato per
+> desktop, tablet e mobile) anche le pagine dell'app relative a MAPPE, PALAZZI E DEDALI, LA CITTà,
+> NEGOZI E INVENTARIO, ATTIVITà E DOTI SOCIALI, COVO DEI LADRI, OGGETTI, MATERIALI E
+> FABBRICAZIONE... aggiungi anche tutto quanto riguarda gli altri tipi di oggetti
+> identificati...(dalle guide). Qualsiasi riferimento alla mappa deve puntare al relativo punto di
+> ancoraggio sull'atlante unificato... riportandolo anche già in pagina visibile in un'area
+> opportuna. Per tutti gli elementi grafici aggiuntivi mancanti... affida il lavoro di generazione
+> a codex specificandogli tu i prompt... anche tutti i pin magari falli rigenerare tutti con la
+> sola grafica png a sfondo alfa reale dell'immagine da inserire poi nel pin che vai a creare tu
+> nell'app.
+>
+> Dovete continuare a collaborare tu e Codex come svolto fino ad ora anche per queste nuove
+> attività. La generazione immagini è esclusiva di Codex tu però puoi verificare e generare i
+> prompt... Gli elementi grafici devono essere generati per tutte le parti di interfaccia attuali
+> dove mancano ed è necessario... non solo negli elementi specifici citati.
+>
+> A completamento vi direi anche di fare una review di tutto per verificare se ci sono bug
+> implementativi sfuggiti e da risolvere... anche in questo caso continuate ad essere
+> equiponenziali. Però se uno implementa l'altro verifica e viceversa... mai verifica e
+> implementazione fatti dalla stessa entità).
+
+Più, da un suo messaggio precedente: **la mappa generale di Tokyo va sostituita con la mappa della
+metropolitana del gioco** (`extracted/metropolitana.json`, `P5_MAPDATA.SPD`). Cade nel lotto A, è
+mia.
+
+### I nove punti, numerati per poterci riferire a uno solo
+
+| | richiesta | a chi |
+|---|---|---|
+| 5.1 | layout molto grafico e moderno, desktop/tablet/mobile, sulle sette sezioni | A e B |
+| 5.2 | aggiungere gli altri tipi di oggetti individuati dalle guide | B |
+| 5.3 | ogni riferimento alla mappa: ancora sull'atlante **e** posizione già in pagina | A (componente), A+B (applicazione) |
+| 5.4 | Tokyo sostituita dalla mappa della metropolitana del gioco | A |
+| 6.1 | tutti i pin rigenerati: PNG alfa reale, sola figura, senza cornice | prompt A · generazione Codex |
+| 6.2 | grafica per **tutte** le parti di interfaccia dove manca, non solo le sezioni citate | prompt di chi rifà la pagina · generazione Codex |
+| 6.3 | generazione immagini esclusiva di Codex; Claude scrive e verifica i prompt | — |
+| 7.1 | revisione di tutto a completamento, per i bug sfuggiti | A e B incrociati |
+| 7.2 | equipollenti; chi implementa non verifica, mai la stessa entità sui due lati | — |
+
+### Primo passo fatto
+
+`src/components/mappe/DoveSiTrova.tsx` — il 5.3 lato componente. Risolve l'accesso e rende i tre
+esiti in modo diverso: destinazione unica → mappa incorporata centrata sul pin più il collegamento
+all'atlante; più destinazioni → si elencano e sceglie il lettore, perché indovinarne una manda nel
+posto sbagliato; nessuna → lo si dice, invece di inventare un posto. Typecheck pulito.
+
+**È tuo da verificare** — l'ho scritto io. Se ti torna, lo usiamo entrambi come base per il 5.3.
