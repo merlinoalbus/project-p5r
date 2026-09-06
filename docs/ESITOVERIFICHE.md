@@ -1035,18 +1035,22 @@ coperti.
    `cancelli-pin.json`, lascia `verify_pin_semantics.py` verde. Il file viene caricato, ma il
    confronto è irraggiungibile dopo `condizionali = set()`.
 3. **Manca la regressione specifica richiesta.** Le prove esistenti mostrano che un'entità
-   sintetica può sparire per data/meteo/fascia, ma non che porta e forziere restino nel DOM prima
-   e dopo progressione/raccolta, né che l'editor non possa renderli nascondibili.
+   sintetica può sparire per data/meteo/fascia, ma non che una porta resti nel DOM prima e dopo la
+   progressione e che un forziere resti visibile finché non viene marcato raccolto. Il forziere
+   può poi essere nascosto dal filtro volontario dei raccolti, non da una flag o da un prerequisito.
 4. **Documentazione ancora contraddittoria.** Il docstring di `verify_pin_semantics.py` prescrive
    ancora `da-configurare` sui pin condizionali; `ATLANTE-STATO.md` conserva la dichiarazione dei
    324 pin condizionati. Entrambe descrivono il contratto ritirato.
 
 ### Criterio di chiusura
 
-Separare nel modello runtime presenza e prerequisiti/stato; soltanto la presenza alimenta il
-filtro. Impedire via API/editor che apertura, raccolta o progressione nascondano elementi fissi;
+Separare nel modello runtime presenza, prerequisiti/stato e raccolta; soltanto la presenza
+alimenta il filtro temporale. Impedire via API/editor che apertura o progressione nascondano gli
+elementi strutturali fissi; conservare per forzieri e collezionabili il distinto filtro volontario
+che li può nascondere dopo che il giocatore li marca raccolti;
 ricostruire e confrontare indipendentemente l'intera catena
-`cancelli-pin.json → nativo → descrizione`; aggiungere le controprove porta/forziere e un caso
+`cancelli-pin.json → nativo → descrizione`; aggiungere le controprove porta sempre visibile,
+forziere visibile prima e nascondibile dopo la raccolta, e un caso
 editoriale temporaneo nei due stati.
 
 Gli altri cinque blocker della verifica precedente sono fuori dallo scope di questo commit e
