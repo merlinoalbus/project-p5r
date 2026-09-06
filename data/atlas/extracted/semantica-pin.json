@@ -785,7 +785,7 @@
         "senzaNome": 6,
         "famiglie": {
           "passaggio|Passaggio": 15,
-          "forziere|Forziere raro": 1
+          "forziere-raro|Forziere raro": 1
         },
         "procedure": {
           "AC_GOTO_AOYAMA02": 1,
@@ -901,7 +901,7 @@
       "tipoSpillo": "forziere",
       "etichetta": "Forziere",
       "stato": "determinato",
-      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 27, cioè lo sprite 26 del foglio, che si chiama «ミニマップ：宝箱»"
+      "prova": "procedura che accende la bandiera del pin: (TBOX|_BOX_) in 122 casi su 122 riconosciuti"
     },
     {
       "tipoNativo": 19,
@@ -1199,7 +1199,7 @@
           "IsUppeerOff": 1
         },
         "etichetteDeiTrigger": {},
-        "tipoSpillo": "forziere",
+        "tipoSpillo": "forziere-raro",
         "etichetta": "Forziere raro",
         "stato": "determinato"
       },
@@ -1241,24 +1241,12 @@
           "motivo": "7 punti su 7 riconosciuti dicono «passaggio», di cui 6 ingressi del campo"
         }
       },
-      "osservazione": {
-        "genere": "forziere",
-        "tipoSpillo": "forziere",
-        "etichetta": "Forziere",
-        "osservazioni": 4,
-        "schermate": [
-          "Kamoshida's Palace — Old Castle 1F",
-          "Kamoshida's Palace — Old Castle 3F",
-          "Kamoshida's Palace — Tower: Lower Level",
-          "Kamoshida's Palace — Tower: Upper Level"
-        ],
-        "motivo": "su 4 schermate del gioco il numero di icone «forziere» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
-      },
+      "osservazione": null,
       "bordo": null,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
+      "tipoSpillo": "forziere-raro",
+      "etichetta": "Forziere raro",
       "stato": "determinato",
-      "prova": "icone contate nelle schermate del gioco: su 4 schermate del gioco il numero di icone «forziere» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
+      "prova": "procedura che accende la bandiera del pin: (R_TBOX|RARE_TBOX) in 32 casi su 33 riconosciuti"
     },
     {
       "tipoNativo": 28,
@@ -6176,7 +6164,7 @@
       "indicePin": 0,
       "tipoNativo": 17,
       "bandiera": 536871394,
-      "tipoSpillo": "forziere",
+      "tipoSpillo": "forziere-raro",
       "etichetta": "Forziere raro",
       "procedure": [
         "D01_151_05_R_TBOX_minimap_03"
@@ -6416,7 +6404,7 @@
       "indicePin": 4,
       "tipoNativo": 26,
       "bandiera": 536873409,
-      "tipoSpillo": "forziere",
+      "tipoSpillo": "forziere-raro",
       "etichetta": "Forziere raro",
       "procedure": [
         "D06_157_13_R_TBOX_03"
@@ -6790,15 +6778,15 @@
           "sbagliati": 5,
           "accuratezza": 0.286
         },
-        "forziere": {
-          "giusti": 4,
-          "sbagliati": 1,
-          "accuratezza": 0.8
-        },
         "ristorante": {
           "giusti": 1,
           "sbagliati": 3,
           "accuratezza": 0.25
+        },
+        "forziere": {
+          "giusti": 4,
+          "sbagliati": 0,
+          "accuratezza": 1.0
         },
         "scala": {
           "giusti": 0,
@@ -6814,6 +6802,11 @@
           "giusti": 0,
           "sbagliati": 2,
           "accuratezza": 0.0
+        },
+        "forziere-raro": {
+          "giusti": 0,
+          "sbagliati": 1,
+          "accuratezza": 0.0
         }
       },
       "scambiPiuFrequenti": {
@@ -6821,10 +6814,10 @@
         "porta letto come passaggio": 6,
         "sicura letto come passaggio": 5,
         "passaggio letto come negozio": 4,
-        "forziere letto come passaggio": 3,
         "porta letto come meccanismo": 3,
         "negozio letto come ristorante": 2,
-        "passaggio letto come scala": 2
+        "passaggio letto come scala": 2,
+        "passaggio letto come scorciatoia": 2
       },
       "conseguenza": "troppo bassa per farne una prova: la lettura geometrica non determina alcun tipo e nessun pin del pacchetto dipende da lei"
     },
@@ -7284,13 +7277,6 @@
         "dalNomeNativo": "passaggio",
         "nomeNativo": "ミニマップ：やじるし　左",
         "dimostratoDa": "posizione sul bordo della planimetria"
-      },
-      {
-        "tipoNativo": 26,
-        "tipoSpillo": "forziere",
-        "dalNomeNativo": "forziere",
-        "nomeNativo": "ミニマップ：宝箱",
-        "dimostratoDa": "icone contate nelle schermate del gioco"
       }
     ],
     "discordi": [],
@@ -7311,8 +7297,9 @@
       "sicura": 1,
       "porta": 2,
       "passaggio": 9,
-      "forziere": 2,
+      "forziere": 1,
       "uscita": 3,
+      "forziere-raro": 1,
       "scala": 6,
       "tesoro-palazzo": 1,
       "timbro": 2,
@@ -7331,17 +7318,19 @@
       "seme-bramosia": 1
     },
     "perProva": {
-      "icone contate nelle schermate del gioco": 2,
+      "icone contate nelle schermate del gioco": 1,
       "prove dirette sui singoli pin": 1,
-      "tabella nativa delle parti": 26,
+      "tabella nativa delle parti": 25,
       "posizione sul bordo della planimetria": 4,
+      "procedura che accende la bandiera del pin": 2,
       "nome interno dello sprite del blocco urbano dimostrato": 51,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 6
     },
     "pinPerProva": {
-      "tabella nativa delle parti": 528,
+      "tabella nativa delle parti": 387,
       "posizione sul bordo della planimetria": 301,
-      "icone contate nelle schermate del gioco": 142,
+      "procedura che accende la bandiera del pin": 179,
+      "icone contate nelle schermate del gioco": 104,
       "nome interno dello sprite del blocco urbano dimostrato": 81,
       "prove dirette sui singoli pin": 81,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 9
@@ -7350,8 +7339,9 @@
     "pinDaBandiera": 48,
     "perTipoDaBandiera": {
       "porta": 30,
-      "forziere": 13,
+      "forziere": 11,
       "seme-bramosia": 3,
+      "forziere-raro": 2,
       "sicura": 2
     },
     "accuratezzaLetturaGeometrica": 0.491,

@@ -62,13 +62,28 @@ def main(out, radice=None):
             assert reso, f'genere senza corrispondenza dichiarata: {genere}'
             assert reso['tipoSpillo'] in registro, f'tipo di segnalino fuori registro: {reso["tipoSpillo"]}'
 
-    # 2. la deduzione si riproduce
-    rifatto = io_.risolvi(dati['osservazioni'], mappe)
+    # 2. la deduzione si riproduce, e si riproduce sapendo quali tipi condividono l'icona.
+    #    Chi guarda una schermata conta icone, non tipi: se due tipi hanno lo stesso sprite, il
+    #    conteggio dice quanti sono in tutto e non può sceglierne uno. Il raggruppamento si
+    #    ricostruisce qui dalla tabella delle parti, non si prende dall'artefatto.
+    per_sprite = collections.defaultdict(set)
+    for r in json.loads((out/'tabella-parti-pin.json').read_text(encoding='utf8'))['tipi']:
+        if r['indiceSprite'] is not None:
+            per_sprite[r['indiceSprite']].add(r['tipoNativo'])
+    tipi_per_sprite = {t: tipi for tipi in per_sprite.values() for t in tipi}
+    rifatto = io_.risolvi(dati['osservazioni'], mappe, tipi_per_sprite)
     assert set(rifatto) == set(esito['generi']), 'generi diversi da quelli risolti'
     for genere, voce in rifatto.items():
         salvato = esito['generi'][genere]
         assert voce['compatibili'] == salvato['compatibili'], f'compatibili diversi per {genere}'
+        assert voce['gruppoIcona'] == salvato['gruppoIcona'], f'gruppo dell’icona diverso per {genere}'
         assert voce['dimostrato'] == salvato['dimostrato'], f'deduzione diversa per {genere}'
+        # nessun genere può dimostrare un tipo la cui icona è condivisa: sarebbe la conclusione
+        # che l'osservazione non è in grado di sostenere
+        if voce['dimostrato'] is not None:
+            assert len(tipi_per_sprite.get(voce['dimostrato'], {voce['dimostrato']})) == 1, \
+                (f'il genere «{genere}» dichiara dimostrato il tipo {voce["dimostrato"]}, ma quella '
+                 'icona è condivisa: il conteggio non può distinguerli')
 
     # 3. soglia e unicità
     incrociate = 0
@@ -91,6 +106,20 @@ def main(out, radice=None):
             assert script['tipoSpillo'] == voce['tipoSpillo'],                 (f'il tipo {tipo} risulta «{voce["tipoSpillo"]}» contando le icone e '
                  f'«{script["tipoSpillo"]}» dalle procedure che accendono la sua bandiera: '
                  'una delle due strade sbaglia')
+            incrociate += 1
+        # Seconda strada indipendente: la tabella nel codice del gioco lega il tipo a uno sprite,
+        # e quello sprite ha un nome. Contare icone su uno schermo e leggere una tabella
+        # nell'eseguibile non hanno nulla in comune: se dicono la stessa cosa, la dicono davvero.
+        # (Prima la controprova era il tipo 26; è caduta quando si è visto che quell'icona la
+        # condividono in due, e il conteggio non poteva distinguerli.)
+        import pin_semantics as ps
+        nome_nativo = (altra.get('tabellaParti') or {}).get('nomeNativo')
+        dalla_tabella = ps.DALLA_TABELLA_DELLE_PARTI.get(nome_nativo or '')
+        if dalla_tabella:
+            assert dalla_tabella[0] == voce['tipoSpillo'], \
+                (f'il tipo {tipo} risulta «{voce["tipoSpillo"]}» contando le icone e '
+                 f'«{dalla_tabella[0]}» dal nome dello sprite «{nome_nativo}» nella tabella '
+                 'nativa: una delle due strade sbaglia')
             incrociate += 1
 
     # 4-bis. Dove l'osservazione dice in che parte della planimetria l'icona e' stata vista, il pin

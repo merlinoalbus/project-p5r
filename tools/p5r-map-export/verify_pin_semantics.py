@@ -123,6 +123,9 @@ def main(out, seed=None):
                  if percorso_osservato.exists() else {})
     urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = bordo_ok = con_condizione = ipotesi = 0
     tabella_ok = 0
+    da_verificare_nel_pacchetto = [0]
+    parti = {r['tipoNativo']: r for r in json.loads(
+        (out/'tabella-parti-pin.json').read_text(encoding='utf8'))['tipi']}
     # La tabella nativa si ricontrolla dall'eseguibile, non dall'artefatto: e' la sola sorgente
     # che non si puo' aggiustare a mano senza che il controllo se ne accorga.
     import pin_part_table as ppt
@@ -299,6 +302,32 @@ def main(out, seed=None):
             if ha:
                 assert all(c['tipo'] == 'da-configurare' and c.get('nota') for c in s['condizioni']),                     f'condizione senza forma valida su {m["chiave"]}'
                 con_condizione += 1
+            # Le prove native devono arrivare nel pacchetto come dato, non come frase. Per gli
+            # spilli di un tipo ancora da identificare sono l'unica cosa che rende possibile la
+            # verifica manuale: se sparissero, resterebbe un pin muto e nessuno se ne accorgerebbe,
+            # perche' il conteggio tornerebbe lo stesso. Qui non torna.
+            nat = s.get('nativo')
+            assert nat, f'spillo nativo senza le sue prove strutturate su {m["chiave"]}'
+            assert isinstance(nat.get('tipoNativo'), int) and isinstance(nat.get('indicePin'), int), \
+                f'prove native senza tipo o indice del pin su {m["chiave"]}'
+            atteso_nativo = pin_nativi[m['chiave']][nat['indicePin']]
+            assert atteso_nativo['nativeType'] == nat['tipoNativo'], \
+                f'le prove citano un tipo nativo diverso da quello del pin su {m["chiave"]}'
+            tab = parti.get(nat['tipoNativo']) or {}
+            for campo in ('partId', 'indiceSprite', 'nomeNativo', 'png', 'motivoSenzaSprite'):
+                assert nat.get(campo) == tab.get(campo), \
+                    f'prove native discordi dalla tabella delle parti ({campo}) su {m["chiave"]}'
+            stato = per_tipo[nat['tipoNativo']]['stato']
+            scelto_a_parte = (m['chiave'], nat['indicePin']) in da_bandiera
+            assert bool(nat.get('daVerificare')) == (stato == 'da-verificare' and not scelto_a_parte), \
+                f'«da verificare» dichiarato male su {m["chiave"]} pin {nat["indicePin"]}'
+            if nat.get('daVerificare'):
+                prove = nat.get('prove') or {}
+                assert prove.get('diffusione') and prove.get('avvertenza'), \
+                    f'spillo da verificare senza la scheda delle prove su {m["chiave"]}'
+                assert prove == per_tipo[nat['tipoNativo']]['riferimenti'], \
+                    f'le prove nel pacchetto non sono quelle del registro semantico su {m["chiave"]}'
+                da_verificare_nel_pacchetto[0] += 1
             if s['riferimento']:
                 assert s['riferimento']['tipo'] == 'luogo'
                 assert quartiere and s['riferimento']['chiave'] in quartieri[quartiere], \
@@ -311,6 +340,21 @@ def main(out, seed=None):
     assert rapporto['pinNativi'] == nativi, 'il rapporto non conta tutti i pin nativi'
     assert rapporto['pinContati'] == nativi, f'contabilità aperta: {rapporto["pinContati"]} su {nativi}'
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
+    # Ogni pin posato di un tipo ancora da identificare deve portare le sue prove: il conto atteso
+    # si ricava dal registro semantico, non dal pacchetto, cosi' toglierle non passa inosservato.
+    atteso_da_verificare = 0
+    for m in pacchetto['mappe']:
+        for s in (m.get('spilli') or []):
+            n = s.get('nativo') or {}
+            if 'tipoNativo' not in n:
+                continue
+            if per_tipo[n['tipoNativo']]['stato'] == 'da-verificare' and \
+                    (m['chiave'], n.get('indicePin')) not in da_bandiera:
+                atteso_da_verificare += 1
+    assert da_verificare_nel_pacchetto[0] == atteso_da_verificare, \
+        (f'{atteso_da_verificare} spilli sono di un tipo da verificare ma solo '
+         f'{da_verificare_nel_pacchetto[0]} portano le prove')
+    assert atteso_da_verificare > 0, 'nessuno spillo da verificare: il controllo non starebbe controllando nulla'
     assert ipotesi == semantica['summary']['ipotesi']
     print('OK', determinati, f'tipi dimostrati ({tabella_ok} dalla tabella nativa delle parti '
           f'ricontrollata sull’eseguibile, {urbani} dal nome dello sprite,',

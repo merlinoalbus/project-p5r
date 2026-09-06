@@ -13,7 +13,7 @@ export const TIPI_SPILLO = [
   'passaggio', 'scala', 'uscita', 'treno',
   'negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita',
   'confidente', 'dialogo',
-  'forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
+  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
   'nota',
 ] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
@@ -23,7 +23,7 @@ export const GRUPPI_SPILLO: ReadonlyArray<{ nome: string; tipi: readonly TipoSpi
   { nome: 'Spostamenti', tipi: ['passaggio', 'scala', 'uscita', 'treno'] },
   { nome: 'Città', tipi: ['negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita'] },
   { nome: 'Persone', tipi: ['confidente', 'dialogo'] },
-  { nome: 'Palazzi e Mementos', tipi: ['forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia'] },
+  { nome: 'Palazzi e Mementos', tipi: ['forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia'] },
   { nome: 'Altro', tipi: ['nota'] },
 ];
 
@@ -74,6 +74,11 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   dialogo: { nome: 'Dialogo', colore: '#6366f1', collezionabile: true, riferimento: null },
   // ---- Palazzi e Mementos ----
   forziere: { nome: 'Forziere', colore: '#eab308', collezionabile: true, riferimento: 'punto' },
+  // Il gioco disegna il forziere raro con la stessa icona di quello normale sulla mappa
+  // d'insieme, ma non sono la stessa cosa: le procedure che li accendono si chiamano `N_TBOX`
+  // (normal) e `R_TBOX`/`RARE_TBOX`, e convivono su 21 planimetrie. Renderli entrambi
+  // «Forziere» cancellava una distinzione che il gioco fa.
+  'forziere-raro': { nome: 'Forziere raro', colore: '#fde047', collezionabile: true, riferimento: 'punto' },
   tesoro: { nome: 'Tesoro', colore: '#a855f7', collezionabile: true, riferimento: 'punto' },
   'tesoro-palazzo': { nome: 'Tesoro del Palazzo', colore: '#d946ef', collezionabile: true, riferimento: 'punto' },
   'seme-bramosia': { nome: 'Seme della bramosia', colore: '#c85cff', collezionabile: true, riferimento: 'punto' },

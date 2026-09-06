@@ -6,6 +6,7 @@ import json
 import math
 import struct
 import sys
+import world_connections as wc
 from world_connections import blocks, hits, procedures, main
 
 
@@ -67,8 +68,15 @@ def verify(out, scripts, bf=None):
          'quelle con cui e’ stato prodotto, o qualcosa e’ cambiato senza passare di qui')
     assert (out/'mondo_connessioni_evidenze.json').read_bytes()==before, \
         'la verifica ha toccato l’artefatto ufficiale: non deve mai succedere'
+    # Il rapporto deve **attestare** la copertura, non solo averla controllata di sfuggita: se
+    # domani le procedure crollassero a zero, il file versionato lo direbbe da solo, invece di
+    # continuare a dichiarare PASS mentre l'artefatto accanto e' vuoto — che e' quel che e'
+    # successo.
     report=dict(status='PASS',fields=len(data['fields']),scripts=sum(bool(r['script']) for r in data['fields']),
         triggers=sum(len(r['triggers']) for r in data['fields']),
+        procedures=sum(len(r['procedures']) for r in data['fields']),
+        triggerResolved=sum(1 for r in data['fields'] for t in r['triggers'] if t['procedureStatus']=='risolta'),
+        minimiPretesi=dict(wc.MINIMI),
         calls=sum(len(p['calls']) for r in data['fields'] for p in r['procedures']),
         passes=['Copertura, sintassi, hash e riferimenti','Rilettura indipendente record binari','Diramazioni, input malformati e determinismo'],
         scope='Evidenze grezze; nessuna certificazione di navigabilita o associazione semantica dei POI')

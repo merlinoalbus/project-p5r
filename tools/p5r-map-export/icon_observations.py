@@ -28,8 +28,21 @@ import sys
 MINIME_OSSERVAZIONI = 4
 
 
-def risolvi(osservazioni, mappe):
-    """Per ogni genere di icona, i tipi di pin compatibili con tutte le osservazioni."""
+def risolvi(osservazioni, mappe, tipi_per_sprite=None):
+    """Per ogni genere di icona, i tipi di pin compatibili con tutte le osservazioni.
+
+    Attenzione a che cosa si conta. Chi guarda una schermata vede **icone**, e un'icona è uno
+    sprite: se due tipi nativi condividono lo stesso sprite — come il 17 e il 26, che sono il
+    forziere normale e quello raro e il gioco disegna identici — chi conta «i forzieri» li conta
+    insieme, e il vincolo di conteggio riguarda la loro **somma**, non l'uno o l'altro.
+
+    Trattarli separatamente è l'errore che questo metodo aveva: il conteggio delle icone «forziere»
+    risultava compatibile con il solo tipo 26, e da lì si concludeva che il 26 fosse il forziere —
+    mentre l'osservazione non poteva distinguerlo dal 17. Con `tipi_per_sprite` il vincolo si
+    applica ai gruppi che condividono l'icona: se il gruppo ne contiene uno solo, il tipo è
+    dimostrato; se ne contiene di più, l'osservazione dimostra che quel gruppo disegna quel genere,
+    e a dire quale sia quale devono pensarci le procedure.
+    """
     per_genere = collections.defaultdict(list)
     for voce in osservazioni:
         for genere, quante in voce['icone'].items():
@@ -51,15 +64,29 @@ def risolvi(osservazioni, mappe):
                     compatibili |= {t for t in mappe['__tutti__'] if conta.get(t, 0) == 0}
             insiemi.append(compatibili)
         rimasti = set.intersection(*insiemi) if insiemi else set()
+        # Il gruppo di tipi che condividono l'icona di quelli rimasti: se il vincolo lascia in
+        # piedi il tipo 26 ma quell'icona la usa anche il 17, l'osservazione non li distingue.
+        gruppo = set(rimasti)
+        if tipi_per_sprite:
+            for t in rimasti:
+                gruppo |= set(tipi_per_sprite.get(t, ()))
+        abbastanza = len(casi) >= MINIME_OSSERVAZIONI
+        dimostrato = sorted(gruppo)[0] if len(gruppo) == 1 and abbastanza else None
+        if len(rimasti) == 1 and len(gruppo) > 1:
+            motivo = (f'l’icona di questo genere è condivisa dai tipi {sorted(gruppo)}: il conteggio '
+                      'dice quanti sono in tutto, non quale sia quale')
+        elif len(rimasti) == 1:
+            motivo = None
+        elif not rimasti:
+            motivo = ('nessun tipo è compatibile con tutte le osservazioni: una di esse è sbagliata, '
+                      'oppure la schermata non mostrava tutte le icone')
+        else:
+            motivo = f'{len(rimasti)} tipi restano compatibili: servono altre schermate per distinguerli'
         esito[genere] = dict(
             osservazioni=len(casi),
             schermate=[v['schermata'] for v, _ in casi],
-            compatibili=sorted(rimasti),
-            dimostrato=sorted(rimasti)[0] if len(rimasti) == 1 and len(casi) >= MINIME_OSSERVAZIONI else None,
-            motivo=None if len(rimasti) == 1 else
-            ('nessun tipo è compatibile con tutte le osservazioni: una di esse è sbagliata, '
-             'oppure la schermata non mostrava tutte le icone' if not rimasti else
-             f'{len(rimasti)} tipi restano compatibili: servono altre schermate per distinguerli'))
+            compatibili=sorted(rimasti), gruppoIcona=sorted(gruppo),
+            dimostrato=dimostrato, motivo=motivo)
     return esito
 
 
@@ -71,7 +98,19 @@ def main(out, radice=None):
     mappe = {m['code']: collections.Counter(p['nativeType'] for p in m['pins']) for m in meta['maps']}
     mappe['__tutti__'] = sorted({p['nativeType'] for m in meta['maps'] for p in m['pins']})
 
-    esito = risolvi(dati['osservazioni'], mappe)
+    # Quali tipi condividono la stessa icona: senza questo il vincolo di conteggio crederebbe di
+    # distinguere due tipi che il gioco disegna identici.
+    percorso_parti = out/'tabella-parti-pin.json'
+    tipi_per_sprite = {}
+    if percorso_parti.exists():
+        per_sprite = collections.defaultdict(set)
+        for r in json.loads(percorso_parti.read_text(encoding='utf8'))['tipi']:
+            if r['indiceSprite'] is not None:
+                per_sprite[r['indiceSprite']].add(r['tipoNativo'])
+        for tipi in per_sprite.values():
+            for t in tipi:
+                tipi_per_sprite[t] = tipi
+    esito = risolvi(dati['osservazioni'], mappe, tipi_per_sprite)
     corrispondenza = dati['corrispondenzaIcone']
     determinati = {}
     for genere, voce in esito.items():
