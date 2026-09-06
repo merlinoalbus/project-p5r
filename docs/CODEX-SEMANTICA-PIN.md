@@ -606,3 +606,28 @@ La riverifica deve comprendere una controprova negativa su copia temporanea: car
 cartella `.BF` errata deve produrre un fallimento e l'impronta di
 `mondo_connessioni_evidenze.json` ufficiale deve restare identica. Il rapporto deve infine esporre
 anche i 4.495 trigger risolti, non soltanto script, trigger e chiamate.
+
+## Percorso minimo completo per chiudere la Fase 3d
+
+I rilievi della quarta verifica non richiedono un nuovo resolver: `AccessoMondoPage` gestisce già
+correttamente esito unico, multiplo e assente. La convergenza robusta è usare davvero quella
+superficie da ogni comando che promette «Sulla mappa»:
+
+1. `CollegamentoMappa` deve costruire
+   `/guida/mondo/<tipo>/<encodeURIComponent(chiave)>`, non chiamare `schedaAccessoMondo()`, che
+   per articoli e negozi torna deliberatamente alle rispettive schede editoriali;
+2. un test del componente deve controllare sia un negozio sia l'articolo
+   `untouchable/kogatana-nera`, pretendendo `%2F` nel singolo segmento della rotta;
+3. un test di integrazione da `OggettiPage` deve provare che il comando renda quella stessa rotta;
+4. per `Catena di perline`, `Soma`, `Homunculus` e `Tessera puntate alte` non serve inventare una
+   meta: raggiunta la rotta del resolver, l'esito `assente` deve mostrare chiaramente che la
+   posizione non è ancora associata. Il test deve fissare questo comportamento;
+5. il campo `generato` del crosswalk deve derivare da una sorgente stabile oppure essere escluso
+   esplicitamente dal confronto dopo aver verificato tutto il contenuto semantico. Una data
+   corrente non è riproducibilità;
+6. la nuova dichiarazione in `ATLANTE-STATO.md` deve riportare il censimento corrente:
+   1.406 accessi su 1.460, 503 punti esatti, 121 crosswalk e 234 esclusi, con i conteggi per tipo
+   rigenerati dal rapporto anziché ricopiati dalla dichiarazione precedente.
+
+Questa correzione preserva la distinzione fra «vai alla scheda» e «trova sulla mappa», evita
+fallback inventati e consente una controprova UI end-to-end sulla rotta pubblica effettiva.
