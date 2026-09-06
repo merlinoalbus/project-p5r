@@ -16,7 +16,12 @@ export function etichettaVersione(mappa: MappaRiassuntoDto, indice?: number, tot
   return quante ? `Immagine ${ordine} di ${quante}` : `Immagine ${ordine}`;
 }
 
-/** Nome del luogo seguito da ciò che la versione mostra: «Covo dei Ladri — settore d'ingresso». */
+/** Nome del luogo seguito da ciò che la versione mostra: «Covo dei Ladri — settore d'ingresso».
+ *
+ * Solo con un'etichetta dimostrata: l'ordinale descrive la posizione in una fila di miniature, non
+ * la zona, e un numero appiccicato al titolo non identifica nulla. Senza etichetta resta il nome
+ * del luogo, uguale per tutte le sue versioni. */
 export function nomeConVersione(mappa: MappaRiassuntoDto, nomeLuogo: string): string {
-  return mappa.gruppoImmagini ? `${nomeLuogo} — ${etichettaVersione(mappa)}` : nomeLuogo;
+  const etichetta = mappa.gruppoImmagini?.etichetta;
+  return etichetta ? `${nomeLuogo} — ${etichetta}` : nomeLuogo;
 }
