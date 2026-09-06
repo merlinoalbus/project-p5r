@@ -941,8 +941,9 @@ cancelli vanno conservate separatamente dalla presenza, oppure soltanto nella de
 
 Il gate deve provare almeno:
 
-1. con una partita prima del relativo sblocco, porta e forziere restano nel DOM e sulla mappa;
-2. marcarli raccolti/aperti può cambiare stato o stile, ma non confondere questo con l'assenza;
+1. con una partita prima del relativo sblocco, una porta strutturale resta nel DOM e sulla mappa;
+2. un forziere resta visibile finché disponibile e può essere nascosto dopo che il giocatore lo
+   marca raccolto, usando il canale `raccolto` e il relativo filtro volontario;
 3. un Confidente con condizione meteo/temporale è presente col meteo corretto e assente con quello
    scorretto;
 4. nessuna flag nativa o procedura di sblocco dei pin dungeon viene usata direttamente come
@@ -976,6 +977,11 @@ Il generatore può quindi pretendere zero `condizioni` per ogni pin proveniente 
 un verificatore indipendente può enumerare l'intero seed: qualsiasi porta, forziere, scala,
 passaggio, leva, stanza sicura o altro elemento fisico con condizioni di presenza deve far
 fallire il gate.
+
+Precisazione successiva dell'utente: `forziere` e gli altri collezionabili non appartengono alla
+stessa categoria operativa degli elementi strutturali fissi. Possono scomparire dopo il consumo,
+ma soltanto perché il giocatore li ha marcati raccolti e ha scelto di nascondere i raccolti; la
+flag nativa, il prerequisito o l'avanzamento non devono sostituire questo stato esplicito.
 
 Sul candidato Fase 2 `7d71dae` il gate nominale
 `python tools/p5r-map-export/verifica_tutto.py --solo pin` dà **5/5 PASS**. Due mutazioni isolate
