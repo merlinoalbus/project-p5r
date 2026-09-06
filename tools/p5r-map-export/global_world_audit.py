@@ -1,4 +1,5 @@
 """Global field/entrance graph with explicit unresolved image and script semantics."""
+from scrittura import scrivi_json
 import collections,csv,hashlib,json,math,re,sys
 from pathlib import Path
 

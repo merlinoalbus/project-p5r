@@ -1,5 +1,6 @@
 """Estrae evidenze delle destinazioni; non certifica percorsi pedonali."""
 from pathlib import Path
+from scrittura import scrivi_json
 import argparse
 import json
 import math
@@ -187,7 +188,7 @@ def main(out, scripts, bf=None, cpk=GAME):
         'Le coordinate XYZ non sono coordinate della planimetria.',
         'Le etichette prompt diverse da GO restano identificate dalla tabella e dall indice nativi.'])
     misurato=controlla_minimi(rows)
-    (out/'mondo_connessioni_evidenze.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
+    scrivi_json(out/'mondo_connessioni_evidenze.json', result)
     print('CAMPI',len(rows),'HTB',sum(bool(r['sources']['htb']) for r in rows),'SCRIPT',sum(bool(r['script']) for r in rows),
         'CHIAMATE',sum(len(p['calls']) for r in rows for p in r['procedures']),
         'CALL_FIELD',misurato['chiamate'],'TRIGGER_RISOLTI',misurato['triggerRisolti'])

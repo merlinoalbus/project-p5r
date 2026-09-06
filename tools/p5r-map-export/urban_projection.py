@@ -1,4 +1,5 @@
 """Urban spatial diagnostics; original images stay untouched."""
+from scrittura import scrivi_json
 import json,sys,math,struct,html
 from pathlib import Path
 from PIL import Image

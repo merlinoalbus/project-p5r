@@ -1,4 +1,5 @@
 """Native identity references for every collected field, without guessed floors."""
+from scrittura import scrivi_json
 import collections,json,struct,sys
 from pathlib import Path
 from extract_maps import sha

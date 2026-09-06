@@ -1,4 +1,5 @@
 """Diagnostic only: field coordinates, native apertures and scale hypotheses."""
+from scrittura import scrivi_json
 import hashlib,json,math,struct,sys
 from pathlib import Path
 import numpy as np

@@ -1,4 +1,5 @@
 """Resolve four school transitions without claiming narrative availability."""
+from scrittura import scrivi_json
 import hashlib,json,re,struct,sys
 from pathlib import Path
 from PIL import Image

@@ -124,7 +124,9 @@ export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
   const righe = db.prepare(`SELECT l.chiave, l.quartiere_chiave, ${quando}, ${giorni}, ${negozio} AS condizioni_negozio FROM luogo l`)
     .all() as Array<{ chiave: string; quartiere_chiave: string; quando: string | null; giorni: string | null; condizioni_negozio: string | null }>;
   const aggiorna = db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?');
-  const spilliDi = db.prepare(`SELECT id, tipo FROM spillo WHERE riferimento_tipo = 'luogo' AND riferimento_chiave = ?`);
+  // Solo gli spilli del seed: quelli che l'utente ha modificato portano le sue scelte, e
+  // riscriverle a ogni avvio sarebbe peggio che non applicare la presenza.
+  const spilliDi = db.prepare(`SELECT id, tipo FROM spillo WHERE riferimento_tipo = 'luogo' AND riferimento_chiave = ? AND origine = 'seed'`);
   let toccati = 0;
   for (const l of righe) {
     const presenza = unisci(

@@ -32,7 +32,8 @@ import type {
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
 import { invalidaEredita } from '../fusione/eredita.js';
-import { sincronizzaMappe } from '../mappe/sincronizzaMappe.js';
+import { collegaPalazziAiLuoghi, sincronizzaMappe } from '../mappe/sincronizzaMappe.js';
+import { applicaPresenzaAiLuoghi } from '../mappe/presenzaEntita.js';
 import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
@@ -162,6 +163,8 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
   if (!forza && leggiMeta(db, 'hash') === seed.hash) {
     // le mappe strutturali e i passaggi automatici si allineano a ogni avvio (idempotente, mai sopra le modifiche dell'utente)
     sincronizzaMappe(db);
+    collegaPalazziAiLuoghi(db);
+    applicaPresenzaAiLuoghi(db);
     return { caricato: false, versione: seed.versione, hash: seed.hash, conteggi: conteggi() };
   }
 
@@ -617,6 +620,12 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     sincronizzaMappe(db);
     const pacchettiSeed = [seed.mappeEditor, ...seed.mappeExtra];
     for (const pacchetto of pacchettiSeed) if (pacchetto.mappe.length > 0) importaMappe(pacchetto, { origine: 'seed', pacchettiSeed });
+    // Dopo i pacchetti, sempre: sono loro a portare i pin dell'atlante nativo, e sono loro a
+    // ripulire gli spilli di seed delle mappe che toccano. Farlo prima significava perdere il
+    // collegamento a un Palazzo e lasciare senza presenza il gemello nativo di un negozio — e al
+    // primo avvio, dove questa e' l'unica strada, il difetto non si vedeva affatto.
+    collegaPalazziAiLuoghi(db);
+    applicaPresenzaAiLuoghi(db);
 
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');
     insMeta.run('hash', seed.hash);

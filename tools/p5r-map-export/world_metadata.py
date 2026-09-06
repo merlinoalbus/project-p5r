@@ -1,5 +1,6 @@
 """Decode field identities and native map pins without inventing connections."""
 from pathlib import Path
+from scrittura import scrivi_json
 import collections
 import json
 import math
@@ -188,7 +189,7 @@ def main(out, cpk=GAME):
             'Raw flags/effects are retained; conditional pins must not become always visible.',
             'Native icon IDs still require verified semantic mapping.',
             'Map title corrections and pins are metadata, not yet applied to the application.'])
-    (out/'mondo_metadati.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
+    scrivi_json(out/'mondo_metadati.json', result)
     print('FIELDS',len(fields),'MAPS',len(maps),'PINS',sum(len(m['pins']) for m in maps))
     return result
 

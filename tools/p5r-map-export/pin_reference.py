@@ -26,6 +26,7 @@ collocabili. Le altre restano senza pin nativi, con il motivo: meglio una mappa 
 mappa con pin nel posto sbagliato.
 """
 from pathlib import Path
+from scrittura import scrivi_json
 import collections
 import json
 import re
@@ -233,7 +234,7 @@ def main(out):
                      motivi=dict(collections.Counter(r['motivo'] for r in righe if r.get('motivo')))),
         limits=['La condivisione del riferimento non dice che cosa un pin rappresenti.',
                 'Le mappe non condivise restano senza pin nativi: il motivo è scritto per ciascuna.'])
-    (out/'riferimento-pin.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'riferimento-pin.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 
