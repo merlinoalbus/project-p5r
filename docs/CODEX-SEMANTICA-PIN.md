@@ -1048,3 +1048,16 @@ Untouchable. Il riferimento uno-a-uno già disponibile è `luogo.negozio`, valor
 `untouchable`: il join deve usare quella relazione esplicita. Il fatto che Untouchable scompaia
 di giorno nel controllo manuale deriva oggi da `luogo.quando = sera`, non prova che
 `negozio.condizioni_json` sia stato trasferito.
+
+### Pre-audit Codex del nuovo gate dei cancelli
+
+La bozza successiva controlla correttamente `cancelli-pin.json → nativo → descrizione`, ma usa
+ancora `cancelli-pin.json` come autorità. Chiude quindi le cancellazioni da un solo lato, non la
+mutazione combinata già riprodotta dal validatore: eliminando una riga dall'artefatto e insieme
+`nativo.cancelli`/`nativo.sbloccoLeggibile`, il ramo `else` considera coerente l'assenza.
+
+Il verificatore deve ricostruire i cancelli dalle sorgenti native (o rigenerare l'artefatto in una
+directory temporanea) e confrontare integralmente chiavi, cancelli e rese col file versionato;
+solo dopo può confrontare quel risultato indipendente con il seed e la descrizione. La
+controprova minima deve cancellare la stessa informazione da entrambi gli artefatti derivati e
+ottenere comunque exit 1.
