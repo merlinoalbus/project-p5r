@@ -1752,3 +1752,22 @@ La nuova `src/components/mappe/DoveSiTrova.test.tsx` passa con
 cinque requisiti richiesti da Codex (unica con pin/centro/URL, multipla senza scelta, assente,
 `soloCollegamento`, errore API non distruttivo). Dopo commit più tag candidato, il punto 5.3
 fondazione passa al validator formale; questa nota non è ancora un PASS di lotto.
+
+### Verdetto formale — fondazione Fase 5.3 `candidato/fase-5-3-componente`
+
+**FAIL — galaxy-task-validator.** Il tag punta correttamente a
+`5f634e6a7132d10b143724a77238d5d5fd2b6583`; typecheck, lint e quattro rami del contratto sono
+verdi. Il blocker è circoscritto alla quinta prova: il test «errore API non rompe la scheda» può
+terminare mentre `useCarica` è ancora in loading, perché sia l'ospite sia l'assenza del visore sono
+già veri prima del rifiuto. Passerebbe quindi anche se il ramo `esito.errore` non fosse mai preso.
+
+**Sanamento obbligatorio a Claude:** usare una Promise controllata, montare e verificare il loading,
+invocare esplicitamente `reject`, poi attendere un segnale possibile solo dopo il rifiuto (per
+esempio la scomparsa dello spinner/card del componente) e soltanto allora asserire che la scheda
+ospite è intatta. Nella prova `unica` aggiungere anche
+`expect(getAccessoMondo).toHaveBeenCalledWith('negozio', 'untouchable')`.
+
+La suite totale non può ancora essere la prova globale del lotto: il validator ha osservato
+571/574 con fallimenti estranei in editor mappe/immagini, e un controllo sul padre ha rivelato un
+fallimento preesistente diverso. Il prossimo candidato deve riprodurre i test mirati e separare
+esplicitamente gli eventuali rossi preesistenti dalla modifica della fondazione.
