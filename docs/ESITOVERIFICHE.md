@@ -947,3 +947,65 @@ test della tabella reale. La prova deve includere anche almeno una delle quattro
 
 **Decisione:** l'implementazione supera il controllo di merito, ma la Fase 3d resta **FAIL** fino
 alla prova automatica della superficie reale Oggetti e a un nuovo riesame su commit stabile.
+
+## Fase 2 — Ottava verifica: copie, prove native e contratto di visibilità
+
+**Esito del riesame: FAIL**  
+**Commit verificato:** `7d71dae3f86e2e9463755409e4873b8bdb3bfa61`  
+**Data verifica:** 6 settembre 2026
+
+Il `galaxy-task-validator` ha isolato lo SHA con `git archive`; il test Fase 3d successivo e le
+modifiche concorrenti del working tree non fanno parte del giudizio.
+
+### Parti conformi
+
+1. La contabilità chiude: `1339 posati + 33 assorbiti + 14 esclusi puntualmente + 43 senza
+   riferimento = 1429` pin nativi.
+2. Le copie comprendono 31 equivalenze e 2 discordanze 17/26. La scelta canonica è corroborata
+   dalle procedure `D01_151_02_R_TBOX_minimap_01` e `D04_155_04_TBOX_minimap_09`, mentre nei due
+   campi discordanti non risulta un setter equivalente.
+3. Happy path: verificatori principali verdi, typecheck e lint PASS, **133 file / 542 test PASS**,
+   build Vite di produzione PASS con il solo warning preesistente sulla dimensione del chunk.
+
+### Rilievi bloccanti
+
+1. **Contratto di visibilità violato.** Lo SHA contiene 1.130 condizioni `da-configurare`, non
+   324 come dichiara lo stato. Almeno 898 riguardano elementi fisici stabili: passaggi, porte,
+   forzieri, stanze sicure, scale, forzieri rari, semi, uscite, timbri e tesori. La flag nativa
+   viene confusa con la presenza temporale. Per decisione esplicita dell'utente questi pin devono
+   essere sempre visibili; soltanto data, fascia, meteo o altra condizione di presenza reale può
+   nascondere un'entità. Prerequisiti, apertura, raccolta e progressione richiedono un canale
+   separato. Servono prove con porta/forziere sempre visibili e un'entità temporanea nascosta
+   soltanto nel momento scorretto.
+2. **Verificatore copie non indipendente e permeabile.** Importa dal produttore coppie, conversione
+   del codice e `TOLLERANZA=8`, benché lo scarto osservato massimo sia 3. Mutazioni isolate a
+   `xCanonica`, `yCanonica`, `tipoNativoCanonica`, `condizionale`, `resa`, `resaCanonica`, tre
+   campi di riepilogo e tolleranza dichiarata terminano erroneamente con codice 0. Le prove
+   procedurali dei due casi 17/26 non sono conservate né ricontrollate.
+3. **Ciclo `nativo_json` incompleto.** Inserimento iniziale e API passano, ma dopo migrazione di un
+   database pre-046 il reseed conserva l'ID lasciando `nativo_json=NULL`. `esportaMappe()` omette
+   inoltre `nativo`, quindi export/import perde le prove. Occorrono backfill senza perdita di ID o
+   dipendenze, export completo, round-trip esatto e controprove sui campi probatori.
+4. **Determinismo cross-platform assente.** L'artefatto versionato è CRLF; il produttore usa
+   `Path.write_text()` senza newline canonica e su Linux produrrebbe LF. JSON semanticamente
+   identici hanno quindi byte e SHA differenti. Va imposta una terminazione stabile e provato il
+   comportamento Windows/Linux.
+5. **`--artefatti` non isola la radice selezionata.** Un percorso relativo valido viene risolto dal
+   `cwd` del subprocess; `.flow` e `.BF` restano derivati dalla radice globale. Una fixture isolata
+   con scripts vuoti supera indebitamente il controllo leggendo le sorgenti del repository
+   principale. Tutti gli input devono derivare dalla radice risolta rispetto al chiamante.
+6. **Documentazione incoerente.** Restano insieme intestazioni e conteggi storici incompatibili:
+   54,6%, 227/1361/7, 324 condizioni contro le 1.130 reali e 539 test contro 542. Lo stato deve
+   distinguere chiaramente cronologia, snapshot giudicato e candidato successivo.
+
+### Pre-audit del lavoro successivo, fuori dallo SHA
+
+Il working tree di Claude riduce le condizioni da 1.130 a 55 attraverso `cancelli-pin.json`, ma
+sono ancora tutte condizioni di progressione/interazione: 23 porte, 16 forzieri normali/rari, 6
+semi, 3 stanze sicure, 1 scala e 6 marker. È un miglioramento quantitativo, non la chiusura del
+vincolo: anche questi 55 devono restare visibili e i loro prerequisiti non devono alimentare il
+filtro di presenza.
+
+**Decisione:** Fase 2 **FAIL**. Serve un nuovo commit stabile e pubblicato che chiuda tutti e sei
+i blocker; fino ad allora non si procede al gate formale della fase successiva e la PR cumulativa
+non può essere fusa.
