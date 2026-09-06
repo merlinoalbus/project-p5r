@@ -1,3 +1,15 @@
+/** L'indirizzo del risolutore unico: da qualunque sezione, questo porta al posto sulla mappa.
+ *
+ * Va tenuto distinto da `schedaAccessoMondo`, che porta invece alla scheda dell'entità. I due
+ * erano stati confusi, e il comando «Dove si trova» finiva sull'elenco dei negozi invece che sulla
+ * mappa: la scheda dice che cos'è una cosa, il risolutore dove sta.
+ *
+ * La chiave di un articolo contiene una barra (`negozio/articolo`), quindi va codificata: senza
+ * `encodeURIComponent` diventerebbe due segmenti di percorso e la rotta non troverebbe nulla. */
+export function percorsoAccessoMondo(tipo: string, chiave: string): string {
+  return `/guida/mondo/${encodeURIComponent(tipo)}/${encodeURIComponent(chiave)}`;
+}
+
 /** Le schede rimangono approfondimenti accessibili anche se manca una posizione. */
 export function schedaAccessoMondo(tipo: string, chiave: string): string {
   const k = encodeURIComponent(chiave);

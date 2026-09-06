@@ -24,7 +24,14 @@ function Accesso({ tipo, chiave }: { tipo: TipoAccessoMondo; chiave: string }) {
   return <div className="flex flex-col gap-4">
     <h1 className="titolo-display m-0">Apri luogo</h1>
     <PageState isLoading={carica.caricamento} error={carica.errore} onRetry={carica.ricarica}>
-      {dati?.esito === 'assente' && guide.length === 0 && <p>Questo luogo non è ancora associato a una mappa.</p>}
+      {/* Qualche voce non ha una posizione. Oggi sono quattro articoli: tre del negozio dentro il
+          Palazzo di Niijima e uno del sito di Tanaka, che si apre dal laptop e non è un posto.
+          Il comando «Sulla mappa» resta al suo posto — un comando che a volte sparisce è peggio —
+          ma qui va detto chiaramente, invece di aprire una pagina che non mostra niente. */}
+      {dati?.esito === 'assente' && guide.length === 0 && <div role="status" className="card flex flex-col gap-2">
+        <p className="m-0">Questa voce non ha una posizione sulla mappa: nel catalogo c’è, ma non è collocata su nessuna planimetria.</p>
+        <p className="m-0 text-text-secondary text-[13px]">Succede per la merce dei negozi che stanno dentro un Palazzo e per quella che si compra online, che nel mondo non hanno un punto.</p>
+      </div>}
       {dati && dati.destinazioni.length > 0 && (dati.esito === 'multipla' || guide.length > 0) && <>
         <p>Il luogo è presente in più posizioni. Scegli quale aprire.</p>
         <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Posizioni del luogo">

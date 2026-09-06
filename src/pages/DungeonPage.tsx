@@ -58,7 +58,10 @@ export function DungeonPage() {
                       <span className="text-[12px] text-text-muted">{d.aree} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
                     </div>
                   </Link>
-                  <CollegamentoVisivo to={schedaAccessoMondo('dungeon', d.chiave)} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Mappa" dettaglio={`${d.aree} sezioni della guida`} />
+                  {/* La carta qui sopra porta gia' alla mappa attraverso il risolutore: questo
+                      secondo collegamento porta alla scheda, ed e' quello che dice il dettaglio.
+                      Diceva pero' «Mappa» con l'icona della mappa, e prometteva la cosa sbagliata. */}
+                  <CollegamentoVisivo to={schedaAccessoMondo('dungeon', d.chiave)} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Scheda del Palazzo" dettaglio={`${d.aree} sezioni della guida`} />
                 </li>
               );
             })}
