@@ -718,6 +718,7 @@ lint puliti.
 | 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
 | 2026-09-06 | Fase 2 (7ª) | **PRONTA PER VERIFICA** — tabella nativa delle parti estratta e verificata dall'eseguibile, 90 tipi su 102 dimostrati, tutti i 1429 pin collocabili posati | in attesa |
 | 2026-09-06 | Fase 3d (5ª) | **PRONTA PER VERIFICA** — «Sulla mappa» usa il risolutore, quattro voci senza posizione dichiarate, crosswalk riproducibile, numeri aggiornati | in attesa |
+| 2026-09-06 | Fase 3d (6ª) | **PRONTA PER VERIFICA** — regressione sulla pagina Oggetti vera e sull'iniezione delle chiavi nell'API | in attesa |
 
 ### Fase 3d (5ª) — i quattro rilievi della quarta verifica
 
@@ -939,3 +940,34 @@ Il resto della Fase 1 (pacchetto seed, ricarica, interfaccia) non è ancora dich
 5. Il merito: che la corrispondenza `tipoNativo + 68` sia davvero dimostrata e non assunta, e che
    nessun tipo dei Palazzi abbia ricevuto un significato. In `icone-mappa.json` il campo
    `associazione` deve valere `blocco-urbano-dimostrato` solo per i 51 tipi urbani.
+
+### Fase 3d (6ª) — la prova sulla superficie vera
+
+Codex aveva ragione: il test montava `CollegamentoMappa` da solo dentro una rotta chiamata
+`/guida/oggetti`, e lasciava scoperta tutta la catena che sta prima — l'API che deve arricchire la
+riga con la chiave dell'articolo, la tabella che deve agganciarla alla riga giusta, il comando che
+deve comparire lì. Si poteva rompere ognuno dei tre senza far cadere nulla.
+
+Ora ci sono due prove che si prendono la catena intera.
+
+`src/pages/OggettiPage.test.tsx` monta la **pagina vera** e controlla quattro cose: una chiave con
+la barra (`yumenoshima/kogatana-nera`) che arriva intera al risolutore; un oggetto venduto in più
+negozi che riceve un comando per ciascuno, nell'ordine; **`Soma`**, una delle quattro voci senza
+posizione, che il comando ce l'ha lo stesso perché è lì che le si dice perché; e un oggetto senza
+chiave né negozi, che non deve promettere una mappa che non c'è. Rimettendo il difetto — il
+componente che torna all'indirizzo della scheda — la prova cade con codice 1: provato.
+
+`server/routes/oggetti-guida.test.ts` pretende dall'API le chiavi esatte: più di cento righe
+agganciate, tutte quelle con la barra nella forma `negozio/articolo`, e `Soma` con la sua chiave
+precisa. Se il crosswalk smettesse di essere caricato o di agganciare, l'elenco resterebbe identico
+nei conteggi e questo test cadrebbe lo stesso.
+
+**Una cosa che ho scoperto scrivendo la prova, e che va detta:** avevo aggiunto un'asserzione sugli
+oggetti venduti in più negozi, ed è fallita. Non per un difetto: sui dati di oggi **nessun oggetto
+risolve a più di un negozio**, perché tutti i 121 abbinamenti passano per il nome dell'articolo,
+che porta a un negozio solo. La forma regge il caso — `negozi` è una lista — e il controllo ora
+verifica quello, invece di pretendere un dato che non esiste. Il caso multiplo resta coperto dal
+test della pagina, che lo esercita su un dato costruito apposta.
+
+**Misurato:** typecheck e lint puliti, **547 test su 547** (erano 542: cinque nuovi), 27
+verificatori su 27.
