@@ -59,11 +59,39 @@ function piantaScaricata(origine: string | null | undefined, pianta: PiantaAreaD
   return { url: origine, fonte: host, pagina: null };
 }
 
+/** Le finestre trascritte in `finestre-dungeon.json`, lette una volta sola.
+ *
+ * Stanno in `dati_guida` come testo, perché è così che il seed le porta. Qui diventano una mappa
+ * `dungeon → {dal, al}`: servono a dire alla mappa di Tokyo quando un Palazzo c'è, e senza di esse
+ * l'unica alternativa sarebbe ricavare la data dalla prosa di `data_sblocco` con un'espressione
+ * regolare — cioè sbagliarne qualcuna, in silenzio, e mandare il giocatore in un Palazzo che non
+ * esiste ancora. */
+let finestreCache: Map<string, { dal: string; al: string | null }> | null = null;
+
+function finestreDungeon(): Map<string, { dal: string; al: string | null }> {
+  if (finestreCache) return finestreCache;
+  finestreCache = new Map();
+  const riga = prepared("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
+  if (riga) {
+    try {
+      const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
+      for (const f of dati.finestre ?? []) {
+        if (f.dal) finestreCache.set(f.dungeon, { dal: f.dal, al: f.al ?? null });
+      }
+    } catch { /* trascrizione illeggibile: si resta senza finestre, non si indovina */ }
+  }
+  return finestreCache;
+}
+
+/** Da chiamare quando il seed viene ricaricato: la trascrizione può essere cambiata. */
+export function invalidaFinestreDungeon(): void { finestreCache = null; }
+
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, conPartita: boolean): DungeonRiassuntoDto {
   const punti = prepared('SELECT p.chiave, p.esauribile FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number }>;
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
-    date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato }, livelloConsigliato: r.livello_consigliato,
+    date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
+    finestra: finestreDungeon().get(r.chiave) ?? null, livelloConsigliato: r.livello_consigliato,
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
     gestiti: conPartita ? punti.filter((p) => stati.has(p.chiave)).length : null,
