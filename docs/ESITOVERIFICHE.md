@@ -1202,3 +1202,39 @@ sostituire il controllo generico `nativo_json` con una classificazione semantica
 strutturali e consumabili ma non le entità temporanee; provare la matrice completa
 giorno/sera × dote sufficiente/insufficiente; coprire via API e DOM almeno una porta, un
 consumabile raccolto e un'entità nativa urbana realmente assente. La Fase 2 resta **FAIL**.
+
+## Fase 2 — Riverifica di join, cancelli, collezionabili e determinismo
+
+**Esito complessivo: FAIL — PASS sul registro dei collezionabili**
+**Commit isolato:** `07d2d364aada145b006c4b1c31ff1dca82c68fa4`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. Il join `negozio.chiave = luogo.negozio` è uno-a-uno sui dati reali: 37 righe, 37 luoghi,
+   37 negozi e zero duplicati. Su un database fresco Akindo riceve quartiere, fascia e data
+   `09-02` corretti.
+2. Il registro dei collezionabili è ora completo: 37 tipi letti su 37, 10 dichiarati
+   collezionabili e 199 occorrenze reali nel pacchetto. Mutare da `true` a `false` un pin di
+   ciascuna delle cinque classi presenti — forziere, forziere raro, seme, tesoro del Palazzo e
+   timbro — produce sempre exit 1 con errore puntuale.
+3. I nove artefatti migrati a `scrittura.py` hanno LF canonico e newline finale.
+4. Test mirati 13/13, typecheck e lint PASS sullo snapshot isolato.
+
+### Rilievi bloccanti
+
+1. **Il join corretto non effettua il backfill.** Su una copia del database popolato, dopo aver
+   azzerato `condizioni_json` del pin seed Akindo, `sincronizzaMappe()` restituisce zero modifiche
+   e lascia il valore nullo. Il controllo di esistenza precede ancora il calcolo e l'applicazione
+   della presenza.
+2. **Il verificatore dei cancelli condivide il produttore.** Importa `cancelli_pin` e chiama
+   direttamente `calcola()`. Una mutazione applicata allo stesso calcolatore, all'artefatto e al
+   seed lascia il verificatore verde: manca un algoritmo od oracolo indipendente.
+3. **Il determinismo non è end-to-end.** `world_connections.py`, `world_metadata.py` e
+   `pin_reference.py` usano ancora `Path.write_text()`. Su Windows producono rispettivamente
+   341.783, 24.681 e 9.262 CRLF e nessuna newline finale; gli equivalenti LF hanno hash diversi.
+   La catena resta quindi dipendente dalla piattaforma.
+
+La chiusura richiede un backfill non distruttivo dei pin seed esistenti che preservi i dati
+manuali; una ricostruzione dei cancelli separata dal produttore; scrittura canonica nei tre
+produttori sorgente e controprova Windows/Linux byte-identica. La Fase 2 resta **FAIL**.
