@@ -1833,3 +1833,26 @@ ritaglio si può così mostrare o celare senza rompere lo stile complessivo. `ca
 generata solo dopo che il renderer la usa davvero, oppure va esplicitamente eliminata dal
 fabbisogno in favore della polilinea SVG esistente. Dopo mapping file→posizione/scala e consumo
 nel componente, Codex può generare e verificare alfa, figura complessiva e resa alla scala reale.
+
+### Riverifica condivisa — fondamenta 5.3 e integrazione, stato del 6 settembre
+
+**`DoveSiTrova`: PASS limitato alla fondazione.** La suite mirata corrente passa: `1 file, 5 test`.
+La prova copre effettivamente il ramo unico (mappa, spillo, centro e URL), multiplo senza scelta,
+assente, `soloCollegamento` e rifiuto API; typecheck e lint del worktree condiviso sono verdi.
+
+**Ma il requisito 5.3 non e' ancora integrato nelle pagine.** Una ricerca sull'albero `src/`,
+escludendo componente e test, non trova alcun montaggio di `<DoveSiTrova>`: la base e' corretta,
+ma Negozi, inventari, attivita', Covo e pagine del mondo non possono ancora mostrare la posizione
+in pagina ne' portare l'utente all'ancora dell'atlante tramite questo componente. Non e' quindi un
+PASS della richiesta utente, soltanto della sua fondazione riusabile.
+
+**Restano aperti e non sostituiti dalla modifica grafica Memento:**
+
+1. `DungeonDettaglioPage` continua a montare `MappaMemento` senza `sbloccati`, percio' ogni
+   Dedalo resta aperto;
+2. `SpilloGrafico` continua a rendere un PNG RGBA nudo anziche' nel contenitore-pin dell'app;
+3. non esiste ancora un adottante di `DoveSiTrova`.
+
+Il worktree contiene inoltre una modifica non pubblicata di `MappaMemento.tsx`; non e' stata
+oggetto di verdetto finale. Il suo layout puo' proseguire, ma non chiude i tre punti funzionali
+elencati sopra.
