@@ -22,6 +22,8 @@ quale mappa ci sia dall'altra parte. Dove porta un passaggio lo dicono gli scrip
 `CALL_FIELD`.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import collections
 import json
 import sys
@@ -144,8 +146,7 @@ def main(out):
         limits=['La direzione è quella sulla planimetria, non un punto d’arrivo: dice da che parte '
                 'si esce, non dove si finisce. L’arrivo è lavoro della fase dei collegamenti.',
                 'Un tipo con pochi pin non entra: il lato prevalente lo deciderebbe il caso.'])
-    (out/'pin-di-bordo.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2),
-                                         encoding='utf8')
+    scrivi_json(out/'pin-di-bordo.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     for tipo, v in sorted(dimostrati.items()):
         print(f"  tipo {tipo:3d} -> {v['etichetta']} ({v['pin']} pin)")

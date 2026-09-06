@@ -1,4 +1,5 @@
 """Independent raw-byte and numerical cross-check; not a semantic certification."""
+from scrittura import scrivi_json
 import hashlib,json,struct,sys
 from pathlib import Path
 from PIL import Image
@@ -30,7 +31,7 @@ def main(out):
             assert np.allclose(expected,e['xy'],atol=1e-9)
     report={'status':'PASS-diagnostic-consistency-only','fields':6,'triggersChecked':count,'goTriggers':len(d['goComparison']),
       'sourcesChecked':len(d['sources']),'appEdgesGenerated':0,'exceptionsRetained':d['exceptions'],'statistics':d['statistics']}
-    (out/'proiezione-scuola/verifica.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    scrivi_json(out/'proiezione-scuola/verifica.json', report)
     print(json.dumps(report))
 
 if __name__=='__main__':main(sys.argv[1])

@@ -1,4 +1,5 @@
 """Independent raw record and whole-flow coverage verification."""
+from scrittura import scrivi_json
 import hashlib,json,re,struct,sys
 from pathlib import Path
 
@@ -66,6 +67,6 @@ def main(out):
     for f in old['fields']:
         for k in ('triggers','triggerPositions','entrances','procedures','triggerCountFbn'):assert f[k]==byid[f['field']][k]
     report={'status':'PASS-evidence-coverage','fields':len(d['fields']),'rawRecordsChecked':records,'callsIndependentlyCounted':calls,'explicitParseFailures':failures,'oldFieldsUnchanged':len(old['fields']),'scope':'Evidence extraction only; no operational navigation claim.'}
-    (root/'verifica-connessioni.json').write_text(json.dumps(report,indent=2),encoding='utf-8');print(json.dumps(report))
+    scrivi_json(root/'verifica-connessioni.json', report);print(json.dumps(report))
 
 if __name__=='__main__':main(sys.argv[1])

@@ -1,4 +1,5 @@
 """Diagnostic only: field coordinates, native apertures and scale hypotheses."""
+from scrittura import scrivi_json, scrivi_testo
 import hashlib,json,math,struct,sys
 from pathlib import Path
 import numpy as np
@@ -86,7 +87,7 @@ def main(out):
             for e in row['entrances']:
                 x,y=e['xy'];marks.append(f'<path d="M{x-3},{y-3}l6,6m-6,0l6,-6" stroke="#ff8800" stroke-width="1"/>')
         svg=f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#333"/><image xlink:href="../png/BASE/FIELD/PANEL/ROADMAP/RMAP_002_0_{layer}.png" width="1024" height="1024"/>'+''.join(marks)+'</svg>'
-        (target/f'piano-{layer+1}.svg').write_text(svg,encoding='utf-8')
+        scrivi_testo(target/f'piano-{layer+1}.svg', svg)
     result['goComparison']=[]
     for row in result['fields']:
         for t in row['triggers']:
@@ -95,7 +96,7 @@ def main(out):
       {'fields':['F002_003_00','F002_003_01','F002_003_02'],'trigger':0,'reason':'Reverse door centers lie 10.26 to 10.57px right of yellow aperture across three floors. Retain discrepancy; no snapping or exact doorway-center claim.'}]
     result['statistics']=[{'factor':factor,'partition':partition,'count':len(rows),'within12Pixels':sum(t['projections'][i]['distance']<=12 for t in rows),'meanNearestDistance':sum(t['projections'][i]['distance'] for t in rows)/len(rows)}
       for i,factor in enumerate(result['factorCandidates']) for partition in ['hypothesis-input','holdout'] if (rows:=[t for t in result['goComparison'] if t['partition']==partition])]
-    (target/'evidenze.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+    scrivi_json(target/'evidenze.json', result)
     print(json.dumps(result['goComparison'],ensure_ascii=True))
 
 if __name__=='__main__':main(sys.argv[1])

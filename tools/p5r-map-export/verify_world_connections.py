@@ -1,4 +1,5 @@
 """Tre controlli indipendenti sulle evidenze, non sulla navigabilita."""
+from scrittura import scrivi_json
 from pathlib import Path
 import ast
 import hashlib
@@ -80,7 +81,7 @@ def verify(out, scripts, bf=None):
         calls=sum(len(p['calls']) for r in data['fields'] for p in r['procedures']),
         passes=['Copertura, sintassi, hash e riferimenti','Rilettura indipendente record binari','Diramazioni, input malformati e determinismo'],
         scope='Evidenze grezze; nessuna certificazione di navigabilita o associazione semantica dei POI')
-    (out/'verifica_connessioni_evidenze.json').write_text(json.dumps(report,indent=2),encoding='utf8')
+    scrivi_json(out/'verifica_connessioni_evidenze.json', report)
     print(json.dumps(report))
 
 

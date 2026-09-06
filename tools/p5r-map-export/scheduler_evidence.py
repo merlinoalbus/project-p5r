@@ -1,4 +1,5 @@
 """Extract monthly scheduler variants and retain reproducible decompilation evidence."""
+from scrittura import scrivi_json, scrivi_testo
 import argparse,concurrent.futures,hashlib,json,re,subprocess
 from pathlib import Path
 from extract_maps import Archive,GAME
@@ -25,7 +26,7 @@ def main(out,exe,cpk):
             run=subprocess.run(args,cwd=cwd,capture_output=True,timeout=180)
             (cwd/'stdout.bin').write_bytes(run.stdout);(cwd/'stderr.bin').write_bytes(run.stderr)
             # Keep exact bytes even if the console encoding differs from this readable rendering.
-            (cwd/'console.txt').write_text(run.stdout.decode('utf-16le',errors='replace')+'\nSTDERR\n'+run.stderr.decode('utf-8',errors='replace'),encoding='utf-8')
+            scrivi_testo(cwd/'console.txt', run.stdout.decode('utf-16le',errors='replace')+'\nSTDERR\n'+run.stderr.decode('utf-8',errors='replace'))
             return {**s,'exitCode':run.returncode,'success':run.returncode==0 and dest.exists(),
               'flow':dest.relative_to(out).as_posix() if dest.exists() else None,'flowSha256':sha(dest.read_bytes()) if dest.exists() else None,
               'logDirectory':cwd.relative_to(out).as_posix(),'command':args}
@@ -37,7 +38,7 @@ def main(out,exe,cpk):
         for result in pool.map(decode,sources):results.append(result);print(result['file'],result['success'],flush=True)
     report={'schemaVersion':1,'compiler':{'file':str(exe),'sha256':sha(exe.read_bytes()),'library':'P5R','encoding':'P5'},
       'coverage':coverage,'results':results,'limits':['File suffix alone is not a proof of date semantics.','Decompiled sources do not directly map native flags into app conditions.']}
-    (target/'decompilazione.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    scrivi_json(target/'decompilazione.json', report)
     print(json.dumps({'coverageSlots':len(coverage),'sources':len(sources),'success':sum(r['success'] for r in results)}),flush=True)
 
 if __name__=='__main__':

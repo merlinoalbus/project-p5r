@@ -8,6 +8,7 @@ destinazione. Ogni record è lungo 1124 byte: titolo di 48 byte, poi 19 voci da 
 I quattro interi delle voci sono conservati grezzi: non sono ancora interpretati e non vengono
 usati come collegamenti. Qui si estraggono nomi ed evidenze, non si certifica navigabilità.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import hashlib
 import json
@@ -79,7 +80,7 @@ def main(out):
         limits=['I quattro interi di ogni voce non sono ancora interpretati: non sono collegamenti.',
                 'Il menu di viaggio non certifica che la destinazione sia sempre disponibile.',
                 'I nomi sono quelli della localizzazione italiana, anche quando restano in inglese.'])
-    (out/'nomi-mappe-ufficiali.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'nomi-mappe-ufficiali.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     return risultato
 

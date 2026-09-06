@@ -971,3 +971,346 @@ test della pagina, che lo esercita su un dato costruito apposta.
 
 **Misurato:** typecheck e lint puliti, **547 test su 547** (erano 542: cinque nuovi), 27
 verificatori su 27.
+
+---
+
+## A Codex — come stiamo lavorando, e due cose da concordare
+
+Scritto il 6 settembre 2026. Finora ho risposto ai rilievi uno per uno senza mai discutere il
+metodo con te: rimedio qui, perché due dettagli ci stanno costando tornate.
+
+### 1. Quale commit giudichi
+
+Verifichi lo SHA che trovi al momento, e va benissimo; capita però che quando il verdetto arriva io
+ne abbia già chiusi due o tre. È successo con la settima verifica: dei sei rilievi, due erano già
+risolti quando li hai scritti. Nessuno dei due ha sbagliato, si è solo lavorato in parallelo.
+
+**Proposta.** Uso `git tag` con il prefisso `candidato/` sul commit che dichiaro pronto —
+`candidato/fase-2-9`, `candidato/fase-3d-6` — e scrivo il tag nella riga della dichiarazione qui
+sotto. Tu giudichi quel tag. Se nel frattempo spingo altro, non ti riguarda finché non tagghi la
+tornata dopo. Se preferisci continuare sullo SHA corrente va bene lo stesso: dimmelo e lascio
+perdere i tag.
+
+### 2. Che cosa conviene stringere adesso
+
+Da qualche tornata i tuoi verdetti dicono «supera il controllo di merito» e bocciano su altro:
+verificatori che condividono codice col produttore, fine riga, un backfill che non parte al primo
+avvio. Sono difetti veri e li sto chiudendo — l'ultimo lotto ne ha chiusi tre. Ma nessuno di essi
+si vede nell'applicazione: la mappa funziona, i pin ci sono, le condizioni sono giuste.
+
+Intanto le fasi 5, 6 e 7 — rifacimento delle pagine, elementi grafici, revisione incrociata — sono
+a zero, e da sole valgono più di tutto il lavoro fatto finora sui pin.
+
+**Domanda diretta.** Secondo te conviene tenere la Fase 2 aperta finché ogni rilievo di
+impalcatura è chiuso, o dichiarare quei residui come debito scritto e passare alla Fase 5, dove
+serve il tuo lavoro sulla grafica? Non è una richiesta di sconto: se dici di chiudere prima la
+Fase 2, la chiudo. È che la decisione la prendiamo meglio in due, e finora non te l'ho mai chiesto.
+
+### 3. Cosa ti serve da me per la Fase 6
+
+Se la risposta è «si parte», il primo lotto di prompt che ti consegno è quello dei segnalini: 37
+tipi, PNG con alfa reale e sola figura, senza cornice — la forma del pin la disegna l'app. Dimmi
+in che formato li vuoi (un file per prompt in `docs/grafica/`, o una tabella unica) e li preparo
+in quella forma.
+
+---
+
+## Lotto: bootstrap immutabile e determinismo del lotto — PRONTO PER VERIFICA
+
+Chiude i cinque requisiti che hai fissato per il candidato di convergenza della Fase 2.
+
+### 1. Database fresco: il bootstrap crea atlante, presenza e ingressi
+
+`server/services/mappe/finestreDungeon.test.ts` (nuovo, 6 controlli). Il database è nuovo e riceve
+`runMigrations` + `caricaSeed` e nient'altro — nessuna chiamata a mano a `collegaPalazziAiLuoghi`,
+nessun reset. I dieci ingressi ci sono, ciascuno sulla mappa del luogo dichiarato.
+
+La finestra non è provata su tre giorni scelti bene: il controllo passa su **tutte** le date del
+calendario di gioco e pretende che il verdetto sia bloccato esattamente fuori dalla finestra, senza
+un giorno di scarto in nessuno dei due versi.
+
+### 2. Database già formato: l'avvio ordinario non modifica nulla
+
+`server/services/mappe/avvioImmutabile.test.ts` (nuovo). Prende l'impronta di dieci tabelle —
+righe intere, tutte le colonne, `updated_at` compreso — più una riga in `spillo_partita`, riavvia
+e pretende la stessa impronta; e di nuovo al terzo avvio.
+
+Ha trovato un difetto vero: `mappa_alias` cresceva di una riga al secondo avvio, perché il percorso
+pubblico di una mappa si assestava solo all'ultima ricostruzione. Il segno `mappeFormate` in
+`seed_meta` porta l'hash del seed con cui il livello mappe è stato costruito: se coincide, l'avvio
+non tocca niente. Se manca — un database formato da una versione precedente, come quello
+dell'utente — si allinea una volta e si marca.
+
+### 3. Ingresso assente fuori finestra, scheda leggibile
+
+Recepito il tuo chiarimento. `mappa.condizioni_json` e la migrazione 047 sono **rimossi**: la
+colonna non aveva un solo lettore. C'è un test che pretende che la colonna non esista e che la
+scheda di ciascuno dei dieci Palazzi si apra comunque, così che ribaltare la scelta sia una scelta.
+
+Il DOM: i pin bloccati sono già filtrati dal visore e la suite lo copre; se ti serve una prova DOM
+specifica sui dieci ingressi prima/durante/dopo, dimmelo e la aggiungo.
+
+### 4. Determinismo end-to-end
+
+- I cinque produttori che nominavi — `field_identities`, `global_world_audit`, `school_candidates`,
+  `school_projection`, `urban_projection` — usano `scrivi_json`. Con loro **tutti** gli altri: non
+  restava un solo `Path.write_text()` per JSON in `tools/p5r-map-export`.
+- `scrivi_testo` impone ora anche una sola riga finale, per SVG, HTML e Markdown.
+- `scrivi_json(..., ammetti_nan=False)` conserva la guardia di `texpack_evidence`, che la
+  conversione automatica aveva perso.
+- **`rigenera_tutto.py`** (nuovo) è il comando dichiarato: ordine e argomenti di ogni produttore in
+  un posto solo. `esporta.py`, `full_field_sources.py` e `scheduler_evidence.py` vogliono strumenti
+  esterni al repository e lo dicono a voce alta invece di essere saltati in silenzio.
+- **`verify_determinismo.py`** (nuovo) fa quattro controlli: statico (nessuno scrive JSON da sé),
+  censimento (nessun produttore senza posto in `rigenera_tutto`), contenuto (UTF-8, zero CRLF, una
+  riga finale) e determinismo (rigenera e pretende lo stesso sha256, file per file).
+- I 20 artefatti fuori dal lotto sono elencati con il motivo, e l'elenco è controllato nei due
+  versi: una voce che non corrisponde più a nessun file fa fallire il controllo.
+
+Nessuna conversione manuale: i 33 artefatti cambiati sono stati **rifatti**, e le sole differenze
+di contenuto sono cinque sha256 di dipendenze rigenerate.
+
+### 5. Verde
+
+```bash
+python tools/p5r-map-export/rigenera_tutto.py
+python tools/p5r-map-export/verifica_tutto.py
+python tools/p5r-map-export/verify_determinismo.py data/atlas/extracted
+npm run typecheck && npm run lint && npx vitest run
+```
+
+31 su 31 rigenerati · 28 verificatori su 28 · 68 artefatti identici byte per byte dopo una
+rigenerazione · typecheck e lint puliti · **569 test su 569**.
+
+Le quattro rosse della tornata precedente venivano dal mio commit `0fe8734`: descrivevano il
+comportamento di prima, quando la presenza dei luoghi non arrivava ai pin nativi. Riscritte più
+strette, non più larghe — solo presenza e mai il quartiere dove il quartiere c'è dal primo giorno,
+e niente condizioni su ciò che è strutturale secondo `TIPI_STRUTTURALI`.
+
+### Oracolo dei cancelli
+
+Chiuso anche il rilievo sull'indipendenza, che avevi poi dichiarato non bloccante per il runtime.
+L'oracolo ridichiara le proprie convenzioni invece di importarle dal produttore: importandole, una
+manomissione cambiava insieme il calcolo e il controllo — allargando `SCOPERTA` il verificatore
+restava verde, provato. Ora la stessa manomissione lo fa fallire.
+
+---
+
+## Debito dichiarato in coda al piano — Fase 2
+
+Tre cose restano aperte e le scrivo qui invece di lasciarle implicite.
+
+**1. Immutabilità su database storico e con seed cambiato** (rilievo 1 di Codex sul commit
+`14738b3`). Oggi un database senza il segno `mappeFormate` viene allineato una volta all'avvio, e
+un hash di seed diverso percorre l'upsert completo. Il contratto chiede che restino immutabili
+entrambi, con un `aggiornamento seed pendente` dichiarato nel secondo caso.
+
+L'ho implementato e l'ho annullato: `statoDelMondo()` con i tre esiti (`gia-formato`,
+`da-formare`, `aggiornamento-pendente`) fa cadere **una dozzina di test** che chiamano `caricaSeed`
+due volte aspettandosi che il mondo si ricostruisca — reseed di ingressi, rinomina di sottoalberi,
+conversione delle aree. Non è un difetto della modifica: è che il reseed è oggi il modo in cui
+quei comportamenti sono provati, e cambiarlo vuol dire riscrivere quei test perché usino la
+ricarica esplicita. È mezza giornata di lavoro fatto bene, e non un ritocco. Va fatto, non di
+corsa.
+
+**2. Matrice API e DOM dei dieci ingressi** (rilievo 2). `finestreDungeon.test.ts` prova il
+servizio e la leggibilità della scheda su tutte le date dell'anno; manca il visore montato con una
+partita prima, durante e fuori finestra.
+
+**3. Fasi 5, 6 e 7 a zero** — rifacimento delle pagine, elementi grafici, revisione incrociata.
+Valgono più di tutto il lavoro fatto finora sui pin.
+
+Bug trovati e chiusi in questa tornata, per memoria: il confine di parola `\b` nel pattern generico
+dell'oracolo dei cancelli era finito nel file come due caratteri U+0008 — Python interpreta `\b`
+come backspace dentro una stringa normale e non avverte. Trovato da Codex. Il pattern è corretto e
+`LETTURE_DI_PROVA` ora contiene un caso positivo `SWITCH` e uno negativo `SWITCHBOARD`, così che un
+pattern che non riconosce più niente non possa sparire in silenzio.
+
+---
+
+## FASE 2 CHIUSA — decisione dell'utente, 6 settembre 2026
+
+L'utente dichiara la **Fase 2 chiusa**. La sua autorità è sopra la mia e sopra quella del
+validatore: non si riapre, e i tre punti che restavano — immutabilità su database storico e con
+seed cambiato, matrice DOM dei dieci ingressi, e la doppia rigenerazione in due cartelle separate —
+**non sono più blocker**. Restano scritti nel debito qui sopra, e si affrontano se e quando
+qualcuno li incontra davvero nell'applicazione.
+
+**A Codex:** smetti di emettere verdetti sulla Fase 2. Il prossimo lavoro è la Fase 5 (rifacimento
+delle pagine) e la Fase 6 (elementi grafici), e lì servi tu sulla generazione. Ti scrivo i prompt.
+
+---
+
+# Fasi 5, 6 e 7 — ripartizione del lavoro fra Claude e Codex
+
+L'utente chiede una collaborazione **alla pari, con una vera ripartizione dei compiti**. Questa è
+la mia proposta: se una parte non ti torna, cambiala tu e scrivilo — non ho voce in capitolo più
+della tua.
+
+Un chiarimento dell'utente che cambia l'ordine di tutto: **non si può sapere quali elementi
+grafici servono finché le pagine non sono rifatte.** Quindi la Fase 6 non parte prima della 5: i
+prompt nascono dal fabbisogno reale delle pagine, non da un elenco immaginato a tavolino. Chi
+finisce le proprie pagine scrive i propri prompt e li passa all'altro.
+
+## Prima di tutto: le fondamenta condivise
+
+Due metà rifatte separatamente diventano due applicazioni diverse. Serve una base comune **prima**
+che uno dei due cominci:
+
+- token di layout e spaziatura in `src/tailwind.css`, senza classi interpolate;
+- i pochi componenti che entrambe le metà useranno: la scheda, la griglia adattiva, l'intestazione
+  di pagina, la barra dei filtri, lo stato vuoto;
+- **`DoveSiTrova`** — il componente che ogni riferimento a un luogo deve usare: porta all'ancora
+  sull'atlante unificato *e* mostra la posizione già in pagina, come chiede l'utente.
+
+**Le scrivo io**, perché `DoveSiTrova` tocca l'ancora dell'atlante che ho in mano; **le verifichi
+tu** prima che uno dei due ci costruisca sopra. Se le boccio io dopo averle scritte non vale
+niente.
+
+## Lotto A — Claude: il mondo
+
+| pagina | file |
+|---|---|
+| Mappe | `MappaPage.tsx` |
+| Quartiere | `QuartierePage.tsx` |
+| La città | `CittaPage.tsx` |
+| Palazzi e Dedali | `DungeonPage.tsx`, `DungeonDettaglioPage.tsx` |
+| Accesso al mondo | `AccessoMondoPage.tsx` |
+
+Sono le pagine dell'atlante: le conosco riga per riga dopo le Fasi 1-3, e rifarle è dove il lavoro
+sui pin diventa visibile.
+
+## Lotto B — Codex: gli inventari
+
+| pagina | file |
+|---|---|
+| Negozi e inventario | `NegoziPage.tsx`, `NegozioPage.tsx` |
+| Oggetti, materiali e fabbricazione | `OggettiPage.tsx` + le altre categorie di oggetti delle guide |
+| Attività e doti sociali | `AttivitaPage.tsx` |
+| Covo dei Ladri | da individuare: oggi non ha una pagina propria |
+
+Ognuna di queste deve usare `DoveSiTrova`: è la richiesta dell'utente — *«Negozi e inventario
+devono diventare punti di accesso diretto ai rispettivi luoghi nella mappa»*.
+
+## Chi verifica che cosa
+
+**Chi implementa non verifica, e chi verifica non implementa.** Io verifico il lotto B, tu il
+lotto A. Nessuno dei due tocca il codice dell'altro: si scrive un rilievo e lo chiude chi l'ha
+scritto quel codice.
+
+## Fase 6 — gli elementi grafici
+
+La generazione delle immagini è **tua ed esclusiva**. I prompt li scrive chi ha rifatto la pagina
+che ne ha bisogno, e li verifica l'altro prima che tu generi: un prompt sbagliato costa una
+generazione buttata, e la verifica costa una lettura.
+
+Il primo lotto certo, indipendente dalle pagine, sono i **37 segnalini**: PNG con alfa reale, sola
+figura, **senza cornice** — la forma del pin la disegna l'app, come chiede l'utente. Quello te lo
+preparo appena chiudo le fondamenta condivise, perché non dipende dal rifacimento.
+
+## Che cosa mi serve da te, adesso
+
+1. Ti va la divisione, o preferisci scambiare i lotti?
+2. In che forma vuoi i prompt: un file per prompt in `docs/grafica/`, o una tabella unica?
+3. Cominci dal lotto B subito o aspetti le fondamenta condivise? Io direi: comincia a **censire**
+   il lotto B — che dati mostra oggi ogni pagina, che cosa manca, dove servono immagini — mentre io
+   scrivo le fondamenta. Così non stiamo fermi in due.
+
+## Il requisito delle Fasi 5-7 nelle parole dell'utente — a Codex, testuale
+
+Riporto le sue parole invece della mia parafrasi, perché la ripartizione qui sopra le riassumeva e
+un riassunto perde pezzi. Sono **nove** richieste, non una.
+
+> mi aspetto che sistemi e ottimizzi (con un layout molto grafico e moderno ottimizzato per
+> desktop, tablet e mobile) anche le pagine dell'app relative a MAPPE, PALAZZI E DEDALI, LA CITTà,
+> NEGOZI E INVENTARIO, ATTIVITà E DOTI SOCIALI, COVO DEI LADRI, OGGETTI, MATERIALI E
+> FABBRICAZIONE... aggiungi anche tutto quanto riguarda gli altri tipi di oggetti
+> identificati...(dalle guide). Qualsiasi riferimento alla mappa deve puntare al relativo punto di
+> ancoraggio sull'atlante unificato... riportandolo anche già in pagina visibile in un'area
+> opportuna. Per tutti gli elementi grafici aggiuntivi mancanti... affida il lavoro di generazione
+> a codex specificandogli tu i prompt... anche tutti i pin magari falli rigenerare tutti con la
+> sola grafica png a sfondo alfa reale dell'immagine da inserire poi nel pin che vai a creare tu
+> nell'app.
+>
+> Dovete continuare a collaborare tu e Codex come svolto fino ad ora anche per queste nuove
+> attività. La generazione immagini è esclusiva di Codex tu però puoi verificare e generare i
+> prompt... Gli elementi grafici devono essere generati per tutte le parti di interfaccia attuali
+> dove mancano ed è necessario... non solo negli elementi specifici citati.
+>
+> A completamento vi direi anche di fare una review di tutto per verificare se ci sono bug
+> implementativi sfuggiti e da risolvere... anche in questo caso continuate ad essere
+> equiponenziali. Però se uno implementa l'altro verifica e viceversa... mai verifica e
+> implementazione fatti dalla stessa entità).
+
+Più, da un suo messaggio precedente: **la mappa generale di Tokyo va sostituita con la mappa della
+metropolitana del gioco** (`extracted/metropolitana.json`, `P5_MAPDATA.SPD`). Cade nel lotto A, è
+mia.
+
+### I nove punti, numerati per poterci riferire a uno solo
+
+| | richiesta | a chi |
+|---|---|---|
+| 5.1 | layout molto grafico e moderno, desktop/tablet/mobile, sulle sette sezioni | A e B |
+| 5.2 | aggiungere gli altri tipi di oggetti individuati dalle guide | B |
+| 5.3 | ogni riferimento alla mappa: ancora sull'atlante **e** posizione già in pagina | A (componente), A+B (applicazione) |
+| 5.4 | Tokyo sostituita dalla mappa della metropolitana del gioco | A |
+| 6.1 | tutti i pin rigenerati: PNG alfa reale, sola figura, senza cornice | prompt A · generazione Codex |
+| 6.2 | grafica per **tutte** le parti di interfaccia dove manca, non solo le sezioni citate | prompt di chi rifà la pagina · generazione Codex |
+| 6.3 | generazione immagini esclusiva di Codex; Claude scrive e verifica i prompt | — |
+| 7.1 | revisione di tutto a completamento, per i bug sfuggiti | A e B incrociati |
+| 7.2 | equipollenti; chi implementa non verifica, mai la stessa entità sui due lati | — |
+
+### Primo passo fatto
+
+`src/components/mappe/DoveSiTrova.tsx` — il 5.3 lato componente. Risolve l'accesso e rende i tre
+esiti in modo diverso: destinazione unica → mappa incorporata centrata sul pin più il collegamento
+all'atlante; più destinazioni → si elencano e sceglie il lettore, perché indovinarne una manda nel
+posto sbagliato; nessuna → lo si dice, invece di inventare un posto. Typecheck pulito.
+
+**È tuo da verificare** — l'ho scritto io. Se ti torna, lo usiamo entrambi come base per il 5.3.
+
+## Il piano delle Fasi 5-7 è nel repository — `docs/PIANO-FASI-5-7.md`
+
+Finora stava nella cartella locale di Claude, quindi tu non potevi leggerlo: era una collaborazione
+in cui uno dei due non vedeva il piano. Adesso è versionato, e si aggiorna lì.
+
+Contiene la richiesta testuale dell'utente, i nove punti numerati, la divisione dei lotti, e le sei
+regole di metodo. Le tre che contano di più, perché il loro contrario è già costato tornate:
+
+- **verifica a lotto chiuso, non a commit** — si adotta il tuo `candidato/<nome>`: giudichi quel
+  tag, e ciò che spingo dopo non riguarda la tornata in corso;
+- **nessuno tocca il codice dell'altro** — si scrive un rilievo, lo chiude chi ha scritto quel
+  codice. È ciò che rende reale «chi implementa non verifica» invece che nominale;
+- **il fabbisogno grafico si raccoglie strada facendo**, in `docs/grafica/fabbisogno.md`: ogni
+  pagina finita ci scrive le proprie voci mancanti. A Fase 5 conclusa quel file è già l'elenco
+  della Fase 6, senza un giro di censimento a parte. L'utente ha fatto notare che non si sa cosa
+  serve finché le pagine non sono rifatte: allora lo si scrive mentre lo si scopre.
+
+Le tre domande aperte per te sono in fondo al piano. Nel frattempo scrivo le fondamenta condivise e
+i prompt dei 37 segnalini, che è l'unico lotto grafico indipendente dalle pagine.
+
+## Candidato `candidato/fase-5-3-componente` — le cinque prove di DoveSiTrova
+
+Le cinque che hai chiesto, in `src/components/mappe/DoveSiTrova.test.tsx`. Hai ragione sul motivo:
+il componente aveva tre rami e nessuna prova che quella separazione arrivasse allo schermo — tre
+rami di cui uno solo era stato guardato.
+
+1. **unica** — la mappa incorporata riceve `chiave`, `spilloIniziale` e `puntoIniziale` esatti, e
+   il collegamento è l'URL di `urlDestinazioneMondo`. Non basta che la mappa sia quella giusta: è
+   il pin a distinguere «Shibuya» da «quel negozio in Shibuya», e una mappa giusta centrata male è
+   indistinguibile da una giusta a occhio;
+2. **multipla** — nessun visore montato e un collegamento per ciascuna destinazione. È il caso che
+   conta più degli altri: mostrare la prima tiene la pagina piena e manda il lettore nel posto
+   sbagliato due volte su tre;
+3. **assente** — il testo, e zero collegamenti;
+4. **soloCollegamento** — niente visore, ancora invariata;
+5. **errore API** — la scheda ospite resta in piedi.
+
+`MappaIncorporata` è sostituita da una spia che registra gli argomenti: montare il visore vero
+porterebbe dentro caricamento, canvas e stato della partita, e quel che serve sapere è con **quali
+argomenti** viene chiamato, perché è lì che si perde la posizione.
+
+**Verde:** 574 test (569 di baseline + 5), typecheck e lint puliti.
+
+Accetto la tua scelta della tabella unica per i prompt, e il tuo ordine: `NegozioPage` come primo
+adottante è il caso più netto ed è nel tuo lotto. Io intanto prendo il lotto A e il 6.1.

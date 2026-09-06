@@ -18,6 +18,30 @@ export const TIPI_SPILLO = [
 ] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
 
+/** Gli elementi fissi del mondo: ci sono sempre, e nessuna condizione li fa sparire.
+ *
+ * Sono l'arredo del mondo — una porta, una scala, un forziere, un passaggio, una stanza sicura —
+ * e restano visibili anche quando sono chiusi, vuoti o non ancora raggiunti: una porta chiusa si
+ * vede, e nasconderla finché non hai la chiave vorrebbe dire mostrarla solo quando non serve più.
+ *
+ * Tutto il resto **può mancare**: un negozio chiude, un'attività è solo di sera, una persona esce
+ * solo quando piove. Quelli il pin ce l'hanno solo quando la cosa c'è, altrimenti chi ci va non
+ * la trova.
+ *
+ * La distinzione è per tipo di segnalino e va usata insieme alla provenienza: un `passaggio` che
+ * viene dall'atlante nativo è una porta di un Palazzo e c'è sempre, mentre il `passaggio` che
+ * dalla mappa di Tokyo porta a un quartiere che apre a giugno, in aprile, davvero non c'è.
+ */
+export const TIPI_STRUTTURALI: readonly TipoSpillo[] = [
+  'passaggio', 'scala', 'uscita', 'scorciatoia', 'rampino', 'porta', 'meccanismo', 'sicura',
+  'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave',
+  'timbro', 'punto-sensibile', 'boss', 'miniboss', 'nemico', 'nota',
+];
+
+export function eStrutturale(tipo: string): boolean {
+  return (TIPI_STRUTTURALI as readonly string[]).includes(tipo);
+}
+
 /** Gruppi della palette dell'editor, nello stesso ordine di `TIPI_SPILLO`: ogni tipo sta in un solo gruppo. */
 export const GRUPPI_SPILLO: ReadonlyArray<{ nome: string; tipi: readonly TipoSpillo[] }> = [
   { nome: 'Spostamenti', tipi: ['passaggio', 'scala', 'uscita', 'treno'] },

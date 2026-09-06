@@ -21,6 +21,8 @@ finire sullo stesso pin della canonica, altrimenti non sarebbe una corrispondenz
 sovrapposizione — e nascerebbero duplicati proprio dove si voleva evitarli.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import json
 import sys
 
@@ -131,8 +133,7 @@ def main(out):
                      scartoMassimo=max((r['scarto'] for r in righe), default=0.0)),
         limits=['La corrispondenza dice dove il pin della copia è già rappresentato, non aggiunge '
                 'uno spillo: sulla canonica quel pin c’è già, e duplicarlo lo mostrerebbe due volte.'])
-    (out/'pin-copie-assorbite.json').write_text(
-        json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'pin-copie-assorbite.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     return risultato
 

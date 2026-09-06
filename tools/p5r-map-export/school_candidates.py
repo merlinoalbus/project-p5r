@@ -1,4 +1,5 @@
 """Resolve four school transitions without claiming narrative availability."""
+from scrittura import scrivi_json, scrivi_testo
 import hashlib,json,re,struct,sys
 from pathlib import Path
 from PIL import Image
@@ -73,12 +74,12 @@ def main(out):
           'conditionsStatus':'native-only-not-mapped-to-app','procedures':list(visited.values()),
           'externalFunctions':sorted(external),'unresolvedNarrativeEventCalls':True,
           'appImportable':False})
-    (target/'candidati-collegamenti.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+    scrivi_json(target/'candidati-collegamenti.json', result)
     for c in result['candidates']:
         if c['arrival']['xy'] is None:continue
         sx,sy=c['sourceXY'];ax,ay=c['arrival']['xy'];name=c['sourceMap']
         svg=f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="900" height="500" viewBox="350 400 180 100"><rect x="350" y="400" width="180" height="100" fill="#333"/><image xlink:href="../png/BASE/FIELD/PANEL/ROADMAP/{name}.png" width="1024" height="1024"/><path d="M{sx},{sy}L{ax},{ay}" stroke="#00ffff" stroke-width="0.5" stroke-dasharray="2 1"/><circle cx="{sx}" cy="{sy}" r="1.5" fill="#00ffff"/><circle cx="{ax}" cy="{ay}" r="1.5" fill="#ff8800"/><text x="355" y="412" fill="white" font-size="3">Candidato: ciano uscita, arancio ingresso FBN</text><text x="355" y="418" fill="white" font-size="3">Condizioni narrative non ancora applicate</text></svg>'
-        (target/f'candidato-{name}.svg').write_text(svg,encoding='utf-8')
+        scrivi_testo(target/f'candidato-{name}.svg', svg)
     print(json.dumps({'signature':result['signature'],'candidates':[{'source':c['sourceField'],'trigger':c['triggerIndex'],'destination':c['destinationField'],'arrival':c['arrival']} for c in result['candidates']]}))
 
 if __name__=='__main__':main(sys.argv[1])

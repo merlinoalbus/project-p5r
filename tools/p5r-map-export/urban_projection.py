@@ -1,4 +1,5 @@
 """Urban spatial diagnostics; original images stay untouched."""
+from scrittura import scrivi_json, scrivi_testo
 import json,sys,math,struct,html
 from pathlib import Path
 from PIL import Image
@@ -39,8 +40,8 @@ def main(out):
         for e in row['entrances']:
             px,py=e['projections'][1]['xy'];eid=e['entrance']['entranceId'];marks.append(f'<path d="M{px-4},{py-4}l8,8m-8,0l8,-8" stroke="orange" stroke-width="2"><title>Ingresso {eid}</title></path>')
         w,h=size;svg=f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}"><rect width="100%" height="100%" fill="#333"/><image href="../{image}" width="{w}" height="{h}"/>'+''.join(marks)+'</svg>'
-        (dest/(code+'.svg')).write_text(svg,encoding='utf-8');report['fields'].append(row)
-    (dest/'evidenze.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+        scrivi_testo(dest/(code+'.svg'), svg);report['fields'].append(row)
+    scrivi_json(dest/'evidenze.json', report)
     print(json.dumps([{'field':r['field'],'triggers':len(r['triggers']),'entrances':len(r['entrances']),'unassociated':len(r['unassociatedPositions'])} for r in report['fields']]))
 
 if __name__=='__main__':main(sys.argv[1])

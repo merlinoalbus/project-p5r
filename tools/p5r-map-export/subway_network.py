@@ -12,6 +12,7 @@ Tre tabelle della cartella `FIELD/PANEL/LMAP`:
   degli indici di colonna, le seguenti sono le tariffe verso ciascuna stazione. Zero significa
   «nessuna tariffa dichiarata», non «gratis».
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import hashlib
 import json
@@ -120,7 +121,7 @@ def main(out):
         limits=['Le tratte sono successioni dichiarate dal gioco, non percorsi verificati nell’app.',
                 'Tariffa zero significa «non dichiarata», non «gratuita».',
                 'L’identificativo di stazione è l’indice del record, non una chiave dell’applicazione.'])
-    (out/'metropolitana.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'metropolitana.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     return risultato
 

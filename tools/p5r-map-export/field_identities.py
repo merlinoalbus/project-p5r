@@ -1,4 +1,5 @@
 """Native identity references for every collected field, without guessed floors."""
+from scrittura import scrivi_json
 import collections,json,struct,sys
 from pathlib import Path
 from extract_maps import sha
@@ -30,6 +31,6 @@ def main(out):
       'placeRecords':len(places),'titleEntries':len(titles),'limits':['Native variants are retained, not asserted as floors.','No canonical name or missing planimetry generated.']}
     report['summary']={'fields':len(rows),'withPlaceRecord':sum(r['placeRecord'] is not None for r in rows),'candidateStatuses':dict(collections.Counter(r['variantCandidateStatus'] for r in rows)),
       'withRoadmap':sum(r['roadmap'] is not None for r in rows),'validCandidateWithoutRoadmap':sum(r['roadmap'] is None and r['variantCandidateStatus']=='valido' for r in rows)}
-    (root/'identita.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(report['summary']))
+    scrivi_json(root/'identita.json', report);print(json.dumps(report['summary']))
 
 if __name__=='__main__':main(sys.argv[1])

@@ -103,6 +103,137 @@ def sotto_il_pin(out):
     return famiglie, per_pin
 
 
+# Le convenzioni che il verificatore si aspetta, scritte qui e non importate dal produttore.
+# Le famiglie di scoperta: dicono «ci sei gia' passato», e per una guida non sono un blocco.
+SCOPERTA_ATTESA = re.compile(r'minimap|_ICON|icon_', re.I)
+# Come si legge il nome di una procedura che accende un cancello.
+LETTURE_ATTESE = [
+    (r'GIM_?\w*BLUE_SWITCH', 'dopo aver azionato la leva blu'),
+    (r'GIM_?\w*RED_SWITCH', 'dopo aver azionato la leva rossa'),
+    (r'GIM_?\w*GREEN_SWITCH', 'dopo aver azionato la leva verde'),
+    (r'ELEVATOR\w*_SWITCH', 'dopo aver chiamato l’ascensore'),
+    (r'GIM\d*_BUTTON', 'dopo aver premuto il pulsante'),
+    (r'MOUSE_SWITCH', 'dopo aver azionato il meccanismo del topo'),
+    (r'\bSWITCH\b|_SWITCH', 'dopo aver azionato il meccanismo'),
+    (r'PASSWARD|PASSWORD', 'dopo aver trovato la parola d’ordine'),
+    (r'SEEDicon', 'dopo aver trovato il seme della bramosia'),
+    (r'MEME_LOCK_CLEAR', 'dopo aver rimosso il blocco nei Memento'),
+    (r'R_TBOX|N_TBOX|N_BOX', 'dopo aver aperto il forziere'),
+    (r'ex_battle', 'dopo lo scontro'),
+    (r'DOOR', 'dopo aver aperto la porta'),
+    (r'_e\d+_\d+(_START|_pre)?$|EVT_LAST|EV_FIRST', 'dopo un evento della storia'),
+]
+
+
+def resa_attesa(nome):
+    for schema, testo in LETTURE_ATTESE:
+        if re.search(schema, nome or '', re.I):
+            return testo
+    return None
+
+
+# Che le convenzioni dicano davvero quel che sembrano dire. Il controllo esiste per un motivo
+# preciso: il confine di parola `\b` era finito nel file come due caratteri U+0008 — Python
+# interpreta `\b` come backspace dentro una stringa normale, non avverte, e il pattern generico
+# smetteva di riconoscere una procedura chiamata `SWITCH`. L'oracolo restava verde perché quel ramo
+# non veniva mai imboccato: un pattern che non riconosce niente non fa fallire nulla, sparisce.
+LETTURE_DI_PROVA = [
+    ('SWITCH', 'dopo aver azionato il meccanismo'),
+    ('D01_SWITCH_A', 'dopo aver azionato il meccanismo'),
+    ('GIM_BLUE_SWITCH', 'dopo aver azionato la leva blu'),
+    ('ELEVATOR01_SWITCH', 'dopo aver chiamato l’ascensore'),
+    ('MOUSE_SWITCH', 'dopo aver azionato il meccanismo del topo'),
+    ('GIM3_BUTTON', 'dopo aver premuto il pulsante'),
+    ('N_TBOX_04', 'dopo aver aperto il forziere'),
+    ('SWITCHBOARD', None),          # non è un interruttore: il confine di parola deve escluderlo
+    ('UNA_PROCEDURA_QUALSIASI', None),
+]
+
+
+def controlla_le_letture():
+    sbagliate = [(nome, atteso, resa_attesa(nome))
+                 for nome, atteso in LETTURE_DI_PROVA if resa_attesa(nome) != atteso]
+    assert not sbagliate, ('le convenzioni di lettura non dicono quel che dichiarano:\n  '
+                           + '\n  '.join(f'{n}: atteso {a!r}, ottenuto {o!r}' for n, a, o in sbagliate))
+
+
+def oracolo_dei_cancelli(out):
+    """Ricostruisce i cancelli dei pin **senza** usare il codice che li produce.
+
+    Chiamare la funzione del produttore e confrontare il risultato con il suo artefatto non prova
+    niente: se l'errore sta nel calcolo, il confronto lo riproduce identico e passa. Serve un
+    secondo conto, scritto a parte, che parta dalle stesse sorgenti native e arrivi da solo alla
+    stessa risposta — un oracolo, non uno specchio.
+
+    Il conto è lo stesso in sostanza e diverso nella forma: qui si parte dai **trigger** e si
+    risale ai pin, mentre il produttore parte dai pin e scende ai trigger. Le famiglie di scoperta
+    e le rese leggibili sono le uniche cose che restano condivise, perché sono la convenzione
+    dichiarata, non l'algoritmo: se cambiano lì, cambiano per tutti e due, ed è giusto così.
+    """
+    # Le convenzioni sono **ridichiarate qui**, non importate. Sembra duplicazione ed e' il
+    # contrario: importarle dal produttore vuol dire che una manomissione della convenzione
+    # cambia insieme il calcolo e il controllo, e il controllo non se ne accorge — provato,
+    # allargando `SCOPERTA` nel produttore il verificatore restava verde. Se un giorno la
+    # convenzione cambia davvero, va cambiata in tutti e due i posti: e' il costo dell'essere
+    # indipendenti, e va pagato apposta invece che per distrazione.
+    con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
+    meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']
+    accesa = re.compile(r'BIT_ON\(\((0x[0-9a-fA-F]+|\d+) \+ (\d+)\)\)')
+
+    # 1. dal basso: per ogni trigger, quali bandiere accende la sua procedura e quali cancelli ha
+    acceso_da = collections.defaultdict(set)
+    porta_cancelli = collections.defaultdict(set)
+    for f in con['fields']:
+        corpo_di = {p['index']: (p['body'] or '') for p in f['procedures']}
+        for t in f['triggers']:
+            corpo = corpo_di.get(t.get('procedureIndex'))
+            if corpo is None:
+                continue
+            gate = frozenset(x for x in [*t['enableFlags'], *t['disableFlags']]
+                             if x not in (0, 0xFFFFFFFF))
+            for base, scarto in accesa.findall(corpo):
+                bandiera = int(base, 0) + int(scarto)
+                porta_cancelli[(f['field'], bandiera)] |= gate
+                acceso_da[(f['field'], bandiera)].add(t.get('procedureIndex'))
+
+    # 2. chi accende ciascun cancello, per dargli un nome
+    nomi_di = collections.defaultdict(set)
+    for f in con['fields']:
+        for p in f['procedures']:
+            for base, scarto in accesa.findall(p['body'] or ''):
+                nomi_di[int(base, 0) + int(scarto)].add(p['name'])
+
+    # 3. dall'alto: ogni pin condizionato prende i cancelli dei trigger che lo rivelano
+    fuori = []
+    for mappa in meta:
+        chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa['code'].split('_')[1:])
+        for indice, pin in enumerate(mappa['pins']):
+            if not pin['conditional']:
+                continue
+            gate = set()
+            visto = False
+            for campo in mappa['fields']:
+                if (campo, pin['flag']) in porta_cancelli:
+                    visto = True
+                    gate |= porta_cancelli[(campo, pin['flag'])]
+            if not visto or not gate:
+                continue
+            veri = []
+            for g in sorted(gate):
+                for nome in sorted(nomi_di.get(g, ())):
+                    if SCOPERTA_ATTESA.search(nome):
+                        continue
+                    veri.append(dict(bandiera=g, procedura=nome,
+                                     famiglia=re.sub(r'\d+', '#', nome),
+                                     resa=resa_attesa(nome)))
+            if not veri:
+                continue
+            fuori.append(dict(mappa=chiave, indicePin=indice, tipoNativo=pin['nativeType'],
+                              bandiera=pin['flag'], cancelli=veri,
+                              rese=sorted({v['resa'] for v in veri if v['resa']})))
+    return fuori
+
+
 def main(out, seed=None):
     out = Path(out)
     radice = Path(__file__).resolve().parents[2]
@@ -129,8 +260,21 @@ def main(out, seed=None):
     tabella_ok = 0
     da_verificare_nel_pacchetto = [0]
     con_prerequisito = [0]
-    cancelli = {(r['mappa'], r['indicePin']): r for r in json.loads(
+    import build_seed_package as bsp
+    collezionabili = bsp.collezionabili_del_registro(radice)
+    # I cancelli si **ricalcolano dalle sorgenti native**, non si leggono dall'artefatto.
+    # Confrontare il pacchetto con `cancelli-pin.json` non prova nulla se qualcuno li altera
+    # insieme: la mutazione combinata passava, ed e' il caso che conta. Qui si rifa' il conto da
+    # `connessioni.json` e si pretende che l'artefatto lo riproduca, prima ancora di usarlo.
+    controlla_le_letture()
+    rifatti = {(r['mappa'], r['indicePin']): r for r in oracolo_dei_cancelli(out)}
+    salvati = {(r['mappa'], r['indicePin']): r for r in json.loads(
         (out/'cancelli-pin.json').read_text(encoding='utf8'))['pin']}
+    assert set(rifatti) == set(salvati),         (f'l’artefatto dei cancelli non coincide con il ricalcolo: {len(salvati)} righe contro '
+         f'{len(rifatti)} ricostruite dalle sorgenti native')
+    for k, atteso in rifatti.items():
+        assert salvati[k]['rese'] == atteso['rese'] and salvati[k]['cancelli'] == atteso['cancelli'],             f'la riga dei cancelli di {k} non e’ quella che le sorgenti native producono'
+    cancelli = rifatti
     parti = {r['tipoNativo']: r for r in json.loads(
         (out/'tabella-parti-pin.json').read_text(encoding='utf8'))['tipi']}
     # La tabella nativa si ricontrolla dall'eseguibile, non dall'artefatto: e' la sola sorgente
@@ -337,6 +481,11 @@ def main(out, seed=None):
             else:
                 assert not nat.get('sbloccoLeggibile') and not nat.get('cancelli'),                     (f'lo spillo di {m["chiave"]} dichiara un prerequisito che cancelli-pin.json '
                      'non conosce')
+            # Collezionabile secondo il registro, pin per pin. Un forziere che entra non
+            # collezionabile resta sulla mappa anche dopo averlo aperto e non si puo' spuntare:
+            # e' un difetto che il conteggio non vede, perche' il pin c'e' ed e' al posto giusto.
+            assert bool(s['collezionabile']) == bool(collezionabili.get(s['tipo'], False)),                 (f'collezionabilita’ diversa da quella del registro per «{s["tipo"]}» su '
+                 f'{m["chiave"]}: il registro dice {collezionabili.get(s["tipo"])}')
             # Le prove native devono arrivare nel pacchetto come dato, non come frase. Per gli
             # spilli di un tipo ancora da identificare sono l'unica cosa che rende possibile la
             # verifica manuale: se sparissero, resterebbe un pin muto e nessuno se ne accorgerebbe,

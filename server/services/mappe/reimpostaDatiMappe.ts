@@ -14,7 +14,8 @@
 import type { AppDatabase } from '../../db/dbService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 import { importaMappe } from './mappeService.js';
-import { sincronizzaMappe } from './sincronizzaMappe.js';
+import { collegaPalazziAiLuoghi, sincronizzaMappe } from './sincronizzaMappe.js';
+import { applicaPresenzaAiLuoghi } from './presenzaEntita.js';
 
 /** Tabelle che compongono il livello mappe: sono le uniche che la ricostruzione svuota. */
 export const TABELLE_MAPPE = [
@@ -56,6 +57,12 @@ export function reimpostaDatiMappe(db: AppDatabase, pacchetti: readonly Esportaz
       const esito = importaMappe(pacchetto, { origine: 'seed', pacchettiSeed: pacchetti });
       importate.push({ pacchetto: indice, mappe: esito.mappe, spilli: esito.spilli, saltate: esito.saltate, condizioniScartate: esito.condizioniScartate });
     }
+    // Dopo l'importazione, non prima: i pin dell'atlante nativo arrivano col pacchetto, e un
+    // negozio disegnato sulla planimetria e' lo stesso negozio dell'illustrazione del quartiere.
+    // Se chiude di sera devono sparire tutti e due.
+    // dopo l'importazione: i pacchetti ripuliscono gli spilli di seed delle mappe che toccano
+    collegaPalazziAiLuoghi(db);
+    applicaPresenzaAiLuoghi(db);
     const violazioni = db.pragma('foreign_key_check') as unknown[];
     if (violazioni.length) throw new Error('Ricostruzione annullata: vincoli referenziali non soddisfatti.');
   })();

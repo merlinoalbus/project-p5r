@@ -1,4 +1,5 @@
 """Three full verification passes, including independent LZ and BC decoding."""
+from scrittura import scrivi_json
 from pathlib import Path
 import ast
 import collections
@@ -164,7 +165,7 @@ def main(out,game):
         assert (current.st_size,current.st_mtime_ns)==(a.stat.st_size,a.stat.st_mtime_ns)
         a.f.close()
     report['passes'].append(dict(pass_number=3,status='PASS',readable_maps=len(r['maps']),overview_sheets=len(r['overviews']),classified_technical_resources=len(r['excluded']),checks='all ROADMAP textures accounted for, exact original-to-readable pixel composition, all maps included once in overview sheets, overview decode, unchanged source archive metadata'))
-    (out/'verifica.json').write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding='utf8')
+    scrivi_json(out/'verifica.json', report)
     print('THREE PASSES COMPLETE',report,flush=True)
     return report
 

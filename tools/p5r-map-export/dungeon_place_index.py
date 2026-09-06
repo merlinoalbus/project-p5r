@@ -10,6 +10,7 @@ dimostrata, quindi i record si conservano con il solo indice di blocco, senza as
 
 Le varianti restano varianti: non vengono dichiarate piani.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import collections
 import hashlib
@@ -73,7 +74,7 @@ def main(out):
         limits=['Le varianti sono varianti native, non piani dichiarati.',
                 'La base dei major di FLDATDNGPLACENO non è dimostrata: i record restano senza major.',
                 'Un titolo di campo non prova un nome distinto del livello grafico.'])
-    (out/'indice-luoghi-dungeon.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'indice-luoghi-dungeon.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     return risultato
 

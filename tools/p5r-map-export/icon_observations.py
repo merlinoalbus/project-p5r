@@ -18,6 +18,8 @@ Le osservazioni stanno in `data/atlas/osservazioni-icone.json`, con la loro prov
 aggiunge una schermata aggiunge una riga lì, e i tipi che restano compatibili si stringono.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import collections
 import json
 import sys
@@ -142,8 +144,7 @@ def main(out, radice=None):
                 'genere: una partita a metà ne nasconde, e il vincolo diventa un «almeno».',
                 'Un solo genere osservato non basta a coprire i pin: serve una schermata per '
                 'ciascun genere di icona che si vuole dimostrare.'])
-    (out/'osservazioni-icone-esito.json').write_text(
-        json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'osservazioni-icone-esito.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     for genere, voce in sorted(esito.items()):
         print(f"  {genere}: {voce['osservazioni']} osservazioni ->",

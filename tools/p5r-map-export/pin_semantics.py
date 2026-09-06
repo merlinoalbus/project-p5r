@@ -21,6 +21,8 @@ Le icone native non entrano nell'applicazione: servono a capire, e ogni pin vien
 con il segnalino dell'app corrispondente.
 """
 from pathlib import Path
+
+from scrittura import scrivi_json
 import collections
 import json
 import re
@@ -958,7 +960,7 @@ def main(out):
                 'nulla: misurata sui tipi già noti sbaglia più di quanto azzecchi, e la famiglia dei '
                 'transiti sbaglia sempre. Resta nel file come materiale, mai come prova.',
                 'Le icone native servono a riconoscere, non a disegnare: l’applicazione usa i propri segnalini.'])
-    (out/'semantica-pin.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'semantica-pin.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 

@@ -19,6 +19,7 @@ hash. Nessun nome viene inventato: ciò che il gioco non nomina resta dichiarato
 il motivo. In particolare non si inventano piani fissi dei Memento: le strutture ricorrenti dei
 campi 190-195 sono marcate come tali.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import collections
 import json
@@ -664,7 +665,7 @@ def main(out, seed=None):
         limits=['Un titolo di campo non prova un nome distinto del livello grafico.',
                 'Le strutture ricorrenti dei Memento non sono piani fissi e non ricevono un nome inventato.',
                 'Gli omonimi restano luoghi separati: vanno distinti, non numerati.'])
-    (out/'atlante-identita.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'atlante-identita.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 

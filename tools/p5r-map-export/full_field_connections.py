@@ -1,4 +1,5 @@
 """Read complete field sources without inventing map associations."""
+from scrittura import scrivi_json
 import collections,json,sys,struct,math
 from pathlib import Path
 from extract_maps import sha
@@ -78,6 +79,6 @@ def main(out):
       'limits':['Source coordinates are not map coordinates.','Local procedure bodies preserve unevaluated conditions.','No operational map or pin associations generated.']}
     result['summary']={'fields':len(rows),'calls':sum(len(p['calls']) for r in rows for p in r['procedures']),
       'components':{k:dict(collections.Counter(r['components'][k]['status'] for r in rows)) for k in ('triggerPositions','entrances','hits','procedures')},'previousDifferences':len(diff)}
-    (root/'connessioni.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(result['summary']))
+    scrivi_json(root/'connessioni.json', result);print(json.dumps(result['summary']))
 
 if __name__=='__main__':main(sys.argv[1])

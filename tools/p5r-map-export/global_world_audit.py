@@ -1,4 +1,5 @@
 """Global field/entrance graph with explicit unresolved image and script semantics."""
+from scrittura import scrivi_json
 import collections,csv,hashlib,json,math,re,sys
 from pathlib import Path
 
@@ -102,7 +103,7 @@ def main(out,connection_file='mondo_connessioni_evidenze.json',target_dir='mondo
             assert old['call']==new['call'] and old['sourceField']==new['sourceField']
             if old['status']!=new['status']:changes.append({'id':old['id'],'targetField':new['targetField'],'previous':old['status'],'current':new['status']})
         report['previousComparison']={'occurrencesPreserved':len(previous['occurrences']),'newOccurrences':len(now)-len(previous['occurrences']),'statusChanges':changes}
-    (target/'inventario.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    scrivi_json(target/'inventario.json', report)
     with (target/'collegamenti.csv').open('w',encoding='utf-8-sig',newline='') as stream:
         w=csv.writer(stream);w.writerow(['campo_partenza','procedura','riga','campo_arrivo','id_ingresso','esito','trigger_origine','mappe_partenza_candidate','mappe_arrivo_candidate'])
         for o in report['occurrences']:w.writerow([o['sourceField'],o['procedureName'],o['call']['line'],o['targetField'],o['requestedEntranceId'],o['status'],','.join(str(t['index']) for t in o['triggerRoots']),';'.join(o['sourceMapCandidates']),';'.join(o['targetMapCandidates'])])

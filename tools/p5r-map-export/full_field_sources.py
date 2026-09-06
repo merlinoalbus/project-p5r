@@ -1,4 +1,5 @@
 """Inventory every original field resource; no ROADMAP-only filtering."""
+from scrittura import scrivi_json, scrivi_testo
 import argparse,collections,concurrent.futures,hashlib,json,re,subprocess
 from pathlib import Path
 from extract_maps import Archive,GAME
@@ -27,7 +28,7 @@ def main(out,compiler,cpk):
         'resources':{kind:selected.get((key,kind)) for kind in ['FBN','HTB','BF']},
         'variants':{kind:[s for s in sources if s['field']=='F'+key and s['kind']==kind] for kind in ['FBN','HTB','BF']}}
         for key in sorted(fieldids)],'decompilations':[]}
-    (root/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
+    scrivi_json(root/'manifest.json', manifest)
     jobs=[s for (key,kind),s in selected.items() if kind=='BF']
     def decode(source):
         key=source['field'][1:];dest=root/'scripts'/(key+'.flow');dest.parent.mkdir(exist_ok=True);cwd=root/'logs'/key;cwd.mkdir(parents=True,exist_ok=True)
@@ -35,7 +36,7 @@ def main(out,compiler,cpk):
         try:
             r=subprocess.run(command,cwd=cwd,capture_output=True,timeout=180)
             (cwd/'stdout.bin').write_bytes(r.stdout);(cwd/'stderr.bin').write_bytes(r.stderr)
-            (cwd/'console.txt').write_text(r.stdout.decode('utf-16le',errors='replace')+'\nSTDERR\n'+r.stderr.decode('utf-8',errors='replace'),encoding='utf-8')
+            scrivi_testo(cwd/'console.txt', r.stdout.decode('utf-16le',errors='replace')+'\nSTDERR\n'+r.stderr.decode('utf-8',errors='replace'))
             return {'field':source['field'],'sourceSha256':source['sha256'],'success':r.returncode==0 and dest.exists(),'exitCode':r.returncode,
               'flow':dest.relative_to(out).as_posix() if dest.exists() else None,'flowSha256':sha(dest.read_bytes()) if dest.exists() else None,'logDirectory':cwd.relative_to(out).as_posix()}
         except subprocess.TimeoutExpired as e:
@@ -51,7 +52,7 @@ def main(out,compiler,cpk):
         for f in old['fields'] for kind,s in f['sources'].items() if s and s['sha256']!=selected.get((f['field'][1:],kind.upper()),{}).get('sha256')]}
     manifest['summary']={'fields':len(fieldids),'sources':len(sources),'resourcesByArchive':dict(collections.Counter(s['archive']+'/'+s['kind'] for s in sources)),
       'scripts':len(jobs),'decompiled':sum(r['success'] for r in manifest['decompilations']),'failed':sum(not r['success'] for r in manifest['decompilations'])}
-    (root/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8');print(json.dumps(manifest['summary']),flush=True)
+    scrivi_json(root/'manifest.json', manifest);print(json.dumps(manifest['summary']),flush=True)
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('out');p.add_argument('--compiler',required=True);p.add_argument('--cpk',default=str(GAME));a=p.parse_args();main(a.out,a.compiler,a.cpk)

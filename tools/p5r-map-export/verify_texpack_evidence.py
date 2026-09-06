@@ -1,4 +1,5 @@
 """Audit serialized evidence directly against original member bytes."""
+from scrittura import scrivi_json
 import hashlib
 import json
 from pathlib import Path
@@ -58,7 +59,7 @@ def main(out):
         assert f'CALL_FIELD(2, 2, {entrance}, 1)' in body and 'else' in body
     report = dict(result='PASS', records=len(d['records']), sentinels=sum(r['sentinel'] for r in d['records']),
         titleReferencesChecked=layers*2, schoolFields=len(d['school']), physicalEdgesCertified=0)
-    (out/'verifica_texpack.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    scrivi_json(out/'verifica_texpack.json', report)
     print(json.dumps(report))
 
 

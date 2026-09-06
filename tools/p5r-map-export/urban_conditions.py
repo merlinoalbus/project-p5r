@@ -1,4 +1,5 @@
 """Reviewed path specifications; native state is not silently mapped to app state."""
+from scrittura import scrivi_json
 import json,sys
 from pathlib import Path
 from extract_maps import sha
@@ -32,7 +33,7 @@ def main(out):
         scheduler.append({'file':path,'sha256':sha(b),'procedure':p,'bank':0,'index':flag,'operation':operation,'calendarInterpretation':None})
     result={'schemaVersion':1,'sourceSha256':sha(raw),'schedulerReferences':scheduler,'notation':{'B0':'bank0 raw address=index','B1':'bank0x10000000 raw address=0x10000000+index','truthy':'nonzero; not assumed equal1'},
       'cases':cases,'limits':['Path expressions describe the selected CALL_FIELD only, not every possible navigation from the interaction.','HTB guard semantics remain separate and unevaluated.','Native conditions are not app conditions; no date inferred from procedure names.','Local procedure bodies retain other narrative/event branches and loops.']}
-    (root/'condizioni.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8');print('6 native path specifications saved')
+    scrivi_json(root/'condizioni.json', result);print('6 native path specifications saved')
 
 if __name__=='__main__':main(sys.argv[1])
 

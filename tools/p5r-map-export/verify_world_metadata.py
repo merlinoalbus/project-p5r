@@ -1,4 +1,5 @@
 """Three checks for raw world metadata; not a certification of navigability."""
+from scrittura import scrivi_json
 import ast
 import hashlib
 import json
@@ -56,7 +57,7 @@ def main(out):
     report=dict(status='PASS',fields=len(fields),maps=len(data['maps']),pins=pins,
         passes=['syntax, source hashes, identity and images','independent binary fields and pin bytes','determinism and malformed input'],
         metadataSha256=previous,scope='Raw metadata only; not a navigability certification')
-    (out/'verifica_metadati.json').write_text(json.dumps(report,indent=2),encoding='utf8')
+    scrivi_json(out/'verifica_metadati.json', report)
 
 
 if __name__=='__main__':

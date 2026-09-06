@@ -1,4 +1,5 @@
 """Independent census coverage for selected literal native addresses."""
+from scrittura import scrivi_json
 import collections,hashlib,json,re,sys
 from pathlib import Path
 
@@ -26,6 +27,6 @@ def main(out):
     report={'status':'PASS-census-only','files':12,'coverageSlots':24,'literalReferences':sum(totals.values()),
       'unresolvedDynamicAddresses':d['summary']['dynamicAddresses'],'counts':[{'function':k[0],'kind':k[1],'address':k[2],'count':v} for k,v in totals.items()],
       'appConditionsGenerated':0}
-    (root/'verifica.json').write_text(json.dumps(report,indent=2),encoding='utf-8');print(json.dumps(report))
+    scrivi_json(root/'verifica.json', report);print(json.dumps(report))
 
 if __name__=='__main__':main(sys.argv[1])

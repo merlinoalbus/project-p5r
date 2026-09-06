@@ -1,4 +1,5 @@
 """Check complete field resource extraction against fresh original CPK indices."""
+from scrittura import scrivi_json
 import hashlib,json,re,sys
 from pathlib import Path
 from extract_maps import Archive,GAME
@@ -40,6 +41,6 @@ def main(out,cpk=GAME):
     report={'status':'PASS-source-coverage','fields':len(ids),'sourceResourcesChecked':len(expected),'scriptsChecked':len(bf),
       'decompiled':sum(r['success'] for r in m['decompilations']),'failed':sum(not r['success'] for r in m['decompilations']),
       'oldSourceChanges':0,'oldFieldsLost':0,'scope':'Union of matching FBN/HTB/FHIT resources in BASE and IT plus ROADMAP; no semantic map or navigation claims.'}
-    (root/'verifica-fonti.json').write_text(json.dumps(report,indent=2),encoding='utf-8');print(json.dumps(report))
+    scrivi_json(root/'verifica-fonti.json', report);print(json.dumps(report))
 
 if __name__=='__main__':main(sys.argv[1])
