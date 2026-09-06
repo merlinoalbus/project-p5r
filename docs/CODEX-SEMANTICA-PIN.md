@@ -634,6 +634,16 @@ superficie da ogni comando che promette «Sulla mappa»:
 Questa correzione preserva la distinzione fra «vai alla scheda» e «trova sulla mappa», evita
 fallback inventati e consente una controprova UI end-to-end sulla rotta pubblica effettiva.
 
+### Pre-verifica della correzione 3d in corso
+
+Il test del nuovo `CollegamentoMappa` passa sia per il negozio sia per la chiave articolo con `/`.
+Il run mirato ha però rilevato che `AccessoMondoPage` ha appena sostituito il messaggio di esito
+assente con una spiegazione più precisa, mentre `AccessoMondoPage.test.tsx` pretende ancora la
+frase precedente. Va aggiornato il test sul nuovo testo e sul `role=status`, mantenendo anche la
+verifica del collegamento alla scheda. Manca inoltre ancora una regressione che renderizzi una
+riga reale di `OggettiPage` e pretenda la rotta del resolver: il solo test del componente non
+prova che la superficie che aveva il difetto continui a usarlo.
+
 ## Contabilità delle tre planimetrie assorbite come copie
 
 La riverifica del pacchetto ha separato le 90 occorrenze non posate: 14 sono esclusioni puntuali
