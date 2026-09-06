@@ -572,3 +572,17 @@ respingere almeno ogni discesa sotto gli invarianti già misurati:
 
 In questo modo un comando con una cartella errata fallisce prima di poter sostituire un artefatto
 completo con un JSON formalmente valido ma privo della sua copertura probatoria.
+
+## Riscontro eseguibile dopo il primo allineamento del verificatore
+
+La correzione delle inizializzazioni e del contratto `da-verificare` è stata recepita, ma
+`verify_pin_semantics.py` fallisce ancora sulla prima mappa, `nativo-rmap-007-1-0`, con
+`numero di pin diverso`. La causa è puntuale: nella costruzione di `attese` il verificatore
+continua a eseguire `continue` quando `stato != determinato`, mentre il seed ora include
+correttamente quegli stessi pin come `nota`.
+
+Il controllo deve quindi ricostruire anche i tipi `da-verificare`, usando `nota` come
+`tipoSpillo`; soltanto le esclusioni già dichiarate dal riferimento possono sottrarre un pin.
+La funzione locale `spillo_di()` deve seguire lo stesso contratto, così da verificare anche le
+condizioni delle note. Non va indebolito il confronto fra i due multinsiemi: dopo la correzione
+`trovati == attese` deve restare esatto per tipo e coordinate.
