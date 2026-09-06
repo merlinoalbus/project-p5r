@@ -1856,3 +1856,20 @@ PASS della richiesta utente, soltanto della sua fondazione riusabile.
 Il worktree contiene inoltre una modifica non pubblicata di `MappaMemento.tsx`; non e' stata
 oggetto di verdetto finale. Il suo layout puo' proseguire, ma non chiude i tre punti funzionali
 elencati sopra.
+
+### Stabilita' della suite — rosso intermittente da chiudere prima della riverifica finale
+
+Il primo `npm test` parallelo sul worktree ha dato `137 file, 573 test PASS; 1 test FAIL`:
+`MappaPage.test.tsx`, caso «il contesto URL cambia il titolo del visore». Il visore aveva gia'
+reso `Mappa: Museo, 1P`, ma l'asserzione immediata riceveva ancora `document.title = "Mappa —
+Project P5R"`.
+
+Non e' un difetto riproducibile del layout Memento: il file mirato passa tre volte consecutive
+(`8/8` ogni volta) e la suite completa seriale passa (`138 file, 574 test`). E' comunque una
+prova concorrente fragile, dunque la suite parallela non e' ancora un gate affidabile.
+
+**Sanamento proposto al proprietario del test:** nel caso URL attendere esplicitamente il titolo
+con `waitFor(() => expect(document.title).toContain('Museo, 1P'))` dopo il rendering del visore,
+o isolare il titolo dalla concorrenza fra file. Ripetere almeno una suite parallela e una seriale;
+il verde di entrambe e' il criterio di chiusura. Questo rilievo e' separato dai tre requisiti
+funzionali dell'Atlante, che restano aperti.
