@@ -35,9 +35,9 @@ function posizionePassaggio(radice: string, figlia: string, i: number, n: number
   return [10 + (80 * (i % colonne)) / Math.max(1, colonne - 1), 10 + (80 * Math.floor(i / colonne)) / Math.max(1, righe - 1)];
 }
 
-export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number; riclassificati: number } {
+export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: number; riclassificati: number; conSblocco: number } {
   const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all() as Array<{ name: string }>).map((r) => r.name));
-  if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0, riclassificati: 0 };
+  if (!tabelle.has('mappa')) return { mappe: 0, spilli: 0, riclassificati: 0, conSblocco: 0 };
   const immaginiMappa = new Set(tabelle.has('immagine') ? (db.prepare("SELECT chiave FROM immagine WHERE ambito = 'mappa'").all() as Array<{ chiave: string }>).map((r) => r.chiave) : []);
   // Tokyo, i quartieri e i Palazzi portano illustrazioni disegnate per l'applicazione, non piante
   // estratte dal gioco: il ruolo lo dichiarano qui, invece di lasciarlo dedurre dall'asset. La
@@ -78,6 +78,15 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const insSpillo = db.prepare(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const mappaEsiste = db.prepare('SELECT 1 FROM mappa WHERE chiave = ?');
+  // I quartieri con una data di sblocco: prima di quella data non ci sono, e i loro pin nemmeno.
+  // La colonna arriva con una migrazione: dove lo schema è ancora indietro non c'è, e chiedere
+  // comunque farebbe fallire tutta la sincronizzazione invece di saltare una condizione.
+  const haSblocco = tabelle.has('quartiere') && (db.prepare("SELECT name FROM pragma_table_info('quartiere')")
+    .all() as Array<{ name: string }>).some((c) => c.name === 'sblocco_data');
+  const quartieriConSblocco = new Set(haSblocco
+    ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
+    : []);
+  let conSblocco = 0;
   let spilli = 0;
   let riclassificati = 0;
   if (tabelle.has('marcatore_mappa') && tabelle.has('punto_interesse')) {
@@ -111,7 +120,16 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     for (const r of righe) {
       const mappa = `citta-${r.quartiere_chiave}`;
       if (esiste.get('luogo', r.luogo_chiave) || !mappaEsiste.get(mappa)) continue;
-      insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
+      const info = insSpillo.run(mappa, spilloPerLuogo(r.tipo), r.nome, r.cosa_offre, r.x, r.y, 'luogo', r.luogo_chiave, 0, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
+      // Un quartiere che si sblocca a giugno non esiste, in aprile: e i suoi luoghi nemmeno. Il
+      // pin deve sparire dal visore finché la partita non ha raggiunto quella data, altrimenti la
+      // guida manda il giocatore in un posto che non c'è ancora. È la sola specie di condizione
+      // che nasconde qualcosa — la presenza — e qui la porta il quartiere.
+      if (quartieriConSblocco.has(r.quartiere_chiave)) {
+        db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
+          .run(JSON.stringify([{ tipo: 'quartiere', quartiere: r.quartiere_chiave }]), Number(info.lastInsertRowid));
+        conSblocco++;
+      }
       spilli++;
     }
   }
@@ -124,11 +142,19 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       if (f.chiave.startsWith('nativo-')) return;
       if (esiste.get('mappa', f.chiave)) return;
       const [x, y] = posizionePassaggio(radice.chiave, f.chiave, i, figlie.length);
-      insSpillo.run(radice.chiave, 'passaggio', f.nome, '', Math.round(x * 10) / 10, Math.round(y * 10) / 10, 'mappa', f.chiave, 0, i, 'seed', t);
+      const passaggio = insSpillo.run(radice.chiave, 'passaggio', f.nome, '', Math.round(x * 10) / 10, Math.round(y * 10) / 10, 'mappa', f.chiave, 0, i, 'seed', t);
+      // Anche la via per arrivarci: se il quartiere non è ancora sbloccato, sulla mappa di Tokyo
+      // non deve esserci nemmeno il passaggio che ci porta.
+      const quartiere = f.chiave.startsWith('citta-') ? f.chiave.slice('citta-'.length) : null;
+      if (quartiere && quartieriConSblocco.has(quartiere)) {
+        db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
+          .run(JSON.stringify([{ tipo: 'quartiere', quartiere }]), Number(passaggio.lastInsertRowid));
+        conSblocco++;
+      }
       spilli++;
     });
   }
   riconciliaAreeGuida(db);
   sincronizzaPercorsiMappe(db);
-  return { mappe, spilli, riclassificati };
+  return { mappe, spilli, riclassificati, conSblocco };
 }
