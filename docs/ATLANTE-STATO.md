@@ -713,7 +713,7 @@ lint puliti.
 | 2026-09-06 | Fasi 1b, 1c, 1d | **PRONTE PER VERIFICA** — pacchetto seed unico agganciato alla guida, ricarica dei soli dati mappe, indice a schede | in attesa |
 | 2026-09-06 | Fase 2 (parte urbana) | riferimento certificato, 51 tipi urbani, 80 pin posati | **2b PASS**, 2a/2c FAIL |
 | 2026-09-06 | Fase 1d (2ª) | **PRONTA PER VERIFICA** — nessuna etichetta tecnica nel DOM espanso, etichetta di versione da un'unica funzione condivisa | in attesa |
-| 2026-09-06 | Fase 2 (2ª) | **PRONTA PER VERIFICA** — 324 pin condizionali con condizione strutturata, artefatto semantico deterministico, contabilità chiusa su 1429 | in attesa |
+| 2026-09-06 | Fase 2 (2ª) | ~~324 pin condizionali con condizione strutturata~~ — **dichiarazione ritirata**: quel contratto è stato rovesciato il 6 settembre, i pin nativi non hanno condizioni | superata |
 | 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
 | 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
 | 2026-09-06 | Fase 2 (7ª) | **PRONTA PER VERIFICA** — tabella nativa delle parti estratta e verificata dall'eseguibile, 90 tipi su 102 dimostrati, tutti i 1429 pin collocabili posati | in attesa |
@@ -877,7 +877,7 @@ senza destinazione, contabilità chiusa su 262.
 
 | rilievo di Codex | correzione |
 |---|---|
-| 324 pin condizionali importati come incondizionati | ognuno entra ora con una **condizione strutturata** `da-configurare` che riporta la bandiera nativa; l'interfaccia la mostra e l'editor la corregge. Nel database: 324 spilli con `condizioni_json`. |
+| 324 pin condizionali importati come incondizionati | **Risposta superata.** All'epoca ognuno entrava con una condizione `da-configurare` che riportava la bandiera nativa. Quel contratto è stato rovesciato il 6 settembre: la bandiera dice «ci sei già passato», che per una guida non è una condizione, e i pin nativi ora non ne hanno nessuna. Vedi «Il contratto di visibilità» più sotto. |
 | `semantica-pin.json` non riproducibile | l'ordine non dipende più dall'iterazione degli insiemi: tutto ordinato per conteggio e poi per nome. Tre rigenerazioni di fila danno la stessa impronta. |
 | contabilità che non chiude (1422 su 1429) | i 7 pin esclusi uno per uno dalla certificazione del riferimento sono ora una voce del rapporto, e il rapporto dichiara `pinNativi` e `pinContati`: **1429 = 1429**. Il verificatore lo controlla. |
 
