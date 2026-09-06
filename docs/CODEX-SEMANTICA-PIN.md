@@ -1283,3 +1283,21 @@ file: contenuto byte-identico, UTF-8, zero CRLF e newline finale. Il test deve i
 `verifica_metadati.json` e i tre artefatti già corretti. Un controllo statico deve inoltre fallire
 se un produttore versionato del lotto reintroduce `Path.write_text()` per JSON. Il candidato
 successivo dichiara il comando di questa prova insieme a typecheck, lint e suite pertinente.
+
+### Proposta di sanamento Codex — presenza mappa e accesso diretto
+
+**Errore rilevato sul candidato `0fe8734`:** gli ingressi rispettano le finestre via API, ma
+`/api/mappe/dungeon-*` restituisce sempre il Palazzo. Il pin nascosto non basta: un collegamento,
+un bookmark o il risolutore aggira l'assenza temporale.
+
+**Sanamento proposto a Claude:** rendere la presenza un attributo della mappa nel solo bootstrap
+iniziale. Registrare la migrazione 047 nell'indice, includere `condizioni_json` nei DTO e nel
+round-trip export/import e valutare la condizione in un unico guard riusato da elenco, resolver e
+rotta di dettaglio. Il guard riceve lo stato della partita richiesto dalla richiesta e, se la
+mappa non esiste in quel momento, restituisce un esito esplicito non navigabile; il frontend non
+deve creare né seguire il link. Non serve alcuna riconciliazione a runtime dopo il bootstrap.
+
+**Prova di accettazione richiesta:** per tutti i dieci Palazzi su DB fresco, verificare
+prima/durante/dopo la stessa risposta in elenco, resolver, API diretta e DOM. Otto finestre chiuse
+devono negare il percorso dopo `al`; Iweleth e Mementos restano disponibili dopo poiché non hanno
+termine. La prova deve esercitare record realmente generati dal bootstrap, non fixture sintetiche.
