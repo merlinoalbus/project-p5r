@@ -32,3 +32,6 @@ data/tmp/
 # Originali dei CPK ripristinati da data/atlas/original-archives (rigenerabili con
 # `python tools/p5r-map-export/restore_originals.py`, hash verificati file per file)
 data/atlas/extracted/originali/
+
+# Cache dei moduli Python degli strumenti
+__pycache__/
