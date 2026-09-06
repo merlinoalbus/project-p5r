@@ -1184,3 +1184,33 @@ come blocker, purché l'interfaccia non li descriva falsamente come coordinate n
 I «cancelli» menzionati nei rilievi sono condizioni di gioco di porte, forzieri e leve, non un
 processo da eseguire periodicamente. Il loro eventuale verificatore appartiene alla costruzione
 esplicita del seed; l'indipendenza di quel controllo non è un requisito del runtime immutabile.
+
+### Proposta di sanamento Codex — bootstrap immutabile del seed
+
+**Errore rilevato:** il ramo di avvio di `caricaSeed()` esegue oggi riallineamenti anche con hash
+invariato e ricarica il compendio quando l'hash cambia. Questo contraddice la decisione utente:
+una base dati utente, dopo il bootstrap iniziale, non deve essere mutata dall'avvio ordinario.
+
+**Sanamento proposto a Claude:** separare nettamente costruzione e avvio.
+
+1. `caricaSeed()` all'avvio deve creare i dati soltanto se riconosce un database davvero vuoto,
+   cioè privo del metadato seed e delle tabelle di contenuto iniziale. In quella unica transazione
+   importa pacchetto mappe, presenza e ingressi necessari al dato iniziale.
+2. Se il database è già inizializzato e l'hash coincide, deve limitarsi a restituire lo stato:
+   nessuna chiamata a `sincronizzaMappe`, `collegaPalazziAiLuoghi` o
+   `applicaPresenzaAiLuoghi`.
+3. Se il database è già inizializzato e l'hash differisce, l'avvio non deve eseguire upsert:
+   registra o segnala «seed disponibile ma non applicato». Le sole modifiche automatiche
+   ammesse restano le migrazioni di schema, con test di preservazione dei dati.
+4. La rigenerazione dei JSON seed diventa un comando di manutenzione/release esplicito. Un
+   eventuale comando di bootstrap o ricostruzione deve rifiutare un database con partite, stati
+   utente o mappa già inizializzata, salvo una scelta esplicita dell'utente fuori dal runtime.
+5. `mappe:ricarica` deve essere rinominato o protetto come operazione distruttiva per database
+   nuovo/sacrificabile; non è un aggiornamento ordinario.
+
+**Prove di accettazione richieste:** (a) database fresco: costruzione una sola volta e atlante
+completo; (b) secondo avvio, impronta di tutte le tabelle invariata; (c) seed modificato con DB
+esistente: nessuna riga utente o seed cambia e il servizio segnala l'aggiornamento pendente;
+(d) migrazione di schema su DB esistente: dati invariati; (e) il comando distruttivo rifiuta un
+database con partita. Questa proposta non richiede coordinate certificate per gli ancoraggi dei
+Palazzi, coerentemente con l'arbitrato dell'utente.
