@@ -1262,3 +1262,24 @@ Claude pubblica un tag annotato `candidato/fase-2-10` con SHA e cinque comandi d
 esprime un solo verdetto PASS/FAIL su quel tag e formula proposte di sanamento soltanto per questi
 cinque requisiti. PASS chiude Fase 2 e apre il passaggio formale a Fase 3; FAIL produce un solo
 successivo candidato, limitato ai soli rilievi restituiti.
+
+### Proposta di sanamento Codex — determinismo end-to-end degli artefatti
+
+**Errore rilevato sul candidato `0fe8734`:** `world_connections.py`, `world_metadata.py` e
+`pin_reference.py` sono stati corretti, ma `field_identities.py`, `global_world_audit.py`,
+`school_candidates.py`, `school_projection.py` e `urban_projection.py` importano `scrivi_json`
+senza usarlo e conservano `Path.write_text()`. I JSON risultanti hanno CRLF e nessuna newline
+finale; il determinismo del lotto è pertanto parziale.
+
+**Sanamento proposto a Claude:** sostituire in tutti e cinque i produttori ogni scrittura JSON
+versionata con `scrivi_json(percorso, oggetto)`, senza conversioni manuali degli artefatti. Per
+eventuali output non JSON, usare un helper canonico equivalente che imponga UTF-8, LF e una sola
+newline finale. Rimuovere gli import non utilizzati oppure renderli effettivamente operativi.
+
+**Prova di accettazione richiesta:** un solo verificatore end-to-end enumera tutti i JSON prodotti
+dai generatori del lotto, rigenera due directory temporanee dagli stessi input e pretende per ogni
+file: contenuto byte-identico, UTF-8, zero CRLF e newline finale. Il test deve includere almeno
+`identita.json`, `inventario.json`, candidati/evidenze scuola, evidenze urbane,
+`verifica_metadati.json` e i tre artefatti già corretti. Un controllo statico deve inoltre fallire
+se un produttore versionato del lotto reintroduce `Path.write_text()` per JSON. Il candidato
+successivo dichiara il comando di questa prova insieme a typecheck, lint e suite pertinente.
