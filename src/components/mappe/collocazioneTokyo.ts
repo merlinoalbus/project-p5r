@@ -32,7 +32,12 @@ export interface Collocazione {
   scala: number;
 }
 
-/** I quartieri. Disposti sull'anello della Yamanote e sulle sue radiali, come nella Tokyo vera. */
+/** I quartieri che stanno sulla mappa di viaggio del gioco.
+ *
+ * Shujin Academy non c'è, e non è una dimenticanza: nel gioco non è una destinazione del treno —
+ * a scuola ci si arriva da Aoyama-Itchōme — e infatti nel foglio degli sprite non ha un disegno.
+ * Metterla lo stesso voleva dire ripiegare sulla fotografia del quartiere, che in mezzo alle
+ * sagome in bianco e nero è una macchia. */
 export const QUARTIERI_TOKYO: Record<string, Collocazione> = {
   // ---- la corona della Yamanote, in senso orario da nord ----
   ikebukuro: { x: 51, y: 11, scala: 5.5 },
@@ -58,7 +63,6 @@ export const QUARTIERI_TOKYO: Record<string, Collocazione> = {
   'meiji-shrine': { x: 27, y: 30, scala: 5.5 },
   // ---- il centro, dentro l'anello ----
   'aoyama-itchome': { x: 46.5, y: 51, scala: 7.5 },
-  'shujin-academy': { x: 40, y: 40, scala: 5.5 },
   akasaka: { x: 58, y: 60, scala: 5.5 },
   nagatacho: { x: 57, y: 46, scala: 5.5 },
   roppongi: { x: 49, y: 68, scala: 5.5 },
@@ -101,8 +105,6 @@ export const LINEE_TOKYO: Linea[] = [
     fermate: ['roppongi', 'ginza', 'tsukishima'] },
   { nome: 'Chiyoda', colore: '#14b8a6',
     fermate: ['meiji-shrine', 'harajuku', 'nagatacho'] },
-  { nome: 'Shujin', colore: '#64748b',
-    fermate: ['aoyama-itchome', 'shujin-academy'] },
 ];
 
 /** I Palazzi, dove il mondo reale li colloca.
