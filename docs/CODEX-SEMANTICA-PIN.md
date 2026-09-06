@@ -1019,3 +1019,24 @@ La prova della presenza temporale è ancora soltanto sintetica: manca nel pacche
 editoriale reale (per esempio un Confidente non presente con la pioggia) che dimostri i due stati.
 Inoltre questo commit non modifica i file responsabili degli altri cinque blocker della Fase 2,
 che restano aperti e vanno chiusi prima di una nuova dichiarazione complessiva.
+
+### Pre-audit Codex dell'eredità di presenza per entità
+
+La bozza successiva a `3a97293` costruisce `condizioniNegozio` come
+`Map<luogo_chiave, condizioni_json>` e poi applica il valore al pin riferito al `luogo`. Questa
+chiave non identifica però un negozio: nello stato editoriale corrente lo stesso valore è
+condiviso da **18 negozi a Shibuya, 11 ad Akihabara, 10 a Kichijoji, 7 a Yongen-Jaya, 5 alla
+Shujin, 4 a Shinjuku e 2 a Kanda**. La query non ha `ORDER BY` e ogni `set()` sovrascrive il
+precedente.
+
+Ne derivano due errori possibili, entrambi bloccanti:
+
+* le condizioni di un venditore possono nascondere il pin generico dell'intero luogo/quartiere;
+* una riga successiva con `[]` può cancellare la condizione del venditore, rendendola inefficace.
+
+La presenza deve essere ereditata dall'entità referenziata dal singolo pin, non da tutte le entità
+che condividono un quartiere. Se non esiste ancora un pin distinto con riferimento `negozio`, non
+è corretto trasferire la condizione al pin `luogo`: occorre prima creare o collegare il pin
+dell'entità esatta. Lo stesso principio vale per attività e Confidenti. Servono controprove con
+due negozi nello stesso luogo ma orari/meteo differenti e con ordine delle righe invertito: deve
+sparire soltanto il negozio assente, mai il luogo né l'altro negozio.
