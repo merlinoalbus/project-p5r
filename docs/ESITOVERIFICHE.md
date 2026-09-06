@@ -1791,3 +1791,24 @@ hover/selezione, raccolto ed evidenza suggerita. Le riserve SVG devono restare n
 contenitore. Aggiornare commenti/CSS e il test di `SpilloGrafico`: con asset presente deve esistere
 sia il contenitore-pin sia la figura, non un'immagine nuda. La controprova è visiva nel visore a
 dimensione reale e automatica sul componente.
+
+### Riverifica — Mappa dei Memento, commit `95b95f7`
+
+**FAIL funzionale, sanamento a Claude.** La composizione grafica è una base leggibile e usa gli
+elementi estratti presenti in `public/asset/mappe/lmap/memento/`, ma il contratto di presenza nel
+momento di gioco non è collegato:
+
+1. `DungeonDettaglioPage` monta `MappaMemento` soltanto con `aree={d.aree}`. Non passa mai la
+   prop `sbloccati`; il componente quindi interpreta sempre ogni Dedalo come aperto
+   (`!sbloccati || sbloccati.size === 0`).
+2. Anche con una prop popolata, l'elenco finale `ol` mappa tutte le aree senza filtrare o
+   disabilitare quelle non aperte. Risultano quindi ancora navigabili dal lettore, in contrasto
+   con il punto grafico nascosto.
+3. Il nuovo componente non ha test: il claim di suite verde non prova i due rami di presenza.
+
+**Sanamento richiesto:** esporre dal dato della partita un insieme esplicito di Dedali disponibili
+(derivato da stato di storia realmente tracciato, non da parsing della prosa), passarlo alla mappa
+e usare la stessa sorgente sia per i nodi grafici sia per l'elenco/accessibilità. Se lo stato non
+è disponibile, non va simulata una partita avanzata: va dichiarata la vista completa e resa
+esplicitamente consultativa. Aggiungere test per: nessun dato di partita, un Dedalo disponibile,
+un Dedalo non disponibile non cliccabile/navigabile e ordine stabile dei nove Dedali.
