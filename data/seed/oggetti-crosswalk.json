@@ -1,553 +1,865 @@
 {
-  "schemaVersion": 1,
-  "cosaE": "ponte fra gli oggetti della guida, che hanno solo un nome, e gli articoli del catalogo, che hanno una chiave e un negozio",
+  "schemaVersion": 2,
+  "cosaE": "ponte fra gli oggetti della guida, che hanno solo un nome, e i negozi e gli articoli del catalogo, che hanno una chiave e arrivano alla mappa",
+  "fonti": {
+    "trascrizione": "data/seed/oggetti-negozi.json",
+    "pagina": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/"
+  },
   "comeSiRigenera": "npm run oggetti:crosswalk",
-  "criterio": "corrispondenza univoca in entrambe le direzioni fra nomi normalizzati; ogni caso ambiguo resta escluso",
+  "criterio": "due vie: il nome dell’articolo quando coincide in modo univoco, e la trascrizione della pagina «Elenco dei negozi». Gli ambigui dichiarati restano fuori.",
   "generato": "2026-09-06",
   "abbinamenti": [
     {
       "nome": "1UP",
       "articolo": "distributori-automatici/1up",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Acqua battesimale",
       "articolo": "chiesa-kanda/acqua-battesimale",
-      "negozio": "chiesa-kanda"
+      "negozio": "chiesa-kanda",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Acqua benedetta",
+      "negozio": "chiesa-kanda",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Acqua della rinascita",
       "articolo": "distributori-automatici/acqua-della-rinascita",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Acqua di Udagawa",
       "articolo": "distributori-automatici/acqua-di-udagawa",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Agodashi Oden",
+      "negozio": "triple-seven",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Amazake definitivo",
       "articolo": "distributori-automatici/amazake-definitivo",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Arginade",
       "articolo": "distributori-automatici/arginade",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Aroma rinfrescante",
       "articolo": "body-chop/aroma-rinfrescante",
-      "negozio": "body-chop"
+      "negozio": "body-chop",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Balsamo vegetale",
       "articolo": "fiorista-rafflesia/balsamo-vegetale",
-      "negozio": "fiorista-rafflesia"
+      "negozio": "fiorista-rafflesia",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Benda adesiva",
       "articolo": "farmacia-aohige/benda-adesiva",
-      "negozio": "farmacia-aohige"
+      "negozio": "farmacia-aohige",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Beni-Azuma",
       "articolo": "venditore-patate-dolci/beni-azuma",
-      "negozio": "venditore-patate-dolci"
+      "negozio": "venditore-patate-dolci",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Big Bang Burger",
       "articolo": "big-bang-burger/big-bang-burger",
-      "negozio": "big-bang-burger"
+      "negozio": "big-bang-burger",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Bomba di popcorn",
       "articolo": "mealport/bomba-di-popcorn",
-      "negozio": "mealport"
+      "negozio": "mealport",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Capsula d'allerta",
       "articolo": "clinica-takemi/capsula-d-allerta",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Caramella frizzina",
+      "negozio": "farmacia-aohige",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Catena di perline",
+      "negozio": "negozio-palazzo-niijima",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Ceneri del pentimento",
+      "negozio": "chiesa-kanda",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Cereali assortiti",
       "articolo": "mealport/cereali-assortiti",
-      "negozio": "mealport"
+      "negozio": "mealport",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Chimaki speciale",
       "articolo": "street-food-houraku/chimaki-speciale",
-      "negozio": "street-food-houraku"
+      "negozio": "street-food-houraku",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Cioccolato osechi",
+      "negozio": "triple-seven",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Creatura",
       "articolo": "distributori-automatici/creatura",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Crostatina angelo",
       "articolo": "taisho-store/crostatina-angelo",
-      "negozio": "taisho-store"
+      "negozio": "taisho-store",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Cuoio conciato",
       "articolo": "yumenoshima/cuoio-conciato",
-      "negozio": "yumenoshima"
+      "negozio": "yumenoshima",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Curry alla fragola",
       "articolo": "distributori-automatici/curry-alla-fragola",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Curry del Leblanc",
       "articolo": "leblanc/curry-del-leblanc",
-      "negozio": "leblanc"
+      "negozio": "leblanc",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Dango lunare",
+      "negozio": "super-muramasa",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Danish di frutta",
+      "negozio": "panetteria-yon-germain",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Dr. Salt NEO",
       "articolo": "distributori-automatici/dr-salt-neo",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Durian au lait",
       "articolo": "distributori-automatici/durian-au-lait",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Earl Green",
       "articolo": "distributori-automatici/earl-green",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Elisir del padre",
       "articolo": "mercante-sakai/elisir-del-padre",
-      "negozio": "mercante-sakai"
+      "negozio": "mercante-sakai",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Fibbia di latta",
       "articolo": "yumenoshima/fibbia-di-latta",
-      "negozio": "yumenoshima"
+      "negozio": "yumenoshima",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Foglio d'alluminio",
+      "negozio": "akiba",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Fosforo rosso",
       "articolo": "akiba/fosforo-rosso",
-      "negozio": "akiba"
+      "negozio": "akiba",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Frullato iperproteico",
       "articolo": "prossimo-asso/frullato-iperproteico",
-      "negozio": "prossimo-asso"
+      "negozio": "prossimo-asso",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Frullato proteico",
       "articolo": "discount-rocinante/frullato-proteico",
-      "negozio": "discount-rocinante"
+      "negozio": "discount-rocinante",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Frutta secca",
+      "negozio": "super-muramasa",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Gel rilassante",
       "articolo": "clinica-takemi/gel-rilassante",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Gelatina viennese",
       "articolo": "prossimo-asso/gelatina-viennese",
-      "negozio": "prossimo-asso"
+      "negozio": "prossimo-asso",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Gocce per occhioni",
       "articolo": "farmacia-aohige/gocce-per-occhioni",
-      "negozio": "farmacia-aohige"
+      "negozio": "farmacia-aohige",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Gomitolo di seta",
       "articolo": "yumenoshima/gomitolo-di-seta",
-      "negozio": "yumenoshima"
+      "negozio": "yumenoshima",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Gomma non statica",
       "articolo": "chiosco-kiyasuku/gomma-non-statica",
-      "negozio": "chiosco-kiyasuku"
+      "negozio": "chiosco-kiyasuku",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Homunculus",
       "articolo": "tanaka-affari-loschi/homunculus",
-      "negozio": "tanaka-affari-loschi"
+      "negozio": "tanaka-affari-loschi",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Incenso AG",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Incenso del risveglio",
       "articolo": "vestiti-usati-kichijoji/incenso-del-risveglio",
-      "negozio": "vestiti-usati-kichijoji"
+      "negozio": "vestiti-usati-kichijoji",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Incenso FO",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Incenso FR",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Incenso MA",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Incenso RS",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Insalata venere",
       "articolo": "big-bang-burger/insalata-venere",
-      "negozio": "big-bang-burger"
+      "negozio": "big-bang-burger",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "IV 100",
       "articolo": "clinica-takemi/iv-100",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "IV 50",
       "articolo": "clinica-takemi/iv-50",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Jagariko",
+      "negozio": "triple-seven",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Joylent",
       "articolo": "distributori-automatici/joylent",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Kajaclear-R",
       "articolo": "clinica-takemi/kajaclear-r",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Katsu a pezzettoni",
       "articolo": "friggitoria-hagoromo/katsu-a-pezzettoni",
-      "negozio": "friggitoria-hagoromo"
+      "negozio": "friggitoria-hagoromo",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Kogatana nera",
       "articolo": "untouchable/kogatana-nera",
-      "negozio": "untouchable"
+      "negozio": "untouchable",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Kundaclear-R",
       "articolo": "clinica-takemi/kundaclear-r",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Lente condensante",
       "articolo": "akiba/lente-condensante",
-      "negozio": "akiba"
+      "negozio": "akiba",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Lenzuolo rinfrescante",
       "articolo": "chiosco-kiyasuku/lenzuolo-rinfrescante",
-      "negozio": "chiosco-kiyasuku"
+      "negozio": "chiosco-kiyasuku",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Locusta alla maionese",
       "articolo": "distributori-automatici/locusta-alla-maionese",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Manta",
       "articolo": "distributori-automatici/manta",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Melon pan",
       "articolo": "panetteria-yon-germain/melon-pan",
-      "negozio": "panetteria-yon-germain"
+      "negozio": "panetteria-yon-germain",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Mercurio",
       "articolo": "yumenoshima/mercurio",
-      "negozio": "yumenoshima"
+      "negozio": "yumenoshima",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Miso di stella marina",
       "articolo": "distributori-automatici/miso-di-stella-marina",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Muschio FR-AG",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Muschio FR-MA",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Muschio MA-FO",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Muschio MA-RS",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
+    },
+    {
+      "nome": "Muschio RS-AG",
+      "negozio": "mantra-ganda",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Nastea",
       "articolo": "distributori-automatici/nastea",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Natto rugiadoso",
       "articolo": "taisho-store/natto-rugiadoso",
-      "negozio": "taisho-store"
+      "negozio": "taisho-store",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Nikuman alla napoletana",
       "articolo": "street-food-houraku/nikuman-alla-napoletana",
-      "negozio": "street-food-houraku"
+      "negozio": "street-food-houraku",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Nikuman gustoso",
       "articolo": "street-food-houraku/nikuman-gustoso",
-      "negozio": "street-food-houraku"
+      "negozio": "street-food-houraku",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Nikuman piccante",
       "articolo": "street-food-houraku/nikuman-piccante",
-      "negozio": "street-food-houraku"
+      "negozio": "street-food-houraku",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Nikuman straniero",
       "articolo": "triple-seven/nikuman-straniero",
-      "negozio": "triple-seven"
+      "negozio": "triple-seven",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Nohar-M",
       "articolo": "clinica-takemi/nohar-m",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Olio del recupero",
       "articolo": "body-chop/olio-del-recupero",
-      "negozio": "body-chop"
+      "negozio": "body-chop",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Pane autunnale",
+      "negozio": "negozio-scolastico",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Pane e marmellata",
       "articolo": "negozio-scolastico/pane-e-marmellata",
-      "negozio": "negozio-scolastico"
+      "negozio": "negozio-scolastico",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Panfritto",
       "articolo": "negozio-scolastico/panfritto",
-      "negozio": "negozio-scolastico"
+      "negozio": "negozio-scolastico",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Panino con yakisoba",
       "articolo": "negozio-scolastico/panino-con-yakisoba",
-      "negozio": "negozio-scolastico"
+      "negozio": "negozio-scolastico",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Panino lunare",
       "articolo": "big-bang-burger/panino-lunare",
-      "negozio": "big-bang-burger"
+      "negozio": "big-bang-burger",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Panino supernova",
       "articolo": "big-bang-burger/panino-supernova",
-      "negozio": "big-bang-burger"
+      "negozio": "big-bang-burger",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Panino terrestre",
       "articolo": "big-bang-burger/panino-terrestre",
-      "negozio": "big-bang-burger"
+      "negozio": "big-bang-burger",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Patatine saturnine",
       "articolo": "big-bang-burger/patatine-saturnine",
-      "negozio": "big-bang-burger"
+      "negozio": "big-bang-burger",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Pergamena spessa",
       "articolo": "yumenoshima/pergamena-spessa",
-      "negozio": "yumenoshima"
+      "negozio": "yumenoshima",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Proteine d'importazione",
       "articolo": "prossimo-asso/proteine-d-importazione",
-      "negozio": "prossimo-asso"
+      "negozio": "prossimo-asso",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Punch non filtrato",
       "articolo": "distributori-automatici/punch-non-filtrato",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Razione militare",
       "articolo": "untouchable/razione-militare",
-      "negozio": "untouchable"
+      "negozio": "untouchable",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Re Karaage",
       "articolo": "triple-seven/re-karaage",
-      "negozio": "triple-seven"
+      "negozio": "triple-seven",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Recup-RO: 100 mg",
       "articolo": "clinica-takemi/recup-ro-100-mg",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Recup-RO: 50 mg",
       "articolo": "clinica-takemi/recup-ro-50-mg",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Reviv-all",
       "articolo": "clinica-takemi/reviv-all",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Rianidrin",
       "articolo": "clinica-takemi/rianidrin",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Rinnov-all",
       "articolo": "clinica-takemi/rinnov-all",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Roccia nera",
       "articolo": "stoneon/roccia-nera",
-      "negozio": "stoneon"
+      "negozio": "stoneon",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sabbia ferrea",
       "articolo": "akiba/sabbia-ferrea",
-      "negozio": "akiba"
+      "negozio": "akiba",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sandalo rasta",
       "articolo": "mantra-ganda/sandalo-rasta",
-      "negozio": "mantra-ganda"
+      "negozio": "mantra-ganda",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sandwich",
       "articolo": "panetteria-yon-germain/sandwich",
-      "negozio": "panetteria-yon-germain"
+      "negozio": "panetteria-yon-germain",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Sandwich inzuppato",
+      "negozio": "panetteria-yon-germain",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Scaldamani",
       "articolo": "chiosco-kiyasuku/scaldamani",
-      "negozio": "chiosco-kiyasuku"
+      "negozio": "chiosco-kiyasuku",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Second Maid",
       "articolo": "distributori-automatici/second-maid",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sicchenina",
       "articolo": "farmacia-aohige/sicchenina",
-      "negozio": "farmacia-aohige"
+      "negozio": "farmacia-aohige",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sicchenina A",
       "articolo": "farmacia-aohige/sicchenina-a",
-      "negozio": "farmacia-aohige"
+      "negozio": "farmacia-aohige",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sicchenina EX",
       "articolo": "farmacia-aohige/sicchenina-ex",
-      "negozio": "farmacia-aohige"
+      "negozio": "farmacia-aohige",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Soba calmante",
       "articolo": "triple-seven/soba-calmante",
-      "negozio": "triple-seven"
+      "negozio": "triple-seven",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Soda di Udagawa",
       "articolo": "distributori-automatici/soda-di-udagawa",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Soma",
       "articolo": "negozio-palazzo-niijima/soma",
-      "negozio": "negozio-palazzo-niijima"
+      "negozio": "negozio-palazzo-niijima",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Spray detergente",
       "articolo": "vestiti-usati-kichijoji/spray-detergente",
-      "negozio": "vestiti-usati-kichijoji"
+      "negozio": "vestiti-usati-kichijoji",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Spray rapido",
       "articolo": "vestiti-usati-kichijoji/spray-rapido",
-      "negozio": "vestiti-usati-kichijoji"
+      "negozio": "vestiti-usati-kichijoji",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Spray supremo",
       "articolo": "vestiti-usati-kichijoji/spray-supremo",
-      "negozio": "vestiti-usati-kichijoji"
+      "negozio": "vestiti-usati-kichijoji",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Starvicks",
       "articolo": "distributori-automatici/starvicks",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Sughero",
       "articolo": "fiorista-rafflesia/sughero",
-      "negozio": "fiorista-rafflesia"
+      "negozio": "fiorista-rafflesia",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Takemedic-All",
       "articolo": "clinica-takemi/takemedic-all",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Takemedic-All V",
       "articolo": "clinica-takemi/takemedic-all-v",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Takemedic-All Z",
       "articolo": "clinica-takemi/takemedic-all-z",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Tè caldo e aspro",
+      "negozio": "farmacia-aohige",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Tè energetico",
       "articolo": "distributori-automatici/te-energetico",
-      "negozio": "distributori-automatici"
+      "negozio": "distributori-automatici",
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Tessera puntate alte",
+      "negozio": "negozio-palazzo-niijima",
+      "via": "trascritto dalla guida"
     },
     {
       "nome": "Trambusto S",
       "articolo": "prossimo-asso/trambusto-s",
-      "negozio": "prossimo-asso"
+      "negozio": "prossimo-asso",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Tris di calamari",
       "articolo": "super-muramasa/tris-di-calamari",
-      "negozio": "super-muramasa"
+      "negozio": "super-muramasa",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Unguento fisico",
       "articolo": "clinica-takemi/unguento-fisico",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Unguento magico",
       "articolo": "clinica-takemi/unguento-magico",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Unguento vitale",
       "articolo": "clinica-takemi/unguento-vitale",
-      "negozio": "clinica-takemi"
+      "negozio": "clinica-takemi",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Vino della grazia",
       "articolo": "chiesa-kanda/vino-della-grazia",
-      "negozio": "chiesa-kanda"
+      "negozio": "chiesa-kanda",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Wafer dei ladri",
       "articolo": "discount-rocinante/wafer-dei-ladri",
-      "negozio": "discount-rocinante"
+      "negozio": "discount-rocinante",
+      "via": "nome dell’articolo"
     },
     {
       "nome": "Yaki-Imo leggendario",
       "articolo": "venditore-patate-dolci/yaki-imo-leggendario",
-      "negozio": "venditore-patate-dolci"
+      "negozio": "venditore-patate-dolci",
+      "via": "nome dell’articolo"
     }
   ],
   "summary": {
     "vociGuida": 355,
     "articoli": 499,
-    "abbinati": 104,
-    "scartati": {
-      "più di un articolo con quel nome": 2,
-      "più di un oggetto con quel nome": 0,
-      "nessun articolo con quel nome": 249
+    "abbinati": 129,
+    "perVia": {
+      "nome dell’articolo": 104,
+      "trascritto dalla guida": 25
+    },
+    "problemi": {
+      "negozio trascritto che il catalogo non ha": 0,
+      "articolo di un’altra sezione della guida (accessori, armi, libri, DVD…)": 123,
+      "oggetto della guida con lo stesso nome di un altro": 0,
+      "oggetto senza articolo e non trascritto in nessun negozio": 225
     }
   },
-  "esempiScartati": {
-    "più di un articolo con quel nome": [
-      "Cesta di vestiti",
-      "Veste nera"
+  "problemi": {
+    "negozio trascritto che il catalogo non ha": [],
+    "articolo di un’altra sezione della guida (accessori, armi, libri, DVD…)": [
+      "super-muramasa: Confezione di frutta primaverile",
+      "yumenoshima: Lettore DVD",
+      "yumenoshima: Famidrive",
+      "yumenoshima: Gambla Goemon",
+      "yumenoshima: Laptop rotto",
+      "body-chop: Profumo di design",
+      "body-chop: Set aromi pregiati",
+      "body-chop: Rossetto cremisi",
+      "37-gradi-celsius: Anello del respiro",
+      "37-gradi-celsius: Anello dell'energia",
+      "37-gradi-celsius: Anello della vitalità",
+      "37-gradi-celsius: Strangolino dei chakra",
+      "37-gradi-celsius: Strangolino della mente",
+      "37-gradi-celsius: Strangolino dell'anima",
+      "taisho-store: Flan al tè matcha",
+      "taisho-store: Tartufi",
+      "taisho-store: Castella",
+      "tsurukame-diamond: Anello del cuore",
+      "tsurukame-diamond: Braccialetto d'argento",
+      "tsurukame-diamond: Fascia rossa",
+      "tsurukame-diamond: Fascia blu",
+      "tsurukame-diamond: Fascia verde",
+      "tsurukame-diamond: Fascia gialla",
+      "tsurukame-diamond: Braccialetto stelle",
+      "tsurukame-diamond: Braccialetto circolare",
+      "tsurukame-diamond: Braccialetto bianco",
+      "tsurukame-diamond: Braccialetto nero",
+      "high-sense: Copertina",
+      "high-sense: Vaso di vetro",
+      "high-sense: Ventaglio Sakura",
+      "prossimo-asso: Collana magnetica",
+      "prossimo-asso: Pesi da polso",
+      "prossimo-asso: Occhiali da sole sportivi",
+      "prossimo-asso: Canna potente",
+      "prossimo-asso: Canna hi-tech",
+      "prossimo-asso: Boilie sospetto",
+      "prossimo-asso: Esperto a biliardo",
+      "prossimo-asso: Set di freccette",
+      "fiorista-rafflesia: Bionutrienti",
+      "libreria-taiheido: Eredità dell'Impiccato"
     ],
-    "più di un oggetto con quel nome": [],
-    "nessun articolo con quel nome": [
+    "oggetto della guida con lo stesso nome di un altro": [],
+    "oggetto senza articolo e non trascritto in nessun negozio": [
       "Frutto del diavolo",
       "Medicina",
       "Takemedic",
-      "Sandwich inzuppato",
-      "Dango lunare"
+      "Pietra vitale",
+      "Perlina",
+      "Mela Hogyoku",
+      "Goccia dell'anima",
+      "Sakura Mochi",
+      "Polvere d'anima",
+      "Anima da masticare",
+      "Bignè alla panna di Ann",
+      "Ciambelle di Makoto",
+      "Taiyaki di Sadayo",
+      "Amezaiku di Sakura",
+      "Hot dog di Ryuji",
+      "Kit energetico S",
+      "Kit energetico L",
+      "Pane per l'anima",
+      "Carota chiardiluna",
+      "Perlina rigenerante",
+      "Band-Ace",
+      "Balsamo vitale",
+      "Pappa reale R",
+      "Oh! Shiruko",
+      "Zuppa a pezzettoni",
+      "Zuppa di zucca",
+      "Carne in scatola spec.",
+      "Festa in lattina",
+      "Pacco di frutta primav.",
+      "Salgemma infranto",
+      "Caffè del Leblanc",
+      "Caffè acido",
+      "Caffè amaro",
+      "Caffè del maestro",
+      "Curry decente",
+      "Curry di fuoco",
+      "Curry fiammante",
+      "Curry infernale",
+      "Curry del maestro",
+      "Pomodoro solare"
     ]
   }
 }
