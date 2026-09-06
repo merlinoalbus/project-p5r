@@ -581,3 +581,284 @@ preferibile sostituire le uscite con asserzioni esplicite sull'esistenza della f
 **Decisione:** quattro dei cinque rilievi originari sono chiusi e la nuova copertura è reale.
 Fase 3d resta respinta finché il collegamento di Oggetti non è risolto con associazioni
 strutturate e lo strumento di copertura non distingue gli errori dalle assenze legittime.
+
+## Fase 3d — Terza verifica del fallback al posto dichiarato
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `5e93228`
+**Data verifica:** 6 settembre 2026
+
+### Rilievi chiusi
+
+1. `copertura-accesso.ts` separa ora le eccezioni dalle assenze legittime, registra chiave e
+   messaggio, stampa gli errori e termina con codice 1 quando ne incontra almeno uno. La misura
+   rieseguita su una copia isolata del database termina con **zero errori** e riproduce
+   **1.321 accessi su 1.371 voci (96,35%)**, dei quali 498 con pin preciso.
+2. Le due uscite anticipate nel test dei confidenti sono state sostituite da asserzioni: il test
+   non può più passare senza aver esercitato la fixture attesa.
+3. Sul commit verificato: typecheck PASS, lint PASS, build PASS, test mirati **8/8**, suite
+   completa **537/537**. Il build mantiene soltanto l'avviso già noto sul chunk principale.
+
+### Nuovo rilievo bloccante sul fallback
+
+Il codice dichiara di allargare al quartiere o al Palazzo soltanto quando le associazioni dirette
+non producono una destinazione. L'implementazione però aggiunge `area -> dungeon`,
+`negozio -> quartiere` e `luogo -> quartiere` a `riferimenti` **prima** della prima chiamata a
+`cerca()`. Il blocco successivo protetto da `if (destinazioni.size === 0)` ripete la stessa
+espansione, quando ormai i riferimenti sono già stati aggiunti.
+
+La controprova sull'intero inventario trova **70 entità** che ricevono insieme almeno un pin
+preciso e almeno una destinazione generica. Esempi riproducibili:
+
+* `luogo:akihabara/super-baron` -> pin `akihabara-electric-town:265` più mappa generica
+  `akihabara`;
+* `luogo:kichijoji/jazz-jin` -> pin `kichijoji-quartiere-dello-shopping:305` più mappa generica
+  `kichijoji`;
+* `negozio:body-chop` -> pin `shibuya-centro-comm-sotterraneo:1008` più mappa generica
+  `shibuya`.
+
+Le destinazioni generiche risultano inoltre marcate `entita-mappa`, non `posto-dichiarato`, perché
+`ripiego` è ancora `false` durante la prima ricerca. La deduplicazione finale elimina il generico
+soltanto quando ha la stessa `mappa` normalizzata del pin; non elimina la seconda meta quando il
+pin è su una planimetria figlia e il fallback è sulla mappa d'insieme.
+
+**Correzione richiesta a Claude:** costruire e cercare prima soltanto i riferimenti diretti; se e
+solo se `destinazioni.size === 0`, aggiungere in un secondo insieme i riferimenti al posto
+dichiarato, attivare `ripiego` e cercare quelli. Aggiungere una regressione con pin preciso su una
+planimetria figlia e quartiere su una mappa diversa, verificando una sola destinazione e assenza
+di `posto-dichiarato`. Aggiungere anche un caso senza pin che verifichi criterio
+`posto-dichiarato`.
+
+### Rilievo originario ancora aperto
+
+`src/pages/OggettiPage.tsx` continua a non importare né usare `CollegamentoMappa`. Il backend
+risolve gli articoli, ma la superficie UI richiesta dal piano non espone ancora l'accesso.
+
+**Decisione:** le correzioni alla misura sono approvate e il valore 96,35% è riproducibile, ma
+la Fase 3d resta respinta per il fallback eseguito prematuramente e per il collegamento ancora
+assente nella pagina Oggetti.
+
+## Fase 2 — Quarta verifica: pin di bordo, osservazioni e collegamenti
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `3f1810c` (dichiarazione introdotta in `2ac55ee`, file della Fase 2 invariati)
+**Data verifica:** 6 settembre 2026
+
+### Evidenze riprodotte
+
+1. I tre artefatti `pin-di-bordo.json`, `osservazioni-icone-esito.json` e
+   `collegamenti-mappe.json` sono stati rigenerati due volte in cartelle isolate: entrambe le
+   copie hanno la stessa impronta dei file versionati. Su Windows i due generatori che stampano
+   la freccia `→` terminano però con `UnicodeEncodeError` dopo aver scritto il file se non si
+   imposta UTF-8; i comandi documentati vanno resi eseguibili così come sono o devono dichiarare
+   il requisito `PYTHONUTF8=1`.
+2. Le quote laterali si riproducono: tipo 13, 65,2% in alto; tipo 14, 70,4% a destra;
+   tipo 15, 75,8% in basso; tipo 16, 79,7% a sinistra. I lati sono distinti e il migliore dei
+   tipi interni si ferma al 48,5%.
+3. Il vincolo sulle schermate si riproduce: `stanza-sicura` lascia come unico candidato il tipo
+   4 su cinque osservazioni; `forziere` lascia il tipo 26 su quattro. Il pin tipo 4 di
+   `RMAP_151_7_0` è a `(732, 206)`, nella stanzetta superiore descritta dall'osservazione.
+4. I 71 collegamenti sono contabilmente coerenti: 28 da trigger proiettato e 43 da meta unica.
+   La ricostruzione indipendente delle assegnazioni finali trova zero collegamenti scelti fra più
+   mappe valide. Le 71 chiavi sono uniche e appartengono tutte ai 262 pin candidati; gli altri
+   191 non hanno alcuna riga di collegamento.
+
+### Rilievi bloccanti
+
+1. **Uno dei quattro tipi di bordo viola il criterio dichiarato.** `QUOTA_FUORI` vale 0,5, ma
+   il tipo 15 ha `quotaFuoriDalTratto = 0,470`. `edge_pins.py` seleziona i candidati usando
+   soltanto `quotaLato`; la soglia sul fuori-tratto è scritta nell'artefatto e nella descrizione,
+   ma non è applicata. `verify_edge_pins.py` non la controlla. I 262 pin e la copertura 780
+   includono quindi 66 pin che non superano il contratto dichiarato.
+2. **La controprova indipendente sul tipo 26 è presente nei dati ma non viene verificata.** Il
+   tipo 26 ha `script.stato = determinato` e famiglia `R_TBOX|RARE_TBOX` in 32 casi su 33, con
+   lo stesso `tipoSpillo` dell'osservazione. Tuttavia `verify_icon_observations.py` stampa
+   `0 confermati anche da un'altra strada indipendente`: guarda la `prova` finale di
+   `semantica-pin.json`, già sovrascritta da «icone contate», e salta proprio il confronto che
+   promette. Il test deve leggere l'evidenza `script` e pretendere almeno la conferma del tipo 26.
+3. **Le cinque schermate non sono auditabili dal repository.** Sono versionati i conteggi e le
+   note, non i file sorgente né impronte/riferimenti stabili. Si può ricontrollare la soluzione
+   combinatoria contro `mondo_metadati.json`, ma non rileggere visivamente le osservazioni da cui
+   dipende la deduzione.
+
+### Rilievo di robustezza sui collegamenti
+
+Nello stato corrente nessuno dei 71 collegamenti finali sceglie fra più mappe. Tuttavia il ramo
+`trigger proiettato` usa `next(...)` sulla prima destinazione valida senza esigere prima che la
+meta sia unica. Oggi un trigger ambiguo viene scavalcato da un trigger più vicino e univoco, ma
+una variazione dei dati potrebbe renderlo vincente. Il verificatore deve ricostruire le mete
+valide, rifiutare ogni assegnazione ambigua e certificare esplicitamente anche la contabilità
+71 collegate / 191 irrisolte.
+
+**Decisione:** il merito dei conteggi delle icone e la contabilità dei collegamenti sono
+sostanzialmente riprodotti, ma la Fase 2 resta respinta. Prima della riverifica occorre applicare
+e verificare davvero la soglia fuori-tratto, rigenerare a cascata copertura e collegamenti,
+rendere effettiva la controprova sul tipo 26, blindare l'unicità delle mete e rendere stabile la
+provenienza delle cinque schermate.
+
+## Fase 2 — Quinta verifica dopo le correzioni
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `3989bfe`
+**Data verifica:** 6 settembre 2026
+
+### Rilievi chiusi
+
+1. La prova dei tipi 13–16 è stata riformulata correttamente sulla dominanza laterale e sul
+   contrasto con i tipi interni: 65,2% alto, 70,4% destra, 75,8% basso e 79,7% sinistra, contro
+   un massimo interno del 48,5%. La quota fuori dal tratto è ora soltanto descrittiva. La
+   controprova binomiale indipendente, corretta prudenzialmente sui 16 tipi e sui quattro lati,
+   resta significativa per tutti e quattro i tipi.
+2. `verify_icon_observations.py` legge ora l'evidenza grezza degli script: il tipo 26 è
+   confermato come `forziere` sia dal conteggio visivo sia dalle procedure `R_TBOX`. Il
+   verificatore pretende almeno una conferma indipendente e controlla anche la posizione
+   registrata per il tipo 4.
+3. `map_links.py` scarta ora le procedure con più mappe valide invece di scegliere la prima.
+   Una ricostruzione indipendente dello stato corrente trova 28 assegnazioni da trigger senza
+   ambiguità, 43 collegamenti a meta unica e contabilità chiusa: 71 collegati + 191 irrisolti =
+   262 candidati.
+4. I generatori non usano più la freccia Unicode nell'output e terminano con codice 0 sulla
+   console Windows ordinaria. Due rigenerazioni isolate dei quattro artefatti coincidono fra
+   loro e con i file versionati. Il pacchetto seed rigenerato coincide byte per byte con quello
+   versionato: 298 mappe, 780 pin posati, 637 condizionati e 1429/1429 pin contabilizzati.
+
+### Rilievi ancora bloccanti
+
+1. **Il docstring di `edge_pins.py` contraddice il criterio corretto.** Alle righe 7–8 dichiara
+   ancora che i quattro tipi cadono «fuori dal tratto nel 90% dei casi». I valori reali sono
+   57,6%, 56,3%, 47,0% e 59,3%. Logica, artefatto e stato sono coerenti con la nuova prova
+   laterale, ma questa affermazione residua è falsa e deve essere corretta.
+2. **Il verificatore non copre le 28 assegnazioni `trigger proiettato`.**
+   `verify_edge_pins.py` ricostruisce le mete soltanto dentro il ramo
+   `meta unica della planimetria`. Per le righe da trigger controlla il tipo del pin e l'unicità
+   della chiave, ma non ricostruisce procedura vincente, proiezione, soglia dell'8%, distanza,
+   mete valide, `arrivo` e `ingresso`. Alterare arbitrariamente un arrivo continuerebbe quindi
+   a far passare il controllo, purché il totale resti 71.
+
+**Correzione richiesta a Claude:** correggere il docstring obsoleto e fare sì che il verificatore
+ricostruisca l'intero insieme atteso delle 28 assegnazioni da trigger con la stessa informazione
+nativa ma con calcolo indipendente, confrontando esattamente partenza, indice del pin, arrivo,
+ingresso, distanza e modo. Devono essere verificati anche la soglia dell'8%, il candidato più
+vicino, la sostituzione del precedente e i modi ammessi. L'unicità va pretesa sulla destinazione
+completa; se più ingressi della stessa mappa sono ammessi, la scelta deve essere motivata e
+verificata esplicitamente.
+
+**Decisione:** le quattro correzioni producono dati correnti corretti e riproducibili, ma il gate
+resta **FAIL** finché il controllo automatico non è capace di rilevare una regressione nelle 28
+assegnazioni da trigger e la documentazione nel codice non descrive fedelmente la prova adottata.
+
+## Fase 2 — Sesta verifica dopo la ricostruzione dei collegamenti
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `68b7c5a`
+**Data verifica:** 6 settembre 2026
+
+### I due rilievi precedenti sono chiusi
+
+1. Il docstring di `edge_pins.py` descrive ora la prova effettiva: dominanza laterale del 65,2%,
+   70,4%, 75,8% e 79,7% contro il massimo interno del 48,5%. Le quote oltre il perimetro del
+   57,6%, 56,3%, 47,0% e 59,3% sono presentate correttamente come dati descrittivi.
+2. Il verificatore ricostruisce le 28 assegnazioni `trigger proiettato`: riproietta i trigger,
+   calcola l'argmin fra tutti i pin, applica la soglia dell'8%, risolve le contese per distanza e
+   confronta partenza, indice del pin, arrivo, ingresso, distanza, modo e punto d'arrivo. Insieme
+   ai 43 casi a meta unica ricostruisce esattamente le 71 righe; 71 + 191 = 262.
+3. In una copia temporanea l'artefatto rigenerato è byte-identico al versionato, 34.432 byte. Le
+   mutazioni indipendenti di arrivo, ingresso, distanza, modo, punto d'arrivo e contabilità sono
+   state tutte rifiutate con codice di uscita 1.
+
+### Regressione dati bloccante introdotta dal commit
+
+`data/atlas/extracted/mondo_connessioni_evidenze.json` è stato rigenerato senza la directory
+corretta degli script e ha perso le evidenze già certificate. Il confronto con il genitore del
+commit misura:
+
+| dato | prima | dopo |
+|---|---:|---:|
+| campi | 209 | 209 |
+| trigger | 4.525 | 4.525 |
+| script | **192** | **0** |
+| procedure | **15.734** | **0** |
+| chiamate `CALL_FIELD` | **2.514** | **0** |
+| trigger con procedura risolta | **4.495** | **0** |
+
+Il diff dell'artefatto è di 10.007 righe aggiunte e 148.576 eliminate. Nel contempo
+`verifica_connessioni_evidenze.json` è rimasto stantio e dichiara ancora `PASS`, 192 script e
+2.514 chiamate: i due artefatti versionati si contraddicono.
+
+La causa è riproducibile nel comando documentato:
+
+```bash
+cd tools/p5r-map-export && for v in verify_*.py; do python "$v" ../../data/atlas/extracted ../..; done
+```
+
+`verify_world_connections.py` interpreta il secondo argomento come cartella contenente i file
+`.flow`; `../..` non è quella cartella. Il generatore ricrea quindi l'artefatto con zero script e,
+una volta che quella versione impoverita è diventata la baseline, il controllo di determinismo
+può risultare verde. Mancano inoltre asserzioni che impediscano la caduta a zero della copertura.
+
+### Correzioni richieste a Claude
+
+1. Ripristinare `mondo_connessioni_evidenze.json` completo da fonte certificata, con almeno i
+   conteggi precedenti: 192 script, 15.734 procedure, 2.514 chiamate e 4.495 trigger risolti.
+2. Rigenerare coerentemente `verifica_connessioni_evidenze.json`, così che rapporto e artefatto
+   descrivano lo stesso stato.
+3. Correggere il comando cumulativo affinché passi la vera sorgente degli script; il verificatore
+   deve operare su una copia temporanea o comunque non distruggere l'artefatto versionato quando
+   gli input sono incompleti.
+4. Aggiungere asserzioni sui conteggi attesi o su minimi non nulli prima di qualunque scrittura.
+5. Come miglioramento non bloccante, duplicare nel verificatore il calcolo del punto d'arrivo:
+   oggi la selezione dei trigger è indipendente, ma `map_links.punto_di_arrivo` è riusato e un
+   errore sistematico in quella funzione passerebbe sia nel produttore sia nel controllo.
+
+**Decisione:** la ricostruzione dei collegamenti supera il riesame, ma la Fase 2 resta **FAIL**
+perché il commit che la dichiara pronta ha cancellato evidenze native già certificate e ha lasciato
+un rapporto di verifica incoerente. Nessun gate può passare introducendo una regressione di dati.
+
+## Fase 3d — Quarta verifica degli accessi dopo il censimento editoriale
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `ed4ccca`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. Su backup SQLite isolato, `genera-crosswalk-oggetti.ts` produce un file byte-identico a quello
+   versionato: 355 voci della guida, 575 articoli, 121 abbinamenti — 118 per nome dell'articolo e
+   3 per trascrizione — e 234 esclusi. Un controllo indipendente trova zero duplicati, zero negozi
+   inesistenti e zero corrispondenze non univoche.
+2. La copertura dell'inventario corrente è 1.406 accessi su 1.460 voci, 503 con punto preciso e
+   zero errori del risolutore. Il controllo su tutte le 1.460 entità trova zero casi con un pin
+   preciso affiancato da una meta generica e zero pin accompagnati dal criterio
+   `posto-dichiarato`.
+3. La controprova negativa è efficace: su una copia in cui la tabella `mappa` è stata rinominata,
+   lo strumento registra 1.460 errori distinti, dichiara la misura non valida ed esce con codice 1.
+4. Il validatore indipendente riproduce 20 test mirati su 20, inclusi i fallback del risolutore e
+   la superficie di accesso.
+
+### Rilievo bloccante nella UI Oggetti
+
+`OggettiPage.tsx` mostra il comando «Sulla mappa», ma `CollegamentoMappa` usa
+`schedaAccessoMondo()`. Per `articolo` quella funzione produce `/guida/negozi` e per `negozio`
+produce `/guida/negozi/<chiave>`: non invoca la rotta del risolutore
+`/guida/mondo/<tipo>/<chiave>` e quindi il comando non conduce alla mappa.
+
+Manca un test specifico che eserciti il collegamento dalla pagina Oggetti e controlli anche una
+chiave articolo contenente `/`. Inoltre quattro delle 121 voci collegate dal crosswalk non hanno
+oggi alcuna destinazione risolta — `Catena di perline`, `Soma`, `Homunculus` e
+`Tessera puntate alte` — e la UI deve evitare un invito falso oppure dichiarare esplicitamente che
+la posizione non è disponibile.
+
+### Dichiarazione stantia e riproducibilità
+
+La quarta dichiarazione in `ATLANTE-STATO.md` precede l'ampliamento del censimento e non descrive
+più lo stato del commit: 1.321/1.371 deve diventare 1.406/1.460; 104 abbinamenti e 249 esclusi
+devono diventare 121 e 234; anche i conti per articoli, negozi e la vecchia tabella 378/534 vanno
+aggiornati.
+
+Il campo `generato` del crosswalk usa la data corrente: oggi il file è byte-identico, ma una
+rigenerazione in un giorno diverso cambia l'artefatto senza variazioni delle fonti. Occorre rendere
+il campo stabile oppure dichiarare e verificare soltanto la riproducibilità semantica.
+
+**Decisione:** il resolver, il ripiego e il crosswalk superano il controllo di merito, ma la Fase
+3d resta **FAIL** finché «Sulla mappa» non usa davvero il resolver, i quattro casi senza meta non
+sono gestiti, manca la regressione UI e la dichiarazione non viene aggiornata.

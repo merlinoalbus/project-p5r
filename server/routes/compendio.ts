@@ -74,6 +74,20 @@ router.get('/confidenti', (_req, res) => {
 router.get('/oggetti-guida', (_req, res) => {
   const dati = datiGuida<OggettiGuidaDto>('oggetti-guida');
   if (!dati) throw httpErrors.notFound('oggetti-non-disponibili', 'I dati degli oggetti della guida non sono caricati.');
+  // Gli oggetti della guida hanno solo un nome; il crosswalk versionato dice quali di essi sono
+  // anche articoli del catalogo, e per quelli la riga può arrivare alla mappa. Gli altri no, e va
+  // bene così: un abbinamento incerto porterebbe nel posto sbagliato.
+  const ponte = datiGuida<{ abbinamenti: Array<{ nome: string; articolo?: string; negozi: string[] }> }>('oggetti-crosswalk');
+  if (ponte) {
+    const per = new Map(ponte.abbinamenti.map((a) => [a.nome, a]));
+    const lega = (v: { nome: string; articolo?: string; negozi?: string[] }) => {
+      const a = per.get(v.nome);
+      if (!a) return;
+      if (a.articolo) v.articolo = a.articolo; else v.negozi = a.negozi;
+    };
+    for (const v of dati.consumabili ?? []) lega(v);
+    for (const v of dati.chiaveEMateriali ?? []) lega(v);
+  }
   res.json(dati);
 });
 router.get('/personaggi', (_req, res) => {

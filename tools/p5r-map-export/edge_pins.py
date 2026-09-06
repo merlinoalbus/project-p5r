@@ -4,12 +4,17 @@ Su una mappa d'insieme i punti in cui si passa a un'altra area sono disegnati co
 bordo del disegno, una per direzione. Non serve sapere quale sprite il gioco usi per riconoscerli:
 basta guardare **dove cadono**.
 
-La misura è netta e si regge sul contrasto. Quattro tipi nativi — 13, 14, 15, 16 — cadono fuori
-dal tratto nel 90% dei casi e, di quelle volte, ciascuno si accosta a un lato **diverso**: 13 in alto,
-14 a destra, 15 in basso, 16 a sinistra, con quote fra il 65% e l'80%. Tutti gli altri tipi, quelli
-che stanno dentro le stanze, non superano il 47% sul proprio lato più frequente e si spargono sui
-quattro. Che quattro tipi si dividano i quattro lati in modo esclusivo non è una coincidenza che
-capita: è il modo in cui il gioco disegna le uscite.
+La misura è netta e si regge su un contrasto, non su una soglia. Quattro tipi nativi — 13, 14, 15,
+16 — si accostano ciascuno a un lato **diverso** del disegno: 13 in alto nel 65,2% dei casi, 14 a
+destra nel 70,4%, 15 in basso nel 75,8%, 16 a sinistra nel 79,7%. Tutti gli altri tipi, quelli che
+stanno dentro le stanze, non superano il 48,5% sul proprio lato più frequente e si spargono sui
+quattro. Che quattro tipi si dividano i quattro lati in modo esclusivo, con quel divario dai tipi
+interni, non è una coincidenza che capita: è il modo in cui il gioco disegna le uscite.
+
+Quanto spesso cadano *oltre* il perimetro del tratto — 57,6%, 56,3%, 47,0% e 59,3% — è un dato che
+descrive, non la prova: un'uscita disegnata sul bordo interno resta un'uscita, e infatti il tipo 15
+sta fuori meno di una volta su due. Chi legge questo file non trovi qui una soglia che il codice
+non applica.
 
 Questo dà il significato — sono passaggi — e da che parte del disegno si esce. Non dà la
 destinazione: le planimetrie non sono tessere affiancate, e sapere che si esce a destra non dice
@@ -21,13 +26,15 @@ import collections
 import json
 import sys
 
-# Quota del lato dominante perché il tipo sia riconosciuto come freccia di bordo, e quota massima
-# che i tipi «interni» raggiungono: è il contrasto fra le due a fare la prova, non la soglia da sola.
+# Quota del lato dominante perché il tipo sia riconosciuto come freccia di bordo. La prova non è
+# questa soglia da sola ma il **divario** con i tipi interni, che non arrivano al 49%: se un tipo
+# interno la raggiungesse, il criterio non distinguerebbe più nulla e non si dimostra niente.
 QUOTA_LATO = 0.6
-QUOTA_INTERNI = 0.5
-# Un tipo di bordo deve anche cadere fuori dal tratto: è lì che il gioco disegna le frecce.
-QUOTA_FUORI = 0.5
 MINIMI_PIN = 20
+# Quanto spesso il tipo cade oltre il perimetro del disegno. **Non è un criterio**: si è provato a
+# usarlo e scartava il tipo 15, che sta in basso nel 76% dei casi ma dentro il perimetro — un'uscita
+# disegnata sul bordo interno resta un'uscita. Resta come dato, perché descrive, non perché decide.
+SOGLIA_FUORI_INFORMATIVA = 0.5
 
 # Per chi usa l'applicazione il pin e' uno solo — un passaggio — e la direzione non cambia che
 # cosa ci si fa sopra: si clicca e si va. Il lato resta pero' scritto nel dato, perche' serve ad
@@ -117,16 +124,18 @@ def main(out):
             tipoSpillo=spillo, etichetta=etichetta, lato=v['lato'], pin=v['pin'],
             motivo=f"{round(v['quotaLato']*100)}% dei suoi {v['pin']} pin cade sul lato "
                    f"{v['lato']} del disegno e {round(v['quotaFuoriDalTratto']*100)}% fuori dal "
-                   f"tratto, mentre nessun tipo interno supera il "
+                   f"tratto (dato, non criterio), mentre nessun tipo interno supera il "
                    f"{round(massimo_interni*100)}% sul proprio lato")
 
     risultato = dict(
         schemaVersion=1,
         sources=dict(metadati='mondo_metadati.json', riferimento='riferimento-pin.json'),
-        criterio=dict(quotaLato=QUOTA_LATO, quotaFuoriDalTratto=QUOTA_FUORI,
-                      minimiPin=MINIMI_PIN, quotaMassimaDeiTipiInterni=round(massimo_interni, 3),
-                      forma='un tipo è una freccia di bordo se cade fuori dal tratto e '
-                            'prevalentemente su un lato, e se quel lato è solo suo'),
+        criterio=dict(quotaLato=QUOTA_LATO, minimiPin=MINIMI_PIN,
+                      quotaMassimaDeiTipiInterni=round(massimo_interni, 3),
+                      quotaFuoriDalTrattoInformativa=SOGLIA_FUORI_INFORMATIVA,
+                      forma='un tipo è una freccia di bordo se cade prevalentemente su un lato, '
+                            'se quel lato è solo suo, e se i tipi interni restano molto sotto. '
+                            'La quota fuori dal tratto è riportata ma non seleziona.'),
         tipi=righe, tipiDimostrati={str(k): v for k, v in dimostrati.items()},
         summary=dict(tipiEsaminati=len(righe), tipiDimostrati=len(dimostrati),
                      pinCoperti=sum(v['pin'] for v in dimostrati.values()),
@@ -139,7 +148,7 @@ def main(out):
                                          encoding='utf8')
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     for tipo, v in sorted(dimostrati.items()):
-        print(f"  tipo {tipo:3d} → {v['etichetta']} ({v['pin']} pin)")
+        print(f"  tipo {tipo:3d} -> {v['etichetta']} ({v['pin']} pin)")
     return risultato
 
 

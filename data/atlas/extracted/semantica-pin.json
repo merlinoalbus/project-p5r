@@ -14,6 +14,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 4,
+        "partId": 24,
+        "indiceSprite": 23,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：セーフルームアイコン",
+        "spriteVuoto": false,
+        "png": "sprite-023.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 5,
         "procedureRiconosciute": 1,
@@ -101,6 +111,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 5,
+        "partId": 28,
+        "indiceSprite": 27,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：目的地・認知ロックポ",
+        "spriteVuoto": false,
+        "png": "sprite-027.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 14,
         "procedureRiconosciute": 2,
@@ -169,10 +189,94 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+      "etichetta": "Da identificare: «ミニマップ：目的地・認知ロックポ» (tipo 5)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+        "diffusione": {
+          "pin": 79,
+          "planimetrieUrbane": 8,
+          "planimetrieDungeon": 26,
+          "condizionali": 79
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 28,
+          "indiceSprite": 27,
+          "nomeNativo": "ミニマップ：目的地・認知ロックポ",
+          "png": "sprite-027.png",
+          "motivoSenzaSprite": null
+        },
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 14,
+          "procedure": {
+            "D#_#_e#_#_START": 5,
+            "D#_#_#_CONSOLE_ICON": 3,
+            "D#_#_miniEV_point#": 2,
+            "D#_BIG_SLOT_GAME_DEFAULT": 2,
+            "D#_#_check#_START": 1
+          },
+          "procedureTutte": {
+            "D#_#_e#_#_START": 5,
+            "D#_#_#_CONSOLE_ICON": 3,
+            "D#_#_miniEV_point#": 2,
+            "D#_BIG_SLOT_GAME_DEFAULT": 2,
+            "D#_#_check#_START": 1
+          },
+          "etichetteDeiTrigger": {
+            "Apri porta": 2,
+            "Cinema": 2,
+            "Magazzino audiovisivi": 2
+          },
+          "etichetteDeiTriggerTutte": {
+            "Apri porta": 2,
+            "Cinema": 2,
+            "Magazzino audiovisivi": 2
+          }
+        },
+        "sottoIlPin": {
+          "punti": 42,
+          "ingressiDelCampo": 21,
+          "famiglie": {
+            "passaggio|Passaggio": 23
+          },
+          "procedure": {
+            "AC_CENTER_HIKARIE_BUTTON": 1,
+            "AC_GOTO_WEST_3F": 1,
+            "AC_YAMANOTE_BUTTON": 1,
+            "BchoDoorBack_south": 1,
+            "CHK_COUNTER": 1,
+            "CHK_KITCHEN_SPACE": 1
+          },
+          "procedureTutte": {
+            "AC_CENTER_HIKARIE_BUTTON": 1,
+            "AC_GOTO_WEST_3F": 1,
+            "AC_YAMANOTE_BUTTON": 1,
+            "BchoDoorBack_south": 1,
+            "CHK_COUNTER": 1,
+            "CHK_KITCHEN_SPACE": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Biglietteria automatica": 1,
+          "Corsi privati": 1,
+          "Cucina": 1,
+          "Edificio principale 3P": 1,
+          "Entrata della banca": 1
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Biglietteria automatica": 1,
+          "Corsi privati": 1,
+          "Cucina": 1,
+          "Edificio principale 3P": 1,
+          "Entrata della banca": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 10,
@@ -183,6 +287,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 10,
+        "partId": 30,
+        "indiceSprite": 29,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：特殊鍵・共犯者クエス",
+        "spriteVuoto": false,
+        "png": "sprite-029.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 21,
         "procedureRiconosciute": 14,
@@ -264,6 +378,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 12,
+        "partId": 31,
+        "indiceSprite": 30,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：開かない扉",
+        "spriteVuoto": false,
+        "png": "sprite-030.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 34,
         "procedureRiconosciute": 59,
@@ -330,10 +454,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
+      "tipoSpillo": "porta",
+      "etichetta": "Porta che non si apre",
       "stato": "determinato",
-      "prova": "procedura che accende la bandiera del pin: (GIM_\\w*SWITCH|_SWITCH|gate_\\w*chenge) in 57 casi su 59 riconosciuti, con 47 conferme dalle etichette dei trigger"
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 31, cioè lo sprite 30 del foglio, che si chiama «ミニマップ：開かない扉»"
     },
     {
       "tipoNativo": 13,
@@ -344,6 +468,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 13,
+        "partId": 57,
+        "indiceSprite": 56,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：やじるし　↑",
+        "spriteVuoto": false,
+        "png": "sprite-056.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 9,
         "procedureRiconosciute": 0,
@@ -408,12 +542,12 @@
         "etichetta": "Passaggio",
         "lato": "alto",
         "pin": 66,
-        "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 14,
@@ -424,6 +558,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 14,
+        "partId": 59,
+        "indiceSprite": 58,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：やじるし　右",
+        "spriteVuoto": false,
+        "png": "sprite-058.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 29,
         "procedureRiconosciute": 0,
@@ -488,12 +632,12 @@
         "etichetta": "Passaggio",
         "lato": "destra",
         "pin": 71,
-        "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 15,
@@ -504,6 +648,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 15,
+        "partId": 58,
+        "indiceSprite": 57,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：やじるし　下",
+        "spriteVuoto": false,
+        "png": "sprite-057.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 37,
         "procedureRiconosciute": 0,
@@ -570,12 +724,12 @@
         "etichetta": "Passaggio",
         "lato": "basso",
         "pin": 66,
-        "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 16,
@@ -586,6 +740,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 16,
+        "partId": 60,
+        "indiceSprite": 59,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：やじるし　左",
+        "spriteVuoto": false,
+        "png": "sprite-059.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 19,
         "procedureRiconosciute": 0,
@@ -646,12 +810,12 @@
         "etichetta": "Passaggio",
         "lato": "sinistra",
         "pin": 59,
-        "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+        "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
       },
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "stato": "determinato",
-      "prova": "posizione sul bordo della planimetria: 80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "prova": "posizione sul bordo della planimetria: 80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 17,
@@ -662,6 +826,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 17,
+        "partId": 27,
+        "indiceSprite": 26,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：宝箱",
+        "spriteVuoto": false,
+        "png": "sprite-026.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 122,
         "procedureRiconosciute": 122,
@@ -727,7 +901,7 @@
       "tipoSpillo": "forziere",
       "etichetta": "Forziere",
       "stato": "determinato",
-      "prova": "procedura che accende la bandiera del pin: (TBOX|_BOX_) in 122 casi su 122 riconosciuti"
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 27, cioè lo sprite 26 del foglio, che si chiama «ミニマップ：宝箱»"
     },
     {
       "tipoNativo": 19,
@@ -738,6 +912,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 19,
+        "partId": 49,
+        "indiceSprite": 48,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：移動先アイコン1",
+        "spriteVuoto": false,
+        "png": "sprite-048.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 87,
@@ -785,10 +969,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "passaggio",
+      "etichetta": "Punto di spostamento",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 49, cioè lo sprite 48 del foglio, che si chiama «ミニマップ：移動先アイコン1»"
     },
     {
       "tipoNativo": 20,
@@ -799,6 +983,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 20,
+        "partId": 54,
+        "indiceSprite": 53,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：ベルベット",
+        "spriteVuoto": false,
+        "png": "sprite-053.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 7,
@@ -837,10 +1031,58 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare: «ミニマップ：ベルベット» (tipo 20)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 15,
+          "planimetrieUrbane": 4,
+          "planimetrieDungeon": 11,
+          "condizionali": 12
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 54,
+          "indiceSprite": 53,
+          "nomeNativo": "ミニマップ：ベルベット",
+          "png": "sprite-053.png",
+          "motivoSenzaSprite": null
+        },
+        "sottoIlPin": {
+          "punti": 7,
+          "ingressiDelCampo": 4,
+          "famiglie": {
+            "passaggio|Passaggio": 4,
+            "ristorante|Ristorante": 1
+          },
+          "procedure": {
+            "CHK_NOODLE02": 1,
+            "D08_VELVET_HIT": 1,
+            "Main_Udon_1": 1
+          },
+          "procedureTutte": {
+            "CHK_NOODLE02": 1,
+            "D08_VELVET_HIT": 1,
+            "Main_Udon_1": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Negozio di udon": 1,
+          "Ramen bar": 1,
+          "Vicolo cieco": 1
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Negozio di udon": 1,
+          "Ramen bar": 1,
+          "Vicolo cieco": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 24,
@@ -851,6 +1093,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 24,
+        "partId": 62,
+        "indiceSprite": 61,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：EXIT　",
+        "spriteVuoto": false,
+        "png": "sprite-061.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 3,
@@ -879,10 +1131,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 62, cioè lo sprite 61 del foglio, che si chiama «ミニマップ：EXIT　»"
     },
     {
       "tipoNativo": 25,
@@ -893,15 +1145,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 25,
+        "partId": 62,
+        "indiceSprite": 61,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：EXIT　",
+        "spriteVuoto": false,
+        "png": "sprite-061.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 62, cioè lo sprite 61 del foglio, che si chiama «ミニマップ：EXIT　»"
     },
     {
       "tipoNativo": 26,
@@ -912,6 +1174,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 26,
+        "partId": 27,
+        "indiceSprite": 26,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：宝箱",
+        "spriteVuoto": false,
+        "png": "sprite-026.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 33,
         "procedureRiconosciute": 33,
@@ -997,6 +1269,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 28,
+        "partId": 12,
+        "indiceSprite": 11,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：自分用アイコン",
+        "spriteVuoto": false,
+        "png": "sprite-011.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 50,
@@ -1043,10 +1325,67 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare: «ミニマップ：自分用アイコン» (tipo 28)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 91,
+          "planimetrieUrbane": 9,
+          "planimetrieDungeon": 55,
+          "condizionali": 91
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 12,
+          "indiceSprite": 11,
+          "nomeNativo": "ミニマップ：自分用アイコン",
+          "png": "sprite-011.png",
+          "motivoSenzaSprite": null
+        },
+        "sottoIlPin": {
+          "punti": 50,
+          "ingressiDelCampo": 11,
+          "famiglie": {
+            "passaggio|Passaggio": 15
+          },
+          "procedure": {
+            "D03_SAFETY_ROOM_06_SET": 2,
+            "D06_157_11_WIRE_OBJ_ON": 2,
+            "DUCT_156_007_B_INOUT": 2,
+            "CAGE_159_025_E_IN": 1,
+            "CHK_AUTO_MACHINE02": 1,
+            "CHK_DEADEND05": 1
+          },
+          "procedureTutte": {
+            "D03_SAFETY_ROOM_06_SET": 2,
+            "D06_157_11_WIRE_OBJ_ON": 2,
+            "DUCT_156_007_B_INOUT": 2,
+            "CAGE_159_025_E_IN": 1,
+            "CHK_AUTO_MACHINE02": 1,
+            "CHK_DEADEND05": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Striscia": 4,
+          "Distributore automatico": 1,
+          "Karaoke": 1,
+          "Ragazzo rassegnato": 1,
+          "Salta fuori dal dipinto": 1
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Striscia": 4,
+          "Distributore automatico": 1,
+          "Karaoke": 1,
+          "Ragazzo rassegnato": 1,
+          "Salta fuori dal dipinto": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 29,
@@ -1057,6 +1396,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 29,
+        "partId": 65,
+        "indiceSprite": 64,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：上下移動矢印　上",
+        "spriteVuoto": false,
+        "png": "sprite-064.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 14,
         "procedureRiconosciute": 0,
@@ -1118,10 +1467,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "scala",
+      "etichetta": "Salita",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 65, cioè lo sprite 64 del foglio, che si chiama «ミニマップ：上下移動矢印　上»"
     },
     {
       "tipoNativo": 30,
@@ -1132,6 +1481,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 30,
+        "partId": 66,
+        "indiceSprite": 65,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：上下移動矢印　下",
+        "spriteVuoto": false,
+        "png": "sprite-065.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 22,
         "procedureRiconosciute": 0,
@@ -1189,10 +1548,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "scala",
+      "etichetta": "Discesa",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 66, cioè lo sprite 65 del foglio, che si chiama «ミニマップ：上下移動矢印　下»"
     },
     {
       "tipoNativo": 32,
@@ -1203,6 +1562,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 32,
+        "partId": 75,
+        "indiceSprite": 74,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：down",
+        "spriteVuoto": false,
+        "png": "sprite-074.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1225,10 +1594,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "scala",
+      "etichetta": "Discesa",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 75, cioè lo sprite 74 del foglio, che si chiama «ミニマップ：down»"
     },
     {
       "tipoNativo": 33,
@@ -1239,6 +1608,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 33,
+        "partId": 75,
+        "indiceSprite": 74,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：down",
+        "spriteVuoto": false,
+        "png": "sprite-074.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 1,
         "procedureRiconosciute": 0,
@@ -1275,10 +1654,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "scala",
+      "etichetta": "Discesa",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 75, cioè lo sprite 74 del foglio, che si chiama «ミニマップ：down»"
     },
     {
       "tipoNativo": 34,
@@ -1289,6 +1668,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 34,
+        "partId": 77,
+        "indiceSprite": 76,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：up ",
+        "spriteVuoto": false,
+        "png": "sprite-076.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1311,10 +1700,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "scala",
+      "etichetta": "Salita",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 77, cioè lo sprite 76 del foglio, che si chiama «ミニマップ：up »"
     },
     {
       "tipoNativo": 35,
@@ -1325,6 +1714,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 35,
+        "partId": 77,
+        "indiceSprite": 76,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：up ",
+        "spriteVuoto": false,
+        "png": "sprite-076.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1347,10 +1746,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "scala",
+      "etichetta": "Salita",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 77, cioè lo sprite 76 del foglio, che si chiama «ミニマップ：up »"
     },
     {
       "tipoNativo": 36,
@@ -1361,6 +1760,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 36,
+        "partId": 79,
+        "indiceSprite": 78,
+        "dentroIlFoglio": true,
+        "nomeNativo": "矢印左上",
+        "spriteVuoto": false,
+        "png": "sprite-078.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1385,10 +1794,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio in alto a sinistra",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 79, cioè lo sprite 78 del foglio, che si chiama «矢印左上»"
     },
     {
       "tipoNativo": 37,
@@ -1399,6 +1808,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 37,
+        "partId": 80,
+        "indiceSprite": 79,
+        "dentroIlFoglio": true,
+        "nomeNativo": "矢印右上",
+        "spriteVuoto": false,
+        "png": "sprite-079.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 2,
@@ -1424,10 +1843,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio in alto a destra",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 80, cioè lo sprite 79 del foglio, che si chiama «矢印右上»"
     },
     {
       "tipoNativo": 38,
@@ -1438,6 +1857,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 38,
+        "partId": 81,
+        "indiceSprite": 80,
+        "dentroIlFoglio": true,
+        "nomeNativo": "矢印左下",
+        "spriteVuoto": false,
+        "png": "sprite-080.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 1,
         "procedureRiconosciute": 0,
@@ -1457,10 +1886,10 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio in basso a sinistra",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 81, cioè lo sprite 80 del foglio, che si chiama «矢印左下»"
     },
     {
       "tipoNativo": 39,
@@ -1471,6 +1900,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 39,
+        "partId": 82,
+        "indiceSprite": 81,
+        "dentroIlFoglio": true,
+        "nomeNativo": "矢印右下",
+        "spriteVuoto": false,
+        "png": "sprite-081.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 2,
         "procedureRiconosciute": 0,
@@ -1514,10 +1953,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio in basso a destra",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 82, cioè lo sprite 81 del foglio, che si chiama «矢印右下»"
     },
     {
       "tipoNativo": 40,
@@ -1528,6 +1967,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 40,
+        "partId": 86,
+        "indiceSprite": 85,
+        "dentroIlFoglio": true,
+        "nomeNativo": "オタカラアイコン",
+        "spriteVuoto": false,
+        "png": "sprite-085.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 3,
@@ -1552,10 +2001,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "tesoro-palazzo",
+      "etichetta": "Tesoro del Palazzo",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 86, cioè lo sprite 85 del foglio, che si chiama «オタカラアイコン»"
     },
     {
       "tipoNativo": 43,
@@ -1566,6 +2015,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 43,
+        "partId": 94,
+        "indiceSprite": 93,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：チェック",
+        "spriteVuoto": false,
+        "png": "sprite-093.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 39,
         "procedureRiconosciute": 2,
@@ -1621,10 +2080,88 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+      "etichetta": "Da identificare: «ミニマップ：チェック» (tipo 43)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+        "diffusione": {
+          "pin": 43,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 12,
+          "condizionali": 43
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 94,
+          "indiceSprite": 93,
+          "nomeNativo": "ミニマップ：チェック",
+          "png": "sprite-093.png",
+          "motivoSenzaSprite": null
+        },
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 39,
+          "procedure": {
+            "D#_#_#_minimap_#": 38,
+            "D#_#_SWITCH_#": 1,
+            "D#_#_minimap_SWITCH": 1
+          },
+          "procedureTutte": {
+            "D#_#_#_minimap_#": 38,
+            "D#_#_SWITCH_#": 1,
+            "D#_#_minimap_SWITCH": 1
+          },
+          "etichetteDeiTrigger": {
+            "Bagno dei ragazzi": 1
+          },
+          "etichetteDeiTriggerTutte": {
+            "Bagno dei ragazzi": 1
+          }
+        },
+        "sottoIlPin": {
+          "punti": 35,
+          "ingressiDelCampo": 3,
+          "famiglie": {
+            "meccanismo|Meccanismo": 5,
+            "passaggio|Passaggio": 3,
+            "scala|Scala": 2
+          },
+          "procedure": {
+            "CheckStair_blue": 2,
+            "CAGE_159_030_C_OUT": 1,
+            "CAGE_159_030_E_OUT": 1,
+            "CheckMarukiNote05": 1,
+            "D01_04_e165_041_AF01_START": 1,
+            "D05_GIM_BLUE_SWITCH01": 1
+          },
+          "procedureTutte": {
+            "CheckStair_blue": 2,
+            "CAGE_159_030_C_OUT": 1,
+            "CAGE_159_030_E_OUT": 1,
+            "CheckMarukiNote05": 1,
+            "D01_04_e165_041_AF01_START": 1,
+            "D05_GIM_BLUE_SWITCH01": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Usa il regolatore di luminosità": 6,
+          "Magazzino audiovisivi": 5,
+          "Siediti": 4,
+          "Tira leva": 4,
+          "Guarda premi": 2
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Usa il regolatore di luminosità": 6,
+          "Magazzino audiovisivi": 5,
+          "Siediti": 4,
+          "Tira leva": 4,
+          "Guarda premi": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 45,
@@ -1635,15 +2172,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 45,
+        "partId": 107,
+        "indiceSprite": 106,
+        "dentroIlFoglio": true,
+        "nomeNativo": "スタンプ",
+        "spriteVuoto": false,
+        "png": "sprite-106.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "timbro",
+      "etichetta": "Timbro dei Memento",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 107, cioè lo sprite 106 del foglio, che si chiama «スタンプ»"
     },
     {
       "tipoNativo": 46,
@@ -1654,6 +2201,16 @@
       "sprite": 114,
       "nomeNativo": "アイコン：自販機",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 46,
+        "partId": 115,
+        "indiceSprite": 114,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：自販機",
+        "spriteVuoto": false,
+        "png": "sprite-114.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 13,
@@ -1713,6 +2270,16 @@
       "sprite": 115,
       "nomeNativo": "アイコン：宝くじ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 47,
+        "partId": 116,
+        "indiceSprite": 115,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：宝くじ",
+        "spriteVuoto": false,
+        "png": "sprite-115.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1749,6 +2316,16 @@
       "sprite": 116,
       "nomeNativo": "アイコン：バイト情報",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 48,
+        "partId": 117,
+        "indiceSprite": 116,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：バイト情報",
+        "spriteVuoto": false,
+        "png": "sprite-116.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1785,6 +2362,16 @@
       "sprite": 117,
       "nomeNativo": "アイコン：ジューサーバー",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 49,
+        "partId": 118,
+        "indiceSprite": 117,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ジューサーバー",
+        "spriteVuoto": false,
+        "png": "sprite-117.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1821,6 +2408,16 @@
       "sprite": 118,
       "nomeNativo": "アイコン：キヨスク",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 50,
+        "partId": 119,
+        "indiceSprite": 118,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：キヨスク",
+        "spriteVuoto": false,
+        "png": "sprite-118.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1859,6 +2456,16 @@
       "sprite": 119,
       "nomeNativo": "アイコン：本屋",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 51,
+        "partId": 120,
+        "indiceSprite": 119,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：本屋",
+        "spriteVuoto": false,
+        "png": "sprite-119.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 3,
@@ -1899,6 +2506,16 @@
       "sprite": 120,
       "nomeNativo": "アイコン：レンタルDVD",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 52,
+        "partId": 121,
+        "indiceSprite": 120,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：レンタルDVD",
+        "spriteVuoto": false,
+        "png": "sprite-120.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1937,6 +2554,16 @@
       "sprite": 121,
       "nomeNativo": "アイコン：ファミレス",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 53,
+        "partId": 122,
+        "indiceSprite": 121,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ファミレス",
+        "spriteVuoto": false,
+        "png": "sprite-121.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -1975,6 +2602,16 @@
       "sprite": 122,
       "nomeNativo": "アイコン：牛丼",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 54,
+        "partId": 123,
+        "indiceSprite": 122,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：牛丼",
+        "spriteVuoto": false,
+        "png": "sprite-122.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2013,6 +2650,16 @@
       "sprite": 123,
       "nomeNativo": "アイコン：ミリタリーショップ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 55,
+        "partId": 124,
+        "indiceSprite": 123,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ミリタリーショップ",
+        "spriteVuoto": false,
+        "png": "sprite-123.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2049,6 +2696,16 @@
       "sprite": 124,
       "nomeNativo": "アイコン：ゲーセン",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 56,
+        "partId": 125,
+        "indiceSprite": 124,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ゲーセン",
+        "spriteVuoto": false,
+        "png": "sprite-124.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 2,
@@ -2089,6 +2746,16 @@
       "sprite": 125,
       "nomeNativo": "アイコン：コンビニ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 57,
+        "partId": 126,
+        "indiceSprite": 125,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：コンビニ",
+        "spriteVuoto": false,
+        "png": "sprite-125.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2125,6 +2792,16 @@
       "sprite": 126,
       "nomeNativo": "アイコン：ジム",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 58,
+        "partId": 127,
+        "indiceSprite": 126,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ジム",
+        "spriteVuoto": false,
+        "png": "sprite-126.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -2144,6 +2821,16 @@
       "sprite": 127,
       "nomeNativo": "アイコン：ビックバンバーガー",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 59,
+        "partId": 128,
+        "indiceSprite": 127,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ビックバンバーガー",
+        "spriteVuoto": false,
+        "png": "sprite-127.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2182,6 +2869,16 @@
       "sprite": 128,
       "nomeNativo": "アイコン：ドラッグストア",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 60,
+        "partId": 129,
+        "indiceSprite": 128,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ドラッグストア",
+        "spriteVuoto": false,
+        "png": "sprite-128.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2218,6 +2915,16 @@
       "sprite": 129,
       "nomeNativo": "アイコン：ドンキ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 61,
+        "partId": 130,
+        "indiceSprite": 129,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ドンキ",
+        "spriteVuoto": false,
+        "png": "sprite-129.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2258,6 +2965,16 @@
       "sprite": 130,
       "nomeNativo": "アイコン：映画館",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 62,
+        "partId": 131,
+        "indiceSprite": 130,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：映画館",
+        "spriteVuoto": false,
+        "png": "sprite-130.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 3,
@@ -2299,6 +3016,16 @@
       "sprite": 131,
       "nomeNativo": "アイコン：花屋",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 63,
+        "partId": 132,
+        "indiceSprite": 131,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：花屋",
+        "spriteVuoto": false,
+        "png": "sprite-131.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 2,
@@ -2339,6 +3066,16 @@
       "sprite": 132,
       "nomeNativo": "アイコン：スーパー",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 64,
+        "partId": 133,
+        "indiceSprite": 132,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：スーパー",
+        "spriteVuoto": false,
+        "png": "sprite-132.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2373,6 +3110,16 @@
       "sprite": 133,
       "nomeNativo": "アイコン：スポーツ用品",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 65,
+        "partId": 134,
+        "indiceSprite": 133,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：スポーツ用品",
+        "spriteVuoto": false,
+        "png": "sprite-133.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2409,6 +3156,16 @@
       "sprite": 134,
       "nomeNativo": "アイコン：和風雑貨",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 66,
+        "partId": 135,
+        "indiceSprite": 134,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：和風雑貨",
+        "spriteVuoto": false,
+        "png": "sprite-134.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2447,6 +3204,16 @@
       "sprite": 135,
       "nomeNativo": "アイコン：宝石店",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 67,
+        "partId": 136,
+        "indiceSprite": 135,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：宝石店",
+        "spriteVuoto": false,
+        "png": "sprite-135.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2485,6 +3252,16 @@
       "sprite": 136,
       "nomeNativo": "アイコン：アクセサリー",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 68,
+        "partId": 137,
+        "indiceSprite": 136,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：アクセサリー",
+        "spriteVuoto": false,
+        "png": "sprite-136.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2523,6 +3300,16 @@
       "sprite": 137,
       "nomeNativo": "アイコン：コスメ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 69,
+        "partId": 138,
+        "indiceSprite": 137,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：コスメ",
+        "spriteVuoto": false,
+        "png": "sprite-137.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2563,6 +3350,16 @@
       "sprite": 138,
       "nomeNativo": "アイコン：パン屋",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 70,
+        "partId": 139,
+        "indiceSprite": 138,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：パン屋",
+        "spriteVuoto": false,
+        "png": "sprite-138.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2603,6 +3400,16 @@
       "sprite": 139,
       "nomeNativo": "アイコン：トイレ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 71,
+        "partId": 140,
+        "indiceSprite": 139,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：トイレ",
+        "spriteVuoto": false,
+        "png": "sprite-139.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2643,6 +3450,16 @@
       "sprite": 140,
       "nomeNativo": "アイコン：教室",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 72,
+        "partId": 141,
+        "indiceSprite": 140,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：教室",
+        "spriteVuoto": false,
+        "png": "sprite-140.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -2662,6 +3479,16 @@
       "sprite": 141,
       "nomeNativo": "アイコン：囚人高校",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 73,
+        "partId": 142,
+        "indiceSprite": 141,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：囚人高校",
+        "spriteVuoto": false,
+        "png": "sprite-141.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -2681,6 +3508,16 @@
       "sprite": 142,
       "nomeNativo": "アイコン：バー",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 74,
+        "partId": 143,
+        "indiceSprite": 142,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：バー",
+        "spriteVuoto": false,
+        "png": "sprite-142.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2719,6 +3556,16 @@
       "sprite": 143,
       "nomeNativo": "アイコン：雑貨屋",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 75,
+        "partId": 144,
+        "indiceSprite": 143,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：雑貨屋",
+        "spriteVuoto": false,
+        "png": "sprite-143.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2757,6 +3604,16 @@
       "sprite": 144,
       "nomeNativo": "アイコン：レトロゲーム",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 76,
+        "partId": 145,
+        "indiceSprite": 144,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：レトロゲーム",
+        "spriteVuoto": false,
+        "png": "sprite-144.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2793,6 +3650,16 @@
       "sprite": 145,
       "nomeNativo": "アイコン：メイドカフェ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 77,
+        "partId": 146,
+        "indiceSprite": 145,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：メイドカフェ",
+        "spriteVuoto": false,
+        "png": "sprite-145.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2829,6 +3696,16 @@
       "sprite": 146,
       "nomeNativo": "アイコン：カチャガチャ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 78,
+        "partId": 147,
+        "indiceSprite": 146,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：カチャガチャ",
+        "spriteVuoto": false,
+        "png": "sprite-146.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2865,6 +3742,16 @@
       "sprite": 147,
       "nomeNativo": "アイコン：家電量販店",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 79,
+        "partId": 148,
+        "indiceSprite": 147,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：家電量販店",
+        "spriteVuoto": false,
+        "png": "sprite-147.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2901,6 +3788,16 @@
       "sprite": 148,
       "nomeNativo": "アイコン：グッズショップ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 80,
+        "partId": 149,
+        "indiceSprite": 148,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：グッズショップ",
+        "spriteVuoto": false,
+        "png": "sprite-148.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2937,6 +3834,16 @@
       "sprite": 149,
       "nomeNativo": "アイコン：工具店",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 81,
+        "partId": 150,
+        "indiceSprite": 149,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：工具店",
+        "spriteVuoto": false,
+        "png": "sprite-149.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -2973,6 +3880,16 @@
       "sprite": 150,
       "nomeNativo": "アイコン：銭湯",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 82,
+        "partId": 151,
+        "indiceSprite": 150,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：銭湯",
+        "spriteVuoto": false,
+        "png": "sprite-150.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3011,6 +3928,16 @@
       "sprite": 151,
       "nomeNativo": "アイコン：ルブラン",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 83,
+        "partId": 152,
+        "indiceSprite": 151,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ルブラン",
+        "spriteVuoto": false,
+        "png": "sprite-151.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -3030,6 +3957,16 @@
       "sprite": 152,
       "nomeNativo": "アイコン：コインランドリー",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 84,
+        "partId": 153,
+        "indiceSprite": 152,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：コインランドリー",
+        "spriteVuoto": false,
+        "png": "sprite-152.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3066,6 +4003,16 @@
       "sprite": 153,
       "nomeNativo": "アイコン：バッティング",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 85,
+        "partId": 154,
+        "indiceSprite": 153,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：バッティング",
+        "spriteVuoto": false,
+        "png": "sprite-153.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -3085,6 +4032,16 @@
       "sprite": 154,
       "nomeNativo": "アイコン：リサイクルショップ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 86,
+        "partId": 155,
+        "indiceSprite": 154,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：リサイクルショップ",
+        "spriteVuoto": false,
+        "png": "sprite-154.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3123,6 +4080,16 @@
       "sprite": 155,
       "nomeNativo": "アイコン：診療所",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 87,
+        "partId": 156,
+        "indiceSprite": 155,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：診療所",
+        "spriteVuoto": false,
+        "png": "sprite-155.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3159,6 +4126,16 @@
       "sprite": 156,
       "nomeNativo": "アイコン：文房具",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 88,
+        "partId": 157,
+        "indiceSprite": 156,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：文房具",
+        "spriteVuoto": false,
+        "png": "sprite-156.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3197,6 +4174,16 @@
       "sprite": 157,
       "nomeNativo": "アイコン：古着屋",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 89,
+        "partId": 158,
+        "indiceSprite": 157,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：古着屋",
+        "spriteVuoto": false,
+        "png": "sprite-157.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3233,6 +4220,16 @@
       "sprite": 158,
       "nomeNativo": "アイコン：お寺",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 90,
+        "partId": 159,
+        "indiceSprite": 158,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：お寺",
+        "spriteVuoto": false,
+        "png": "sprite-158.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3269,6 +4266,16 @@
       "sprite": 159,
       "nomeNativo": "アイコン：ジャズクラブ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 91,
+        "partId": 160,
+        "indiceSprite": 159,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ジャズクラブ",
+        "spriteVuoto": false,
+        "png": "sprite-159.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -3288,6 +4295,16 @@
       "sprite": 160,
       "nomeNativo": "アイコン：パワーストーン",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 92,
+        "partId": 161,
+        "indiceSprite": 160,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：パワーストーン",
+        "spriteVuoto": false,
+        "png": "sprite-160.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3324,6 +4341,16 @@
       "sprite": 161,
       "nomeNativo": "アイコン：ダーツ",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 93,
+        "partId": 162,
+        "indiceSprite": 161,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：ダーツ",
+        "spriteVuoto": false,
+        "png": "sprite-161.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
@@ -3343,6 +4370,16 @@
       "sprite": 162,
       "nomeNativo": "アイコン：お香",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 94,
+        "partId": 163,
+        "indiceSprite": 162,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：お香",
+        "spriteVuoto": false,
+        "png": "sprite-162.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3383,6 +4420,16 @@
       "sprite": 163,
       "nomeNativo": "アイコン：揚げ物屋",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 95,
+        "partId": 164,
+        "indiceSprite": 163,
+        "dentroIlFoglio": true,
+        "nomeNativo": "アイコン：揚げ物屋",
+        "spriteVuoto": false,
+        "png": "sprite-163.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3419,6 +4466,16 @@
       "sprite": 164,
       "nomeNativo": "スーパー（小）",
       "associazione": "blocco-urbano-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 96,
+        "partId": 165,
+        "indiceSprite": 164,
+        "dentroIlFoglio": true,
+        "nomeNativo": "スーパー（小）",
+        "spriteVuoto": false,
+        "png": "sprite-164.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3455,6 +4512,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 97,
+        "partId": 108,
+        "indiceSprite": 107,
+        "dentroIlFoglio": true,
+        "nomeNativo": "種",
+        "spriteVuoto": false,
+        "png": "sprite-107.png",
+        "motivoSenzaSprite": null
+      },
       "script": {
         "pinConBandieraRisolta": 23,
         "procedureRiconosciute": 21,
@@ -3510,9 +4577,9 @@
       "osservazione": null,
       "bordo": null,
       "tipoSpillo": "seme-bramosia",
-      "etichetta": "Seme della bramosia",
+      "etichetta": "Seme di bramosia",
       "stato": "determinato",
-      "prova": "procedura che accende la bandiera del pin: SEEDicon in 21 casi su 21 riconosciuti"
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 108, cioè lo sprite 107 del foglio, che si chiama «種»"
     },
     {
       "tipoNativo": 98,
@@ -3523,6 +4590,16 @@
       "sprite": 174,
       "nomeNativo": "マイパレス_メーカー",
       "associazione": "blocco-covo-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 98,
+        "partId": 175,
+        "indiceSprite": 174,
+        "dentroIlFoglio": true,
+        "nomeNativo": "マイパレス_メーカー",
+        "spriteVuoto": false,
+        "png": "sprite-174.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3563,6 +4640,16 @@
       "sprite": 175,
       "nomeNativo": "マイパレス_ミュージック",
       "associazione": "blocco-covo-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 99,
+        "partId": 176,
+        "indiceSprite": 175,
+        "dentroIlFoglio": true,
+        "nomeNativo": "マイパレス_ミュージック",
+        "spriteVuoto": false,
+        "png": "sprite-175.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3603,6 +4690,16 @@
       "sprite": 176,
       "nomeNativo": "マイパレス_テレビ",
       "associazione": "blocco-covo-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 100,
+        "partId": 177,
+        "indiceSprite": 176,
+        "dentroIlFoglio": true,
+        "nomeNativo": "マイパレス_テレビ",
+        "spriteVuoto": false,
+        "png": "sprite-176.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3643,6 +4740,16 @@
       "sprite": 177,
       "nomeNativo": "マイパレス_ギャラリー",
       "associazione": "blocco-covo-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 101,
+        "partId": 178,
+        "indiceSprite": 177,
+        "dentroIlFoglio": true,
+        "nomeNativo": "マイパレス_ギャラリー",
+        "spriteVuoto": false,
+        "png": "sprite-177.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3683,6 +4790,16 @@
       "sprite": 178,
       "nomeNativo": "マイパレス_プレイエリア",
       "associazione": "blocco-covo-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 102,
+        "partId": 179,
+        "indiceSprite": 178,
+        "dentroIlFoglio": true,
+        "nomeNativo": "マイパレス_プレイエリア",
+        "spriteVuoto": false,
+        "png": "sprite-178.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3723,6 +4840,16 @@
       "sprite": 179,
       "nomeNativo": "マイパレス_アワード",
       "associazione": "blocco-covo-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 103,
+        "partId": 180,
+        "indiceSprite": 179,
+        "dentroIlFoglio": true,
+        "nomeNativo": "マイパレス_アワード",
+        "spriteVuoto": false,
+        "png": "sprite-179.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 3,
@@ -3765,6 +4892,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 104,
+        "partId": 181,
+        "indiceSprite": 180,
+        "dentroIlFoglio": true,
+        "nomeNativo": "837d83438370838c83585f8341834383658380947a927582b582bd82c682ab82",
+        "spriteVuoto": false,
+        "png": "sprite-180.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 5,
@@ -3799,10 +4936,50 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare: «837d83438370838c83585f8341834383658380947a927582b582bd82c682ab82» (tipo 104)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 12,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 12
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "tabellaParti": {
+          "partId": 181,
+          "indiceSprite": 180,
+          "nomeNativo": "837d83438370838c83585f8341834383658380947a927582b582bd82c682ab82",
+          "png": "sprite-180.png",
+          "motivoSenzaSprite": null
+        },
+        "sottoIlPin": {
+          "punti": 5,
+          "ingressiDelCampo": 4,
+          "famiglie": {
+            "passaggio|Passaggio": 4,
+            "attivita|Voce del Covo dei Ladri": 1
+          },
+          "procedure": {
+            "MyPalace_Image": 1
+          },
+          "procedureTutte": {
+            "MyPalace_Image": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda galleria": 1
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda galleria": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 105,
@@ -3813,6 +4990,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 105,
+        "partId": 168,
+        "indiceSprite": 167,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ＩＮＦＯ",
+        "spriteVuoto": false,
+        "png": "sprite-167.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3835,10 +5022,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Punto informazioni",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 168, cioè lo sprite 167 del foglio, che si chiama «ＩＮＦＯ»"
     },
     {
       "tipoNativo": 106,
@@ -3849,6 +5036,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 106,
+        "partId": 166,
+        "indiceSprite": 165,
+        "dentroIlFoglio": true,
+        "nomeNativo": "中華マン屋",
+        "spriteVuoto": false,
+        "png": "sprite-165.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3875,10 +5072,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "ristorante",
+      "etichetta": "Panini al vapore",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 166, cioè lo sprite 165 del foglio, che si chiama «中華マン屋»"
     },
     {
       "tipoNativo": 107,
@@ -3889,6 +5086,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 107,
+        "partId": 169,
+        "indiceSprite": 168,
+        "dentroIlFoglio": true,
+        "nomeNativo": "輸入食品",
+        "spriteVuoto": false,
+        "png": "sprite-168.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3915,10 +5122,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "negozio",
+      "etichetta": "Alimentari importati",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 169, cioè lo sprite 168 del foglio, che si chiama «輸入食品»"
     },
     {
       "tipoNativo": 108,
@@ -3929,6 +5136,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 108,
+        "partId": 167,
+        "indiceSprite": 166,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ジョゼ",
+        "spriteVuoto": false,
+        "png": "sprite-166.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -3951,10 +5168,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "negozio",
+      "etichetta": "Jose",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 167, cioè lo sprite 166 del foglio, che si chiama «ジョゼ»"
     },
     {
       "tipoNativo": 109,
@@ -3965,15 +5182,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 109,
+        "partId": 107,
+        "indiceSprite": 106,
+        "dentroIlFoglio": true,
+        "nomeNativo": "スタンプ",
+        "spriteVuoto": false,
+        "png": "sprite-106.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "timbro",
+      "etichetta": "Timbro dei Memento",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 107, cioè lo sprite 106 del foglio, che si chiama «スタンプ»"
     },
     {
       "tipoNativo": 110,
@@ -3984,15 +5211,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 110,
+        "partId": 170,
+        "indiceSprite": 169,
+        "dentroIlFoglio": true,
+        "nomeNativo": "教会",
+        "spriteVuoto": false,
+        "png": "sprite-169.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "culto",
+      "etichetta": "Chiesa",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 170, cioè lo sprite 169 del foglio, che si chiama «教会»"
     },
     {
       "tipoNativo": 111,
@@ -4003,6 +5240,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
+      "tabellaParti": {
+        "tipoNativo": 111,
+        "partId": 171,
+        "indiceSprite": 170,
+        "dentroIlFoglio": true,
+        "nomeNativo": "路地アクセサリー売り",
+        "spriteVuoto": false,
+        "png": "sprite-170.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -4029,10 +5276,10 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "negozio",
+      "etichetta": "Venditore di accessori nel vicolo",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 171, cioè lo sprite 170 del foglio, che si chiama «路地アクセサリー売り»"
     },
     {
       "tipoNativo": 112,
@@ -4043,15 +5290,25 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 112,
+        "partId": 62,
+        "indiceSprite": 61,
+        "dentroIlFoglio": true,
+        "nomeNativo": "ミニマップ：EXIT　",
+        "spriteVuoto": false,
+        "png": "sprite-061.png",
+        "motivoSenzaSprite": null
+      },
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "uscita",
+      "etichetta": "Uscita",
+      "stato": "determinato",
+      "prova": "tabella nativa delle parti: il gioco disegna questo tipo con la parte 62, cioè lo sprite 61 del foglio, che si chiama «ミニマップ：EXIT　»"
     },
     {
       "tipoNativo": 113,
@@ -4062,6 +5319,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 113,
+        "partId": 200,
+        "indiceSprite": 199,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 6,
@@ -4097,10 +5364,52 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 113)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 9,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 200,
+          "indiceSprite": 199,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 6,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "scala|Scala": 5,
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {
+            "CheckStair_red": 3,
+            "CheckStair_blue": 2
+          },
+          "procedureTutte": {
+            "CheckStair_red": 3,
+            "CheckStair_blue": 2
+          },
+          "proposta": "scala"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 5
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda premi": 5
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 114,
@@ -4111,6 +5420,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 114,
+        "partId": 201,
+        "indiceSprite": 200,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 9,
@@ -4141,10 +5460,56 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 114)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 10,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 201,
+          "indiceSprite": 200,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 9,
+          "ingressiDelCampo": 2,
+          "famiglie": {
+            "scala|Scala": 4,
+            "passaggio|Passaggio": 2
+          },
+          "procedure": {
+            "CheckStair_green": 4,
+            "D10_162_11_minimap_05": 1,
+            "D10_162_11_minimap_18": 1,
+            "D10_162_11_minimap_33": 1
+          },
+          "procedureTutte": {
+            "CheckStair_green": 4,
+            "D10_162_11_minimap_05": 1,
+            "D10_162_11_minimap_18": 1,
+            "D10_162_11_minimap_33": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 4
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda premi": 4
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 115,
@@ -4155,6 +5520,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 115,
+        "partId": 202,
+        "indiceSprite": 201,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 11,
@@ -4198,10 +5573,60 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 115)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 14,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 202,
+          "indiceSprite": 201,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 11,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "scala|Scala": 7,
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {
+            "CheckStair_blue": 5,
+            "CheckStair_red": 2,
+            "CheckGate_pink": 1,
+            "D10_162_11_minimap_27": 1,
+            "D10_162_11_minimap_36": 1
+          },
+          "procedureTutte": {
+            "CheckStair_blue": 5,
+            "CheckStair_red": 2,
+            "CheckGate_pink": 1,
+            "D10_162_11_minimap_27": 1,
+            "D10_162_11_minimap_36": 1
+          },
+          "proposta": "scala"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 7,
+          "Avvia Personalizza Covo": 1
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda premi": 7,
+          "Avvia Personalizza Covo": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 116,
@@ -4212,6 +5637,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 116,
+        "partId": 203,
+        "indiceSprite": 202,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 6,
@@ -4247,10 +5682,53 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 116)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 6,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 203,
+          "indiceSprite": 202,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 6,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "scala|Scala": 6
+          },
+          "procedure": {
+            "CheckStair_yellow": 4,
+            "CheckStair_lightblue": 1,
+            "CheckStair_red": 1
+          },
+          "procedureTutte": {
+            "CheckStair_yellow": 4,
+            "CheckStair_lightblue": 1,
+            "CheckStair_red": 1
+          },
+          "proposta": "scala"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 6
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda premi": 6
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 117,
@@ -4261,6 +5739,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 117,
+        "partId": 204,
+        "indiceSprite": 203,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 4,
@@ -4290,10 +5778,54 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 117)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 4,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 204,
+          "indiceSprite": 203,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 4,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "scala|Scala": 2,
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {
+            "CheckStair_blue": 1,
+            "CheckStair_lightblue": 1,
+            "D10_162_11_minimap_23": 1
+          },
+          "procedureTutte": {
+            "CheckStair_blue": 1,
+            "CheckStair_lightblue": 1,
+            "D10_162_11_minimap_23": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 2
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda premi": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 118,
@@ -4304,6 +5836,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 118,
+        "partId": 205,
+        "indiceSprite": 204,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 3,
@@ -4332,10 +5874,53 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 118)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 3,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 205,
+          "indiceSprite": 204,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 3,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "scala|Scala": 2
+          },
+          "procedure": {
+            "CheckStair_green": 1,
+            "CheckStair_pink": 1,
+            "D10_162_11_minimap_14": 1
+          },
+          "procedureTutte": {
+            "CheckStair_green": 1,
+            "CheckStair_pink": 1,
+            "D10_162_11_minimap_14": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 2
+        },
+        "etichetteDeiPuntiViciniTutte": {
+          "Guarda premi": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 119,
@@ -4346,6 +5931,16 @@
       "sprite": null,
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
+      "tabellaParti": {
+        "tipoNativo": 119,
+        "partId": 206,
+        "indiceSprite": 205,
+        "dentroIlFoglio": false,
+        "nomeNativo": null,
+        "spriteVuoto": null,
+        "png": null,
+        "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+      },
       "script": null,
       "proiezione": {
         "coppie": 1,
@@ -4368,10 +5963,39 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "etichetta": "Da identificare (tipo 119)",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "tabellaParti": {
+          "partId": 206,
+          "indiceSprite": 205,
+          "nomeNativo": null,
+          "png": null,
+          "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+        },
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {},
+          "procedureTutte": {},
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     }
   ],
   "provePalazzi": [
@@ -5136,25 +6760,35 @@
   "letturaGeometrica": {
     "controprova": {
       "domanda": "sui tipi il cui significato è dimostrato per altra via, quante volte il trigger sotto il pin darebbe la risposta giusta",
-      "casi": 69,
-      "giusti": 37,
-      "sbagliati": 32,
-      "accuratezza": 0.536,
+      "casi": 106,
+      "giusti": 52,
+      "sbagliati": 54,
+      "accuratezza": 0.491,
       "perFamiglia": {
         "passaggio": {
-          "giusti": 24,
-          "sbagliati": 17,
-          "accuratezza": 0.585
+          "giusti": 31,
+          "sbagliati": 25,
+          "accuratezza": 0.554
         },
         "attivita": {
           "giusti": 8,
-          "sbagliati": 1,
-          "accuratezza": 0.889
+          "sbagliati": 2,
+          "accuratezza": 0.8
         },
         "meccanismo": {
           "giusti": 0,
-          "sbagliati": 7,
+          "sbagliati": 9,
           "accuratezza": 0.0
+        },
+        "uscita": {
+          "giusti": 6,
+          "sbagliati": 2,
+          "accuratezza": 0.75
+        },
+        "negozio": {
+          "giusti": 2,
+          "sbagliati": 5,
+          "accuratezza": 0.286
         },
         "forziere": {
           "giusti": 4,
@@ -5162,74 +6796,39 @@
           "accuratezza": 0.8
         },
         "ristorante": {
+          "giusti": 1,
+          "sbagliati": 3,
+          "accuratezza": 0.25
+        },
+        "scala": {
+          "giusti": 0,
+          "sbagliati": 3,
+          "accuratezza": 0.0
+        },
+        "scorciatoia": {
           "giusti": 0,
           "sbagliati": 2,
           "accuratezza": 0.0
         },
-        "negozio": {
-          "giusti": 1,
-          "sbagliati": 1,
-          "accuratezza": 0.5
-        },
-        "scala": {
-          "giusti": 0,
-          "sbagliati": 1,
-          "accuratezza": 0.0
-        },
         "seme-bramosia": {
           "giusti": 0,
-          "sbagliati": 1,
-          "accuratezza": 0.0
-        },
-        "uscita": {
-          "giusti": 0,
-          "sbagliati": 1,
+          "sbagliati": 2,
           "accuratezza": 0.0
         }
       },
       "scambiPiuFrequenti": {
-        "porta letto come passaggio": 5,
+        "scala letto come passaggio": 8,
+        "porta letto come passaggio": 6,
         "sicura letto come passaggio": 5,
+        "passaggio letto come negozio": 4,
         "forziere letto come passaggio": 3,
         "porta letto come meccanismo": 3,
-        "passaggio letto come meccanismo": 2,
-        "negozio letto come passaggio": 2,
-        "nota letto come passaggio": 1,
-        "negozio letto come ristorante": 1
+        "negozio letto come ristorante": 2,
+        "passaggio letto come scala": 2
       },
       "conseguenza": "troppo bassa per farne una prova: la lettura geometrica non determina alcun tipo e nessun pin del pacchetto dipende da lei"
     },
     "materialeNonUsato": [
-      {
-        "chiave": "nativo-rmap-001-3-0",
-        "indicePin": 33,
-        "tipoNativo": 111,
-        "tipoSpillo": "negozio",
-        "etichetta": "Negozio",
-        "campo": "F001_003_00",
-        "procedura": "CHK_CLOTHES_SHOP",
-        "prova": "il trigger sotto questo pin chiama «CHK_CLOTHES_SHOP»"
-      },
-      {
-        "chiave": "nativo-rmap-001-4-0",
-        "indicePin": 4,
-        "tipoNativo": 19,
-        "tipoSpillo": "negozio",
-        "etichetta": "Negozio",
-        "campo": "F001_004_00",
-        "procedura": "CHK_FLOWERSHOP",
-        "prova": "il trigger sotto questo pin chiama «CHK_FLOWERSHOP»"
-      },
-      {
-        "chiave": "nativo-rmap-001-5-0",
-        "indicePin": 2,
-        "tipoNativo": 19,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_005_00",
-        "procedura": "AC_GOTO_BASE_PASS",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_BASE_PASS»"
-      },
       {
         "chiave": "nativo-rmap-002-0-1",
         "indicePin": 19,
@@ -5241,16 +6840,6 @@
         "prova": "il trigger sotto questo pin chiama «AC_GOTO_WEST_3F»"
       },
       {
-        "chiave": "nativo-rmap-002-0-2",
-        "indicePin": 1,
-        "tipoNativo": 19,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F002_004_00",
-        "procedura": "AC_GOTO_WEST_1F",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_WEST_1F»"
-      },
-      {
         "chiave": "nativo-rmap-005-1-0",
         "indicePin": 0,
         "tipoNativo": 20,
@@ -5259,86 +6848,6 @@
         "campo": "F005_001_00",
         "procedura": "Main_Udon_1",
         "prova": "il trigger sotto questo pin chiama «Main_Udon_1»"
-      },
-      {
-        "chiave": "nativo-rmap-005-1-0",
-        "indicePin": 10,
-        "tipoNativo": 106,
-        "tipoSpillo": "ristorante",
-        "etichetta": "Ristorante",
-        "campo": "F005_001_00",
-        "procedura": "Main_Izakaya03",
-        "prova": "il trigger sotto questo pin chiama «Main_Izakaya03»"
-      },
-      {
-        "chiave": "nativo-rmap-005-1-0",
-        "indicePin": 13,
-        "tipoNativo": 107,
-        "tipoSpillo": "ristorante",
-        "etichetta": "Ristorante",
-        "campo": "F005_001_00",
-        "procedura": "Main_Izakaya08",
-        "prova": "il trigger sotto questo pin chiama «Main_Izakaya08»"
-      },
-      {
-        "chiave": "nativo-rmap-006-1-0",
-        "indicePin": 0,
-        "tipoNativo": 19,
-        "tipoSpillo": "negozio",
-        "etichetta": "Negozio",
-        "campo": "F006_001_00",
-        "procedura": "CHK_PAWNSHOP",
-        "prova": "il trigger sotto questo pin chiama «CHK_PAWNSHOP»"
-      },
-      {
-        "chiave": "nativo-rmap-007-1-0",
-        "indicePin": 0,
-        "tipoNativo": 19,
-        "tipoSpillo": "negozio",
-        "etichetta": "Negozio",
-        "campo": "F007_001_00",
-        "procedura": "CHK_TOOL_SHOP_SHELF01",
-        "prova": "il trigger sotto questo pin chiama «CHK_TOOL_SHOP_SHELF01»"
-      },
-      {
-        "chiave": "nativo-rmap-007-1-0",
-        "indicePin": 6,
-        "tipoNativo": 19,
-        "tipoSpillo": "negozio",
-        "etichetta": "Negozio",
-        "campo": "F007_001_00",
-        "procedura": "CHK_ELECTRO_SHOP",
-        "prova": "il trigger sotto questo pin chiama «CHK_ELECTRO_SHOP»"
-      },
-      {
-        "chiave": "nativo-rmap-009-2-0",
-        "indicePin": 0,
-        "tipoNativo": 39,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F009_002_00",
-        "procedura": "GOTO_ARCADE",
-        "prova": "il trigger sotto questo pin chiama «GOTO_ARCADE»"
-      },
-      {
-        "chiave": "nativo-rmap-022-1-1",
-        "indicePin": 0,
-        "tipoNativo": 24,
-        "tipoSpillo": "attivita",
-        "etichetta": "Voce del Covo dei Ladri",
-        "campo": "F022_001_00",
-        "procedura": "Leave_MyPalace",
-        "prova": "il trigger sotto questo pin chiama «Leave_MyPalace»"
-      },
-      {
-        "chiave": "nativo-rmap-022-1-1",
-        "indicePin": 13,
-        "tipoNativo": 37,
-        "tipoSpillo": "scala",
-        "etichetta": "Scala",
-        "campo": "F022_001_00",
-        "procedura": "Stairs_Shortcut_1",
-        "prova": "il trigger sotto questo pin chiama «Stairs_Shortcut_1»"
       },
       {
         "chiave": "nativo-rmap-022-1-4",
@@ -5361,16 +6870,6 @@
         "prova": "il trigger sotto questo pin chiama «DUCT_153_009_04_INOUT»"
       },
       {
-        "chiave": "nativo-rmap-154-1-0",
-        "indicePin": 0,
-        "tipoNativo": 24,
-        "tipoSpillo": "uscita",
-        "etichetta": "Uscita",
-        "campo": "F154_001_00",
-        "procedura": "DUNGEON_EXIT",
-        "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
-      },
-      {
         "chiave": "nativo-rmap-154-2-0",
         "indicePin": 1,
         "tipoNativo": 5,
@@ -5379,56 +6878,6 @@
         "campo": "F154_002_00",
         "procedura": "GOTO_154_001_01",
         "prova": "il trigger sotto questo pin chiama «GOTO_154_001_01»"
-      },
-      {
-        "chiave": "nativo-rmap-154-5-1",
-        "indicePin": 5,
-        "tipoNativo": 36,
-        "tipoSpillo": "seme-bramosia",
-        "etichetta": "Seme della bramosia",
-        "campo": "F154_005_00",
-        "procedura": "D03_154_05_SEEDicon_3",
-        "prova": "il trigger sotto questo pin chiama «D03_154_05_SEEDicon_3»"
-      },
-      {
-        "chiave": "nativo-rmap-155-1-0",
-        "indicePin": 0,
-        "tipoNativo": 24,
-        "tipoSpillo": "uscita",
-        "etichetta": "Uscita",
-        "campo": "F155_001_00",
-        "procedura": "DUNGEON_EXIT",
-        "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
-      },
-      {
-        "chiave": "nativo-rmap-155-1-0",
-        "indicePin": 5,
-        "tipoNativo": 39,
-        "tipoSpillo": "scorciatoia",
-        "etichetta": "Scorciatoia",
-        "campo": "F155_001_00",
-        "procedura": "D04_SUBERITDAI_01",
-        "prova": "il trigger sotto questo pin chiama «D04_SUBERITDAI_01»"
-      },
-      {
-        "chiave": "nativo-rmap-156-12-0",
-        "indicePin": 1,
-        "tipoNativo": 19,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_012_00",
-        "procedura": "GOTO_156_05_00",
-        "prova": "il trigger sotto questo pin chiama «GOTO_156_05_00»"
-      },
-      {
-        "chiave": "nativo-rmap-156-3-0",
-        "indicePin": 1,
-        "tipoNativo": 19,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_003_00",
-        "procedura": "DUCT_156_003_1_A_INOUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_156_003_1_A_INOUT»"
       },
       {
         "chiave": "nativo-rmap-156-5-0",
@@ -5471,26 +6920,6 @@
         "prova": "il trigger sotto questo pin chiama «D05_GIM_BLUE_SWITCH03»"
       },
       {
-        "chiave": "nativo-rmap-156-5-0",
-        "indicePin": 5,
-        "tipoNativo": 30,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_005_00",
-        "procedura": "GOTO_156_12_01",
-        "prova": "il trigger sotto questo pin chiama «GOTO_156_12_01»"
-      },
-      {
-        "chiave": "nativo-rmap-156-5-0",
-        "indicePin": 6,
-        "tipoNativo": 29,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_005_00",
-        "procedura": "GOTO_156_06_00",
-        "prova": "il trigger sotto questo pin chiama «GOTO_156_06_00»"
-      },
-      {
         "chiave": "nativo-rmap-156-7-0",
         "indicePin": 2,
         "tipoNativo": 28,
@@ -5501,16 +6930,6 @@
         "prova": "il trigger sotto questo pin chiama «DUCT_156_007_B_INOUT»"
       },
       {
-        "chiave": "nativo-rmap-156-7-0",
-        "indicePin": 5,
-        "tipoNativo": 29,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_007_00",
-        "procedura": "GOTO_156_04_01",
-        "prova": "il trigger sotto questo pin chiama «GOTO_156_04_01»"
-      },
-      {
         "chiave": "nativo-rmap-156-7-1",
         "indicePin": 3,
         "tipoNativo": 28,
@@ -5519,36 +6938,6 @@
         "campo": "F156_007_00",
         "procedura": "DUCT_156_007_B_INOUT",
         "prova": "il trigger sotto questo pin chiama «DUCT_156_007_B_INOUT»"
-      },
-      {
-        "chiave": "nativo-rmap-156-7-1",
-        "indicePin": 5,
-        "tipoNativo": 29,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_007_00",
-        "procedura": "GOTO_156_04_01",
-        "prova": "il trigger sotto questo pin chiama «GOTO_156_04_01»"
-      },
-      {
-        "chiave": "nativo-rmap-156-9-0",
-        "indicePin": 10,
-        "tipoNativo": 29,
-        "tipoSpillo": "meccanismo",
-        "etichetta": "Meccanismo",
-        "campo": "F156_009_00",
-        "procedura": "D156_09_SWITCH_UP",
-        "prova": "il trigger sotto questo pin chiama «D156_09_SWITCH_UP»"
-      },
-      {
-        "chiave": "nativo-rmap-159-10-1",
-        "indicePin": 1,
-        "tipoNativo": 19,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F159_010_00",
-        "procedura": "DUCT_159_010_A_OUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_159_010_A_OUT»"
       },
       {
         "chiave": "nativo-rmap-159-10-1",
@@ -5569,16 +6958,6 @@
         "campo": "F159_035_00",
         "procedura": "MOUSE_SWITCH",
         "prova": "il trigger sotto questo pin chiama «MOUSE_SWITCH»"
-      },
-      {
-        "chiave": "nativo-rmap-159-9-0",
-        "indicePin": 11,
-        "tipoNativo": 30,
-        "tipoSpillo": "meccanismo",
-        "etichetta": "Meccanismo",
-        "campo": "F159_009_00",
-        "procedura": "D159_09_ELEVATOR_A_SWITCH",
-        "prova": "il trigger sotto questo pin chiama «D159_09_ELEVATOR_A_SWITCH»"
       },
       {
         "chiave": "nativo-rmap-162-11-0",
@@ -5639,16 +7018,6 @@
         "campo": "F162_011_00",
         "procedura": "CheckStair_blue",
         "prova": "il trigger sotto questo pin chiama «CheckStair_blue»"
-      },
-      {
-        "chiave": "nativo-rmap-162-11-1",
-        "indicePin": 0,
-        "tipoNativo": 30,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F162_011_00",
-        "procedura": "D010_CALL_ELEVATOR_ENTRANCE",
-        "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR_ENTRANCE»"
       },
       {
         "chiave": "nativo-rmap-162-11-1",
@@ -5869,69 +7238,109 @@
         "campo": "F162_011_00",
         "procedura": "CheckStair_blue",
         "prova": "il trigger sotto questo pin chiama «CheckStair_blue»"
-      },
-      {
-        "chiave": "nativo-rmap-162-12-1",
-        "indicePin": 3,
-        "tipoNativo": 30,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F162_012_00",
-        "procedura": "D010_CALL_ELEVATOR_FAILURE",
-        "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR_FAILURE»"
-      },
-      {
-        "chiave": "nativo-rmap-162-15-1",
-        "indicePin": 3,
-        "tipoNativo": 29,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F162_015_00",
-        "procedura": "D010_CALL_ELEVATOR",
-        "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR»"
       }
     ]
   },
+  "concordanzaConLaTabellaDelleParti": {
+    "concordi": [
+      {
+        "tipoNativo": 4,
+        "tipoSpillo": "sicura",
+        "dalNomeNativo": "sicura",
+        "nomeNativo": "ミニマップ：セーフルームアイコン",
+        "dimostratoDa": "icone contate nelle schermate del gioco"
+      },
+      {
+        "tipoNativo": 10,
+        "tipoSpillo": "porta",
+        "dalNomeNativo": "porta",
+        "nomeNativo": "ミニマップ：特殊鍵・共犯者クエス",
+        "dimostratoDa": "prove dirette sui singoli pin"
+      },
+      {
+        "tipoNativo": 13,
+        "tipoSpillo": "passaggio",
+        "dalNomeNativo": "passaggio",
+        "nomeNativo": "ミニマップ：やじるし　↑",
+        "dimostratoDa": "posizione sul bordo della planimetria"
+      },
+      {
+        "tipoNativo": 14,
+        "tipoSpillo": "passaggio",
+        "dalNomeNativo": "passaggio",
+        "nomeNativo": "ミニマップ：やじるし　右",
+        "dimostratoDa": "posizione sul bordo della planimetria"
+      },
+      {
+        "tipoNativo": 15,
+        "tipoSpillo": "passaggio",
+        "dalNomeNativo": "passaggio",
+        "nomeNativo": "ミニマップ：やじるし　下",
+        "dimostratoDa": "posizione sul bordo della planimetria"
+      },
+      {
+        "tipoNativo": 16,
+        "tipoSpillo": "passaggio",
+        "dalNomeNativo": "passaggio",
+        "nomeNativo": "ミニマップ：やじるし　左",
+        "dimostratoDa": "posizione sul bordo della planimetria"
+      },
+      {
+        "tipoNativo": 26,
+        "tipoSpillo": "forziere",
+        "dalNomeNativo": "forziere",
+        "nomeNativo": "ミニマップ：宝箱",
+        "dimostratoDa": "icone contate nelle schermate del gioco"
+      }
+    ],
+    "discordi": [],
+    "motivo": "ogni tipo dimostrato per un’altra strada, dove la tabella nativa arriva a un nome tradotto, deve ricevere lo stesso tipo di segnalino: prove che non si sono parlate e dicono la stessa cosa"
+  },
   "summary": {
     "tipi": 102,
-    "determinati": 67,
+    "determinati": 90,
     "ipotesi": 0,
-    "nonDeterminati": 35,
+    "nonDeterminati": 12,
     "pinConIpotesi": 0,
     "perTipoIpotesi": {},
-    "pinDeterminati": 846,
-    "pinNonDeterminati": 583,
+    "daVerificare": 12,
+    "pinDeterminati": 1142,
+    "pinDaVerificare": 287,
+    "pinNonDeterminati": 0,
     "perTipoSpillo": {
       "sicura": 1,
-      "porta": 1,
-      "meccanismo": 1,
-      "passaggio": 4,
+      "porta": 2,
+      "passaggio": 9,
       "forziere": 2,
+      "uscita": 3,
+      "scala": 6,
+      "tesoro-palazzo": 1,
+      "timbro": 2,
       "distributore": 2,
       "attivita": 13,
       "cercalavoro": 1,
-      "negozio": 28,
-      "ristorante": 6,
+      "negozio": 31,
+      "ristorante": 7,
       "sala-giochi": 1,
       "cinema": 1,
-      "nota": 1,
+      "nota": 2,
       "terme": 1,
       "casa": 1,
       "lavanderia": 1,
-      "culto": 1,
+      "culto": 2,
       "seme-bramosia": 1
     },
     "perProva": {
       "icone contate nelle schermate del gioco": 2,
       "prove dirette sui singoli pin": 1,
-      "procedura che accende la bandiera del pin": 3,
+      "tabella nativa delle parti": 26,
       "posizione sul bordo della planimetria": 4,
       "nome interno dello sprite del blocco urbano dimostrato": 51,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 6
     },
     "pinPerProva": {
+      "tabella nativa delle parti": 528,
       "posizione sul bordo della planimetria": 301,
-      "procedura che accende la bandiera del pin": 232,
       "icone contate nelle schermate del gioco": 142,
       "nome interno dello sprite del blocco urbano dimostrato": 81,
       "prove dirette sui singoli pin": 81,
@@ -5945,17 +7354,16 @@
       "seme-bramosia": 3,
       "sicura": 2
     },
-    "accuratezzaLetturaGeometrica": 0.536,
-    "casiControprova": 69,
+    "accuratezzaLetturaGeometrica": 0.491,
+    "casiControprova": 106,
     "perTipoPuntuale": {},
     "motiviNonDeterminati": {
       "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 2,
-      "nessuna famiglia domina fra le procedure che gli cadono sotto": 27,
-      "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono": 6
+      "nessuna famiglia domina fra le procedure che gli cadono sotto": 10
     }
   },
   "limits": [
-    "I tipi non determinati non vanno importati: un pin senza significato è peggio di un pin assente.",
+    "I tipi senza significato dimostrato entrano come segnalino «nota» dichiarato da verificare, con la scheda delle prove raccolte: è una decisione dell’utente del 6 settembre 2026, che si riserva il controllo sulle schermate del gioco. Non sono determinazioni e non vanno lette come tali.",
     "La lettura geometrica — che cosa sta sotto il pin secondo la proiezione — non determina nulla: misurata sui tipi già noti sbaglia più di quanto azzecchi, e la famiglia dei transiti sbaglia sempre. Resta nel file come materiale, mai come prova.",
     "Le icone native servono a riconoscere, non a disegnare: l’applicazione usa i propri segnalini."
   ]

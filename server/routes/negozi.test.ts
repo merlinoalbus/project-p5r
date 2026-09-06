@@ -23,10 +23,10 @@ describe('API negozi e inventario', () => {
   });
   afterAll(() => closeDb());
 
-  it('47 negozi con conteggi, quartiere e Confidente; scheda Untouchable con 218 articoli e fonti', async () => {
+  it('60 negozi con conteggi, quartiere e Confidente; scheda Untouchable con 218 articoli e fonti', async () => {
     const n = (await request(app).get('/api/compendio/negozi')).body.data as NegozioRiassuntoDto[];
-    expect(n).toHaveLength(47);
-    expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(499);
+    expect(n).toHaveLength(60);
+    expect(n.reduce((s, x) => s + x.articoli, 0)).toBe(575);
     const u = n.find((x) => x.chiave === 'untouchable')!;
     expect(u).toMatchObject({ nome: 'Untouchable', luogoChiave: 'shibuya', quartiereNome: 'Shibuya', articoli: 218 });
     expect(u.confidente).toEqual({ chiave: 'iwai', nome: expect.stringContaining('Iwai') });
@@ -46,7 +46,7 @@ describe('API negozi e inventario', () => {
     expect(r.totale).toBeGreaterThanOrEqual(1);
     expect(r.articoli[0].negozioNome).toBe('Untouchable');
     r = (await request(app).get('/api/compendio/articoli?categoria=consumabile')).body.data as RicercaArticoliDto;
-    expect(r.totale).toBe(68);
+    expect(r.totale).toBe(101);
     expect(r.articoli.every((a) => a.categoria === 'consumabile')).toBe(true);
     r = (await request(app).get('/api/compendio/articoli?per=Ann&categoria=arma')).body.data as RicercaArticoliDto;
     expect(r.totale).toBeGreaterThan(0);

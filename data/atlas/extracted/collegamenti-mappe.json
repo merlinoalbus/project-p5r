@@ -1114,9 +1114,11 @@
     "conPuntoDiArrivo": 41,
     "esiti": {
       "pin di passaggio senza destinazione": 191,
+      "planimetria con piu’ mete, nessun abbinamento forzato": 67,
       "collegato": 41,
       "collegato, senza punto di arrivo": 30,
-      "trigger troppo lontano da ogni pin": 82
+      "trigger troppo lontano da ogni pin": 82,
+      "procedura con piu’ mete, lasciata senza": 1
     },
     "archiDelGrafo": 1317,
     "archiReciproci": 274

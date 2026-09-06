@@ -165,7 +165,7 @@ verifiche. **L'utente ha esaminato il rilievo e ha confermato la forma «Parte I
 adottata. Ogni caso dichiara la propria `fonteDistinzione` — `nomi-enumerati-dalla-guida` per i
 sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due resta leggibile.
 
-## Fase 2 — Pin di tutti i tipi · **copertura dimostrata 29,6%, in lavorazione**
+## Fase 2 — Pin di tutti i tipi · **copertura dimostrata 54,6%, in lavorazione**
 
 | passo | stato | esito |
 |---|---|---|
@@ -316,6 +316,50 @@ mappa d'insieme del Palazzo e a esplorazione completa. I generi che restano e qu
 freccia di passaggio ~370 pin (tipi 13, 14, 15, 16, 19), forziere aperto o punto tesoro ~230
 (tipi 17, 5, 28), lucchetto ~110 (tipi 10, 12), altre ~170.
 
+### Le uscite riconosciute da dove stanno, e i primi collegamenti veri
+
+**Copertura dei pin: 780 su 1429, il 54,6%.** Il salto viene da una misura semplice.
+
+Quattro tipi nativi si accostano ciascuno a un lato **diverso** del disegno: il 13 in alto (65%),
+il 14 a destra (70%), il 15 in basso (76%), il 16 a sinistra (80%). Nessun tipo interno supera il
+48% sul proprio lato. Sono le frecce con cui la mappa d'insieme segna dove si passa a un'altra
+area, e per riconoscerle non serve sapere quale sprite il gioco usi: basta dove cadono. **262
+pin.** La prova sta nel divario, e `verify_edge_pins.py` lo pretende: se un tipo interno arrivasse
+alla soglia, la deduzione cade da sola.
+
+Per chi usa l'applicazione il pin resta uno solo, «Passaggio»: la direzione non cambia che cosa ci
+si fa sopra. Il lato resta però nel dato. **Attenzione a un errore da non fare:** il lato *non*
+dice quale sia la mappa di arrivo. Le planimetrie non sono tessere affiancate, e un'uscita a
+destra non cerca un'entrata a sinistra su una mappa vicina — la destinazione la dicono gli script.
+
+#### Dove porta un passaggio
+
+`CALL_FIELD(maggiore, minore, sub, ingresso)` è la chiamata con cui il gioco sposta il giocatore.
+L'indice della funzione è **0x1000**, molto più in alto degli altri, e gli argomenti sono spinti
+al contrario: per questo la prima ricerca non trovava nulla. Dedotto come per `BIT_ON`, provandolo
+su script di risposta nota; il verificatore pretende che almeno l'85% delle chiamate dichiarate
+nei `.flow` venga ritrovato.
+
+**1407 procedure chiamano `CALL_FIELD`, 567 destinazioni distinte, 1317 archi fra risorse di cui
+274 reciproci.** È il grafo del mondo.
+
+Abbinare i pin alle destinazioni è un'altra cosa, e si fa solo dove è lecito:
+
+| criterio | collegamenti |
+|---|---|
+| il trigger che chiama `CALL_FIELD`, proiettato, cade sul pin (entro l'8% della diagonale) | 28 |
+| la planimetria ha **una sola meta**: ogni suo pin porta lì, non c'è nulla da scegliere | 43 |
+| **totale** | **71**, di cui 41 con punto d'arrivo calcolato |
+
+Nel database `spillo_destinazione` passa da **0 a 40 righe**. Restano 191 pin su 67 planimetrie
+con più mete e nessun trigger posizionato che dica quale porti dove: quelli restano posati e
+visibili, **senza destinazione inventata**.
+
+C'è un dubbio aperto che vale la pena scrivere: nel gioco le frecce della mappa d'insieme non
+sembrano cliccabili — solo le stanze sicure lo sono. Se è così, il gioco non ha mai avuto bisogno
+di sapere dove porta ogni freccia, il dato non esiste, e per quelle 191 il collegamento è una
+funzionalità nostra da costruire, non un'informazione da estrarre.
+
 ### Due firme grafiche misurate sulle texture
 
 Cercando di fare a meno delle schermate ho provato a leggere la texture sotto ogni pin. Una
@@ -423,7 +467,7 @@ risponde con una destinazione unica: *Kichijoji › Quartiere dello shopping*, s
 Sniper (Freccette e Biliardo)», sulla planimetria nativa del gioco. Leblanc ne dà due, il
 quartiere e i Vicoli, entrambe con il pin.
 
-## Fase 3 — Collegamenti effettivi · **accessi fatti, collegamenti da fare**
+## Fase 3 — Collegamenti effettivi · **3d PRONTA PER VERIFICA, 3a–3c in lavorazione**
 
 | passo | stato |
 |---|---|
@@ -431,6 +475,47 @@ quartiere e i Vicoli, entrambe con il pin.
 | 3a — proiezione 3D→2D per mappa | ⬜ |
 | 3b — collegamenti con partenza e arrivo | ⬜ |
 | 3c — condizioni narrative | ⬜ |
+
+### Fase 3d — le sezioni arrivano alla mappa · **PRONTA PER VERIFICA**
+
+**Copertura degli accessi: 1321 voci su 1371, il 96,4%**, misurata sull'inventario completo con
+`npm run accesso:copertura` e zero errori del risolutore.
+
+| | voci | con accesso | con punto preciso |
+|---|---|---|---|
+| luoghi | 84 | **84** | 61 |
+| punti di interesse | 688 | **688** | 0 |
+| articoli | 499 | 457 | 395 |
+| negozi | 47 | 44 | 30 |
+| attività | 30 | 29 | 0 |
+| confidenti | 23 | 19 | 12 |
+
+Il meccanismo è a due tempi. Prima si cercano le **associazioni dirette**; solo se non portano da
+nessuna parte si allarga al **posto dichiarato** — un punto alla sua area e, se quella non ha
+planimetria, al Palazzo; un luogo al suo quartiere; un negozio al quartiere che dichiara. Quando
+scatta lo dichiara con il criterio `posto-dichiarato`, così chi legge distingue «ti porto sul
+punto» da «ti porto nel posto giusto».
+
+Che i due tempi restino separati non è un dettaglio: quando i blocchi del ripiego erano rimasti
+anche prima della prima ricerca, **settanta entità** ricevevano insieme un pin preciso e una meta
+generica. Ora la controprova sull'intero inventario ne trova zero, e due regressioni la
+proteggono — una con il pin su una planimetria figlia e il quartiere su un'altra mappa, dove la
+deduplicazione per chiave uguale non basterebbe.
+
+#### Il ponte con gli oggetti della guida
+
+Gli oggetti della pagina «Oggetti» vengono dalla guida e **non hanno una chiave**: hanno un nome e
+una riga di testo. Collegarli con un confronto fra nomi a ogni richiesta sarebbe la stessa
+somiglianza che è stata tolta alle attività. Il ponte si fa una volta e si versiona:
+`npm run oggetti:crosswalk` genera `data/seed/oggetti-crosswalk.json` abbinando un oggetto a un
+articolo **solo quando la corrispondenza è univoca nei due sensi**. Sono **104 abbinamenti** su
+355 voci; due casi ambigui e 249 senza articolo restano dichiaratamente senza collegamento.
+
+#### Cosa resta scoperto, e perché
+
+Cinquanta voci: tre negozi senza un indirizzo fisico (uno online, uno dentro un Palazzo, un
+venditore ambulante), quattro confidenti che non si incontrano in un luogo del catalogo (Igor e le
+Gemelle stanno nella Stanza di Velluto), un'attività, e quarantadue articoli di quei tre negozi.
 
 ### Le sezioni arrivano allo stesso mondo
 
@@ -469,6 +554,51 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 ---
 
 ## Registro delle dichiarazioni di pronto
+
+### Fase 3d — quarta dichiarazione, 6 settembre 2026
+
+Chiusi tutti e cinque i rilievi della prima verifica e i due delle successive. Comandi:
+
+```
+npm run oggetti:crosswalk
+npm run accesso:copertura -- --rapporto data/atlas/analysis/ripresa-2026-09/copertura-accesso.json
+npm run typecheck && npm run lint && npm test
+```
+
+Misurato: **1321 accessi su 1371 voci, zero errori**, suite **539 su 539**.
+
+**Cosa verificare.** Oltre alla riproducibilità, il merito:
+
+1. che il ripiego resti davvero un ripiego — la controprova è: nessuna entità deve avere insieme
+   un pin preciso e una destinazione senza pin, e il conto deve dare zero su tutto l'inventario;
+2. che il crosswalk degli oggetti non abbini nulla di ambiguo: 104 righe, tutte con
+   corrispondenza univoca nei due sensi, e i 249 esclusi dichiarati;
+3. che `posto-dichiarato` compaia solo dove il pin non c'è, mai accanto a uno;
+4. che lo strumento di copertura fallisca davvero se il risolutore lancia: si può provare
+   rompendo di proposito una query e controllando che esca con codice 1.
+
+### Fase 2 — quarta dichiarazione, 6 settembre 2026
+
+Copertura dei pin da 423 a **780 su 1429 (54,6%)**, con due strade nuove e i loro verificatori:
+
+```
+python tools/p5r-map-export/edge_pins.py data/atlas/extracted
+python tools/p5r-map-export/verify_edge_pins.py data/atlas/extracted
+python tools/p5r-map-export/map_links.py data/atlas/extracted
+python tools/p5r-map-export/icon_observations.py data/atlas/extracted
+python tools/p5r-map-export/verify_icon_observations.py data/atlas/extracted
+```
+
+**Cosa verificare.** Il merito delle deduzioni:
+
+1. i quattro tipi di bordo: che il divario con i tipi interni regga (65–80% contro 48%) e che i
+   quattro lati siano esclusivi. Se un tipo interno arrivasse alla soglia la deduzione va tolta;
+2. il tipo 4 dedotto dalle icone contate: cinque schermate, unico compatibile, più la conferma
+   posizionale. E la conferma incrociata sul forziere, che dà il tipo 26 già noto per altra via;
+3. i 71 collegamenti: che nessuno di essi sia stato scelto fra più destinazioni possibili;
+4. che i 191 pin senza destinazione non ne abbiano ricevuta una inventata.
+
+
 
 ### Fase 2 — terza dichiarazione, 6 settembre 2026
 
@@ -518,6 +648,115 @@ lint puliti.
 | 2026-09-06 | Fase 1d (2ª) | **PRONTA PER VERIFICA** — nessuna etichetta tecnica nel DOM espanso, etichetta di versione da un'unica funzione condivisa | in attesa |
 | 2026-09-06 | Fase 2 (2ª) | **PRONTA PER VERIFICA** — 324 pin condizionali con condizione strutturata, artefatto semantico deterministico, contabilità chiusa su 1429 | in attesa |
 | 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
+| 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
+| 2026-09-06 | Fase 2 (7ª) | **PRONTA PER VERIFICA** — tabella nativa delle parti estratta e verificata dall'eseguibile, 90 tipi su 102 dimostrati, tutti i 1429 pin collocabili posati | in attesa |
+
+### Fase 2 (7ª) — la tabella nativa e i pin da verificare
+
+**Due cose nuove, e la seconda è una decisione dell'utente.**
+
+**1. Il significato dei pin non era nei dati, ed è saltato fuori nel codice.** Prima di cercarlo
+altrove ho chiuso ogni strada che stava negli archivi: censiti tutti i campi dei 178 `ICON.BIN` su
+1782 record — cinque portano informazione (tipo, x, y, bandiera, attivo), tredici sono
+identicamente zero; censiti `PARTS.BIN` e `DISP.BIN`, mai aperti prima; aperto `MINIMAP.PLG`;
+enumerati tutti e sette i fogli `SPR0` del pacchetto. Nessuna tabella. Codex l'ha trovata nel
+renderer del gioco, e qui è stata estratta e ricontrollata:
+
+```text
+partId = uint32(0x24557a0 + 0x14 * tipoNativo)      # in P5R.exe, identificativo a base uno
+```
+
+`tools/p5r-map-export/pin_part_table.py` la estrae, `verify_pin_part_table.py` la ricontrolla
+rileggendo l'eseguibile. La prova non è il disassemblato ma il fatto che **59 corrispondenze già
+dimostrate per quattro strade indipendenti tornano tutte**: il tipo 4 come stanza sicura dal
+conteggio delle icone, i 51 tipi urbani, i 6 del Covo, il tipo 97. E soprattutto: **nessuna
+lettura spostata ne riproduce nemmeno una** — spostando l'offset di ±4 o ±0x14, cambiando il passo
+o togliendo la base uno, le ancore vanno tutte a zero. È il controllo che distingue una tabella
+trovata da una coincidenza, e sta nel verificatore.
+
+**La conferma che vale di più.** I quattro tipi di bordo, dedotti dalla sola geometria e contestati
+per due tornate, ricevono dalla tabella i nomi `やじるし　↑`, `右`, `下`, `左`: 13 in alto, 14 a
+destra, 15 in basso, 16 a sinistra — **esattamente** come li avevo dedotti. In tutto 7 concordanze
+e **0 discordanze** fra la tabella e le determinazioni prese per altre strade; il controllo è
+automatico e fa fallire la generazione se una discordanza compare. Ne è uscita anche una
+correzione: il tipo 12 non è un «meccanismo» ma `開かない扉`, una porta che non si apre.
+
+**2. I tipi che restano senza significato entrano come `nota` da verificare.** Decisione
+dell'utente del 6 settembre 2026, che supera il divieto precedente («i tipi non decisi restano non
+importati»): questi pin si vedono sulla mappa, dichiarano di essere da verificare, e portano nella
+nota la scheda delle prove raccolte — diffusione, procedure che ne accendono la bandiera, testi che
+il gioco mostra vicino, e il nome nativo dello sprite dove la tabella ci arriva. La verifica la fa
+l'utente sulle schermate del gioco. L'artefatto conserva **tutte** le procedure e le etichette, non
+le prime otto: la scheda leggibile tronca, la prova no.
+
+**Rese ritirate su rilievo di Codex.** Avevo proposto `porta` per la Stanza di Velluto (tipo 20),
+`punto-sensibile` per la spunta (43) e per «destinazione / blocco cognitivo» (5). Nessuna delle tre
+regge: la «V» azzurra non è una serratura, una spunta non dice che cosa si esamini, e un nome che
+ne dice due non ne dimostra uno. Restano da verificare, con il nome nativo nella scheda. Il tipo 19
+resta `passaggio` ma come **punto di spostamento**, non come arco risolto: i collegamenti con
+partenza e arrivo sono la Fase 3b e stanno altrove.
+
+**Misurato:**
+
+| | prima | ora |
+|---|---:|---:|
+| tipi con significato dimostrato | 67 / 102 | **90 / 102** |
+| pin con significato dimostrato | 846 | **1142** |
+| pin posati nel pacchetto | 780 | **1339** |
+| pin senza collocazione | 649 | **90**, tutti per planimetria senza riferimento certificato |
+| contabilità sui pin nativi | 1429 | 1429, chiusa |
+
+**Riproduzione:**
+```bash
+python tools/p5r-map-export/pin_part_table.py data/atlas/extracted
+python tools/p5r-map-export/pin_semantics.py data/atlas/extracted .
+python tools/p5r-map-export/build_seed_package.py data/atlas/extracted data/seed data/seed/mappe/atlante-mondo.json
+python tools/p5r-map-export/verify_pin_part_table.py data/atlas/extracted
+python tools/p5r-map-export/verify_pin_semantics.py data/atlas/extracted data/seed
+npm run typecheck && npm run lint && npm test
+```
+Suite **539/539**, typecheck e lint puliti.
+
+**Nota di correzione su una mia misura precedente.** Avevo riferito «25 verificatori su 25 verdi»:
+non era vero. Il comando che avevo usato mandava l'uscita in `tail`, e il codice di ritorno letto
+era quello di `tail`, sempre zero. Misurati uno per uno con gli argomenti giusti, cinque
+verificatori falliscono — `map_icons`, `texpack_evidence`, `school_candidates`,
+`global_world_audit`, `full_field_connections` — e falliscono **anche sul commit precedente al
+mio lavoro**, quindi non sono una regressione di questo lotto ma un debito aperto. Il sesto,
+`world_connections`, è la regressione delle evidenze che Codex descrive in
+`docs/CODEX-SEMANTICA-PIN.md`: la prossima cosa che chiudo.
+
+
+### Risposta ai due rilievi della quinta verifica
+
+| rilievo di Codex | correzione |
+|---|---|
+| il docstring di `edge_pins.py` dichiarava ancora «fuori dal tratto nel 90% dei casi», cifra falsa | riscritto sulla prova effettiva: dominanza laterale 65,2% / 70,4% / 75,8% / 79,7% contro un massimo interno del 48,5%. Le quote fuori dal tratto (57,6%, 56,3%, 47,0%, 59,3%) restano scritte **come dato che descrive**, con detto a chiare lettere che il codice non applica alcuna soglia su di esse. |
+| il verificatore non copriva le 28 assegnazioni da trigger: cambiando a mano un arrivo il controllo passava lo stesso | `controlla_collegamenti` non conta più: **ricostruisce da capo** l'insieme atteso dalle sorgenti native e lo confronta riga per riga. Per ogni trigger riproietta la posizione, misura la distanza da **tutti** i pin di passaggio (l'argmin è verificato, non assunto), applica la soglia dell'8%, risolve i pin contesi con la distanza minore, e confronta `partenza`, `indicePin`, `arrivo`, `ingresso`, `distanza`, `modo` e `punto` d'arrivo. I modi ammessi sono due e sono elencati; una meta forzata deve avere distanza assente, un trigger deve averla entro soglia. |
+
+**Unicità sulla destinazione completa.** Il generatore chiedeva che fosse unica la *mappa* di
+arrivo e poi prendeva la prima riga dell'elenco: se due chiamate portavano alla stessa mappa da
+entrate diverse, l'entrata veniva scelta di fatto a caso, e l'entrata è ciò che decide in che
+punto si arriva. Ora la funzione `meta_unica` pretende l'unicità della coppia **mappa + entrata**.
+Quando le entrate sono più d'una ma la mappa è una sola il collegamento resta — la meta è certa —
+ma senza entrata e senza punto d'arrivo, con il motivo scritto nella riga; quando le mappe sono
+più d'una non si collega niente. Sui dati correnti il caso ambiguo **non si presenta**: le 71
+righe sono rimaste identiche byte per byte, e l'unica differenza nell'artefatto è una voce in più
+nel riepilogo. Vale come rete per il futuro, non come correzione di un errore in atto.
+
+**Prova che il controllo morde.** Manomettendo una riga per volta nell'artefatto e rilanciando il
+verificatore: arrivo cambiato → uscita 1; entrata → 1; distanza → 1; modo → 1; punto d'arrivo → 1;
+artefatto integro → 0. È esattamente lo scenario che Codex indicava come non coperto.
+
+**Riproduzione:**
+```bash
+python tools/p5r-map-export/map_links.py data/atlas/extracted
+cd tools/p5r-map-export && for v in verify_*.py; do python "$v" ../../data/atlas/extracted ../..; done
+npm run typecheck && npm run lint && npm test
+```
+Misurato: 25 verificatori su 25 verdi, suite **539/539**, typecheck e lint puliti,
+71 collegamenti (28 da trigger proiettato, 43 da meta unica) e 191 pin di passaggio dichiarati
+senza destinazione, contabilità chiusa su 262.
 
 ### Risposta ai tre rilievi sulla Fase 2
 

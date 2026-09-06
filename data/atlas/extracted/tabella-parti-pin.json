@@ -1,0 +1,1084 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "eseguibile": {
+      "nome": "P5R.exe",
+      "bytes": 395876288,
+      "sha256": "5d9e18c383700302d029c947ddf8c811ba6afa47e60ec1afa0554d452bdc0cbf"
+    },
+    "foglio": "icone-mappa.json"
+  },
+  "tabella": {
+    "offset": 38098848,
+    "passo": 20,
+    "baseUno": true,
+    "spriteDelFoglio": 193,
+    "sha256Regione": "0c41b0f3b0cdcaf314c8286217e1fff92ba9a141a1dabec60bdc76a632167920",
+    "provenienza": "renderer dei record ICON: la tabella è caricata a 0x1412a756c dall’indirizzo virtuale 0x1424575a0; l’indice è 5×tipo scalato per quattro, quindi voci da 0x14 byte"
+  },
+  "ancore": {
+    "stanza sicura contata nelle schermate": {
+      "tipi": 1,
+      "coincidono": 1,
+      "discordanti": {}
+    },
+    "blocco urbano dai nomi degli sprite": {
+      "tipi": 51,
+      "coincidono": 51,
+      "discordanti": {}
+    },
+    "blocco del Covo dei Ladri dai nomi degli sprite": {
+      "tipi": 6,
+      "coincidono": 6,
+      "discordanti": {}
+    },
+    "tipo 97 dal nome dello sprite": {
+      "tipi": 1,
+      "coincidono": 1,
+      "discordanti": {}
+    }
+  },
+  "tipi": [
+    {
+      "tipoNativo": 4,
+      "partId": 24,
+      "indiceSprite": 23,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：セーフルームアイコン",
+      "spriteVuoto": false,
+      "png": "sprite-023.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 5,
+      "partId": 28,
+      "indiceSprite": 27,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：目的地・認知ロックポ",
+      "spriteVuoto": false,
+      "png": "sprite-027.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 10,
+      "partId": 30,
+      "indiceSprite": 29,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：特殊鍵・共犯者クエス",
+      "spriteVuoto": false,
+      "png": "sprite-029.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 12,
+      "partId": 31,
+      "indiceSprite": 30,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：開かない扉",
+      "spriteVuoto": false,
+      "png": "sprite-030.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 13,
+      "partId": 57,
+      "indiceSprite": 56,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：やじるし　↑",
+      "spriteVuoto": false,
+      "png": "sprite-056.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 14,
+      "partId": 59,
+      "indiceSprite": 58,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：やじるし　右",
+      "spriteVuoto": false,
+      "png": "sprite-058.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 15,
+      "partId": 58,
+      "indiceSprite": 57,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：やじるし　下",
+      "spriteVuoto": false,
+      "png": "sprite-057.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 16,
+      "partId": 60,
+      "indiceSprite": 59,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：やじるし　左",
+      "spriteVuoto": false,
+      "png": "sprite-059.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 17,
+      "partId": 27,
+      "indiceSprite": 26,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：宝箱",
+      "spriteVuoto": false,
+      "png": "sprite-026.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 19,
+      "partId": 49,
+      "indiceSprite": 48,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：移動先アイコン1",
+      "spriteVuoto": false,
+      "png": "sprite-048.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 20,
+      "partId": 54,
+      "indiceSprite": 53,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：ベルベット",
+      "spriteVuoto": false,
+      "png": "sprite-053.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 24,
+      "partId": 62,
+      "indiceSprite": 61,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：EXIT　",
+      "spriteVuoto": false,
+      "png": "sprite-061.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 25,
+      "partId": 62,
+      "indiceSprite": 61,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：EXIT　",
+      "spriteVuoto": false,
+      "png": "sprite-061.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 26,
+      "partId": 27,
+      "indiceSprite": 26,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：宝箱",
+      "spriteVuoto": false,
+      "png": "sprite-026.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 28,
+      "partId": 12,
+      "indiceSprite": 11,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：自分用アイコン",
+      "spriteVuoto": false,
+      "png": "sprite-011.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 29,
+      "partId": 65,
+      "indiceSprite": 64,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：上下移動矢印　上",
+      "spriteVuoto": false,
+      "png": "sprite-064.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 30,
+      "partId": 66,
+      "indiceSprite": 65,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：上下移動矢印　下",
+      "spriteVuoto": false,
+      "png": "sprite-065.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 32,
+      "partId": 75,
+      "indiceSprite": 74,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：down",
+      "spriteVuoto": false,
+      "png": "sprite-074.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 33,
+      "partId": 75,
+      "indiceSprite": 74,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：down",
+      "spriteVuoto": false,
+      "png": "sprite-074.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 34,
+      "partId": 77,
+      "indiceSprite": 76,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：up ",
+      "spriteVuoto": false,
+      "png": "sprite-076.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 35,
+      "partId": 77,
+      "indiceSprite": 76,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：up ",
+      "spriteVuoto": false,
+      "png": "sprite-076.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 36,
+      "partId": 79,
+      "indiceSprite": 78,
+      "dentroIlFoglio": true,
+      "nomeNativo": "矢印左上",
+      "spriteVuoto": false,
+      "png": "sprite-078.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 37,
+      "partId": 80,
+      "indiceSprite": 79,
+      "dentroIlFoglio": true,
+      "nomeNativo": "矢印右上",
+      "spriteVuoto": false,
+      "png": "sprite-079.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 38,
+      "partId": 81,
+      "indiceSprite": 80,
+      "dentroIlFoglio": true,
+      "nomeNativo": "矢印左下",
+      "spriteVuoto": false,
+      "png": "sprite-080.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 39,
+      "partId": 82,
+      "indiceSprite": 81,
+      "dentroIlFoglio": true,
+      "nomeNativo": "矢印右下",
+      "spriteVuoto": false,
+      "png": "sprite-081.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 40,
+      "partId": 86,
+      "indiceSprite": 85,
+      "dentroIlFoglio": true,
+      "nomeNativo": "オタカラアイコン",
+      "spriteVuoto": false,
+      "png": "sprite-085.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 43,
+      "partId": 94,
+      "indiceSprite": 93,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：チェック",
+      "spriteVuoto": false,
+      "png": "sprite-093.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 45,
+      "partId": 107,
+      "indiceSprite": 106,
+      "dentroIlFoglio": true,
+      "nomeNativo": "スタンプ",
+      "spriteVuoto": false,
+      "png": "sprite-106.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 46,
+      "partId": 115,
+      "indiceSprite": 114,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：自販機",
+      "spriteVuoto": false,
+      "png": "sprite-114.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 47,
+      "partId": 116,
+      "indiceSprite": 115,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：宝くじ",
+      "spriteVuoto": false,
+      "png": "sprite-115.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 48,
+      "partId": 117,
+      "indiceSprite": 116,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：バイト情報",
+      "spriteVuoto": false,
+      "png": "sprite-116.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 49,
+      "partId": 118,
+      "indiceSprite": 117,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ジューサーバー",
+      "spriteVuoto": false,
+      "png": "sprite-117.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 50,
+      "partId": 119,
+      "indiceSprite": 118,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：キヨスク",
+      "spriteVuoto": false,
+      "png": "sprite-118.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 51,
+      "partId": 120,
+      "indiceSprite": 119,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：本屋",
+      "spriteVuoto": false,
+      "png": "sprite-119.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 52,
+      "partId": 121,
+      "indiceSprite": 120,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：レンタルDVD",
+      "spriteVuoto": false,
+      "png": "sprite-120.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 53,
+      "partId": 122,
+      "indiceSprite": 121,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ファミレス",
+      "spriteVuoto": false,
+      "png": "sprite-121.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 54,
+      "partId": 123,
+      "indiceSprite": 122,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：牛丼",
+      "spriteVuoto": false,
+      "png": "sprite-122.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 55,
+      "partId": 124,
+      "indiceSprite": 123,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ミリタリーショップ",
+      "spriteVuoto": false,
+      "png": "sprite-123.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 56,
+      "partId": 125,
+      "indiceSprite": 124,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ゲーセン",
+      "spriteVuoto": false,
+      "png": "sprite-124.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 57,
+      "partId": 126,
+      "indiceSprite": 125,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：コンビニ",
+      "spriteVuoto": false,
+      "png": "sprite-125.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 58,
+      "partId": 127,
+      "indiceSprite": 126,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ジム",
+      "spriteVuoto": false,
+      "png": "sprite-126.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 59,
+      "partId": 128,
+      "indiceSprite": 127,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ビックバンバーガー",
+      "spriteVuoto": false,
+      "png": "sprite-127.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 60,
+      "partId": 129,
+      "indiceSprite": 128,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ドラッグストア",
+      "spriteVuoto": false,
+      "png": "sprite-128.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 61,
+      "partId": 130,
+      "indiceSprite": 129,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ドンキ",
+      "spriteVuoto": false,
+      "png": "sprite-129.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 62,
+      "partId": 131,
+      "indiceSprite": 130,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：映画館",
+      "spriteVuoto": false,
+      "png": "sprite-130.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 63,
+      "partId": 132,
+      "indiceSprite": 131,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：花屋",
+      "spriteVuoto": false,
+      "png": "sprite-131.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 64,
+      "partId": 133,
+      "indiceSprite": 132,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：スーパー",
+      "spriteVuoto": false,
+      "png": "sprite-132.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 65,
+      "partId": 134,
+      "indiceSprite": 133,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：スポーツ用品",
+      "spriteVuoto": false,
+      "png": "sprite-133.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 66,
+      "partId": 135,
+      "indiceSprite": 134,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：和風雑貨",
+      "spriteVuoto": false,
+      "png": "sprite-134.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 67,
+      "partId": 136,
+      "indiceSprite": 135,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：宝石店",
+      "spriteVuoto": false,
+      "png": "sprite-135.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 68,
+      "partId": 137,
+      "indiceSprite": 136,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：アクセサリー",
+      "spriteVuoto": false,
+      "png": "sprite-136.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 69,
+      "partId": 138,
+      "indiceSprite": 137,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：コスメ",
+      "spriteVuoto": false,
+      "png": "sprite-137.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 70,
+      "partId": 139,
+      "indiceSprite": 138,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：パン屋",
+      "spriteVuoto": false,
+      "png": "sprite-138.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 71,
+      "partId": 140,
+      "indiceSprite": 139,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：トイレ",
+      "spriteVuoto": false,
+      "png": "sprite-139.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 72,
+      "partId": 141,
+      "indiceSprite": 140,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：教室",
+      "spriteVuoto": false,
+      "png": "sprite-140.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 73,
+      "partId": 142,
+      "indiceSprite": 141,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：囚人高校",
+      "spriteVuoto": false,
+      "png": "sprite-141.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 74,
+      "partId": 143,
+      "indiceSprite": 142,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：バー",
+      "spriteVuoto": false,
+      "png": "sprite-142.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 75,
+      "partId": 144,
+      "indiceSprite": 143,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：雑貨屋",
+      "spriteVuoto": false,
+      "png": "sprite-143.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 76,
+      "partId": 145,
+      "indiceSprite": 144,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：レトロゲーム",
+      "spriteVuoto": false,
+      "png": "sprite-144.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 77,
+      "partId": 146,
+      "indiceSprite": 145,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：メイドカフェ",
+      "spriteVuoto": false,
+      "png": "sprite-145.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 78,
+      "partId": 147,
+      "indiceSprite": 146,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：カチャガチャ",
+      "spriteVuoto": false,
+      "png": "sprite-146.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 79,
+      "partId": 148,
+      "indiceSprite": 147,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：家電量販店",
+      "spriteVuoto": false,
+      "png": "sprite-147.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 80,
+      "partId": 149,
+      "indiceSprite": 148,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：グッズショップ",
+      "spriteVuoto": false,
+      "png": "sprite-148.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 81,
+      "partId": 150,
+      "indiceSprite": 149,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：工具店",
+      "spriteVuoto": false,
+      "png": "sprite-149.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 82,
+      "partId": 151,
+      "indiceSprite": 150,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：銭湯",
+      "spriteVuoto": false,
+      "png": "sprite-150.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 83,
+      "partId": 152,
+      "indiceSprite": 151,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ルブラン",
+      "spriteVuoto": false,
+      "png": "sprite-151.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 84,
+      "partId": 153,
+      "indiceSprite": 152,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：コインランドリー",
+      "spriteVuoto": false,
+      "png": "sprite-152.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 85,
+      "partId": 154,
+      "indiceSprite": 153,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：バッティング",
+      "spriteVuoto": false,
+      "png": "sprite-153.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 86,
+      "partId": 155,
+      "indiceSprite": 154,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：リサイクルショップ",
+      "spriteVuoto": false,
+      "png": "sprite-154.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 87,
+      "partId": 156,
+      "indiceSprite": 155,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：診療所",
+      "spriteVuoto": false,
+      "png": "sprite-155.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 88,
+      "partId": 157,
+      "indiceSprite": 156,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：文房具",
+      "spriteVuoto": false,
+      "png": "sprite-156.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 89,
+      "partId": 158,
+      "indiceSprite": 157,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：古着屋",
+      "spriteVuoto": false,
+      "png": "sprite-157.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 90,
+      "partId": 159,
+      "indiceSprite": 158,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：お寺",
+      "spriteVuoto": false,
+      "png": "sprite-158.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 91,
+      "partId": 160,
+      "indiceSprite": 159,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ジャズクラブ",
+      "spriteVuoto": false,
+      "png": "sprite-159.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 92,
+      "partId": 161,
+      "indiceSprite": 160,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：パワーストーン",
+      "spriteVuoto": false,
+      "png": "sprite-160.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 93,
+      "partId": 162,
+      "indiceSprite": 161,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：ダーツ",
+      "spriteVuoto": false,
+      "png": "sprite-161.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 94,
+      "partId": 163,
+      "indiceSprite": 162,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：お香",
+      "spriteVuoto": false,
+      "png": "sprite-162.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 95,
+      "partId": 164,
+      "indiceSprite": 163,
+      "dentroIlFoglio": true,
+      "nomeNativo": "アイコン：揚げ物屋",
+      "spriteVuoto": false,
+      "png": "sprite-163.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 96,
+      "partId": 165,
+      "indiceSprite": 164,
+      "dentroIlFoglio": true,
+      "nomeNativo": "スーパー（小）",
+      "spriteVuoto": false,
+      "png": "sprite-164.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 97,
+      "partId": 108,
+      "indiceSprite": 107,
+      "dentroIlFoglio": true,
+      "nomeNativo": "種",
+      "spriteVuoto": false,
+      "png": "sprite-107.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 98,
+      "partId": 175,
+      "indiceSprite": 174,
+      "dentroIlFoglio": true,
+      "nomeNativo": "マイパレス_メーカー",
+      "spriteVuoto": false,
+      "png": "sprite-174.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 99,
+      "partId": 176,
+      "indiceSprite": 175,
+      "dentroIlFoglio": true,
+      "nomeNativo": "マイパレス_ミュージック",
+      "spriteVuoto": false,
+      "png": "sprite-175.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 100,
+      "partId": 177,
+      "indiceSprite": 176,
+      "dentroIlFoglio": true,
+      "nomeNativo": "マイパレス_テレビ",
+      "spriteVuoto": false,
+      "png": "sprite-176.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 101,
+      "partId": 178,
+      "indiceSprite": 177,
+      "dentroIlFoglio": true,
+      "nomeNativo": "マイパレス_ギャラリー",
+      "spriteVuoto": false,
+      "png": "sprite-177.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 102,
+      "partId": 179,
+      "indiceSprite": 178,
+      "dentroIlFoglio": true,
+      "nomeNativo": "マイパレス_プレイエリア",
+      "spriteVuoto": false,
+      "png": "sprite-178.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 103,
+      "partId": 180,
+      "indiceSprite": 179,
+      "dentroIlFoglio": true,
+      "nomeNativo": "マイパレス_アワード",
+      "spriteVuoto": false,
+      "png": "sprite-179.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 104,
+      "partId": 181,
+      "indiceSprite": 180,
+      "dentroIlFoglio": true,
+      "nomeNativo": "837d83438370838c83585f8341834383658380947a927582b582bd82c682ab82",
+      "spriteVuoto": false,
+      "png": "sprite-180.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 105,
+      "partId": 168,
+      "indiceSprite": 167,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ＩＮＦＯ",
+      "spriteVuoto": false,
+      "png": "sprite-167.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 106,
+      "partId": 166,
+      "indiceSprite": 165,
+      "dentroIlFoglio": true,
+      "nomeNativo": "中華マン屋",
+      "spriteVuoto": false,
+      "png": "sprite-165.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 107,
+      "partId": 169,
+      "indiceSprite": 168,
+      "dentroIlFoglio": true,
+      "nomeNativo": "輸入食品",
+      "spriteVuoto": false,
+      "png": "sprite-168.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 108,
+      "partId": 167,
+      "indiceSprite": 166,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ジョゼ",
+      "spriteVuoto": false,
+      "png": "sprite-166.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 109,
+      "partId": 107,
+      "indiceSprite": 106,
+      "dentroIlFoglio": true,
+      "nomeNativo": "スタンプ",
+      "spriteVuoto": false,
+      "png": "sprite-106.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 110,
+      "partId": 170,
+      "indiceSprite": 169,
+      "dentroIlFoglio": true,
+      "nomeNativo": "教会",
+      "spriteVuoto": false,
+      "png": "sprite-169.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 111,
+      "partId": 171,
+      "indiceSprite": 170,
+      "dentroIlFoglio": true,
+      "nomeNativo": "路地アクセサリー売り",
+      "spriteVuoto": false,
+      "png": "sprite-170.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 112,
+      "partId": 62,
+      "indiceSprite": 61,
+      "dentroIlFoglio": true,
+      "nomeNativo": "ミニマップ：EXIT　",
+      "spriteVuoto": false,
+      "png": "sprite-061.png",
+      "motivoSenzaSprite": null
+    },
+    {
+      "tipoNativo": 113,
+      "partId": 200,
+      "indiceSprite": 199,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    },
+    {
+      "tipoNativo": 114,
+      "partId": 201,
+      "indiceSprite": 200,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    },
+    {
+      "tipoNativo": 115,
+      "partId": 202,
+      "indiceSprite": 201,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    },
+    {
+      "tipoNativo": 116,
+      "partId": 203,
+      "indiceSprite": 202,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    },
+    {
+      "tipoNativo": 117,
+      "partId": 204,
+      "indiceSprite": 203,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    },
+    {
+      "tipoNativo": 118,
+      "partId": 205,
+      "indiceSprite": 204,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    },
+    {
+      "tipoNativo": 119,
+      "partId": 206,
+      "indiceSprite": 205,
+      "dentroIlFoglio": false,
+      "nomeNativo": null,
+      "spriteVuoto": null,
+      "png": null,
+      "motivoSenzaSprite": "il foglio ha 193 sprite e questo identificativo cade fuori: la sorgente grafica di questa parte non è ancora stata trovata"
+    }
+  ],
+  "summary": {
+    "tipi": 102,
+    "dentroIlFoglio": 95,
+    "conNome": 95,
+    "fuoriDalFoglio": [
+      113,
+      114,
+      115,
+      116,
+      117,
+      118,
+      119
+    ],
+    "ancoreCoincidenti": 59,
+    "ancoreTotali": 59
+  },
+  "limits": [
+    "La tabella dice quale parte grafica il gioco disegna per un tipo, non che cosa quella parte significhi per l’applicazione: il nome nativo dello sprite va ancora tradotto in un tipo di segnalino, voce per voce.",
+    "Gli identificativi oltre i 193 sprite del foglio noto restano senza sorgente grafica: il numero è dimostrato, l’immagine no.",
+    "Più tipi nativi possono usare la stessa parte: sono uguali a vedersi, non necessariamente la stessa cosa, e non vanno fusi senza altre prove."
+  ]
+}

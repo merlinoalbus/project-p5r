@@ -81,14 +81,43 @@ def main(out, radice=None):
         assert len(rifatto[genere]['compatibili']) == 1, f'piu’ di un tipo compatibile per {genere}'
         assert voce['tipoSpillo'] in registro, f'tipo di segnalino fuori registro: {voce["tipoSpillo"]}'
 
-        # 4. conferma incrociata con le altre strade
-        altra = semantica.get(tipo)
-        if altra and altra['stato'] == 'determinato' and \
-                not (altra.get('prova') or '').startswith('icone contate'):
-            assert altra['tipoSpillo'] == voce['tipoSpillo'], \
-                (f'il tipo {tipo} risulta «{voce["tipoSpillo"]}» contando le icone e '
-                 f'«{altra["tipoSpillo"]}» per un’altra strada: una delle due sbaglia')
+        # 4. Conferma incrociata. Guardare la `prova` finale non serve: per un tipo dedotto qui e'
+        #    gia' stata sovrascritta con «icone contate», e il confronto che si promette non
+        #    avverrebbe mai. Si legge invece l'evidenza grezza delle altre strade — quella degli
+        #    script, che resta nel file accanto — e si pretende che dica la stessa cosa.
+        altra = semantica.get(tipo) or {}
+        script = altra.get('script')
+        if script and script.get('stato') == 'determinato':
+            assert script['tipoSpillo'] == voce['tipoSpillo'],                 (f'il tipo {tipo} risulta «{voce["tipoSpillo"]}» contando le icone e '
+                 f'«{script["tipoSpillo"]}» dalle procedure che accendono la sua bandiera: '
+                 'una delle due strade sbaglia')
             incrociate += 1
+
+    # 4-bis. Dove l'osservazione dice in che parte della planimetria l'icona e' stata vista, il pin
+    #        dedotto deve cadere li'. E' l'unico modo di ricontrollare un'osservazione visiva senza
+    #        avere l'immagine: se il tipo fosse sbagliato, il suo pin starebbe da un'altra parte.
+    import edge_pins as ep
+    riferimento = {r['chiave']: r for r in
+                   json.loads((out/'riferimento-pin.json').read_text(encoding='utf8'))['mappe']}
+    perCodice = {m['code']: m for m in meta['maps']}
+    posizioni = 0
+    for voce in dati['osservazioni']:
+        vista = voce.get('posizioneVista')
+        if not vista:
+            continue
+        atteso = esito['generi'][vista['genere']]['dimostrato']
+        assert atteso is not None, f'posizione dichiarata per un genere non dedotto: {vista["genere"]}'
+        codice = vista['planimetria']
+        chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(x) for x in codice.split('_')[1:])
+        rif = riferimento[chiave]
+        fattore = rif['fattoreScala']
+        quadranti = {ep.lato_di(perCodice[codice]['pins'][i]['x']*fattore,
+                                perCodice[codice]['pins'][i]['y']*fattore, rif['riquadroContenuto'])
+                     for i in rif['collocabili']
+                     if perCodice[codice]['pins'][i]['nativeType'] == atteso}
+        assert vista['quadrante'] in quadranti,             (f'l’osservazione dice che su {codice} l’icona sta in «{vista["quadrante"]}», ma il pin '
+             f'di tipo {atteso} sta in {sorted(quadranti)}: una delle due cose e’ sbagliata')
+        posizioni += 1
 
     # 5. gli irrisolti restano tali
     dedotti = {int(k) for k in esito['tipiDimostrati']}
@@ -101,12 +130,18 @@ def main(out, radice=None):
         v = semantica.get(tipo)
         assert v and v['stato'] == 'determinato', f'tipo dedotto ma non usato nella semantica: {tipo}'
 
+    # La conferma incrociata non e' un di piu': e' cio' che da' credito al metodo, e almeno una
+    # dev'esserci. Oggi e' il forziere, che risulta il tipo 26 anche dalle procedure R_TBOX.
+    assert incrociate >= 1, ('nessuna deduzione risulta confermata da una strada indipendente: '
+                             'senza controprova il metodo vale quanto la fiducia che gli si da')
+
     coperti = sum(sum(c.get(t, 0) for c in mappe.values() if isinstance(c, collections.Counter))
                   for t in dedotti)
     irrisolti = [g for g, v in rifatto.items() if v['dimostrato'] is None]
     print('OK', len(dedotti), 'tipi dedotti contando le icone su', len(dati['osservazioni']),
           'schermate,', coperti, 'pin coperti;', incrociate,
           'confermati anche da un’altra strada indipendente;',
+          posizioni, 'osservazioni ricontrollate anche sulla posizione;',
           len(irrisolti), 'generi restano irrisolti e dichiarati tali', irrisolti or '')
 
 

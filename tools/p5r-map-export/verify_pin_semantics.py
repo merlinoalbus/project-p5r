@@ -122,6 +122,12 @@ def main(out, seed=None):
     osservati = (json.loads(percorso_osservato.read_text(encoding='utf8'))['tipiDimostrati']
                  if percorso_osservato.exists() else {})
     urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = bordo_ok = con_condizione = ipotesi = 0
+    tabella_ok = 0
+    # La tabella nativa si ricontrolla dall'eseguibile, non dall'artefatto: e' la sola sorgente
+    # che non si puo' aggiustare a mano senza che il controllo se ne accorga.
+    import pin_part_table as ppt
+    binario = ppt.leggi(ppt.ESEGUIBILE)
+    nomi_sprite = {s['index']: s.get('nome') for s in icone['sprite']}
     per_tipo = {r['tipoNativo']: r for r in semantica['tipi']}
     assert len(per_tipo) == len(semantica['tipi']), 'tipi nativi ripetuti'
     assert {r['tipoNativo'] for r in icone['tipiNativi']} == set(per_tipo), 'censimento diverso da quello delle icone'
@@ -129,8 +135,8 @@ def main(out, seed=None):
     for r in icone['tipiNativi']:
         v = per_tipo[r['tipoNativo']]
         assert v['occorrenze'] == r['occorrenze'] and v['associazione'] == r['associazione']
-        assert v['stato'] in ('determinato', 'non-determinato'), \
-            f'stato non ammesso: un tipo o è dimostrato o non lo è ({r["tipoNativo"]})'
+        assert v['stato'] in ('determinato', 'da-verificare'), \
+            f'stato non ammesso: un tipo o è dimostrato o è da verificare ({r["tipoNativo"]})'
         if v['stato'] == 'determinato':
             assert v['tipoSpillo'] in registro, f'tipo di segnalino fuori registro: {v["tipoSpillo"]}'
             assert v['etichetta'] and v.get('prova'), f'significato senza etichetta o senza prova: {r["tipoNativo"]}'
@@ -153,6 +159,27 @@ def main(out, seed=None):
                 assert str(r['tipoNativo']) in osservati,                     f'tipo dichiarato dedotto dalle icone ma assente dall’esito: {r["tipoNativo"]}'
                 assert osservati[str(r['tipoNativo'])]['tipoSpillo'] == v['tipoSpillo'],                     f'segnalino diverso da quello dedotto dalle icone: {r["tipoNativo"]}'
                 osservati_ok += 1
+            elif v['prova'].startswith('tabella nativa delle parti'):
+                # La strada piu' diretta, e per questo va ricontrollata dall'eseguibile e non
+                # dall'artefatto: si rilegge il partId dal file, si risale allo sprite e si
+                # pretende che il nome sia proprio quello a cui la traduzione dichiarata associa
+                # questo segnalino. Cambiare la tabella a mano deve far cadere il controllo.
+                import struct
+                import pin_part_table as ppt
+                parte = struct.unpack_from('<I', binario, ppt.TABELLA + ppt.PASSO*r['tipoNativo'])[0]
+                indice = parte - 1
+                assert 0 <= indice < ppt.SPRITE_DEL_FOGLIO, \
+                    f'tipo {r["tipoNativo"]}: dichiarato dalla tabella ma la parte cade fuori dal foglio'
+                nome = nomi_sprite.get(indice)
+                assert nome and nome == (v.get('tabellaParti') or {}).get('nomeNativo'), \
+                    f'tipo {r["tipoNativo"]}: nome dello sprite diverso da quello registrato'
+                reso = ps.DALLA_TABELLA_DELLE_PARTI.get(nome)
+                assert reso, f'tipo {r["tipoNativo"]}: nome nativo senza traduzione dichiarata'
+                assert (v['tipoSpillo'], v['etichetta']) == reso, \
+                    f'tipo {r["tipoNativo"]}: segnalino diverso da quello dichiarato per «{nome}»'
+                assert str(parte) in v['prova'] and nome in v['prova'], \
+                    f'tipo {r["tipoNativo"]}: la prova scritta non cita la parte e il nome'
+                tabella_ok += 1
             elif v['prova'].startswith('prove dirette'):
                 # il tipo e' dimostrato dai suoi stessi pin: si riaggregano le prove dirette e si
                 # controlla che siano tante e concordi quanto dichiarato
@@ -179,7 +206,29 @@ def main(out, seed=None):
                 dagli_script_ok += 1
             determinati += 1
         else:
-            assert v['tipoSpillo'] is None and v['etichetta'] is None and v['motivo']
+            # Un tipo senza significato dimostrato entra come «nota» dichiarato da verificare: non
+            # deve mai indossare un tipo che afferma qualcosa, deve dire perché non si sa, e deve
+            # portare la scheda delle prove — altrimenti la verifica manuale non ha da cosa partire.
+            assert v['tipoSpillo'] == 'nota', \
+                f'un tipo non dimostrato ha ricevuto un segnalino che afferma: {r["tipoNativo"]}'
+            assert v['etichetta'] and 'Da identificare' in v['etichetta'], \
+                f'un tipo da verificare non si dichiara tale nell’etichetta: {r["tipoNativo"]}'
+            assert v['motivo'], f'tipo da verificare senza motivo scritto: {r["tipoNativo"]}'
+            scheda = v.get('riferimenti')
+            assert scheda and scheda.get('diffusione'), \
+                f'tipo da verificare senza la scheda delle prove: {r["tipoNativo"]}'
+            assert scheda.get('avvertenza'), \
+                f'la scheda non avverte che gli indizi geometrici non decidono: {r["tipoNativo"]}'
+            # dove la tabella nativa arriva a un nome, la scheda e l'etichetta devono portarlo
+            nome = (v.get('tabellaParti') or {}).get('nomeNativo')
+            if nome:
+                assert nome in v['etichetta'], \
+                    f'il nome nativo è noto ma non compare nell’etichetta: {r["tipoNativo"]}'
+                assert (scheda.get('tabellaParti') or {}).get('nomeNativo') == nome, \
+                    f'la scheda non riporta il nome nativo raggiunto: {r["tipoNativo"]}'
+                assert nome not in ps.DALLA_TABELLA_DELLE_PARTI, \
+                    (f'il tipo {r["tipoNativo"]} ha una resa dichiarata per «{nome}» ma resta da '
+                     'verificare: o si applica o si toglie dalla tabella delle rese')
     for v in per_tipo.values():
         assert 'sotto il pin' not in (v.get('prova') or ''), \
             f'un tipo è determinato dalla lettura geometrica, che la controprova smentisce: {v["tipoNativo"]}'
@@ -220,8 +269,8 @@ def main(out, seed=None):
             p = pin_nativi[m['chiave']][i]
             v = per_tipo[p['nativeType']]
             scelto = da_bandiera.get((m['chiave'], i))
-            if v['stato'] != 'determinato' and not scelto:
-                continue
+            # Anche i tipi da verificare sono posati, come «nota»: entrano nel conto atteso,
+            # altrimenti la contabilità direbbe che nel pacchetto c'è piu' di quel che dovrebbe.
             spillo = scelto['tipoSpillo'] if scelto else v['tipoSpillo']
             attese[(spillo, round(100*p['x']*fattore/larghezza, 3),
                     round(100*p['y']*fattore/altezza, 3))] += 1
@@ -233,8 +282,8 @@ def main(out, seed=None):
             scelto = da_bandiera.get((m['chiave'], i))
             if scelto:
                 return scelto['tipoSpillo']
-            v = per_tipo[pin_nativi[m['chiave']][i]['nativeType']]
-            return v['tipoSpillo'] if v['stato'] == 'determinato' else None
+            # anche i tipi da verificare hanno il loro segnalino, «nota»: sono posati come gli altri
+            return per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['tipoSpillo']
 
         condizionali = {(spillo_di(i),
                          round(100*pin_nativi[m['chiave']][i]['x']*fattore/larghezza, 3),
@@ -263,7 +312,8 @@ def main(out, seed=None):
     assert rapporto['pinContati'] == nativi, f'contabilità aperta: {rapporto["pinContati"]} su {nativi}'
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
     assert ipotesi == semantica['summary']['ipotesi']
-    print('OK', determinati, f'tipi dimostrati ({urbani} dal nome dello sprite,',
+    print('OK', determinati, f'tipi dimostrati ({tabella_ok} dalla tabella nativa delle parti '
+          f'ricontrollata sull’eseguibile, {urbani} dal nome dello sprite,',
           f'{dagli_script_ok} dalle procedure che accendono la bandiera,',
           f'{dai_pin_ok} dalle prove dirette dei propri pin,',
           f'{osservati_ok} contando le icone nelle schermate,',

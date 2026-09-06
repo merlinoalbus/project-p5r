@@ -6,10 +6,10 @@
   },
   "criterio": {
     "quotaLato": 0.6,
-    "quotaFuoriDalTratto": 0.5,
     "minimiPin": 20,
     "quotaMassimaDeiTipiInterni": 0.485,
-    "forma": "un tipo è una freccia di bordo se cade fuori dal tratto e prevalentemente su un lato, e se quel lato è solo suo"
+    "quotaFuoriDalTrattoInformativa": 0.5,
+    "forma": "un tipo è una freccia di bordo se cade prevalentemente su un lato, se quel lato è solo suo, e se i tipi interni restano molto sotto. La quota fuori dal tratto è riportata ma non seleziona."
   },
   "tipi": {
     "4": {
@@ -211,28 +211,28 @@
       "etichetta": "Passaggio",
       "lato": "alto",
       "pin": 66,
-      "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     "14": {
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "lato": "destra",
       "pin": 71,
-      "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     "15": {
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "lato": "basso",
       "pin": 66,
-      "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     "16": {
       "tipoSpillo": "passaggio",
       "etichetta": "Passaggio",
       "lato": "sinistra",
       "pin": 59,
-      "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto (dato, non criterio), mentre nessun tipo interno supera il 48% sul proprio lato"
     }
   },
   "summary": {

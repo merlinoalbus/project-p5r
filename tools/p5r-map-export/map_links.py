@@ -38,6 +38,36 @@ def chiave_di(codice):
     return 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in codice.split('_')[1:])
 
 
+def meta_unica(destinazioni, mia, esistenti):
+    """L'unica destinazione a cui portano queste chiamate, se ce n'è una sola.
+
+    Due livelli, e la differenza non è un dettaglio. Una chiamata dice mappa **e** entrata, e
+    l'entrata è ciò che decide in che punto si arriva: due entrate diverse della stessa mappa
+    sono due arrivi diversi. Perciò:
+
+    - una sola destinazione completa (mappa + entrata) → si collega con il punto d'arrivo;
+    - più entrate ma **una sola mappa** → la mappa di arrivo è certa, il punto no. Si collega
+      lo stesso, senza entrata e senza punto: dire dove si va è già il collegamento, e
+      sceglierne una a caso metterebbe il giocatore in un punto sbagliato della mappa giusta;
+    - più mappe → non si sa dove si va e non si collega niente.
+
+    Restituisce `(destinazione, esito)`, dove la destinazione è `[maggiore, minore, sub, entrata]`
+    con entrata `None` quando è ignota, ed `esito` è `'entrata-ambigua'`, `'piu-mete'` o `None`.
+    Chi chiama sa se sta guardando una procedura o una planimetria intera, e scrive la voce di
+    riepilogo di conseguenza.
+    """
+    buone = sorted({tuple(d) for d in destinazioni
+                    if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti})
+    if not buone:
+        return None, None
+    if len(buone) == 1:
+        return list(buone[0]), None
+    mappe = {d[:3] for d in buone}
+    if len(mappe) == 1:
+        return list(next(iter(mappe))) + [None], 'entrata-ambigua'
+    return None, 'piu-mete'
+
+
 def destinazioni_per_campo(collegamenti):
     per_campo = collections.defaultdict(set)
     for c in collegamenti:
@@ -52,7 +82,9 @@ def destinazioni_per_campo(collegamenti):
 
 def punto_di_arrivo(codice, ingresso, meta, campi, proiezioni):
     """Il punto sulla planimetria di arrivo, se la sua proiezione è certificata."""
-    import numpy
+    if ingresso is None:
+        return None, ('le chiamate citano più entrate della stessa planimetria: la mappa di '
+                      'arrivo è certa, il punto d’arrivo no')
     riga = proiezioni.get(codice)
     if not riga or riga['esito'] != 'certificata':
         return None, 'la planimetria di arrivo non ha una proiezione certificata'
@@ -144,10 +176,12 @@ def main(out):
                 if distanza > DISTANZA_ABBINAMENTO:
                     esiti['trigger troppo lontano da ogni pin'] += 1
                     continue
-                scelta = next((d for d in destinazioni
-                               if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti),
-                              None)
-                if not scelta:
+                scelta, esito = meta_unica(destinazioni, mia, esistenti)
+                if esito == 'piu-mete':
+                    esiti['procedura con piu’ mete, lasciata senza'] += 1
+                elif esito == 'entrata-ambigua':
+                    esiti['procedura con una meta sola ma piu’ entrate'] += 1
+                if scelta is None:
                     continue
                 precedente = assegnati.get(vicino[0])
                 if precedente and precedente[1] <= distanza:
@@ -163,11 +197,12 @@ def main(out):
         destinazioni = set()
         for nome_campo in mappa['fields']:
             destinazioni |= per_campo.get(nome_campo, set())
-        valide = sorted({d for d in destinazioni
-                         if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti})
-        mete = {tuple(d[:3]) for d in valide}
-        if len(mete) == 1:
-            scelta_unica = list(valide[0])
+        scelta_unica, esito = meta_unica(destinazioni, mia, esistenti)
+        if esito == 'piu-mete':
+            esiti['planimetria con piu’ mete, nessun abbinamento forzato'] += 1
+        elif esito == 'entrata-ambigua':
+            esiti['planimetria con una meta sola ma piu’ entrate'] += 1
+        if scelta_unica is not None:
             for indice in indici:
                 if indice in assegnati:
                     continue
