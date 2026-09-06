@@ -109,12 +109,61 @@ italiano, 91 tratte dichiarate (64 archi distinti) e la matrice delle tariffe. �
 
 ---
 
-## Fase 1 — Organizzazione dell'atlante · ⬜ da iniziare
+## Fase 1 — Organizzazione dell'atlante · **PRONTA PER VERIFICA**
 
-Nomi corretti, gerarchia completa, deduplicazione secondo il record nativo di presentazione
-(`texpack` + `texelem` + indice titolo + offset), non secondo il titolo. Pacchetto seed
-autosufficiente, migrazione per il ruolo dell'immagine, reset e ricarica dei soli dati mappe,
-indice a schede con presentazione uniforme degli omonimi.
+| passo | stato | esito |
+|---|---|---|
+| 1a — catalogo di identità certificato | ♻️ corretta la terza volta | `atlas_identity.py` → `extracted/atlante-identita.json`: **301 planimetrie in 149 luoghi**, 274 nomi ognuno con file, offset e impronta della sua fonte, 27 senza nome nativo con il motivo, **3 copie effettive**, 5 gruppi di omonimi. `verify_atlas_identity.py` passa. |
+| 1b — pacchetto seed autosufficiente | ✅ | `build_seed_package.py` → `data/seed/mappe/atlante-mondo.json`: 298 mappe, 228 con `gruppoImmagini`, 49 con contesti, **72 agganciate a un'area della guida**. Sostituisce `atlante-base.json`. |
+| 1c — reset e ricostruzione dei soli dati mappe | ✅ | `reimpostaDatiMappe.ts` + `npm run mappe:ricarica`. Eseguita: 334 mappe, 268 spilli, 116 contenuti guida, **zero tabelle cambiate fuori dal livello mappe**, due esecuzioni di fila danno lo stesso stato. |
+| 1d — indice a schede e presentazione | ✅ | migrazioni 043-045, etichette parlanti delle versioni, raggruppamento delle radici, conteggi aggregati sull'intero sottoalbero. Nell'app: **13 schede** invece di 18. |
+
+### Come si distinguono le cose che prima si confondevano
+
+**Identità.** Non il titolo, ma il record nativo di presentazione: elemento di texture più indice
+del titolo d'area. Da lì le tre distinzioni richieste:
+
+- **copia effettiva** — stessi pixel *e* stesso record di presentazione → **3 immagini**, le sole
+  che escono dal pacchetto. Due immagini pixel-identiche senza record restano distinte: sono
+  risorse native diverse, e il gioco riusa la stessa sagoma in luoghi diversi;
+- **versione della stessa zona** — 79 luoghi ne hanno più d'una, raccolte sotto quel luogo;
+- **zona omonima** — 5 gruppi, tenuti separati e distinti.
+
+**Le versioni hanno nomi che dicono qualcosa**, misurati sui pixel e non supposti: «settore
+d'ingresso», «porzione settentrionale», «planimetria completa», «inquadratura orientale»,
+«variante grafica».
+
+**I nomi hanno una fonte, una posizione e un'impronta.** In ordine: la grafia ufficiale della
+mappa d'insieme (81 nomi), il titolo d'area del record texpack, l'indice nativo dei luoghi, il
+titolo roadmap. I titoli composti — «Edificio principale 1P / Edificio laboratori 1P» — portano
+la posizione di **ogni** pezzo. Il verificatore ricalcola l'impronta sul file e rifiuta un nome
+senza offset.
+
+**Il ruolo dell'immagine è un dato, non una deduzione** (migrazioni 043 e 044):
+`planimetria-nativa`, `illustrazione-editoriale`, `emblema`, `nessuna`. Prima frontend e backend
+lo deducevano in modo diverso dal percorso dell'asset, con una lista di eccezioni nel codice.
+
+### Un difetto trovato nel database dell'utente
+
+`mappa_presentazione` non esisteva pur essendo `user_version` oltre la 042, e l'importazione la
+salta in silenzio quando non la trova: contesti e gruppi di immagini sparivano senza errore, e
+l'indice mostrava le versioni di uno stesso luogo come luoghi separati. La **migrazione 045** la
+crea dove manca.
+
+### Punto arbitrato dall'utente il 6 settembre 2026
+
+Sette luoghi omonimi non sono distinguibili né dai vicini nel grafo né dalla guida: cinque
+«Corridoio della prigione» nella discesa dei Memento e due «Ufficio riciclaggio» nel Palazzo di
+Kaneshiro. Per questi resta l'ordine di attraversamento, scritto nella forma **«– Parte I, II,
+III»**. Altri sei prendono lo stesso schema perché **è la guida stessa a usarlo** per quelle
+zone: `iweleth` ha già «Corridoio della prigione – Parte I/II/III» e «Vuoto cavernoso – Parte
+I/II», e adottarlo fa sì che Mappe e Palazzi chiamino la stessa zona allo stesso modo.
+
+Codex ha segnalato questa forma come violazione del divieto di numerare, in entrambe le
+verifiche. **L'utente ha esaminato il rilievo e ha confermato la forma «Parte I, II, III»**
+(messaggio del 6 settembre 2026: «confermo il tema Parte 1, 2 e 3»). Resta quindi la soluzione
+adottata. Ogni caso dichiara la propria `fonteDistinzione` — `nomi-enumerati-dalla-guida` per i
+sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due resta leggibile.
 
 ## Fase 2 — Pin di tutti i tipi · ⬜ da iniziare
 
@@ -140,7 +189,8 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 |---|---|---|---|
 | 2026-09-06 | Fase 0 | fonti native in chiaro, 4 estrattori con 4 verificatori indipendenti, suite 534/534 | **PASS** |
 | 2026-09-06 | Fase 1a | catalogo di identità delle 301 planimetrie | **FAIL** — 5 rilievi bloccanti |
-| 2026-09-06 | Fase 1a (2ª) | **PRONTA PER VERIFICA** — i cinque rilievi corretti: 3 copie, 81 nomi ufficiali, provenienza con offset e impronta, nessuna etichetta sintetica, omonimi risolti in più passaggi | in attesa |
+| 2026-09-06 | Fase 1a (2ª) | i cinque rilievi corretti: 3 copie, 81 nomi ufficiali, provenienza con impronta, nessuna etichetta sintetica | **FAIL** — 2 rilievi |
+| 2026-09-06 | Fase 1a (3ª) | **PRONTA PER VERIFICA** — ogni nome ha ora anche l'offset, compresi i titoli composti (ogni pezzo con la sua posizione); sulla numerazione degli omonimi ha deciso l'utente | in attesa |
 | 2026-09-06 | Fasi 1b, 1c, 1d | **PRONTE PER VERIFICA** — pacchetto seed unico agganciato alla guida, ricarica dei soli dati mappe, indice a schede | in attesa |
 
 ### Cosa verificare nelle Fasi 1b, 1c e 1d
