@@ -7,7 +7,7 @@ import type { QuartiereDettaglioDto } from '../../types';
 import { notifica } from '../../stores/notificationStore';
 
 export function IngressoQuartiere({quartiere:q,onSalvato,onChiudi}:{quartiere:QuartiereDettaglioDto;onSalvato:()=>Promise<void>;onChiudi:()=>void}) {
- const [mappa,setMappa]=useState(q.ingresso?.mappa??q.mappaChiave??`citta-${q.chiave}`);
+ const [mappa,setMappa]=useState(q.ingresso?.mappa ?? q.mappaChiave ?? '');
  const [ricerca,setRicerca]=useState('');
  const [x,setX]=useState(q.ingresso?.x??50),[y,setY]=useState(q.ingresso?.y??50);
  const [zoom,setZoom]=useState(q.ingresso?.zoom??2.5);
