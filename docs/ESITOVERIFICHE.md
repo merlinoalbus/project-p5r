@@ -174,3 +174,110 @@ bloccanti non sono corretti e sottoposti a una nuova verifica indipendente. Il r
 **Decisione:** Fase 1a nuovamente respinta. In applicazione della sequenza di validazione, le
 Fasi 1b, 1c e 1d dichiarate contemporaneamente pronte non vengono ancora valutate: la verifica
 si ferma sulla dipendenza 1a finché i due rilievi residui non sono corretti.
+
+## Fase 1a — Terza verifica e arbitrato dell'utente
+
+**Esito: PASS**
+**Commit verificato:** `64e092e`
+**Data verifica:** 6 settembre 2026
+
+### Evidenze
+
+1. `atlas_identity.py` rigenera un file byte-identico a quello versionato: SHA-256
+   `741B86C16F4D345806CD4E7CBBDF120DA615DE5CE3172E8D65B949A064ED90D6`.
+2. `verify_atlas_identity.py` passa sul catalogo versionato: 301 planimetrie in 149 luoghi,
+   274 nomi ricontrollati sulle fonti, 3 copie e 298 versioni/non-copie verificate sui pixel.
+3. Ogni fonte nominale valorizzata possiede file, SHA-256 e offset; i titoli composti riportano
+   la posizione di ciascun componente.
+4. La precedente obiezione alla forma «Parte I/II/III» è ritirata per decisione esplicita
+   dell'utente, che ha confermato che questi sono i nomi effettivi da adottare. Non costituisce
+   quindi un rilievo residuo.
+
+**Decisione:** Fase 1a approvata. I due rilievi della seconda verifica sono chiusi dalla
+correzione degli offset e dall'arbitrato vincolante dell'utente sulla nomenclatura.
+
+## Fase 1b — Pacchetto seed autosufficiente
+
+**Esito: PASS**
+**Commit verificato:** `2a5fcc0` (con catalogo 1a aggiornato fino a `64e092e`)
+**Data verifica:** 6 settembre 2026
+
+### Evidenze
+
+1. La rigenerazione isolata di `atlante-mondo.json` è byte-identica al file versionato:
+   SHA-256 `9E0C966C58D91922278D77137B3ADC0D4642E3004206FA22722668CB29C6D73F`.
+   Anche `pacchetto-seed-rapporto.json` è byte-identico, SHA-256
+   `70E2FA0BE2D5C80D95ED4AC25A510D0127C0D6DC13D96520049ED4D236E4F35D`.
+2. Il pacchetto contiene 298 mappe con 298 chiavi uniche e 298 asset esistenti; tutte dichiarano
+   `ruoloImmagine = planimetria-nativa`. Non risultano campi obbligatori o asset mancanti.
+3. I conteggi rigenerati coincidono con la dichiarazione: 149 luoghi, 3 copie escluse, 228 mappe
+   con gruppo immagini, 49 con contesti e 72 associazioni uniche a entità della guida.
+
+**Decisione:** Fase 1b approvata. Il difetto di etichette tecniche descritto nella Fase 1d
+riguarda la presentazione all'utente e non altera completezza o riproducibilità del pacchetto.
+
+## Fase 1c — Reset e ricostruzione dei soli dati mappe
+
+**Esito: PASS**
+**Commit verificato:** `2a5fcc0`
+**Data verifica:** 6 settembre 2026
+
+### Evidenze
+
+1. `ricarica-mappe.ts --dati <copia>` è stato eseguito due volte su una copia isolata del
+   database. Entrambe le esecuzioni producono 334 mappe, 268 spilli e 116 contenuti guida;
+   `fuoriDalLivelloMappe` è vuoto e i conteggi finali di tutte le tabelle coincidono.
+2. È stato eseguito anche un confronto più severo del rapporto incorporato: le impronte del
+   contenuto completo di ogni tabella non appartenente al livello mappe sono identiche prima
+   della prima ricarica, dopo la prima e dopo la seconda. Partita, catalogo, Persona,
+   confidenti, negozi e contenuti sorgente della guida non cambiano.
+3. Un database nuovo, migrato e caricato da zero, converge agli stessi conteggi e allo stesso
+   contenuto logico del livello mappe. Le sole quattro differenze fisiche rispetto alla copia
+   sono riferimenti `immagine_chiave` preesistenti dell'istanza (`tokyo`, `citta-shibuya`,
+   `citta-yongen-jaya`, `citta-mementos`), correttamente conservati sulla copia e assenti su una
+   nuova installazione; asset, gerarchia e ogni altro campo coincidono.
+4. Entrambi i database terminano con `user_version = 45`, `foreign_key_check` vuoto,
+   298 planimetrie native, 73 associazioni `mappa_entita`, 116 righe sia in `dungeon_area` sia
+   in `guida_mappa`, e zero mappe con `entita_tipo = 'area'` e `ruolo_immagine = 'nessuna'`.
+
+**Decisione:** Fase 1c approvata. La ricarica è idempotente, confinata al livello autorizzato
+e riproducibile da installazione nuova senza dipendere da residui dell'atlante precedente.
+
+## Fase 1d — Indice a schede e presentazione
+
+**Esito: FAIL**
+**Commit verificato:** `2a5fcc0`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. L'API espone 334 mappe e 18 radici che l'indice raggruppa correttamente in 13 schede.
+2. Il Covo dei Ladri è una sola scheda con 5 versioni e le etichette parlanti attese:
+   `settore d'ingresso`, `planimetria completa`, `porzione occidentale`,
+   `porzione settentrionale`, `inquadratura orientale`.
+3. I conteggi delle schede sommano ricorsivamente l'intero sottoalbero: per esempio Tokyo
+   mostra 47 mappe e 81 spilli. Il controllo browser a 390×844 conferma 13 schede e nessun
+   overflow orizzontale (`scrollWidth = clientWidth = 390`).
+
+### Rilievi bloccanti
+
+1. **Nell'albero espanso sono visibili 26 etichette tecniche.** Il controllo DOM desktop/mobile
+   rileva stringhe quali `risorsa 151/0 livello 0`, `risorsa 153/8 livello 2` e
+   `risorsa 190/62 livello 0`. Nel runtime 20 nomi includono inoltre direttamente il suffisso
+   tecnico. Questo viola il criterio esplicito «nessuna etichetta tecnica residua».
+2. **La presentazione delle versioni non è unificata negli otto punti richiesti.** La funzione
+   parlante `src/utils/etichettaVersione.ts` è usata soltanto da `ImmaginiLuogo.tsx`, mentre
+   `src/utils/presentazioneMappa.ts` continua a produrre `immagine N` nei selettori usati da
+   editor, destinazione e ingresso; breadcrumb e mappa incorporata ricevono ancora una forma
+   diversa. Manca quindi la singola funzione condivisa prevista dal piano e lo stesso luogo
+   può essere presentato con etichette differenti a seconda della superficie.
+
+### Regressioni generali
+
+- `npm run typecheck`: PASS;
+- `npm run lint`: PASS;
+- `npm test -- --run`: PASS, 132 file e **534 test su 534**.
+
+**Decisione:** Fase 1d respinta. Per il nuovo riesame devono sparire tutte le 26 etichette
+tecniche dal DOM espanso e la stessa etichetta di versione deve provenire da un'unica funzione
+condivisa in tutti gli otto punti elencati nel piano. Le Fasi 1a, 1b e 1c restano approvate.
