@@ -52,7 +52,8 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
     const palazzi = albero.filter((m) => m.tipo === 'palazzo');
     expect(palazzi.length).toBeGreaterThan(3);
-    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'mementos-i-dedali')).toBe(true);
+    // la chiave pubblica del Dedalo è il percorso derivato dal nome del seed («Memento»), non la chiave storica
+    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'memento')).toBe(true);
     const aree = albero.filter((m) => m.tipo === 'area');
     expect(aree.length).toBeGreaterThan(10);
     // le aree dei Palazzi/Dedali vengono dalla guida (entità «area»); i pacchetti dell'utente possono aggiungere aree anche sotto Tokyo o un quartiere
