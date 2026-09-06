@@ -35,7 +35,7 @@ it('mantiene una scelta esplicita per destinazioni multiple', async () => {
 it('mantiene il catalogo raggiungibile quando associazione è assente o il servizio fallisce', async () => {
   getAccessoMondo.mockResolvedValue(risposta([]));
   const vista = monta();
-  expect(await screen.findByText('Questo luogo non è ancora associato a una mappa.')).toBeInTheDocument();
+  expect(await screen.findByText(/non ha una posizione sulla mappa/)).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Apri scheda e informazioni' })).toHaveAttribute('href', '/guida/negozi/untouchable');
   vista.unmount();getAccessoMondo.mockRejectedValue(new Error('Servizio indisponibile'));monta();
   expect(await screen.findByText('Servizio indisponibile')).toBeInTheDocument();
@@ -65,6 +65,6 @@ it('mantiene i contenuti guida distinti da un arrivo geografico', async () => {
   expect(await screen.findByRole('region', { name: 'Contenuti della guida' })).toBeInTheDocument();
   const link = screen.getByRole('link', { name: 'Biblioteca' });
   expect(link).toHaveAttribute('href', '/guida/mappe/palazzo?area=castello%2Fbiblioteca');
-  expect(screen.queryByText('Questo luogo non è ancora associato a una mappa.')).not.toBeInTheDocument();
+  expect(screen.queryByText(/non ha una posizione sulla mappa/)).not.toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Apri scheda e informazioni' })).toBeInTheDocument();
 });

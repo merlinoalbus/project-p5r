@@ -52,7 +52,7 @@ describe('EditorMappaPage', () => {
     monta();
     expect(await screen.findByText('Modifica')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi/ }));
-    fireEvent.click(within(screen.getByRole('group', { name: 'Tipo del nuovo spillo' })).getByRole('button', { name: /Forziere/ }));
+    fireEvent.click(within(screen.getByRole('group', { name: 'Tipo del nuovo spillo' })).getByRole('button', { name: 'Forziere' }));
     const tela = screen.getByRole('application');
     fireEvent.pointerDown(tela, { pointerId: 1, clientX: 0, clientY: 0 });
     fireEvent.pointerUp(tela, { pointerId: 1, clientX: 0, clientY: 0 });
@@ -263,7 +263,7 @@ describe('EditorMappaPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi/ }));
     const palette = within(screen.getByRole('group', { name: 'Tipo del nuovo spillo' }));
     for (const g of ['Spostamenti', 'Città', 'Persone', 'Palazzi e Mementos', 'Altro']) expect(palette.getByText(g)).toBeInTheDocument();
-    expect(palette.getAllByRole('button')).toHaveLength(36);
+    expect(palette.getAllByRole('button')).toHaveLength(37);
     for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
     expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
   });

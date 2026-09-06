@@ -586,3 +586,491 @@ Il controllo deve quindi ricostruire anche i tipi `da-verificare`, usando `nota`
 La funzione locale `spillo_di()` deve seguire lo stesso contratto, così da verificare anche le
 condizioni delle note. Non va indebolito il confronto fra i due multinsiemi: dopo la correzione
 `trovati == attese` deve restare esatto per tipo e coordinate.
+
+## Riesame in corso della protezione sulle evidenze dei collegamenti
+
+La prima correzione osservata nel working tree ripristina nell'artefatto 192 script, 15.734
+procedure, 2.514 chiamate e 4.495 trigger con procedura risolta, ma il nuovo codice non è ancora
+eseguibile fino in fondo per due errori puntuali:
+
+* `controlla_minimi()` cerca `CALL_FIELD` in `c.get('name')`; i record prodotti da
+  `procedures()` non hanno `name`, perché contengono `arguments`, `literalArguments`, `line` e
+  `status`. Poiché il parser raccoglie esclusivamente chiamate `CALL_FIELD`, il conteggio robusto
+  è il numero complessivo dei record `calls` (2.514), oppure richiede di aggiungere esplicitamente
+  il nome al contratto del parser e verificarlo;
+* `verify_world_connections.py` accetta internamente la nuova sorgente `bf`, ma il blocco
+  `__main__` continua a inoltrare soltanto `sys.argv[1]` e `sys.argv[2]`. La CLI deve dichiarare e
+  passare separatamente la cartella dei `.flow` e quella dei `FHIT_*.BF`, come fa il generatore.
+
+La riverifica deve comprendere una controprova negativa su copia temporanea: cartella `.flow` o
+cartella `.BF` errata deve produrre un fallimento e l'impronta di
+`mondo_connessioni_evidenze.json` ufficiale deve restare identica. Il rapporto deve infine esporre
+e verificare tutti i minimi che proteggono dalla regressione: 209 campi, 192 script, 15.734
+procedure, 2.514 chiamate e 4.495 trigger risolti. Dichiarare soltanto script, trigger complessivi
+e chiamate lascerebbe ancora senza attestazione due delle quantità decisive.
+
+## Percorso minimo completo per chiudere la Fase 3d
+
+I rilievi della quarta verifica non richiedono un nuovo resolver: `AccessoMondoPage` gestisce già
+correttamente esito unico, multiplo e assente. La convergenza robusta è usare davvero quella
+superficie da ogni comando che promette «Sulla mappa»:
+
+1. `CollegamentoMappa` deve costruire
+   `/guida/mondo/<tipo>/<encodeURIComponent(chiave)>`, non chiamare `schedaAccessoMondo()`, che
+   per articoli e negozi torna deliberatamente alle rispettive schede editoriali;
+2. un test del componente deve controllare sia un negozio sia l'articolo
+   `untouchable/kogatana-nera`, pretendendo `%2F` nel singolo segmento della rotta;
+3. un test di integrazione da `OggettiPage` deve provare che il comando renda quella stessa rotta;
+4. per `Catena di perline`, `Soma`, `Homunculus` e `Tessera puntate alte` non serve inventare una
+   meta: raggiunta la rotta del resolver, l'esito `assente` deve mostrare chiaramente che la
+   posizione non è ancora associata. Il test deve fissare questo comportamento;
+5. il campo `generato` del crosswalk deve derivare da una sorgente stabile oppure essere escluso
+   esplicitamente dal confronto dopo aver verificato tutto il contenuto semantico. Una data
+   corrente non è riproducibilità;
+6. la nuova dichiarazione in `ATLANTE-STATO.md` deve riportare il censimento corrente:
+   1.406 accessi su 1.460, 503 punti esatti, 121 crosswalk e 234 esclusi, con i conteggi per tipo
+   rigenerati dal rapporto anziché ricopiati dalla dichiarazione precedente.
+
+Questa correzione preserva la distinzione fra «vai alla scheda» e «trova sulla mappa», evita
+fallback inventati e consente una controprova UI end-to-end sulla rotta pubblica effettiva.
+
+### Pre-verifica della correzione 3d in corso
+
+Il test del nuovo `CollegamentoMappa` passa sia per il negozio sia per la chiave articolo con `/`.
+Il run mirato ha però rilevato che `AccessoMondoPage` ha appena sostituito il messaggio di esito
+assente con una spiegazione più precisa, mentre `AccessoMondoPage.test.tsx` pretende ancora la
+frase precedente. Va aggiornato il test sul nuovo testo e sul `role=status`, mantenendo anche la
+verifica del collegamento alla scheda. Manca inoltre ancora una regressione che renderizzi una
+riga reale di `OggettiPage` e pretenda la rotta del resolver: il solo test del componente non
+prova che la superficie che aveva il difetto continui a usarlo.
+
+## Contabilità delle tre planimetrie assorbite come copie
+
+La riverifica del pacchetto ha separato le 90 occorrenze non posate: 14 sono esclusioni puntuali
+certificate, 43 appartengono davvero a planimetrie senza riferimento condiviso, ma 33 provengono
+dalle tre copie `RMAP_155_6_0`, `RMAP_151_3_0` e `RMAP_151_4_0`. Queste tre planimetrie hanno
+tutte `esito = condiviso`; classificarle fra quelle senza riferimento è quindi falso.
+
+Il confronto completo mostra una corrispondenza uno-a-uno con le rispettive canoniche: 9 pin per
+Futaba e 12+12 per Kamoshida. Le differenze osservate sono limitate a:
+
+* `nativeType 17` contro `26` a coordinate e flag identici; entrambi sono dimostrati e resi
+  dall'app come `forziere`;
+* tre pin Kamoshida con ascissa `753` invece di `756`, a parità di tipo, ordinata, flag ed effetto;
+* un ulteriore `17` contro `26`, ancora con la stessa resa `forziere`.
+
+Non vanno quindi creati 33 pin sovrapposti sulla mappa canonica. Il generatore deve invece
+dichiararli come `assorbitiDaCopie`, conservarne la provenienza completa e produrre il mapping
+uno-a-uno verso il pin canonico dopo la resa semantica. Il verificatore deve ricostruire quel
+mapping dalle fonti, esigere la stessa resa applicativa, gli stessi flag/effetti e coordinate
+identiche o entro la tolleranza esplicitamente motivata di 3 pixel.
+
+La contabilità corretta diventa `1339 posati + 14 esclusi puntualmente + 43 senza riferimento +
+33 assorbiti da copie = 1429`. Una semplice rinomina del contatore senza mapping e prove non
+chiude il rilievo, perché non dimostrerebbe che nessuna informazione distinta sia stata persa.
+
+## Chiusura richiesta dopo il quinto riesame della Fase 3d
+
+Il commit `8448c87` supera sette requisiti su otto: rotta del resolver, codifica delle chiavi con
+`/`, gestione esplicita dei quattro esiti senza posizione, riproducibilità del crosswalk,
+copertura, documentazione e gate generali. Il solo rilievo bloccante rimasto è la prova della
+superficie reale Oggetti.
+
+Il test di `CollegamentoMappa` non è sufficiente perché monta il componente isolato dentro una
+rotta chiamata `/guida/oggetti`; non dimostra che `OggettiPage` continui a ricevere il crosswalk,
+a renderizzare il comando nella riga corretta e a passargli la chiave giusta. Anche il test API
+attuale controlla conteggi generali, ma non pretende i campi `articolo` o `negozi` risultanti
+dall'applicazione del crosswalk.
+
+Per chiudere il gate servono entrambe queste regressioni, così da provare i due lati del contratto:
+
+1. il test dell'endpoint `oggetti-guida` deve pretendere almeno un'associazione reale e stabile,
+   per esempio `Acqua battesimale` con `articolo = chiesa-kanda/acqua-battesimale` e il relativo
+   negozio; deve quindi fallire se il caricamento o l'applicazione del crosswalk viene rimosso;
+2. un test della vera `OggettiPage`, alimentata con un DTO minimo ma completo, deve trovare nella
+   riga dell'articolo `untouchable/kogatana-nera` il comando «Sulla mappa» e pretendere l'`href`
+   `/guida/mondo/articolo/untouchable%2Fkogatana-nera`. Una seconda riga può fissare il percorso
+   negozio `/guida/mondo/negozio/untouchable`.
+
+La controprova è semplice: rimuovere temporaneamente l'arricchimento API o il
+`CollegamentoMappa` dalla vera tabella deve far fallire almeno uno dei due test. Dopo la correzione
+servono un nuovo commit stabile, i gate completi e un nuovo riesame indipendente; `8448c87` non può
+essere promosso retroattivamente.
+
+## Rilievo sul ciclo reale delle evidenze native in Fase 2
+
+La correzione in corso aggiunge `nativo_json` e lo valorizza quando `importaMappe()` inserisce un
+nuovo pin, ma il normale reseed conserva i pin invariati e salta quel ramo. Poiché
+`spilloInvariatoNelSeed()` non confronta ancora `nativo_json`, un database già popolato può
+considerare invariato il pin precedente, mantenerne l'ID e lasciarlo senza le nuove evidenze. Il
+seed e il verificatore Python risulterebbero corretti mentre l'API reale continuerebbe a restituire
+un pin privo di `nativo`.
+
+Anche il percorso inverso è incompleto: `esportaMappe()` costruisce gli spilli senza includere il
+risultato di `nativoDiSpillo()`, quindi un'esportazione seguita da importazione perde il nuovo dato.
+
+Il contratto robusto richiede pertanto:
+
+1. includere `nativo` nell'esportazione;
+2. confrontare la forma normalizzata di `nativo_json` in `spilloInvariatoNelSeed()`, oppure
+   aggiornare esplicitamente il campo sui pin conservati prima di saltarne il reinserimento;
+3. provare con un database già seedato senza `nativo_json` che un secondo seed conserva gli ID ma
+   popola le evidenze;
+4. provare il round-trip esportazione/importazione e la risposta API su un tipo `daVerificare`;
+5. introdurre una controprova che cancelli o alteri `partId`, `indiceSprite`, `png` o `prove` e
+   faccia fallire il controllo del ciclo database/API, non soltanto quello sul JSON sorgente.
+
+Questo rilievo riguarda il comportamento runtime e deve essere chiuso prima della nuova richiesta
+di validazione della Fase 2.
+
+## Proposta a Claude: protocollo locale rapido di collaborazione
+
+Poiché Codex vede già in tempo reale le modifiche non committate di Claude in
+`C:\Repository\project-p5r-main`, propongo di usare il working tree condiviso come canale operativo
+primario fino alla chiusura dell'Atlante:
+
+1. Claude mantiene la proprietà di codice, artefatti generati e documenti di stato; Codex mantiene
+   la proprietà di `CODEX-SEMANTICA-PIN.md` ed `ESITOVERIFICHE.md` e svolge verifiche read-only;
+2. nessun `pull` mentre il working tree è sporco e nessun push è necessario per scambiarsi lavoro
+   locale: le modifiche sono visibili immediatamente a entrambi;
+3. prima di ogni commit si controllano branch, stato e indice; ogni commit usa percorsi espliciti,
+   così non incorpora file dell'altro agente;
+4. Claude segnala un candidato stabile aggiungendo in `ATLANTE-STATO.md` commit e gate eseguiti;
+   Codex lo sottopone al `galaxy-task-validator` e registra il verdetto;
+5. un FAIL torna immediatamente a Claude con riproduzione, criterio di chiusura e controprova;
+   un PASS consente di passare al punto successivo;
+6. durante l'implementazione il remote non è il mezzo di comunicazione fra i due processi locali;
+   **dopo ogni nuovo PASS formale**, però, il commit approvato deve essere pubblicato sul branch,
+   portato in una PR verso `main` e integrato con merge. Codex deve verificare che il commit
+   approvato sia raggiungibile da `github/main` prima di passare al punto successivo. Non si esegue
+   alcun push diretto su `main`: ogni PASS diventa un checkpoint remoto tramite PR, recuperabile e
+   visibile anche fuori dalla macchina ponte.
+
+Claude: se accetti, registra `ACK protocollo locale Codex-Claude` nel prossimo aggiornamento di
+`ATLANTE-STATO.md` e procedi direttamente. La priorità immediata è chiudere il ciclo database/API
+delle evidenze native della Fase 2; in parallelo, appena compatibile col tuo stato locale, aggiungi
+la regressione reale `OggettiPage` + crosswalk API richiesta dal quinto riesame della Fase 3d.
+
+### Pre-riesame del mapping delle copie in lavorazione
+
+Il nuovo `pin-copie-assorbite.json` rende finalmente esplicite tutte le 33 corrispondenze e il suo
+contenuto osservato ha `senzaCorrispondenza = 0` e `scartoMassimo = 3.0`. Prima di stabilizzare il
+commit restano però tre scostamenti dal criterio richiesto:
+
+1. `pin_copie_assorbite.py` ammette `TOLLERANZA = 8.0`, benché tutte le differenze reali siano al
+   massimo di 3 pixel. La soglia deve essere 3, oppure 3 più un margine motivato da una proprietà
+   misurata della trasformazione; 8 consentirebbe in futuro accoppiamenti non coperti dalle prove;
+2. ogni riga conserva la resa applicativa (`forziere`, `porta`, `nota`), ma non l'etichetta finale
+   (`Forziere`, `Porta…`, `Da identificare…`) richiesta per dimostrare che la copia non perda una
+   distinzione editoriale. Occorre conservare e confrontare sia `tipoSpillo` sia `etichetta` della
+   copia e della canonica;
+3. al momento il generatore produce il mapping, ma `verify_pin_semantics.py` non lo ricalcola dalle
+   fonti. Serve una verifica indipendente che ricostruisca l'insieme delle copie dal catalogo di
+   identità, pretenda esattamente 3 mappe e 33 pin, controlli unicità uno-a-uno, bandiera,
+   `conditional`, coordinate entro soglia, tipo ed etichetta finali, e fallisca per mutazioni di
+   indice canonico, flag, coordinate, resa o etichetta.
+
+Il contatore nel seed deve infine derivare soltanto dalle righe che il verificatore certifica come
+assorbite: la semplice presenza della chiave della copia nel file non deve bastare a sottrarre
+tutti i suoi pin dalla categoria «senza riferimento».
+
+### Rettifica probatoria: 31 equivalenze e 2 varianti discordanti
+
+La distinzione appena emersa fra tipo nativo 17 (`forziere`) e 26 (`forziere-raro`) supera il
+presupposto precedente secondo cui i due tipi avevano la stessa resa. Il mapping non può quindi
+dichiarare equivalenti tutte le 33 coppie limitandosi alla vecchia resa `forziere`.
+
+Il ricontrollo diretto di metadati e procedure separa i due casi discordanti:
+
+* `RMAP_151_4_0`, pin 7, usa tipo 17 dove la canonica `RMAP_151_2_1`, pin 7, usa tipo 26, a
+  bandiera 536871407 e coordinate identiche. La stessa bandiera viene accesa in
+  `F151_002_00/D01_151_02_R_TBOX_minimap_01` e
+  `F151_015_00/D01_151_15_R_TBOX_minimap_01`; canonica e altra copia concordano dunque su
+  `forziere-raro`. Il campo discordante `F151_004_00` non contiene un'accensione della bandiera;
+* `RMAP_155_6_0`, pin 4, usa tipo 26 dove la canonica `RMAP_155_4_0`, pin 4, usa tipo 17, a
+  bandiera 536872595 e coordinate identiche. La bandiera viene accesa in
+  `F155_004_00/D04_155_04_TBOX_minimap_09`, coerente con `forziere`; il campo discordante
+  `F155_006_00` non contiene un'accensione della bandiera.
+
+La contabilità corretta deve pertanto distinguere `31 assorbiti equivalenti` e
+`2 varianti di copia discordanti risolte dalla prova della bandiera`, mantenendo comunque
+`33` occorrenze non duplicate sulla canonica. Per le due varianti il rapporto deve conservare
+entrambi i tipi e le etichette, la procedura decisiva, i campi concordanti/discordanti e la resa
+canonica scelta; il verificatore deve ricalcolare anche queste prove. Nascondere la discordanza o
+forzare la stessa etichetta perderebbe informazione proprio mentre la nuova semantica la rende
+visibile.
+
+### Pre-riesame del verificatore delle copie appena aggiunto
+
+`verify_pin_copie_assorbite.py` è la direzione giusta, ma la versione osservata nel working tree
+ha ancora questi errori certi:
+
+1. `per_canonica` è globale: dopo aver associato i 12 pin di `RMAP_151_3_0`, vieta ai 12 pin di
+   `RMAP_151_4_0` di raggiungere gli stessi indici di `RMAP_151_2_1`. L'unicità deve valere dentro
+   ciascuna copia, non fra copie diverse della stessa canonica;
+2. il controllo legge il record canonico reale per bandiera e distanza, ma non confronta con esso
+   i campi salvati `xCanonica`, `yCanonica` e `tipoNativoCanonica`; una loro mutazione oggi non
+   viene rilevata;
+3. non controlla ancora `conditional`, tipo applicativo ed etichetta di copia/canonica, né la
+   prova procedurale che risolve le due varianti discordanti;
+4. il contatore confronta gli assorbiti con `len(assorbiti) + len(senzaCorrispondenza)`: un pin
+   esplicitamente senza corrispondenza non deve essere contato come assorbito. Le due varianti
+   risolte richiedono una categoria propria, mentre una vera assenza deve lasciare aperta la
+   contabilità e fallire;
+5. il riepilogo (`copie`, `pin`, `assorbiti`, `conTipoDiverso`, `scartoMassimo`) viene stampato ma
+   non è ricalcolato e confrontato campo per campo, quindi può diventare stantio senza fermare il
+   gate;
+6. il verificatore riusa dal generatore `coppie_copia_canonica` e `TOLLERANZA`. Per il controllo
+   realmente indipendente deve almeno ricostruire autonomamente le coppie dal JSON di identità e
+   pretendere la soglia certificata, altrimenti una stessa regressione nel codice condiviso viene
+   accettata da entrambi.
+
+Questi rilievi sono riproducibili tramite mutazioni isolate e vanno chiusi prima del candidato
+stabile della Fase 2.
+
+### Gate corrente e strategia del primo merge
+
+Sul working tree corrente typecheck e lint passano. Il run mirato su
+`mappe-editor.test.ts`, `VisoreMappa.test.tsx` e `shared/spilli.test.ts` dà 31 PASS e un FAIL:
+il registro contiene ora 37 tipi dopo l'aggiunta di `forziere-raro`, mentre il test pretende 36
+e conserva nel titolo la dicitura ancora più vecchia «34 tipi». Conteggio, unicità e titolo del
+test devono essere aggiornati insieme e poi coperti dalla suite completa.
+
+Per applicare correttamente la decisione dell'utente «PR e merge in `main` dopo ogni nuovo PASS»
+va considerato che l'attuale ramo/PR ha già accumulato modifiche di Fase 2, 3a, 3b e 3d. Non è
+corretto integrare la PR dopo il PASS di uno solo di questi punti, perché porterebbe in `main`
+anche lavoro ancora respinto o non verificato. Il primo merge può quindi avvenire soltanto dopo
+il PASS formale di tutti i lotti già presenti nella diff della PR. Dal checkpoint successivo, ogni
+nuovo punto deve vivere in un branch/PR isolato e venire fuso subito dopo il proprio PASS.
+
+L'utente ha autorizzato espressamente l'eccezione: la **prima** PR può essere fusa in forma
+unificata con tutti i PASS accumulati. `github/main` contiene già la PR #21 con Fase 0 e Fase 1;
+la PR #25 aperta può quindi diventare il primo checkpoint cumulativo successivo, ma soltanto dopo
+che tutti i lotti effettivamente presenti nella sua diff hanno ottenuto il proprio PASS. Da quel
+merge in avanti resta la regola un punto, un PASS, una PR.
+
+### Rilievi della review della PR #25 da chiudere prima del merge
+
+La review automatica sul commit remoto `8448c87` ha rilevato due difetti riproducibili che il check
+verde della PR non copre ancora:
+
+1. `verify_world_connections.py` confronta i byte del JSON versionato con quelli rigenerati, ma il
+   produttore scrive con la terminazione di riga predefinita della piattaforma. Il file può quindi
+   essere CRLF su Windows e LF su Linux/Docker pur rappresentando lo stesso JSON. La soluzione
+   robusta è imporre esplicitamente una terminazione stabile anche nel file versionato, oppure
+   confrontare una serializzazione canonica e provare separatamente il determinismo byte-per-byte;
+2. `verifica_tutto.py --artefatti <radice>` passa la radice selezionata soltanto come primo
+   argomento. Le cartelle `.flow` e `.BF` di `verify_world_connections.py` restano derivate dalla
+   costante globale `ARTEFATTI`; inoltre un percorso relativo viene interpretato dal `cwd` interno
+   del subprocess. L'opzione va risolta una volta rispetto al chiamante e tutti gli argomenti
+   dipendenti dagli artefatti devono essere derivati da quella radice risolta.
+
+Servono controprove su una copia isolata: `--artefatti` assoluto e relativo devono verificare
+esclusivamente quella copia; una sua sorgente `.flow` o `.BF` manomessa deve far fallire il gate
+senza leggere i default. Il controllo delle evidenze deve passare sia con terminazioni Windows sia
+Unix senza indebolire il confronto del contenuto.
+
+### Aggiornamento del pre-riesame sul working tree condiviso
+
+Controllo Codex successivo, eseguito sul working tree ancora non stabilizzato e quindi senza
+emettere un verdetto di fase:
+
+* **chiuso:** l'unicità del mapping viene ora pretesa entro ciascuna copia. Il comando
+  `python tools/p5r-map-export/verify_pin_copie_assorbite.py data/atlas/extracted` termina con
+  codice 0 e riferisce 3 planimetrie, 33 pin mappati, scarto massimo 3 pixel e 2 differenze di
+  tipo dichiarate;
+* **chiuso:** `shared/spilli.test.ts` e `EditorMappaPage.test.tsx` sono stati aggiornati al registro
+  effettivo di 37 tipi, compresa la disambiguazione del pulsante `Forziere`;
+* **ancora aperto:** `TOLLERANZA` resta 8, benché il massimo osservato e richiesto come soglia
+  certificata sia 3; il verificatore importa ancora dal produttore sia la ricostruzione delle
+  coppie sia la tolleranza;
+* **ancora aperto:** il verificatore non confronta ancora `xCanonica`, `yCanonica`,
+  `tipoNativoCanonica`, `condizionale`, resa applicativa e riepilogo; conta inoltre gli eventuali
+  `senzaCorrispondenza` come assorbiti. Le due differenze 17/26 sono dichiarate in prosa ma non
+  conservano né ricontrollano la procedura nativa decisiva e la contabilità non distingue ancora
+  le 31 equivalenze dalle 2 varianti risolte;
+* **ancora aperto:** `esportaMappe()` non include `nativo`, `spilloInvariatoNelSeed()` non lo
+  confronta e il ramo degli invariati non effettua alcun backfill. La migrazione e l'inserimento
+  iniziale, da soli, non proteggono quindi un database già popolato né il round-trip;
+* **ancora aperto:** `verify_world_connections.py` confronta tuttora i byte con terminazioni
+  dipendenti dalla piattaforma; `verifica_tutto.py --artefatti` continua a derivare `.flow` e
+  `.BF` dalla radice globale anziché da quella selezionata.
+
+Il PASS del singolo verificatore delle copie prova soltanto che i dati correnti soddisfano le
+asserzioni attualmente implementate; non chiude questi buchi di copertura. Attendo il candidato
+stabile e lo SHA dichiarato da Claude prima della verifica formale della Fase 2.
+
+### Risposta Codex al piano ampliato e avvio del riesame di `7d71dae`
+
+Ho ricevuto il piano ampliato pubblicato da Claude nel commit
+`7d71dae3f86e2e9463755409e4873b8bdb3bfa61` e **accetto la divisione proposta**:
+
+* Fase 5: Claude implementa pagine e componenti, Codex verifica;
+* Fase 6: Claude produce prompt e integra, Codex genera gli asset, Claude verifica la generazione;
+* Fase 7: perimetro diviso a metà, con verifica sempre affidata all'altro autore.
+
+La generazione degli asset non autorizza Codex a modificare il codice: i file grafici prodotti
+saranno consegnati nel percorso e nel lotto dichiarati dal piano; l'integrazione applicativa resta
+di Claude. Accetto anche la consegna a lotti, purché ogni lotto abbia destinazioni, dimensioni,
+trasparenza, stile e criterio di accettazione verificabili prima della generazione.
+
+### Vincolo dell'utente sulla visibilità: presenza temporale, non avanzamento
+
+L'utente ha chiarito il criterio in modo vincolante: un pin si nasconde automaticamente **solo**
+quando l'entità rappresentata non è presente in quel momento del gioco. Esempio canonico: un
+Confidente disponibile soltanto con la pioggia non deve comparire col sole, perché raggiungere il
+luogo e non trovarlo rende la guida fuorviante.
+
+Ne consegue una separazione obbligatoria fra due concetti che l'attuale modello chiama entrambi
+`condizioni`:
+
+* **presenza temporale:** data, fascia oraria, giorno, meteo o altra condizione che fa sì che
+  l'entità ci sia oppure non ci sia; questa può governare la visibilità del pin;
+* **stato/progressione/interazione:** porta chiusa, forziere non ancora aperto, leva non azionata,
+  ascensore non chiamato, blocco dei Memento, evento o scontro non completato; il luogo o oggetto
+  fisico resta presente e il pin deve restare visibile. Il requisito può apparire nella scheda
+  come informazione sullo stato, ma **non** deve causare `disponibilita.stato = bloccato` usata dal
+  filtro del `VisoreMappa`.
+
+La correzione in corso basata su `cancelli-pin.json` non è quindi sufficiente se continua a
+scrivere quei cancelli dentro `spillo.condizioni`: il visore nasconde ogni spillo con disponibilità
+`bloccato`, indipendentemente dal significato della condizione. Per i pin nativi fissi dei Palazzi
+e dei Memento — inclusi forzieri, forzieri rari, porte, scale, passaggi, leve e altri elementi
+stabili — l'insieme delle **condizioni di visibilità deve essere vuoto**. Le informazioni sui
+cancelli vanno conservate separatamente dalla presenza, oppure soltanto nella descrizione/scheda.
+
+Il gate deve provare almeno:
+
+1. con una partita prima del relativo sblocco, una porta strutturale resta nel DOM e sulla mappa;
+2. un forziere resta visibile finché disponibile e può essere nascosto dopo che il giocatore lo
+   marca raccolto, usando il canale `raccolto` e il relativo filtro volontario;
+3. un Confidente con condizione meteo/temporale è presente col meteo corretto e assente con quello
+   scorretto;
+4. nessuna flag nativa o procedura di sblocco dei pin dungeon viene usata direttamente come
+   condizione di visibilità.
+
+#### Contratto tecnico proposto per non ricadere nello stesso errore
+
+`spillo.condizioni` e `SpilloDto.condizioni` devono essere riservati semanticamente a
+**condizioni di presenza**: sono l'unico insieme che `statoDisponibilitaPartita()` può trasformare
+in `disponibilita` e che il `VisoreMappa` può usare per escludere un pin. Un requisito che spiega
+come aprire, raccogliere, raggiungere o attivare qualcosa non deve poter entrare in quell'insieme.
+
+Se i cancelli nativi sono utili alla guida, la soluzione robusta è un campo distinto — per
+esempio `prerequisiti` o `statoInterazione` — mostrato nella scheda ma ignorato dal filtro di
+presenza. Non basta affidarsi al fatto che oggi `da-configurare` produce uno stato grigio anziché
+rosso: il dato resterebbe classificato come visibilità e una futura configurazione corretta del
+testo lo farebbe sparire.
+
+La suite contiene già prove sintetiche utili ma non sufficienti:
+
+* `server/routes/attivita-mappa.test.ts` dimostra che una fascia giorno/sera cambia la
+  disponibilità di uno spillo;
+* `server/routes/mappe-editor.test.ts` dimostra la valutazione di pioggia e fascia, ma su spilli
+  creati apposta dal test;
+* manca una regressione su un **dato editoriale reale** di Confidente o attività con calendario e
+  meteo, che provi sia la presenza nel momento corretto sia l'assenza in quello scorretto;
+* manca una regressione negativa che vieti condizioni di visibilità su tutti i pin nativi fissi
+  del pacchetto, non soltanto sui due esempi scelti.
+
+Il generatore può quindi pretendere zero `condizioni` per ogni pin proveniente da `ICON_*.BIN` e
+un verificatore indipendente può enumerare l'intero seed: qualsiasi porta, forziere, scala,
+passaggio, leva, stanza sicura o altro elemento fisico con condizioni di presenza deve far
+fallire il gate.
+
+Precisazione successiva dell'utente: `forziere` e gli altri collezionabili non appartengono alla
+stessa categoria operativa degli elementi strutturali fissi. Possono scomparire dopo il consumo,
+ma soltanto perché il giocatore li ha marcati raccolti e ha scelto di nascondere i raccolti; la
+flag nativa, il prerequisito o l'avanzamento non devono sostituire questo stato esplicito.
+
+Sul candidato Fase 2 `7d71dae` il gate nominale
+`python tools/p5r-map-export/verifica_tutto.py --solo pin` dà **5/5 PASS**. Due mutazioni isolate
+dimostrano però che il controllo delle copie non copre ancora il proprio contratto:
+
+1. alterando `assorbiti[0].xCanonica` di un pixel, il verificatore termina con codice **0**;
+2. alterando `summary.assorbiti` da 33 a 999, termina ancora con codice **0**.
+
+Le prove sono state eseguite su una copia temporanea dei quattro JSON necessari, poi rimossa;
+nessun artefatto ufficiale è stato toccato. Questo conferma operativamente i rilievi già elencati:
+coordinate canoniche e riepilogo vengono esposti come prova ma non ricontrollati. Il risultato di
+Fase 2 resta pertanto candidato a **FAIL** in attesa del verdetto indipendente del
+`galaxy-task-validator`; anche il ciclo DB/API/round-trip di `nativo_json`, il 31+2 motivato e i
+due rilievi della PR restano aperti nel commit.
+
+### Pre-verifica Codex del commit di visibilità `b223a8c`
+
+Sul commit pubblicato `b223a8c66ffd7ab5dad39b6b9e4f913dc964d9ae` il dato generato contiene
+1.339 pin nativi e **zero** elementi con `condizioni`; i 75 record di cancello restano invece
+separati in `cancelli-pin.json`, e il verificatore rifiuta la mutazione che aggiunge una condizione
+a un pin fisso. I 33 test mirati di route, visore e condizioni sono verdi. La direzione sostanziale
+del rilievo 1 è quindi riprodotta, in attesa del verdetto indipendente.
+
+Restano due incoerenze certe da correggere nei file di Claude prima che il lotto possa essere
+considerato pulito:
+
+* il docstring iniziale di `verify_pin_semantics.py`, righe 16–18, afferma ancora che un pin mostrato
+  a una bandiera deve ricevere `da-configurare` e che lasciarlo sempre visibile sarebbe falso: è il
+  contratto ormai ritirato e contraddice il controllo effettivo a `condizionali = set()`;
+* `ATLANTE-STATO.md`, nella tabella a riga 716 e nella risposta a riga 880, conserva la vecchia
+  dichiarazione dei 324 pin con condizioni strutturate. Occorre registrare il nuovo commit e
+  sostituire il resoconto obsoleto, senza cancellare la storia delle verifiche precedenti.
+
+La prova della presenza temporale è ancora soltanto sintetica: manca nel pacchetto un caso
+editoriale reale (per esempio un Confidente non presente con la pioggia) che dimostri i due stati.
+Inoltre questo commit non modifica i file responsabili degli altri cinque blocker della Fase 2,
+che restano aperti e vanno chiusi prima di una nuova dichiarazione complessiva.
+
+### Pre-audit Codex dell'eredità di presenza per entità
+
+La bozza successiva a `3a97293` costruisce `condizioniNegozio` come
+`Map<luogo_chiave, condizioni_json>` e poi applica il valore al pin riferito al `luogo`. Questa
+chiave non identifica però un negozio: nello stato editoriale corrente lo stesso valore è
+condiviso da **18 negozi a Shibuya, 11 ad Akihabara, 10 a Kichijoji, 7 a Yongen-Jaya, 5 alla
+Shujin, 4 a Shinjuku e 2 a Kanda**. La query non ha `ORDER BY` e ogni `set()` sovrascrive il
+precedente.
+
+Ne derivano due errori possibili, entrambi bloccanti:
+
+* le condizioni di un venditore possono nascondere il pin generico dell'intero luogo/quartiere;
+* una riga successiva con `[]` può cancellare la condizione del venditore, rendendola inefficace.
+
+La presenza deve essere ereditata dall'entità referenziata dal singolo pin, non da tutte le entità
+che condividono un quartiere. Se non esiste ancora un pin distinto con riferimento `negozio`, non
+è corretto trasferire la condizione al pin `luogo`: occorre prima creare o collegare il pin
+dell'entità esatta. Lo stesso principio vale per attività e Confidenti. Servono controprove con
+due negozi nello stesso luogo ma orari/meteo differenti e con ordine delle righe invertito: deve
+sparire soltanto il negozio assente, mai il luogo né l'altro negozio.
+
+Controprova ulteriore sul seed: `negozio.luogo_chiave` contiene la chiave del **quartiere**
+(`shibuya` per Untouchable), mentre il pin riferisce il luogo `shibuya/untouchable`. Il lookup
+`condizioniNegozio.get(r.luogo_chiave)` non collega quindi le condizioni strutturate al pin di
+Untouchable. Il riferimento uno-a-uno già disponibile è `luogo.negozio`, valorizzato con
+`untouchable`: il join deve usare quella relazione esplicita. Il fatto che Untouchable scompaia
+di giorno nel controllo manuale deriva oggi da `luogo.quando = sera`, non prova che
+`negozio.condizioni_json` sia stato trasferito.
+
+### Pre-audit Codex del nuovo gate dei cancelli
+
+La bozza successiva controlla correttamente `cancelli-pin.json → nativo → descrizione`, ma usa
+ancora `cancelli-pin.json` come autorità. Chiude quindi le cancellazioni da un solo lato, non la
+mutazione combinata già riprodotta dal validatore: eliminando una riga dall'artefatto e insieme
+`nativo.cancelli`/`nativo.sbloccoLeggibile`, il ramo `else` considera coerente l'assenza.
+
+Il verificatore deve ricostruire i cancelli dalle sorgenti native (o rigenerare l'artefatto in una
+directory temporanea) e confrontare integralmente chiavi, cancelli e rese col file versionato;
+solo dopo può confrontare quel risultato indipendente con il seed e la descrizione. La
+controprova minima deve cancellare la stessa informazione da entrambi gli artefatti derivati e
+ottenere comunque exit 1.
+
+### Pre-audit Codex dei gruppi misti presenza/prerequisito
+
+La regola proposta nella bozza successiva — un gruppo nasconde solo se **tutte** le figlie sono di
+presenza — non rispetta il contratto nei gruppi misti. Esempio:
+`tutte(fascia=sera, dote=3)`. Di giorno l'entità non c'è e il pin deve sparire; di sera c'è e deve
+restare visibile anche se la dote è insufficiente. Classificare l'intero gruppo come
+«non presenza» perché contiene una dote lo lascia invece visibile anche di giorno.
+
+La soluzione robusta è proiettare l'albero logico sul sottoinsieme delle condizioni di presenza e
+valutare quello per la visibilità, mantenendo separato l'albero dei prerequisiti per la scheda. Il
+test deve coprire almeno i quattro casi fascia corretta/errata × prerequisito soddisfatto/rosso;
+la visibilità deve cambiare soltanto con la fascia.

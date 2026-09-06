@@ -862,3 +862,245 @@ il campo stabile oppure dichiarare e verificare soltanto la riproducibilità sem
 **Decisione:** il resolver, il ripiego e il crosswalk superano il controllo di merito, ma la Fase
 3d resta **FAIL** finché «Sulla mappa» non usa davvero il resolver, i quattro casi senza meta non
 sono gestiti, manca la regressione UI e la dichiarazione non viene aggiornata.
+
+## Fase 2 — Settima verifica: tabella nativa, copertura e ripristino delle evidenze
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `a566073`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. La tabella nativa `tipo → partId → sprite` supera il ricontrollo sull'eseguibile: 102 tipi,
+   95 con sorgente grafica, 7 dichiarati senza sorgente e 59/59 ancore corrette.
+2. La semantica chiude su 90 tipi determinati e 12 `da-verificare`; 1.142 occorrenze determinate
+   più 287 aperte fanno tutte le 1.429 native. Nessun tipo aperto riceve un significato specifico,
+   salvo i pin riconosciuti individualmente dalla propria bandiera.
+3. I 1.339 pin importati sono ricostruiti per tipo e coordinate; 1.130 hanno una condizione
+   strutturata. Il riferimento planimetrico ricontrolla 250 mappe con pin, 217 condivise, 1.372
+   pin collocabili e 14 esclusioni puntuali.
+4. I 71 collegamenti superano la ricostruzione indipendente completa: 43 da meta unica e 28 da
+   trigger, con partenza, indice, arrivo, ingresso, distanza, modalità e punto d'arrivo coincidenti.
+5. Il corpus mondiale è stato ripristinato: 209 campi, 192 script, 15.734 procedure, 2.514
+   `CALL_FIELD` e 4.495 trigger risolti. La rigenerazione isolata è byte-identica; sorgenti `.flow`
+   o `.BF` errate falliscono lasciando invariato l'artefatto ufficiale.
+6. Sul commit: verificatori pin e collegamenti PASS, typecheck PASS, lint PASS e 132 file con
+   **539 test su 539** PASS.
+
+### Rilievi bloccanti
+
+1. `verifica_connessioni_evidenze.json` e il suo produttore non espongono ancora
+   `procedures = 15734` e `triggerResolved = 4495`. I valori sono controllati in esecuzione ma
+   non restano attestati nel rapporto versionato.
+2. La causa dichiarata per i 90 pin non posati è falsa. La contabilità reale è
+   `1339 posati + 14 esclusi puntualmente + 43 senza riferimento condiviso + 33 assorbiti dalle
+   tre copie = 1429`. Per i 33 serve un mapping versionato uno-a-uno verso la canonica, con mappa,
+   indice, tipo nativo, coordinate, flag, resa finale e tolleranza esplicita; non vanno creati
+   duplicati sovrapposti.
+3. `ATLANTE-STATO.md` conserva copertura, conteggi e dichiarazioni superati, compresa l'attribuzione
+   dei 90 casi al riferimento mancante. Anche il documento di collaborazione descrive come aperti
+   due difetti del verificatore mondiale ormai corretti: lo stato corrente va separato chiaramente
+   dalla cronologia.
+4. Le evidenze complete dei tipi `da-verificare` esistono in `semantica-pin.json`, ma il pacchetto
+   ne trasferisce soltanto una selezione testuale. Non conserva e non espone stabilmente `partId`,
+   indice sprite, PNG o motivo dell'assenza dello sprite, e sceglie alternativamente alcune
+   famiglie di etichette. Eliminando dalle descrizioni le evidenze dei 280 pin aperti, il
+   verificatore continua a passare. Il seed/DTO/UI deve conservare le evidenze complete e una
+   controprova negativa deve fallire quando vengono rimosse o alterate.
+
+**Decisione:** tabella nativa, semantica, posizionamento, condizioni, collegamenti e corpus
+superano il controllo di merito, ma la Fase 2 resta **FAIL** finché rapporto, copie assorbite,
+documentazione ed evidenze importate non sono corretti e sottoposti a un nuovo riesame stabile.
+
+## Fase 3d — Quinta verifica: accesso reale dalla superficie Oggetti
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `8448c87`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. «Sulla mappa» usa la rotta reale `/guida/mondo/<tipo>/<chiave>` e non torna più alle schede
+   editoriali.
+2. Le chiavi contenenti `/` vengono codificate come un singolo segmento e ricostruite
+   correttamente lungo client, router e API.
+3. `Catena di perline`, `Soma`, `Homunculus` e `Tessera puntate alte` non ricevono mete inventate:
+   la pagina distingue gli acquisti di Palazzo e online e comunica che la posizione non è
+   associata.
+4. Due rigenerazioni indipendenti del crosswalk sono byte-identiche al file versionato, con SHA-256
+   `849FE939CB7E7A5288B2F75092F2240879DE09961686FA0E587465322CBF1F2F`.
+5. La misura indipendente ricostruisce 1.460 entità, 1.406 accessi, 503 punti precisi e zero errori;
+   la dichiarazione corrente riporta i conteggi aggiornati.
+6. Sul commit: typecheck, lint e build PASS; 133 file e 542 test PASS; 9 test mirati PASS.
+
+### Rilievo bloccante
+
+Il test aggiunto monta `CollegamentoMappa` isolatamente dentro una rotta chiamata
+`/guida/oggetti`, ma non monta la vera `OggettiPage`. Il test dell'endpoint controlla contenuti e
+conteggi generali, ma non verifica che il crosswalk arricchisca la risposta con le chiavi
+`articolo` o `negozi`. Potrebbero quindi rompersi il caricamento del crosswalk, l'associazione alla
+riga o il rendering del comando nella tabella senza far fallire alcun test.
+
+La chiusura richiede una regressione sulla vera `OggettiPage` con una chiave articolo contenente
+`/`, oppure la combinazione equivalente di un test API sull'iniezione delle chiavi esatte e un
+test della tabella reale. La prova deve includere anche almeno una delle quattro voci senza meta.
+
+**Decisione:** l'implementazione supera il controllo di merito, ma la Fase 3d resta **FAIL** fino
+alla prova automatica della superficie reale Oggetti e a un nuovo riesame su commit stabile.
+
+## Fase 2 — Ottava verifica: copie, prove native e contratto di visibilità
+
+**Esito del riesame: FAIL**  
+**Commit verificato:** `7d71dae3f86e2e9463755409e4873b8bdb3bfa61`  
+**Data verifica:** 6 settembre 2026
+
+Il `galaxy-task-validator` ha isolato lo SHA con `git archive`; il test Fase 3d successivo e le
+modifiche concorrenti del working tree non fanno parte del giudizio.
+
+### Parti conformi
+
+1. La contabilità chiude: `1339 posati + 33 assorbiti + 14 esclusi puntualmente + 43 senza
+   riferimento = 1429` pin nativi.
+2. Le copie comprendono 31 equivalenze e 2 discordanze 17/26. La scelta canonica è corroborata
+   dalle procedure `D01_151_02_R_TBOX_minimap_01` e `D04_155_04_TBOX_minimap_09`, mentre nei due
+   campi discordanti non risulta un setter equivalente.
+3. Happy path: verificatori principali verdi, typecheck e lint PASS, **133 file / 542 test PASS**,
+   build Vite di produzione PASS con il solo warning preesistente sulla dimensione del chunk.
+
+### Rilievi bloccanti
+
+1. **Contratto di visibilità violato.** Lo SHA contiene 1.130 condizioni `da-configurare`, non
+   324 come dichiara lo stato. Almeno 898 riguardano elementi fisici stabili: passaggi, porte,
+   forzieri, stanze sicure, scale, forzieri rari, semi, uscite, timbri e tesori. La flag nativa
+   viene confusa con la presenza temporale. Per decisione esplicita dell'utente questi pin devono
+   essere sempre visibili; soltanto data, fascia, meteo o altra condizione di presenza reale può
+   nascondere un'entità. Prerequisiti, apertura, raccolta e progressione richiedono un canale
+   separato. Servono prove con porta/forziere sempre visibili e un'entità temporanea nascosta
+   soltanto nel momento scorretto.
+2. **Verificatore copie non indipendente e permeabile.** Importa dal produttore coppie, conversione
+   del codice e `TOLLERANZA=8`, benché lo scarto osservato massimo sia 3. Mutazioni isolate a
+   `xCanonica`, `yCanonica`, `tipoNativoCanonica`, `condizionale`, `resa`, `resaCanonica`, tre
+   campi di riepilogo e tolleranza dichiarata terminano erroneamente con codice 0. Le prove
+   procedurali dei due casi 17/26 non sono conservate né ricontrollate.
+3. **Ciclo `nativo_json` incompleto.** Inserimento iniziale e API passano, ma dopo migrazione di un
+   database pre-046 il reseed conserva l'ID lasciando `nativo_json=NULL`. `esportaMappe()` omette
+   inoltre `nativo`, quindi export/import perde le prove. Occorrono backfill senza perdita di ID o
+   dipendenze, export completo, round-trip esatto e controprove sui campi probatori.
+4. **Determinismo cross-platform assente.** L'artefatto versionato è CRLF; il produttore usa
+   `Path.write_text()` senza newline canonica e su Linux produrrebbe LF. JSON semanticamente
+   identici hanno quindi byte e SHA differenti. Va imposta una terminazione stabile e provato il
+   comportamento Windows/Linux.
+5. **`--artefatti` non isola la radice selezionata.** Un percorso relativo valido viene risolto dal
+   `cwd` del subprocess; `.flow` e `.BF` restano derivati dalla radice globale. Una fixture isolata
+   con scripts vuoti supera indebitamente il controllo leggendo le sorgenti del repository
+   principale. Tutti gli input devono derivare dalla radice risolta rispetto al chiamante.
+6. **Documentazione incoerente.** Restano insieme intestazioni e conteggi storici incompatibili:
+   54,6%, 227/1361/7, 324 condizioni contro le 1.130 reali e 539 test contro 542. Lo stato deve
+   distinguere chiaramente cronologia, snapshot giudicato e candidato successivo.
+
+### Pre-audit del lavoro successivo, fuori dallo SHA
+
+Il working tree di Claude riduce le condizioni da 1.130 a 55 attraverso `cancelli-pin.json`, ma
+sono ancora tutte condizioni di progressione/interazione: 23 porte, 16 forzieri normali/rari, 6
+semi, 3 stanze sicure, 1 scala e 6 marker. È un miglioramento quantitativo, non la chiusura del
+vincolo: anche questi 55 devono restare visibili e i loro prerequisiti non devono alimentare il
+filtro di presenza.
+
+**Decisione:** Fase 2 **FAIL**. Serve un nuovo commit stabile e pubblicato che chiuda tutti e sei
+i blocker; fino ad allora non si procede al gate formale della fase successiva e la PR cumulativa
+non può essere fusa.
+
+## Fase 2 — Riverifica ristretta del contratto di visibilità
+
+**Esito del rilievo 1: FAIL**  
+**Commit isolato:** `b223a8c66ffd7ab5dad39b6b9e4f913dc964d9ae`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+Il nuovo seed corregge la parte sostanziale: contiene 1.339 pin nativi e **zero condizioni di
+visibilità**. `cancelli-pin.json` censisce 75 pin con prerequisiti, 55 dei quali hanno una resa
+leggibile conservata in `nativo.cancelli`, `nativo.sbloccoLeggibile` e nella descrizione. La
+rigenerazione è semanticamente identica, l'artefatto dei cancelli è byte-identico, il verificatore
+respinge la reintroduzione di una condizione su porta/forziere e la suite esatta chiude con 134
+file e 547 test PASS. Data, fascia e meteo sono valutati correttamente sui casi temporanei già
+coperti.
+
+### Rilievi bloccanti del lotto
+
+1. **Il runtime non garantisce l'invariante.** API ed editor accettano ancora `condizioni` su
+   `porta`, `forziere`, `scala` e `passaggio`; una condizione non soddisfatta produce
+   `disponibilita=bloccato` e il visore nasconde il pin. Il seed corrente è corretto, ma una
+   modifica ordinaria può violare di nuovo il contratto.
+2. **Il canale separato dei prerequisiti non è verificato.** Eliminare da una fixture
+   `nativo.cancelli` e `nativo.sbloccoLeggibile`, oppure eliminare una riga di
+   `cancelli-pin.json`, lascia `verify_pin_semantics.py` verde. Il file viene caricato, ma il
+   confronto è irraggiungibile dopo `condizionali = set()`.
+3. **Manca la regressione specifica richiesta.** Le prove esistenti mostrano che un'entità
+   sintetica può sparire per data/meteo/fascia, ma non che una porta resti nel DOM prima e dopo la
+   progressione e che un forziere resti visibile finché non viene marcato raccolto. Il forziere
+   può poi essere nascosto dal filtro volontario dei raccolti, non da una flag o da un prerequisito.
+4. **Documentazione ancora contraddittoria.** Il docstring di `verify_pin_semantics.py` prescrive
+   ancora `da-configurare` sui pin condizionali; `ATLANTE-STATO.md` conserva la dichiarazione dei
+   324 pin condizionati. Entrambe descrivono il contratto ritirato.
+
+### Criterio di chiusura
+
+Separare nel modello runtime presenza, prerequisiti/stato e raccolta; soltanto la presenza
+alimenta il filtro temporale. Impedire via API/editor che apertura o progressione nascondano gli
+elementi strutturali fissi; conservare per forzieri e collezionabili il distinto filtro volontario
+che li può nascondere dopo che il giocatore li marca raccolti;
+ricostruire e confrontare indipendentemente l'intera catena
+`cancelli-pin.json → nativo → descrizione`; aggiungere le controprove porta sempre visibile,
+forziere visibile prima e nascondibile dopo la raccolta, e un caso
+editoriale temporaneo nei due stati.
+
+Gli altri cinque blocker della verifica precedente sono fuori dallo scope di questo commit e
+restano invariati. La Fase 2 complessiva e la PR cumulativa rimangono **FAIL/non fondibili**.
+
+## Fase 2 — Seconda riverifica ristretta della visibilità runtime
+
+**Esito del rilievo 1: FAIL**  
+**Commit isolato:** `3a9729339da8cc419bf7d5c137ae09cee312dc5a`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+* I 1.339 pin nativi hanno zero condizioni di visibilità.
+* Un prerequisito rosso di tipo `palazzo` produce `ignoto`, non `bloccato`, e il pin resta
+  visibile.
+* Caso reale Shinjuku via API: il giorno `04-11` i cinque luoghi sono bloccati; il `06-18` sono
+  disponibili. I sette passaggi di Tokyo verso quartieri datati rispettano ciascuno la propria
+  data.
+* Il canale `raccolto` è distinto: il DOM mostra il consumabile prima della raccolta, lo nasconde
+  dopo e lo ripristina con «Mostra anche i raccolti».
+* Typecheck, lint e suite completa: **135 file / 551 test PASS**.
+
+### Blocker residui
+
+1. **I consumabili nativi non usano realmente `raccolto`.** Nel seed 128 forzieri, 35 forzieri
+   rari, 26 semi di bramosia, 6 tesori e 4 timbri — **199 elementi** — hanno tutti
+   `collezionabile=false`. Non possono quindi essere marcati né nascosti dal filtro sui dati reali.
+2. **Gli strutturali restano nascondibili via API/editor.** Un `passaggio` nativo accetta via
+   `PUT` la condizione `quartiere: shinjuku`, restituisce HTTP 200 e l'11 aprile diventa
+   `bloccato`; il visore lo nasconde.
+3. **I gruppi logici perdono la natura di presenza.** Una presenza rossa racchiusa in `tutte`
+   produce `ignoto`, perché `nascondeIlPin()` guarda soltanto il tipo esterno `gruppo`; anche
+   `non` richiede una semantica ricorsiva esplicita.
+4. **Il mutation gate dei cancelli resta permeabile.** Eliminando da una fixture i campi
+   `nativo.cancelli`/`nativo.sbloccoLeggibile` e la corrispondente riga di `cancelli-pin.json`, il
+   verificatore termina ancora con codice 0.
+5. **I nuovi test controllano soprattutto il JSON.** Mancano prove dirette di
+   `valutaRequisitiSpillo`, gruppi, prerequisito rosso ma visibile, strutturale protetto e dati
+   reali nei due stati API/DOM.
+6. Sullo SHA giudicato `finestre-dungeon.json` non è ancora referenziato dal codice e non governa
+   la presenza dei Palazzi.
+
+### Criterio di chiusura aggiornato
+
+Rendere collezionabili i 199 consumabili appropriati e provarne il ciclo reale; impedire o
+neutralizzare condizioni di assenza sugli strutturali non consumabili; propagare correttamente la
+presenza dentro i gruppi logici; aggiungere test API e DOM nei due stati; rendere il verificatore
+sensibile a rimozione o alterazione del canale dei cancelli.
+
+La correzione successiva deve inoltre evitare di ereditare condizioni da un negozio al pin
+generico del luogo condiviso, come documentato nel pre-audit Codex: la presenza va collegata
+all'entità esatta. La Fase 2 resta **FAIL**.

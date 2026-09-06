@@ -13,7 +13,74 @@ pronto e a ogni punto di lavoro significativo; faccio `git pull` prima di legger
 
 - Worktree: `C:\Repository\project-p5r-main`, ramo `lavoro/atlante-mondo`
 - App: BE 3101 / FE 5273 (`bash scripts/start-all.sh`), DB `data/project-p5r.db` (1 partita dell'utente)
-- Piano completo: le 5 fasi sono descritte qui sotto in sintesi; il dettaglio è nel piano approvato
+- Piano completo: le fasi sono descritte qui sotto in sintesi; il dettaglio è nel piano approvato
+
+---
+
+## Ampliamento del piano — richiesta dell'utente del 6 settembre 2026
+
+Tre fasi nuove, **dopo** il completamento di quelle in corso. Sono scritte qui perché questo è il
+file che Codex legge: servono a organizzarci il lavoro prima di cominciarlo, non dopo.
+
+### Fase 5 — Rifacimento delle pagine dell'applicazione
+
+Layout dichiaratamente grafico e moderno, ottimizzato per **desktop, tablet e cellulare** (l'app si
+usa col tablet in mano mentre si gioca: i bersagli restano ≥ 44px e la lettura viene prima
+dell'ornamento). Pagine interessate:
+
+`Mappe` · `Palazzi e Dedali` · `La città` · `Negozi e inventario` · `Attività e doti sociali` ·
+`Covo dei ladri` · `Oggetti` · `Materiali e fabbricazione` — **più** le altre categorie di oggetti
+che le guide distinguono e che oggi non hanno una loro pagina: armi da mischia, armi a distanza,
+protezioni, accessori, abiti, libri, DVD a noleggio, carte abilità, regali per i confidenti,
+oggetti chiave.
+
+Due regole valgono ovunque:
+
+1. **ogni riferimento alla mappa punta al punto di ancoraggio sull'atlante unificato**, cioè al
+   risolutore `/guida/mondo/<tipo>/<chiave>`, mai alla scheda e mai a un elenco. È lo stesso
+   difetto già trovato in `OggettiPage` e va escluso per costruzione, non pagina per pagina;
+2. **la posizione si vede già in pagina**, in un'area apposta: non basta il collegamento, ci vuole
+   il pezzo di mappa con il pin acceso, così chi consulta sa dov'è senza cambiare schermata.
+
+### Fase 6 — Elementi grafici mancanti
+
+**La generazione delle immagini è di Codex, in esclusiva.** Io scrivo i prompt, verifico il
+risultato e lo integro; non genero immagini.
+
+- **tutti i segnalini vanno rigenerati** come PNG con **canale alfa reale** e con la sola figura
+  (niente cornice, niente goccia, niente ombra): la forma del pin la disegna l'applicazione, e
+  l'immagine ci va dentro. Oggi alcuni asset sono spilli completi, e questo impedisce di cambiare
+  forma o stato senza rifare l'immagine;
+- gli elementi grafici mancanti vanno coperti **in tutta l'interfaccia**, non solo nelle pagine
+  della Fase 5: dove oggi c'è una riserva SVG o un buco, ci va l'asset;
+- ogni prompt porta nome del file di destinazione in `public/asset/…`, dimensione, sfondo
+  trasparente, palette e testo in italiano, come le voci già presenti in
+  `docs/grafica/prompt-immagini.md`.
+
+### Fase 7 — Revisione incrociata finale
+
+Una passata su tutto per i difetti di implementazione sfuggiti. Vale la regola che fin qui ha
+funzionato, e va tenuta stretta:
+
+> **chi implementa non verifica, e chi verifica non implementa.** Mai la stessa entità su
+> entrambi i lati dello stesso pezzo.
+
+Siamo pari grado: per i pezzi che scrive Codex la verifica è mia, con la stessa severità con cui
+lui ha verificato me — e gli esiti li scrivo dove li scrive lui, così restano confrontabili.
+
+### Come ci dividiamo il lavoro (proposta a Codex)
+
+| ambito | implementa | verifica |
+|---|---|---|
+| pagine e componenti dell'app (Fase 5) | io | Codex |
+| prompt grafici (Fase 6) | io | Codex |
+| generazione delle immagini (Fase 6) | **Codex** | **io** |
+| integrazione degli asset nell'app | io | Codex |
+| revisione finale, metà del perimetro ciascuno (Fase 7) | a testa | l'altro |
+
+Perché la Fase 6 non si blocchi in attesa: i prompt li consegno **a lotti** per area
+(segnalini → icone di sezione → illustrazioni), così Codex può generare mentre io continuo sulle
+pagine. Ogni lotto ha una sua voce in `docs/grafica/stato-generazione-asset.md` con lo stato.
 
 ---
 
@@ -646,10 +713,58 @@ lint puliti.
 | 2026-09-06 | Fasi 1b, 1c, 1d | **PRONTE PER VERIFICA** — pacchetto seed unico agganciato alla guida, ricarica dei soli dati mappe, indice a schede | in attesa |
 | 2026-09-06 | Fase 2 (parte urbana) | riferimento certificato, 51 tipi urbani, 80 pin posati | **2b PASS**, 2a/2c FAIL |
 | 2026-09-06 | Fase 1d (2ª) | **PRONTA PER VERIFICA** — nessuna etichetta tecnica nel DOM espanso, etichetta di versione da un'unica funzione condivisa | in attesa |
-| 2026-09-06 | Fase 2 (2ª) | **PRONTA PER VERIFICA** — 324 pin condizionali con condizione strutturata, artefatto semantico deterministico, contabilità chiusa su 1429 | in attesa |
+| 2026-09-06 | Fase 2 (2ª) | ~~324 pin condizionali con condizione strutturata~~ — **dichiarazione ritirata**: quel contratto è stato rovesciato il 6 settembre, i pin nativi non hanno condizioni | superata |
 | 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
 | 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
 | 2026-09-06 | Fase 2 (7ª) | **PRONTA PER VERIFICA** — tabella nativa delle parti estratta e verificata dall'eseguibile, 90 tipi su 102 dimostrati, tutti i 1429 pin collocabili posati | in attesa |
+| 2026-09-06 | Fase 3d (5ª) | **PRONTA PER VERIFICA** — «Sulla mappa» usa il risolutore, quattro voci senza posizione dichiarate, crosswalk riproducibile, numeri aggiornati | in attesa |
+| 2026-09-06 | Fase 3d (6ª) | **PRONTA PER VERIFICA** — regressione sulla pagina Oggetti vera e sull'iniezione delle chiavi nell'API | in attesa |
+
+### Fase 3d (5ª) — i quattro rilievi della quarta verifica
+
+**1. «Sulla mappa» non portava alla mappa.** `CollegamentoMappa` — il componente il cui unico
+compito è portare al posto — usava `schedaAccessoMondo()`, che è l'indirizzo della *scheda*: dalla
+pagina Oggetti si finiva sull'elenco dei negozi. Il difetto era invisibile guardando la pagina (il
+collegamento c'era, il testo era giusto, il click portava da qualche parte) e nessun test ne
+controllava la destinazione. Ora esiste `percorsoAccessoMondo()`, distinta e documentata come tale,
+e il componente usa quella.
+
+Con lo stesso sguardo è emerso un secondo caso in `DungeonPage`: un pulsante con l'icona della
+mappa che diceva «Mappa» e portava alla scheda, mentre la carta del Palazzo sopra portava già alla
+mappa. Lì la destinazione era giusta e sbagliata era la promessa: ora dice «Scheda del Palazzo».
+
+**2. La regressione c'è, e ho controllato che morda.** `CollegamentoMappa.test.tsx` verifica
+l'indirizzo del risolutore, che una chiave di articolo con la barra (`negozio/articolo`) venga
+codificata e ritrovata intera dalla rotta, e che i due indirizzi restino diversi fra loro.
+Rimettendo il difetto, il test fallisce con codice 1: provato.
+
+**3. Le quattro voci senza posizione non ricevono più un invito muto.** Sono
+`Catena di perline`, `Soma` e `Tessera puntate alte` del negozio dentro il Palazzo di Niijima, e
+`Homunculus` del sito di Tanaka, che si apre dal laptop e non è un posto — verificato nel catalogo,
+non supposto. Il comando resta al suo posto (un comando che a volte sparisce è peggio) ma la pagina
+ora dice esplicitamente che la voce non ha una posizione e perché.
+
+**4. Il crosswalk non dipende più dal calendario.** Il campo `generato` portava la data corrente:
+bastava rilanciare il comando il giorno dopo per avere un artefatto diverso senza che nessuna fonte
+fosse cambiata. Al suo posto c'è `dipendeDa`, con l'impronta sha256 della trascrizione. Due
+generazioni consecutive danno file identici: verificato.
+
+**Numeri aggiornati** (la quarta dichiarazione era ferma a prima dell'ampliamento del censimento):
+
+| | quarta dichiarazione | ora |
+|---|---:|---:|
+| voci dell'inventario con accesso | 1321 / 1371 | **1406 / 1460** (96,3%) |
+| con punto preciso | — | **503** (34,5%) |
+| errori del risolutore | — | **0** |
+| abbinamenti del crosswalk | 104 | **121** |
+| esclusi | 249 | **234** |
+
+**Riproduzione:**
+```bash
+npm run oggetti:crosswalk && npm run accesso:copertura
+npx vitest run src/components/mappe/CollegamentoMappa.test.tsx src/pages/AccessoMondoPage.test.tsx
+npm run typecheck && npm run lint && npm test
+```
 
 ### Fase 2 (7ª) — la tabella nativa e i pin da verificare
 
@@ -762,7 +877,7 @@ senza destinazione, contabilità chiusa su 262.
 
 | rilievo di Codex | correzione |
 |---|---|
-| 324 pin condizionali importati come incondizionati | ognuno entra ora con una **condizione strutturata** `da-configurare` che riporta la bandiera nativa; l'interfaccia la mostra e l'editor la corregge. Nel database: 324 spilli con `condizioni_json`. |
+| 324 pin condizionali importati come incondizionati | **Risposta superata.** All'epoca ognuno entrava con una condizione `da-configurare` che riportava la bandiera nativa. Quel contratto è stato rovesciato il 6 settembre: la bandiera dice «ci sei già passato», che per una guida non è una condizione, e i pin nativi ora non ne hanno nessuna. Vedi «Il contratto di visibilità» più sotto. |
 | `semantica-pin.json` non riproducibile | l'ordine non dipende più dall'iterazione degli insiemi: tutto ordinato per conteggio e poi per nome. Tre rigenerazioni di fila danno la stessa impronta. |
 | contabilità che non chiude (1422 su 1429) | i 7 pin esclusi uno per uno dalla certificazione del riferimento sono ora una voce del rapporto, e il rapporto dichiara `pinNativi` e `pinContati`: **1429 = 1429**. Il verificatore lo controlla. |
 
@@ -825,3 +940,34 @@ Il resto della Fase 1 (pacchetto seed, ricarica, interfaccia) non è ancora dich
 5. Il merito: che la corrispondenza `tipoNativo + 68` sia davvero dimostrata e non assunta, e che
    nessun tipo dei Palazzi abbia ricevuto un significato. In `icone-mappa.json` il campo
    `associazione` deve valere `blocco-urbano-dimostrato` solo per i 51 tipi urbani.
+
+### Fase 3d (6ª) — la prova sulla superficie vera
+
+Codex aveva ragione: il test montava `CollegamentoMappa` da solo dentro una rotta chiamata
+`/guida/oggetti`, e lasciava scoperta tutta la catena che sta prima — l'API che deve arricchire la
+riga con la chiave dell'articolo, la tabella che deve agganciarla alla riga giusta, il comando che
+deve comparire lì. Si poteva rompere ognuno dei tre senza far cadere nulla.
+
+Ora ci sono due prove che si prendono la catena intera.
+
+`src/pages/OggettiPage.test.tsx` monta la **pagina vera** e controlla quattro cose: una chiave con
+la barra (`yumenoshima/kogatana-nera`) che arriva intera al risolutore; un oggetto venduto in più
+negozi che riceve un comando per ciascuno, nell'ordine; **`Soma`**, una delle quattro voci senza
+posizione, che il comando ce l'ha lo stesso perché è lì che le si dice perché; e un oggetto senza
+chiave né negozi, che non deve promettere una mappa che non c'è. Rimettendo il difetto — il
+componente che torna all'indirizzo della scheda — la prova cade con codice 1: provato.
+
+`server/routes/oggetti-guida.test.ts` pretende dall'API le chiavi esatte: più di cento righe
+agganciate, tutte quelle con la barra nella forma `negozio/articolo`, e `Soma` con la sua chiave
+precisa. Se il crosswalk smettesse di essere caricato o di agganciare, l'elenco resterebbe identico
+nei conteggi e questo test cadrebbe lo stesso.
+
+**Una cosa che ho scoperto scrivendo la prova, e che va detta:** avevo aggiunto un'asserzione sugli
+oggetti venduti in più negozi, ed è fallita. Non per un difetto: sui dati di oggi **nessun oggetto
+risolve a più di un negozio**, perché tutti i 121 abbinamenti passano per il nome dell'articolo,
+che porta a un negozio solo. La forma regge il caso — `negozi` è una lista — e il controllo ora
+verifica quello, invece di pretendere un dato che non esiste. Il caso multiplo resta coperto dal
+test della pagina, che lo esercita su un dato costruito apposta.
+
+**Misurato:** typecheck e lint puliti, **547 test su 547** (erano 542: cinque nuovi), 27
+verificatori su 27.
