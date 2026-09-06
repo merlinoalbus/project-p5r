@@ -37,7 +37,7 @@ import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -49,6 +49,8 @@ export interface EsitoSeed {
 
 interface SeedCompleto {
   versione: number;
+  /** Il ponte fra oggetti della guida e articoli, tenuto come testo: va in `dati_guida` così com'è. */
+  oggettiCrosswalk: string;
   persone: PersonaSeed[];
   skill: SkillSeed[];
   oggetti: OggettoSeed[];
@@ -130,6 +132,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     mappeCitta: JSON.parse(contenuti['mappe-citta.json']) as MappeCittaSeed,
     personaggi: JSON.parse(contenuti['personaggi.json']) as PersonaggiSeed,
     oggettiGuida: JSON.parse(contenuti['oggetti-guida.json']) as OggettiGuidaSeed,
+    oggettiCrosswalk: contenuti['oggetti-crosswalk.json'],
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -400,6 +403,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     });
     for (const r of db.prepare('SELECT chiave FROM richiesta').all() as Array<{ chiave: string }>) if (!chiaviRichieste.has(r.chiave)) db.prepare('DELETE FROM richiesta WHERE chiave = ?').run(r.chiave);
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('jose', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(JSON.stringify(seed.mementos.jose));
+    // Il ponte fra gli oggetti della guida e gli articoli del catalogo: generato una volta e
+    // versionato (`npm run oggetti:crosswalk`), non calcolato a ogni richiesta.
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('oggetti-crosswalk', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(seed.oggettiCrosswalk);
 
     // ---- Aiuto in battaglia (Fase 7.3): sezioni della guida e indice delle Ombre (le chiavi dei dungeon devono esistere) ----
     for (const o of seed.battaglia.ombre) if (!chiaviDungeon.has(o.dungeonChiave)) throw new Error(`Seed battaglia: dungeon sconosciuto '${o.dungeonChiave}' per l'Ombra '${o.ombra ?? o.persona ?? ''}'.`);

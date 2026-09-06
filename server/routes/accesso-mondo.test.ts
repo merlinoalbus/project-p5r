@@ -126,3 +126,31 @@ it('un confidente porta ai luoghi che il catalogo gli attribuisce', async () => 
   expect(r.status).toBe(200);
   expect(JSON.stringify(r.body.data)).toContain(riga!.chiave);
 });
+
+it('non affianca mai una meta generica al pin preciso, nemmeno su mappe diverse', async () => {
+  // il pin sta su una planimetria figlia, il quartiere è un'altra mappa: la deduplicazione per
+  // chiave uguale non basterebbe, e infatti qui si verifica il comportamento, non l'implementazione
+  const luogo = getDb().prepare("SELECT chiave FROM luogo WHERE negozio='untouchable' LIMIT 1").get() as { chiave: string };
+  const figlia = await request(app).post('/api/mappe').send({ chiave: 'shibuya-sotterraneo-prova', nome: 'Sotterraneo di prova', genitore: 'citta-shibuya', tipo: 'quartiere' });
+  expect([201, 409]).toContain(figlia.status);
+  const pin = await request(app).post('/api/mappe/shibuya-sotterraneo-prova/spilli')
+    .send({ tipo: 'negozio', nome: 'Untouchable', x: 20, y: 30, riferimento: { tipo: 'luogo', chiave: luogo.chiave } });
+  expect(pin.status).toBe(201);
+  const r = (await accesso('luogo', luogo.chiave)).body.data;
+  const criteri = r.destinazioni.flatMap((d: { provenienze: Array<{ criterio: string }> }) => d.provenienze.map((p) => p.criterio));
+  expect(criteri).not.toContain('posto-dichiarato');
+  expect(r.destinazioni.every((d: { spillo: number | null }) => d.spillo !== null)).toBe(true);
+});
+
+it('senza alcun pin arriva al posto dichiarato, e lo dice nel criterio', async () => {
+  // un luogo che nessun pin riferisce: l'unica via è il quartiere in cui sta, ed è un ripiego
+  const l = getDb().prepare(`SELECT chiave FROM luogo WHERE quartiere_chiave IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM spillo s WHERE s.riferimento_tipo='luogo' AND s.riferimento_chiave=luogo.chiave AND s.mappa_chiave IS NOT NULL)
+      AND negozio IS NULL LIMIT 1`).get() as { chiave: string } | undefined;
+  expect(l).toBeTruthy();
+  const r = (await accesso('luogo', l!.chiave)).body.data;
+  expect(r.destinazioni.length).toBeGreaterThan(0);
+  expect(r.destinazioni.every((d: { spillo: number | null }) => d.spillo === null)).toBe(true);
+  expect(r.destinazioni.flatMap((d: { provenienze: Array<{ criterio: string }> }) => d.provenienze.map((p) => p.criterio)))
+    .toContain('posto-dichiarato');
+});
