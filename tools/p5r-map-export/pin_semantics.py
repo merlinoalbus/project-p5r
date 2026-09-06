@@ -390,9 +390,12 @@ def significato_dalle_bandiere(out):
 
     Due vincoli, senza i quali la lettura sbaglia, ed è stato misurato:
 
-    * **pertinenza** — le bandiere non sono globali: 931 delle 3258 sono accese da script di
-      Palazzi diversi. Vale solo la procedura che sta in uno script il cui nome cita il campo di
-      quella mappa. Senza questo vincolo il tipo del seme della bramosia risultava un forziere;
+    * **una bandiera, un solo script** — le bandiere non sono globali e collidono fra Palazzi:
+      931 delle 3258 sono accese da script diversi. Se più di uno la accende non si sa quale sia
+      il suo, e il pin resta senza. Con il vincolo largo (basta che uno degli script citi il campo)
+      il seme della bramosia risultava un forziere: non basta, ci vuole questo;
+    * **una procedura, una bandiera** — 2405 procedure su 6538 ne accendono più d'una, e allora il
+      loro nome descrive una sola di quelle, non si sa quale. Restano fuori;
     * **una bandiera, un pin** — quattordici bandiere accendono più pin della stessa mappa, e per
       quelle non si può dire quale delle icone la procedura stia rivelando. Restano fuori.
 
@@ -404,21 +407,21 @@ def significato_dalle_bandiere(out):
         return {}
     raccolta = json.loads(percorso.read_text(encoding='utf8'))['bandiere']
     meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
+    quante_bandiere = collections.Counter()
+    for voci in raccolta.values():
+        for v in voci:
+            quante_bandiere[(v['script'], v['procedura'])] += 1
     fuori = {}
     for mappa in meta['maps']:
         chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa['code'].split('_')[1:])
-        codici = set()
-        for campo in mappa['fields']:
-            trovato = re.match(r'F(\d{3})_(\d{3})_(\d{2})', campo)
-            if trovato:
-                codici.add(trovato.group(1) + '_' + trovato.group(2))
-                codici.add(trovato.group(1))
         quanti = collections.Counter(p['flag'] for p in mappa['pins'] if p['conditional'])
         for indice, pin in enumerate(mappa['pins']):
             if not pin['conditional'] or quanti[pin['flag']] > 1:
                 continue
-            voci = [v for v in raccolta.get(str(pin['flag']), [])
-                    if any(c in v['script'] for c in codici)]
+            voci = raccolta.get(str(pin['flag']), [])
+            if not voci or len({v['script'] for v in voci}) > 1:
+                continue
+            voci = [v for v in voci if quante_bandiere[(v['script'], v['procedura'])] == 1]
             if not voci:
                 continue
             famiglie = {famiglia_di(v['procedura']) for v in voci}
@@ -434,6 +437,29 @@ def significato_dalle_bandiere(out):
                 prova='la bandiera che il gioco accende per mostrarlo è accesa da «'
                       + procedure[0] + '»')
     return fuori
+
+
+# Quando abbastanza pin dello stesso tipo hanno la propria prova diretta e dicono tutti la stessa
+# cosa, quella diventa una prova sul tipo: non e' piu' un'induzione da nomi, sono casi contati uno
+# per uno. Le soglie sono quelle delle altre strade, perche' la forza della prova e' la stessa.
+MINIME_PROVE_DIRETTE = 8
+DOMINANZA_PROVE_DIRETTE = 0.9
+
+
+def tipi_dalle_prove_dirette(da_bandiera):
+    """I tipi che le prove dirette sui singoli pin dimostrano, quando sono tante e concordi."""
+    per_tipo = collections.defaultdict(collections.Counter)
+    for voce in da_bandiera.values():
+        per_tipo[voce['tipoNativo']][(voce['tipoSpillo'], voce['etichetta'])] += 1
+    esito = {}
+    for tipo, conti in per_tipo.items():
+        totale = sum(conti.values())
+        (spillo, etichetta), quante = sorted(conti.items(), key=lambda x: (-x[1], x[0][0]))[0]
+        if totale >= MINIME_PROVE_DIRETTE and quante/totale >= DOMINANZA_PROVE_DIRETTE:
+            esito[tipo] = dict(tipoSpillo=spillo, etichetta=etichetta, prove=quante, totale=totale,
+                               motivo=f'{quante} pin di questo tipo su {totale} hanno la propria '
+                                      f'bandiera accesa da una procedura che dice «{etichetta.lower()}»')
+    return esito
 
 
 def controprova(out, per_tipo):
@@ -644,6 +670,14 @@ def main(out):
     out = Path(out)
     icone = json.loads((out/'icone-mappa.json').read_text(encoding='utf8'))
     dagli_script = significato_dagli_script(out)
+    # Che cosa il gioco disegna davvero, contato nelle schermate: dove il vincolo di conteggio
+    # lascia un solo tipo compatibile, quel tipo e' dimostrato per osservazione diretta.
+    percorso_osservato = out/'osservazioni-icone-esito.json'
+    osservati = ({int(k): v for k, v in json.loads(
+        percorso_osservato.read_text(encoding='utf8'))['tipiDimostrati'].items()}
+        if percorso_osservato.exists() else {})
+    da_bandiera = significato_dalle_bandiere(out)
+    dai_pin = tipi_dalle_prove_dirette(da_bandiera)
     dalle_procedure_sotto = significato_dalle_procedure_sotto(out)
     dalla_proiezione = significato_dalla_proiezione(out)
     righe = []
@@ -659,11 +693,22 @@ def main(out):
         sotto = dalle_procedure_sotto.get(r['tipoNativo'])
         voce['proiezione'] = proiezione
         voce['sottoIlPin'] = sotto
-        if r['associazione'] in ('blocco-urbano-dimostrato', 'blocco-covo-dimostrato') and significato:
+        osservato = osservati.get(r['tipoNativo'])
+        voce['osservazione'] = osservato
+        if osservato:
+            voce.update(tipoSpillo=osservato['tipoSpillo'], etichetta=osservato['etichetta'],
+                        stato='determinato',
+                        prova='icone contate nelle schermate del gioco: ' + osservato['motivo'])
+        elif r['associazione'] in ('blocco-urbano-dimostrato', 'blocco-covo-dimostrato') and significato:
             voce.update(tipoSpillo=significato[0], etichetta=significato[1], stato='determinato',
                         prova='nome interno dello sprite del '
                               + ('blocco urbano dimostrato' if r['associazione'].startswith('blocco-urbano')
                                  else 'blocco del Covo dei Ladri dimostrato'))
+        elif r['tipoNativo'] in dai_pin:
+            prova_diretta = dai_pin[r['tipoNativo']]
+            voce.update(tipoSpillo=prova_diretta['tipoSpillo'], etichetta=prova_diretta['etichetta'],
+                        stato='determinato',
+                        prova='prove dirette sui singoli pin: ' + prova_diretta['motivo'])
         elif script and script['stato'] == 'determinato':
             voce.update(tipoSpillo=script['tipoSpillo'], etichetta=script['etichetta'], stato='determinato',
                         prova=f"procedura che accende la bandiera del pin: {script['famigliaDominante']} "
@@ -688,7 +733,6 @@ def main(out):
     senza = [r for r in righe if r['stato'] == 'non-determinato']
     # Le determinazioni per singolo pin poggiavano sulla stessa lettura geometrica, e la
     # controprova la smentisce: restano registrate come materiale, non come prova.
-    da_bandiera = significato_dalle_bandiere(out)
     puntuali = []
     materiale = significato_puntuale(out, {r['tipoNativo'] for r in determinati})
     prova_della_lettura = controprova(out, {r['tipoNativo']: r for r in righe})
@@ -698,6 +742,7 @@ def main(out):
     risultato = dict(
         schemaVersion=1, sources=dict(icone='icone-mappa.json', registro='shared/spilli.ts'),
         tipi=righe, provePalazzi=PROVE_PALAZZI, pinPuntuali=puntuali,
+        tipiDalleProveDirette={str(k): v for k, v in sorted(dai_pin.items())},
         pinDaBandiera=[da_bandiera[k] for k in sorted(da_bandiera)],
         letturaGeometrica=dict(controprova=prova_della_lettura,
                                materialeNonUsato=materiale),

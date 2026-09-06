@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "osservazioni": "data/atlas/osservazioni-icone.json",
+    "metadati": "mondo_metadati.json"
+  },
+  "criterio": {
+    "minimeOsservazioni": 4,
+    "forma": "vincolo di conteggio: il tipo deve comparire tante volte quante le icone osservate, in ogni schermata",
+    "prudenza": "una schermata con più planimetrie candidate accetta i tipi compatibili con almeno una di esse"
+  },
+  "generi": {
+    "forziere": {
+      "osservazioni": 4,
+      "schermate": [
+        "Kamoshida's Palace — Old Castle 1F",
+        "Kamoshida's Palace — Old Castle 3F",
+        "Kamoshida's Palace — Tower: Lower Level",
+        "Kamoshida's Palace — Tower: Upper Level"
+      ],
+      "compatibili": [
+        26
+      ],
+      "dimostrato": 26,
+      "motivo": null
+    },
+    "porta-chiusa": {
+      "osservazioni": 5,
+      "schermate": [
+        "Kamoshida's Palace — Old Castle 1F",
+        "Kamoshida's Palace — Old Castle 2F",
+        "Kamoshida's Palace — Old Castle 3F",
+        "Kamoshida's Palace — Tower: Lower Level",
+        "Kamoshida's Palace — Tower: Upper Level"
+      ],
+      "compatibili": [],
+      "dimostrato": null,
+      "motivo": "nessun tipo è compatibile con tutte le osservazioni: una di esse è sbagliata, oppure la schermata non mostrava tutte le icone"
+    },
+    "stanza-sicura": {
+      "osservazioni": 5,
+      "schermate": [
+        "Kamoshida's Palace — Old Castle 1F",
+        "Kamoshida's Palace — Old Castle 2F",
+        "Kamoshida's Palace — Old Castle 3F",
+        "Kamoshida's Palace — Tower: Lower Level",
+        "Kamoshida's Palace — Tower: Upper Level"
+      ],
+      "compatibili": [
+        4
+      ],
+      "dimostrato": 4,
+      "motivo": null
+    }
+  },
+  "tipiDimostrati": {
+    "4": {
+      "genere": "stanza-sicura",
+      "tipoSpillo": "sicura",
+      "etichetta": "Stanza sicura",
+      "osservazioni": 5,
+      "schermate": [
+        "Kamoshida's Palace — Old Castle 1F",
+        "Kamoshida's Palace — Old Castle 2F",
+        "Kamoshida's Palace — Old Castle 3F",
+        "Kamoshida's Palace — Tower: Lower Level",
+        "Kamoshida's Palace — Tower: Upper Level"
+      ],
+      "motivo": "su 5 schermate del gioco il numero di icone «stanza-sicura» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
+    },
+    "26": {
+      "genere": "forziere",
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere",
+      "osservazioni": 4,
+      "schermate": [
+        "Kamoshida's Palace — Old Castle 1F",
+        "Kamoshida's Palace — Old Castle 3F",
+        "Kamoshida's Palace — Tower: Lower Level",
+        "Kamoshida's Palace — Tower: Upper Level"
+      ],
+      "motivo": "su 4 schermate del gioco il numero di icone «forziere» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
+    }
+  },
+  "summary": {
+    "generiOsservati": 3,
+    "tipiDimostrati": 2,
+    "pinCoperti": 142
+  },
+  "limits": [
+    "Il conteggio prova qualcosa solo se la schermata mostra tutte le icone di quel genere: una partita a metà ne nasconde, e il vincolo diventa un «almeno».",
+    "Un solo genere osservato non basta a coprire i pin: serve una schermata per ciascun genere di icona che si vuole dimostrare."
+  ]
+}

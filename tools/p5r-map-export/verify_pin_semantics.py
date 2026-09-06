@@ -25,6 +25,8 @@ import json
 import re
 import sys
 
+import pin_semantics as ps
+
 
 def tipi_spillo_del_registro(radice):
     testo = (radice/'shared/spilli.ts').read_text(encoding='utf8')
@@ -67,7 +69,6 @@ def sotto_il_pin(out):
     percorso = out/'proiezioni-mappa.json'
     if not percorso.exists():
         return {}, {}
-    import pin_semantics as ps
     meta = {m['code']: m for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']}
     con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
     campi = {f['field']: f for f in con['fields']}
@@ -112,10 +113,12 @@ def main(out, seed=None):
     registro = tipi_spillo_del_registro(radice)
     dagli_script = evidenze_dagli_script(out)
     famiglie_sotto, procedure_sotto = sotto_il_pin(out)
-    famiglie = [(f[0], f[1]) for f in __import__('pin_semantics').FAMIGLIE]
-    import pin_semantics as ps
-
-    urbani = dagli_script_ok = sotto_ok = con_condizione = ipotesi = 0
+    atteso_bandiera = ps.significato_dalle_bandiere(out)
+    famiglie = [(f[0], f[1]) for f in ps.FAMIGLIE]
+    percorso_osservato = out/'osservazioni-icone-esito.json'
+    osservati = (json.loads(percorso_osservato.read_text(encoding='utf8'))['tipiDimostrati']
+                 if percorso_osservato.exists() else {})
+    urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = con_condizione = ipotesi = 0
     per_tipo = {r['tipoNativo']: r for r in semantica['tipi']}
     assert len(per_tipo) == len(semantica['tipi']), 'tipi nativi ripetuti'
     assert {r['tipoNativo'] for r in icone['tipiNativi']} == set(per_tipo), 'censimento diverso da quello delle icone'
@@ -136,6 +139,20 @@ def main(out, seed=None):
                           else mi.SCARTO_MY_PALACE)
                 assert r['sprite'] == r['tipoNativo'] + scarto, f'sprite fuori scarto: {r["tipoNativo"]}'
                 urbani += 1
+            elif v['prova'].startswith('icone contate'):
+                # la deduzione dalle schermate ha il suo verificatore dedicato: qui basta che il
+                # tipo sia davvero fra quelli dedotti li', e che il segnalino coincida
+                assert str(r['tipoNativo']) in osservati,                     f'tipo dichiarato dedotto dalle icone ma assente dall’esito: {r["tipoNativo"]}'
+                assert osservati[str(r['tipoNativo'])]['tipoSpillo'] == v['tipoSpillo'],                     f'segnalino diverso da quello dedotto dalle icone: {r["tipoNativo"]}'
+                osservati_ok += 1
+            elif v['prova'].startswith('prove dirette'):
+                # il tipo e' dimostrato dai suoi stessi pin: si riaggregano le prove dirette e si
+                # controlla che siano tante e concordi quanto dichiarato
+                rifatto = ps.tipi_dalle_prove_dirette(atteso_bandiera)
+                atteso = rifatto.get(r['tipoNativo'])
+                assert atteso and atteso['tipoSpillo'] == v['tipoSpillo'],                     f'prove dirette non riproducibili: {r["tipoNativo"]}'
+                assert atteso['totale'] >= ps.MINIME_PROVE_DIRETTE and                     atteso['prove']/atteso['totale'] >= ps.DOMINANZA_PROVE_DIRETTE,                     f'prove dirette insufficienti: {r["tipoNativo"]}'
+                dai_pin_ok += 1
             else:
                 # la strada degli script va ricalcolata, non creduta
                 nomi = dagli_script.get(r['tipoNativo'], collections.Counter())
@@ -172,7 +189,6 @@ def main(out, seed=None):
     # delle bandiere, si riapplica il vincolo di pertinenza e quello di bandiera unica, e si
     # controlla che esca esattamente lo stesso elenco.
     da_bandiera = {(r['chiave'], r['indicePin']): r for r in semantica.get('pinDaBandiera') or []}
-    atteso_bandiera = ps.significato_dalle_bandiere(out)
     assert set(da_bandiera) == set(atteso_bandiera), 'i pin riconosciuti dalla bandiera non si riproducono'
     for k, v in da_bandiera.items():
         rifatto = atteso_bandiera[k]
@@ -240,7 +256,9 @@ def main(out, seed=None):
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
     assert ipotesi == semantica['summary']['ipotesi']
     print('OK', determinati, f'tipi dimostrati ({urbani} dal nome dello sprite,',
-          f'{dagli_script_ok} dalle procedure che accendono la bandiera),',
+          f'{dagli_script_ok} dalle procedure che accendono la bandiera,',
+          f'{dai_pin_ok} dalle prove dirette dei propri pin,',
+          f'{osservati_ok} contando le icone nelle schermate),',
           len(da_bandiera), 'pin riconosciuti uno per uno dalla propria bandiera;',
           f'la lettura geometrica azzecca il {round(misura["accuratezza"]*100)}% su',
           misura['casi'], 'casi di controllo e non determina nulla;',

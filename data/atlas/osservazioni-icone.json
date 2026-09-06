@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "cosaSono": "Icone osservate nelle schermate di mappa del gioco, contate per schermata. Servono a legare un tipo di pin nativo al suo significato quando né lo sprite né le procedure lo dicono: se in una schermata si contano N icone di un certo genere, il tipo che le disegna deve comparire esattamente N volte fra i pin di quella mappa. Con abbastanza schermate resta un solo tipo compatibile, e quello è dimostrato.",
+  "comeSiUsa": "tools/p5r-map-export/icon_observations.py risolve i vincoli; verify_icon_observations.py li ricontrolla. Una schermata può corrispondere a più planimetrie native (versioni della stessa area): in quel caso vale l'unione dei candidati, che è la lettura prudente.",
+  "chiHaOsservato": "l'utente, dalle schermate del proprio gioco, 6 settembre 2026",
+  "osservazioni": [
+    {
+      "schermata": "Kamoshida's Palace — Old Castle 1F",
+      "planimetrie": [
+        "RMAP_151_2_0"
+      ],
+      "icone": {
+        "stanza-sicura": 1,
+        "forziere": 0,
+        "porta-chiusa": 0
+      },
+      "note": "rombo verde con la lettera S, in una stanzetta a sinistra del corridoio centrale",
+      "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
+    },
+    {
+      "schermata": "Kamoshida's Palace — Old Castle 2F",
+      "planimetrie": [
+        "RMAP_151_2_1",
+        "RMAP_151_3_0",
+        "RMAP_151_4_0"
+      ],
+      "icone": {
+        "stanza-sicura": 1,
+        "porta-chiusa": 1
+      },
+      "note": "un rombo verde S al centro; nella stessa schermata si vedono anche un lucchetto giallo e una freccia grigia verso il basso",
+      "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
+    },
+    {
+      "schermata": "Kamoshida's Palace — Old Castle 3F",
+      "planimetrie": [
+        "RMAP_151_4_1",
+        "RMAP_151_5_0",
+        "RMAP_151_5_1"
+      ],
+      "icone": {
+        "stanza-sicura": 2,
+        "forziere": 1,
+        "porta-chiusa": 0
+      },
+      "note": "due rombi verdi S, uno in alto e uno in basso; un forziere giallo in basso a sinistra",
+      "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
+    },
+    {
+      "schermata": "Kamoshida's Palace — Tower: Lower Level",
+      "planimetrie": [
+        "RMAP_151_7_0"
+      ],
+      "icone": {
+        "stanza-sicura": 1,
+        "forziere": 1,
+        "porta-chiusa": 0
+      },
+      "note": "rombo verde S in alto, nella stanzetta sopra il pilastro centrale; due frecce grigie ai lati e un'icona gialla al centro",
+      "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
+    },
+    {
+      "schermata": "Kamoshida's Palace — Tower: Upper Level",
+      "planimetrie": [
+        "RMAP_151_10_0",
+        "RMAP_151_10_1"
+      ],
+      "icone": {
+        "stanza-sicura": 0,
+        "forziere": 0,
+        "porta-chiusa": 0
+      },
+      "note": "nessun rombo verde",
+      "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
+    }
+  ],
+  "corrispondenzaIcone": {
+    "stanza-sicura": {
+      "tipoSpillo": "sicura",
+      "etichetta": "Stanza sicura"
+    },
+    "forziere": {
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere"
+    },
+    "porta-chiusa": {
+      "tipoSpillo": "porta",
+      "etichetta": "Porta chiusa"
+    },
+    "passaggio": {
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio"
+    },
+    "scala": {
+      "tipoSpillo": "scala",
+      "etichetta": "Scala"
+    }
+  },
+  "limiti": [
+    "Il conteggio vale come prova solo se la schermata mostra tutte le icone di quel genere: una schermata presa a metà partita ne nasconde alcune, e allora il vincolo va scritto come «almeno N», non come «esattamente N». Le osservazioni qui raccolte sono di schermate a esplorazione completa del piano.",
+    "Una posizione confermata vale più di un conteggio: dove l'icona osservata e il pin nativo cadono nello stesso punto della stessa planimetria, la prova non dipende dal conteggio."
+  ]
+}

@@ -72,10 +72,24 @@
           "motivo": "28 punti su 29 riconosciuti dicono «passaggio», di cui 24 ingressi del campo"
         }
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "osservazione": {
+        "genere": "stanza-sicura",
+        "tipoSpillo": "sicura",
+        "etichetta": "Stanza sicura",
+        "osservazioni": 5,
+        "schermate": [
+          "Kamoshida's Palace — Old Castle 1F",
+          "Kamoshida's Palace — Old Castle 2F",
+          "Kamoshida's Palace — Old Castle 3F",
+          "Kamoshida's Palace — Tower: Lower Level",
+          "Kamoshida's Palace — Tower: Upper Level"
+        ],
+        "motivo": "su 5 schermate del gioco il numero di icone «stanza-sicura» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
+      },
+      "tipoSpillo": "sicura",
+      "etichetta": "Stanza sicura",
+      "stato": "determinato",
+      "prova": "icone contate nelle schermate del gioco: su 5 schermate del gioco il numero di icone «stanza-sicura» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
     },
     {
       "tipoNativo": 5,
@@ -152,6 +166,7 @@
           "motivo": "23 punti su 23 riconosciuti dicono «passaggio», di cui 21 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -231,10 +246,11 @@
           "motivo": "12 punti su 14 riconosciuti dicono «passaggio», di cui 8 ingressi del campo"
         }
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "osservazione": null,
+      "tipoSpillo": "porta",
+      "etichetta": "Porta",
+      "stato": "determinato",
+      "prova": "prove dirette sui singoli pin: 24 pin di questo tipo su 25 hanno la propria bandiera accesa da una procedura che dice «porta»"
     },
     {
       "tipoNativo": 12,
@@ -309,6 +325,7 @@
           "motivo": "9 punti su 9 riconosciuti dicono «passaggio», di cui 8 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": "meccanismo",
       "etichetta": "Meccanismo",
       "stato": "determinato",
@@ -381,6 +398,7 @@
           "motivo": "14 punti su 15 riconosciuti dicono «passaggio», di cui 10 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -453,6 +471,7 @@
           "motivo": "16 punti su 16 riconosciuti dicono «passaggio», di cui 15 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -527,6 +546,7 @@
           "motivo": "16 punti su 18 riconosciuti dicono «passaggio», di cui 9 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -595,6 +615,7 @@
           "motivo": "15 punti su 16 riconosciuti dicono «passaggio», di cui 11 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -669,6 +690,7 @@
           "motivo": "13 punti su 17 riconosciuti dicono «passaggio», di cui 13 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": "forziere",
       "etichetta": "Forziere",
       "stato": "determinato",
@@ -728,6 +750,7 @@
           "motivo": "48 punti su 52 riconosciuti dicono «passaggio», di cui 43 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -778,6 +801,7 @@
           "motivo": "4 punti su 5 riconosciuti dicono «passaggio», di cui 4 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -818,6 +842,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -835,6 +860,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -906,6 +932,7 @@
           "motivo": "7 punti su 7 riconosciuti dicono «passaggio», di cui 6 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": "forziere",
       "etichetta": "Forziere raro",
       "stato": "determinato",
@@ -964,6 +991,7 @@
           "motivo": "15 punti su 15 riconosciuti dicono «passaggio», di cui 11 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1037,6 +1065,7 @@
           "motivo": "8 punti su 9 riconosciuti dicono «passaggio», di cui 4 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1106,6 +1135,7 @@
           "motivo": "10 punti su 11 riconosciuti dicono «passaggio», di cui 7 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1140,6 +1170,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1188,6 +1219,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1222,6 +1254,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1256,6 +1289,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1292,6 +1326,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1329,6 +1364,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1360,6 +1396,7 @@
       },
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1415,6 +1452,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1451,6 +1489,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1518,6 +1557,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1535,6 +1575,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1592,6 +1633,7 @@
           "motivo": "8 punti su 9 riconosciuti dicono «passaggio», di cui 8 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": "distributore",
       "etichetta": "Distributore di bevande",
       "stato": "determinato",
@@ -1626,6 +1668,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Lotteria",
       "stato": "determinato",
@@ -1660,6 +1703,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "cercalavoro",
       "etichetta": "Bacheca dei lavori",
       "stato": "determinato",
@@ -1694,6 +1738,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "distributore",
       "etichetta": "Chiosco dei succhi",
       "stato": "determinato",
@@ -1730,6 +1775,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Chiosco",
       "stato": "determinato",
@@ -1768,6 +1814,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Libreria",
       "stato": "determinato",
@@ -1804,6 +1851,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Noleggio di film",
       "stato": "determinato",
@@ -1840,6 +1888,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Ristorante di famiglia",
       "stato": "determinato",
@@ -1876,6 +1925,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Manzo e riso",
       "stato": "determinato",
@@ -1910,6 +1960,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Negozio softair",
       "stato": "determinato",
@@ -1948,6 +1999,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "sala-giochi",
       "etichetta": "Sala giochi",
       "stato": "determinato",
@@ -1982,6 +2034,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Minimarket",
       "stato": "determinato",
@@ -1999,6 +2052,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Palestra",
       "stato": "determinato",
@@ -2035,6 +2089,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Big Bang Burger",
       "stato": "determinato",
@@ -2069,6 +2124,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Farmacia",
       "stato": "determinato",
@@ -2107,6 +2163,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Grande magazzino",
       "stato": "determinato",
@@ -2146,6 +2203,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "cinema",
       "etichetta": "Cinema",
       "stato": "determinato",
@@ -2184,6 +2242,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Fioraio",
       "stato": "determinato",
@@ -2216,6 +2275,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
       "stato": "determinato",
@@ -2250,6 +2310,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Articoli sportivi",
       "stato": "determinato",
@@ -2286,6 +2347,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Articoli tradizionali",
       "stato": "determinato",
@@ -2322,6 +2384,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Gioielleria",
       "stato": "determinato",
@@ -2358,6 +2421,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Accessori",
       "stato": "determinato",
@@ -2396,6 +2460,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Cosmetici",
       "stato": "determinato",
@@ -2434,6 +2499,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Panetteria",
       "stato": "determinato",
@@ -2472,6 +2538,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "nota",
       "etichetta": "Servizi igienici",
       "stato": "determinato",
@@ -2489,6 +2556,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Aula",
       "stato": "determinato",
@@ -2506,6 +2574,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Scuola",
       "stato": "determinato",
@@ -2542,6 +2611,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Bar",
       "stato": "determinato",
@@ -2578,6 +2648,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Casalinghi",
       "stato": "determinato",
@@ -2612,6 +2683,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Retrogiochi",
       "stato": "determinato",
@@ -2646,6 +2718,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Maid café",
       "stato": "determinato",
@@ -2680,6 +2753,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Distributori di capsule",
       "stato": "determinato",
@@ -2714,6 +2788,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Elettronica",
       "stato": "determinato",
@@ -2748,6 +2823,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Gadget",
       "stato": "determinato",
@@ -2782,6 +2858,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Ferramenta",
       "stato": "determinato",
@@ -2818,6 +2895,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "terme",
       "etichetta": "Bagno pubblico",
       "stato": "determinato",
@@ -2835,6 +2913,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "casa",
       "etichetta": "Café Leblanc",
       "stato": "determinato",
@@ -2869,6 +2948,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "lavanderia",
       "etichetta": "Lavanderia automatica",
       "stato": "determinato",
@@ -2886,6 +2966,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Gabbie di battuta",
       "stato": "determinato",
@@ -2922,6 +3003,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Usato",
       "stato": "determinato",
@@ -2956,6 +3038,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Clinica",
       "stato": "determinato",
@@ -2992,6 +3075,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Cartoleria",
       "stato": "determinato",
@@ -3026,6 +3110,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Abbigliamento usato",
       "stato": "determinato",
@@ -3060,6 +3145,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "culto",
       "etichetta": "Tempio",
       "stato": "determinato",
@@ -3077,6 +3163,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Jazz club",
       "stato": "determinato",
@@ -3111,6 +3198,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Pietre",
       "stato": "determinato",
@@ -3128,6 +3216,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Freccette",
       "stato": "determinato",
@@ -3166,6 +3255,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Incensi",
       "stato": "determinato",
@@ -3200,6 +3290,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Fritti",
       "stato": "determinato",
@@ -3234,6 +3325,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
       "stato": "determinato",
@@ -3300,6 +3392,7 @@
           "motivo": "5 punti su 6 riconosciuti dicono «passaggio», di cui 5 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": "seme-bramosia",
       "etichetta": "Seme della bramosia",
       "stato": "determinato",
@@ -3338,6 +3431,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Creatore del Palazzo",
       "stato": "determinato",
@@ -3376,6 +3470,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Musica",
       "stato": "determinato",
@@ -3414,6 +3509,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Televisione",
       "stato": "determinato",
@@ -3452,6 +3548,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Galleria",
       "stato": "determinato",
@@ -3490,6 +3587,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Area giochi",
       "stato": "determinato",
@@ -3530,6 +3628,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Premi",
       "stato": "determinato",
@@ -3576,6 +3675,7 @@
           "motivo": "4 punti su 5 riconosciuti dicono «passaggio», di cui 4 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3610,6 +3710,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3648,6 +3749,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3686,6 +3788,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3720,6 +3823,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3737,6 +3841,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3754,6 +3859,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3792,6 +3898,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3809,6 +3916,7 @@
       "script": null,
       "proiezione": null,
       "sottoIlPin": null,
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3856,6 +3964,7 @@
           "motivo": "5 punti su 6 riconosciuti dicono «scala», di cui 1 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3898,6 +4007,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3953,6 +4063,7 @@
           "motivo": "7 punti su 8 riconosciuti dicono «scala», di cui 1 ingressi del campo"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4000,6 +4111,7 @@
           "motivo": "6 punti su 6 riconosciuti dicono «scala»"
         }
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4041,6 +4153,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4081,6 +4194,7 @@
         },
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4115,6 +4229,7 @@
         "procedure": {},
         "proposta": null
       },
+      "osservazione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4149,68 +4264,16 @@
     }
   ],
   "pinPuntuali": [],
+  "tipiDalleProveDirette": {
+    "10": {
+      "tipoSpillo": "porta",
+      "etichetta": "Porta",
+      "prove": 24,
+      "totale": 25,
+      "motivo": "24 pin di questo tipo su 25 hanno la propria bandiera accesa da una procedura che dice «porta»"
+    }
+  },
   "pinDaBandiera": [
-    {
-      "chiave": "nativo-rmap-001-3-0",
-      "indicePin": 6,
-      "tipoNativo": 20,
-      "bandiera": 536874967,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "SET_VELVET_DOOR"
-      ],
-      "script": [
-        "FIELD/INIT/FINI_001_003.BF",
-        "FIELD/INIT/FINI_005_001.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR»"
-    },
-    {
-      "chiave": "nativo-rmap-005-1-0",
-      "indicePin": 0,
-      "tipoNativo": 20,
-      "bandiera": 536874967,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "SET_VELVET_DOOR"
-      ],
-      "script": [
-        "FIELD/INIT/FINI_005_001.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR»"
-    },
-    {
-      "chiave": "nativo-rmap-006-1-0",
-      "indicePin": 5,
-      "tipoNativo": 20,
-      "bandiera": 536874967,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "SET_VELVET_DOOR"
-      ],
-      "script": [
-        "FIELD/INIT/FINI_006_001.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR»"
-    },
-    {
-      "chiave": "nativo-rmap-007-1-0",
-      "indicePin": 3,
-      "tipoNativo": 20,
-      "bandiera": 536874967,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "SET_VELVET_DOOR"
-      ],
-      "script": [
-        "FIELD/INIT/FINI_007_001.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «SET_VELVET_DOOR»"
-    },
     {
       "chiave": "nativo-rmap-151-10-0",
       "indicePin": 2,
@@ -4257,66 +4320,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_11_TBOX_minimap_16»"
     },
     {
-      "chiave": "nativo-rmap-151-2-0",
-      "indicePin": 6,
-      "tipoNativo": 17,
-      "bandiera": 536871388,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "MAIN_DOOR_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-2-0",
-      "indicePin": 7,
-      "tipoNativo": 17,
-      "bandiera": 536871391,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "MAIN_DOOR_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-2-1",
-      "indicePin": 6,
-      "tipoNativo": 17,
-      "bandiera": 536871390,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_15_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-2-1",
-      "indicePin": 7,
-      "tipoNativo": 26,
-      "bandiera": 536871407,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "MAIN_DOOR_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03»"
-    },
-    {
       "chiave": "nativo-rmap-151-2-1",
       "indicePin": 8,
       "tipoNativo": 12,
@@ -4330,51 +4333,6 @@
         "FIELD/DOOR/FDOOR151_003.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_000D»"
-    },
-    {
-      "chiave": "nativo-rmap-151-2-1",
-      "indicePin": 11,
-      "tipoNativo": 17,
-      "bandiera": 536871406,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_15_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-3-0",
-      "indicePin": 6,
-      "tipoNativo": 17,
-      "bandiera": 536871390,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_15_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-3-0",
-      "indicePin": 7,
-      "tipoNativo": 26,
-      "bandiera": 536871407,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "MAIN_DOOR_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03»"
     },
     {
       "chiave": "nativo-rmap-151-3-0",
@@ -4392,51 +4350,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_000D»"
     },
     {
-      "chiave": "nativo-rmap-151-3-0",
-      "indicePin": 11,
-      "tipoNativo": 17,
-      "bandiera": 536871406,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_15_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-4-0",
-      "indicePin": 6,
-      "tipoNativo": 17,
-      "bandiera": 536871390,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_15_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-4-0",
-      "indicePin": 7,
-      "tipoNativo": 17,
-      "bandiera": 536871407,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "MAIN_DOOR_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «MAIN_DOOR_03»"
-    },
-    {
       "chiave": "nativo-rmap-151-4-0",
       "indicePin": 8,
       "tipoNativo": 12,
@@ -4450,21 +4363,6 @@
         "FIELD/DOOR/FDOOR151_003.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_000D»"
-    },
-    {
-      "chiave": "nativo-rmap-151-4-0",
-      "indicePin": 11,
-      "tipoNativo": 17,
-      "bandiera": 536871406,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_15_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_15_TBOX_minimap_03»"
     },
     {
       "chiave": "nativo-rmap-151-4-1",
@@ -4480,22 +4378,6 @@
         "FIELD/HIT/FHIT_151_005_00.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_05_TBOX_minimap_09»"
-    },
-    {
-      "chiave": "nativo-rmap-151-4-1",
-      "indicePin": 7,
-      "tipoNativo": 10,
-      "bandiera": 536871488,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D01_04_e159_040_START",
-        "D151_04_GIM_SWITCH_01"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_004_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_04_e159_040_START»"
     },
     {
       "chiave": "nativo-rmap-151-4-2",
@@ -4528,22 +4410,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_05_TBOX_minimap_09»"
     },
     {
-      "chiave": "nativo-rmap-151-5-0",
-      "indicePin": 7,
-      "tipoNativo": 10,
-      "bandiera": 536871488,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D01_04_e159_040_START",
-        "D151_04_GIM_SWITCH_01"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_004_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_04_e159_040_START»"
-    },
-    {
       "chiave": "nativo-rmap-151-5-1",
       "indicePin": 0,
       "tipoNativo": 17,
@@ -4557,67 +4423,6 @@
         "FIELD/HIT/FHIT_151_005_00.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_05_R_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-151-5-1",
-      "indicePin": 6,
-      "tipoNativo": 10,
-      "bandiera": 536871488,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D01_04_e159_040_START",
-        "D151_04_GIM_SWITCH_01"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_004_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_04_e159_040_START»"
-    },
-    {
-      "chiave": "nativo-rmap-151-6-4",
-      "indicePin": 0,
-      "tipoNativo": 97,
-      "bandiera": 536875957,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D01_151_06_TBOX_minimap_11"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_151_006_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D01_151_06_TBOX_minimap_11»"
-    },
-    {
-      "chiave": "nativo-rmap-152-4-0",
-      "indicePin": 2,
-      "tipoNativo": 12,
-      "bandiera": 536875928,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0000"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR152_004.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0000»"
-    },
-    {
-      "chiave": "nativo-rmap-153-2-0",
-      "indicePin": 2,
-      "tipoNativo": 28,
-      "bandiera": 536873563,
-      "tipoSpillo": "sicura",
-      "etichetta": "Stanza sicura",
-      "procedure": [
-        "D02_SAFEROOM_IN_SET"
-      ],
-      "script": [
-        "FIELD/INIT/FINI_153_051.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D02_SAFEROOM_IN_SET»"
     },
     {
       "chiave": "nativo-rmap-153-2-0",
@@ -4710,68 +4515,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D02_09_LOCKED_DOOR»"
     },
     {
-      "chiave": "nativo-rmap-154-1-0",
-      "indicePin": 4,
-      "tipoNativo": 13,
-      "bandiera": 536875684,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-1-0",
-      "indicePin": 5,
-      "tipoNativo": 30,
-      "bandiera": 536872136,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN",
-        "D03_2nd_EntryEvent"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF",
-        "FIELD/INIT/FINI_154_002.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-11-1",
-      "indicePin": 1,
-      "tipoNativo": 12,
-      "bandiera": 536875927,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0693"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR154_011.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0693»"
-    },
-    {
-      "chiave": "nativo-rmap-154-11-2",
-      "indicePin": 0,
-      "tipoNativo": 15,
-      "bandiera": 536872219,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_011_DOOR_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_011_DOOR_OPEN»"
-    },
-    {
       "chiave": "nativo-rmap-154-11-2",
       "indicePin": 1,
       "tipoNativo": 10,
@@ -4785,158 +4528,6 @@
         "FIELD/DOOR/FDOOR154_011.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_11_DOOR»"
-    },
-    {
-      "chiave": "nativo-rmap-154-14-0",
-      "indicePin": 3,
-      "tipoNativo": 30,
-      "bandiera": 536872214,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "DEPOSIT_BOX_CHECK_PROC"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_005_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC»"
-    },
-    {
-      "chiave": "nativo-rmap-154-14-1",
-      "indicePin": 2,
-      "tipoNativo": 30,
-      "bandiera": 536872214,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "DEPOSIT_BOX_CHECK_PROC"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_005_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC»"
-    },
-    {
-      "chiave": "nativo-rmap-154-2-0",
-      "indicePin": 2,
-      "tipoNativo": 15,
-      "bandiera": 536875684,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-2-0",
-      "indicePin": 3,
-      "tipoNativo": 15,
-      "bandiera": 536872149,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-2-0",
-      "indicePin": 4,
-      "tipoNativo": 30,
-      "bandiera": 536872136,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN",
-        "D03_2nd_EntryEvent"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF",
-        "FIELD/INIT/FINI_154_002.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-2-1",
-      "indicePin": 0,
-      "tipoNativo": 5,
-      "bandiera": 536872257,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_03_BigDoorLook_FIRST"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_003_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_03_BigDoorLook_FIRST»"
-    },
-    {
-      "chiave": "nativo-rmap-154-2-1",
-      "indicePin": 1,
-      "tipoNativo": 15,
-      "bandiera": 536872149,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-2-1",
-      "indicePin": 5,
-      "tipoNativo": 15,
-      "bandiera": 536875684,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-3-0",
-      "indicePin": 0,
-      "tipoNativo": 13,
-      "bandiera": 536872219,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_011_DOOR_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_011_DOOR_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-3-1",
-      "indicePin": 4,
-      "tipoNativo": 15,
-      "bandiera": 536872149,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
     },
     {
       "chiave": "nativo-rmap-154-3-1",
@@ -4969,81 +4560,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_03_LOCKED_DOOR_02»"
     },
     {
-      "chiave": "nativo-rmap-154-3-1",
-      "indicePin": 10,
-      "tipoNativo": 10,
-      "bandiera": 536871650,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "FLD_D03_03_LOCKED_DOOR_03"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR154_003.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_03_LOCKED_DOOR_03»"
-    },
-    {
-      "chiave": "nativo-rmap-154-3-2",
-      "indicePin": 3,
-      "tipoNativo": 15,
-      "bandiera": 536872149,
-      "tipoSpillo": "porta",
-      "etichetta": "Serranda",
-      "procedure": [
-        "D03_02_SHUTTER_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_002_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_02_SHUTTER_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-5-0",
-      "indicePin": 0,
-      "tipoNativo": 97,
-      "bandiera": 536875958,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "DEPOSIT_BOX_CHECK_PROC"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_005_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC»"
-    },
-    {
-      "chiave": "nativo-rmap-154-5-1",
-      "indicePin": 3,
-      "tipoNativo": 29,
-      "bandiera": 536872214,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "DEPOSIT_BOX_CHECK_PROC"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_005_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «DEPOSIT_BOX_CHECK_PROC»"
-    },
-    {
-      "chiave": "nativo-rmap-154-5-1",
-      "indicePin": 6,
-      "tipoNativo": 37,
-      "bandiera": 536872217,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "FLD_D03_09_DOOR_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_009_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_09_DOOR_OPEN»"
-    },
-    {
       "chiave": "nativo-rmap-154-7-1",
       "indicePin": 4,
       "tipoNativo": 10,
@@ -5059,51 +4575,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «DO3_07_LOCKED_DOOR»"
     },
     {
-      "chiave": "nativo-rmap-154-8-0",
-      "indicePin": 1,
-      "tipoNativo": 17,
-      "bandiera": 536872198,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_08_MONEY_DOOR_FRONT"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_008_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_08_MONEY_DOOR_FRONT»"
-    },
-    {
-      "chiave": "nativo-rmap-154-8-1",
-      "indicePin": 0,
-      "tipoNativo": 5,
-      "bandiera": 536872040,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_08_MONEY_DOOR_BACK"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_008_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_08_MONEY_DOOR_BACK»"
-    },
-    {
-      "chiave": "nativo-rmap-154-8-1",
-      "indicePin": 2,
-      "tipoNativo": 26,
-      "bandiera": 536872209,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_08_MONEY_DOOR_BACK"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_008_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_08_MONEY_DOOR_BACK»"
-    },
-    {
       "chiave": "nativo-rmap-154-9-0",
       "indicePin": 1,
       "tipoNativo": 10,
@@ -5117,67 +4588,6 @@
         "FIELD/DOOR/FDOOR154_009.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_08_DOOR»"
-    },
-    {
-      "chiave": "nativo-rmap-154-9-0",
-      "indicePin": 2,
-      "tipoNativo": 10,
-      "bandiera": 536875649,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "FLD_D03_MONEY_DOOR_PROC"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR154_008.BF",
-        "FIELD/DOOR/FDOOR154_009.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_MONEY_DOOR_PROC»"
-    },
-    {
-      "chiave": "nativo-rmap-154-9-1",
-      "indicePin": 0,
-      "tipoNativo": 38,
-      "bandiera": 536872217,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "FLD_D03_09_DOOR_OPEN"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_009_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D03_09_DOOR_OPEN»"
-    },
-    {
-      "chiave": "nativo-rmap-154-9-1",
-      "indicePin": 1,
-      "tipoNativo": 17,
-      "bandiera": 536872199,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_09_MONEY_DOOR_BACK"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_009_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_09_MONEY_DOOR_BACK»"
-    },
-    {
-      "chiave": "nativo-rmap-154-9-1",
-      "indicePin": 2,
-      "tipoNativo": 26,
-      "bandiera": 536872210,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D03_09_MONEY_DOOR_BACK"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_154_009_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D03_09_MONEY_DOOR_BACK»"
     },
     {
       "chiave": "nativo-rmap-155-3-0",
@@ -5240,158 +4650,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D04_155_07_TBOX_minimap_05»"
     },
     {
-      "chiave": "nativo-rmap-156-2-0",
-      "indicePin": 3,
-      "tipoNativo": 17,
-      "bandiera": 536872987,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "D156_002_DOOR_NG",
-        "D156_02_START_EV"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_156_002_00.BF",
-        "FIELD/INIT/FINI_156_002.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D156_002_DOOR_NG»"
-    },
-    {
-      "chiave": "nativo-rmap-156-7-0",
-      "indicePin": 4,
-      "tipoNativo": 26,
-      "bandiera": 536873007,
-      "tipoSpillo": "seme-bramosia",
-      "etichetta": "Seme della bramosia",
-      "procedure": [
-        "D05_156_07_SEEDicon_2"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_156_007_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D05_156_07_SEEDicon_2»"
-    },
-    {
-      "chiave": "nativo-rmap-156-7-1",
-      "indicePin": 4,
-      "tipoNativo": 17,
-      "bandiera": 536872992,
-      "tipoSpillo": "seme-bramosia",
-      "etichetta": "Seme della bramosia",
-      "procedure": [
-        "D05_156_07_SEEDicon_2"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_156_007_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D05_156_07_SEEDicon_2»"
-    },
-    {
-      "chiave": "nativo-rmap-157-10-0",
-      "indicePin": 0,
-      "tipoNativo": 5,
-      "bandiera": 536873131,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_BIG_SLOT_GAME_DEFAULT"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_BIG_SLOT_GAME_DEFAULT»"
-    },
-    {
-      "chiave": "nativo-rmap-157-10-0",
-      "indicePin": 1,
-      "tipoNativo": 14,
-      "bandiera": 536873487,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_SLOT_GAME_05"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05»"
-    },
-    {
-      "chiave": "nativo-rmap-157-10-1",
-      "indicePin": 0,
-      "tipoNativo": 5,
-      "bandiera": 536873131,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_BIG_SLOT_GAME_DEFAULT"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_BIG_SLOT_GAME_DEFAULT»"
-    },
-    {
-      "chiave": "nativo-rmap-157-10-1",
-      "indicePin": 1,
-      "tipoNativo": 14,
-      "bandiera": 536873487,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_SLOT_GAME_05"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05»"
-    },
-    {
-      "chiave": "nativo-rmap-157-10-1",
-      "indicePin": 2,
-      "tipoNativo": 17,
-      "bandiera": 536873393,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_SLOT_GAME_05"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05»"
-    },
-    {
-      "chiave": "nativo-rmap-157-12-0",
-      "indicePin": 9,
-      "tipoNativo": 10,
-      "bandiera": 536875847,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "FLD_D06_12_FIRST_DOOR"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR157_012.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D06_12_FIRST_DOOR»"
-    },
-    {
-      "chiave": "nativo-rmap-157-12-0",
-      "indicePin": 10,
-      "tipoNativo": 10,
-      "bandiera": 536875848,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "FLD_D06_12_DOWN_DOOR"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR157_012.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «FLD_D06_12_DOWN_DOOR»"
-    },
-    {
       "chiave": "nativo-rmap-157-13-0",
       "indicePin": 4,
       "tipoNativo": 26,
@@ -5405,162 +4663,6 @@
         "FIELD/HIT/FHIT_157_013_00.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D06_157_13_R_TBOX_03»"
-    },
-    {
-      "chiave": "nativo-rmap-157-4-1",
-      "indicePin": 10,
-      "tipoNativo": 12,
-      "bandiera": 536875925,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0649"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR157_004.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0649»"
-    },
-    {
-      "chiave": "nativo-rmap-157-5-0",
-      "indicePin": 9,
-      "tipoNativo": 10,
-      "bandiera": 536875882,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "f157_005_DOOR_0000",
-        "f157_005_DOOR_0641",
-        "f157_005_DOOR_0641_HIT"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR157_005.BF",
-        "FIELD/HIT/FHIT_157_005_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «f157_005_DOOR_0000»"
-    },
-    {
-      "chiave": "nativo-rmap-157-5-0",
-      "indicePin": 10,
-      "tipoNativo": 10,
-      "bandiera": 536875883,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "f157_005_DOOR_0002",
-        "f157_005_DOOR_0004"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR157_005.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «f157_005_DOOR_0002»"
-    },
-    {
-      "chiave": "nativo-rmap-157-5-0",
-      "indicePin": 11,
-      "tipoNativo": 10,
-      "bandiera": 536875884,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "f157_005_DOOR_0000",
-        "f157_005_DOOR_0000_HIT"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR157_005.BF",
-        "FIELD/HIT/FHIT_157_005_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «f157_005_DOOR_0000»"
-    },
-    {
-      "chiave": "nativo-rmap-157-9-0",
-      "indicePin": 1,
-      "tipoNativo": 16,
-      "bandiera": 536873487,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_SLOT_GAME_05"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05»"
-    },
-    {
-      "chiave": "nativo-rmap-157-9-1",
-      "indicePin": 1,
-      "tipoNativo": 16,
-      "bandiera": 536873487,
-      "tipoSpillo": "attivita",
-      "etichetta": "Gioco",
-      "procedure": [
-        "D6_SLOT_GAME_05"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_157_010_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D6_SLOT_GAME_05»"
-    },
-    {
-      "chiave": "nativo-rmap-159-11-0",
-      "indicePin": 5,
-      "tipoNativo": 13,
-      "bandiera": 536875921,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D159_11_ELEVATOR_SWITCH_NG"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG»"
-    },
-    {
-      "chiave": "nativo-rmap-159-11-1",
-      "indicePin": 5,
-      "tipoNativo": 13,
-      "bandiera": 536875921,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D159_11_ELEVATOR_SWITCH_NG"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG»"
-    },
-    {
-      "chiave": "nativo-rmap-159-11-4",
-      "indicePin": 3,
-      "tipoNativo": 12,
-      "bandiera": 536875923,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D159_11_ELEVATOR_SWITCH_NG"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG»"
-    },
-    {
-      "chiave": "nativo-rmap-159-13-0",
-      "indicePin": 0,
-      "tipoNativo": 13,
-      "bandiera": 536875921,
-      "tipoSpillo": "meccanismo",
-      "etichetta": "Meccanismo",
-      "procedure": [
-        "D159_11_ELEVATOR_SWITCH_NG"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_11_ELEVATOR_SWITCH_NG»"
     },
     {
       "chiave": "nativo-rmap-159-2-1",
@@ -5593,51 +4695,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D07_159_02_TBOX_minimap_02»"
     },
     {
-      "chiave": "nativo-rmap-159-2-3",
-      "indicePin": 10,
-      "tipoNativo": 29,
-      "bandiera": 536871293,
-      "tipoSpillo": "passaggio",
-      "etichetta": "Ascensore",
-      "procedure": [
-        "D159_20_ELEVATOR_B_GOTO"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO»"
-    },
-    {
-      "chiave": "nativo-rmap-159-2-3",
-      "indicePin": 13,
-      "tipoNativo": 10,
-      "bandiera": 536873837,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0015"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR159_003.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0015»"
-    },
-    {
-      "chiave": "nativo-rmap-159-20-0",
-      "indicePin": 3,
-      "tipoNativo": 30,
-      "bandiera": 536871293,
-      "tipoSpillo": "passaggio",
-      "etichetta": "Ascensore",
-      "procedure": [
-        "D159_20_ELEVATOR_B_GOTO"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO»"
-    },
-    {
       "chiave": "nativo-rmap-159-20-0",
       "indicePin": 8,
       "tipoNativo": 10,
@@ -5666,36 +4723,6 @@
         "FIELD/DOOR/FDOOR159_020.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D7_20_Door_Lock_D»"
-    },
-    {
-      "chiave": "nativo-rmap-159-20-1",
-      "indicePin": 0,
-      "tipoNativo": 30,
-      "bandiera": 536871293,
-      "tipoSpillo": "passaggio",
-      "etichetta": "Ascensore",
-      "procedure": [
-        "D159_20_ELEVATOR_B_GOTO"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO»"
-    },
-    {
-      "chiave": "nativo-rmap-159-20-1",
-      "indicePin": 2,
-      "tipoNativo": 97,
-      "bandiera": 536875956,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D07_159_20_TBOX_minimap_06"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D07_159_20_TBOX_minimap_06»"
     },
     {
       "chiave": "nativo-rmap-159-25-0",
@@ -5803,51 +4830,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D7_25_Door_Lock_G»"
     },
     {
-      "chiave": "nativo-rmap-159-3-0",
-      "indicePin": 10,
-      "tipoNativo": 29,
-      "bandiera": 536871293,
-      "tipoSpillo": "passaggio",
-      "etichetta": "Ascensore",
-      "procedure": [
-        "D159_20_ELEVATOR_B_GOTO"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO»"
-    },
-    {
-      "chiave": "nativo-rmap-159-3-0",
-      "indicePin": 13,
-      "tipoNativo": 10,
-      "bandiera": 536873837,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0015"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR159_003.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0015»"
-    },
-    {
-      "chiave": "nativo-rmap-159-3-1",
-      "indicePin": 2,
-      "tipoNativo": 29,
-      "bandiera": 536871293,
-      "tipoSpillo": "passaggio",
-      "etichetta": "Ascensore",
-      "procedure": [
-        "D159_20_ELEVATOR_B_GOTO"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO»"
-    },
-    {
       "chiave": "nativo-rmap-159-30-0",
       "indicePin": 4,
       "tipoNativo": 10,
@@ -5938,52 +4920,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D7_35_Door_Lock_A»"
     },
     {
-      "chiave": "nativo-rmap-159-35-0",
-      "indicePin": 4,
-      "tipoNativo": 17,
-      "bandiera": 536873903,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D07_159_35_TBOX_minimap_12",
-        "D07_159_35_minimap_14"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_035_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D07_159_35_TBOX_minimap_12»"
-    },
-    {
-      "chiave": "nativo-rmap-159-9-0",
-      "indicePin": 10,
-      "tipoNativo": 29,
-      "bandiera": 536871293,
-      "tipoSpillo": "passaggio",
-      "etichetta": "Ascensore",
-      "procedure": [
-        "D159_20_ELEVATOR_B_GOTO"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_159_020_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D159_20_ELEVATOR_B_GOTO»"
-    },
-    {
-      "chiave": "nativo-rmap-159-9-0",
-      "indicePin": 13,
-      "tipoNativo": 10,
-      "bandiera": 536873837,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0015"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR159_003.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0015»"
-    },
-    {
       "chiave": "nativo-rmap-160-2-0",
       "indicePin": 3,
       "tipoNativo": 17,
@@ -5999,211 +4935,6 @@
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D08_160_02_TBOX_minimap_09»"
     },
     {
-      "chiave": "nativo-rmap-161-1-0",
-      "indicePin": 4,
-      "tipoNativo": 12,
-      "bandiera": 536875923,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0C80",
-        "EX_0000"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR161_001.BF",
-        "FIELD/DOOR/FDOOR161_002.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0C80»"
-    },
-    {
-      "chiave": "nativo-rmap-161-2-0",
-      "indicePin": 3,
-      "tipoNativo": 12,
-      "bandiera": 536875923,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "Door_EX_0C80",
-        "EX_0000"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR161_001.BF",
-        "FIELD/DOOR/FDOOR161_002.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «Door_EX_0C80»"
-    },
-    {
-      "chiave": "nativo-rmap-162-11-1",
-      "indicePin": 11,
-      "tipoNativo": 97,
-      "bandiera": 536875958,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "procedure": [
-        "D10_162_11_TBOX_minimap_06"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_011_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_162_11_TBOX_minimap_06»"
-    },
-    {
-      "chiave": "nativo-rmap-162-12-0",
-      "indicePin": 1,
-      "tipoNativo": 26,
-      "bandiera": 536875399,
-      "tipoSpillo": "sicura",
-      "etichetta": "Stanza sicura",
-      "procedure": [
-        "D10_SAFETY_ROOM_05_SET"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_012_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_05_SET»"
-    },
-    {
-      "chiave": "nativo-rmap-162-12-0",
-      "indicePin": 2,
-      "tipoNativo": 10,
-      "bandiera": 536872091,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock01"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_012.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock01»"
-    },
-    {
-      "chiave": "nativo-rmap-162-12-0",
-      "indicePin": 3,
-      "tipoNativo": 10,
-      "bandiera": 536872092,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock02"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_012.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock02»"
-    },
-    {
-      "chiave": "nativo-rmap-162-12-0",
-      "indicePin": 6,
-      "tipoNativo": 12,
-      "bandiera": 536875175,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "CheckPasswardDoor"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_012_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «CheckPasswardDoor»"
-    },
-    {
-      "chiave": "nativo-rmap-162-12-1",
-      "indicePin": 6,
-      "tipoNativo": 17,
-      "bandiera": 536875393,
-      "tipoSpillo": "sicura",
-      "etichetta": "Stanza sicura",
-      "procedure": [
-        "D10_SAFETY_ROOM_05_SET"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_012_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_05_SET»"
-    },
-    {
-      "chiave": "nativo-rmap-162-12-1",
-      "indicePin": 7,
-      "tipoNativo": 97,
-      "bandiera": 536875956,
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere raro",
-      "procedure": [
-        "D10_162_12_R_TBOX_minimap_03"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_012_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_162_12_R_TBOX_minimap_03»"
-    },
-    {
-      "chiave": "nativo-rmap-162-15-1",
-      "indicePin": 4,
-      "tipoNativo": 10,
-      "bandiera": 536875483,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock01",
-        "IsUppeerOff",
-        "IsUppeerOn"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_015.BF",
-        "FIELD/HIT/FHIT_162_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock01»"
-    },
-    {
-      "chiave": "nativo-rmap-162-15-1",
-      "indicePin": 5,
-      "tipoNativo": 10,
-      "bandiera": 536875484,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock02",
-        "IsUppeerOff",
-        "IsUppeerOn"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_015.BF",
-        "FIELD/HIT/FHIT_162_015_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock02»"
-    },
-    {
-      "chiave": "nativo-rmap-162-16-0",
-      "indicePin": 3,
-      "tipoNativo": 17,
-      "bandiera": 536875390,
-      "tipoSpillo": "sicura",
-      "etichetta": "Stanza sicura",
-      "procedure": [
-        "D10_SAFETY_ROOM_07_SET"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_016_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_07_SET»"
-    },
-    {
-      "chiave": "nativo-rmap-162-16-0",
-      "indicePin": 5,
-      "tipoNativo": 10,
-      "bandiera": 536875453,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock01"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_016.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock01»"
-    },
-    {
       "chiave": "nativo-rmap-162-16-1",
       "indicePin": 1,
       "tipoNativo": 17,
@@ -6217,66 +4948,6 @@
         "FIELD/HIT/FHIT_162_016_00.BF"
       ],
       "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_162_16_TBOX_minimap_11»"
-    },
-    {
-      "chiave": "nativo-rmap-162-16-1",
-      "indicePin": 3,
-      "tipoNativo": 10,
-      "bandiera": 536875454,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock03"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_016.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock03»"
-    },
-    {
-      "chiave": "nativo-rmap-162-16-2",
-      "indicePin": 1,
-      "tipoNativo": 10,
-      "bandiera": 536875455,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta chiusa",
-      "procedure": [
-        "InternalLock02"
-      ],
-      "script": [
-        "FIELD/DOOR/FDOOR162_016.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «InternalLock02»"
-    },
-    {
-      "chiave": "nativo-rmap-162-16-2",
-      "indicePin": 2,
-      "tipoNativo": 10,
-      "bandiera": 536875456,
-      "tipoSpillo": "porta",
-      "etichetta": "Porta",
-      "procedure": [
-        "LookPasswardDoor01"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_016_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «LookPasswardDoor01»"
-    },
-    {
-      "chiave": "nativo-rmap-162-16-3",
-      "indicePin": 0,
-      "tipoNativo": 26,
-      "bandiera": 536875398,
-      "tipoSpillo": "sicura",
-      "etichetta": "Stanza sicura",
-      "procedure": [
-        "D10_SAFETY_ROOM_07_SET"
-      ],
-      "script": [
-        "FIELD/HIT/FHIT_162_016_00.BF"
-      ],
-      "prova": "la bandiera che il gioco accende per mostrarlo è accesa da «D10_SAFETY_ROOM_07_SET»"
     },
     {
       "chiave": "nativo-rmap-162-16-3",
@@ -6327,19 +4998,24 @@
   "letturaGeometrica": {
     "controprova": {
       "domanda": "sui tipi il cui significato è dimostrato per altra via, quante volte il trigger sotto il pin darebbe la risposta giusta",
-      "casi": 26,
+      "casi": 40,
       "giusti": 13,
-      "sbagliati": 13,
-      "accuratezza": 0.5,
+      "sbagliati": 27,
+      "accuratezza": 0.325,
       "perFamiglia": {
+        "passaggio": {
+          "giusti": 0,
+          "sbagliati": 17,
+          "accuratezza": 0.0
+        },
         "attivita": {
           "giusti": 8,
           "sbagliati": 0,
           "accuratezza": 1.0
         },
-        "passaggio": {
+        "meccanismo": {
           "giusti": 0,
-          "sbagliati": 7,
+          "sbagliati": 5,
           "accuratezza": 0.0
         },
         "forziere": {
@@ -6366,22 +5042,17 @@
           "giusti": 0,
           "sbagliati": 1,
           "accuratezza": 0.0
-        },
-        "meccanismo": {
-          "giusti": 0,
-          "sbagliati": 1,
-          "accuratezza": 0.0
         }
       },
       "scambiPiuFrequenti": {
+        "porta letto come passaggio": 5,
+        "sicura letto come passaggio": 5,
         "forziere letto come passaggio": 3,
+        "porta letto come meccanismo": 3,
         "negozio letto come passaggio": 2,
         "nota letto come passaggio": 1,
         "negozio letto come ristorante": 1,
-        "distributore letto come ristorante": 1,
-        "attivita letto come scala": 1,
-        "meccanismo letto come passaggio": 1,
-        "forziere letto come seme-bramosia": 1
+        "distributore letto come ristorante": 1
       },
       "conseguenza": "troppo bassa per farne una prova: la lettura geometrica non determina alcun tipo e nessun pin del pacchetto dipende da lei"
     },
@@ -6677,39 +5348,9 @@
         "prova": "il trigger sotto questo pin chiama «GOTO_153_05_01»"
       },
       {
-        "chiave": "nativo-rmap-153-6-0",
-        "indicePin": 10,
-        "tipoNativo": 10,
-        "tipoSpillo": "meccanismo",
-        "etichetta": "Meccanismo",
-        "campo": "F153_006_00",
-        "procedura": "D153_06_SWITCH",
-        "prova": "il trigger sotto questo pin chiama «D153_06_SWITCH»"
-      },
-      {
-        "chiave": "nativo-rmap-153-9-0",
-        "indicePin": 0,
-        "tipoNativo": 4,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F153_009_00",
-        "procedura": "DUCT_153_009_04_INOUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_153_009_04_INOUT»"
-      },
-      {
         "chiave": "nativo-rmap-153-9-0",
         "indicePin": 2,
         "tipoNativo": 28,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F153_009_00",
-        "procedura": "DUCT_153_009_04_INOUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_153_009_04_INOUT»"
-      },
-      {
-        "chiave": "nativo-rmap-153-9-1",
-        "indicePin": 5,
-        "tipoNativo": 4,
         "tipoSpillo": "passaggio",
         "etichetta": "Passaggio",
         "campo": "F153_009_00",
@@ -6745,16 +5386,6 @@
         "campo": "F154_002_00",
         "procedura": "GOTO_154_003_02",
         "prova": "il trigger sotto questo pin chiama «GOTO_154_003_02»"
-      },
-      {
-        "chiave": "nativo-rmap-154-2-1",
-        "indicePin": 3,
-        "tipoNativo": 10,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F154_002_00",
-        "procedura": "DUCT_154_002_C_01",
-        "prova": "il trigger sotto questo pin chiama «DUCT_154_002_C_01»"
       },
       {
         "chiave": "nativo-rmap-154-5-1",
@@ -6868,16 +5499,6 @@
       },
       {
         "chiave": "nativo-rmap-156-7-0",
-        "indicePin": 0,
-        "tipoNativo": 4,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_007_00",
-        "procedura": "DUCT_156_007_B_INOUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_156_007_B_INOUT»"
-      },
-      {
-        "chiave": "nativo-rmap-156-7-0",
         "indicePin": 2,
         "tipoNativo": 28,
         "tipoSpillo": "passaggio",
@@ -6895,16 +5516,6 @@
         "campo": "F156_007_00",
         "procedura": "GOTO_156_04_01",
         "prova": "il trigger sotto questo pin chiama «GOTO_156_04_01»"
-      },
-      {
-        "chiave": "nativo-rmap-156-7-1",
-        "indicePin": 1,
-        "tipoNativo": 4,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F156_007_00",
-        "procedura": "DUCT_156_007_B_INOUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_156_007_B_INOUT»"
       },
       {
         "chiave": "nativo-rmap-156-7-1",
@@ -6947,16 +5558,6 @@
         "prova": "il trigger sotto questo pin chiama «D06_157_12_R_TBOX_02»"
       },
       {
-        "chiave": "nativo-rmap-157-12-0",
-        "indicePin": 9,
-        "tipoNativo": 10,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F157_012_00",
-        "procedura": "DUCT_157_012_A_IN",
-        "prova": "il trigger sotto questo pin chiama «DUCT_157_012_A_IN»"
-      },
-      {
         "chiave": "nativo-rmap-159-10-1",
         "indicePin": 1,
         "tipoNativo": 19,
@@ -6977,26 +5578,6 @@
         "prova": "il trigger sotto questo pin chiama «DUCT_159_010_A_IN»"
       },
       {
-        "chiave": "nativo-rmap-159-20-0",
-        "indicePin": 8,
-        "tipoNativo": 10,
-        "tipoSpillo": "meccanismo",
-        "etichetta": "Meccanismo",
-        "campo": "F159_020_00",
-        "procedura": "D159_20_ELEVATOR_A_SWITCH",
-        "prova": "il trigger sotto questo pin chiama «D159_20_ELEVATOR_A_SWITCH»"
-      },
-      {
-        "chiave": "nativo-rmap-159-25-0",
-        "indicePin": 7,
-        "tipoNativo": 10,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F159_025_00",
-        "procedura": "DUCT_159_025_A_B_OUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_159_025_A_B_OUT»"
-      },
-      {
         "chiave": "nativo-rmap-159-25-1",
         "indicePin": 0,
         "tipoNativo": 16,
@@ -7015,16 +5596,6 @@
         "campo": "F159_035_00",
         "procedura": "MOUSE_SWITCH",
         "prova": "il trigger sotto questo pin chiama «MOUSE_SWITCH»"
-      },
-      {
-        "chiave": "nativo-rmap-159-9-0",
-        "indicePin": 3,
-        "tipoNativo": 4,
-        "tipoSpillo": "meccanismo",
-        "etichetta": "Meccanismo",
-        "campo": "F159_009_00",
-        "procedura": "D159_09_ELEVATOR_A_SWITCH",
-        "prova": "il trigger sotto questo pin chiama «D159_09_ELEVATOR_A_SWITCH»"
       },
       {
         "chiave": "nativo-rmap-159-9-0",
@@ -7347,16 +5918,6 @@
         "prova": "il trigger sotto questo pin chiama «CheckStair_blue»"
       },
       {
-        "chiave": "nativo-rmap-162-12-0",
-        "indicePin": 4,
-        "tipoNativo": 10,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F162_012_00",
-        "procedura": "DUC_01_01_INOUT",
-        "prova": "il trigger sotto questo pin chiama «DUC_01_01_INOUT»"
-      },
-      {
         "chiave": "nativo-rmap-162-12-1",
         "indicePin": 3,
         "tipoNativo": 30,
@@ -7390,14 +5951,16 @@
   },
   "summary": {
     "tipi": 102,
-    "determinati": 61,
+    "determinati": 63,
     "ipotesi": 0,
-    "nonDeterminati": 41,
+    "nonDeterminati": 39,
     "pinConIpotesi": 0,
     "perTipoIpotesi": {},
-    "pinDeterminati": 360,
-    "pinNonDeterminati": 1069,
+    "pinDeterminati": 545,
+    "pinNonDeterminati": 884,
     "perTipoSpillo": {
+      "sicura": 1,
+      "porta": 1,
       "meccanismo": 1,
       "forziere": 2,
       "distributore": 2,
@@ -7415,31 +5978,32 @@
       "seme-bramosia": 1
     },
     "perProva": {
+      "icone contate nelle schermate del gioco": 1,
+      "prove dirette sui singoli pin": 1,
       "procedura che accende la bandiera del pin": 4,
       "nome interno dello sprite del blocco urbano dimostrato": 51,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 6
     },
     "pinPerProva": {
       "procedura che accende la bandiera del pin": 270,
+      "icone contate nelle schermate del gioco": 104,
       "nome interno dello sprite del blocco urbano dimostrato": 81,
+      "prove dirette sui singoli pin": 81,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 9
     },
     "pinPuntuali": 0,
-    "pinDaBandiera": 143,
+    "pinDaBandiera": 48,
     "perTipoDaBandiera": {
-      "porta": 83,
-      "forziere": 28,
-      "attivita": 7,
-      "meccanismo": 7,
-      "sicura": 7,
-      "passaggio": 6,
-      "seme-bramosia": 5
+      "porta": 30,
+      "forziere": 13,
+      "seme-bramosia": 3,
+      "sicura": 2
     },
-    "accuratezzaLetturaGeometrica": 0.5,
-    "casiControprova": 26,
+    "accuratezzaLetturaGeometrica": 0.325,
+    "casiControprova": 40,
     "perTipoPuntuale": {},
     "motiviNonDeterminati": {
-      "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 4,
+      "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 2,
       "nessuna famiglia domina fra le procedure che gli cadono sotto": 31,
       "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono": 6
     }
