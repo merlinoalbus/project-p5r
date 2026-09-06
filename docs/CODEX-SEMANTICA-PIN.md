@@ -1104,3 +1104,24 @@ Restano però due blocker certi prima che il lotto possa essere dichiarato pront
 
 Attività, finestre dungeon e i due rilievi formali di visibilità su `2ebaf1a` restano inoltre
 fuori dalla bozza visibile e dovranno essere chiusi nello stesso candidato complessivo.
+
+### Pre-audit Codex della bozza finestre e ingressi dei Palazzi
+
+La bozza successiva a `4f6e947` finalmente dà alle finestre dungeon una superficie, ma il pin di
+ingresso viene collocato con `posizionePassaggio(...)`: è una posizione di griglia, non la
+coordinata del punto d'ingresso dimostrata dalla fonte. Il commento precedente nello stesso
+sincronizzatore esclude correttamente questa scorciatoia per le planimetrie native; usarla qui e
+descrivere il risultato come «Il Palazzo dove sta davvero» introdurrebbe un mockup non autorizzato.
+La fonte che dimostra una relazione campo→Palazzo non dimostra automaticamente il punto 2D sulla
+mappa editoriale. Finché la coordinata non è certificata, il collegamento può raggiungere la
+mappa/entità ma non deve promettere un pin preciso.
+
+La migrazione 047 aggiunge inoltre `mappa.condizioni_json`, ma nella bozza corrente il campo non
+viene scritto, esportato, importato, restituito dai DTO né valutato dal runtime: le condizioni
+continuano a vivere soltanto sul nuovo pin. O si completa l'intero ciclo della presenza della
+mappa, con prove prima/dentro/dopo la finestra su elenco, dettaglio e risolutore, oppure la
+migrazione è orfana e non chiude il blocker.
+
+Prima del commit servono quindi coordinate dimostrate o una destinazione dichiaratamente non
+puntuale; nessun uso della griglia come dato reale. Il gate deve inoltre provare che gli accessi
+diretti al Palazzo non aggirino la finestra applicata soltanto al pin di ingresso.
