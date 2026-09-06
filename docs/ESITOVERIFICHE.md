@@ -1281,3 +1281,58 @@ La chiusura richiede una riconciliazione non distruttiva e idempotente nel perco
 capace di sostituire soltanto la presenza derivata; categorie separate; contabilità esplicita
 degli elementi senza riferimento; canale attività; prove API e DOM senza preparazione manuale.
 La Fase 2 resta **FAIL**.
+
+## Fase 2 — Riverifica delle finestre dei Palazzi
+
+**Esito: FAIL**
+**Commit isolato:** `9cffd65c4aa86f54672d80a99ec4d62b303fe5c9`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. `finestre-dungeon.json` contiene dieci finestre coerenti con le date del catalogo. Dopo
+   l'invocazione manuale di `collegaPalazziAiLuoghi`, ciascun ingresso è bloccato prima,
+   disponibile durante e — per gli otto intervalli chiusi — bloccato dopo; Iweleth e Mementos
+   restano disponibili dopo poiché non hanno data finale.
+2. L'inserzione isolata è idempotente: la prima chiamata crea dieci pin, la seconda zero.
+3. Il filtro esistente degli spilli propaga `disponibilita` all'API e al visore, che nasconde i
+   pin bloccati salvo l'opt-in dell'utente. Lint PASS; suite 135 file / 561 test PASS; test
+   mirati mappa, visibilità e DOM 37/37 PASS. Il typecheck non è stato valutabile nello snapshot
+   per `EPERM` sulla junction `node_modules/.tmp`, non per un errore TypeScript.
+
+### Rilievi bloccanti
+
+1. **La migrazione 047 non entra nel ciclo reale.** `migrations/index.ts` termina alla 046:
+   su database precedente `runMigrations` resta a `user_version=46` e `mappa` non riceve
+   `condizioni_json`.
+2. **La condizione della mappa non ha lifecycle.** Anche presupponendo la colonna, essa non
+   attraversa DTO, query, export/import o valutatore: l'URL diretto `/api/mappe/dungeon-*`
+   restituisce la destinazione prima della finestra. Nascondere il solo pin di ingresso non
+   implementa l'assenza temporale della mappa.
+3. **Il percorso ordinario non crea gli ingressi.** Su `runMigrations + caricaSeed` fresco gli
+   ingressi `dungeon-*` sono zero; esistono soltanto dopo una chiamata manuale, perché il
+   collegamento è invocato dal reset distruttivo e non dall'avvio/reseed normale.
+4. **Il backfill non ripara i dati esistenti e il reset non li preserva.** Un pin Kamoshida con
+   `condizioni_json` azzerato resta tale dopo la sincronizzazione. Il solo percorso che crea i
+   pin cancella invece mappe, spilli, destinazioni, immagini e `spillo_partita`, senza backup o
+   ripristino: non è ammesso per una partita esistente.
+5. **Le coordinate sono una griglia simulata.** Tutti i dieci pin usano il fallback
+   `posizionePassaggio`, senza una prova 3D→2D. Okumura e Mementos coincidono a `90,90` su Tokyo:
+   questi non sono punti geografici certificati.
+6. **Le provenienze non sostengono i luoghi dichiarati.** La prova Kamoshida sostiene
+   Shujin↔Palazzo, non una coordinata; quella Madarame punta a Piazza della stazione, non a
+   Central Street. Kaneshiro, Futaba e i sei fallback Tokyo sono auto-attribuiti a una presunta
+   decisione utente senza evidenza nel commit genitore; possono al più essere accessi generici,
+   dichiarati non localizzati, mai pin precisi. Iweleth da Sheriruth non equivale a Tokyo.
+7. **Mancano test dei requisiti introdotti.** Il commit non prova registrazione 047, avvio e
+   backfill ordinari, URL diretto, coordinate/provenienza certificate o conservazione dei dati
+   utente; la suite verde non intercetta queste regressioni.
+
+### Criterio di chiusura
+
+Registrare e testare 047 su database vecchio e fresco; scegliere e realizzare la semantica
+completa della presenza della mappa (DTO, export/import, API e accesso diretto), oppure eliminare
+il campo morto; creare e riconciliare gli ingressi nel percorso ordinario preservando ID, stati e
+contenuti utente; usare soltanto coordinate e provenienze certificate e rappresentare gli altri
+casi come destinazioni non collocate; aggiungere prove API, DOM e URL diretto prima/durante/dopo,
+più mutation test di backfill e conservazione. La Fase 2 resta **FAIL**.
