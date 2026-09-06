@@ -218,7 +218,19 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esitoVisibilita = ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined;
+  const esito = ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined;
+  // Un pin che viene dall'atlante nativo e' un elemento fisso del mondo — una porta, un forziere,
+  // una scala, una stanza sicura — e non si nasconde mai, qualunque condizione gli venga
+  // attaccata. E' un invariante del runtime, non una convenzione dei dati: passa sopra a
+  // qualunque strada di scrittura, l'API, l'editor, il seed o una modifica diretta al database.
+  // La condizione resta scritta e si vede, ma non fa sparire il pin: nascondere una porta finche'
+  // non hai la chiave vorrebbe dire mostrarla solo quando non serve piu'.
+  //
+  // Non vale per tipo di segnalino: un passaggio della mappa di Tokyo verso un quartiere che apre
+  // a giugno, in aprile, davvero non c'e'. Vale per provenienza.
+  const esitoVisibilita = esito && nativoDiSpillo(r) && esito.stato === 'bloccato'
+    ? { ...esito, stato: 'ignoto' as const }
+    : esito;
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',

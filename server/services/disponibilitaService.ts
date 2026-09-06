@@ -15,7 +15,7 @@
 import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
-import { nascondeIlPin } from '../../shared/condizioniSpillo.js';
+import { nascondeIlPinCondizione } from '../../shared/condizioniSpillo.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo, dataSbloccoQuartiere, ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
@@ -299,7 +299,7 @@ export function valutaDisponibilita(testi: Array<string | null | undefined>, st:
  */
 export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
   const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
-  const bloccante = requisiti.some((q, i) => q.stato === 'rosso' && nascondeIlPin(elenco[i].tipo));
+  const bloccante = requisiti.some((q, i) => q.stato === 'rosso' && nascondeIlPinCondizione(elenco[i]));
   const stato = bloccante ? 'bloccato'
     : requisiti.some((q) => q.stato === 'rosso' || q.stato === 'grigio') ? 'ignoto' : 'disponibile';
   return { stato, requisiti };
