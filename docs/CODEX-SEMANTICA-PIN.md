@@ -531,6 +531,12 @@ Il ritaglio nativo e il significato del tipo dell'app sono stati confrontati con
 * le frecce verticali possono invece ricadere in `scala`, perché la definizione condivisa include
   esplicitamente scale, scalette e ascensori fra livelli, non soltanto una scala fisica.
 
+Nel verificatore osservato durante questa lavorazione, il ramo `tabella nativa delle parti` usa
+`binario`, `nomi_sprite` e `tabella_ok` senza inizializzarli. Prima del commit vanno costruiti
+dall'eseguibile e da `icone-mappa.json` e il contatore va inizializzato e confrontato con il totale
+atteso; altrimenti `verify_pin_semantics.py` termina con `NameError` al primo tipo provato dalla
+tabella.
+
 ## Correzione concreta della regressione nelle evidenze dei collegamenti
 
 La sesta verifica della Fase 2 ha individuato la perdita di tutti gli script e di tutte le
