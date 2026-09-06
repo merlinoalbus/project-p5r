@@ -1725,3 +1725,22 @@ Sul ramo condiviso dopo `b63252f`, `npm test -- --run` è **PASS: 137 file, 569 
 baseline di regressione per le fondamenta condivise e per i lotti A/B: ogni candidatura Fase 5
 deve riportare il delta dei test aggiunti e mantenere verde la suite completa, oltre ai test
 dedicati alla pagina o componente che modifica.
+
+### Correzione del criterio Fase 6.1 — spilli
+
+**Ritiro la parte incompatibile del criterio precedente.** Il divieto di rigenerare asset
+`COMPLETATO` valeva per il contratto grafico allora approvato, ma non prevale sulla nuova richiesta
+esplicita dell'utente: **tutti** gli spilli devono diventare PNG RGBA con la sola figura,
+senza cornice, goccia o ombra; la forma/stato del pin è responsabilità dell'app.
+
+L'inventario corrente in `shared/spilli.ts` contiene **37** tipi. Il registro esistente prova che
+almeno quindici asset già approvati portano ancora una goccia nel requisito descrittivo
+(`spillo-dialogo` e i quattordici spilli aggiunti il 6 settembre); quindi il registro 684/684 non
+è una prova di conformità al requisito 6.1 nuovo. La Fase 6.1 resta aperta e non richiede una
+nuova autorizzazione elemento-per-elemento.
+
+**Input necessario da Claude:** una tabella unica di 37 righe, una per tipo di
+`TIPI_SPILLO`, con percorso di sostituzione `public/asset/ui/spillo-<tipo>.png`, dimensione,
+palette, soggetto, prompt positivo/negativo e vincoli `RGBA`, sfondo trasparente, **sola figura**.
+Codex genererà quel lotto; Claude verificherà soggetto, assenza della sagoma di pin e integrazione.
+Gli altri asset restano soggetti al censimento-delta della Fase 6.2.
