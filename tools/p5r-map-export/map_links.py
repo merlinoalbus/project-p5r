@@ -157,18 +157,24 @@ def main(out):
                                         f'{round(distanza*100, 1)}% della tela da questo pin',
                                         'trigger proiettato')
 
-        # 2. dove non regge, resta il caso forzato: un pin, una destinazione
-        if not assegnati and len(indici) == 1:
-            destinazioni = set()
-            for nome_campo in mappa['fields']:
-                destinazioni |= per_campo.get(nome_campo, set())
-            valide = sorted({d for d in destinazioni
-                             if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti})
-            if len(valide) == 1:
-                assegnati[indici[0]] = (list(valide[0]), None,
-                                        'la planimetria ha un solo pin di passaggio e il suo '
-                                        'campo una sola destinazione',
-                                        'un solo pin, una sola destinazione')
+        # 2. Dove la proiezione non arriva: se la planimetria ha **una sola meta**, ogni suo pin
+        #    di passaggio porta li'. Non c'e' niente da abbinare — la destinazione e' una, e
+        #    qualunque uscita si prenda si finisce nello stesso posto.
+        destinazioni = set()
+        for nome_campo in mappa['fields']:
+            destinazioni |= per_campo.get(nome_campo, set())
+        valide = sorted({d for d in destinazioni
+                         if tuple(d[:3]) != mia and 'RMAP_%03d_%d_%d' % tuple(d[:3]) in esistenti})
+        mete = {tuple(d[:3]) for d in valide}
+        if len(mete) == 1:
+            scelta_unica = list(valide[0])
+            for indice in indici:
+                if indice in assegnati:
+                    continue
+                assegnati[indice] = (scelta_unica, None,
+                                     'la planimetria ha una sola meta, quindi ogni suo pin di '
+                                     'passaggio porta li’',
+                                     'meta unica della planimetria')
 
         for indice, (scelta, distanza, motivo, modo) in sorted(assegnati.items()):
             maggiore, minore, sub, ingresso = scelta

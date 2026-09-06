@@ -95,6 +95,66 @@
       "prova": "il trigger che chiama il movimento cade a 2.6% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-001-5-0",
+      "indicePin": 0,
+      "x": 8.496,
+      "y": 42.578,
+      "arrivo": "nativo-rmap-011-4-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-001-5-0",
+      "indicePin": 1,
+      "x": 43.945,
+      "y": 49.805,
+      "arrivo": "nativo-rmap-011-4-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-002-1-0",
+      "indicePin": 2,
+      "x": 46.875,
+      "y": 33.789,
+      "arrivo": "nativo-rmap-002-5-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 23.459,
+        "y": 31.241,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-002-1-0",
+      "indicePin": 3,
+      "x": 7.324,
+      "y": 33.789,
+      "arrivo": "nativo-rmap-002-5-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 23.459,
+        "y": 31.241,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-151-13-0",
       "indicePin": 0,
       "x": 37.451,
@@ -103,9 +163,43 @@
       "ingresso": 0,
       "punto": null,
       "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-151-16-0",
+      "indicePin": 0,
+      "x": 34.863,
+      "y": 74.902,
+      "arrivo": "nativo-rmap-152-1-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 25.729,
+        "y": 10.625,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-151-16-0",
+      "indicePin": 1,
+      "x": 71.68,
+      "y": 55.371,
+      "arrivo": "nativo-rmap-152-1-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 25.729,
+        "y": 10.625,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-151-1-0",
@@ -142,6 +236,23 @@
       "prova": "il trigger che chiama il movimento cade a 0.6% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-151-1-1",
+      "indicePin": 1,
+      "x": 40.43,
+      "y": 9.18,
+      "arrivo": "nativo-rmap-151-2-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 34.434,
+        "y": 32.059,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-151-2-1",
       "indicePin": 3,
       "x": 29.102,
@@ -159,6 +270,57 @@
       "prova": "il trigger che chiama il movimento cade a 6.6% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-151-2-1",
+      "indicePin": 4,
+      "x": 26.758,
+      "y": 20.752,
+      "arrivo": "nativo-rmap-151-1-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 32.13,
+        "y": 25.125,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-151-2-2",
+      "indicePin": 3,
+      "x": 29.102,
+      "y": 37.598,
+      "arrivo": "nativo-rmap-151-1-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 32.13,
+        "y": 25.125,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-151-2-2",
+      "indicePin": 4,
+      "x": 26.758,
+      "y": 20.752,
+      "arrivo": "nativo-rmap-151-1-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 32.13,
+        "y": 25.125,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-153-1-0",
       "indicePin": 3,
       "x": 49.316,
@@ -174,6 +336,40 @@
       "modo": "trigger proiettato",
       "distanza": 0.0278,
       "prova": "il trigger che chiama il movimento cade a 2.8% della tela da questo pin"
+    },
+    {
+      "partenza": "nativo-rmap-153-2-1",
+      "indicePin": 1,
+      "x": 7.495,
+      "y": 9.265,
+      "arrivo": "nativo-rmap-153-3-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 26.972,
+        "y": 44.789,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-153-2-1",
+      "indicePin": 2,
+      "x": 2.124,
+      "y": 0.061,
+      "arrivo": "nativo-rmap-153-3-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 26.972,
+        "y": 44.789,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-153-3-0",
@@ -200,6 +396,19 @@
       "modo": "trigger proiettato",
       "distanza": 0.0336,
       "prova": "il trigger che chiama il movimento cade a 3.4% della tela da questo pin"
+    },
+    {
+      "partenza": "nativo-rmap-153-3-1",
+      "indicePin": 2,
+      "x": 27.295,
+      "y": 47.412,
+      "arrivo": "nativo-rmap-153-2-1",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-153-5-0",
@@ -266,6 +475,32 @@
       "prova": "il trigger che chiama il movimento cade a 0.5% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-154-2-0",
+      "indicePin": 2,
+      "x": 43.652,
+      "y": 43.457,
+      "arrivo": "nativo-rmap-154-3-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-154-2-0",
+      "indicePin": 3,
+      "x": 21.484,
+      "y": 42.48,
+      "arrivo": "nativo-rmap-154-3-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-154-2-1",
       "indicePin": 1,
       "x": 21.484,
@@ -277,6 +512,19 @@
       "modo": "trigger proiettato",
       "distanza": 0.0644,
       "prova": "il trigger che chiama il movimento cade a 6.4% della tela da questo pin"
+    },
+    {
+      "partenza": "nativo-rmap-154-2-1",
+      "indicePin": 5,
+      "x": 43.652,
+      "y": 43.457,
+      "arrivo": "nativo-rmap-154-3-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-154-7-1",
@@ -291,9 +539,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-155-1-0",
@@ -334,9 +582,43 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-155-6-1",
+      "indicePin": 0,
+      "x": 44.287,
+      "y": 53.174,
+      "arrivo": "nativo-rmap-155-4-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 11.438,
+        "y": 39.881,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-155-6-1",
+      "indicePin": 1,
+      "x": 56.982,
+      "y": 33.691,
+      "arrivo": "nativo-rmap-155-4-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 11.438,
+        "y": 39.881,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-155-6-2",
@@ -351,9 +633,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-156-11-1",
@@ -368,9 +650,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-157-6-0",
@@ -390,6 +672,57 @@
       "prova": "il trigger che chiama il movimento cade a 1.5% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-157-7-0",
+      "indicePin": 0,
+      "x": 45.361,
+      "y": 32.812,
+      "arrivo": "nativo-rmap-157-8-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 28.107,
+        "y": 21.288,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-157-7-0",
+      "indicePin": 1,
+      "x": 57.031,
+      "y": 12.793,
+      "arrivo": "nativo-rmap-157-8-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 28.107,
+        "y": 21.288,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-157-7-0",
+      "indicePin": 2,
+      "x": 69.775,
+      "y": 28.027,
+      "arrivo": "nativo-rmap-157-8-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 28.107,
+        "y": 21.288,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-157-9-0",
       "indicePin": 0,
       "x": 43.75,
@@ -405,6 +738,23 @@
       "modo": "trigger proiettato",
       "distanza": 0.0612,
       "prova": "il trigger che chiama il movimento cade a 6.1% della tela da questo pin"
+    },
+    {
+      "partenza": "nativo-rmap-157-9-0",
+      "indicePin": 1,
+      "x": 0.098,
+      "y": 27.441,
+      "arrivo": "nativo-rmap-157-10-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 23.147,
+        "y": 14.319,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-157-9-1",
@@ -424,6 +774,49 @@
       "prova": "il trigger che chiama il movimento cade a 6.1% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-157-9-1",
+      "indicePin": 1,
+      "x": 0.098,
+      "y": 27.441,
+      "arrivo": "nativo-rmap-157-10-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 23.147,
+        "y": 14.319,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-159-13-0",
+      "indicePin": 0,
+      "x": 54.199,
+      "y": 3.76,
+      "arrivo": "nativo-rmap-159-11-2",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-159-13-0",
+      "indicePin": 1,
+      "x": 27.148,
+      "y": 1.758,
+      "arrivo": "nativo-rmap-159-11-2",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-159-1-0",
       "indicePin": 3,
       "x": 54.932,
@@ -435,6 +828,92 @@
       "modo": "trigger proiettato",
       "distanza": 0.0081,
       "prova": "il trigger che chiama il movimento cade a 0.8% della tela da questo pin"
+    },
+    {
+      "partenza": "nativo-rmap-160-2-0",
+      "indicePin": 0,
+      "x": 34.863,
+      "y": 63.574,
+      "arrivo": "nativo-rmap-160-3-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-160-2-0",
+      "indicePin": 1,
+      "x": 34.473,
+      "y": 2.832,
+      "arrivo": "nativo-rmap-160-3-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-160-3-0",
+      "indicePin": 0,
+      "x": 35.645,
+      "y": 45.947,
+      "arrivo": "nativo-rmap-160-4-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-160-3-0",
+      "indicePin": 1,
+      "x": 36.035,
+      "y": 2.197,
+      "arrivo": "nativo-rmap-160-4-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-160-4-0",
+      "indicePin": 0,
+      "x": 32.422,
+      "y": 60.205,
+      "arrivo": "nativo-rmap-160-5-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 35.4,
+        "y": 21.854,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-160-4-0",
+      "indicePin": 1,
+      "x": 37.891,
+      "y": 3.906,
+      "arrivo": "nativo-rmap-160-5-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 35.4,
+        "y": 21.854,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-160-5-0",
@@ -476,6 +955,32 @@
       "prova": "il trigger che chiama il movimento cade a 0.7% della tela da questo pin"
     },
     {
+      "partenza": "nativo-rmap-161-3-0",
+      "indicePin": 0,
+      "x": 36.621,
+      "y": 42.578,
+      "arrivo": "nativo-rmap-161-4-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
+      "partenza": "nativo-rmap-161-3-0",
+      "indicePin": 1,
+      "x": 14.307,
+      "y": 0.732,
+      "arrivo": "nativo-rmap-161-4-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
+    },
+    {
       "partenza": "nativo-rmap-162-16-0",
       "indicePin": 4,
       "x": 7.568,
@@ -488,9 +993,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-162-16-1",
@@ -505,9 +1010,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-162-16-2",
@@ -522,9 +1027,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-162-16-3",
@@ -539,9 +1044,9 @@
         "zoom": 3
       },
       "motivoSenzaPunto": null,
-      "modo": "un solo pin, una sola destinazione",
+      "modo": "meta unica della planimetria",
       "distanza": null,
-      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione"
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     },
     {
       "partenza": "nativo-rmap-162-9-0",
@@ -581,6 +1086,19 @@
       "modo": "trigger proiettato",
       "distanza": 0.0398,
       "prova": "il trigger che chiama il movimento cade a 4.0% della tela da questo pin"
+    },
+    {
+      "partenza": "nativo-rmap-162-9-4",
+      "indicePin": 2,
+      "x": 11.621,
+      "y": 14.6,
+      "arrivo": "nativo-rmap-162-15-2",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "modo": "meta unica della planimetria",
+      "distanza": null,
+      "prova": "la planimetria ha una sola meta, quindi ogni suo pin di passaggio porta li’"
     }
   ],
   "grafoDelleRisorse": {
@@ -588,16 +1106,16 @@
     "reciproci": 274
   },
   "summary": {
-    "collegamenti": 37,
+    "collegamenti": 71,
     "perModo": {
       "trigger proiettato": 28,
-      "un solo pin, una sola destinazione": 9
+      "meta unica della planimetria": 43
     },
-    "conPuntoDiArrivo": 22,
+    "conPuntoDiArrivo": 41,
     "esiti": {
-      "pin di passaggio senza destinazione": 225,
-      "collegato": 22,
-      "collegato, senza punto di arrivo": 15,
+      "pin di passaggio senza destinazione": 191,
+      "collegato": 41,
+      "collegato, senza punto di arrivo": 30,
       "trigger troppo lontano da ogni pin": 82
     },
     "archiDelGrafo": 1317,
