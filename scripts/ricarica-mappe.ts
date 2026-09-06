@@ -2,7 +2,11 @@
 // npm run mappe:ricarica — azzera e ricostruisce il livello mappe dal seed
 // ============================================================
 //
-//   npx tsx --env-file=.env scripts/ricarica-mappe.ts [--rapporto <file>]
+//   npx tsx --env-file=.env scripts/ricarica-mappe.ts [--dati <cartella>] [--rapporto <file>]
+//
+// `--dati` sceglie la cartella del database su cui lavorare. Serve perché `--env-file` reimposta
+// DATA_DIR e una variabile d'ambiente da sola non basterebbe a dirottare il comando su una copia:
+// senza questa opzione una prova finirebbe sul database dell'utente.
 //
 // Da usare quando il pacchetto dell'atlante cambia in modo non incrementale. Il rapporto elenca
 // i conteggi di tutte le tabelle prima e dopo: se qualcosa fuori dal livello mappe fosse
@@ -21,8 +25,11 @@ import type { EsportazioneMappeDto } from '../shared/types.js';
 const argomenti = process.argv.slice(2);
 const indiceRapporto = argomenti.indexOf('--rapporto');
 const fileRapporto = indiceRapporto >= 0 ? argomenti[indiceRapporto + 1] : null;
+const indiceDati = argomenti.indexOf('--dati');
+const cartellaDati = indiceDati >= 0 ? argomenti[indiceDati + 1] : config.dataDir;
 
-const db = initDb();
+const db = initDb(path.join(cartellaDati, 'project-p5r.db'));
+console.log('database:', path.resolve(cartellaDati, 'project-p5r.db'));
 runMigrations(db);
 // il compendio deve essere allineato prima di ricostruire l'atlante: le mappe si agganciano alle sue entità
 caricaSeed(db);

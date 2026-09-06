@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import type { MappaRiassuntoDto } from '../../types';
 import { useAsset } from '../../stores/assetStore';
+import { etichettaVersione } from '../../utils/etichettaVersione';
 
 interface Props {
   mappe: MappaRiassuntoDto[];
@@ -14,11 +15,6 @@ export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
   const immagini = [...mappe].sort((a, b) => (a.immagineCollezione?.indice ?? a.gruppoImmagini?.ordine ?? a.ordine) - (b.immagineCollezione?.indice ?? b.gruppoImmagini?.ordine ?? b.ordine) || a.chiave.localeCompare(b.chiave));
   const titolo = nome ?? immagini[0]?.gruppoImmagini?.nome ?? 'questo luogo';
   return <ul className="m-0 p-0 list-none flex flex-wrap gap-3" aria-label={`Immagini di ${titolo}`}>{immagini.map((m, i) => <Miniatura key={m.chiave} mappa={m} indice={m.immagineCollezione?.indice ?? i + 1} totale={m.immagineCollezione?.totale ?? immagini.length} attuale={attuale}>{discendenti?.(m)}</Miniatura>)}</ul>;
-}
-/** Dice che cosa mostra la versione — l'estensione o l'inquadratura della zona. L'ordinale resta
- * solo dove la differenza non è stata dimostrata. */
-export function etichettaVersione(mappa: MappaRiassuntoDto, indice: number, totale: number): string {
-  return mappa.gruppoImmagini?.etichetta ?? `Immagine ${indice} di ${totale}`;
 }
 function Miniatura({ mappa, indice, totale, attuale, children }: { mappa: MappaRiassuntoDto; indice: number; totale: number; attuale?: string; children?: ReactNode }) {
   const asset = useAsset(mappa.asset), originale = useAsset(mappa.assetOriginale);

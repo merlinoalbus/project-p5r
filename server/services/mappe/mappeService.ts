@@ -59,13 +59,11 @@ function presentazioneMappa(chiave: string): Pick<MappaRiassuntoDto, 'contesti' 
   return r?{contesti:JSON.parse(r.contesti_json),...(r.gruppo_immagini_json?{gruppoImmagini:JSON.parse(r.gruppo_immagini_json)}:{})}:{};
 }
 
-/** La mappa ha un'immagine consultabile: lo dichiara la colonna del ruolo, non lo si deduce dal
- * percorso dell'asset (migrazione 043). Lo stemma di un Palazzo identifica il luogo ma non lo
- * rappresenta, quindi non conta come mappa. */
-function conImmagine(r: RigaMappa): boolean { return r.ruolo_immagine === 'planimetria-nativa' || r.ruolo_immagine === 'illustrazione-editoriale'; }
 function collezioniImmagini(){
  const righe=prepared('SELECT * FROM mappa').all() as RigaMappa[];
- return calcolaCollezioniImmagini(righe.map(r=>({chiave:r.chiave,genitore:r.genitore_chiave,nome:r.nome,ordine:r.ordine,...presentazioneMappa(r.chiave),fisica:conImmagine(r)})));
+ // La numerazione delle omonime riguarda le piante del gioco: l'illustrazione di un quartiere
+ // porta lo stesso nome ma è un'altra cosa, e non entra nella collezione.
+ return calcolaCollezioniImmagini(righe.map(r=>({chiave:r.chiave,genitore:r.genitore_chiave,nome:r.nome,ordine:r.ordine,...presentazioneMappa(r.chiave),fisica:r.ruolo_immagine==='planimetria-nativa'})));
 }
 function riassunto(r: RigaMappa, collezioni=collezioniImmagini()): MappaRiassuntoDto {
   const c = conteggi(r.chiave);
@@ -729,11 +727,19 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const ruolo: RuoloImmagine = m.ruoloImmagine && (RUOLI_IMMAGINE as readonly string[]).includes(m.ruoloImmagine)
         ? m.ruoloImmagine
         : m.asset?.startsWith('palazzi/') ? 'emblema' : (m.asset ?? m.immagine) ? 'illustrazione-editoriale' : 'nessuna';
-      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at, ruolo_immagine)
-        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      const conRuolo = (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
+      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at${conRuolo ? ', ruolo_immagine' : ''})
+        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${conRuolo ? ', ?' : ''})
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
-          larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at, ruolo_immagine = excluded.ruolo_immagine`)
-        .run(m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null, origine, m.note ?? '', adesso, ruolo);
+          larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at${conRuolo ? ', ruolo_immagine = excluded.ruolo_immagine' : ''}`)
+        .run(...[m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null, origine, m.note ?? '', adesso, ...(conRuolo ? [ruolo] : [])]);
+      // L'entità dichiarata dalla mappa vale anche come associazione consultabile: è così che la
+      // scheda dell'area della guida mostra la sua planimetria e che le altre sezioni la trovano.
+      if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) {
+        prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ?').run(m.chiave);
+        if (m.entita?.tipo && m.entita.chiave) prepared('INSERT OR REPLACE INTO mappa_entita VALUES(?,?,?,?)')
+          .run(m.chiave, m.entita.tipo, m.entita.chiave, JSON.stringify({ origine, dichiarata: 'pacchetto' }));
+      }
       if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
         const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional()}).nullable()});
         const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});

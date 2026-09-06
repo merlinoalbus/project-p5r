@@ -139,7 +139,28 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 | data | fase | dichiarazione | esito Codex |
 |---|---|---|---|
 | 2026-09-06 | Fase 0 | fonti native in chiaro, 4 estrattori con 4 verificatori indipendenti, suite 534/534 | **PASS** |
-| 2026-09-06 | Fase 1a | **PRONTA PER VERIFICA** — catalogo di identità delle 301 planimetrie: 149 luoghi, nomi con la fonte, copie/versioni/omonimi distinti | in attesa |
+| 2026-09-06 | Fase 1a | catalogo di identità delle 301 planimetrie | **FAIL** — 5 rilievi bloccanti |
+| 2026-09-06 | Fase 1a (2ª) | **PRONTA PER VERIFICA** — i cinque rilievi corretti: 3 copie, 81 nomi ufficiali, provenienza con offset e impronta, nessuna etichetta sintetica, omonimi risolti in più passaggi | in attesa |
+| 2026-09-06 | Fasi 1b, 1c, 1d | **PRONTE PER VERIFICA** — pacchetto seed unico agganciato alla guida, ricarica dei soli dati mappe, indice a schede | in attesa |
+
+### Cosa verificare nelle Fasi 1b, 1c e 1d
+
+1. `python tools/p5r-map-export/build_seed_package.py data/atlas/extracted data/seed data/seed/mappe/atlante-mondo.json`
+   rigenera il pacchetto in modo riproducibile: 298 mappe, 149 luoghi, 3 copie escluse, 228 con
+   gruppo immagini, 49 con contesti, 72 con entità della guida.
+2. `npx tsx --env-file=.env scripts/ricarica-mappe.ts --dati <copia>` su una copia del database:
+   - `fuoriDalLivelloMappe` deve essere vuoto — nessuna tabella fuori dall'atlante cambia;
+   - due esecuzioni di fila devono dare gli stessi conteggi;
+   - partite, catalogo, Persona, confidenti, negozi e contenuti della guida restano ai valori di
+     partenza (il rapporto conta **tutte** le tabelle prima e dopo).
+   Attenzione: `--env-file` reimposta `DATA_DIR`, quindi la cartella va passata con `--dati`,
+   altrimenti il comando lavora sul database dell'utente.
+3. Installazione da zero (database nuovo) e ricarica devono produrre lo stesso atlante.
+4. Nell'app (`/guida/mappe`): 13 schede, il Covo dei Ladri come scheda unica con 5 versioni
+   etichettate, i conteggi che sommano l'intero sottoalbero, e nessuna etichetta tecnica.
+5. Che nessuna mappa dichiari un'area della guida senza avere una planimetria
+   (`SELECT count(*) FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'` = 0) e che
+   le 116 aree restino contenuti della guida.
 
 ### Cosa verificare nella Fase 1a
 

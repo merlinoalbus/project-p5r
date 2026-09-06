@@ -345,7 +345,7 @@
   },
   {
    "chiave": "nativo-rmap-190-1-0",
-   "nome": "Strutture ricorrenti dei Memento",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 0,
@@ -359,14 +359,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 0,
     "etichetta": "risorsa 190/1 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-190-2-0",
-   "nome": "Strutture ricorrenti dei Memento — risorsa 190/2 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/2 livello 0",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 1,
@@ -380,14 +380,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 1,
     "etichetta": "risorsa 190/2 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-190-3-0",
-   "nome": "Strutture ricorrenti dei Memento — risorsa 190/3 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/3 livello 0",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 2,
@@ -401,14 +401,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 2,
     "etichetta": "risorsa 190/3 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-190-51-0",
-   "nome": "Strutture ricorrenti dei Memento — risorsa 190/51 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/51 livello 0",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 3,
@@ -422,14 +422,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 3,
     "etichetta": "risorsa 190/51 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-190-61-0",
-   "nome": "Strutture ricorrenti dei Memento — risorsa 190/61 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/61 livello 0",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 4,
@@ -443,17 +443,38 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
     "ordine": 4,
     "etichetta": "risorsa 190/61 livello 0"
    }
   },
   {
-   "chiave": "nativo-rmap-192-62-0",
-   "nome": "Strutture ricorrenti dei Memento — risorsa 192/62 livello 0",
+   "chiave": "nativo-rmap-190-62-0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 190/62 livello 0",
    "tipo": "area",
    "genitore": "dungeon-mementos",
    "ordine": 5,
+   "immagine": null,
+   "asset": "mappe/native/nativo-rmap-190-62-0",
+   "ruoloImmagine": "planimetria-nativa",
+   "larghezza": 256,
+   "altezza": 1024,
+   "entita": null,
+   "note": "Struttura che i Memento riusano nelle aree generate: non è un piano fisso. Versione «risorsa 190/62 livello 0» della stessa zona.",
+   "spilli": [],
+   "gruppoImmagini": {
+    "id": "nativo-rmap-190-1-0",
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
+    "ordine": 5,
+    "etichetta": "risorsa 190/62 livello 0"
+   }
+  },
+  {
+   "chiave": "nativo-rmap-192-62-0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 192/62 livello 0",
+   "tipo": "area",
+   "genitore": "dungeon-mementos",
+   "ordine": 6,
    "immagine": null,
    "asset": "mappe/native/nativo-rmap-192-62-0",
    "ruoloImmagine": "planimetria-nativa",
@@ -464,17 +485,17 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
-    "ordine": 5,
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
+    "ordine": 6,
     "etichetta": "risorsa 192/62 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-195-11-0",
-   "nome": "Strutture ricorrenti dei Memento — risorsa 195/11 livello 0",
+   "nome": "Memento - aree fisse — Strutture che i Memento riusano — risorsa 195/11 livello 0",
    "tipo": "area",
    "genitore": "dungeon-mementos",
-   "ordine": 6,
+   "ordine": 7,
    "immagine": null,
    "asset": "mappe/native/nativo-rmap-195-11-0",
    "ruoloImmagine": "planimetria-nativa",
@@ -485,8 +506,8 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-190-1-0",
-    "nome": "Strutture ricorrenti dei Memento",
-    "ordine": 6,
+    "nome": "Memento - aree fisse — Strutture che i Memento riusano",
+    "ordine": 7,
     "etichetta": "risorsa 195/11 livello 0"
    }
   },
@@ -510,7 +531,7 @@
   },
   {
    "chiave": "nativo-rmap-160-2-0",
-   "nome": "Cammino per il Santo Graal — 1º tratto",
+   "nome": "Cammino per il Santo Graal – Parte I",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 100,
@@ -528,7 +549,7 @@
   },
   {
    "chiave": "nativo-rmap-160-3-0",
-   "nome": "Cammino per il Santo Graal — 2º tratto",
+   "nome": "Cammino per il Santo Graal – Parte II",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 200,
@@ -546,7 +567,7 @@
   },
   {
    "chiave": "nativo-rmap-160-4-0",
-   "nome": "Cammino per il Santo Graal — 3º tratto",
+   "nome": "Cammino per il Santo Graal – Parte III",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 300,
@@ -557,20 +578,20 @@
    "altezza": 2048,
    "entita": {
     "tipo": "area",
-    "chiave": "iweleth-11-cammino-per-il-santo-graal-parte-iii"
+    "chiave": "iweleth-12-cammino-per-il-santo-graal-parte-iv"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-160-4-0",
-    "nome": "Cammino per il Santo Graal — 3º tratto",
+    "nome": "Cammino per il Santo Graal – Parte III",
     "ordine": 0,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-160-4-1",
-   "nome": "Cammino per il Santo Graal — 3º tratto — inquadratura settentrionale",
+   "nome": "Cammino per il Santo Graal – Parte III — inquadratura settentrionale",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 301,
@@ -584,14 +605,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-160-4-0",
-    "nome": "Cammino per il Santo Graal — 3º tratto",
+    "nome": "Cammino per il Santo Graal – Parte III",
     "ordine": 1,
     "etichetta": "inquadratura settentrionale"
    }
   },
   {
    "chiave": "nativo-rmap-160-4-2",
-   "nome": "Cammino per il Santo Graal — 3º tratto — inquadratura meridionale",
+   "nome": "Cammino per il Santo Graal – Parte III — inquadratura meridionale",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 302,
@@ -605,14 +626,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-160-4-0",
-    "nome": "Cammino per il Santo Graal — 3º tratto",
+    "nome": "Cammino per il Santo Graal – Parte III",
     "ordine": 2,
     "etichetta": "inquadratura meridionale"
    }
   },
   {
    "chiave": "nativo-rmap-160-5-0",
-   "nome": "Cammino per il Santo Graal — 4º tratto",
+   "nome": "Cammino per il Santo Graal – Parte IV",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 400,
@@ -623,7 +644,7 @@
    "altezza": 2048,
    "entita": {
     "tipo": "area",
-    "chiave": "iweleth-12-cammino-per-il-santo-graal-parte-iv"
+    "chiave": "iweleth-11-cammino-per-il-santo-graal-parte-iii"
    },
    "note": "Zona omonima distinta dall’ordine in cui la storia la attraversa.",
    "spilli": []
@@ -1203,7 +1224,7 @@
   },
   {
    "chiave": "nativo-rmap-155-10-0",
-   "nome": "Risorse grafiche non usate da alcun campo",
+   "nome": "Palazzo di Futaba — Immagini native che nessun campo usa",
    "tipo": "area",
    "genitore": "dungeon-futaba",
    "ordine": 1400,
@@ -1320,7 +1341,7 @@
   },
   {
    "chiave": "nativo-rmap-151-0-0",
-   "nome": "Risorse grafiche non usate da alcun campo",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 0,
@@ -1334,14 +1355,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 0,
     "etichetta": "risorsa 151/0 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-151-0-1",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 151/0 livello 1",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — risorsa 151/0 livello 1",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 1,
@@ -1355,14 +1376,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 1,
     "etichetta": "risorsa 151/0 livello 1"
    }
   },
   {
    "chiave": "nativo-rmap-152-11-0",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 152/11 livello 0",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — risorsa 152/11 livello 0",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 2,
@@ -1376,14 +1397,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 2,
     "etichetta": "risorsa 152/11 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-152-11-1",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 152/11 livello 1",
+   "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa — risorsa 152/11 livello 1",
    "tipo": "area",
    "genitore": "dungeon-kamoshida",
    "ordine": 3,
@@ -1397,7 +1418,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-151-0-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kamoshida — Immagini native che nessun campo usa",
     "ordine": 3,
     "etichetta": "risorsa 152/11 livello 1"
    }
@@ -2432,7 +2453,7 @@
   },
   {
    "chiave": "nativo-rmap-154-11-0",
-   "nome": "Ufficio riciclaggio — 1º tratto — inquadratura meridionale — più ristretta",
+   "nome": "Ufficio riciclaggio – Parte I — inquadratura meridionale — più ristretta",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 900,
@@ -2446,14 +2467,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
-    "nome": "Ufficio riciclaggio — 1º tratto",
+    "nome": "Ufficio riciclaggio – Parte I",
     "ordine": 0,
     "etichetta": "inquadratura meridionale — più ristretta"
    }
   },
   {
    "chiave": "nativo-rmap-154-11-1",
-   "nome": "Ufficio riciclaggio — 1º tratto — inquadratura meridionale — seconda per ampiezza",
+   "nome": "Ufficio riciclaggio – Parte I — inquadratura meridionale — seconda per ampiezza",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 901,
@@ -2467,14 +2488,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
-    "nome": "Ufficio riciclaggio — 1º tratto",
+    "nome": "Ufficio riciclaggio – Parte I",
     "ordine": 1,
     "etichetta": "inquadratura meridionale — seconda per ampiezza"
    }
   },
   {
    "chiave": "nativo-rmap-154-11-2",
-   "nome": "Ufficio riciclaggio — 1º tratto — inquadratura meridionale — più ampia",
+   "nome": "Ufficio riciclaggio – Parte I — inquadratura meridionale — più ampia",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 902,
@@ -2488,14 +2509,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
-    "nome": "Ufficio riciclaggio — 1º tratto",
+    "nome": "Ufficio riciclaggio – Parte I",
     "ordine": 2,
     "etichetta": "inquadratura meridionale — più ampia"
    }
   },
   {
    "chiave": "nativo-rmap-154-14-0",
-   "nome": "Ufficio riciclaggio — 1º tratto — porzione meridionale",
+   "nome": "Ufficio riciclaggio – Parte I — porzione meridionale",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 903,
@@ -2509,7 +2530,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
-    "nome": "Ufficio riciclaggio — 1º tratto",
+    "nome": "Ufficio riciclaggio – Parte I",
     "ordine": 3,
     "etichetta": "porzione meridionale"
    },
@@ -2530,7 +2551,7 @@
   },
   {
    "chiave": "nativo-rmap-154-14-1",
-   "nome": "Ufficio riciclaggio — 1º tratto",
+   "nome": "Ufficio riciclaggio – Parte I",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 904,
@@ -2547,14 +2568,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-11-0",
-    "nome": "Ufficio riciclaggio — 1º tratto",
+    "nome": "Ufficio riciclaggio – Parte I",
     "ordine": 4,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-154-12-0",
-   "nome": "Ufficio riciclaggio — 2º tratto",
+   "nome": "Ufficio riciclaggio – Parte II",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1000,
@@ -2568,14 +2589,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-12-0",
-    "nome": "Ufficio riciclaggio — 2º tratto",
+    "nome": "Ufficio riciclaggio – Parte II",
     "ordine": 0,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-154-12-1",
-   "nome": "Ufficio riciclaggio — 2º tratto — inquadratura settentrionale",
+   "nome": "Ufficio riciclaggio – Parte II — inquadratura settentrionale",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1001,
@@ -2589,14 +2610,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-12-0",
-    "nome": "Ufficio riciclaggio — 2º tratto",
+    "nome": "Ufficio riciclaggio – Parte II",
     "ordine": 1,
     "etichetta": "inquadratura settentrionale"
    }
   },
   {
    "chiave": "nativo-rmap-154-12-2",
-   "nome": "Ufficio riciclaggio — 2º tratto — inquadratura meridionale",
+   "nome": "Ufficio riciclaggio – Parte II — inquadratura meridionale",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1002,
@@ -2610,14 +2631,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-12-0",
-    "nome": "Ufficio riciclaggio — 2º tratto",
+    "nome": "Ufficio riciclaggio – Parte II",
     "ordine": 2,
     "etichetta": "inquadratura meridionale"
    }
   },
   {
    "chiave": "nativo-rmap-154-13-0",
-   "nome": "Risorse grafiche non usate da alcun campo",
+   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1100,
@@ -2631,14 +2652,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-13-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
     "ordine": 0,
     "etichetta": "risorsa 154/13 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-154-13-1",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 154/13 livello 1",
+   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina — risorsa 154/13 livello 1",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1101,
@@ -2652,14 +2673,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-13-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
     "ordine": 1,
     "etichetta": "risorsa 154/13 livello 1"
    }
   },
   {
    "chiave": "nativo-rmap-154-13-2",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 154/13 livello 2",
+   "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina — risorsa 154/13 livello 2",
    "tipo": "area",
    "genitore": "dungeon-kaneshiro",
    "ordine": 1102,
@@ -2673,7 +2694,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-154-13-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Kaneshiro — Zona che nessuna tabella nativa nomina",
     "ordine": 2,
     "etichetta": "risorsa 154/13 livello 2"
    }
@@ -3108,7 +3129,7 @@
   },
   {
    "chiave": "nativo-rmap-153-8-0",
-   "nome": "Risorse grafiche non usate da alcun campo",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 700,
@@ -3122,14 +3143,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 0,
     "etichetta": "risorsa 153/8 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-153-8-1",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/8 livello 1",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/8 livello 1",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 701,
@@ -3143,14 +3164,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 1,
     "etichetta": "risorsa 153/8 livello 1"
    }
   },
   {
    "chiave": "nativo-rmap-153-8-2",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/8 livello 2",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/8 livello 2",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 702,
@@ -3164,14 +3185,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 2,
     "etichetta": "risorsa 153/8 livello 2"
    }
   },
   {
    "chiave": "nativo-rmap-153-10-0",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/10 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/10 livello 0",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 703,
@@ -3185,14 +3206,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 3,
     "etichetta": "risorsa 153/10 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-153-11-0",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/11 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/11 livello 0",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 704,
@@ -3206,14 +3227,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 4,
     "etichetta": "risorsa 153/11 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-153-12-0",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/12 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/12 livello 0",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 705,
@@ -3227,14 +3248,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 5,
     "etichetta": "risorsa 153/12 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-153-13-0",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 153/13 livello 0",
+   "nome": "Palazzo di Madarame — Immagini native che nessun campo usa — risorsa 153/13 livello 0",
    "tipo": "area",
    "genitore": "dungeon-madarame",
    "ordine": 706,
@@ -3248,7 +3269,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-153-8-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Madarame — Immagini native che nessun campo usa",
     "ordine": 6,
     "etichetta": "risorsa 153/13 livello 0"
    }
@@ -3381,7 +3402,7 @@
   },
   {
    "chiave": "nativo-rmap-162-2-0",
-   "nome": "??? Sala d'ingresso — inquadratura meridionale — più ristretta",
+   "nome": "Sala d'ingresso — inquadratura meridionale — più ristretta",
    "tipo": "area",
    "genitore": "dungeon-maruki",
    "ordine": 100,
@@ -3395,14 +3416,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
-    "nome": "??? Sala d'ingresso",
+    "nome": "Sala d'ingresso",
     "ordine": 0,
     "etichetta": "inquadratura meridionale — più ristretta"
    }
   },
   {
    "chiave": "nativo-rmap-162-2-1",
-   "nome": "??? Sala d'ingresso — inquadratura meridionale — più ampia",
+   "nome": "Sala d'ingresso — inquadratura meridionale — più ampia",
    "tipo": "area",
    "genitore": "dungeon-maruki",
    "ordine": 101,
@@ -3416,14 +3437,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
-    "nome": "??? Sala d'ingresso",
+    "nome": "Sala d'ingresso",
     "ordine": 1,
     "etichetta": "inquadratura meridionale — più ampia"
    }
   },
   {
    "chiave": "nativo-rmap-162-2-2",
-   "nome": "??? Sala d'ingresso",
+   "nome": "Sala d'ingresso",
    "tipo": "area",
    "genitore": "dungeon-maruki",
    "ordine": 102,
@@ -3440,14 +3461,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
-    "nome": "??? Sala d'ingresso",
+    "nome": "Sala d'ingresso",
     "ordine": 2,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-162-2-3",
-   "nome": "??? Sala d'ingresso — inquadratura settentrionale",
+   "nome": "Sala d'ingresso — inquadratura settentrionale",
    "tipo": "area",
    "genitore": "dungeon-maruki",
    "ordine": 103,
@@ -3461,14 +3482,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-2-0",
-    "nome": "??? Sala d'ingresso",
+    "nome": "Sala d'ingresso",
     "ordine": 3,
     "etichetta": "inquadratura settentrionale"
    }
   },
   {
    "chiave": "nativo-rmap-162-3-0",
-   "nome": "??? Corridoio — porzione settentrionale",
+   "nome": "Corridoio — porzione settentrionale",
    "tipo": "area",
    "genitore": "dungeon-maruki",
    "ordine": 200,
@@ -3482,14 +3503,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-3-0",
-    "nome": "??? Corridoio",
+    "nome": "Corridoio",
     "ordine": 0,
     "etichetta": "porzione settentrionale"
    }
   },
   {
    "chiave": "nativo-rmap-162-3-1",
-   "nome": "??? Corridoio",
+   "nome": "Corridoio",
    "tipo": "area",
    "genitore": "dungeon-maruki",
    "ordine": 201,
@@ -3506,7 +3527,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-162-3-0",
-    "nome": "??? Corridoio",
+    "nome": "Corridoio",
     "ordine": 1,
     "etichetta": "planimetria completa"
    }
@@ -4167,7 +4188,7 @@
   },
   {
    "chiave": "nativo-rmap-157-3-0",
-   "nome": "Risorse grafiche non usate da alcun campo",
+   "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina",
    "tipo": "area",
    "genitore": "dungeon-niijima",
    "ordine": 100,
@@ -4181,14 +4202,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-3-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina",
     "ordine": 0,
     "etichetta": "risorsa 157/3 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-157-3-1",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 157/3 livello 1",
+   "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina — risorsa 157/3 livello 1",
    "tipo": "area",
    "genitore": "dungeon-niijima",
    "ordine": 101,
@@ -4202,7 +4223,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-157-3-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Niijima — Zona che nessuna tabella nativa nomina",
     "ordine": 1,
     "etichetta": "risorsa 157/3 livello 1"
    }
@@ -6056,7 +6077,7 @@
   },
   {
    "chiave": "nativo-rmap-159-15-0",
-   "nome": "Risorse grafiche non usate da alcun campo",
+   "nome": "Palazzo di Shido — Immagini native che nessun campo usa",
    "tipo": "area",
    "genitore": "dungeon-shido",
    "ordine": 1100,
@@ -6070,14 +6091,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-15-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Shido — Immagini native che nessun campo usa",
     "ordine": 0,
     "etichetta": "risorsa 159/15 livello 0"
    }
   },
   {
    "chiave": "nativo-rmap-159-16-0",
-   "nome": "Risorse grafiche non usate da alcun campo — risorsa 159/16 livello 0",
+   "nome": "Palazzo di Shido — Immagini native che nessun campo usa — risorsa 159/16 livello 0",
    "tipo": "area",
    "genitore": "dungeon-shido",
    "ordine": 1101,
@@ -6091,7 +6112,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-159-15-0",
-    "nome": "Risorse grafiche non usate da alcun campo",
+    "nome": "Palazzo di Shido — Immagini native che nessun campo usa",
     "ordine": 1,
     "etichetta": "risorsa 159/16 livello 0"
    }
@@ -6269,7 +6290,7 @@
   },
   {
    "chiave": "nativo-rmap-161-2-0",
-   "nome": "Corridoio della prigione — 1º tratto — inquadratura occidentale",
+   "nome": "Corridoio della prigione – Parte I — inquadratura occidentale",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 800,
@@ -6283,14 +6304,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-2-0",
-    "nome": "Corridoio della prigione — 1º tratto",
+    "nome": "Corridoio della prigione – Parte I",
     "ordine": 0,
     "etichetta": "inquadratura occidentale"
    }
   },
   {
    "chiave": "nativo-rmap-161-2-1",
-   "nome": "Corridoio della prigione — 1º tratto — variante grafica",
+   "nome": "Corridoio della prigione – Parte I — variante grafica",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 801,
@@ -6304,14 +6325,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-2-0",
-    "nome": "Corridoio della prigione — 1º tratto",
+    "nome": "Corridoio della prigione – Parte I",
     "ordine": 1,
     "etichetta": "variante grafica"
    }
   },
   {
    "chiave": "nativo-rmap-161-2-2",
-   "nome": "Corridoio della prigione — 1º tratto",
+   "nome": "Corridoio della prigione – Parte I",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 802,
@@ -6328,14 +6349,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-2-0",
-    "nome": "Corridoio della prigione — 1º tratto",
+    "nome": "Corridoio della prigione – Parte I",
     "ordine": 2,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-161-3-0",
-   "nome": "Corridoio della prigione — 2º tratto",
+   "nome": "Corridoio della prigione – Parte II",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 900,
@@ -6353,7 +6374,7 @@
   },
   {
    "chiave": "nativo-rmap-161-4-0",
-   "nome": "Vuoto cavernoso — 1º tratto — inquadratura occidentale",
+   "nome": "Vuoto cavernoso – Parte I — inquadratura occidentale",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1000,
@@ -6367,14 +6388,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-4-0",
-    "nome": "Vuoto cavernoso — 1º tratto",
+    "nome": "Vuoto cavernoso – Parte I",
     "ordine": 0,
     "etichetta": "inquadratura occidentale"
    }
   },
   {
    "chiave": "nativo-rmap-161-4-1",
-   "nome": "Vuoto cavernoso — 1º tratto",
+   "nome": "Vuoto cavernoso – Parte I",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1001,
@@ -6391,14 +6412,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-4-0",
-    "nome": "Vuoto cavernoso — 1º tratto",
+    "nome": "Vuoto cavernoso – Parte I",
     "ordine": 1,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-161-4-2",
-   "nome": "Vuoto cavernoso — 1º tratto — variante grafica",
+   "nome": "Vuoto cavernoso – Parte I — variante grafica",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1002,
@@ -6412,14 +6433,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-4-0",
-    "nome": "Vuoto cavernoso — 1º tratto",
+    "nome": "Vuoto cavernoso – Parte I",
     "ordine": 2,
     "etichetta": "variante grafica"
    }
   },
   {
    "chiave": "nativo-rmap-161-5-0",
-   "nome": "Corridoio della prigione — 3º tratto",
+   "nome": "Corridoio della prigione – Parte III",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1100,
@@ -6437,7 +6458,7 @@
   },
   {
    "chiave": "nativo-rmap-161-6-0",
-   "nome": "Corridoio della prigione — 4º tratto — inquadratura settentrionale",
+   "nome": "Corridoio della prigione – Parte IV — inquadratura settentrionale",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1200,
@@ -6451,14 +6472,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-6-0",
-    "nome": "Corridoio della prigione — 4º tratto",
+    "nome": "Corridoio della prigione – Parte IV",
     "ordine": 0,
     "etichetta": "inquadratura settentrionale"
    }
   },
   {
    "chiave": "nativo-rmap-161-6-1",
-   "nome": "Corridoio della prigione — 4º tratto",
+   "nome": "Corridoio della prigione – Parte IV",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1201,
@@ -6472,14 +6493,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-6-0",
-    "nome": "Corridoio della prigione — 4º tratto",
+    "nome": "Corridoio della prigione – Parte IV",
     "ordine": 1,
     "etichetta": "planimetria completa"
    }
   },
   {
    "chiave": "nativo-rmap-161-7-0",
-   "nome": "Vuoto cavernoso — 2º tratto",
+   "nome": "Vuoto cavernoso – Parte II",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1300,
@@ -6497,7 +6518,7 @@
   },
   {
    "chiave": "nativo-rmap-161-8-0",
-   "nome": "Corridoio della prigione — 5º tratto — inquadratura settentrionale — più ampia",
+   "nome": "Corridoio della prigione – Parte V — inquadratura settentrionale — più ampia",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1400,
@@ -6511,14 +6532,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-8-0",
-    "nome": "Corridoio della prigione — 5º tratto",
+    "nome": "Corridoio della prigione – Parte V",
     "ordine": 0,
     "etichetta": "inquadratura settentrionale — più ampia"
    }
   },
   {
    "chiave": "nativo-rmap-161-9-0",
-   "nome": "Corridoio della prigione — 5º tratto — inquadratura settentrionale — più ristretta",
+   "nome": "Corridoio della prigione – Parte V — inquadratura settentrionale — più ristretta",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1401,
@@ -6532,14 +6553,14 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-8-0",
-    "nome": "Corridoio della prigione — 5º tratto",
+    "nome": "Corridoio della prigione – Parte V",
     "ordine": 1,
     "etichetta": "inquadratura settentrionale — più ristretta"
    }
   },
   {
    "chiave": "nativo-rmap-161-10-0",
-   "nome": "Corridoio della prigione — 5º tratto",
+   "nome": "Corridoio della prigione – Parte V",
    "tipo": "area",
    "genitore": "dungeon-iweleth",
    "ordine": 1402,
@@ -6553,7 +6574,7 @@
    "spilli": [],
    "gruppoImmagini": {
     "id": "nativo-rmap-161-8-0",
-    "nome": "Corridoio della prigione — 5º tratto",
+    "nome": "Corridoio della prigione – Parte V",
     "ordine": 2,
     "etichetta": "planimetria completa"
    }
