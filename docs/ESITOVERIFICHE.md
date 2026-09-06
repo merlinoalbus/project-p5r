@@ -1509,3 +1509,23 @@ directory può lasciare identico un file obsoleto e dichiarare falsamente il lot
 una prova che l'insieme dei produttori dichiarati in `ORDINE`, quelli speciali e gli output attesi
 sia coerente e completo. La prova deve fallire sia togliendo `world_connections.py` dall'ordine,
 sia aggiungendo una voce a `SPECIALI` senza produttore eseguibile.
+
+### Preflight `verify_determinismo.py` — confronto nella stessa directory
+
+La bozza del nuovo verificatore non realizza ancora la doppia rigenerazione richiesta. Il parametro
+`out` viene passato a `rigenera_tutto.py`, ma `artefatti_del_lotto(out)` ignora `out` e costruisce
+gli hash dai file della radice Git; `prima` e `dopo` confrontano quindi la **stessa** directory
+prima e dopo una riscrittura. Questo trova una non-idempotenza semplice, ma non prova due build
+indipendenti e non isola output residui, cache o input nascosti.
+
+Il fatto che sia comparsa la directory non versionata `tools/p5r-map-export/data/atlas/...` durante
+il lavoro conferma il rischio di percorsi relativi: un controllo che riscrive la radice può anche
+scrivere fuori dal corpus previsto.
+
+**Sanamento richiesto:** il verificatore crea due directory temporanee A/B, vi prepara lo stesso
+insieme di ingressi, esegue il rigeneratore separatamente in A e B e confronta gli output relativi
+attesi byte per byte. `artefatti_del_lotto` deve ricevere e usare la radice della singola build,
+mentre la lista dei percorsi attesi può provenire da Git ma va tradotta in A/B. Il test deve
+asserire che la working tree non cambia e che nessun output è creato sotto
+`tools/p5r-map-export/data/`; la directory già generata va rimossa solo da Claude dopo averne
+individuato il chiamante.
