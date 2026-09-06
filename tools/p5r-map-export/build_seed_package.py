@@ -132,7 +132,20 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
     from pin_luoghi import PAROLE
     meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
     riferimento = {r['chiave']: r for r in json.loads((out/'riferimento-pin.json').read_text(encoding='utf8'))['mappe']}
-    semantica = {r['tipoNativo']: r for r in json.loads((out/'semantica-pin.json').read_text(encoding='utf8'))['tipi']}
+    _sem = json.loads((out/'semantica-pin.json').read_text(encoding='utf8'))
+    semantica = {r['tipoNativo']: r for r in _sem['tipi']}
+    # Dove il tipo resta muto perche' i suoi pin sono troppo pochi per una dominanza, il singolo pin
+    # puo' comunque avere la sua prova: il trigger che gli sta sotto. Quella vale per quel pin solo.
+    puntuali = {(r['chiave'], r['indicePin']): r for r in _sem.get('pinPuntuali') or []}
+    # La bandiera che il gioco accende per mostrare *quel* pin dice che cosa sia quel pin, e vale
+    # piu' del tipo, che e' una generalizzazione su tutti i pin con lo stesso numero.
+    da_bandiera = {(r['chiave'], r['indicePin']): r for r in _sem.get('pinDaBandiera') or []}
+    # Dove porta un pin di passaggio, quando l'abbinamento e' forzato: e' quello che rende il
+    # mondo uno, un pin su cui si clicca e si finisce dall'altra parte.
+    percorso_link = out/'collegamenti-mappe.json'
+    collegamenti = ({(r['partenza'], r['indicePin']): r
+                     for r in json.loads(percorso_link.read_text(encoding='utf8'))['collegamenti']}
+                    if percorso_link.exists() else {})
     quartieri = json.loads((seed/'citta.json').read_text(encoding='utf8'))['quartieri']
     luoghi_per_quartiere = {q['chiave']: q.get('luoghi', []) for q in quartieri}
 
@@ -161,20 +174,40 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
         for indice in rif['collocabili']:
             p = mappa_nativa['pins'][indice]
             sem = semantica.get(p['nativeType'])
-            if not sem or sem['stato'] != 'determinato':
-                esiti['tipo nativo senza significato dimostrato'] += 1
+            puntuale = da_bandiera.get((chiave, indice)) or puntuali.get((chiave, indice))
+            # Un tipo non dimostrato resta fuori, come vuole il contratto della Fase 2a: una
+            # descrizione che avverte «forse» non rende certificato il tipo assegnato. Entra invece
+            # il pin che ha una prova sua, che dimostrata lo e' eccome.
+            if not sem or (sem['stato'] != 'determinato' and not puntuale):
+                esiti['tipo nativo senza significato'] += 1
                 continue
             luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
             nota = ['Pin nativo del gioco.']
+            # La prova puntuale riguarda proprio questo pin, quindi conta piu' di un'ipotesi sul suo
+            # tipo; dove il tipo e' dimostrato, invece, non c'e' nulla da aggiungere.
+            if puntuale:
+                tipo_spillo, etichetta = puntuale['tipoSpillo'], puntuale['etichetta']
+                nota.append('Riconosciuto singolarmente: ' + puntuale['prova'] + '.')
+            else:
+                tipo_spillo, etichetta = sem['tipoSpillo'], sem['etichetta']
             # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
             if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')
             spillo = dict(
-                tipo=sem['tipoSpillo'], nome=luogo['nome'] if luogo else sem['etichetta'],
+                tipo=tipo_spillo, nome=luogo['nome'] if luogo else etichetta,
                 descrizione=' '.join(nota),
                 x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
                 riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
                 collezionabile=False, ordine=len(voce['spilli']))
+            legame = collegamenti.get((chiave, indice))
+            if legame:
+                nota.append('Porta a ' + legame['arrivo'] + '.')
+                if legame['punto']:
+                    spillo['destinazione'] = dict(mappa=legame['arrivo'], **legame['punto'])
+                else:
+                    # la mappa di arrivo si sa, il punto no: si dichiara invece di inventarlo
+                    nota.append('Il punto preciso di arrivo non e’ noto: '
+                                + (legame['motivoSenzaPunto'] or 'proiezione mancante') + '.')
             # Il gioco mostra questo pin solo a certe condizioni, e la bandiera che le governa non è
             # ancora tradotta nel vocabolario dell'applicazione. Entra allora come condizione da
             # configurare, che l'interfaccia sa mostrare e l'editor sa correggere: trattarlo come
@@ -184,6 +217,7 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                                              nota=f"Il gioco lo mostra alla bandiera nativa {p['flag']}, "
                                                   'non ancora tradotta in una condizione della guida.')]
                 condizionati[0] += 1
+            spillo['descrizione'] = ' '.join(nota)
             voce['spilli'].append(spillo)
             esiti['posato con luogo collegato' if luogo else 'posato senza luogo collegato'] += 1
             posati += 1

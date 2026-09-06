@@ -6,11 +6,11 @@ import { DEFINIZIONI_SPILLO, GRUPPI_SPILLO, TIPI_SPILLO, spilloPerLuogo, spilloP
 
 describe('registro dei tipi di spillo', () => {
   it('conta 34 tipi distinti, ognuno con nome, colore esadecimale e riserva nel registro', () => {
-    expect(TIPI_SPILLO).toHaveLength(34);
-    expect(new Set(TIPI_SPILLO).size).toBe(34);
+    expect(TIPI_SPILLO).toHaveLength(36);
+    expect(new Set(TIPI_SPILLO).size).toBe(36);
     for (const t of TIPI_SPILLO) expect(DEFINIZIONI_SPILLO[t]).toMatchObject({ nome: expect.any(String), colore: expect.stringMatching(/^#[0-9a-f]{6}$/) });
-    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].colore)).size).toBe(34);
-    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].nome)).size).toBe(34);
+    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].colore)).size).toBe(36);
+    expect(new Set(TIPI_SPILLO.map((t) => DEFINIZIONI_SPILLO[t].nome)).size).toBe(36);
   });
 
   it('i gruppi della palette coprono ogni tipo una sola volta, nello stesso ordine del registro', () => {

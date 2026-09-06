@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "tabella": "IT.CPK/FIELD/FTD/FLDSAVEDATAPLACE.FTD",
+    "byte": 4208
+  },
+  "formato": {
+    "primoRecord": 104,
+    "lunghezzaRecord": 52,
+    "lunghezzaNome": 48,
+    "passoMisurato": 52,
+    "ricorrenzeDelPasso": 78,
+    "stringheNelFile": 79,
+    "nota": "il numero che precede il nome non è un indice progressivo"
+  },
+  "luoghi": [
+    {
+      "ordine": 0,
+      "offset": 104,
+      "codice": 1,
+      "nome": "Mansarda del Leblanc",
+      "stato": "valido"
+    },
+    {
+      "ordine": 1,
+      "offset": 156,
+      "codice": 2,
+      "nome": "???",
+      "stato": "segnaposto"
+    },
+    {
+      "ordine": 2,
+      "offset": 208,
+      "codice": 3,
+      "nome": "Piazza Stazione Shibuya",
+      "stato": "valido"
+    },
+    {
+      "ordine": 3,
+      "offset": 260,
+      "codice": 4,
+      "nome": "Stazione di polizia",
+      "stato": "valido"
+    },
+    {
+      "ordine": 4,
+      "offset": 312,
+      "codice": 5,
+      "nome": "Sala interrogatori",
+      "stato": "valido"
+    },
+    {
+      "ordine": 5,
+      "offset": 364,
+      "codice": 6,
+      "nome": "Timbro 6",
+      "stato": "valido"
+    },
+    {
+      "ordine": 6,
+      "offset": 416,
+      "codice": 7,
+      "nome": "Timbro 7",
+      "stato": "valido"
+    },
+    {
+      "ordine": 7,
+      "offset": 468,
+      "codice": 8,
+      "nome": "Timbro 8",
+      "stato": "valido"
+    },
+    {
+      "ordine": 8,
+      "offset": 520,
+      "codice": 9,
+      "nome": "Timbro 9",
+      "stato": "valido"
+    },
+    {
+      "ordine": 9,
+      "offset": 572,
+      "codice": 254,
+      "nome": "Mansarda del Leblanc",
+      "stato": "valido"
+    },
+    {
+      "ordine": 10,
+      "offset": 624,
+      "codice": 255,
+      "nome": "Libera dati",
+      "stato": "valido"
+    },
+    {
+      "ordine": 11,
+      "offset": 676,
+      "codice": 0,
+      "nome": "Piazza Stazione Shibuya",
+      "stato": "valido"
+    },
+    {
+      "ordine": 12,
+      "offset": 728,
+      "codice": 0,
+      "nome": "Sottopasso",
+      "stato": "valido"
+    },
+    {
+      "ordine": 13,
+      "offset": 780,
+      "codice": 0,
+      "nome": "Central Street",
+      "stato": "valido"
+    },
+    {
+      "ordine": 14,
+      "offset": 832,
+      "codice": 0,
+      "nome": "Centro comm. sotterraneo",
+      "stato": "valido"
+    },
+    {
+      "ordine": 15,
+      "offset": 884,
+      "codice": 0,
+      "nome": "Biglietteria di Ginza",
+      "stato": "valido"
+    },
+    {
+      "ordine": 16,
+      "offset": 936,
+      "codice": 0,
+      "nome": "Accesso Teikyu",
+      "stato": "valido"
+    },
+    {
+      "ordine": 17,
+      "offset": 988,
+      "codice": 0,
+      "nome": "Cancello della Shujin",
+      "stato": "valido"
+    },
+    {
+      "ordine": 18,
+      "offset": 1040,
+      "codice": 0,
+      "nome": "Edificio aule",
+      "stato": "valido"
+    },
+    {
+      "ordine": 19,
+      "offset": 1092,
+      "codice": 0,
+      "nome": "Edificio sportivo",
+      "stato": "valido"
+    },
+    {
+      "ordine": 20,
+      "offset": 1144,
+      "codice": 0,
+      "nome": "Cortile della Shujin",
+      "stato": "valido"
+    },
+    {
+      "ordine": 21,
+      "offset": 1196,
+      "codice": 0,
+      "nome": "Tetto della Shujin",
+      "stato": "valido"
+    },
+    {
+      "ordine": 22,
+      "offset": 1248,
+      "codice": 0,
+      "nome": "Aula della Shujin",
+      "stato": "valido"
+    },
+    {
+      "ordine": 23,
+      "offset": 1300,
+      "codice": 0,
+      "nome": "Biblioteca della Shujin",
+      "stato": "valido"
+    },
+    {
+      "ordine": 24,
+      "offset": 1352,
+      "codice": 0,
+      "nome": "Mensa della Shujin",
+      "stato": "valido"
+    },
+    {
+      "ordine": 25,
+      "offset": 1404,
+      "codice": 0,
+      "nome": "Leblanc",
+      "stato": "valido"
+    },
+    {
+      "ordine": 26,
+      "offset": 1456,
+      "codice": 0,
+      "nome": "Kichijoji",
+      "stato": "valido"
+    },
+    {
+      "ordine": 27,
+      "offset": 1508,
+      "codice": 0,
+      "nome": "Quartiere a luci rosse",
+      "stato": "valido"
+    },
+    {
+      "ordine": 28,
+      "offset": 1560,
+      "codice": 0,
+      "nome": "Electric Town",
+      "stato": "valido"
+    },
+    {
+      "ordine": 29,
+      "offset": 1612,
+      "codice": 0,
+      "nome": "Vicoli",
+      "stato": "valido"
+    },
+    {
+      "ordine": 30,
+      "offset": 1664,
+      "codice": 0,
+      "nome": "Clinica",
+      "stato": "valido"
+    },
+    {
+      "ordine": 31,
+      "offset": 1716,
+      "codice": 0,
+      "nome": "Negozio softair",
+      "stato": "valido"
+    },
+    {
+      "ordine": 32,
+      "offset": 1768,
+      "codice": 0,
+      "nome": "Stanza di Velluto",
+      "stato": "valido"
+    },
+    {
+      "ordine": 33,
+      "offset": 1820,
+      "codice": 0,
+      "nome": "Chiesa di Kanda",
+      "stato": "valido"
+    },
+    {
+      "ordine": 34,
+      "offset": 1872,
+      "codice": 0,
+      "nome": "Sala giochi di Akihabara",
+      "stato": "valido"
+    },
+    {
+      "ordine": 35,
+      "offset": 1924,
+      "codice": 0,
+      "nome": "Bar di Shinjuku",
+      "stato": "valido"
+    },
+    {
+      "ordine": 36,
+      "offset": 1976,
+      "codice": 0,
+      "nome": "Ristorante buffet",
+      "stato": "valido"
+    },
+    {
+      "ordine": 37,
+      "offset": 2028,
+      "codice": 0,
+      "nome": "Sala giochi di Shibuya",
+      "stato": "valido"
+    },
+    {
+      "ordine": 38,
+      "offset": 2080,
+      "codice": 0,
+      "nome": "Binario Aoyama",
+      "stato": "valido"
+    },
+    {
+      "ordine": 39,
+      "offset": 2132,
+      "codice": 0,
+      "nome": "Binario Yongen-Jaya",
+      "stato": "valido"
+    },
+    {
+      "ordine": 40,
+      "offset": 2184,
+      "codice": 0,
+      "nome": "Spiaggia Waikiki",
+      "stato": "valido"
+    },
+    {
+      "ordine": 41,
+      "offset": 2236,
+      "codice": 0,
+      "nome": "Cantiere dello stadio",
+      "stato": "valido"
+    },
+    {
+      "ordine": 42,
+      "offset": 2288,
+      "codice": 0,
+      "nome": "Citt稲 natale",
+      "stato": "valido"
+    },
+    {
+      "ordine": 43,
+      "offset": 2340,
+      "codice": 0,
+      "nome": "Palazzo di Kamoshida",
+      "stato": "valido"
+    },
+    {
+      "ordine": 44,
+      "offset": 2392,
+      "codice": 0,
+      "nome": "Palazzo di Kamoshida",
+      "stato": "valido"
+    },
+    {
+      "ordine": 45,
+      "offset": 2444,
+      "codice": 0,
+      "nome": "Palazzo di Kamoshida",
+      "stato": "valido"
+    },
+    {
+      "ordine": 46,
+      "offset": 2496,
+      "codice": 0,
+      "nome": "Palazzo di Madarame",
+      "stato": "valido"
+    },
+    {
+      "ordine": 47,
+      "offset": 2548,
+      "codice": 0,
+      "nome": "Palazzo di Madarame",
+      "stato": "valido"
+    },
+    {
+      "ordine": 48,
+      "offset": 2600,
+      "codice": 0,
+      "nome": "Palazzo di Kaneshiro",
+      "stato": "valido"
+    },
+    {
+      "ordine": 49,
+      "offset": 2652,
+      "codice": 0,
+      "nome": "Palazzo di Kaneshiro",
+      "stato": "valido"
+    },
+    {
+      "ordine": 50,
+      "offset": 2704,
+      "codice": 0,
+      "nome": "Palazzo di Kaneshiro",
+      "stato": "valido"
+    },
+    {
+      "ordine": 51,
+      "offset": 2756,
+      "codice": 0,
+      "nome": "Palazzo di Futaba",
+      "stato": "valido"
+    },
+    {
+      "ordine": 52,
+      "offset": 2808,
+      "codice": 0,
+      "nome": "Palazzo di Futaba",
+      "stato": "valido"
+    },
+    {
+      "ordine": 53,
+      "offset": 2860,
+      "codice": 0,
+      "nome": "Palazzo di Okumura",
+      "stato": "valido"
+    },
+    {
+      "ordine": 54,
+      "offset": 2912,
+      "codice": 0,
+      "nome": "Palazzo di Okumura",
+      "stato": "valido"
+    },
+    {
+      "ordine": 55,
+      "offset": 2964,
+      "codice": 0,
+      "nome": "Palazzo di Niijima",
+      "stato": "valido"
+    },
+    {
+      "ordine": 56,
+      "offset": 3016,
+      "codice": 0,
+      "nome": "Palazzo di Niijima",
+      "stato": "valido"
+    },
+    {
+      "ordine": 57,
+      "offset": 3068,
+      "codice": 0,
+      "nome": "Palazzo di Niijima",
+      "stato": "valido"
+    },
+    {
+      "ordine": 58,
+      "offset": 3120,
+      "codice": 0,
+      "nome": "Palazzo di Shido",
+      "stato": "valido"
+    },
+    {
+      "ordine": 59,
+      "offset": 3172,
+      "codice": 0,
+      "nome": "Palazzo di Shido",
+      "stato": "valido"
+    },
+    {
+      "ordine": 60,
+      "offset": 3224,
+      "codice": 0,
+      "nome": "Mondo del clifoto",
+      "stato": "valido"
+    },
+    {
+      "ordine": 61,
+      "offset": 3276,
+      "codice": 0,
+      "nome": "Mondo del clifoto",
+      "stato": "valido"
+    },
+    {
+      "ordine": 62,
+      "offset": 3328,
+      "codice": 0,
+      "nome": "Mondo del clifoto",
+      "stato": "valido"
+    },
+    {
+      "ordine": 63,
+      "offset": 3380,
+      "codice": 0,
+      "nome": "Profondit稲 dei Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 64,
+      "offset": 3432,
+      "codice": 0,
+      "nome": "Profondit稲 dei Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 65,
+      "offset": 3484,
+      "codice": 0,
+      "nome": "Palazzo di Maruki",
+      "stato": "valido"
+    },
+    {
+      "ordine": 66,
+      "offset": 3536,
+      "codice": 1,
+      "nome": "Palazzo ???",
+      "stato": "valido"
+    },
+    {
+      "ordine": 67,
+      "offset": 3588,
+      "codice": 0,
+      "nome": "Palazzo di Maruki",
+      "stato": "valido"
+    },
+    {
+      "ordine": 68,
+      "offset": 3640,
+      "codice": 1,
+      "nome": "Palazzo ???",
+      "stato": "valido"
+    },
+    {
+      "ordine": 69,
+      "offset": 3692,
+      "codice": 0,
+      "nome": "Palazzo di Maruki",
+      "stato": "valido"
+    },
+    {
+      "ordine": 70,
+      "offset": 3744,
+      "codice": 1,
+      "nome": "Palazzo di Maruki",
+      "stato": "valido"
+    },
+    {
+      "ordine": 71,
+      "offset": 3796,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 72,
+      "offset": 3848,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 73,
+      "offset": 3900,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 74,
+      "offset": 3952,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 75,
+      "offset": 4004,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 76,
+      "offset": 4056,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 77,
+      "offset": 4108,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    },
+    {
+      "ordine": 78,
+      "offset": 4160,
+      "codice": 0,
+      "nome": "Memento",
+      "stato": "valido"
+    }
+  ],
+  "nomiDistinti": [
+    "Accesso Teikyu",
+    "Aula della Shujin",
+    "Bar di Shinjuku",
+    "Biblioteca della Shujin",
+    "Biglietteria di Ginza",
+    "Binario Aoyama",
+    "Binario Yongen-Jaya",
+    "Cancello della Shujin",
+    "Cantiere dello stadio",
+    "Central Street",
+    "Centro comm. sotterraneo",
+    "Chiesa di Kanda",
+    "Citt稲 natale",
+    "Clinica",
+    "Cortile della Shujin",
+    "Edificio aule",
+    "Edificio sportivo",
+    "Electric Town",
+    "Kichijoji",
+    "Leblanc",
+    "Libera dati",
+    "Mansarda del Leblanc",
+    "Memento",
+    "Mensa della Shujin",
+    "Mondo del clifoto",
+    "Negozio softair",
+    "Palazzo ???",
+    "Palazzo di Futaba",
+    "Palazzo di Kamoshida",
+    "Palazzo di Kaneshiro",
+    "Palazzo di Madarame",
+    "Palazzo di Maruki",
+    "Palazzo di Niijima",
+    "Palazzo di Okumura",
+    "Palazzo di Shido",
+    "Piazza Stazione Shibuya",
+    "Profondit稲 dei Memento",
+    "Quartiere a luci rosse",
+    "Ristorante buffet",
+    "Sala giochi di Akihabara",
+    "Sala giochi di Shibuya",
+    "Sala interrogatori",
+    "Sottopasso",
+    "Spiaggia Waikiki",
+    "Stanza di Velluto",
+    "Stazione di polizia",
+    "Tetto della Shujin",
+    "Timbro 6",
+    "Timbro 7",
+    "Timbro 8",
+    "Timbro 9",
+    "Vicoli"
+  ],
+  "summary": {
+    "record": 79,
+    "validi": 78,
+    "nomiDistinti": 52,
+    "segnaposto": 1,
+    "vuoti": 0
+  },
+  "limits": [
+    "I nomi sono quelli del gioco e non vanno tradotti di nuovo.",
+    "Un «???» è un segnaposto del gioco, non un nome mancante: va lasciato tale.",
+    "Lo stesso luogo compare più volte: l’elenco è dei salvataggi, non dei posti."
+  ]
+}

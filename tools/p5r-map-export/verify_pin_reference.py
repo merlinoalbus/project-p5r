@@ -18,6 +18,9 @@ import re
 import sys
 
 
+import pin_reference as pr
+
+
 def main(out):
     import numpy
     from PIL import Image
@@ -38,6 +41,27 @@ def main(out):
     per_codice = {r['codice']: r for r in atteso['mappe']}
     assert len(per_codice) == len(atteso['mappe']) == 301, 'planimetrie mancanti o ripetute'
 
+    # Il tratto di riferimento e' quello dei livelli della stessa risorsa messi insieme, dove
+    # condividono la tela: qui l'unione si ricostruisce da capo dalle immagini, senza fidarsi.
+    maschere = {}
+    for mappa in meta['maps']:
+        c = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa['code'].split('_')[1:])
+        maschere[mappa['code']] = numpy.array(
+            Image.open(native/(c + '.png')).convert('RGBA').getchannel('A')) > 0
+    per_risorsa = {}
+    for codice, m in maschere.items():
+        maggiore, minore, _ = (int(v) for v in codice.split('_')[1:])
+        per_risorsa.setdefault((maggiore, minore, m.shape), []).append(codice)
+    unione = {}
+    for insieme in per_risorsa.values():
+        if len(insieme) < 2:
+            continue
+        somma = numpy.zeros_like(maschere[insieme[0]])
+        for c in insieme:
+            somma |= maschere[c]
+        for c in insieme:
+            unione[c] = somma
+
     controllati = collocati = 0
     for mappa in meta['maps']:
         r = per_codice[mappa['code']]
@@ -49,13 +73,16 @@ def main(out):
             assert r['esito'] == 'senza-pin'
             continue
         immagine = immagini[mappa['code']]
-        maschera = numpy.array(Image.open(native/(chiave + '.png')).convert('RGBA').getchannel('A')) > 0
+        maschera = maschere[mappa['code']]
         larghezza, altezza = immagine['width'], immagine['height']
         assert maschera.shape == (altezza, larghezza), f'PNG di dimensioni diverse: {chiave}'
-        x0, y0, x1, y1 = immagine['alpha_bbox']
+        x0, y0, x1, y1 = r.get('riquadroContenuto') or immagine['alpha_bbox']
         diagonale = (larghezza**2 + altezza**2) ** 0.5
         margine = criterio['margineTela'] * diagonale
-        ys, xs = numpy.nonzero(maschera)
+        tratto = unione.get(mappa['code'])
+        atteso_tratto = 'livelli della risorsa uniti' if tratto is not None else 'solo questo livello'
+        assert r.get('tratto') == atteso_tratto, f'tratto di riferimento diverso su {chiave}'
+        ys, xs = numpy.nonzero(tratto if tratto is not None else maschera)
 
         def distanze(fattore):
             return [float(numpy.hypot(xs - p['x']*fattore, ys - p['y']*fattore).min())/diagonale for p in pin]
@@ -64,7 +91,11 @@ def main(out):
             return sorted(v)[len(v)//2] if v else 1.0
 
         fattore = r.get('fattoreScala', 1.0)
-        assert fattore in criterio['fattori'], f'fattore fuori dall’elenco su {chiave}'
+        # oltre alle potenze di due e' ammesso il fattore suggerito dai dati, che va pero'
+        # ricalcolato qui e ritrovato uguale
+        suggerito = pr.fattore_suggerito(pin, (x0, y0, x1, y1))
+        assert r.get('fattoreSuggerito') == suggerito, f'fattore suggerito diverso su {chiave}'
+        assert fattore in criterio['fattori'] or fattore == suggerito,             f'fattore fuori dall’elenco e diverso da quello suggerito su {chiave}'
         base = mediana(distanze(1.0))
         if fattore != 1.0:
             scelto = mediana(distanze(fattore))
@@ -77,7 +108,15 @@ def main(out):
                   and y0 - margine <= p['y']*fattore <= y1 + margine and d[i] <= lontano]
         med = mediana([d[i] for i in dentro])
         quota = len(dentro)/len(pin)
-        atteso_esito = 'condiviso' if med <= vicino and quota >= quota_minima else 'non-condiviso'
+        # con un solo pin appoggiato la prova sta nel confronto con il fondo, e va rifatta qui
+        solo_debole = False
+        if len(dentro) == 1:
+            gx, gy = numpy.meshgrid(numpy.linspace(x0, x1, criterio['passoFondo']),
+                                    numpy.linspace(y0, y1, criterio['passoFondo']))
+            campione = numpy.stack([gx.ravel(), gy.ravel()], 1)
+            fondo = [float(numpy.hypot(xs - c[0], ys - c[1]).min())/diagonale for c in campione]
+            solo_debole = sum(1 for f in fondo if f <= med)/len(fondo) > criterio['frazioneFondo']
+        atteso_esito = 'condiviso' if (med <= vicino and quota >= quota_minima and not solo_debole)             else 'non-condiviso'
         assert r['esito'] == atteso_esito, f'esito diverso su {chiave}: {r["esito"]} invece di {atteso_esito}'
         if atteso_esito == 'condiviso':
             assert r['collocabili'] == dentro, f'elenco dei pin collocabili diverso su {chiave}'
@@ -87,7 +126,7 @@ def main(out):
                 assert d[i] <= lontano, f'pin collocabile lontano dal tratto su {chiave}'
             collocati += len(dentro)
         else:
-            assert med > vicino or quota < quota_minima, f'mappa scartata senza motivo: {chiave}'
+            assert med > vicino or quota < quota_minima or solo_debole,                 f'mappa scartata senza motivo: {chiave}'
             assert not r['collocabili'], f'mappa non condivisa con pin collocabili: {chiave}'
         controllati += 1
 

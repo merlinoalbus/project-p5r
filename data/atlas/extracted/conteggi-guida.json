@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "guida": "data/seed/dungeon.json",
+    "pacchetto": "data/seed/mappe/atlante-mondo.json",
+    "metadati": "mondo_metadati.json"
+  },
+  "criterio": {
+    "areeMinime": 10,
+    "quotaAccordo": 0.75,
+    "distacco": 0.15,
+    "forma": "il tipo deve comparire tante volte quanti i punti che la guida conta in quell’area, su una quota alta delle aree e staccando il secondo"
+  },
+  "generi": {
+    "forziere": {
+      "aree": 42,
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere",
+      "migliori": [
+        {
+          "tipo": 17,
+          "accordo": 0.31
+        },
+        {
+          "tipo": 15,
+          "accordo": 0.214
+        },
+        {
+          "tipo": 4,
+          "accordo": 0.19
+        },
+        {
+          "tipo": 19,
+          "accordo": 0.19
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 31% delle aree"
+    },
+    "forziere-chiuso": {
+      "aree": 14,
+      "tipoSpillo": "forziere",
+      "etichetta": "Forziere chiuso",
+      "migliori": [
+        {
+          "tipo": 4,
+          "accordo": 0.429
+        },
+        {
+          "tipo": 19,
+          "accordo": 0.357
+        },
+        {
+          "tipo": 28,
+          "accordo": 0.286
+        },
+        {
+          "tipo": 29,
+          "accordo": 0.286
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 43% delle aree"
+    },
+    "miniboss": {
+      "aree": 39,
+      "tipoSpillo": "miniboss",
+      "etichetta": "Nemico potente",
+      "migliori": [
+        {
+          "tipo": 17,
+          "accordo": 0.385
+        },
+        {
+          "tipo": 4,
+          "accordo": 0.282
+        },
+        {
+          "tipo": 19,
+          "accordo": 0.231
+        },
+        {
+          "tipo": 10,
+          "accordo": 0.205
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 38% delle aree"
+    },
+    "oggetto": {
+      "aree": 49,
+      "tipoSpillo": "oggetto-chiave",
+      "etichetta": "Oggetto",
+      "migliori": [
+        {
+          "tipo": 19,
+          "accordo": 0.429
+        },
+        {
+          "tipo": 4,
+          "accordo": 0.408
+        },
+        {
+          "tipo": 17,
+          "accordo": 0.347
+        },
+        {
+          "tipo": 28,
+          "accordo": 0.347
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 43% delle aree"
+    },
+    "puzzle": {
+      "aree": 27,
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "migliori": [
+        {
+          "tipo": 4,
+          "accordo": 0.444
+        },
+        {
+          "tipo": 19,
+          "accordo": 0.333
+        },
+        {
+          "tipo": 28,
+          "accordo": 0.333
+        },
+        {
+          "tipo": 17,
+          "accordo": 0.296
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 44% delle aree"
+    },
+    "scorciatoia": {
+      "aree": 16,
+      "tipoSpillo": "scorciatoia",
+      "etichetta": "Scorciatoia",
+      "migliori": [
+        {
+          "tipo": 19,
+          "accordo": 0.375
+        },
+        {
+          "tipo": 4,
+          "accordo": 0.312
+        },
+        {
+          "tipo": 13,
+          "accordo": 0.312
+        },
+        {
+          "tipo": 15,
+          "accordo": 0.25
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 38% delle aree"
+    },
+    "sicura": {
+      "aree": 38,
+      "tipoSpillo": "sicura",
+      "etichetta": "Stanza sicura",
+      "migliori": [
+        {
+          "tipo": 4,
+          "accordo": 0.553
+        },
+        {
+          "tipo": 19,
+          "accordo": 0.447
+        },
+        {
+          "tipo": 17,
+          "accordo": 0.395
+        },
+        {
+          "tipo": 28,
+          "accordo": 0.395
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 55% delle aree"
+    },
+    "volonta": {
+      "aree": 14,
+      "tipoSpillo": "seme-bramosia",
+      "etichetta": "Seme della bramosia",
+      "migliori": [
+        {
+          "tipo": 4,
+          "accordo": 0.571
+        },
+        {
+          "tipo": 19,
+          "accordo": 0.571
+        },
+        {
+          "tipo": 28,
+          "accordo": 0.571
+        },
+        {
+          "tipo": 17,
+          "accordo": 0.5
+        }
+      ],
+      "dimostrato": null,
+      "motivo": "il migliore accorda solo sul 57% delle aree"
+    }
+  },
+  "tipiDimostrati": {},
+  "summary": {
+    "areeConPlanimetria": 72,
+    "generiEsaminati": 8,
+    "tipiDimostrati": 0
+  },
+  "limits": [
+    "La guida è editoriale: conta ciò che serve al giocatore, non ciò che la mappa disegna. Per questo non si pretende l’accordo perfetto, e la quota è scritta.",
+    "Una planimetria è una versione dell’area: si confronta quella con più pin."
+  ]
+}

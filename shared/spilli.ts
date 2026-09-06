@@ -10,7 +10,7 @@
 
 /** Ordine di presentazione (palette dell'editor, legenda): spostamenti, città, persone, Palazzi e Mementos, nota. */
 export const TIPI_SPILLO = [
-  'passaggio', 'treno',
+  'passaggio', 'scala', 'uscita', 'treno',
   'negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita',
   'confidente', 'dialogo',
   'forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
@@ -20,7 +20,7 @@ export type TipoSpillo = (typeof TIPI_SPILLO)[number];
 
 /** Gruppi della palette dell'editor, nello stesso ordine di `TIPI_SPILLO`: ogni tipo sta in un solo gruppo. */
 export const GRUPPI_SPILLO: ReadonlyArray<{ nome: string; tipi: readonly TipoSpillo[] }> = [
-  { nome: 'Spostamenti', tipi: ['passaggio', 'treno'] },
+  { nome: 'Spostamenti', tipi: ['passaggio', 'scala', 'uscita', 'treno'] },
   { nome: 'Città', tipi: ['negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita'] },
   { nome: 'Persone', tipi: ['confidente', 'dialogo'] },
   { nome: 'Palazzi e Mementos', tipi: ['forziere', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia'] },
@@ -42,6 +42,10 @@ export interface DefinizioneSpillo {
 export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   // ---- Spostamenti ----
   passaggio: { nome: 'Passaggio', colore: '#3b82f6', collezionabile: false, riferimento: 'mappa' },
+  /** Scala, scaletta o ascensore fra due livelli dello stesso luogo: la mappa del gioco le distingue dai passaggi piani. */
+  scala: { nome: 'Scala', colore: '#2dd4bf', collezionabile: false, riferimento: 'mappa' },
+  /** Punto da cui si lascia un Palazzo o un Dedalo e si torna in città. */
+  uscita: { nome: 'Uscita', colore: '#ef4444', collezionabile: false, riferimento: 'mappa' },
   treno: { nome: 'Stazione', colore: '#15803d', collezionabile: false, riferimento: 'mappa' },
   // ---- Città: negozi, servizi e luoghi con un'etichetta propria sulla mappa del gioco ----
   negozio: { nome: 'Negozio', colore: '#22c55e', collezionabile: false, riferimento: 'negozio' },

@@ -16,6 +16,8 @@ function base(d: number) {
 /** Riserve SVG (tratto semplice, leggibile a 16–20 px) per tutti i tipi del registro. */
 const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   passaggio: (d) => <svg {...base(d)}><path d="M5 21V9a7 7 0 0 1 14 0v12" /><path d="M9 21v-6h6v6" /><path d="M12 6v4" /><path d="M10 8l2 2 2-2" /></svg>,
+  scala: (d) => <svg {...base(d)}><path d="M4 20h4v-4h4v-4h4V8h4" /><path d="M4 16h4M8 12h4M12 8h4" /><path d="M17 4h4v4" /></svg>,
+  uscita: (d) => <svg {...base(d)}><path d="M14 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8" /><path d="M18 8l4 4-4 4" /><path d="M22 12H10" /></svg>,
   negozio: (d) => <svg {...base(d)}><path d="M4 9l1.5-4h13L20 9" /><path d="M5 9v11h14V9" /><path d="M9 20v-6h6v6" /></svg>,
   forziere: (d) => <svg {...base(d)}><rect x="3" y="8" width="18" height="12" rx="2" /><path d="M3 12h18" /><path d="M7 8V6a5 5 0 0 1 10 0v2" /><path d="M12 12v3" /></svg>,
   tesoro: (d) => <svg {...base(d)}><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20" /><path d="M9 3l3 6 3-6" /><path d="M9 9l3 12 3-12" /></svg>,

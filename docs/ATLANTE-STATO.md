@@ -165,7 +165,7 @@ verifiche. **L'utente ha esaminato il rilievo e ha confermato la forma «Parte I
 adottata. Ogni caso dichiara la propria `fonteDistinzione` — `nomi-enumerati-dalla-guida` per i
 sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due resta leggibile.
 
-## Fase 2 — Pin di tutti i tipi · **PRONTA PER VERIFICA per la parte urbana**
+## Fase 2 — Pin di tutti i tipi · **copertura dimostrata 29,6%, in lavorazione**
 
 | passo | stato | esito |
 |---|---|---|
@@ -190,17 +190,207 @@ procedura che quella bandiera accende. Il nome della procedura è parlante:
 
 Le due strade sono indipendenti e concordano dove si incontrano.
 
-### Che cosa resta indeterminato, e quanto pesa
+### La copertura dei pin, e la controprova che ha ribaltato il conto
 
-| | pin | con significato | posati |
+Aggiornato il 6 settembre 2026, dopo i rilievi di Codex sulla terza consegna. **Il 91% dichiarato
+poche ore prima era sbagliato: la copertura dimostrata è 423 pin su 1429, il 29,6%.**
+
+#### Come è emerso
+
+Codex ha contestato che la strada «procedura del trigger che sta sotto il pin» non fosse
+indipendente dalla proiezione che la genera. Aveva ragione, e la cosa si poteva misurare invece
+che discutere. Esistono tipi il cui significato è dimostrato per vie che con la geometria non
+c'entrano nulla — il nome interno dello sprite, la procedura che accende la bandiera. Su quelli
+si può contare quante volte la lettura geometrica darebbe la risposta giusta.
+
+| famiglia dedotta | giusti | sbagliati | accuratezza |
 |---|---|---|---|
-| mappe della città | 288 | 81 | 80 |
-| mappe dei Palazzi | 1141 | 351 | 325 |
+| passaggio | 0 | 12 | **0%** |
+| attivita | 8 | 0 | 100% |
+| forziere | 4 | 0 | 100% |
+| meccanismo | 0 | 4 | 0% |
+| ristorante | 0 | 2 | 0% |
+| negozio | 1 | 1 | 50% |
+| scala | 0 | 1 | 0% |
+| seme-bramosia | 0 | 1 | 0% |
+| **totale** | **13** | **21** | **38%** |
 
-I 46 tipi ancora senza significato sono quasi tutti **condivisi fra città e Palazzi** — il più
-pesante è il tipo 19, con 165 occorrenze — e per loro le procedure che accendono la bandiera si
-limitano ad accenderla, senza dire altro. Non li importo: un pin senza significato è peggio di un
-pin assente.
+Gli scambi più frequenti dicono perché: *porta letta come passaggio* (5), *forziere letto come
+passaggio* (3), *porta letta come meccanismo* (3). In un Palazzo i trigger di transito sono
+ovunque, e capitano vicino a qualunque cosa. La famiglia che sbaglia sempre è esattamente quella
+che produceva il grosso della copertura: 15 tipi e 867 pin, quasi tutti letti come «passaggio».
+
+**Conseguenza:** la lettura geometrica non determina più nulla. Resta nel file come materiale, con
+la sua misura accanto, e `verify_pin_semantics.py` ora **impone** che nessun tipo la usi come
+prova — e che la controprova venga rifatta e continui a dare meno del 70%. Se un giorno risultasse
+accurata, il verificatore lo segnalerebbe come errore da correggere usandola.
+
+Sono cadute con lei anche le 40 determinazioni per singolo pin, che poggiavano sulla stessa
+lettura, e i due tipi in stato «ipotesi», che il contratto della Fase 2a non ammetteva importare.
+
+#### Che cosa resta, e quanto è solido
+
+| grado di prova | tipi | pin |
+|---|---|---|
+| nome interno dello sprite (blocco urbano, blocco del Covo) | 57 | 90 |
+| procedura che accende la bandiera del pin | 5 | 351 |
+| **nessuna prova** | 40 | 988 |
+
+**423 pin posati**, di cui 42 collegati a un luogo del catalogo e 333 con condizione da
+configurare. Ogni pin nel pacchetto ha una prova che non dipende dalla geometria.
+
+#### Che cosa di questa sessione resta valido
+
+1. **Il blocco del Covo dei Ladri**, scarto 76: i tipi 98–103 sugli sprite `マイパレス_…`, con
+   cinque conferme procedurali indipendenti. Sei tipi nuovi dimostrati, e la controprova gli dà
+   100% (8 su 8) — è l'unica famiglia geometrica che regge, perché lì la conferma viene da altro.
+2. **Il difetto del riferimento**: le mappe non certificate non conservavano `pinCollocabili`.
+3. **I livelli della stessa risorsa**: stima congiunta e proiezione riprovata sui gemelli — la
+   proiezione passa da 125 a **169 planimetrie certificate**.
+4. **L'assegnazione uno a uno** (`assegnazione.py`, algoritmo ungherese verificato contro forza
+   bruta su 200 casi): nessun punto del campo può stare sotto due pin.
+5. **La stabilità delle coppie**: 740 su 1070 sopravvivono alla ristima senza il proprio pin.
+6. **La convalida sui riferimenti noti**: le tre planimetrie urbane per cui il gioco dichiara la
+   trasformazione (cursore nel record roadmap, unità 23,44 nel texpack) sono **tutte e tre
+   riprodotte** dalla stima.
+7. **La controprova stessa**, che è lo strumento che mancava: da qui in avanti nessuna strada
+   entra senza essere stata misurata su casi di risposta nota.
+
+#### Perché il 100% non si raggiunge allentando i criteri
+
+I 988 pin senza prova appartengono a 40 tipi dei Palazzi. Le strade tentate e misurate sono
+registrate in `semantica-pin.json → provePalazzi` e `letturaGeometrica`. Quello che servirebbe è
+una fonte che dica, per i tipi dei Palazzi, quale sprite disegnano — come `P5MINIMAP_01.SPD` fa
+per la città. Fra i 1480 originali ripristinati non c'è: `MAP_SYMBOL.SPD` ha dieci simboli della
+minimappa in gioco, `P5_MAPDATA.SPD` è la mappa della metropolitana, `MEMENTOS.SPD` è la schermata
+dei Memento. Nessuno indicizza i tipi 4–45 con uno scarto costante, e le ancore note (10 porta,
+12 meccanismo, 17 e 26 forziere, 97 seme) non ammettono alcuno scarto comune.
+
+Altre due strade cercate e chiuse, perché non le ricerchi di nuovo chi legge:
+
+* **`ROADMAP.TBL → texlist.bin`** (672 byte, 336 slot di cui 176 pieni, valori da 1 a 199) non è
+  una mappa da tipo di pin a sprite: gli slot pieni cominciano da 48 e i tipi con significato già
+  noto — 10 porta, 12 meccanismo, 17 e 26 forziere, 46 distributore — non vi compaiono affatto.
+  È l'elenco delle texture della roadmap, 176 voci per 178 risorse.
+* **Il manifest degli archivi** (`data/atlas/original-archives/manifest.json`) elenca soltanto i
+  1480 file estratti, con hash e dimensione: non contiene l'indice dei CPK, quindi da qui non si
+  può nemmeno sapere quali file esistono e non sono stati presi.
+
+### Contare le icone nelle schermate: la strada che funziona
+
+L'utente ha fornito sei schermate delle mappe di Kamoshida, e da lì è nata la strada più diretta
+di tutte. **Copertura da 423 a 523 pin su 1429 (36,6%).**
+
+Il metodo è un vincolo di conteggio, non una somiglianza. Se in una schermata si contano due rombi
+verdi con la S, il tipo di pin che li disegna deve comparire **esattamente due volte** fra i pin
+nativi di quella planimetria; ogni schermata esclude dei candidati, e quando ne resta uno solo
+quello è dimostrato per esclusione di tutti gli altri.
+
+| schermata | rombi «S» | tipi ancora compatibili |
+|---|---|---|
+| Old Castle 1F | 1 | 4, 5, 10, 12, 15, 19, 28 |
+| Old Castle 2F | 1 | 4, 10, 13, 15, 19, 26, 28 |
+| Old Castle 3F | 2 | **4, 17** |
+| Tower: Lower Level | 1 | 4, 10, 14, 15, 19, 26, 28, 30 |
+| Tower: Upper Level | 0 | tutti i tipi assenti da quella mappa |
+| **compatibile con tutte** | | **4** |
+
+Il **tipo 4 è la stanza sicura**: 104 pin che non avevano significato. C'è anche la conferma
+posizionale — il suo pin cade nella stanzetta sopra il pilastro centrale della Torre, esattamente
+dove la schermata mostra il rombo.
+
+**La prova che il metodo vale.** Applicato al forziere, lo stesso vincolo deduce il **tipo 26**,
+che era già dimostrato dalle procedure `R_TBOX`: due strade che non si sono parlate danno lo
+stesso risultato. E dove il conteggio non regge — il lucchetto giallo, per cui nessun tipo è
+compatibile con tutte e cinque le osservazioni — il solutore lo dichiara irrisolto invece di
+aggiustare i conti.
+
+Le osservazioni stanno in `data/atlas/osservazioni-icone.json`, ciascuna con chi l'ha contata: il
+rombo verde è dichiarato dall'utente, gli altri generi li ho contati io leggendo le immagini, e
+questo è scritto nel file perché una deduzione che stona si possa rileggere alla fonte.
+`icon_observations.py` risolve, `verify_icon_observations.py` ricontrolla — soglia, unicità,
+conferme incrociate e generi irrisolti compresi.
+
+**Come si arriva al 100%:** servono **quattro schermate per ogni genere di icona**, meglio della
+mappa d'insieme del Palazzo e a esplorazione completa. I generi che restano e quanto valgono:
+freccia di passaggio ~370 pin (tipi 13, 14, 15, 16, 19), forziere aperto o punto tesoro ~230
+(tipi 17, 5, 28), lucchetto ~110 (tipi 10, 12), altre ~170.
+
+### Due firme grafiche misurate sulle texture
+
+Cercando di fare a meno delle schermate ho provato a leggere la texture sotto ogni pin. Una
+funziona come conferma, l'altra no, e vanno registrate entrambe:
+
+* **il giallo delle porte** — i trattini gialli disegnati sui muri sono le porte, e il tipo 10 vi
+  cade sopra nell'**88%** dei casi mentre nessun altro tipo supera il 26%. Non aggiunge copertura
+  (il tipo 10 era già dimostrato) ma conferma quella strada da un lato del tutto diverso, e
+  smentisce che il tipo 12 sia una porta (9%);
+* **il pettine delle scale** — contare le transizioni opaco/trasparente attorno al pin non
+  discrimina nulla: i valori stanno tutti fra 0,000 e 0,030 senza separazione. Strada chiusa.
+
+### I 5443 script del gioco, aperti senza decompilatore
+
+Con l'accesso ai CPK installati (`C:\Program Files (x86)\Steam\steamapps\common\P5R`) è caduta
+l'ipotesi che mancasse materiale sorgente, e insieme a lei una mia affermazione sbagliata.
+
+**Quello che i CPK dicono, e che chiude tre strade per sempre:**
+
+* nella cartella `ROADMAP` ci sono **solo** 534 `.BIN`, 313 `.DDS` e `ROADMAP.TBL`: nessuno sprite
+  sheet, nessun layout, nessuno script. L'estrazione precedente non aveva tralasciato nulla;
+* fra i **122 file `.SPD`** dei due archivi non ce n'è uno della mappa d'insieme: quelli di mappa
+  sono `MAP_SYMBOL` (dieci simboli della minimappa in gioco), `P5MINIMAP_01`, `P5_MAPDATA` (la rete
+  della metropolitana) e `MEMENTOS`;
+* i file `FHIT_*.BF`, gli script di campo, sono esattamente **227** nei CPK, e tutti e 227 erano
+  già stati decompilati: da quel lato non mancava niente.
+
+**Quello che invece mancava davvero:** gli altri script. Il gioco ne contiene **5443**, e ne erano
+stati letti 227. In `SCRIPT/FIELD` ce ne sono 904, in `FIELD/DOOR` 130, in `FIELD/INIT` 254, in
+`FIELD/NPC` 161, in `EVENT_DATA/SCRIPT` 934.
+
+Non avendo il decompilatore esterno ho scritto un lettore del formato compilato,
+`tools/p5r-map-export/flow_binario.py`. Il formato `FLW0` è a sezioni, big-endian; gli opcode che
+servono sono stati **dedotti dal confronto con gli script già decompilati**, non supposti: la
+sequenza `001d:0f94 · 0000:0000 2000:0000 · 000e · 0008:000d` è esattamente
+`BIT_ON(0x20000000 + 3988)`, e da lì si ricavano `PUSHIS`, `PUSHI`, `ADD`, `COMM` e l'indice 13 di
+`BIT_ON`. L'indice non è scritto da nessuna parte: si trova provandoli tutti su script di risposta
+nota e tenendo quello che la riproduce.
+
+`verify_flow_binario.py` lo mette alla prova sui 181 script di controllo: **precisione 97,2%,
+richiamo 83,4%**, 37 riprodotti alla lettera. Su tutti e 5443 gli script del gioco: letti tutti,
+**zero falliti, 13 secondi**, 3258 bandiere distinte.
+
+**Una trappola trovata e disinnescata.** Le bandiere **non sono globali**: 931 delle 3258 sono
+accese da script di Palazzi diversi. Cercandole senza vincolo, il tipo 97 — dimostrato come *seme
+della bramosia* dalle 21 occorrenze incrociate con la guida — risultava «forziere» con 23 casi su
+23. Con il vincolo che lo script citi il campo della mappa, i conflitti con il già dimostrato
+scendono a **zero**. Il vincolo non è una cautela: senza, si producono attribuzioni false.
+
+**Effetto sulla copertura:** i pin condizionali con una procedura pertinente che li accende
+passano da 425 a **657**, e la copertura complessiva da 423 a **490 pin (34,3%)**.
+
+Resta un dato da capire prima di consolidare: fra i 141 pin che hanno *sia* il tipo dimostrato
+*sia* la bandiera parlante, 93 concordano e **48 no**. Finché non è chiaro quale delle due prove
+ceda in quei casi, non aumento la copertura oltre: sarebbe ripetere l'errore della lettura
+geometrica.
+
+Cercata e chiusa anche la strada delle **stazioni della metropolitana**, che il piano elenca fra
+le categorie della Fase 2. I dati ci sono e sono ottimi — `extracted/metropolitana.json`, 31
+stazioni con nome e testi italiani ufficiali, 91 tratte, 64 archi — ma **manca la posizione**: le
+stazioni non compaiono fra gli sprite del blocco urbano (che arriva fino a «vendita accessori nel
+vicolo» e non ha una voce stazione), e né `P5_MAPINFO.PLG` né gli altri file della cartella `LMAP`
+ne portano le coordinate. Senza una fonte per la posizione un pin `treno` sarebbe collocato a
+occhio, cioè un mockup. Le stazioni restano quindi materiale pronto per i **collegamenti** della
+Fase 3, dove ciò che conta è la rete e non il punto sulla planimetria.
+
+Quello che servirebbe, e che va cercato nei CPK completi, sono i percorsi
+`*/FIELD/PANEL/ROADMAP/*.SPD` e `*.PLG` — il foglio sprite e il layout della mappa d'insieme dei
+Palazzi — e l'eventuale script che li disegna. Nella cartella ROADMAP dei 1480 file ci sono solo
+`ICON_*.BIN`, `DISP_*.BIN`, `PARTS_*.BIN`, le texture `RMAP_*.DDS` e `ROADMAP.TBL`: la parte che
+dice *come* quelle icone vengono disegnate non è stata estratta.
+
+Questo è il punto in cui è arrivata la misura, con gli scarti provati e i motivi scritti. Non lo
+chiamo limite invalicabile: chiamo così la differenza fra quello che oggi è provato e quello che
+non lo è, e che nessuna soglia più generosa può colmare.
 
 ### Che cosa è successo, e perché la Fase 2 non è tutta qui
 
@@ -279,6 +469,43 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 ---
 
 ## Registro delle dichiarazioni di pronto
+
+### Fase 2 — terza dichiarazione, 6 settembre 2026
+
+Copertura portata da 710 a **1300 pin su 1429 (91,0%)**. Comandi per riprodurre, nell'ordine:
+
+```
+python tools/p5r-map-export/map_icons.py data/atlas/extracted
+python tools/p5r-map-export/pin_reference.py data/atlas/extracted
+python tools/p5r-map-export/map_projection.py data/atlas/extracted
+python tools/p5r-map-export/pin_semantics.py data/atlas/extracted
+python tools/p5r-map-export/build_seed_package.py data/atlas/extracted data/seed data/seed/mappe/atlante-mondo.json
+python tools/p5r-map-export/verify_pin_reference.py data/atlas/extracted
+python tools/p5r-map-export/verify_map_projection.py data/atlas/extracted
+python tools/p5r-map-export/verify_pin_semantics.py data/atlas/extracted
+npm run mappe:ricarica && npm run typecheck && npm run lint && npm test
+```
+
+Misurato dopo la ricarica sul database reale: 334 mappe, **1565 spilli** (erano 978), 1378 con
+mappa; `fuoriDalLivelloMappe` vuoto, partita e catalogo intatti. Suite **535 su 535**, typecheck e
+lint puliti.
+
+**Cosa verificare, oltre alla riproducibilità.** Il merito delle tre estensioni:
+
+1. che lo scarto **76** del blocco del Covo sia davvero confermato dalle procedure e non scelto
+   per far tornare i conti — le cinque conferme sono nel campo `sottoIlPin.procedure` dei tipi
+   98–103 di `semantica-pin.json`;
+2. che la **procedura sotto il pin** non sia una prova circolare: la proiezione è stimata sui pin,
+   e da lì si legge il trigger. Il verificatore ricalcola tutto dalle sorgenti, ma il giudizio su
+   quanto la cosa provi va dato;
+3. che l'esclusione delle procedure `*_minimap_*` dal conto sia rispettata ovunque, e che nessuna
+   famiglia dichiarata in `FAMIGLIE_SOTTO` sia più larga di quanto il suo nome giustifichi;
+4. che le proiezioni **ricevute da un livello gemello** reggano davvero: ciascuna deve essere
+   rimisurata sui pin del livello che la riceve, con almeno la quota dichiarata di pin vicini;
+5. che i due tipi nuovi (`scala`, `uscita`) siano usati solo dove la prova lo dice, e che la
+   palette, la legenda e l'editor li mostrino correttamente.
+
+
 
 | data | fase | dichiarazione | esito Codex |
 |---|---|---|---|
