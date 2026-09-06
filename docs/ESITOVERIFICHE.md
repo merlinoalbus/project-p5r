@@ -467,3 +467,68 @@ finché i 46 tipi ancora privi di significato non saranno risolti o esclusi in v
 rimozione di tutte le quattro famiglie di chiavi costruite a mano, associazioni delle attività
 strutturate anziché nominali, conteggi sull'inventario completo e test specifici dei nuovi
 percorsi.
+
+## Fase 2 — Terza verifica della copertura al 90,8%
+
+**Esito: FAIL**
+**Commit verificato:** `5ca6444`
+**Data verifica:** 6 settembre 2026
+
+### Evidenze riprodotte
+
+1. Su una copia isolata del commit, la catena completa di generazione e i tre verificatori
+   dedicati terminano senza errori. I conteggi dichiarati sono reali: 1.429 pin nativi, 1.297
+   posati, 1.099 condizionati, 42 collegati a un luogo e 132 non posati; la contabilità chiude.
+2. `semantica-pin.json` contiene 102 tipi: 77 determinati, 2 in stato `ipotesi` e 23 non
+   determinati. Le prove dichiarate si ricontano in 51 tipi dal blocco urbano, 6 dal blocco del
+   Covo dei Ladri, 5 dalle procedure che accendono la bandiera e 15 dal punto del campo sotto il
+   pin; sono inoltre risolti 40 pin individuali.
+3. Lo scarto 76 del Covo porta effettivamente i tipi 98–103 sui sei sprite `マイパレス_*`.
+   Cinque famiglie hanno anche la conferma nominale indicata (`Maker`, `Sound`, `Image`,
+   `Daifugou`, `Award`) e non sono emerse smentite nel campione prodotto.
+4. Le 20 proiezioni ereditate da un livello gemello vengono rimisurate sul livello ricevente e
+   il verificatore ne ricontrolla quota, scarto e accoppiamenti. I nuovi tipi `scala` e `uscita`
+   sono registrati nella palette, nel gruppo Spostamenti e nelle icone del visore; la suite
+   esercita anche la loro presenza nell'editor.
+5. Sul commit isolato: `npm run typecheck` PASS, `npm run lint` PASS, 132 file e **535 test su
+   535** PASS. Due rigenerazioni complete consecutive producono le stesse impronte per
+   riferimento, proiezioni, semantica e pacchetto seed.
+
+### Rilievi bloccanti
+
+1. **Le ipotesi vengono importate, contro il contratto della Fase 2a.** Il piano prescrive che
+   un `nativeType` non deciso resti non importato. Invece i tipi 43 e 114 restano esplicitamente
+   in stato `ipotesi` (53 occorrenze complessive) e **36 loro pin entrano nel pacchetto seed**
+   come `meccanismo` o `nota`; la descrizione avverte che non sono certi, ma questo non rende
+   certificato il tipo assegnato.
+2. **La proiezione non usa l'assegnazione vincolata richiesta dal piano.** `stima` sceglie per
+   ciascun pin il punto del campo più vicino in modo indipendente, quindi lo stesso punto può
+   essere riutilizzato. Succede in 96 delle 176 mappe certificate: 242 dei 1.178 accoppiamenti
+   sono riusi; 97 riusi riguardano pin con coordinate differenti. Il verificatore ricalcola lo
+   stesso nearest-neighbour, ma non impone una corrispondenza uno-a-uno e quindi certifica la
+   coerenza dell'output con l'algoritmo, non il vincolo previsto.
+3. **Manca la convalida incrociata obbligatoria sui 9 campi con fattore già noto.** Né il
+   generatore né `verify_map_projection.py` contengono il confronto con i fattori 1,5/23,44 o
+   un elenco dei nove casi. Di conseguenza il requisito che la stima li riproduca non è
+   verificato.
+4. **Sei proiezioni usano un campo non dichiarato dalla mappa.** Il fallback
+   `campoAllargato` prova qualunque campo dello stesso maggiore e sceglie quello con scarto
+   minimo; include perfino due mappe senza alcun campo dichiarato. Quei campi alimentano poi
+   la lettura semantica dei trigger. Non esiste una prova indipendente che il campo scelto
+   rappresenti davvero quella planimetria.
+5. **L'esclusione promessa per `*_minimap_*` non è applicata.** `famiglia_sotto` non scarta
+   quei nomi: 36 accoppiamenti con procedure `TBOX_minimap` vengono classificati come
+   `forziere`/`forziere raro`, distribuiti su 11 tipi nativi. Nei tipi oggi determinati per
+   dominanza sotto il pin questi casi restano minoritari, ma la prova dichiarata e il codice
+   non coincidono e il conteggio non è quello documentato.
+6. **La prova “procedura sotto il pin” non è indipendente dalla proiezione che la genera.** La
+   trasformazione viene scelta minimizzando la distanza fra gli stessi pin e l'insieme di
+   trigger/ingressi; subito dopo, il trigger più vicino viene assunto come prova del significato.
+   I riusi, il fallback a campi estranei e l'assenza di convalida sui nove riferimenti impediscono
+   di considerare dimostrati i 15 tipi e gli 867 pin che dipendono da questa strada.
+
+**Decisione:** la crescita di copertura, la contabilità, il blocco del Covo, l'eredità fra
+livelli e l'integrazione UI dei nuovi tipi sono riprodotte; la Fase 2 complessiva resta respinta.
+Per il riesame occorrono: non importare alcuna ipotesi, usare un'assegnazione uno-a-uno,
+convalidare esplicitamente i nove campi noti, eliminare o dimostrare `campoAllargato`, applicare
+realmente l'esclusione `*_minimap_*` e rendere la prova semantica indipendente dal fitting.
