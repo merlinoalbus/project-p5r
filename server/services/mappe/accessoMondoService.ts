@@ -91,33 +91,6 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         const n = prepared('SELECT a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave=a.negozio_chiave WHERE a.chiave=? AND n.nascosto=0').get(chiave) as { negozio_chiave: string } | undefined;
         if (n) riferimenti.push({ tipo: 'negozio', chiave: n.negozio_chiave });
       }
-      // singola area non ha una planimetria propria — succede per trecentonove punti — arrivare
-      // al Palazzo giusto è comunque arrivare nel posto, e da lì la mappa d'insieme mostra dove.
-      for (const a of [...riferimenti].filter(r => r.tipo === 'area')) {
-        const d = prepared('SELECT dungeon_chiave FROM dungeon_area WHERE chiave = ?').get(a.chiave) as { dungeon_chiave: string | null } | undefined;
-        if (d?.dungeon_chiave && !riferimenti.some(r => r.tipo === 'dungeon' && r.chiave === d.dungeon_chiave)) {
-          riferimenti.push({ tipo: 'dungeon', chiave: d.dungeon_chiave });
-        }
-      }
-      // un quartiere del catalogo. Nove negozi non hanno un luogo che li ospiti — un venditore
-      // ambulante, un negozio dentro un Palazzo, uno online — e senza questo passo resterebbero
-      // irraggiungibili pur avendo un indirizzo scritto.
-      for (const n of [...riferimenti].filter(r => r.tipo === 'negozio')) {
-        const d = prepared('SELECT luogo_chiave FROM negozio WHERE chiave = ?').get(n.chiave) as { luogo_chiave: string | null } | undefined;
-        if (d?.luogo_chiave && prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(d.luogo_chiave)
-            && !riferimenti.some(r => r.tipo === 'quartiere' && r.chiave === d.luogo_chiave)) {
-          riferimenti.push({ tipo: 'quartiere', chiave: d.luogo_chiave });
-        }
-      }
-      // il suo pin la destinazione precisa vince comunque — il passo più sotto toglie l'accesso
-      // generico quando sulla stessa mappa c'è già il pin esatto — ma dove il pin manca è meglio
-      // arrivare al quartiere giusto che non arrivare affatto.
-      for (const l of [...riferimenti].filter(r => r.tipo === 'luogo')) {
-        const q = prepared('SELECT quartiere_chiave FROM luogo WHERE chiave = ?').get(l.chiave) as { quartiere_chiave: string | null } | undefined;
-        if (q?.quartiere_chiave && !riferimenti.some(r => r.tipo === 'quartiere' && r.chiave === q.quartiere_chiave)) {
-          riferimenti.push({ tipo: 'quartiere', chiave: q.quartiere_chiave });
-        }
-      }
       // Il legame luogo.negozio è un riferimento strutturato al catalogo.
       for (const n of riferimenti.filter(r => r.tipo === 'negozio')) {
         for (const l of prepared('SELECT chiave FROM luogo WHERE negozio = ? ORDER BY chiave').all(n.chiave) as Array<{ chiave: string }>) riferimenti.push({ tipo: 'luogo', chiave: l.chiave });

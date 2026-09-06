@@ -1,0 +1,553 @@
+{
+  "schemaVersion": 1,
+  "cosaE": "ponte fra gli oggetti della guida, che hanno solo un nome, e gli articoli del catalogo, che hanno una chiave e un negozio",
+  "comeSiRigenera": "npm run oggetti:crosswalk",
+  "criterio": "corrispondenza univoca in entrambe le direzioni fra nomi normalizzati; ogni caso ambiguo resta escluso",
+  "generato": "2026-09-06",
+  "abbinamenti": [
+    {
+      "nome": "1UP",
+      "articolo": "distributori-automatici/1up",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Acqua battesimale",
+      "articolo": "chiesa-kanda/acqua-battesimale",
+      "negozio": "chiesa-kanda"
+    },
+    {
+      "nome": "Acqua della rinascita",
+      "articolo": "distributori-automatici/acqua-della-rinascita",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Acqua di Udagawa",
+      "articolo": "distributori-automatici/acqua-di-udagawa",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Amazake definitivo",
+      "articolo": "distributori-automatici/amazake-definitivo",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Arginade",
+      "articolo": "distributori-automatici/arginade",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Aroma rinfrescante",
+      "articolo": "body-chop/aroma-rinfrescante",
+      "negozio": "body-chop"
+    },
+    {
+      "nome": "Balsamo vegetale",
+      "articolo": "fiorista-rafflesia/balsamo-vegetale",
+      "negozio": "fiorista-rafflesia"
+    },
+    {
+      "nome": "Benda adesiva",
+      "articolo": "farmacia-aohige/benda-adesiva",
+      "negozio": "farmacia-aohige"
+    },
+    {
+      "nome": "Beni-Azuma",
+      "articolo": "venditore-patate-dolci/beni-azuma",
+      "negozio": "venditore-patate-dolci"
+    },
+    {
+      "nome": "Big Bang Burger",
+      "articolo": "big-bang-burger/big-bang-burger",
+      "negozio": "big-bang-burger"
+    },
+    {
+      "nome": "Bomba di popcorn",
+      "articolo": "mealport/bomba-di-popcorn",
+      "negozio": "mealport"
+    },
+    {
+      "nome": "Capsula d'allerta",
+      "articolo": "clinica-takemi/capsula-d-allerta",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Cereali assortiti",
+      "articolo": "mealport/cereali-assortiti",
+      "negozio": "mealport"
+    },
+    {
+      "nome": "Chimaki speciale",
+      "articolo": "street-food-houraku/chimaki-speciale",
+      "negozio": "street-food-houraku"
+    },
+    {
+      "nome": "Creatura",
+      "articolo": "distributori-automatici/creatura",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Crostatina angelo",
+      "articolo": "taisho-store/crostatina-angelo",
+      "negozio": "taisho-store"
+    },
+    {
+      "nome": "Cuoio conciato",
+      "articolo": "yumenoshima/cuoio-conciato",
+      "negozio": "yumenoshima"
+    },
+    {
+      "nome": "Curry alla fragola",
+      "articolo": "distributori-automatici/curry-alla-fragola",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Curry del Leblanc",
+      "articolo": "leblanc/curry-del-leblanc",
+      "negozio": "leblanc"
+    },
+    {
+      "nome": "Dr. Salt NEO",
+      "articolo": "distributori-automatici/dr-salt-neo",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Durian au lait",
+      "articolo": "distributori-automatici/durian-au-lait",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Earl Green",
+      "articolo": "distributori-automatici/earl-green",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Elisir del padre",
+      "articolo": "mercante-sakai/elisir-del-padre",
+      "negozio": "mercante-sakai"
+    },
+    {
+      "nome": "Fibbia di latta",
+      "articolo": "yumenoshima/fibbia-di-latta",
+      "negozio": "yumenoshima"
+    },
+    {
+      "nome": "Fosforo rosso",
+      "articolo": "akiba/fosforo-rosso",
+      "negozio": "akiba"
+    },
+    {
+      "nome": "Frullato iperproteico",
+      "articolo": "prossimo-asso/frullato-iperproteico",
+      "negozio": "prossimo-asso"
+    },
+    {
+      "nome": "Frullato proteico",
+      "articolo": "discount-rocinante/frullato-proteico",
+      "negozio": "discount-rocinante"
+    },
+    {
+      "nome": "Gel rilassante",
+      "articolo": "clinica-takemi/gel-rilassante",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Gelatina viennese",
+      "articolo": "prossimo-asso/gelatina-viennese",
+      "negozio": "prossimo-asso"
+    },
+    {
+      "nome": "Gocce per occhioni",
+      "articolo": "farmacia-aohige/gocce-per-occhioni",
+      "negozio": "farmacia-aohige"
+    },
+    {
+      "nome": "Gomitolo di seta",
+      "articolo": "yumenoshima/gomitolo-di-seta",
+      "negozio": "yumenoshima"
+    },
+    {
+      "nome": "Gomma non statica",
+      "articolo": "chiosco-kiyasuku/gomma-non-statica",
+      "negozio": "chiosco-kiyasuku"
+    },
+    {
+      "nome": "Homunculus",
+      "articolo": "tanaka-affari-loschi/homunculus",
+      "negozio": "tanaka-affari-loschi"
+    },
+    {
+      "nome": "Incenso del risveglio",
+      "articolo": "vestiti-usati-kichijoji/incenso-del-risveglio",
+      "negozio": "vestiti-usati-kichijoji"
+    },
+    {
+      "nome": "Insalata venere",
+      "articolo": "big-bang-burger/insalata-venere",
+      "negozio": "big-bang-burger"
+    },
+    {
+      "nome": "IV 100",
+      "articolo": "clinica-takemi/iv-100",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "IV 50",
+      "articolo": "clinica-takemi/iv-50",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Joylent",
+      "articolo": "distributori-automatici/joylent",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Kajaclear-R",
+      "articolo": "clinica-takemi/kajaclear-r",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Katsu a pezzettoni",
+      "articolo": "friggitoria-hagoromo/katsu-a-pezzettoni",
+      "negozio": "friggitoria-hagoromo"
+    },
+    {
+      "nome": "Kogatana nera",
+      "articolo": "untouchable/kogatana-nera",
+      "negozio": "untouchable"
+    },
+    {
+      "nome": "Kundaclear-R",
+      "articolo": "clinica-takemi/kundaclear-r",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Lente condensante",
+      "articolo": "akiba/lente-condensante",
+      "negozio": "akiba"
+    },
+    {
+      "nome": "Lenzuolo rinfrescante",
+      "articolo": "chiosco-kiyasuku/lenzuolo-rinfrescante",
+      "negozio": "chiosco-kiyasuku"
+    },
+    {
+      "nome": "Locusta alla maionese",
+      "articolo": "distributori-automatici/locusta-alla-maionese",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Manta",
+      "articolo": "distributori-automatici/manta",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Melon pan",
+      "articolo": "panetteria-yon-germain/melon-pan",
+      "negozio": "panetteria-yon-germain"
+    },
+    {
+      "nome": "Mercurio",
+      "articolo": "yumenoshima/mercurio",
+      "negozio": "yumenoshima"
+    },
+    {
+      "nome": "Miso di stella marina",
+      "articolo": "distributori-automatici/miso-di-stella-marina",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Nastea",
+      "articolo": "distributori-automatici/nastea",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Natto rugiadoso",
+      "articolo": "taisho-store/natto-rugiadoso",
+      "negozio": "taisho-store"
+    },
+    {
+      "nome": "Nikuman alla napoletana",
+      "articolo": "street-food-houraku/nikuman-alla-napoletana",
+      "negozio": "street-food-houraku"
+    },
+    {
+      "nome": "Nikuman gustoso",
+      "articolo": "street-food-houraku/nikuman-gustoso",
+      "negozio": "street-food-houraku"
+    },
+    {
+      "nome": "Nikuman piccante",
+      "articolo": "street-food-houraku/nikuman-piccante",
+      "negozio": "street-food-houraku"
+    },
+    {
+      "nome": "Nikuman straniero",
+      "articolo": "triple-seven/nikuman-straniero",
+      "negozio": "triple-seven"
+    },
+    {
+      "nome": "Nohar-M",
+      "articolo": "clinica-takemi/nohar-m",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Olio del recupero",
+      "articolo": "body-chop/olio-del-recupero",
+      "negozio": "body-chop"
+    },
+    {
+      "nome": "Pane e marmellata",
+      "articolo": "negozio-scolastico/pane-e-marmellata",
+      "negozio": "negozio-scolastico"
+    },
+    {
+      "nome": "Panfritto",
+      "articolo": "negozio-scolastico/panfritto",
+      "negozio": "negozio-scolastico"
+    },
+    {
+      "nome": "Panino con yakisoba",
+      "articolo": "negozio-scolastico/panino-con-yakisoba",
+      "negozio": "negozio-scolastico"
+    },
+    {
+      "nome": "Panino lunare",
+      "articolo": "big-bang-burger/panino-lunare",
+      "negozio": "big-bang-burger"
+    },
+    {
+      "nome": "Panino supernova",
+      "articolo": "big-bang-burger/panino-supernova",
+      "negozio": "big-bang-burger"
+    },
+    {
+      "nome": "Panino terrestre",
+      "articolo": "big-bang-burger/panino-terrestre",
+      "negozio": "big-bang-burger"
+    },
+    {
+      "nome": "Patatine saturnine",
+      "articolo": "big-bang-burger/patatine-saturnine",
+      "negozio": "big-bang-burger"
+    },
+    {
+      "nome": "Pergamena spessa",
+      "articolo": "yumenoshima/pergamena-spessa",
+      "negozio": "yumenoshima"
+    },
+    {
+      "nome": "Proteine d'importazione",
+      "articolo": "prossimo-asso/proteine-d-importazione",
+      "negozio": "prossimo-asso"
+    },
+    {
+      "nome": "Punch non filtrato",
+      "articolo": "distributori-automatici/punch-non-filtrato",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Razione militare",
+      "articolo": "untouchable/razione-militare",
+      "negozio": "untouchable"
+    },
+    {
+      "nome": "Re Karaage",
+      "articolo": "triple-seven/re-karaage",
+      "negozio": "triple-seven"
+    },
+    {
+      "nome": "Recup-RO: 100 mg",
+      "articolo": "clinica-takemi/recup-ro-100-mg",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Recup-RO: 50 mg",
+      "articolo": "clinica-takemi/recup-ro-50-mg",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Reviv-all",
+      "articolo": "clinica-takemi/reviv-all",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Rianidrin",
+      "articolo": "clinica-takemi/rianidrin",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Rinnov-all",
+      "articolo": "clinica-takemi/rinnov-all",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Roccia nera",
+      "articolo": "stoneon/roccia-nera",
+      "negozio": "stoneon"
+    },
+    {
+      "nome": "Sabbia ferrea",
+      "articolo": "akiba/sabbia-ferrea",
+      "negozio": "akiba"
+    },
+    {
+      "nome": "Sandalo rasta",
+      "articolo": "mantra-ganda/sandalo-rasta",
+      "negozio": "mantra-ganda"
+    },
+    {
+      "nome": "Sandwich",
+      "articolo": "panetteria-yon-germain/sandwich",
+      "negozio": "panetteria-yon-germain"
+    },
+    {
+      "nome": "Scaldamani",
+      "articolo": "chiosco-kiyasuku/scaldamani",
+      "negozio": "chiosco-kiyasuku"
+    },
+    {
+      "nome": "Second Maid",
+      "articolo": "distributori-automatici/second-maid",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Sicchenina",
+      "articolo": "farmacia-aohige/sicchenina",
+      "negozio": "farmacia-aohige"
+    },
+    {
+      "nome": "Sicchenina A",
+      "articolo": "farmacia-aohige/sicchenina-a",
+      "negozio": "farmacia-aohige"
+    },
+    {
+      "nome": "Sicchenina EX",
+      "articolo": "farmacia-aohige/sicchenina-ex",
+      "negozio": "farmacia-aohige"
+    },
+    {
+      "nome": "Soba calmante",
+      "articolo": "triple-seven/soba-calmante",
+      "negozio": "triple-seven"
+    },
+    {
+      "nome": "Soda di Udagawa",
+      "articolo": "distributori-automatici/soda-di-udagawa",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Soma",
+      "articolo": "negozio-palazzo-niijima/soma",
+      "negozio": "negozio-palazzo-niijima"
+    },
+    {
+      "nome": "Spray detergente",
+      "articolo": "vestiti-usati-kichijoji/spray-detergente",
+      "negozio": "vestiti-usati-kichijoji"
+    },
+    {
+      "nome": "Spray rapido",
+      "articolo": "vestiti-usati-kichijoji/spray-rapido",
+      "negozio": "vestiti-usati-kichijoji"
+    },
+    {
+      "nome": "Spray supremo",
+      "articolo": "vestiti-usati-kichijoji/spray-supremo",
+      "negozio": "vestiti-usati-kichijoji"
+    },
+    {
+      "nome": "Starvicks",
+      "articolo": "distributori-automatici/starvicks",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Sughero",
+      "articolo": "fiorista-rafflesia/sughero",
+      "negozio": "fiorista-rafflesia"
+    },
+    {
+      "nome": "Takemedic-All",
+      "articolo": "clinica-takemi/takemedic-all",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Takemedic-All V",
+      "articolo": "clinica-takemi/takemedic-all-v",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Takemedic-All Z",
+      "articolo": "clinica-takemi/takemedic-all-z",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Tè energetico",
+      "articolo": "distributori-automatici/te-energetico",
+      "negozio": "distributori-automatici"
+    },
+    {
+      "nome": "Trambusto S",
+      "articolo": "prossimo-asso/trambusto-s",
+      "negozio": "prossimo-asso"
+    },
+    {
+      "nome": "Tris di calamari",
+      "articolo": "super-muramasa/tris-di-calamari",
+      "negozio": "super-muramasa"
+    },
+    {
+      "nome": "Unguento fisico",
+      "articolo": "clinica-takemi/unguento-fisico",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Unguento magico",
+      "articolo": "clinica-takemi/unguento-magico",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Unguento vitale",
+      "articolo": "clinica-takemi/unguento-vitale",
+      "negozio": "clinica-takemi"
+    },
+    {
+      "nome": "Vino della grazia",
+      "articolo": "chiesa-kanda/vino-della-grazia",
+      "negozio": "chiesa-kanda"
+    },
+    {
+      "nome": "Wafer dei ladri",
+      "articolo": "discount-rocinante/wafer-dei-ladri",
+      "negozio": "discount-rocinante"
+    },
+    {
+      "nome": "Yaki-Imo leggendario",
+      "articolo": "venditore-patate-dolci/yaki-imo-leggendario",
+      "negozio": "venditore-patate-dolci"
+    }
+  ],
+  "summary": {
+    "vociGuida": 355,
+    "articoli": 499,
+    "abbinati": 104,
+    "scartati": {
+      "più di un articolo con quel nome": 2,
+      "più di un oggetto con quel nome": 0,
+      "nessun articolo con quel nome": 249
+    }
+  },
+  "esempiScartati": {
+    "più di un articolo con quel nome": [
+      "Cesta di vestiti",
+      "Veste nera"
+    ],
+    "più di un oggetto con quel nome": [],
+    "nessun articolo con quel nome": [
+      "Frutto del diavolo",
+      "Medicina",
+      "Takemedic",
+      "Sandwich inzuppato",
+      "Dango lunare"
+    ]
+  }
+}
