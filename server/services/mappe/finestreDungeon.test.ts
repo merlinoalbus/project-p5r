@@ -45,9 +45,13 @@ interface Finestra {
   luogo?: { mappa?: string | null };
 }
 
+/** I Memento restano fuori dall'atlante — non sono un luogo che si raggiunge da Tokyo ma un pozzo
+ *  con una pagina sua — quindi non hanno un pin d'ingresso. Le finestre attese sono le altre. */
+const SENZA_INGRESSO = new Set(['mementos']);
+
 const finestre: Finestra[] = (JSON.parse(
   fs.readFileSync(path.join(DIR_SEED, 'finestre-dungeon.json'), 'utf8'),
-) as { finestre: Finestra[] }).finestre;
+) as { finestre: Finestra[] }).finestre.filter((f) => !SENZA_INGRESSO.has(f.dungeon));
 
 const GIORNI_DEL_MESE: Record<number, number> = {
   4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31, 1: 31, 2: 28, 3: 31,
@@ -97,6 +101,8 @@ describe('le finestre dei Palazzi, dal percorso di avvio ordinario', () => {
   it('l’avvio ordinario crea un ingresso per ciascuno dei Palazzi dichiarati', () => {
     const trovati = ingressi();
     expect(trovati).toHaveLength(finestre.length);
+    // e nessun ingresso ai Memento: quelli si raggiungono dalla loro pagina
+    expect(trovati.some((i) => i.riferimento_chiave === 'dungeon-mementos')).toBe(false);
     expect(new Set(trovati.map((i) => i.riferimento_chiave)))
       .toEqual(new Set(finestre.map((f) => `dungeon-${f.dungeon}`)));
   });

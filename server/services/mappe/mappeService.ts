@@ -38,7 +38,11 @@ function rigaMappa(chiave: string): RigaMappa {
 function conteggi(chiave: string): { spilli: number; figli: number } {
   return {
     spilli: (prepared('SELECT COUNT(*) AS n FROM spillo WHERE mappa_chiave = ?').get(chiave) as { n: number }).n,
-    figli: (prepared('SELECT COUNT(*) AS n FROM mappa WHERE genitore_chiave = ?').get(chiave) as { n: number }).n,
+    // I figli si contano fra quelli che si vedono: il nodo dei Memento è tolto dall'albero, e
+    // contarlo lo stesso faceva dire a Tokyo «venticinque luoghi» mostrandone ventiquattro. Un
+    // conteggio che non torna con l'elenco sotto è peggio che nessun conteggio.
+    figli: (prepared("SELECT COUNT(*) AS n FROM mappa WHERE genitore_chiave = ? AND chiave <> 'citta-mementos'")
+      .get(chiave) as { n: number }).n,
   };
 }
 
@@ -80,10 +84,45 @@ function riassunto(r: RigaMappa, collezioni=collezioniImmagini()): MappaRiassunt
   };
 }
 
-/** Albero completo (piatto, con genitore): radici prima, poi per ordine. */
+/** La radice dei Memento, e tutto quel che le sta sotto.
+ *
+ * I Memento non sono un luogo dell'atlante. Non si visitano per aree come un Palazzo — i piani
+ * sono generati a ogni discesa — e la loro pagina li disegna per intero, col pozzo e i nove
+ * dedali. Comparivano però anche nell'indice delle Mappe e nella Città come un quartiere
+ * qualunque, e chi ci arrivava di lì trovava otto planimetrie di strutture fisse senza contesto:
+ * meno di niente. Si raggiungono da `/guida/dungeon/mementos` e dalle richieste dei Memento, che
+ * a quella pagina puntano.
+ */
+const RADICI_MEMENTO = [
+  'dungeon-mementos',
+  // «Entrata dei Memento» è un nodo quartiere figlio di Tokyo. Tolto il quartiere dalla Città,
+  // quello restava nell'albero come un luogo orfano che porta al pozzo dalla porta di servizio.
+  'citta-mementos',
+];
+
+/** Le radici date e tutta la loro discendenza, seguendo i genitori finché l'insieme smette di crescere. */
+function discendenzaDi(radici: string[]): Set<string> {
+  const dentro = new Set<string>(radici);
+  const nodi = prepared('SELECT chiave, genitore_chiave FROM mappa').all() as Array<{ chiave: string; genitore_chiave: string | null }>;
+  for (let cresciuto = true; cresciuto;) {
+    cresciuto = false;
+    for (const n of nodi) {
+      if (n.genitore_chiave && dentro.has(n.genitore_chiave) && !dentro.has(n.chiave)) {
+        dentro.add(n.chiave);
+        cresciuto = true;
+      }
+    }
+  }
+  return dentro;
+}
+
+/** Albero completo (piatto, con genitore): radici prima, poi per ordine. Senza i Memento. */
 export function elencaMappe(): MappaRiassuntoDto[] {
   const collezioni=collezioniImmagini();
-  return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, nome').all() as RigaMappa[]).map(r=>riassunto(r,collezioni));
+  const memento = discendenzaDi(RADICI_MEMENTO);
+  return (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, nome').all() as RigaMappa[])
+    .filter((r) => !memento.has(r.chiave))
+    .map(r=>riassunto(r,collezioni));
 }
 
 function percorsoDi(r: RigaMappa): Array<{ chiave: string; nome: string }> {
