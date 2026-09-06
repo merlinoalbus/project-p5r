@@ -1718,3 +1718,10 @@ riduce il rischio dell'API/componente comune e diventa il modello per le destina
 Oggetti e per i luoghi condizionati delle Attività. Nessun fabbisogno grafico è ancora registrato:
 si apre `docs/grafica/fabbisogno.md` solo con asset realmente mancanti scoperti durante ciascuna
 pagina, senza rigenerare i 684 file già approvati.
+
+### Baseline prima dei lotti Fase 5
+
+Sul ramo condiviso dopo `b63252f`, `npm test -- --run` è **PASS: 137 file, 569 test**. Questa è la
+baseline di regressione per le fondamenta condivise e per i lotti A/B: ogni candidatura Fase 5
+deve riportare il delta dei test aggiunti e mantenere verde la suite completa, oltre ai test
+dedicati alla pagina o componente che modifica.
