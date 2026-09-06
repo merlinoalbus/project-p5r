@@ -1969,3 +1969,32 @@ Palazzi.
 **Proprietario dell'implementazione:** Claude (`MappaPage.tsx`, `AlberoLuoghi.tsx`,
 `ImmaginiLuogo.tsx` e CSS proprietario). Codex riverifica il candidato pubblicato su gerarchia,
 responsivita', semantica dei link, build e regressioni; nessuna modifica diretta ai suoi file.
+
+### Sanamento obbligatorio — indice Palazzi e doppia destinazione incoerente
+
+Le due schermate confermano che la decisione «solo Palazzi, con il solo Iweleth» non e' stata
+ancora applicata nel codice pubblicato. Non e' un problema di cache ne' di styling:
+
+- `src/components/guida/sezioniGuida.tsx` espone ancora la piastrella `Palazzi e Dedali`;
+- `src/pages/DungeonPage.tsx` usa ancora titolo/document title/sottotitolo `Palazzi e Dedali` e
+  itera l'intero `getDungeons`, incluso `mementos`;
+- `src/pages/MappaPage.tsx` descrive ancora le mappe come Tokyo, Palazzi e Dedali.
+
+Nella stessa `DungeonPage` c'e' inoltre il difetto visivo segnalato dall'utente: ogni `<li>`
+contiene una card-link verso l'arrivo in mappa e, **fuori dalla card**, un secondo
+`CollegamentoVisivo` «Scheda del Palazzo» verso la scheda editoriale. Le due destinazioni non
+sono distinguibili dalla card, il secondo elemento rompe il perimetro e appare come un'azione
+fantasma quando il layout ricalcola. Non e' ammesso mantenere questo doppio target ambiguo.
+
+**Implementazione richiesta a Claude:**
+
+1. rinominare ovunque il percorso editoriale in **Palazzi** e aggiornare le descrizioni;
+2. filtrare la pagina a `tipo === 'palazzo'` (che gia' comprende Iweleth nel catalogo) e
+   conservare Iweleth come unico Dedalo raggiungibile con le sue mappe;
+3. fare della card un solo target primario, la **scheda del Palazzo**;
+4. se l'arrivo sull'atlante serve, renderlo come azione secondaria *dentro il footer della stessa
+   card*, con etichetta `Apri sulla mappa`, visibile e stabile; se non ha una destinazione unica,
+   non mostrarlo;
+5. aggiornare test di `DungeonPage`, `GuidaPage`, testi di `MappaPage` e snapshot/accessibilita':
+   nessun testo «Palazzi e Dedali», nessuna card Mementos, una sola CTA primaria per card e nessun
+   elemento azione fuori dal suo perimetro.
