@@ -96,6 +96,67 @@ SIGNIFICATO = {
     'マイパレス_アワード': ('attivita', 'Premi'),
 }
 
+# Nomi raggiunti attraverso la tabella nativa delle parti (`pin_part_table.py`), che lega il tipo
+# di un pin allo sprite con cui il gioco lo disegna. Il nome è del gioco; la resa nel vocabolario
+# dell'applicazione è una scelta, presa qui una per una e scritta accanto alla lettura letterale.
+#
+# Il criterio della scelta: si assegna un tipo di segnalino solo dove il nome nomina **una cosa che
+# sta nel mondo** — un'uscita, una scala, un tesoro, un negozio. Dove il nome descrive un ruolo
+# dell'interfaccia e non un oggetto (l'icona del giocatore, un ritaglio il cui nome non si decodifica)
+# il tipo resta `nota`: il nome è dimostrato, il significato per la guida no, e sarà l'utente a
+# chiuderlo guardando le schermate. Battezzarli per somiglianza sarebbe l'errore già misurato.
+DALLA_TABELLA_DELLE_PARTI = {
+    # Tipi che erano già dimostrati per altre strade. Sono qui apposta: servono da controllo
+    # incrociato, perché il nome nativo deve dire la stessa cosa che dicevano il conteggio delle
+    # icone, la posizione sul bordo e le procedure. Dove non la dice, uno dei due sbaglia e va
+    # visto — è così che è saltato fuori che il tipo 12 non è un meccanismo ma una porta chiusa.
+    'ミニマップ：セーフルームアイコン': ('sicura', 'Stanza sicura'),
+    'ミニマップ：宝箱': ('forziere', 'Forziere'),
+    'ミニマップ：開かない扉': ('porta', 'Porta che non si apre'),
+    'ミニマップ：特殊鍵・共犯者クエス': ('porta', 'Porta a chiave speciale'),
+    'ミニマップ：やじるし　↑': ('passaggio', 'Passaggio verso l’alto'),
+    'ミニマップ：やじるし　下': ('passaggio', 'Passaggio verso il basso'),
+    'ミニマップ：やじるし　右': ('passaggio', 'Passaggio verso destra'),
+    'ミニマップ：やじるし　左': ('passaggio', 'Passaggio verso sinistra'),
+    '種': ('seme-bramosia', 'Seme di bramosia'),
+    # movimento verticale e scale: il nome dice la direzione, e la direzione è il significato
+    'ミニマップ：上下移動矢印　上': ('scala', 'Salita'),
+    'ミニマップ：上下移動矢印　下': ('scala', 'Discesa'),
+    'ミニマップ：up ': ('scala', 'Salita'),
+    'ミニマップ：down': ('scala', 'Discesa'),
+    # uscite e passaggi
+    'ミニマップ：EXIT　': ('uscita', 'Uscita'),
+    # Un punto di spostamento, non un arco già risolto: dice che di lì ci si muove, non dove si
+    # arriva. I collegamenti con partenza e arrivo sono un'altra cosa e stanno altrove (Fase 3b).
+    'ミニマップ：移動先アイコン1': ('passaggio', 'Punto di spostamento'),
+    '矢印左上': ('passaggio', 'Passaggio in alto a sinistra'),
+    '矢印右上': ('passaggio', 'Passaggio in alto a destra'),
+    '矢印左下': ('passaggio', 'Passaggio in basso a sinistra'),
+    '矢印右下': ('passaggio', 'Passaggio in basso a destra'),
+    'オタカラアイコン': ('tesoro-palazzo', 'Tesoro del Palazzo'),
+    'スタンプ': ('timbro', 'Timbro dei Memento'),
+    # Tre rese proposte e poi ritirate, su rilievo di Codex del 6 settembre 2026. Il nome nativo
+    # dimostra che cosa il gioco disegna, non come vada chiamato nella guida, e in questi tre casi
+    # il salto non regge:
+    #
+    # - `ミニマップ：ベルベット` (tipo 20): il ritaglio è una «V» azzurra della Stanza di Velluto.
+    #   Che ci si entri da una porta blu è una cosa che so io del gioco, non una cosa che il nome
+    #   dimostri; e nel registro `porta` è «porta chiusa o serratura», che questa non è.
+    # - `ミニマップ：チェック` (tipo 43): è una spunta. Una spunta non dice che cosa si esamini.
+    # - `ミニマップ：目的地・認知ロックポ` (tipo 5): il nome ne mette insieme due, «destinazione»
+    #   e «punto di blocco cognitivo». Un nome che ne dice due non ne dimostra uno.
+    #
+    # Restano `nota` da verificare, e la loro scheda porta il nome nativo: chi controlla sulle
+    # schermate parte da lì, che è molto più di dove si era.
+    # botteghe che stanno fuori dal blocco urbano
+    '中華マン屋': ('ristorante', 'Panini al vapore'),
+    '輸入食品': ('negozio', 'Alimentari importati'),
+    'ジョゼ': ('negozio', 'Jose'),
+    '教会': ('culto', 'Chiesa'),
+    '路地アクセサリー売り': ('negozio', 'Venditore di accessori nel vicolo'),
+    'ＩＮＦＯ': ('nota', 'Punto informazioni'),
+}
+
 # Nomi di procedura che dicono che cosa il pin rappresenta, con il tipo di segnalino e l'etichetta.
 # L'ordine conta: la prima famiglia che riconosce il nome vince, e le varianti rare vanno prima
 # della forma generica.
@@ -666,7 +727,7 @@ def significato_dalla_proiezione(out):
     return esito
 
 
-def riferimenti_da_verificare(riga, script, sotto, proiezione, motivo):
+def riferimenti_da_verificare(riga, script, sotto, proiezione, motivo, dalla_tabella=None):
     """Tutto ciò che si è raccolto su un tipo che resta senza significato dimostrato.
 
     Decisione dell'utente del 6 settembre 2026: questi pin **entrano lo stesso**, come segnalino
@@ -688,23 +749,34 @@ def riferimenti_da_verificare(riga, script, sotto, proiezione, motivo):
     def primi(d, quanti=8):
         return dict(sorted((d or {}).items(), key=lambda x: (-x[1], x[0]))[:quanti])
 
+    tabella = dalla_tabella or riga.get('tabellaParti') or {}
     scheda = dict(
         motivoNonDeterminato=motivo,
         diffusione=dict(pin=riga['occorrenze'], planimetrieUrbane=riga['mappeUrbane'],
                         planimetrieDungeon=riga['mappeDungeon'], condizionali=riga['condizionali']),
-        spriteNativo=riga['nomeNativo'], associazione=riga['associazione'])
+        spriteNativo=riga['nomeNativo'], associazione=riga['associazione'],
+        # il join nativo tipo → parte → sprite: dove c'è, è la traccia più forte della scheda,
+        # perché è il nome che il gioco dà a ciò che disegna
+        tabellaParti=dict(partId=tabella.get('partId'), indiceSprite=tabella.get('indiceSprite'),
+                          nomeNativo=tabella.get('nomeNativo'), png=tabella.get('png'),
+                          motivoSenzaSprite=tabella.get('motivoSenzaSprite')) if tabella else None)
     if script:
+        # La scheda mostra le prime voci per restare leggibile, ma l'artefatto conserva **tutto**:
+        # troncare l'evidenza a otto righe renderebbe la verifica manuale monca proprio dove serve.
         scheda['procedureCheAccendonoLaBandiera'] = dict(
             pinConBandieraRisolta=script['pinConBandieraRisolta'],
-            procedure=primi(script['procedure']),
-            etichetteDeiTrigger=primi(script['etichetteDeiTrigger']))
+            procedure=primi(script['procedure']), procedureTutte=dict(script['procedure']),
+            etichetteDeiTrigger=primi(script['etichetteDeiTrigger']),
+            etichetteDeiTriggerTutte=dict(script['etichetteDeiTrigger']))
     if sotto:
         scheda['sottoIlPin'] = dict(
             punti=sotto['coppie'], ingressiDelCampo=sotto['ingressi'],
-            famiglie=primi(sotto['famiglie']), procedure=primi(sotto['procedure']),
+            famiglie=dict(sotto['famiglie']), procedure=primi(sotto['procedure']),
+            procedureTutte=dict(sotto['procedure']),
             proposta=(sotto.get('proposta') or {}).get('tipoSpillo'))
     if proiezione and proiezione.get('etichette'):
         scheda['etichetteDeiPuntiVicini'] = primi(proiezione['etichette'])
+        scheda['etichetteDeiPuntiViciniTutte'] = dict(proiezione['etichette'])
     scheda['avvertenza'] = ('Le due voci geometriche — che cosa cade sotto il pin e le etichette '
                             'dei punti vicini — orientano la verifica ma non decidono: misurate '
                             'sui tipi già dimostrati per altra strada azzeccano meno della metà '
@@ -728,6 +800,12 @@ def main(out):
     osservati = ({int(k): v for k, v in json.loads(
         percorso_osservato.read_text(encoding='utf8'))['tipiDimostrati'].items()}
         if percorso_osservato.exists() else {})
+    # La tabella nativa che lega il tipo allo sprite: è la strada più diretta di tutte, perché il
+    # nome dello sprite è quello che il gioco stesso dà a ciò che disegna.
+    percorso_parti = out/'tabella-parti-pin.json'
+    parti = ({r['tipoNativo']: r for r in json.loads(
+        percorso_parti.read_text(encoding='utf8'))['tipi']}
+        if percorso_parti.exists() else {})
     da_bandiera = significato_dalle_bandiere(out)
     dai_pin = tipi_dalle_prove_dirette(da_bandiera)
     dalle_procedure_sotto = significato_dalle_procedure_sotto(out)
@@ -739,6 +817,8 @@ def main(out):
                     condizionali=r['condizionali'], sprite=r['sprite'], nomeNativo=r['nomeNativo'],
                     associazione=r['associazione'])
         significato = SIGNIFICATO.get(r['nomeNativo'] or '')
+        dalla_tabella = parti.get(r['tipoNativo'])
+        voce['tabellaParti'] = dalla_tabella
         script = dagli_script.get(r['tipoNativo'])
         proiezione = dalla_proiezione.get(r['tipoNativo'])
         voce['script'] = script
@@ -767,6 +847,13 @@ def main(out):
             voce.update(tipoSpillo=prova_diretta['tipoSpillo'], etichetta=prova_diretta['etichetta'],
                         stato='determinato',
                         prova='prove dirette sui singoli pin: ' + prova_diretta['motivo'])
+        elif dalla_tabella and DALLA_TABELLA_DELLE_PARTI.get(dalla_tabella['nomeNativo'] or ''):
+            reso = DALLA_TABELLA_DELLE_PARTI[dalla_tabella['nomeNativo']]
+            voce.update(tipoSpillo=reso[0], etichetta=reso[1], stato='determinato',
+                        prova='tabella nativa delle parti: il gioco disegna questo tipo con la '
+                              f"parte {dalla_tabella['partId']}, cioè lo sprite "
+                              f"{dalla_tabella['indiceSprite']} del foglio, che si chiama "
+                              f"«{dalla_tabella['nomeNativo']}»")
         elif script and script['stato'] == 'determinato':
             voce.update(tipoSpillo=script['tipoSpillo'], etichetta=script['etichetta'], stato='determinato',
                         prova=f"procedura che accende la bandiera del pin: {script['famigliaDominante']} "
@@ -780,10 +867,36 @@ def main(out):
                             if sotto and sotto['coppie']
                             else 'né lo sprite, né le procedure che accendono la sua bandiera, '
                                  'né un punto del campo sotto di lui lo dicono'))
-            voce.update(tipoSpillo='nota', etichetta='Da identificare (tipo %d)' % r['tipoNativo'],
-                        stato='da-verificare', motivo=motivo,
-                        riferimenti=riferimenti_da_verificare(r, script, sotto, proiezione, motivo))
+            # Dove la tabella nativa arriva a un nome, l'etichetta lo porta: «Da identificare» e
+            # basta non aiuta chi va a controllare, il nome che il gioco dà allo sprite sì.
+            nome_nativo = (dalla_tabella or {}).get('nomeNativo')
+            voce.update(tipoSpillo='nota', stato='da-verificare', motivo=motivo,
+                        etichetta=(f'Da identificare: «{nome_nativo}» (tipo {r["tipoNativo"]})'
+                                   if nome_nativo else
+                                   'Da identificare (tipo %d)' % r['tipoNativo']),
+                        riferimenti=riferimenti_da_verificare(r, script, sotto, proiezione, motivo,
+                                                              dalla_tabella))
         righe.append(voce)
+    # Controllo incrociato: dove un tipo è dimostrato da una strada e la tabella nativa arriva a un
+    # nome che sappiamo tradurre, le due devono dire la stessa cosa. È il controllo più severo che
+    # abbiamo, perché mette a confronto prove che non si sono parlate — un conteggio di icone fatto
+    # a occhio, una misura geometrica, una famiglia di procedure e il nome che il gioco dà allo
+    # sprite. Una discordanza non è un dettaglio: vuol dire che una delle due strade sbaglia.
+    concordanze, discordanze = [], []
+    for r in righe:
+        if r['stato'] != 'determinato':
+            continue
+        nome = (r.get('tabellaParti') or {}).get('nomeNativo')
+        reso = DALLA_TABELLA_DELLE_PARTI.get(nome or '')
+        if not reso or (r['prova'] or '').startswith('tabella nativa'):
+            continue
+        voce = dict(tipoNativo=r['tipoNativo'], tipoSpillo=r['tipoSpillo'],
+                    dalNomeNativo=reso[0], nomeNativo=nome,
+                    dimostratoDa=(r['prova'] or '').split(':')[0])
+        (concordanze if reso[0] == r['tipoSpillo'] else discordanze).append(voce)
+    if discordanze:
+        raise ValueError('il nome nativo dello sprite contraddice una determinazione presa per '
+                         f'altra strada: {discordanze}')
     pin_per_prova = collections.Counter()
     for r in righe:
         if r['stato'] == 'determinato':
@@ -796,7 +909,9 @@ def main(out):
     puntuali = []
     materiale = significato_puntuale(out, {r['tipoNativo'] for r in determinati})
     prova_della_lettura = controprova(out, {r['tipoNativo']: r for r in righe})
-    mancanti = sorted(set(SIGNIFICATO) - {r['nomeNativo'] for r in righe})
+    nomi_in_uso = {r['nomeNativo'] for r in righe} | {
+        (r.get('tabellaParti') or {}).get('nomeNativo') for r in righe}
+    mancanti = sorted((set(SIGNIFICATO) | set(DALLA_TABELLA_DELLE_PARTI)) - nomi_in_uso)
     if mancanti:
         raise ValueError(f'Traduzioni dichiarate per sprite che nessun pin usa: {mancanti}')
     risultato = dict(
@@ -806,6 +921,11 @@ def main(out):
         pinDaBandiera=[da_bandiera[k] for k in sorted(da_bandiera)],
         letturaGeometrica=dict(controprova=prova_della_lettura,
                                materialeNonUsato=materiale),
+        concordanzaConLaTabellaDelleParti=dict(
+            concordi=concordanze, discordi=discordanze,
+            motivo='ogni tipo dimostrato per un’altra strada, dove la tabella nativa arriva a un '
+                   'nome tradotto, deve ricevere lo stesso tipo di segnalino: prove che non si '
+                   'sono parlate e dicono la stessa cosa'),
         summary=dict(tipi=len(righe), determinati=len(determinati), ipotesi=len(ipotesi), nonDeterminati=len(senza),
                      pinConIpotesi=sum(r['occorrenze'] for r in ipotesi),
                      perTipoIpotesi=dict(collections.Counter(r['tipoSpillo'] for r in ipotesi)),
