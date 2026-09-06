@@ -19,7 +19,7 @@ const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo:
 
 describe('CittaPage', () => {
   it('mostra la mappa di Tokyo incorporata (con «Schermo intero» e «Modifica mappa») e le piastrelle dei quartieri', async () => {
-    api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
+    api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' }] as QuartiereRiassuntoDto[]);
     api.getMappa.mockResolvedValue(mappa('tokyo', 'Tokyo'));
     render(<MemoryRouter><CittaPage /></MemoryRouter>);
     expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
@@ -39,7 +39,8 @@ describe('CittaPage', () => {
 
 describe('QuartierePage', () => {
   it('mostra la mappa del quartiere incorporata e i luoghi senza i pulsanti di posizionamento (ora nell’editor)', async () => {
-    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', sblocco: null, descrizione: '', fonte: '', mappa: true, pianta: null, piantaAssente: null,
+    // `mappaChiave` la dà il backend (cittaService), non la costruisce la pagina: il mock deve dirla
+    const q: QuartiereDettaglioDto = { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', sblocco: null, descrizione: '', fonte: '', mappa: true, pianta: null, piantaAssente: null,
       luoghi: [{ chiave: 'shibuya/untouchable', ordine: 0, tipo: 'negozio', nome: 'Untouchable', cosaOffre: 'Armi', quando: 'entrambe', giorni: null, sblocco: null, confidenti: [{ chiave: 'iwai', nome: 'Munehisa Iwai' }], attivita: [], negozio: 'untouchable', piatti: null, note: null, fonte: '', verificato: true, marcatore: null } as QuartiereDettaglioDto['luoghi'][number]] };
     api.getQuartiere.mockResolvedValue(q);
     api.getMappa.mockResolvedValue(mappa('citta-shibuya', 'Shibuya'));

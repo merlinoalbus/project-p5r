@@ -85,7 +85,7 @@ export function QuartierePage() {
           </div>
           {configuraIngresso ? <IngressoQuartiere key={q.chiave} quartiere={q} onSalvato={async()=>{await dati.ricarica();}} onChiudi={()=>setConfiguraIngresso(false)} /> : <button type="button" className="btn btn-secondary self-start touch" onClick={()=>setConfiguraIngresso(true)}>Configura ingresso da Città</button>}
           <section className="flex flex-col gap-1.5">
-            <MappaIncorporata chiave={q.ingresso?.mappa??q.mappaChiave??`citta-${q.chiave}`} puntoIniziale={q.ingresso} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(480px, calc(100vh - 280px))" />
+            {(q.ingresso?.mappa || q.mappaChiave) && <MappaIncorporata chiave={q.ingresso?.mappa ?? q.mappaChiave ?? ''} puntoIniziale={q.ingresso} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(480px, calc(100vh - 280px))" />}
             <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
               {q.ingresso ? <span>Ingresso configurato: {q.ingresso.nome}.</span> : q.pianta ? (
                 <span>Mappa da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Spilli e immagine si modificano dall'editor.</span>

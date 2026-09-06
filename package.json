@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "preview": "vite preview",
+    "accesso:copertura": "tsx --env-file=.env scripts/copertura-accesso.ts",
     "seed:scarica": "tsx scripts/seed/scaricaDataset.ts",
     "seed:normalizza": "tsx scripts/seed/normalizzaDataset.ts",
     "seed:verifica": "tsx scripts/seed/verificaIncrociata.ts",

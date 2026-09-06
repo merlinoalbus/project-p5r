@@ -58,16 +58,14 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       // quartiere il luogo è quello che porta il suo stesso nome — quando ce n'è esattamente uno:
       // altrimenti resta il quartiere, che è comunque un posto sulla mappa.
       if (tipo === 'attivita') {
-        const a = prepared('SELECT nome, luogo_chiave FROM attivita WHERE chiave = ?').get(chiave) as { nome: string; luogo_chiave: string | null } | undefined;
+        // Un'attività dichiara dove si svolge, e quel campo è l'unica associazione registrata che
+        // abbia: si usa quella. Cercare il luogo per somiglianza del nome — «Freccette» dentro
+        // «Penguin Sniper (Freccette e Biliardo)» — porterebbe al posto giusto per caso e a quello
+        // sbagliato al primo nome che cambia, e contraddirebbe il contratto di questa funzione.
+        const a = prepared('SELECT luogo_chiave FROM attivita WHERE chiave = ?').get(chiave) as { luogo_chiave: string | null } | undefined;
         if (a?.luogo_chiave) {
-          const cerca = (sql: string) => prepared(sql).all(a.luogo_chiave, a.nome) as Array<{ chiave: string }>;
-          // prima il nome uguale, poi il nome contenuto: «Freccette» sta dentro «Penguin Sniper
-          // (Freccette e Biliardo)». Vale solo quando il quartiere ne ha esattamente uno.
-          const esatti = cerca('SELECT chiave FROM luogo WHERE quartiere_chiave = ? AND lower(nome) = lower(?)');
-          const contenuti = esatti.length === 1 ? esatti
-            : cerca("SELECT chiave FROM luogo WHERE quartiere_chiave = ? AND lower(nome) LIKE '%' || lower(?) || '%'");
-          if (contenuti.length === 1) riferimenti.push({ tipo: 'luogo', chiave: contenuti[0].chiave });
-          if (prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(a.luogo_chiave)) riferimenti.push({ tipo: 'quartiere', chiave: a.luogo_chiave });
+          if (prepared('SELECT 1 FROM luogo WHERE chiave = ?').get(a.luogo_chiave)) riferimenti.push({ tipo: 'luogo', chiave: a.luogo_chiave });
+          else if (prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(a.luogo_chiave)) riferimenti.push({ tipo: 'quartiere', chiave: a.luogo_chiave });
         }
       }
       // Un confidente si incontra in luoghi precisi, e il catalogo li elenca: sono quelli, non
@@ -76,6 +74,14 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
         for (const l of prepared("SELECT chiave FROM luogo WHERE confidenti_json IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(luogo.confidenti_json) WHERE value = ?) ORDER BY chiave").all(chiave) as Array<{ chiave: string }>) {
           riferimenti.push({ tipo: 'luogo', chiave: l.chiave });
         }
+      }
+      // Un punto di interesse sta in un'area della guida, e l'area — quando una planimetria la
+      // dichiara — è un posto sulla mappa. È un'associazione registrata, non una somiglianza: il
+      // punto porta dove porta la sua area. I pin che riferiscono i punti hanno tutti
+      // `mappa_chiave` nullo, quindi senza questo passo un punto non arriverebbe da nessuna parte.
+      if (tipo === 'punto') {
+        const a = prepared('SELECT area_chiave FROM punto_interesse WHERE chiave = ?').get(chiave) as { area_chiave: string | null } | undefined;
+        if (a?.area_chiave) riferimenti.push({ tipo: 'area', chiave: a.area_chiave });
       }
       if (tipo === 'articolo') {
         const n = prepared('SELECT a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave=a.negozio_chiave WHERE a.chiave=? AND n.nascosto=0').get(chiave) as { negozio_chiave: string } | undefined;

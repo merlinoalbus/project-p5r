@@ -17,6 +17,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
+import { schedaAccessoMondo } from '../utils/accessoMondo';
 
 export function DungeonPage() {
   useDocumentTitle('Palazzi e Dedali');
@@ -57,7 +58,7 @@ export function DungeonPage() {
                       <span className="text-[12px] text-text-muted">{d.aree} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
                     </div>
                   </Link>
-                  <CollegamentoVisivo to={`/guida/mappe/dungeon-${encodeURIComponent(d.chiave)}`} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Mappa" dettaglio={`${d.aree} sezioni della guida`} />
+                  <CollegamentoVisivo to={schedaAccessoMondo('dungeon', d.chiave)} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Mappa" dettaglio={`${d.aree} sezioni della guida`} />
                 </li>
               );
             })}

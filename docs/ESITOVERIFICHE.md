@@ -532,3 +532,52 @@ livelli e l'integrazione UI dei nuovi tipi sono riprodotte; la Fase 2 complessiv
 Per il riesame occorrono: non importare alcuna ipotesi, usare un'assegnazione uno-a-uno,
 convalidare esplicitamente i nove campi noti, eliminare o dimostrare `campoAllargato`, applicare
 realmente l'esclusione `*_minimap_*` e rendere la prova semantica indipendente dal fitting.
+
+## Fase 3d — Seconda verifica dopo le correzioni
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `ed14c40`
+**Data verifica:** 6 settembre 2026
+
+### Rilievi chiusi
+
+1. Le quattro costruzioni manuali di chiavi sono state eliminate. `CittaPage` usa
+   `mappaChiave` restituita dal backend; `QuartierePage` e `IngressoQuartiere` non inventano più
+   il fallback `citta-*`; `DungeonPage` passa dal resolver comune.
+2. L'accesso delle attività non usa più uguaglianza o `LIKE` sul nome. Il resolver segue
+   esclusivamente `attivita.luogo_chiave`, interpretandola come chiave di un luogo o di un
+   quartiere esistente. Il nuovo test inserisce un'esca nominale e prova che non viene scelta.
+3. `npm run accesso:copertura`, rieseguito su una copia isolata del database, riproduce l'intero
+   inventario: **1.371 voci, 906 con accesso, 498 con pin preciso**. Per tipo: luoghi 61/84,
+   negozi 30/47, punti 379/688, confidenti 12/23, articoli 395/499, attività 29/30.
+4. Il nuovo percorso dei punti segue il riferimento strutturato `punto_interesse.area_chiave` e
+   porta alle planimetrie associate all'area; non usa somiglianze di nome. Porta 379 punti a una
+   mappa, deliberatamente senza dichiarare un pin preciso non dimostrato.
+5. Sono presenti test dedicati per l'esclusione del matching nominale delle attività e per i
+   luoghi attribuiti ai confidenti. Sul commit: typecheck PASS, lint PASS, build PASS, test mirati
+   **10/10**, suite completa **537/537**.
+
+### Rilievi ancora bloccanti
+
+1. **La pagina Oggetti resta senza collegamento alla mappa.** `OggettiPage.tsx` non usa
+   `CollegamentoMappa`. Il commit stesso dichiara aperto il quinto rilievo; quindi la Fase 3d non
+   può ancora essere approvata. Poiché le righe editoriali non hanno una chiave di catalogo, la
+   soluzione robusta non è reintrodurre un `LIKE` a runtime: serve un crosswalk versionato che
+   assegni una chiave soltanto ai match univoci e verificati, lasciando esplicitamente senza link
+   gli altri.
+2. **La misura di copertura può nascondere errori runtime.** `copertura-accesso.ts` intercetta
+   qualsiasi eccezione del resolver e la aggiunge a `senzaAccesso`, senza contare o mostrare gli
+   errori. Un bug SQL o un'eccezione inattesa diventerebbe quindi indistinguibile da una normale
+   entità priva di associazione. Il rapporto deve distinguere `senzaAccesso` da `errori` e la
+   verifica deve fallire se `errori` non è vuoto.
+
+### Nota sul test dei confidenti
+
+Il test contiene due uscite anticipate (`if (!riga) return`, `if (!chiave) return`) che lo
+renderebbero vacuo su una fixture diversa. Sulla fixture attuale il ramo viene esercitato: ci
+sono 34 luoghi con `confidenti_json` e le voci sono chiavi stringa. Nel riesame finale è comunque
+preferibile sostituire le uscite con asserzioni esplicite sull'esistenza della fixture.
+
+**Decisione:** quattro dei cinque rilievi originari sono chiusi e la nuova copertura è reale.
+Fase 3d resta respinta finché il collegamento di Oggetti non è risolto con associazioni
+strutturate e lo strumento di copertura non distingue gli errori dalle assenze legittime.
