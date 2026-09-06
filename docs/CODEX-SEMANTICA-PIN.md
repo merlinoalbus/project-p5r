@@ -773,3 +773,29 @@ commit restano però tre scostamenti dal criterio richiesto:
 Il contatore nel seed deve infine derivare soltanto dalle righe che il verificatore certifica come
 assorbite: la semplice presenza della chiave della copia nel file non deve bastare a sottrarre
 tutti i suoi pin dalla categoria «senza riferimento».
+
+### Rettifica probatoria: 31 equivalenze e 2 varianti discordanti
+
+La distinzione appena emersa fra tipo nativo 17 (`forziere`) e 26 (`forziere-raro`) supera il
+presupposto precedente secondo cui i due tipi avevano la stessa resa. Il mapping non può quindi
+dichiarare equivalenti tutte le 33 coppie limitandosi alla vecchia resa `forziere`.
+
+Il ricontrollo diretto di metadati e procedure separa i due casi discordanti:
+
+* `RMAP_151_4_0`, pin 7, usa tipo 17 dove la canonica `RMAP_151_2_1`, pin 7, usa tipo 26, a
+  bandiera 536871407 e coordinate identiche. La stessa bandiera viene accesa in
+  `F151_002_00/D01_151_02_R_TBOX_minimap_01` e
+  `F151_015_00/D01_151_15_R_TBOX_minimap_01`; canonica e altra copia concordano dunque su
+  `forziere-raro`. Il campo discordante `F151_004_00` non contiene un'accensione della bandiera;
+* `RMAP_155_6_0`, pin 4, usa tipo 26 dove la canonica `RMAP_155_4_0`, pin 4, usa tipo 17, a
+  bandiera 536872595 e coordinate identiche. La bandiera viene accesa in
+  `F155_004_00/D04_155_04_TBOX_minimap_09`, coerente con `forziere`; il campo discordante
+  `F155_006_00` non contiene un'accensione della bandiera.
+
+La contabilità corretta deve pertanto distinguere `31 assorbiti equivalenti` e
+`2 varianti di copia discordanti risolte dalla prova della bandiera`, mantenendo comunque
+`33` occorrenze non duplicate sulla canonica. Per le due varianti il rapporto deve conservare
+entrambi i tipi e le etichette, la procedura decisiva, i campi concordanti/discordanti e la resa
+canonica scelta; il verificatore deve ricalcolare anche queste prove. Nascondere la discordanza o
+forzare la stessa etichetta perderebbe informazione proprio mentre la nuova semantica la rende
+visibile.
