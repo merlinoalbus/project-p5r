@@ -285,3 +285,31 @@ controllare tutte le 48 aggiunte e rifiutare `verificato: true` quando la fonte 
 nome, negozio e prezzo. Restano inoltre aperti i due rilievi già comunicati: il generatore legge
 ancora il database runtime e il campo `generato` usa la data corrente, quindi l'output non è
 ancora autosufficiente e byte-deterministico rispetto ai soli file versionati.
+
+## Aggiornamento 4 — corpus editoriale fornito dall'utente per il censimento
+
+**Stato:** fonti di controllo comunicate dall'utente durante la lavorazione di Claude
+
+Il rilievo precedente non presume che la lavorazione corrente resti incompleta: Claude sta
+consultando le guide e completando il censimento. La verifica finale va quindi eseguita sul suo
+commit stabile, confrontando i campi con il seguente corpus editoriale indicato dall'utente:
+
+* negozi speciali: https://www.allgamestaff.it/persona-5-royal/negozi-speciali/
+* distributori automatici: https://www.allgamestaff.it/persona-5-royal/distributori-automatici/
+* scambi e venditori nascosti: https://www.allgamestaff.it/persona-5-royal/scambi-oggetti-curiosi-venditori-nascosti/
+* oggetti chiave: https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/
+* carte abilità: https://www.allgamestaff.it/persona-5-royal/carte-abilita/
+* tesori: https://www.allgamestaff.it/persona-5-royal/tesori/
+* armi da mischia: https://www.allgamestaff.it/persona-5-royal/armi-da-mischia/
+* armi a distanza: https://www.allgamestaff.it/persona-5-royal/armi-a-distanza/
+* protezioni: https://www.allgamestaff.it/persona-5-royal/protezioni/
+* accessori: https://www.allgamestaff.it/persona-5-royal/accessori/
+* abiti: https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/
+* regali per i Confidenti: https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/
+
+Per ogni nuova riga, `verificato` deve riferirsi ai campi effettivamente attestati dalla fonte.
+Nome, negozio e prezzo possono venire dall'elenco dei negozi; effetto, categoria, destinatario,
+reperibilità e condizioni devono invece essere confrontati con la guida tematica pertinente.
+Le assenze legittime vanno distinte dai campi non ancora censiti. Il gate controllerà inoltre
+che uno stesso articolo presente in più guide non venga duplicato sotto chiavi incompatibili e
+che le diverse reperibilità siano conservate senza sceglierne arbitrariamente una.
