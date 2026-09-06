@@ -668,3 +668,31 @@ identiche o entro la tolleranza esplicitamente motivata di 3 pixel.
 La contabilità corretta diventa `1339 posati + 14 esclusi puntualmente + 43 senza riferimento +
 33 assorbiti da copie = 1429`. Una semplice rinomina del contatore senza mapping e prove non
 chiude il rilievo, perché non dimostrerebbe che nessuna informazione distinta sia stata persa.
+
+## Chiusura richiesta dopo il quinto riesame della Fase 3d
+
+Il commit `8448c87` supera sette requisiti su otto: rotta del resolver, codifica delle chiavi con
+`/`, gestione esplicita dei quattro esiti senza posizione, riproducibilità del crosswalk,
+copertura, documentazione e gate generali. Il solo rilievo bloccante rimasto è la prova della
+superficie reale Oggetti.
+
+Il test di `CollegamentoMappa` non è sufficiente perché monta il componente isolato dentro una
+rotta chiamata `/guida/oggetti`; non dimostra che `OggettiPage` continui a ricevere il crosswalk,
+a renderizzare il comando nella riga corretta e a passargli la chiave giusta. Anche il test API
+attuale controlla conteggi generali, ma non pretende i campi `articolo` o `negozi` risultanti
+dall'applicazione del crosswalk.
+
+Per chiudere il gate servono entrambe queste regressioni, così da provare i due lati del contratto:
+
+1. il test dell'endpoint `oggetti-guida` deve pretendere almeno un'associazione reale e stabile,
+   per esempio `Acqua battesimale` con `articolo = chiesa-kanda/acqua-battesimale` e il relativo
+   negozio; deve quindi fallire se il caricamento o l'applicazione del crosswalk viene rimosso;
+2. un test della vera `OggettiPage`, alimentata con un DTO minimo ma completo, deve trovare nella
+   riga dell'articolo `untouchable/kogatana-nera` il comando «Sulla mappa» e pretendere l'`href`
+   `/guida/mondo/articolo/untouchable%2Fkogatana-nera`. Una seconda riga può fissare il percorso
+   negozio `/guida/mondo/negozio/untouchable`.
+
+La controprova è semplice: rimuovere temporaneamente l'arricchimento API o il
+`CollegamentoMappa` dalla vera tabella deve far fallire almeno uno dei due test. Dopo la correzione
+servono un nuovo commit stabile, i gate completi e un nuovo riesame indipendente; `8448c87` non può
+essere promosso retroattivamente.
