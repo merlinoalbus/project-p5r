@@ -140,6 +140,12 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
     # La bandiera che il gioco accende per mostrare *quel* pin dice che cosa sia quel pin, e vale
     # piu' del tipo, che e' una generalizzazione su tutti i pin con lo stesso numero.
     da_bandiera = {(r['chiave'], r['indicePin']): r for r in _sem.get('pinDaBandiera') or []}
+    # Dove porta un pin di passaggio, quando l'abbinamento e' forzato: e' quello che rende il
+    # mondo uno, un pin su cui si clicca e si finisce dall'altra parte.
+    percorso_link = out/'collegamenti-mappe.json'
+    collegamenti = ({(r['partenza'], r['indicePin']): r
+                     for r in json.loads(percorso_link.read_text(encoding='utf8'))['collegamenti']}
+                    if percorso_link.exists() else {})
     quartieri = json.loads((seed/'citta.json').read_text(encoding='utf8'))['quartieri']
     luoghi_per_quartiere = {q['chiave']: q.get('luoghi', []) for q in quartieri}
 
@@ -193,6 +199,15 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                 x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
                 riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
                 collezionabile=False, ordine=len(voce['spilli']))
+            legame = collegamenti.get((chiave, indice))
+            if legame:
+                nota.append('Porta a ' + legame['arrivo'] + '.')
+                if legame['punto']:
+                    spillo['destinazione'] = dict(mappa=legame['arrivo'], **legame['punto'])
+                else:
+                    # la mappa di arrivo si sa, il punto no: si dichiara invece di inventarlo
+                    nota.append('Il punto preciso di arrivo non e’ noto: '
+                                + (legame['motivoSenzaPunto'] or 'proiezione mancante') + '.')
             # Il gioco mostra questo pin solo a certe condizioni, e la bandiera che le governa non è
             # ancora tradotta nel vocabolario dell'applicazione. Entra allora come condizione da
             # configurare, che l'interfaccia sa mostrare e l'editor sa correggere: trattarlo come
@@ -202,6 +217,7 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                                              nota=f"Il gioco lo mostra alla bandiera nativa {p['flag']}, "
                                                   'non ancora tradotta in una condizione della guida.')]
                 condizionati[0] += 1
+            spillo['descrizione'] = ' '.join(nota)
             voce['spilli'].append(spillo)
             esiti['posato con luogo collegato' if luogo else 'posato senza luogo collegato'] += 1
             posati += 1

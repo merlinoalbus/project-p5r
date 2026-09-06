@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "collegamenti": "collegamenti-script.json",
+    "proiezioni": "proiezioni-mappa.json",
+    "bordo": "pin-di-bordo.json",
+    "riferimento": "riferimento-pin.json"
+  },
+  "criterio": {
+    "zoom": 3,
+    "abbinamento": "solo dove è forzato: una planimetria con un solo pin di passaggio e una sola destinazione nota",
+    "arrivo": "posizione dell’entrata citata dalla chiamata, proiettata sulla planimetria di arrivo dove la proiezione è certificata"
+  },
+  "collegamenti": [
+    {
+      "partenza": "nativo-rmap-151-13-0",
+      "indicePin": 0,
+      "x": 37.451,
+      "y": 47.949,
+      "arrivo": "nativo-rmap-152-5-0",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_152_5_0 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-154-7-1",
+      "indicePin": 0,
+      "x": 50.439,
+      "y": 4.395,
+      "arrivo": "nativo-rmap-154-5-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 72.398,
+        "y": 44.206,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_154_5_1 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-155-6-0",
+      "indicePin": 0,
+      "x": 56.982,
+      "y": 33.691,
+      "arrivo": "nativo-rmap-155-4-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 11.438,
+        "y": 39.881,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_155_4_1 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-155-6-2",
+      "indicePin": 0,
+      "x": 11.072,
+      "y": 13.293,
+      "arrivo": "nativo-rmap-155-4-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 11.438,
+        "y": 39.881,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_155_4_1 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-156-11-1",
+      "indicePin": 0,
+      "x": 6.152,
+      "y": 43.359,
+      "arrivo": "nativo-rmap-156-10-1",
+      "ingresso": 0,
+      "punto": {
+        "x": 47.723,
+        "y": 7.803,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_156_10_1 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-162-16-0",
+      "indicePin": 4,
+      "x": 7.568,
+      "y": 22.461,
+      "arrivo": "nativo-rmap-162-9-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 41.177,
+        "y": 61.367,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_162_9_0 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-162-16-1",
+      "indicePin": 2,
+      "x": 7.568,
+      "y": 22.461,
+      "arrivo": "nativo-rmap-162-9-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 41.177,
+        "y": 61.367,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_162_9_0 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-162-16-2",
+      "indicePin": 0,
+      "x": 53.516,
+      "y": 19.092,
+      "arrivo": "nativo-rmap-162-9-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 41.177,
+        "y": 61.367,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_162_9_0 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-162-16-3",
+      "indicePin": 1,
+      "x": 53.516,
+      "y": 19.092,
+      "arrivo": "nativo-rmap-162-9-0",
+      "ingresso": 0,
+      "punto": {
+        "x": 41.177,
+        "y": 61.367,
+        "zoom": 3
+      },
+      "motivoSenzaPunto": null,
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_162_9_0 attraverso l’entrata 0"
+    },
+    {
+      "partenza": "nativo-rmap-162-9-1",
+      "indicePin": 0,
+      "x": 25.146,
+      "y": 71.777,
+      "arrivo": "nativo-rmap-162-15-2",
+      "ingresso": 0,
+      "punto": null,
+      "motivoSenzaPunto": "la planimetria di arrivo non ha una proiezione certificata",
+      "prova": "la planimetria ha un solo pin di passaggio e il suo campo una sola destinazione, RMAP_162_15_2 attraverso l’entrata 0"
+    }
+  ],
+  "grafoDelleRisorse": {
+    "archi": 1317,
+    "reciproci": 274
+  },
+  "summary": {
+    "collegamentiCerti": 10,
+    "conPuntoDiArrivo": 8,
+    "esiti": {
+      "nessuna destinazione nota": 80,
+      "abbinamento ambiguo, lasciato senza": 172,
+      "collegamento certo, senza punto di arrivo": 2,
+      "collegamento certo": 8
+    },
+    "archiDelGrafo": 1317,
+    "archiReciproci": 274
+  },
+  "limits": [
+    "Dove i pin di passaggio sono più d’uno e le destinazioni pure, quale porti dove non è deducibile dai conteggi: quei pin restano senza collegamento.",
+    "Il grafo delle risorse dice quali planimetrie sono collegate, non da quale pin: è materiale per il seguito, non un collegamento pronto."
+  ]
+}
