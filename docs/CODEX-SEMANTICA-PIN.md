@@ -1095,6 +1095,12 @@ Restano però due blocker certi prima che il lotto possa essere dichiarato pront
    con `condizioni_json` nullo, malgrado la relazione uno-a-uno ora corretta. La sincronizzazione
    deve riconciliare anche i record già esistenti senza cambiarne identità o stato per partita,
    e una prova deve partire da un database già popolato.
+3. La normalizzazione LF non copre ancora il corpus sorgente. `world_connections.py`,
+   `world_metadata.py` e `pin_reference.py` usano ancora `Path.write_text()`; sul checkout Windows
+   i rispettivi JSON contengono 341.783, 24.681 e 9.262 CRLF, zero LF solitari e nessuna newline
+   finale. I nove artefatti migrati sono ora corretti, ma una rigenerazione end-to-end può ancora
+   produrre byte e hash diversi fra Windows e Linux. Anche questi produttori devono usare la
+   scrittura canonica ed essere coperti dalla prova cross-platform.
 
 Attività, finestre dungeon e i due rilievi formali di visibilità su `2ebaf1a` restano inoltre
 fuori dalla bozza visibile e dovranno essere chiusi nello stesso candidato complessivo.
