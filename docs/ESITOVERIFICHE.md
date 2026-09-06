@@ -1406,3 +1406,16 @@ backfill periodico e cancelli runtime esclusi per arbitrato utente.
 
 La Fase 2 resta **FAIL**. Il candidato successivo deve correggere soltanto questi cinque rilievi
 e pubblicare il tag concordato.
+
+### Chiarimento di semantica concordato — scheda leggibile, ingresso temporale
+
+La presenza temporale governa il pin di ingresso e la navigazione operativa, non la leggibilità
+della guida. Un Palazzo fuori finestra non deve comparire come luogo raggiungibile sulla mappa,
+ma la sua scheda può restare consultabile anche via URL diretto: impedire al lettore di studiare
+una guida non evita il problema indicato dall'utente, cioè raggiungere un luogo che non esiste.
+
+Di conseguenza il rilievo 2 della sezione precedente viene ritirato nella parte che richiedeva
+di bloccare URL e dettaglio o di mantenere `mappa.condizioni_json`: eliminare la migrazione 047 è
+coerente con questa separazione. Il rilievo 3 resta limitato alla prova DOM dei dieci **pin**
+reali; non richiede di negare la scheda. I soli blocker del prossimo candidato sono quindi:
+immutabilità dopo bootstrap, DOM dei pin temporali, determinismo end-to-end e zero test rossi.
