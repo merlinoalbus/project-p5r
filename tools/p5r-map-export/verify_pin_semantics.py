@@ -124,6 +124,8 @@ def main(out, seed=None):
     urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = bordo_ok = con_condizione = ipotesi = 0
     tabella_ok = 0
     da_verificare_nel_pacchetto = [0]
+    cancelli = {(r['mappa'], r['indicePin']): r for r in json.loads(
+        (out/'cancelli-pin.json').read_text(encoding='utf8'))['pin']}
     parti = {r['tipoNativo']: r for r in json.loads(
         (out/'tabella-parti-pin.json').read_text(encoding='utf8'))['tipi']}
     # La tabella nativa si ricontrolla dall'eseguibile, non dall'artefatto: e' la sola sorgente
@@ -288,11 +290,24 @@ def main(out, seed=None):
             # anche i tipi da verificare hanno il loro segnalino, «nota»: sono posati come gli altri
             return per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['tipoSpillo']
 
-        condizionali = {(spillo_di(i),
-                         round(100*pin_nativi[m['chiave']][i]['x']*fattore/larghezza, 3),
-                         round(100*pin_nativi[m['chiave']][i]['y']*fattore/altezza, 3))
-                        for i in rif['collocabili'] if pin_nativi[m['chiave']][i]['conditional']
-                        and spillo_di(i) is not None}
+        # Una condizione va **solo** dove un cancello leggibile la giustifica. Non piu' a ogni pin
+        # condizionato: la bandiera di un pin dice quasi sempre «ci sei gia' passato», e in una
+        # guida — che si consulta prima di arrivarci — quella non e' una condizione. Il controllo
+        # pretende la corrispondenza esatta nei due sensi: niente condizioni inventate, e nessun
+        # cancello dimenticato.
+        # Il contratto di visibilita', in una riga: **un pin nativo non ha condizioni**.
+        #
+        # Sono elementi fissi del mondo — passaggi, porte, forzieri, stanze sicure, scale, semi,
+        # uscite — e ci sono sempre. Nasconderli finche' il giocatore non li ha trovati vorrebbe
+        # dire che la guida mostra un posto solo dopo che ci sei stato, cioe' quando non serve
+        # piu'. Anche un prerequisito (la porta che si apre con la leva blu) non nasconde niente:
+        # la porta si vede, e la descrizione dice che cosa ci vuole per aprirla.
+        #
+        # `condizioni` resta riservato alla **presenza nel momento della visita** — data, fascia,
+        # meteo, sblocco del quartiere — e quella riguarda le entita' della guida, non i pin
+        # nativi: nei Palazzi non piove. Se un giorno un pin nativo ne avesse una davvero, andra'
+        # dimostrata qui prima di passare.
+        condizionali = set()
         for s in propri:
             assert (s['tipo'], s['x'], s['y']) in attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
             assert 0 <= s['x'] <= 100 and 0 <= s['y'] <= 100
@@ -301,6 +316,11 @@ def main(out, seed=None):
             assert ha == atteso_condizionale, f'condizione mancante o di troppo su {m["chiave"]}'
             if ha:
                 assert all(c['tipo'] == 'da-configurare' and c.get('nota') for c in s['condizioni']),                     f'condizione senza forma valida su {m["chiave"]}'
+                # la nota deve dire che cosa devi aver fatto, non un numero di bandiera
+                atteso_testo = (cancelli.get((m['chiave'], (s.get('nativo') or {}).get('indicePin'))) or {}).get('rese') or []
+                for c in s['condizioni']:
+                    assert all(t in c['nota'] for t in atteso_testo),                         f'la condizione non riporta il cancello che la giustifica su {m["chiave"]}'
+                    assert not re.search(r'bandiera nativa \d+', c['nota']),                         f'la condizione cita ancora un numero di bandiera invece del blocco su {m["chiave"]}'
                 con_condizione += 1
             # Le prove native devono arrivare nel pacchetto come dato, non come frase. Per gli
             # spilli di un tipo ancora da identificare sono l'unica cosa che rende possibile la

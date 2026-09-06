@@ -195,10 +195,15 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                       else f'{len(candidati)} luoghi del quartiere corrispondono')
 
     per_chiave = {m['chiave']: m for m in mappe}
+    percorso_cancelli = out/'cancelli-pin.json'
+    cancelli = ({(r['mappa'], r['indicePin']): r for r in
+                 json.loads(percorso_cancelli.read_text(encoding='utf8'))['pin']}
+                if percorso_cancelli.exists() else {})
     percorso_copie = out/'pin-copie-assorbite.json'
     copie_assorbite = ({r['copia'] for r in json.loads(percorso_copie.read_text(encoding='utf8'))['assorbiti']}
                        if percorso_copie.exists() else set())
     esiti, posati, condizionati = collections.Counter(), 0, [0]
+    con_cancello = [0]
     for mappa_nativa in meta['maps']:
         chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa_nativa['code'].split('_')[1:])
         voce, rif = per_chiave.get(chiave), riferimento.get(chiave)
@@ -258,30 +263,40 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                 motivoSenzaSprite=tab.get('motivoSenzaSprite'),
                 daVerificare=bool(da_verificare),
                 prove=sem.get('riferimenti') if da_verificare else None)
+            # Il collegamento e il prerequisito sono informazione, e vanno raccolti **prima** di
+            # comporre la descrizione: aggiungerli dopo li faceva finire in una lista che nessuno
+            # rileggeva piu'.
+            legame = collegamenti.get((chiave, indice))
+            destinazione = None
+            if legame:
+                nota.append('Porta a ' + legame['arrivo'] + '.')
+                if legame['punto']:
+                    destinazione = dict(mappa=legame['arrivo'], **legame['punto'])
+                else:
+                    # la mappa di arrivo si sa, il punto no: si dichiara invece di inventarlo
+                    nota.append('Il punto preciso di arrivo non e’ noto: '
+                                + (legame['motivoSenzaPunto'] or 'proiezione mancante') + '.')
+
+            # Un cancello **non** e' una condizione di visibilita'. Una porta chiusa si vede: e'
+            # li', semplicemente non si apre ancora. Nasconderla finche' non hai la chiave
+            # vorrebbe dire che la guida ti dice dov'e' la porta solo dopo che l'hai aperta, cioe'
+            # quando non serve piu'. Il prerequisito e' informazione: sta nella descrizione e,
+            # come dato, dentro `nativo`.
+            cancello = cancelli.get((chiave, indice))
+            if cancello and cancello['rese']:
+                nota.append('Nel gioco si sblocca ' + ' e '.join(cancello['rese']) + '.')
+                nativo['cancelli'] = cancello['cancelli']
+                nativo['sbloccoLeggibile'] = cancello['rese']
+                con_cancello[0] += 1
+
             spillo = dict(
                 tipo=tipo_spillo, nome=luogo['nome'] if luogo else etichetta,
                 descrizione=' '.join(nota), nativo=nativo,
                 x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
                 riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
                 collezionabile=False, ordine=len(voce['spilli']))
-            legame = collegamenti.get((chiave, indice))
-            if legame:
-                nota.append('Porta a ' + legame['arrivo'] + '.')
-                if legame['punto']:
-                    spillo['destinazione'] = dict(mappa=legame['arrivo'], **legame['punto'])
-                else:
-                    # la mappa di arrivo si sa, il punto no: si dichiara invece di inventarlo
-                    nota.append('Il punto preciso di arrivo non e’ noto: '
-                                + (legame['motivoSenzaPunto'] or 'proiezione mancante') + '.')
-            # Il gioco mostra questo pin solo a certe condizioni, e la bandiera che le governa non è
-            # ancora tradotta nel vocabolario dell'applicazione. Entra allora come condizione da
-            # configurare, che l'interfaccia sa mostrare e l'editor sa correggere: trattarlo come
-            # incondizionato lo farebbe comparire sempre, che è falso.
-            if p['conditional']:
-                spillo['condizioni'] = [dict(tipo='da-configurare',
-                                             nota=f"Il gioco lo mostra alla bandiera nativa {p['flag']}, "
-                                                  'non ancora tradotta in una condizione della guida.')]
-                condizionati[0] += 1
+            if destinazione:
+                spillo['destinazione'] = destinazione
             spillo['descrizione'] = ' '.join(nota)
             voce['spilli'].append(spillo)
             esiti['posato con luogo collegato' if luogo else 'posato senza luogo collegato'] += 1
