@@ -89,11 +89,13 @@ function Cartellino({ s }: { s: Segno }) {
       style={{ filter: CONTORNO }}
       onMouseEnter={(e) => { if (s.href) e.currentTarget.style.filter = CONTORNO_ORO; }}
       onMouseLeave={(e) => { e.currentTarget.style.filter = CONTORNO; }} />
-    <span className={`-mt-[8%] whitespace-nowrap rounded-[2px] border border-white px-[0.45em] py-[0.05em] font-display text-[8px] uppercase leading-tight tracking-[0.04em] text-white shadow-[0_1px_4px_rgba(0,0,0,0.6)] sm:text-[10px] ${
+    <span className={`-mt-[6%] whitespace-nowrap rounded-[2px] border-2 border-white px-[0.5em] py-[0.12em] font-display text-[11px] uppercase leading-none tracking-[0.05em] text-white shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:text-[15px] lg:text-[17px] ${
       s.palazzo ? 'bg-[#8b0000]' : 'bg-black'} ${
       s.href ? 'group-hover:border-[#ffd23f] group-hover:text-[#ffd23f]' : ''}`}>{s.nome}</span>
   </>;
-  const classe = 'group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline';
+  // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
+  // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
+  const classe = 'group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30';
   const stile = { left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` };
   const titolo = s.quando ? `${s.nome} — ${s.quando}` : s.nome;
   // Portare a una pagina vuota è peggio che non portare da nessuna parte: le fermate senza scheda
@@ -197,7 +199,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
       <Rete />
       {presenti.map((s) => <Cartellino key={s.chiave} s={s} />)}
       <Link to="/guida/completamento"
-        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[2px] border border-white bg-black px-1.5 py-0.5 font-display text-[8px] uppercase tracking-[0.04em] text-white no-underline shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-[10px]"
+        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[2px] border-2 border-white bg-black px-2 py-0.5 font-display text-[11px] uppercase tracking-[0.05em] text-white no-underline shadow-[0_2px_8px_rgba(0,0,0,0.7)] sm:text-[15px] lg:text-[17px]"
         style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
         title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
     </div>
