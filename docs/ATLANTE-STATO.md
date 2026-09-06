@@ -276,6 +276,15 @@ Altre due strade cercate e chiuse, perché non le ricerchi di nuovo chi legge:
   1480 file estratti, con hash e dimensione: non contiene l'indice dei CPK, quindi da qui non si
   può nemmeno sapere quali file esistono e non sono stati presi.
 
+Cercata e chiusa anche la strada delle **stazioni della metropolitana**, che il piano elenca fra
+le categorie della Fase 2. I dati ci sono e sono ottimi — `extracted/metropolitana.json`, 31
+stazioni con nome e testi italiani ufficiali, 91 tratte, 64 archi — ma **manca la posizione**: le
+stazioni non compaiono fra gli sprite del blocco urbano (che arriva fino a «vendita accessori nel
+vicolo» e non ha una voce stazione), e né `P5_MAPINFO.PLG` né gli altri file della cartella `LMAP`
+ne portano le coordinate. Senza una fonte per la posizione un pin `treno` sarebbe collocato a
+occhio, cioè un mockup. Le stazioni restano quindi materiale pronto per i **collegamenti** della
+Fase 3, dove ciò che conta è la rete e non il punto sulla planimetria.
+
 Quello che servirebbe, e che va cercato nei CPK completi, sono i percorsi
 `*/FIELD/PANEL/ROADMAP/*.SPD` e `*.PLG` — il foglio sprite e il layout della mappa d'insieme dei
 Palazzi — e l'eventuale script che li disegna. Nella cartella ROADMAP dei 1480 file ci sono solo
