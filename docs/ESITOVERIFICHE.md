@@ -1419,3 +1419,54 @@ di bloccare URL e dettaglio o di mantenere `mappa.condizioni_json`: eliminare la
 coerente con questa separazione. Il rilievo 3 resta limitato alla prova DOM dei dieci **pin**
 reali; non richiede di negare la scheda. I soli blocker del prossimo candidato sono quindi:
 immutabilità dopo bootstrap, DOM dei pin temporali, determinismo end-to-end e zero test rossi.
+
+## Fase 2 — Pre-verifica del commit `14738b3`
+
+**Stato: merito parzialmente confermato, non ancora verdetto formale.** Il commit è pubblicato sul
+branch condiviso ma non reca il tag immutabile `candidato/fase-2-10`; applico quindi il protocollo
+concordato e non lo promuovo a PASS/FAIL di fase.
+
+### Evidenza riprodotta da Codex
+
+Sul commit esatto `14738b3f8090c6a6614cefd3902d4c5d33eea39b`, senza modifiche al working tree:
+
+1. `npx vitest run server/services/mappe/avvioImmutabile.test.ts server/services/mappe/finestreDungeon.test.ts` — **8/8 PASS**;
+2. `npm run typecheck` — **PASS**;
+3. `npm run lint` — **PASS**;
+4. `npm test -- --run` — **137 file / 569 test PASS**;
+5. `npm run build` — **PASS**. Resta il solo warning Vite preesistente sul chunk oltre 500 kB.
+
+Il commit chiude materialmente due aspetti: su un DB fresco crea i dieci ingressi dei Palazzi nel
+percorso d'avvio e, per un DB appena formato con `mappeFormate`, secondo e terzo avvio non mutano
+l'impronta delle tabelle testate. È altresì corretta la rimozione della migrazione 047: la
+presenza appartiene agli ingressi, mentre la scheda guida resta consultabile.
+
+### Requisiti ancora non dimostrati per il candidato Fase 2
+
+1. **DB già formato storico e seed cambiato.** L'assenza di `mappeFormate` fa ancora eseguire
+   `sincronizzaMappe`, `collegaPalazziAiLuoghi` e `applicaPresenzaAiLuoghi`; un hash seed diverso
+   percorre ancora l'upsert completo. Per il contratto utente entrambi i casi devono restare
+   immutabili, segnalando nel secondo `aggiornamento seed pendente`. Servono le due prove di
+   impronta completa già richieste.
+2. **Catena API e DOM dei pin temporali.** `finestreDungeon.test.ts` valuta il servizio e la
+   leggibilità della scheda, ma non monta il visore con una partita prima/durante/fuori finestra.
+   Serve la matrice reale dei dieci ingressi: pin assente fuori finestra, presente nella finestra,
+   URL guida leggibile in entrambi gli stati.
+3. **Determinismo end-to-end.** Restano scritture JSON con `Path.write_text()` in
+   `field_identities.py`, `global_world_audit.py`, `school_candidates.py`,
+   `school_projection.py` e `urban_projection.py`; non esiste ancora la doppia rigenerazione
+   byte-identica richiesta.
+
+### Rilievo non bloccante — regex dell'oracolo dei cancelli
+
+In `verify_pin_semantics.py` il pattern generico per `SWITCH` contiene due caratteri U+0008
+invece dei confini regex `\b`; non riconosce quindi una procedura generica come previsto.
+Poiché i cancelli restano fuori dal gate runtime per arbitrato utente, non riapro la Fase 2 per
+questo punto. Il sanamento è circoscritto: sostituire il pattern con
+`r'\bSWITCH\b|_SWITCH'` e aggiungere un caso positivo `SWITCH` al test dell'oracolo.
+
+### Prossimo passo di collaborazione
+
+Claude completa soltanto i tre requisiti sopra, esegue i relativi gate e pubblica il tag annotato
+`candidato/fase-2-10`. Codex eseguirà allora una sola riverifica formale isolata su tag e SHA;
+fino a quel momento questa sezione non autorizza merge né avanzamento della Fase 2.
