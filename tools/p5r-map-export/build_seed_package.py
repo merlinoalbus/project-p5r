@@ -119,6 +119,21 @@ def abbina_aree(luoghi, aree_per_dungeon):
     return collections.Counter(esiti)
 
 
+def collezionabili_del_registro(radice):
+    """Quali tipi di segnalino il registro dell'app dichiara collezionabili.
+
+    Si legge da `shared/spilli.ts` invece di riscriverne l'elenco qui: due elenchi della stessa
+    cosa divergono, e il registro è quello che l'applicazione usa davvero.
+    """
+    testo = (radice/'shared/spilli.ts').read_text(encoding='utf8')
+    fuori = {}
+    for m in re.finditer(r"'?([a-z0-9-]+)'?\s*:\s*\{[^}]*collezionabile:\s*(true|false)", testo):
+        fuori[m.group(1)] = m.group(2) == 'true'
+    if not fuori:
+        raise ValueError('registro dei segnalini non leggibile: collezionabilità sconosciuta')
+    return fuori
+
+
 def scheda_da_verificare(tipo, sem):
     """La nota che accompagna un pin di tipo non ancora identificato.
 
@@ -195,6 +210,7 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                       else f'{len(candidati)} luoghi del quartiere corrispondono')
 
     per_chiave = {m['chiave']: m for m in mappe}
+    COLLEZIONABILI = collezionabili_del_registro(Path(__file__).resolve().parents[2])
     percorso_cancelli = out/'cancelli-pin.json'
     cancelli = ({(r['mappa'], r['indicePin']): r for r in
                  json.loads(percorso_cancelli.read_text(encoding='utf8'))['pin']}
@@ -294,7 +310,12 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                 descrizione=' '.join(nota), nativo=nativo,
                 x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
                 riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
-                collezionabile=False, ordine=len(voce['spilli']))
+                # Un forziere si spunta: e' l'unico modo legittimo di toglierlo dalla vista, e
+                # lo decide il giocatore. Entrava non collezionabile, quindi restava li' anche
+                # dopo averlo aperto e non c'era verso di segnarlo — mentre il registro dice da
+                # sempre quali tipi lo sono.
+                collezionabile=bool(COLLEZIONABILI.get(tipo_spillo, False)),
+                ordine=len(voce['spilli']))
             if destinazione:
                 spillo['destinazione'] = destinazione
             spillo['descrizione'] = ' '.join(nota)

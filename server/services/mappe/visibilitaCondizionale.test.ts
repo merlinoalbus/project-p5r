@@ -21,6 +21,7 @@ import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
+import { valutaRequisitiSpillo } from '../disponibilitaService.js';
 
 const DIR_SEED = path.join('data', 'seed');
 
@@ -75,5 +76,63 @@ describe('visibilità condizionale dei pin', () => {
     // nascondere un pin; `dote` o `confidente` che un prerequisito e' tornato a farlo sparire.
     expect(tipi.size).toBeGreaterThan(0);
     for (const t of tipi) expect(nascondeIlPin(t)).toBe(true);
+  });
+
+  // ---- Il contratto visto dal runtime, non dai dati -----------------------------------------
+  //
+  // I dati oggi sono corretti, ma il difetto vero sarebbe un runtime che permette di violarli:
+  // basterebbe che qualcuno aggiungesse un prerequisito a una porta perché sparisse dalla mappa.
+  // Questi due controlli guardano la valutazione, non il seed.
+
+  // Lo stato di una partita all'11 aprile, di giorno, senza doti alzate: il minimo che serve
+  // perché la valutazione dia un verdetto invece di un «non so».
+  const statoVuoto = {
+    dataGioco: '04-11', fasciaGioco: 'giorno', giornoSettimana: 'lunedi',
+    sbloccoQuartieri: new Map(), articoliOttenuti: new Set<string>(), letture: new Set<string>(),
+  } as unknown as Parameters<typeof valutaRequisitiSpillo>[1];
+
+  it('un prerequisito non soddisfatto non toglie il pin: la porta resta', () => {
+    // «Perizia rango 5» con una partita che non ce l'ha: la porta c'è comunque, e la guida deve
+    // dire dov'è prima che tu possa aprirla, non dopo
+    // «serve il grimaldello», con una partita che non ce l'ha: la porta c'è comunque, e la guida
+    // deve dire dov'è prima che tu possa aprirla, non dopo
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'articolo', articolo: 'grimaldello', testo: 'Grimaldello' }],
+      statoVuoto);
+    expect(esito.stato).not.toBe('bloccato');
+  });
+
+  it('una condizione di presenza non soddisfatta invece lo toglie', () => {
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'fascia', fascia: 'sera', testo: 'solo di sera' }],
+      statoVuoto);
+    expect(esito.stato).toBe('bloccato');
+  });
+
+  it('nessun pin strutturale del seed può essere nascosto da un prerequisito', () => {
+    // porte, forzieri, scale, passaggi: se uno di questi avesse una condizione, quella condizione
+    // dovrebbe comunque essere di presenza — e oggi non ne hanno nessuna
+    const strutturali = getDb().prepare(`SELECT tipo, condizioni_json FROM spillo
+      WHERE tipo IN ('porta','forziere','forziere-raro','scala','passaggio','uscita','sicura')
+        AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`)
+      .all() as Array<{ tipo: string; condizioni_json: string }>;
+    for (const r of strutturali) {
+      for (const c of JSON.parse(r.condizioni_json) as Array<{ tipo: string }>) {
+        expect(nascondeIlPin(c.tipo)).toBe(true);
+      }
+    }
+  });
+
+  it('un forziere è collezionabile: lo nasconde il filtro dei raccolti, non una condizione', () => {
+    const forzieri = getDb().prepare("SELECT collezionabile, condizioni_json FROM spillo WHERE tipo = 'forziere'")
+      .all() as Array<{ collezionabile: number; condizioni_json: string | null }>;
+    expect(forzieri.length).toBeGreaterThan(0);
+    for (const f of forzieri) {
+      // niente condizione: un forziere non sparisce per una bandiera o per un prerequisito
+      expect(f.condizioni_json === null || f.condizioni_json === '[]' || f.condizioni_json === '').toBe(true);
+      // ed è collezionabile, che è l'unico modo legittimo di toglierlo dalla vista: lo decide il
+      // giocatore spuntandolo, e il filtro dei raccolti è volontario
+      expect(f.collezionabile).toBe(1);
+    }
   });
 });

@@ -13,9 +13,13 @@ Quattro controlli:
 4. **i pin nel pacchetto** — ognuno viene da un tipo determinato, sta su una planimetria che
    condivide il riferimento, ha le coordinate che si ottengono applicando il fattore dichiarato,
    e se cita un luogo quel luogo esiste nel quartiere della sua mappa;
-5. **i condizionali restano condizionali** — un pin che il gioco mostra a una bandiera deve avere
-   una condizione strutturata `da-configurare`, non una frase nella descrizione: senza condizione
-   comparirebbe sempre, che è falso. E chi non è condizionale non deve averne;
+5. **il contratto di visibilità** — un pin nativo non ha condizioni. Sono elementi fissi del
+   mondo, e ci sono sempre: la bandiera nativa dice «ci sei già passato», che per una guida non è
+   una condizione, e nemmeno un prerequisito lo è — una porta chiusa si vede. Le condizioni
+   restano riservate alla presenza (data, fascia, meteo, sblocco del quartiere), che riguarda le
+   entità della guida. Il prerequisito viaggia sul suo canale — `nativo.cancelli`,
+   `nativo.sbloccoLeggibile` e la descrizione — e quel canale viene ricontrollato per intero:
+   toglierne un pezzo fa cadere il controllo;
 6. **la contabilità chiude** — posati più esclusi devono fare esattamente i pin nativi: nessuna
    occorrenza può sparire dal riepilogo.
 """
@@ -124,6 +128,7 @@ def main(out, seed=None):
     urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = bordo_ok = con_condizione = ipotesi = 0
     tabella_ok = 0
     da_verificare_nel_pacchetto = [0]
+    con_prerequisito = [0]
     cancelli = {(r['mappa'], r['indicePin']): r for r in json.loads(
         (out/'cancelli-pin.json').read_text(encoding='utf8'))['pin']}
     parti = {r['tipoNativo']: r for r in json.loads(
@@ -314,14 +319,24 @@ def main(out, seed=None):
             atteso_condizionale = (s['tipo'], s['x'], s['y']) in condizionali
             ha = bool(s.get('condizioni'))
             assert ha == atteso_condizionale, f'condizione mancante o di troppo su {m["chiave"]}'
-            if ha:
-                assert all(c['tipo'] == 'da-configurare' and c.get('nota') for c in s['condizioni']),                     f'condizione senza forma valida su {m["chiave"]}'
-                # la nota deve dire che cosa devi aver fatto, non un numero di bandiera
-                atteso_testo = (cancelli.get((m['chiave'], (s.get('nativo') or {}).get('indicePin'))) or {}).get('rese') or []
-                for c in s['condizioni']:
-                    assert all(t in c['nota'] for t in atteso_testo),                         f'la condizione non riporta il cancello che la giustifica su {m["chiave"]}'
-                    assert not re.search(r'bandiera nativa \d+', c['nota']),                         f'la condizione cita ancora un numero di bandiera invece del blocco su {m["chiave"]}'
-                con_condizione += 1
+            # Il canale dei prerequisiti, ricontrollato per intero e nei due sensi. E' l'altra
+            # meta' del contratto: i cancelli non nascondono, ma **devono esserci**. Toglierne uno
+            # da `cancelli-pin.json`, o svuotare `nativo.cancelli` nel pacchetto, o cancellare la
+            # frase dalla descrizione, deve far cadere il controllo — altrimenti l'informazione
+            # sparisce in silenzio e il pin resta muto, che e' il difetto di prima al contrario.
+            atteso_cancello = cancelli.get((m['chiave'], (s.get('nativo') or {}).get('indicePin')))
+            rese = (atteso_cancello or {}).get('rese') or []
+            nat = s.get('nativo') or {}
+            if rese:
+                assert nat.get('sbloccoLeggibile') == rese,                     (f'il prerequisito di {m["chiave"]} pin {nat.get("indicePin")} non arriva nel '
+                     'pacchetto: cancelli-pin.json lo ha, lo spillo no')
+                assert nat.get('cancelli') == atteso_cancello['cancelli'],                     f'le prove del prerequisito non coincidono su {m["chiave"]}'
+                for t in rese:
+                    assert t in (s.get('descrizione') or ''),                         f'il prerequisito non e’ scritto nella descrizione su {m["chiave"]}'
+                con_prerequisito[0] += 1
+            else:
+                assert not nat.get('sbloccoLeggibile') and not nat.get('cancelli'),                     (f'lo spillo di {m["chiave"]} dichiara un prerequisito che cancelli-pin.json '
+                     'non conosce')
             # Le prove native devono arrivare nel pacchetto come dato, non come frase. Per gli
             # spilli di un tipo ancora da identificare sono l'unica cosa che rende possibile la
             # verifica manuale: se sparissero, resterebbe un pin muto e nessuno se ne accorgerebbe,
