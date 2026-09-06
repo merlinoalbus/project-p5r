@@ -32,8 +32,12 @@ it('risolve lo stesso pin dal negozio e dai suoi articoli senza inventare coordi
     expect(r.body.data.destinazioni[0]).toMatchObject({ mappa: 'shibuya', spillo: id, centro: null });
     expect(urlDestinazioneMondo(r.body.data.destinazioni[0])).toBe(`/guida/mappe/shibuya?spillo=${id}`);
   }
+  // Tolto il negozio, il pin sparisce: il luogo non ha piu' un punto preciso, ma il quartiere che
+  // dichiara resta un posto sulla mappa. La differenza dev'essere leggibile nel criterio.
   getDb().prepare("UPDATE negozio SET nascosto=1 WHERE chiave='untouchable'").run();
-  expect((await accesso('luogo', luogo.chiave)).body.data.esito).toBe('assente');
+  const dopo = (await accesso('luogo', luogo.chiave)).body.data;
+  expect(dopo.destinazioni.length).toBeGreaterThan(0);
+  expect(dopo.destinazioni.every((d: { spillo: number | null }) => d.spillo === null)).toBe(true);
   expect((await accesso('articolo', articolo.chiave)).body.data.esito).toBe('assente');
 });
 
@@ -73,13 +77,22 @@ it('usa ingresso solo per il quartiere e conserva alias dopo rinomina', async ()
   expect((await accesso('mappa', 'shibuya')).body.data.destinazioni[0].mappa).toBe('shibuya-centrale');
 });
 
-it('distingue associazione assente, entità inesistente e pin eliminato', async () => {
-  expect((await accesso('negozio', 'untouchable')).body.data).toMatchObject({ esito: 'assente', destinazioni: [] });
+it('distingue il punto preciso dal posto dichiarato, l’entità inesistente e il pin eliminato', async () => {
+  // Senza pin il negozio arriva comunque al quartiere che dichiara, ma con il criterio che lo dice
+  const senzaPin = (await accesso('negozio', 'untouchable')).body.data;
+  expect(senzaPin.destinazioni.length).toBeGreaterThan(0);
+  expect(senzaPin.destinazioni.every((d: { spillo: number | null }) => d.spillo === null)).toBe(true);
   expect((await accesso('negozio', 'inesistente')).status).toBe(404);
   expect((await accesso('tipo-inesistente', 'untouchable')).status).toBe(400);
   const id = await creaPin('shibuya');
+  const conPin = (await accesso('negozio', 'untouchable')).body.data;
+  expect(conPin.destinazioni[0].spillo).toBe(id);
+  // e il posto dichiarato non si aggiunge accanto al punto preciso: sarebbe una seconda meta
+  expect(conPin.destinazioni.flatMap((d: { provenienze: Array<{ criterio: string }> }) => d.provenienze.map(p => p.criterio)))
+    .not.toContain('posto-dichiarato');
+  expect(conPin.destinazioni).toHaveLength(1);
   expect((await request(app).delete(`/api/mappe/spilli/${id}`)).status).toBe(204);
-  expect((await accesso('negozio', 'untouchable')).body.data.esito).toBe('assente');
+  expect((await accesso('negozio', 'untouchable')).body.data.destinazioni.every((d: { spillo: number | null }) => d.spillo === null)).toBe(true);
   getDb().prepare("UPDATE negozio SET nascosto=1 WHERE chiave='untouchable'").run();
   expect((await accesso('negozio', 'untouchable')).status).toBe(404);
 });
@@ -103,12 +116,13 @@ it('un’attività porta al posto che dichiara, e non a uno scelto per somiglian
 it('un confidente porta ai luoghi che il catalogo gli attribuisce', async () => {
   const db = getDb();
   const riga = db.prepare("SELECT chiave FROM luogo WHERE confidenti_json IS NOT NULL AND confidenti_json <> '[]' LIMIT 1").get() as { chiave: string } | undefined;
-  if (!riga) return;
-  const confidente = db.prepare('SELECT confidenti_json FROM luogo WHERE chiave=?').get(riga.chiave) as { confidenti_json: string };
+  // niente uscite anticipate: se la fixture non ha il caso, il test deve dirlo invece di passare a vuoto
+  expect(riga).toBeTruthy();
+  const confidente = db.prepare('SELECT confidenti_json FROM luogo WHERE chiave=?').get(riga!.chiave) as { confidenti_json: string };
   const prima = JSON.parse(confidente.confidenti_json)[0] as { chiave?: string } | string;
   const chiave = typeof prima === 'string' ? prima : prima.chiave;
-  if (!chiave) return;
-  const r = await accesso('confidente', chiave);
+  expect(chiave).toBeTruthy();
+  const r = await accesso('confidente', chiave!);
   expect(r.status).toBe(200);
-  expect(JSON.stringify(r.body.data)).toContain(riga.chiave);
+  expect(JSON.stringify(r.body.data)).toContain(riga!.chiave);
 });
