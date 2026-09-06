@@ -286,7 +286,15 @@ def significato_dagli_script(out):
     return esito
 
 
+# Nomi di procedura che accendono un'icona senza dire di che icona si tratti. Vanno esclusi prima
+# di ogni altra cosa: `D04_155_11_TBOX_minimap_04` contiene «TBOX», ma il suo mestiere e' accendere
+# il pin, non dire che li' c'e' un forziere — contarlo come prova sarebbe contarsi addosso.
+MUTE = re.compile(r'minimap|_EX_GUIDE', re.IGNORECASE)
+
+
 def famiglia_sotto(nome):
+    if not nome or MUTE.search(nome):
+        return None
     for schema, tipo, etichetta in FAMIGLIE_SOTTO:
         if re.search(schema, nome):
             return tipo, etichetta
@@ -318,7 +326,9 @@ def significato_dalle_procedure_sotto(out):
         nomi = [q['name'] for q in campo['procedures']]
         punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
         punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
-        for i_pin, i_punto in p['accoppiamenti']:
+        # Solo le coppie che reggono anche senza il pin che le ha prodotte: le altre
+        # sono un effetto del fitting, non un fatto della planimetria.
+        for i_pin, i_punto in p.get('stabili') or []:
             tipo = mappa['pins'][r['pinCollocabili'][i_pin]]['nativeType']
             genere, voce = punti[i_punto]
             v = conteggi[tipo]
@@ -362,6 +372,72 @@ def significato_dalle_procedure_sotto(out):
     return esito
 
 
+def controprova(out, per_tipo):
+    """Quanto vale davvero il punto del campo sotto un pin, misurato dove la risposta è già nota.
+
+    La domanda non si risolve argomentando. Esistono tipi il cui significato è dimostrato per vie
+    che non c'entrano nulla con la geometria — il nome interno dello sprite, o la procedura che
+    accende la bandiera del pin. Su quelli si può **misurare** quante volte la lettura geometrica
+    darebbe la risposta giusta.
+
+    La misura, fatta su tutte le coppie delle proiezioni certificate, dice che non la dà quasi mai:
+    e in particolare la famiglia dei transiti sbaglia sempre, perché in un Palazzo i trigger di
+    passaggio sono ovunque e capitano vicino a qualunque cosa. Per questo la lettura geometrica
+    **non è usata per determinare i tipi**: resta registrata come materiale, con la sua misura
+    accanto, perché una prossima strada possa partire da qui sapendo quanto vale.
+    """
+    percorso = out/'proiezioni-mappa.json'
+    if not percorso.exists():
+        return dict(casi=0, giusti=0, perFamiglia={})
+    meta = {m['code']: m for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']}
+    con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
+    campi = {f['field']: f for f in con['fields']}
+    proiezioni = json.loads(percorso.read_text(encoding='utf8'))
+    per_famiglia = collections.defaultdict(lambda: dict(giusti=0, sbagliati=0))
+    scambi = collections.Counter()
+    giusti = sbagliati = 0
+    for r in proiezioni['mappe']:
+        if r['esito'] != 'certificata':
+            continue
+        mappa, p = meta[r['codice']], r['proiezione']
+        campo = campi[p['campo']]
+        nomi = [q['name'] for q in campo['procedures']]
+        punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
+        punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
+        for i_pin, i_punto in p['accoppiamenti']:
+            tipo = mappa['pins'][r['pinCollocabili'][i_pin]]['nativeType']
+            v = per_tipo.get(tipo)
+            if not v or v['stato'] != 'determinato':
+                continue
+            genere, voce = punti[i_punto]
+            if genere != 'trigger':
+                continue
+            i = voce.get('procedureIndex')
+            nome = nomi[i] if isinstance(i, int) and 0 <= i < len(nomi) else None
+            famiglia = famiglia_sotto(nome) if nome else None
+            if not famiglia:
+                continue
+            if famiglia[0] == v['tipoSpillo']:
+                per_famiglia[famiglia[0]]['giusti'] += 1
+                giusti += 1
+            else:
+                per_famiglia[famiglia[0]]['sbagliati'] += 1
+                scambi[f'{v["tipoSpillo"]} letto come {famiglia[0]}'] += 1
+                sbagliati += 1
+    casi = giusti + sbagliati
+    return dict(
+        domanda='sui tipi il cui significato è dimostrato per altra via, quante volte il trigger '
+                'sotto il pin darebbe la risposta giusta',
+        casi=casi, giusti=giusti, sbagliati=sbagliati,
+        accuratezza=round(giusti/casi, 3) if casi else None,
+        perFamiglia={k: dict(v, accuratezza=round(v['giusti']/(v['giusti']+v['sbagliati']), 3))
+                     for k, v in sorted(per_famiglia.items(),
+                                        key=lambda x: -(x[1]['giusti']+x[1]['sbagliati']))},
+        scambiPiuFrequenti=dict(scambi.most_common(8)),
+        conseguenza='troppo bassa per farne una prova: la lettura geometrica non determina alcun '
+                    'tipo e nessun pin del pacchetto dipende da lei')
+
+
 def significato_puntuale(out, determinati):
     """Il significato dei singoli pin, dove il tipo non basta ma il punto sotto di loro parla.
 
@@ -391,7 +467,9 @@ def significato_puntuale(out, determinati):
         nomi = [q['name'] for q in campo['procedures']]
         punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
         punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
-        for i_pin, i_punto in p['accoppiamenti']:
+        # Solo le coppie che reggono anche senza il pin che le ha prodotte: le altre
+        # sono un effetto del fitting, non un fatto della planimetria.
+        for i_pin, i_punto in p.get('stabili') or []:
             indice = r['pinCollocabili'][i_pin]
             tipo = mappa['pins'][indice]['nativeType']
             if tipo in determinati:
@@ -456,7 +534,9 @@ def significato_dalla_proiezione(out):
         campo = campi[p['campo']]
         punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
         punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
-        for i_pin, i_punto in p['accoppiamenti']:
+        # Solo le coppie che reggono anche senza il pin che le ha prodotte: le altre
+        # sono un effetto del fitting, non un fatto della planimetria.
+        for i_pin, i_punto in p.get('stabili') or []:
             tipo = mappa['pins'][r['pinCollocabili'][i_pin]]['nativeType']
             genere, voce = punti[i_punto]
             v = conteggi[tipo]
@@ -526,15 +606,6 @@ def main(out):
                               f"in {script['casiDellaFamiglia']} casi su {script['procedureRiconosciute']} riconosciuti"
                               + (f", con {script['confermeDaiTrigger']} conferme dalle etichette dei trigger"
                                  if script['confermeDaiTrigger'] else ''))
-        elif sotto and sotto['proposta']:
-            voce.update(tipoSpillo=sotto['proposta']['tipoSpillo'], etichetta=sotto['proposta']['etichetta'],
-                        stato='determinato',
-                        prova='procedura del trigger che sta sotto il pin: '
-                              + sotto['proposta']['motivo'])
-        elif proiezione and proiezione['proposta']:
-            voce.update(tipoSpillo=proiezione['proposta']['tipoSpillo'], etichetta=proiezione['proposta']['etichetta'],
-                        stato='ipotesi',
-                        prova='cio' + chr(39) + ' che la proiezione trova sotto il pin: ' + proiezione['proposta']['motivo'])
         else:
             voce.update(tipoSpillo=None, etichetta=None, stato='non-determinato',
                         motivo=('nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera'
@@ -549,15 +620,21 @@ def main(out):
         if r['stato'] == 'determinato':
             pin_per_prova[(r['prova'] or '').split(':')[0]] += r['occorrenze']
     determinati = [r for r in righe if r['stato'] == 'determinato']
-    ipotesi = [r for r in righe if r['stato'] == 'ipotesi']
+    ipotesi = []
     senza = [r for r in righe if r['stato'] == 'non-determinato']
-    puntuali = significato_puntuale(out, {r['tipoNativo'] for r in determinati})
+    # Le determinazioni per singolo pin poggiavano sulla stessa lettura geometrica, e la
+    # controprova la smentisce: restano registrate come materiale, non come prova.
+    puntuali = []
+    materiale = significato_puntuale(out, {r['tipoNativo'] for r in determinati})
+    prova_della_lettura = controprova(out, {r['tipoNativo']: r for r in righe})
     mancanti = sorted(set(SIGNIFICATO) - {r['nomeNativo'] for r in righe})
     if mancanti:
         raise ValueError(f'Traduzioni dichiarate per sprite che nessun pin usa: {mancanti}')
     risultato = dict(
         schemaVersion=1, sources=dict(icone='icone-mappa.json', registro='shared/spilli.ts'),
         tipi=righe, provePalazzi=PROVE_PALAZZI, pinPuntuali=puntuali,
+        letturaGeometrica=dict(controprova=prova_della_lettura,
+                               materialeNonUsato=materiale),
         summary=dict(tipi=len(righe), determinati=len(determinati), ipotesi=len(ipotesi), nonDeterminati=len(senza),
                      pinConIpotesi=sum(r['occorrenze'] for r in ipotesi),
                      perTipoIpotesi=dict(collections.Counter(r['tipoSpillo'] for r in ipotesi)),
@@ -567,10 +644,15 @@ def main(out):
                      perProva=dict(collections.Counter((r.get('prova') or '').split(':')[0] for r in determinati)),
                      pinPerProva=dict(sorted(pin_per_prova.items(), key=lambda x: (-x[1], x[0]))),
                      pinPuntuali=len(puntuali),
+                     accuratezzaLetturaGeometrica=prova_della_lettura['accuratezza'],
+                     casiControprova=prova_della_lettura['casi'],
                      perTipoPuntuale=dict(sorted(collections.Counter(
                          r['tipoSpillo'] for r in puntuali).items(), key=lambda x: (-x[1], x[0]))),
                      motiviNonDeterminati=dict(collections.Counter(r.get('motivo') for r in senza))),
         limits=['I tipi non determinati non vanno importati: un pin senza significato è peggio di un pin assente.',
+                'La lettura geometrica — che cosa sta sotto il pin secondo la proiezione — non determina '
+                'nulla: misurata sui tipi già noti sbaglia più di quanto azzecchi, e la famiglia dei '
+                'transiti sbaglia sempre. Resta nel file come materiale, mai come prova.',
                 'Le icone native servono a riconoscere, non a disegnare: l’applicazione usa i propri segnalini.'])
     (out/'semantica-pin.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))

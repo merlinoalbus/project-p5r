@@ -166,7 +166,10 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
             p = mappa_nativa['pins'][indice]
             sem = semantica.get(p['nativeType'])
             puntuale = puntuali.get((chiave, indice))
-            if not sem or (sem['stato'] not in ('determinato', 'ipotesi') and not puntuale):
+            # Un tipo non dimostrato resta fuori, come vuole il contratto della Fase 2a: una
+            # descrizione che avverte «forse» non rende certificato il tipo assegnato. Entra invece
+            # il pin che ha una prova sua, che dimostrata lo e' eccome.
+            if not sem or (sem['stato'] != 'determinato' and not puntuale):
                 esiti['tipo nativo senza significato'] += 1
                 continue
             luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
@@ -178,9 +181,6 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                 nota.append('Riconosciuto singolarmente: ' + puntuale['prova'] + '.')
             else:
                 tipo_spillo, etichetta = sem['tipoSpillo'], sem['etichetta']
-                if sem['stato'] == 'ipotesi':
-                    # dichiarato per quello che e': un indizio forte, non una dimostrazione
-                    nota.append('Che cosa sia e’ un’ipotesi, non una certezza: ' + sem['prova'] + '.')
             # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
             if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')

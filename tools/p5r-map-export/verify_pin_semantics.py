@@ -123,14 +123,9 @@ def main(out, seed=None):
     for r in icone['tipiNativi']:
         v = per_tipo[r['tipoNativo']]
         assert v['occorrenze'] == r['occorrenze'] and v['associazione'] == r['associazione']
-        if v['stato'] == 'ipotesi':
-            # un'ipotesi deve dichiararsi tale e portare la propria misura, e non puo' esistere
-            # dove una prova vera c'era gia'
-            assert v['tipoSpillo'] in registro and v['etichetta'] and v.get('prova')
-            assert v['proiezione'] and v['proiezione']['proposta'], f'ipotesi senza misura: {r["tipoNativo"]}'
-            assert v['proiezione']['coppie'] >= ps.MINIME_COPPIE, f'ipotesi con troppe poche coppie: {r["tipoNativo"]}'
-            ipotesi += 1
-        elif v['stato'] == 'determinato':
+        assert v['stato'] in ('determinato', 'non-determinato'), \
+            f'stato non ammesso: un tipo o è dimostrato o non lo è ({r["tipoNativo"]})'
+        if v['stato'] == 'determinato':
             assert v['tipoSpillo'] in registro, f'tipo di segnalino fuori registro: {v["tipoSpillo"]}'
             assert v['etichetta'] and v.get('prova'), f'significato senza etichetta o senza prova: {r["tipoNativo"]}'
             if r['associazione'] in ('blocco-urbano-dimostrato', 'blocco-covo-dimostrato'):
@@ -141,17 +136,6 @@ def main(out, seed=None):
                           else mi.SCARTO_MY_PALACE)
                 assert r['sprite'] == r['tipoNativo'] + scarto, f'sprite fuori scarto: {r["tipoNativo"]}'
                 urbani += 1
-            elif v['prova'].startswith('procedura del trigger'):
-                # la terza strada va ricalcolata dalle proiezioni, non creduta
-                conti = famiglie_sotto.get(r['tipoNativo'], collections.Counter())
-                riconosciute = sum(conti.values())
-                (spillo, etichetta), quante = sorted(conti.items(), key=lambda x: (-x[1], x[0][0]))[0]
-                assert spillo == v['tipoSpillo'], f'famiglia sotto il pin diversa: {r["tipoNativo"]}'
-                quota = quante/riconosciute
-                assert (riconosciute >= ps.MINIME_SOTTO and quota >= ps.DOMINANZA_SOTTO) or \
-                       (riconosciute >= ps.MINIME_SOTTO_RIDOTTE and quota >= ps.DOMINANZA_SOTTO_RIDOTTA), \
-                    f'dominanza insufficiente sotto il pin: {r["tipoNativo"]}'
-                sotto_ok += 1
             else:
                 # la strada degli script va ricalcolata, non creduta
                 nomi = dagli_script.get(r['tipoNativo'], collections.Counter())
@@ -171,21 +155,18 @@ def main(out, seed=None):
             determinati += 1
         else:
             assert v['tipoSpillo'] is None and v['etichetta'] is None and v['motivo']
+    for v in per_tipo.values():
+        assert 'sotto il pin' not in (v.get('prova') or ''), \
+            f'un tipo è determinato dalla lettura geometrica, che la controprova smentisce: {v["tipoNativo"]}'
+    assert not semantica.get('pinPuntuali'), 'nessun pin deve essere determinato singolarmente'
+    # la controprova va rifatta, non letta: è lei a giustificare l'esclusione della lettura
+    misura = ps.controprova(out, per_tipo)
+    assert misura == semantica['letturaGeometrica']['controprova'], 'la controprova non si riproduce'
+    assert misura['casi'] >= 20, 'la controprova ha troppi pochi casi per dire qualcosa'
+    assert misura['accuratezza'] < 0.7, \
+        ('la lettura geometrica risulta accurata: se lo è davvero, va usata come prova, '
+         'non lasciata da parte')
     assert determinati == semantica['summary']['determinati']
-
-    # Ogni determinazione puntuale deve corrispondere a una procedura trovata davvero sotto quel
-    # pin, e non puo' riguardare un tipo che ha gia' una prova sua.
-    puntuali = {(x['chiave'], x['indicePin']): x for x in semantica.get('pinPuntuali') or []}
-    assert len(puntuali) == len(semantica.get('pinPuntuali') or []), 'pin puntuali ripetuti'
-    for (chiave, indice), x in puntuali.items():
-        trovato = procedure_sotto.get((chiave, indice))
-        assert trovato, f'determinazione puntuale senza procedura sotto: {chiave}#{indice}'
-        tipo, (spillo, etichetta), nome = trovato
-        assert tipo == x['tipoNativo'] and spillo == x['tipoSpillo'] and etichetta == x['etichetta'] \
-            and nome == x['procedura'], f'determinazione puntuale non riproducibile: {chiave}#{indice}'
-        assert per_tipo[tipo]['stato'] != 'determinato', \
-            f'determinazione puntuale su un tipo gia' + chr(39) + f' dimostrato: {tipo}'
-        assert spillo in registro, f'tipo di segnalino fuori registro: {spillo}'
 
     pin_nativi = {}
     for m in meta['maps']:
@@ -202,23 +183,17 @@ def main(out, seed=None):
         for i in rif['collocabili']:
             p = pin_nativi[m['chiave']][i]
             v = per_tipo[p['nativeType']]
-            puntuale = puntuali.get((m['chiave'], i))
-            if v['stato'] not in ('determinato', 'ipotesi') and not puntuale:
+            if v['stato'] != 'determinato':
                 continue
-            spillo = puntuale['tipoSpillo'] if (puntuale and v['stato'] != 'determinato') else v['tipoSpillo']
-            attese[(spillo, round(100*p['x']*fattore/larghezza, 3), round(100*p['y']*fattore/altezza, 3))] += 1
+            attese[(v['tipoSpillo'], round(100*p['x']*fattore/larghezza, 3),
+                    round(100*p['y']*fattore/altezza, 3))] += 1
         assert len(propri) == sum(attese.values()), f'numero di pin diverso su {m["chiave"]}'
         trovati = collections.Counter((x['tipo'], x['x'], x['y']) for x in propri)
         assert trovati == attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
         quartiere = m['genitore'].removeprefix('citta-') if (m['genitore'] or '').startswith('citta-') else None
         def spillo_di(i):
             v = per_tipo[pin_nativi[m['chiave']][i]['nativeType']]
-            puntuale = puntuali.get((m['chiave'], i))
-            if v['stato'] == 'determinato':
-                return v['tipoSpillo']
-            if puntuale:
-                return puntuale['tipoSpillo']
-            return v['tipoSpillo'] if v['stato'] == 'ipotesi' else None
+            return v['tipoSpillo'] if v['stato'] == 'determinato' else None
 
         condizionali = {(spillo_di(i),
                          round(100*pin_nativi[m['chiave']][i]['x']*fattore/larghezza, 3),
@@ -248,9 +223,9 @@ def main(out, seed=None):
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
     assert ipotesi == semantica['summary']['ipotesi']
     print('OK', determinati, f'tipi dimostrati ({urbani} dal nome dello sprite,',
-          f'{dagli_script_ok} dalle procedure che accendono la bandiera,',
-          f'{sotto_ok} dalla procedura sotto il pin) e', ipotesi, 'per ipotesi dichiarata,',
-          len(puntuali), 'pin risolti singolarmente;',
+          f'{dagli_script_ok} dalle procedure che accendono la bandiera);',
+          f'la lettura geometrica azzecca il {round(misura["accuratezza"]*100)}% su',
+          misura['casi'], 'casi di controllo e non determina nulla;',
           len(per_tipo)-determinati-ipotesi, 'lasciati senza;',
           controllati, 'pin nel pacchetto ricontrollati,', con_luogo, 'collegati a un luogo del catalogo,',
           con_condizione, 'con condizione da configurare; contabilità chiusa su', nativi, 'pin nativi')
