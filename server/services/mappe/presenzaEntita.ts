@@ -30,6 +30,8 @@
 // ============================================================
 
 import { nascondeIlPin, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { eStrutturale } from '../../../shared/spilli.js';
+import type { AppDatabase } from '../../db/dbService.js';
 
 const GIORNI: Record<string, string> = {
   lunedi: 'lunedi', martedi: 'martedi', mercoledi: 'mercoledi', giovedi: 'giovedi',
@@ -95,4 +97,45 @@ export function unisci(...gruppi: RequisitoSpillo[][]): RequisitoSpillo[] {
     }
   }
   return fuori;
+}
+
+
+/** Applica a ogni spillo che cita un luogo la presenza di quel luogo.
+ *
+ * Va eseguita **dopo** l'importazione del pacchetto, non durante la sincronizzazione: i pin
+ * dell'atlante nativo arrivano con il pacchetto, e un negozio disegnato sulla planimetria è lo
+ * stesso negozio di quello sull'illustrazione del quartiere — se chiude di sera devono sparire
+ * tutti e due, non uno solo. Applicandola solo ai pin editoriali, il pin nativo di un negozio
+ * chiuso restava visibile, che è il difetto che si voleva togliere.
+ *
+ * Gli elementi fissi restano fuori: una porta o un forziere non chiudono.
+ */
+export function applicaPresenzaAiLuoghi(db: AppDatabase): number {
+  const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((t) => t.name));
+  if (!tabelle.has('luogo') || !tabelle.has('spillo')) return 0;
+  const colonne = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
+  const quando = colonne.includes('quando') ? 'l.quando' : "'' AS quando";
+  const giorni = colonne.includes('giorni') ? 'l.giorni' : "'' AS giorni";
+  const negozio = colonne.includes('negozio') && tabelle.has('negozio')
+    ? '(SELECT n.condizioni_json FROM negozio n WHERE n.chiave = l.negozio)' : 'NULL';
+  const quartieri = new Set(colonne.length && tabelle.has('quartiere')
+    ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
+    : []);
+  const righe = db.prepare(`SELECT l.chiave, l.quartiere_chiave, ${quando}, ${giorni}, ${negozio} AS condizioni_negozio FROM luogo l`)
+    .all() as Array<{ chiave: string; quartiere_chiave: string; quando: string | null; giorni: string | null; condizioni_negozio: string | null }>;
+  const aggiorna = db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?');
+  const spilliDi = db.prepare(`SELECT id, tipo FROM spillo WHERE riferimento_tipo = 'luogo' AND riferimento_chiave = ?`);
+  let toccati = 0;
+  for (const l of righe) {
+    const presenza = unisci(
+      quartieri.has(l.quartiere_chiave) ? [{ tipo: 'quartiere' as const, quartiere: l.quartiere_chiave }] : [],
+      fasciaDaTesto(l.quando), giorniDaTesto(l.giorni), soloPresenza(l.condizioni_negozio));
+    if (!presenza.length) continue;
+    for (const s of spilliDi.all(l.chiave) as Array<{ id: number; tipo: string }>) {
+      if (eStrutturale(s.tipo)) continue;
+      aggiorna.run(JSON.stringify(presenza), s.id);
+      toccati += 1;
+    }
+  }
+  return toccati;
 }

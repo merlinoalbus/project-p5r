@@ -20,7 +20,7 @@ import { dettaglioNegozio } from '../negoziService.js';
 import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
-import { DEFINIZIONI_SPILLO, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
+import { eStrutturale, DEFINIZIONI_SPILLO, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
 import type { CondizioneSpilloDto, DettaglioSpilloDto, EsportazioneMappeDto, ImmagineSpilloDto, MappaDto, MappaRiassuntoDto, SpilloDto } from '../../../shared/types.js';
 import fs from 'node:fs';
 import { creaZip, type VoceZip } from '../../utils/zip.js';
@@ -226,9 +226,12 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // La condizione resta scritta e si vede, ma non fa sparire il pin: nascondere una porta finche'
   // non hai la chiave vorrebbe dire mostrarla solo quando non serve piu'.
   //
-  // Non vale per tipo di segnalino: un passaggio della mappa di Tokyo verso un quartiere che apre
-  // a giugno, in aprile, davvero non c'e'. Vale per provenienza.
-  const esitoVisibilita = esito && nativoDiSpillo(r) && esito.stato === 'bloccato'
+  // Vale per **provenienza e tipo insieme**, e servono tutte e due. La sola provenienza
+  // proteggeva anche un negozio disegnato sulla planimetria nativa, che invece di sera chiude e
+  // il pin deve sparire; il solo tipo avrebbe protetto il passaggio che dalla mappa di Tokyo
+  // porta a un quartiere non ancora sbloccato, che in aprile davvero non c'e'.
+  const esitoVisibilita = esito && esito.stato === 'bloccato'
+    && nativoDiSpillo(r) && eStrutturale(r.tipo)
     ? { ...esito, stato: 'ignoto' as const }
     : esito;
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
