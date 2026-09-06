@@ -18,6 +18,7 @@ import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
+import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
 const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['libri', 'Libri'], ['film', 'Film e DVD']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
@@ -42,6 +43,7 @@ function Attivita({ a }: { a: AttivitaDto }) {
       </button>
       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
         {a.luogo && <span><strong className="text-text">Dove:</strong> {a.luogoChiave ? <Link to={`/guida/citta/${a.luogoChiave}`}>{a.luogo}</Link> : a.luogo}</span>}
+        <CollegamentoMappa tipo="attivita" chiave={a.chiave} compatto />
         {a.costo !== null && <span><strong className="text-text">Costo:</strong> {a.costo.toLocaleString('it-IT')} ¥</span>}
         {a.paga && <span><strong className="text-text">Paga:</strong> {a.paga}</span>}
         {a.sblocco && <span><strong className="text-text">Sblocco:</strong> {a.sblocco}</span>}

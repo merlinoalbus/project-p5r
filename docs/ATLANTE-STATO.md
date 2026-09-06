@@ -233,10 +233,43 @@ risponde con una destinazione unica: *Kichijoji › Quartiere dello shopping*, s
 Sniper (Freccette e Biliardo)», sulla planimetria nativa del gioco. Leblanc ne dà due, il
 quartiere e i Vicoli, entrambe con il pin.
 
-## Fase 3 — Collegamenti effettivi · ⬜ da iniziare
+## Fase 3 — Collegamenti effettivi · **accessi fatti, collegamenti da fare**
 
-Proiezione 3D→2D certificata per mappa, collegamenti con partenza e arrivo precisi, condizioni
-narrative da giorno/momento/meteo, accessi dalle altre sezioni dell'app.
+| passo | stato |
+|---|---|
+| 3d — accessi dalle altre sezioni | ✅ |
+| 3a — proiezione 3D→2D per mappa | ⬜ |
+| 3b — collegamenti con partenza e arrivo | ⬜ |
+| 3c — condizioni narrative | ⬜ |
+
+### Le sezioni arrivano allo stesso mondo
+
+`attivita` è ora un tipo di accesso come gli altri, e il risolutore unico sa raggiungere il posto
+in tre modi nuovi: un'attività passa dal quartiere che la scheda registra e, dentro quel
+quartiere, dal luogo che porta il suo nome; un confidente passa dai luoghi che il catalogo elenca
+per lui; un negozio, un articolo o un luogo passavano già dagli spilli.
+
+Copertura misurata sull'intero inventario, non su un campione:
+
+| sezione | voci | con accesso alla mappa | con il pin esatto |
+|---|---|---|---|
+| negozi | 47 | 30 | 30 |
+| attività | 30 | 29 | 3 |
+| confidenti | 23 | 12 | 12 |
+| quartieri | 24 | 24 | — |
+| Palazzi e Dedali | 10 | 10 | — |
+| luoghi | 84 | 61 | 61 |
+| aree della guida | 116 | 72 | — |
+| articoli (primi 200) | 200 | 140 | 140 |
+| **totale** | **534** | **378** | **246** |
+
+Esempi verificati: Sojiro apre *Yongen-Jaya › Vicoli* sul Café Leblanc, Iwai *Shibuya › Central
+Street* su Untouchable, «Gabbie di Battuta» il suo pin nei Vicoli, il Palazzo di Kamoshida la sua
+mappa. Le voci senza accesso sono quelle che un posto non ce l'hanno: Morgana, la lettura in
+metropolitana, i negozi ambulanti.
+
+Nelle pagine è comparso un collegamento unico, `CollegamentoMappa`, usato da negozi, attività,
+confidenti e Palazzi: la scheda dice che cos'è, la mappa dove si trova.
 
 ## Fase 4 — Specifica grafica per Codex · ⬜ da iniziare
 
