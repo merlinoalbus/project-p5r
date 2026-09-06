@@ -40,7 +40,7 @@ del gioco.**
 | **5.1** | layout molto grafico e moderno, desktop/tablet/mobile, sulle sette sezioni | A e B, ciascuno sulle proprie |
 | **5.2** | aggiungere gli altri tipi di oggetti individuati dalle guide | B |
 | **5.3** | ogni riferimento alla mappa: ancora sull'atlante **e** posizione già in pagina | componente: A · applicazione: A e B |
-| **5.4** | Tokyo sostituita dalla mappa della metropolitana del gioco | A |
+| **5.4** | **ogni mappa radice è quella del gioco**: Tokyo → mappa della metropolitana, Mementos → mappa dei Memento, ogni Palazzo → la sua mappa d'insieme nativa | A |
 | **6.1** | tutti i pin rigenerati: PNG alfa reale, **sola figura, senza cornice** | prompt A · generazione Codex |
 | **6.2** | grafica per **tutte** le parti di interfaccia dove manca, non solo le sezioni citate | prompt di chi rifà la pagina · generazione Codex |
 | **6.3** | generazione immagini **esclusiva di Codex**; Claude scrive e verifica i prompt | — |
@@ -140,3 +140,35 @@ fondamenta condivise (A scrive, B verifica)
 2. I prompt: un file per prompt in `docs/grafica/`, o una tabella unica?
 3. Mentre scrivo le fondamenta, cominci a **censire** il lotto B — che dati mostra oggi ogni
    pagina, cosa manca, dove servono immagini? Così non stiamo fermi in due.
+
+---
+
+## 5.4 esteso — «anche la mappa dei Memento va sostituita con quella dei Memento, ecc. ecc.»
+
+L'utente ha allargato il punto il 6 settembre: non è solo Tokyo. **Ogni mappa radice deve essere
+la mappa che il gioco usa per quella cosa**, non un'illustrazione editoriale.
+
+Oggi le undici radici stanno così:
+
+| radice | immagine attuale | mappa del gioco |
+|---|---|---|
+| `tokyo` | `mappe/tokyo` — illustrazione | **da comporre**: non esiste un'unica immagine. Il gioco disegna la schermata di viaggio con gli sprite di `P5_MAPDATA.SPD` (icone dei quartieri: il 105 di Shibuya, il Kabukichō di Shinjuku, la ruota di Odaiba, il Kaminarimon di Asakusa…) più le 31 stazioni e i 64 archi di `metropolitana.json` |
+| `dungeon-kamoshida` | `palazzi/kamoshida` — illustrazione | **trovata**: `nativo-rmap-151-0-0`, il castello intero visto d'insieme. Verificata a occhio |
+| gli altri 8 Palazzi | `palazzi/<nome>` — illustrazione | **da individuare** |
+| `dungeon-mementos` | `palazzi/mementos` — illustrazione | **da individuare** |
+
+### Dove si è arrivati nella ricerca, così non si ricomincia
+
+L'ipotesi «la mappa d'insieme è quella con codice `<campo>-0-<n>`» **regge solo per Kamoshida**:
+degli altri dieci Palazzi nessuno ha un figlio con minore 0. Il gioco non numera le mappe
+d'insieme in modo uniforme, quindi la strada è un'altra.
+
+La fonte giusta è `nomi-mappe-ufficiali.json`, estratto da `FLDWHOLEMAPTABLE.FTD` e
+`FLDWHOLEMAPTABLEDNG.FTD`: la tabella `dungeon` ha **11 record e 98 voci valide** — undici come le
+radici. È il menu di viaggio che il gioco mostra sulla mappa d'insieme, e le sue voci dovrebbero
+dire quale ROADMAP fa da mappa d'insieme per ciascun Palazzo. **Prossimo passo: leggerla record per
+record e incrociarla con i codici delle planimetrie.**
+
+Attenzione a una tentazione: prendere «la planimetria più grande» o «quella con più pin» come
+mappa d'insieme. Sarebbe un indovinello, e su undici radici ne sbaglierebbe qualcuna in silenzio —
+esattamente il tipo di scorciatoia che in Fase 1 è già stata respinta.
