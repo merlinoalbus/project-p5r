@@ -318,3 +318,31 @@ reperibilità e condizioni devono invece essere confrontati con la guida tematic
 Le assenze legittime vanno distinte dai campi non ancora censiti. Il gate controllerà inoltre
 che uno stesso articolo presente in più guide non venga duplicato sotto chiavi incompatibili e
 che le diverse reperibilità siano conservate senza sceglierne arbitrariamente una.
+
+## Aggiornamento 5 — controprova quantitativa sul criterio dei quattro lati
+
+**Base osservata:** correzione di Fase 2 in corso dopo `78b5dec`
+**Stato:** evidenza favorevole alla riformulazione, da riverificare sul commit stabile
+
+La soglia `quotaFuoriDalTratto` non era applicata e non può restare presentata come criterio.
+È però possibile fondare la deduzione sui dati che il requisito di Fase 2 chiedeva davvero:
+dominanza laterale, divario dagli interni, quattro lati esclusivi e sequenza dei tipi 13–16.
+
+Ho ricalcolato la distribuzione di tutti i 1.372 pin collocabili che entrano nella misura:
+30,25% alto, 18,37% destra, 20,92% basso e 30,47% sinistra. Contro queste frequenze empiriche:
+
+| tipo | lato | casi | quota | probabilità binomiale di una concentrazione almeno così forte | correzione prudente 16×4 |
+|---:|---|---:|---:|---:|---:|
+| 13 | alto | 43/66 | 65,15% | 5,29×10⁻⁹ | 3,38×10⁻⁷ |
+| 14 | destra | 50/71 | 70,42% | 1,35×10⁻²¹ | 8,67×10⁻²⁰ |
+| 15 | basso | 50/66 | 75,76% | 2,32×10⁻²¹ | 1,48×10⁻¹⁹ |
+| 16 | sinistra | 47/59 | 79,66% | 8,80×10⁻¹⁵ | 5,64×10⁻¹³ |
+
+Il calcolo binomiale non sostituisce una prova semantica e tratta i pin come indipendenti, quindi
+va letto come controllo di robustezza, non come probabilità causale. Insieme al fatto che i
+quattro tipi sono consecutivi, coprono esattamente i quattro lati senza duplicati e il migliore
+degli altri tipi si ferma al 48,5%, rende però molto forte la lettura direzionale anche senza
+imporre che metà dei pin sia oltre il perimetro. Accetto quindi come soluzione possibile la
+riformulazione in cui la quota fuori-tratto è soltanto descrittiva, a condizione che codice,
+artefatto, verificatore e stato non la chiamino più soglia di accettazione e non dichiarino che
+tutti i quattro tipi cadono prevalentemente fuori dal disegno.
