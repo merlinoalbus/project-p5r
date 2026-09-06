@@ -106,6 +106,15 @@ FAMIGLIE = [
     (r'(GIM_\w*SWITCH|_SWITCH|gate_\w*chenge)', 'meccanismo', 'Meccanismo'),
     (r'DOOR', 'porta', 'Porta'),
     (r'SAFETY_ROOM', 'sicura', 'Stanza sicura'),
+    # Nomi che compaiono negli script fuori dai campi, letti con `flow_binario`: `FIELD/DOOR` da
+    # solo ne porta centotrenta.
+    (r'SAFEROOM', 'sicura', 'Stanza sicura'),
+    (r'FastTravel', 'sicura', 'Punto di viaggio rapido'),
+    (r'InternalLock', 'porta', 'Porta chiusa'),
+    (r'SHUTTER', 'porta', 'Serranda'),
+    (r'(Door_|doorfence|DoorBack|PasswardDoor|BigDoor)', 'porta', 'Porta'),
+    (r'ELEVATOR', 'passaggio', 'Ascensore'),
+    (r'(SLOT_GAME|BIG_SLOT)', 'attivita', 'Gioco'),
 ]
 # Un tipo è determinato quando una famiglia parlante copre almeno questa quota delle procedure
 # riconosciute, e i casi sono almeno questi: sotto, è un indizio, non una prova.
@@ -372,6 +381,61 @@ def significato_dalle_procedure_sotto(out):
     return esito
 
 
+def significato_dalle_bandiere(out):
+    """Che cosa accende ciascun pin, letto in tutti i 5443 script del gioco.
+
+    È la prova più diretta che esista per un pin: il gioco lo mostra quando una certa bandiera si
+    accende, e da qualche parte c'è la procedura che la accende. Se quella procedura si chiama
+    `D04_155_03_SEEDicon_2`, lì c'è un seme della bramosia — non «di solito», proprio lì.
+
+    Due vincoli, senza i quali la lettura sbaglia, ed è stato misurato:
+
+    * **pertinenza** — le bandiere non sono globali: 931 delle 3258 sono accese da script di
+      Palazzi diversi. Vale solo la procedura che sta in uno script il cui nome cita il campo di
+      quella mappa. Senza questo vincolo il tipo del seme della bramosia risultava un forziere;
+    * **una bandiera, un pin** — quattordici bandiere accendono più pin della stessa mappa, e per
+      quelle non si può dire quale delle icone la procedura stia rivelando. Restano fuori.
+
+    Dove questa prova c'è, **vince sul tipo**: il tipo è una generalizzazione su tutti i pin che
+    portano quel numero, questa riguarda proprio quello.
+    """
+    percorso = out/'bandiere-script.json'
+    if not percorso.exists():
+        return {}
+    raccolta = json.loads(percorso.read_text(encoding='utf8'))['bandiere']
+    meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
+    fuori = {}
+    for mappa in meta['maps']:
+        chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa['code'].split('_')[1:])
+        codici = set()
+        for campo in mappa['fields']:
+            trovato = re.match(r'F(\d{3})_(\d{3})_(\d{2})', campo)
+            if trovato:
+                codici.add(trovato.group(1) + '_' + trovato.group(2))
+                codici.add(trovato.group(1))
+        quanti = collections.Counter(p['flag'] for p in mappa['pins'] if p['conditional'])
+        for indice, pin in enumerate(mappa['pins']):
+            if not pin['conditional'] or quanti[pin['flag']] > 1:
+                continue
+            voci = [v for v in raccolta.get(str(pin['flag']), [])
+                    if any(c in v['script'] for c in codici)]
+            if not voci:
+                continue
+            famiglie = {famiglia_di(v['procedura']) for v in voci}
+            famiglie = {f for f in famiglie if f}
+            if len(famiglie) != 1:
+                continue
+            schema, tipo_spillo, etichetta = famiglie.pop()
+            procedure = sorted({v['procedura'] for v in voci})
+            fuori[(chiave, indice)] = dict(
+                chiave=chiave, indicePin=indice, tipoNativo=pin['nativeType'],
+                bandiera=pin['flag'], tipoSpillo=tipo_spillo, etichetta=etichetta,
+                procedure=procedure[:4], script=sorted({v['script'] for v in voci})[:2],
+                prova='la bandiera che il gioco accende per mostrarlo è accesa da «'
+                      + procedure[0] + '»')
+    return fuori
+
+
 def controprova(out, per_tipo):
     """Quanto vale davvero il punto del campo sotto un pin, misurato dove la risposta è già nota.
 
@@ -624,6 +688,7 @@ def main(out):
     senza = [r for r in righe if r['stato'] == 'non-determinato']
     # Le determinazioni per singolo pin poggiavano sulla stessa lettura geometrica, e la
     # controprova la smentisce: restano registrate come materiale, non come prova.
+    da_bandiera = significato_dalle_bandiere(out)
     puntuali = []
     materiale = significato_puntuale(out, {r['tipoNativo'] for r in determinati})
     prova_della_lettura = controprova(out, {r['tipoNativo']: r for r in righe})
@@ -633,6 +698,7 @@ def main(out):
     risultato = dict(
         schemaVersion=1, sources=dict(icone='icone-mappa.json', registro='shared/spilli.ts'),
         tipi=righe, provePalazzi=PROVE_PALAZZI, pinPuntuali=puntuali,
+        pinDaBandiera=[da_bandiera[k] for k in sorted(da_bandiera)],
         letturaGeometrica=dict(controprova=prova_della_lettura,
                                materialeNonUsato=materiale),
         summary=dict(tipi=len(righe), determinati=len(determinati), ipotesi=len(ipotesi), nonDeterminati=len(senza),
@@ -644,6 +710,10 @@ def main(out):
                      perProva=dict(collections.Counter((r.get('prova') or '').split(':')[0] for r in determinati)),
                      pinPerProva=dict(sorted(pin_per_prova.items(), key=lambda x: (-x[1], x[0]))),
                      pinPuntuali=len(puntuali),
+                     pinDaBandiera=len(da_bandiera),
+                     perTipoDaBandiera=dict(sorted(collections.Counter(
+                         v['tipoSpillo'] for v in da_bandiera.values()).items(),
+                         key=lambda x: (-x[1], x[0]))),
                      accuratezzaLetturaGeometrica=prova_della_lettura['accuratezza'],
                      casiControprova=prova_della_lettura['casi'],
                      perTipoPuntuale=dict(sorted(collections.Counter(

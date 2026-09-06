@@ -137,6 +137,9 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
     # Dove il tipo resta muto perche' i suoi pin sono troppo pochi per una dominanza, il singolo pin
     # puo' comunque avere la sua prova: il trigger che gli sta sotto. Quella vale per quel pin solo.
     puntuali = {(r['chiave'], r['indicePin']): r for r in _sem.get('pinPuntuali') or []}
+    # La bandiera che il gioco accende per mostrare *quel* pin dice che cosa sia quel pin, e vale
+    # piu' del tipo, che e' una generalizzazione su tutti i pin con lo stesso numero.
+    da_bandiera = {(r['chiave'], r['indicePin']): r for r in _sem.get('pinDaBandiera') or []}
     quartieri = json.loads((seed/'citta.json').read_text(encoding='utf8'))['quartieri']
     luoghi_per_quartiere = {q['chiave']: q.get('luoghi', []) for q in quartieri}
 
@@ -165,7 +168,7 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
         for indice in rif['collocabili']:
             p = mappa_nativa['pins'][indice]
             sem = semantica.get(p['nativeType'])
-            puntuale = puntuali.get((chiave, indice))
+            puntuale = da_bandiera.get((chiave, indice)) or puntuali.get((chiave, indice))
             # Un tipo non dimostrato resta fuori, come vuole il contratto della Fase 2a: una
             # descrizione che avverte «forse» non rende certificato il tipo assegnato. Entra invece
             # il pin che ha una prova sua, che dimostrata lo e' eccome.
@@ -176,7 +179,7 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
             nota = ['Pin nativo del gioco.']
             # La prova puntuale riguarda proprio questo pin, quindi conta piu' di un'ipotesi sul suo
             # tipo; dove il tipo e' dimostrato, invece, non c'e' nulla da aggiungere.
-            if puntuale and sem['stato'] != 'determinato':
+            if puntuale:
                 tipo_spillo, etichetta = puntuale['tipoSpillo'], puntuale['etichetta']
                 nota.append('Riconosciuto singolarmente: ' + puntuale['prova'] + '.')
             else:

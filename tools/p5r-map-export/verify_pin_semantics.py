@@ -168,6 +168,18 @@ def main(out, seed=None):
          'non lasciata da parte')
     assert determinati == semantica['summary']['determinati']
 
+    # La via delle bandiere va ricalcolata dalle sorgenti, non creduta: si rilegge la raccolta
+    # delle bandiere, si riapplica il vincolo di pertinenza e quello di bandiera unica, e si
+    # controlla che esca esattamente lo stesso elenco.
+    da_bandiera = {(r['chiave'], r['indicePin']): r for r in semantica.get('pinDaBandiera') or []}
+    atteso_bandiera = ps.significato_dalle_bandiere(out)
+    assert set(da_bandiera) == set(atteso_bandiera), 'i pin riconosciuti dalla bandiera non si riproducono'
+    for k, v in da_bandiera.items():
+        rifatto = atteso_bandiera[k]
+        assert v['tipoSpillo'] == rifatto['tipoSpillo'] and v['etichetta'] == rifatto['etichetta'],             f'significato dalla bandiera diverso: {k}'
+        assert v['tipoSpillo'] in registro, f'tipo di segnalino fuori registro: {v["tipoSpillo"]}'
+        assert v['procedure'] and v['script'], f'riconoscimento dalla bandiera senza fonte: {k}'
+
     pin_nativi = {}
     for m in meta['maps']:
         pin_nativi['nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in m['code'].split('_')[1:])] = m['pins']
@@ -183,15 +195,20 @@ def main(out, seed=None):
         for i in rif['collocabili']:
             p = pin_nativi[m['chiave']][i]
             v = per_tipo[p['nativeType']]
-            if v['stato'] != 'determinato':
+            scelto = da_bandiera.get((m['chiave'], i))
+            if v['stato'] != 'determinato' and not scelto:
                 continue
-            attese[(v['tipoSpillo'], round(100*p['x']*fattore/larghezza, 3),
+            spillo = scelto['tipoSpillo'] if scelto else v['tipoSpillo']
+            attese[(spillo, round(100*p['x']*fattore/larghezza, 3),
                     round(100*p['y']*fattore/altezza, 3))] += 1
         assert len(propri) == sum(attese.values()), f'numero di pin diverso su {m["chiave"]}'
         trovati = collections.Counter((x['tipo'], x['x'], x['y']) for x in propri)
         assert trovati == attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
         quartiere = m['genitore'].removeprefix('citta-') if (m['genitore'] or '').startswith('citta-') else None
         def spillo_di(i):
+            scelto = da_bandiera.get((m['chiave'], i))
+            if scelto:
+                return scelto['tipoSpillo']
             v = per_tipo[pin_nativi[m['chiave']][i]['nativeType']]
             return v['tipoSpillo'] if v['stato'] == 'determinato' else None
 
@@ -223,7 +240,8 @@ def main(out, seed=None):
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
     assert ipotesi == semantica['summary']['ipotesi']
     print('OK', determinati, f'tipi dimostrati ({urbani} dal nome dello sprite,',
-          f'{dagli_script_ok} dalle procedure che accendono la bandiera);',
+          f'{dagli_script_ok} dalle procedure che accendono la bandiera),',
+          len(da_bandiera), 'pin riconosciuti uno per uno dalla propria bandiera;',
           f'la lettura geometrica azzecca il {round(misura["accuratezza"]*100)}% su',
           misura['casi'], 'casi di controllo e non determina nulla;',
           len(per_tipo)-determinati-ipotesi, 'lasciati senza;',
