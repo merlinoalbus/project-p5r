@@ -137,7 +137,7 @@ def costruisci(out, seed):
 
     mappe, ordine_per_genitore = [], collections.Counter()
     for luogo in luoghi:
-        nome = luogo.get('nomeDistintivo') or luogo['nome']
+        nome = luogo.get('nomeDistintivo') or luogo['nome'] or segnaposto(luogo)
         genitore = GENITORE[luogo['gruppo']]
         tipo = 'luogo' if luogo['gruppo'] in RADICI else ('area' if genitore and genitore.startswith('dungeon-') else 'luogo')
         etichette = {v['chiave']: v for v in luogo.get('descrizioneVersioni', [])}
@@ -176,6 +176,20 @@ def costruisci(out, seed):
                                     for c in distinti]
             mappe.append(voce)
     return catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon
+
+
+# Testo da mostrare per cio' che il gioco non nomina. Non e' un nome del gioco e il catalogo non
+# lo contiene: dice al lettore che cosa sta guardando, invece di far passare un'etichetta tecnica.
+SEGNAPOSTO = {
+    'struttura-ricorrente-dei-memento': 'Strutture che i Memento riusano',
+    'nessun-campo-la-usa': 'Immagini native che nessun campo usa',
+    'nessuna-tabella-nativa-la-nomina': 'Zona che nessuna tabella nativa nomina',
+}
+
+
+def segnaposto(luogo):
+    testo = SEGNAPOSTO[luogo['motivoSenzaNome']]
+    return f"{luogo['gruppo']} — {testo}" if luogo['gruppo'] and luogo['gruppo'] not in testo else testo
 
 
 def nota(luogo, immagine, etichetta):

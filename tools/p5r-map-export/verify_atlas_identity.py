@@ -4,12 +4,14 @@ Quattro controlli, tutti ricalcolati dalle fonti senza usare `atlas_identity`:
 
 1. **Copertura** — le 301 planimetrie native compaiono una volta sola, ognuna in un solo luogo,
    e le chiavi corrispondono ai file davvero presenti in `public/asset/mappe/native`.
-2. **Nomi** — ogni nome dichiarato è ritrovato nella fonte che il catalogo indica (titolo d'area
-   del record texpack, indice nativo dei luoghi, titolo roadmap o livello fratello), e nessun
-   nome è un'etichetta tecnica.
-3. **Copie e versioni** — una copia ha davvero gli stessi pixel di un'altra immagine dello stesso
-   luogo; due versioni dello stesso luogo hanno davvero pixel diversi. Le etichette delle
-   versioni sono univoche dentro il luogo.
+2. **Nomi** — ogni nome dichiarato è ritrovato nella fonte che il catalogo indica (grafia
+   ufficiale della mappa d'insieme, titolo d'area del record texpack, indice nativo dei luoghi,
+   titolo roadmap o livello fratello); ogni fonte dichiara file e impronta, e l'impronta viene
+   ricalcolata sul file. Nessun nome è un'etichetta tecnica o sintetica.
+3. **Copie e versioni** — una copia ha davvero gli stessi pixel **e** lo stesso record nativo di
+   presentazione di un'altra immagine dello stesso luogo; due versioni non coincidono su
+   entrambi. Due immagini senza record di presentazione restano distinte anche a pixel uguali:
+   sono risorse native diverse, e il gioco riusa la stessa sagoma in luoghi diversi. Le etichette delle versioni sono univoche dentro il luogo.
 4. **Omonimie** — i luoghi marcati omonimi condividono davvero nome e gruppo, e ognuno ha un nome
    distintivo diverso dagli altri del suo gruppo.
 """
@@ -20,7 +22,7 @@ import json
 import re
 import sys
 
-TECNICO = re.compile(r'^(Area \d+|RMAP|Risorse native|Luogo \d+)')
+TECNICO = re.compile(r'^(Area \d+|RMAP|Risorse native|Luogo \d+|Risorse grafiche|Strutture ricorrenti|Immagini native)')
 
 
 def main(out):
@@ -29,6 +31,7 @@ def main(out):
     texpack = json.loads((out/'mondo_texpack_evidenze.json').read_text(encoding='utf8'))
     metadati = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
     indice = json.loads((out/'indice-luoghi-dungeon.json').read_text(encoding='utf8'))
+    ufficiale = json.loads((out/'nomi-mappe-ufficiali.json').read_text(encoding='utf8'))
     manifest = json.loads((out/'manifest.json').read_text(encoding='utf8'))
     native = Path(__file__).resolve().parents[2]/'public/asset/mappe/native'
 
@@ -80,9 +83,18 @@ def main(out):
         elif f['fonte'] == 'livello-fratello-nominato':
             fratello = immagini[f['riferimento']]
             assert fratello['nome'] == r['nome'] and (fratello['major'], fratello['minor']) == (r['major'], r['minor'])
+        elif f['fonte'] == 'nome-ufficiale-mappa-insieme':
+            voce = ufficiale['tables'][f['tabella']][f['record']]['voci'][f['voce']]
+            assert voce['nome'] == r['nome'] and voce['offset'] == f['offset'], f'grafia ufficiale diversa: {r["chiave"]}'
         else:
             raise AssertionError(f'fonte del nome sconosciuta: {f["fonte"]}')
+        # ogni nome deve dire da quale file viene e con quale impronta
+        assert f.get('file') and f.get('sha256'), f'provenienza incompleta su {r["chiave"]}'
+        assert hashlib.sha256((out/f['file']).read_bytes()).hexdigest() == f['sha256'], f'sorgente cambiata: {f["file"]}'
         controllati += 1
+
+    def presentazione(r):
+        return tuple(sorted({(c['texelem'], c['areaIndice']) for c in r['contesti']}))
 
     # 3. copie e versioni sui pixel dichiarati dal manifest dell'estrazione
     pixel = {}
@@ -93,9 +105,17 @@ def main(out):
     copie = versioni = 0
     for l in catalogo['luoghi']:
         impronte = [pixel[k] for k in l['versioni']]
-        assert len(set(impronte)) == len(impronte), f'due versioni identiche in {l["chiaveLuogo"]}'
+        # due versioni possono condividere i pixel solo se sono risorse native distinte: il gioco
+        # riusa la stessa sagoma in stanze diverse, e quello non è un duplicato da togliere
+        identita = [(pixel[k], presentazione(immagini[k])) for k in l['versioni'] if presentazione(immagini[k])]
+        assert len(set(identita)) == len(identita), f'due versioni sono la stessa risorsa in {l["chiaveLuogo"]}'
         for k in l['copie']:
             assert pixel[k] in impronte, f'copia senza originale: {k}'
+            # una copia deve condividere il record nativo di presentazione, non solo i pixel
+            firma = presentazione(immagini[k])
+            assert firma, f'copia senza record di presentazione: {k}'
+            originali = [v for v in l['versioni'] if pixel[v] == pixel[k] and presentazione(immagini[v]) == firma]
+            assert originali, f'copia senza un originale con lo stesso texelem e titolo: {k}'
             copie += 1
         etichette = [v['etichetta'] for v in l.get('descrizioneVersioni', [])]
         assert len(set(etichette)) == len(etichette), f'etichette ripetute in {l["chiaveLuogo"]}'

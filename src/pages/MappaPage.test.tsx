@@ -148,7 +148,7 @@ it('la planimetria nativa mantiene contesto e guida dentro il pannello reale del
 
 it('Tokyo con asset originale mappe e dimensioni non registrate mantiene la planimetria',async()=>{
   useAssetStore.setState({manifest:{generato:'T',totale:1,file:{'mappe/tokyo':'/asset/mappe/tokyo.png'}},caricato:true});
-  getMappa.mockResolvedValue({...dettaglio,chiave:'tokyo',nome:'Tokyo',immagineUrl:null,asset:null,assetOriginale:'mappe/tokyo',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'tokyo',nome:'Tokyo'}]});
+  getMappa.mockResolvedValue({...dettaglio,chiave:'tokyo',nome:'Tokyo',immagineUrl:null,asset:null,assetOriginale:'mappe/tokyo',ruoloImmagine:'illustrazione-editoriale',larghezza:null,altezza:null,spilli:[],percorso:[{chiave:'tokyo',nome:'Tokyo'}]});
   monta('/guida/mappe/tokyo');
   expect(await screen.findByRole('img',{name:'Mappa: Tokyo'})).toHaveAttribute('src','/asset/mappe/tokyo.png');
   expect(screen.getByTestId('visore-mappa')).toBeInTheDocument();

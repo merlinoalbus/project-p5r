@@ -1,9 +1,9 @@
 {
   "pacchetto": "atlante-mondo.json",
-  "mappe": 297,
+  "mappe": 298,
   "luoghi": 149,
-  "copieEscluse": 4,
-  "conGruppoImmagini": 227,
+  "copieEscluse": 3,
+  "conGruppoImmagini": 228,
   "conContesti": 49,
   "conEntita": 72,
   "abbinamentoAree": {
@@ -20,7 +20,7 @@
     "citta-kichijoji": 1,
     "citta-odaiba": 1,
     "null": 7,
-    "dungeon-mementos": 7,
+    "dungeon-mementos": 8,
     "dungeon-iweleth": 26,
     "dungeon-futaba": 32,
     "dungeon-kamoshida": 34,

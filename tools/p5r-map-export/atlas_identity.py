@@ -40,7 +40,39 @@ GRAFO = 'campi-completi/grafo/collegamenti.csv'
 def carica(out):
     leggi = lambda p: json.loads((out/p).read_text(encoding='utf8'))
     return (leggi('mondo_metadati.json'), leggi('mondo_texpack_evidenze.json'),
-            leggi('manifest.json'), leggi('indice-luoghi-dungeon.json'))
+            leggi('manifest.json'), leggi('indice-luoghi-dungeon.json'),
+            leggi('nomi-mappe-ufficiali.json'))
+
+
+def normalizza_nome(testo):
+    """Forma di confronto fra nomi della stessa zona scritti da tabelle diverse."""
+    import unicodedata
+    t = unicodedata.normalize('NFKD', (testo or '').casefold())
+    t = ''.join(c for c in t if not unicodedata.combining(c))
+    return ' '.join(re.sub(r'[^a-z0-9]+', ' ', t).split())
+
+
+def nomi_ufficiali(tabella):
+    """Le destinazioni del menu di viaggio, indicizzate per forma di confronto del nome.
+
+    È la tabella che il gioco mostra al giocatore quando apre la mappa d'insieme, quindi è la
+    grafia ufficiale italiana di quei luoghi. Non è però indicizzata per planimetria: dice come
+    si chiama una destinazione, non quale immagine la rappresenta. Serve perciò a fissare la
+    grafia di un nome che l'identità nativa ha già stabilito, non a stabilire l'identità.
+    """
+    per_nome = {}
+    for insieme, record in tabella['tables'].items():
+        sorgente = tabella['sources'][insieme]
+        for r in record:
+            for v in r['voci']:
+                if v['stato'] != 'valido' or v['nome'] in ('Annulla',):
+                    continue
+                chiave = normalizza_nome(v['nome'])
+                if chiave and chiave not in per_nome:
+                    per_nome[chiave] = dict(nome=v['nome'], insieme=insieme, offset=v['offset'],
+                                            record=r['index'], voce=v['index'],
+                                            file=sorgente['file'], sha256=sorgente['sha256'])
+    return per_nome
 
 
 def contesti_per_immagine(texpack):
@@ -81,7 +113,11 @@ def nomi_dall_indice(mappa, campi, indice):
 
 
 def costruisci(out):
-    meta, texpack, manifest, indice_dng = carica(out)
+    meta, texpack, manifest, indice_dng, tabella_ufficiale = carica(out)
+    ufficiali = nomi_ufficiali(tabella_ufficiale)
+    sorgente_texpack = texpack['source']
+    sorgente_indice = indice_dng['sources']['dungeon']
+    sorgente_titoli = {s['path'].rsplit('/', 1)[-1]: s for s in meta['sources']}
     contesti = contesti_per_immagine(texpack)
     campi = {f['id']: f for f in meta['fields']}
     indice = {(r['major'], r['minor']): r for r in indice_dng['tables']['dungeon'] if r['major'] is not None}
@@ -103,14 +139,34 @@ def costruisci(out):
         titolo_meta = None if TECNICO.match(mappa['title'] or '') else mappa['title']
         dai_campi = nomi_dall_indice(mappa, campi, indice)
 
+        # L'identità la stabilisce il record nativo; sulla grafia ha l'ultima parola la tabella
+        # ufficiale delle destinazioni, che è il testo che il gioco mostra al giocatore.
         nome = fonte = None
         if ctx and ctx[0]['areaTesto'] not in VUOTI:
-            nome, fonte = ctx[0]['areaTesto'], dict(fonte='titolo-area-texpack', indice=ctx[0]['areaIndice'],
-                                                    offset=ctx[0]['areaOffset'], texelem=ctx[0]['texelem'])
-        elif titolo_meta:
-            nome, fonte = titolo_meta, dict(fonte='titolo-roadmap', evidenze=mappa['nameEvidence'])
+            nome = ctx[0]['areaTesto']
+            fonte = dict(fonte='titolo-area-texpack', indice=ctx[0]['areaIndice'], offset=ctx[0]['areaOffset'],
+                         texelem=ctx[0]['texelem'], file=sorgente_texpack['file'], sha256=sorgente_texpack['sha256'])
         elif dai_campi:
             nome, fonte = dai_campi[0]
+            fonte = dict(fonte, file=sorgente_indice['file'], sha256=sorgente_indice['sha256'])
+        elif titolo_meta:
+            nome = titolo_meta
+            luoghi_campo = [campi[f]['place'] for f in mappa['nameEvidence'] if campi.get(f, {}).get('place')]
+            piano = next((p for l in luoghi_campo for p in l['floors'] if p['title'] == titolo_meta), None)
+            titoli = sorgente_titoli.get('FLDPLACENAME.FTD', {})
+            fonte = dict(fonte='titolo-roadmap', evidenze=mappa['nameEvidence'],
+                         offset=piano['offset'] if piano else None, indice=piano['index'] if piano else None,
+                         file=titoli.get('file'), sha256=titoli.get('sha256'),
+                         indiceLuoghi={k: sorgente_titoli['FLDPLACENO.FTD'][k] for k in ('file', 'sha256')}
+                         if 'FLDPLACENO.FTD' in sorgente_titoli else None)
+        if nome:
+            ufficiale = ufficiali.get(normalizza_nome(nome))
+            if ufficiale:
+                fonte = dict(fonte='nome-ufficiale-mappa-insieme', grafiaDa=fonte,
+                             tabella=ufficiale['insieme'], record=ufficiale['record'], voce=ufficiale['voce'],
+                             offset=ufficiale['offset'], file=ufficiale['file'], sha256=ufficiale['sha256'],
+                             identitaDa=(fonte or {}).get('fonte'))
+                nome = ufficiale['nome']
 
         gruppo = fonte_gruppo = None
         if ctx and ctx[0]['gruppoTesto'] not in VUOTI:
@@ -153,7 +209,9 @@ def raggruppa(righe):
             if x['nome'] is None or TECNICO.match(x['nome']):
                 x['nome'] = riferimento['nome']
                 x['gruppo'] = x['gruppo'] or riferimento['gruppo']
-                x['fonteNome'] = dict(fonte='livello-fratello-nominato', riferimento=riferimento['chiave'])
+                x['fonteNome'] = dict(fonte='livello-fratello-nominato', riferimento=riferimento['chiave'],
+                                      **{k: v for k, v in (riferimento['fonteNome'] or {}).items()
+                                         if k in ('file', 'sha256', 'offset')})
                 # appartiene al luogo del fratello, non a un luogo omonimo separato
                 x['contesti'] = x['contesti'] or riferimento['contesti']
 
@@ -211,25 +269,27 @@ def raggruppa(righe):
     catalogo = []
     for chiave, membri in luoghi.items():
         membri.sort(key=lambda x: (x['major'], x['minor'], x['layer']))
+        # Una copia è la stessa risorsa usata due volte: stessi pixel **e** stesso record nativo di
+        # presentazione. Pixel uguali da soli non bastano — il gioco riusa la stessa sagoma per
+        # stanze diverse — e un'immagine senza record non è dimostrabile come copia di nessuna.
+        def presentazione(m):
+            return tuple(sorted({(c['texelem'], c['areaIndice']) for c in m['contesti']}))
         visti, versioni, copie = {}, [], []
         for m in membri:
-            gemello = visti.get(m['pixelSha256'])
+            firma = presentazione(m)
+            gemello = visti.get((m['pixelSha256'], firma)) if firma else None
             if gemello is None:
-                visti[m['pixelSha256']] = m['chiave']
+                if firma:
+                    visti[(m['pixelSha256'], firma)] = m['chiave']
                 versioni.append(m)
                 m['ruolo'] = 'canonica' if len(versioni) == 1 else 'versione'
             else:
                 m['ruolo'] = 'copia-di:' + gemello
                 copie.append(m)
         primo = versioni[0]
-        nome = primo['nome']
-        if chiave[0] == 'memento-ricorrenti':
-            nome = 'Strutture ricorrenti dei Memento'
-        elif chiave[0] == 'non-usate':
-            nome = 'Risorse grafiche non usate da alcun campo'
         catalogo.append(dict(
             chiaveLuogo=primo['chiave'], tipoIdentita=chiave[0], identita=list(chiave[1:]),
-            nome=nome, nomeNativo=primo['nome'], gruppo=primo['gruppo'], statoNome=primo['statoNome'],
+            nome=primo['nome'], gruppo=primo['gruppo'], statoNome=primo['statoNome'],
             motivoSenzaNome=primo.get('motivoSenzaNome'),
             campi=sorted({f for m in membri for f in m['campi']}),
             versioni=[m['chiave'] for m in versioni], copie=[m['chiave'] for m in copie]))
@@ -272,44 +332,149 @@ def adiacenze(out):
     return archi
 
 
-def distingui_omonimi(out, catalogo, omonimi):
-    """Dà un nome distintivo ai luoghi che il gioco chiama allo stesso modo, usando ciò che collegano.
+def vicini_nel_grafo(archi, luogo_di_campo, luogo):
+    """I luoghi attaccati a questo, secondo le transizioni fra campi."""
+    trovati = []
+    for c in luogo['campi']:
+        for v in archi.get(c, ()):
+            altro = luogo_di_campo.get(v)
+            if altro is not None and altro is not luogo:
+                trovati.append(altro)
+    return trovati
 
-    Quando due zone diverse portano lo stesso nome, il tratto che le distingue davvero è a cosa
-    sono attaccate: il grafo delle transizioni fra campi lo dice senza inventare nulla. Se i
-    vicini non bastano a distinguerle, resta l'ordine con cui la storia le attraversa.
+
+def nomi_enumerati_dalla_guida(seed):
+    """Nomi che la guida usa per le zone che il gioco chiama tutte allo stesso modo.
+
+    La guida italiana distingue già ciò che il gioco confonde: dove il gioco ha cinque
+    «Corridoio della prigione», la guida ha «Corridoio della prigione – Parte I, II, III». Sono
+    nomi di una fonte editoriale che l'applicazione già usa in Palazzi e Dedali: adottarli qui
+    significa che le due sezioni chiamano la stessa zona allo stesso modo.
+    """
+    if not seed or not (seed/'dungeon.json').exists():
+        return {}
+    dungeon = json.loads((seed/'dungeon.json').read_text(encoding='utf8'))
+    per_base = collections.defaultdict(list)
+    for d in dungeon:
+        for a in d.get('aree', []):
+            base = re.split(r'\s+[–—-]\s+Parte\b', a['nome'], maxsplit=1)[0].strip()
+            if base != a['nome']:
+                per_base[(d['chiave'], base.casefold())].append(a)
+    return {k: sorted(v, key=lambda a: a['ordine']) for k, v in per_base.items()}
+
+
+def raffina_colori(catalogo, archi, luogo_di_campo, giri=4):
+    """Raffinazione iterativa: due zone omonime possono separarsi guardando com'è fatto l'intorno.
+
+    Al primo giro ogni luogo vale il proprio nome, quindi le omonime si equivalgono. Al giro
+    successivo conta anche il colore dei vicini, poi quello dei vicini dei vicini: una catena di
+    zone identiche si distingue partendo dagli estremi, che confinano con qualcosa di diverso.
+    """
+    colore = {l['chiaveLuogo']: (l['gruppo'], l['nome']) for l in catalogo}
+    for _ in range(giri):
+        nuovo = {l['chiaveLuogo']: (colore[l['chiaveLuogo']],
+                                    tuple(sorted(str(colore[v['chiaveLuogo']])
+                                                 for v in vicini_nel_grafo(archi, luogo_di_campo, l))))
+                 for l in catalogo}
+        if len({str(v) for v in nuovo.values()}) == len({str(v) for v in colore.values()}):
+            break
+        colore = nuovo
+    return {k: str(v) for k, v in colore.items()}
+
+
+ROMANI = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
+
+
+def risolvi_omonimi(gruppo, contesto, ultimo=False):
+    """Prova a dare un nome distintivo a un gruppo di zone che il gioco chiama allo stesso modo.
+
+    In ordine, e solo con prove:
+
+    1. **ciò a cui sono attaccate** — i vicini nel grafo delle transizioni, presi con il loro nome
+       distintivo quando ce l'hanno già;
+    2. **i nomi che la guida ha già enumerato** — dove la guida distingue le stesse zone e il
+       numero coincide, si adottano i suoi nomi nell'ordine in cui il grafo le attraversa;
+    3. **la raffinazione sul grafo** — se l'intorno esteso le separa, il nome lo danno comunque i
+       vicini più prossimi.
+
+    Torna vero quando ci riesce. Con `ultimo` resta l'ordine di attraversamento, nella stessa
+    forma che la guida usa per le zone omonime dello stesso tipo.
+    """
+    archi, luogo_di_campo = contesto['archi'], contesto['luoghiPerCampo']
+    ordinati = sorted(gruppo, key=lambda x: x['campi'] or ['~'])
+
+    def nome_utile(v):
+        return v.get('nomeDistintivo') or (None if v['omonimo'] else v['nome'])
+    vicini = {l['chiaveLuogo']: sorted({n for n in (nome_utile(v) for v in vicini_nel_grafo(archi, luogo_di_campo, l)) if n})
+              for l in gruppo}
+
+    def dai_vicini(l):
+        v = vicini[l['chiaveLuogo']]
+        return f"{l['nome']} (tra {' e '.join(v[:2])})" if len(v) >= 2 else f"{l['nome']} (verso {v[0]})" if v else None
+
+    def assegna(fonte, etichette, extra=None):
+        for l in gruppo:
+            l['nomeDistintivo'] = etichette[l['chiaveLuogo']]
+            l['fonteDistinzione'] = dict(fonte=fonte, vicini=vicini[l['chiaveLuogo']], **(extra or {}))
+
+    def univoche(etichette):
+        return all(etichette.values()) and len(set(etichette.values())) == len(gruppo)
+
+    proposte = {l['chiaveLuogo']: dai_vicini(l) for l in gruppo}
+    if univoche(proposte):
+        assegna('vicini-nel-grafo', proposte)
+        return True
+
+    dungeon = contesto['dungeonDiGruppo'].get(gruppo[0]['gruppo'], '')
+    aree = contesto['guida'].get((dungeon, (gruppo[0]['nome'] or '').casefold()), [])
+    if len(aree) == len(gruppo):
+        for l, area in zip(ordinati, aree):
+            l['nomeDistintivo'] = area['nome']
+            l['fonteDistinzione'] = dict(fonte='nomi-enumerati-dalla-guida', area=area['chiave'],
+                                         vicini=vicini[l['chiaveLuogo']],
+                                         nota='assegnati nell’ordine in cui il grafo attraversa le zone')
+        return True
+
+    colore = contesto['colore']
+    if len({colore[l['chiaveLuogo']] for l in gruppo}) == len(gruppo) and univoche(proposte):
+        assegna('raffinazione-sul-grafo', proposte)
+        return True
+
+    for l in gruppo:
+        l['nomeDistintivo'] = None
+        l['fonteDistinzione'] = None
+    if not ultimo:
+        return False
+    for posto, l in enumerate(ordinati):
+        l['nomeDistintivo'] = f"{l['nome']} – Parte {ROMANI[posto] if posto < len(ROMANI) else posto + 1}"
+        l['fonteDistinzione'] = dict(
+            fonte='ordine-di-attraversamento', vicini=vicini[l['chiaveLuogo']],
+            nota='né i vicini nel grafo né la guida distinguono queste zone: resta l’ordine in cui la '
+                 'storia le attraversa, nella forma che la guida usa per le zone omonime dello stesso tipo')
+    return True
+
+
+def distingui_omonimi(out, catalogo, omonimi, seed=None, dungeon_di_gruppo=None):
+    """Distingue tutti i gruppi di zone omonime, in più passaggi.
+
+    Un gruppo appena distinto diventa un vicino utile per gli altri: così una catena di zone
+    identiche si scioglie dagli estremi verso il centro, invece di arrendersi al primo giro.
     """
     archi = adiacenze(out)
     luogo_di_campo = {c: l for l in catalogo for c in l['campi'] if not condiviso(c)}
-    for testo, chiavi in omonimi.items():
-        gruppo = [l for l in catalogo if l['chiaveLuogo'] in chiavi]
-        vicini = {}
-        for l in gruppo:
-            propri, omonimi_vicini = [], []
-            for c in l['campi']:
-                for v in archi.get(c, ()):
-                    altro = luogo_di_campo.get(v)
-                    if not altro or altro is l or not altro['nome']:
-                        continue
-                    (omonimi_vicini if altro['omonimo'] else propri).append(altro['nome'])
-            # prima i vicini con nome proprio, poi quelli a loro volta omonimi
-            vicini[l['chiaveLuogo']] = list(dict.fromkeys(sorted(set(propri)) + sorted(set(omonimi_vicini))))
-        etichette = {l['chiaveLuogo']: (f"{l['nome']} (tra {' e '.join(vicini[l['chiaveLuogo']][:2])})"
-                                        if len(vicini[l['chiaveLuogo']]) >= 2
-                                        else f"{l['nome']} (verso {vicini[l['chiaveLuogo']][0]})"
-                                        if vicini[l['chiaveLuogo']] else None)
-                     for l in gruppo}
-        distinti = all(etichette.values()) and len(set(etichette.values())) == len(gruppo)
-        # in ordine di attraversamento: i campi seguono l'avanzare della storia dentro la zona
-        for posto, l in enumerate(sorted(gruppo, key=lambda x: x['campi'] or ['~'])):
-            vic = vicini[l['chiaveLuogo']]
-            if distinti:
-                l['nomeDistintivo'] = etichette[l['chiaveLuogo']]
-                l['fonteDistinzione'] = dict(fonte='vicini-nel-grafo', vicini=vic)
-            else:
-                l['nomeDistintivo'] = f"{l['nome']} — {posto+1}º tratto"
-                l['fonteDistinzione'] = dict(fonte='ordine-di-attraversamento', vicini=vic,
-                                             nota='i vicini non bastano a distinguere le zone omonime')
+    contesto = dict(archi=archi, luoghiPerCampo=luogo_di_campo,
+                    guida=nomi_enumerati_dalla_guida(seed),
+                    dungeonDiGruppo=dungeon_di_gruppo or {},
+                    colore=raffina_colori(catalogo, archi, luogo_di_campo))
+    per_chiave = {l['chiaveLuogo']: l for l in catalogo}
+    da_fare = [[per_chiave[c] for c in chiavi] for chiavi in omonimi.values()]
+    while da_fare:
+        rimasti = [g for g in da_fare if not risolvi_omonimi(g, contesto)]
+        if len(rimasti) == len(da_fare):
+            break
+        da_fare = rimasti
+    for gruppo in da_fare:
+        risolvi_omonimi(gruppo, contesto, ultimo=True)
     return catalogo
 
 
@@ -411,11 +576,23 @@ def descrivi_versioni(out, catalogo):
     return catalogo
 
 
-def main(out):
+# Dove vive ciascun gruppo nativo: serve solo a ritrovare le aree della guida dello stesso Palazzo.
+DUNGEON_DI_GRUPPO = {
+    'Palazzo di Kamoshida': 'kamoshida', 'Palazzo di Madarame': 'madarame',
+    'Palazzo di Kaneshiro': 'kaneshiro', 'Palazzo di Futaba': 'futaba',
+    'Palazzo di Okumura': 'okumura', 'Palazzo di Niijima': 'niijima',
+    'Palazzo di Shido': 'shido', 'Palazzo di Maruki': 'maruki',
+    'Profondità dei Memento': 'iweleth', 'Mondo del clifoto': 'iweleth',
+    'Memento - aree fisse': 'mementos',
+}
+
+
+def main(out, seed=None):
     out = Path(out)
+    seed = Path(seed) if seed else Path(__file__).resolve().parents[2]/'data/seed'
     righe, meta = costruisci(out)
     catalogo, omonimi = raggruppa(righe)
-    distingui_omonimi(out, catalogo, omonimi)
+    distingui_omonimi(out, catalogo, omonimi, seed, DUNGEON_DI_GRUPPO)
     descrivi_versioni(out, catalogo)
     senza = [r for r in righe if r['statoNome'] == 'senza-nome-nativo']
     risultato = dict(
@@ -449,4 +626,4 @@ def main(out):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(*sys.argv[1:3])

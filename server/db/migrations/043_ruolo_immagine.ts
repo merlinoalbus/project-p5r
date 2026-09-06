@@ -11,8 +11,9 @@
 //
 //   planimetria-nativa        pianta estratta dal gioco
 //   illustrazione-editoriale  mappa disegnata per l'applicazione: si consulta e porta spilli
-//   emblema                   stemma del Palazzo: identifica il luogo, non lo rappresenta
 //   nessuna                   la mappa non ha immagine propria
+//
+// Lo stemma dei Palazzi manca da questo elenco e lo aggiunge la 044.
 //
 // La distinzione serve a non far passare un'illustrazione per una pianta del gioco, e a non far
 // passare uno stemma per una mappa; non toglie nulla alle illustrazioni dei quartieri, che
@@ -26,13 +27,11 @@ export const migration043: Migration = {
   name: 'ruolo_immagine',
   up: (db) => {
     db.exec(`ALTER TABLE mappa ADD COLUMN ruolo_immagine TEXT NOT NULL DEFAULT 'nessuna'
-      CHECK (ruolo_immagine IN ('planimetria-nativa', 'illustrazione-editoriale', 'emblema', 'nessuna'))`);
+      CHECK (ruolo_immagine IN ('planimetria-nativa', 'illustrazione-editoriale', 'nessuna'))`);
     // ha un'immagine chi porta un asset del repository o un'immagine caricata nell'istanza
     db.exec(`UPDATE mappa SET ruolo_immagine = 'illustrazione-editoriale'
       WHERE asset IS NOT NULL OR EXISTS (
         SELECT 1 FROM immagine i WHERE i.ambito = 'mappa' AND i.chiave IN (mappa.immagine_chiave, mappa.chiave))`);
-    // gli stemmi dei Palazzi non sono mappe
-    db.exec("UPDATE mappa SET ruolo_immagine = 'emblema' WHERE asset LIKE 'palazzi/%'");
     // le uniche piante estratte dal gioco sono quelle dell'atlante nativo
     db.exec("UPDATE mappa SET ruolo_immagine = 'planimetria-nativa' WHERE asset LIKE 'mappe/native/%'");
   },
