@@ -862,3 +862,52 @@ il campo stabile oppure dichiarare e verificare soltanto la riproducibilità sem
 **Decisione:** il resolver, il ripiego e il crosswalk superano il controllo di merito, ma la Fase
 3d resta **FAIL** finché «Sulla mappa» non usa davvero il resolver, i quattro casi senza meta non
 sono gestiti, manca la regressione UI e la dichiarazione non viene aggiornata.
+
+## Fase 2 — Settima verifica: tabella nativa, copertura e ripristino delle evidenze
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `a566073`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. La tabella nativa `tipo → partId → sprite` supera il ricontrollo sull'eseguibile: 102 tipi,
+   95 con sorgente grafica, 7 dichiarati senza sorgente e 59/59 ancore corrette.
+2. La semantica chiude su 90 tipi determinati e 12 `da-verificare`; 1.142 occorrenze determinate
+   più 287 aperte fanno tutte le 1.429 native. Nessun tipo aperto riceve un significato specifico,
+   salvo i pin riconosciuti individualmente dalla propria bandiera.
+3. I 1.339 pin importati sono ricostruiti per tipo e coordinate; 1.130 hanno una condizione
+   strutturata. Il riferimento planimetrico ricontrolla 250 mappe con pin, 217 condivise, 1.372
+   pin collocabili e 14 esclusioni puntuali.
+4. I 71 collegamenti superano la ricostruzione indipendente completa: 43 da meta unica e 28 da
+   trigger, con partenza, indice, arrivo, ingresso, distanza, modalità e punto d'arrivo coincidenti.
+5. Il corpus mondiale è stato ripristinato: 209 campi, 192 script, 15.734 procedure, 2.514
+   `CALL_FIELD` e 4.495 trigger risolti. La rigenerazione isolata è byte-identica; sorgenti `.flow`
+   o `.BF` errate falliscono lasciando invariato l'artefatto ufficiale.
+6. Sul commit: verificatori pin e collegamenti PASS, typecheck PASS, lint PASS e 132 file con
+   **539 test su 539** PASS.
+
+### Rilievi bloccanti
+
+1. `verifica_connessioni_evidenze.json` e il suo produttore non espongono ancora
+   `procedures = 15734` e `triggerResolved = 4495`. I valori sono controllati in esecuzione ma
+   non restano attestati nel rapporto versionato.
+2. La causa dichiarata per i 90 pin non posati è falsa. La contabilità reale è
+   `1339 posati + 14 esclusi puntualmente + 43 senza riferimento condiviso + 33 assorbiti dalle
+   tre copie = 1429`. Per i 33 serve un mapping versionato uno-a-uno verso la canonica, con mappa,
+   indice, tipo nativo, coordinate, flag, resa finale e tolleranza esplicita; non vanno creati
+   duplicati sovrapposti.
+3. `ATLANTE-STATO.md` conserva copertura, conteggi e dichiarazioni superati, compresa l'attribuzione
+   dei 90 casi al riferimento mancante. Anche il documento di collaborazione descrive come aperti
+   due difetti del verificatore mondiale ormai corretti: lo stato corrente va separato chiaramente
+   dalla cronologia.
+4. Le evidenze complete dei tipi `da-verificare` esistono in `semantica-pin.json`, ma il pacchetto
+   ne trasferisce soltanto una selezione testuale. Non conserva e non espone stabilmente `partId`,
+   indice sprite, PNG o motivo dell'assenza dello sprite, e sceglie alternativamente alcune
+   famiglie di etichette. Eliminando dalle descrizioni le evidenze dei 280 pin aperti, il
+   verificatore continua a passare. Il seed/DTO/UI deve conservare le evidenze complete e una
+   controprova negativa deve fallire quando vengono rimosse o alterate.
+
+**Decisione:** tabella nativa, semantica, posizionamento, condizioni, collegamenti e corpus
+superano il controllo di merito, ma la Fase 2 resta **FAIL** finché rapporto, copie assorbite,
+documentazione ed evidenze importate non sono corretti e sottoposti a un nuovo riesame stabile.
