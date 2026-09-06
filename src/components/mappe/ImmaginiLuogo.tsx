@@ -15,11 +15,16 @@ export function ImmaginiLuogo({ mappe, attuale, nome, discendenti }: Props) {
   const titolo = nome ?? immagini[0]?.gruppoImmagini?.nome ?? 'questo luogo';
   return <ul className="m-0 p-0 list-none flex flex-wrap gap-3" aria-label={`Immagini di ${titolo}`}>{immagini.map((m, i) => <Miniatura key={m.chiave} mappa={m} indice={m.immagineCollezione?.indice ?? i + 1} totale={m.immagineCollezione?.totale ?? immagini.length} attuale={attuale}>{discendenti?.(m)}</Miniatura>)}</ul>;
 }
+/** Dice che cosa mostra la versione — l'estensione o l'inquadratura della zona. L'ordinale resta
+ * solo dove la differenza non è stata dimostrata. */
+export function etichettaVersione(mappa: MappaRiassuntoDto, indice: number, totale: number): string {
+  return mappa.gruppoImmagini?.etichetta ?? `Immagine ${indice} di ${totale}`;
+}
 function Miniatura({ mappa, indice, totale, attuale, children }: { mappa: MappaRiassuntoDto; indice: number; totale: number; attuale?: string; children?: ReactNode }) {
   const asset = useAsset(mappa.asset), originale = useAsset(mappa.assetOriginale);
   const src = mappa.immagineUrl ?? asset ?? originale;
-  return <li><Link className="card flex flex-col items-center gap-2 no-underline text-text touch" aria-current={attuale === mappa.chiave ? 'page' : undefined} to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`}>
+  return <li><Link className="card flex flex-col items-center gap-2 no-underline text-text touch max-w-44" aria-current={attuale === mappa.chiave ? 'page' : undefined} to={`/guida/mappe/${encodeURIComponent(mappa.chiave)}`}>
     {src && <img src={src} alt="" className="w-28 h-24 object-contain bg-neutral-700 rounded" />}
-    <span>Immagine {indice} di {totale}</span>
+    <span className="text-[12px] text-center">{etichettaVersione(mappa, indice, totale)}</span>
   </Link>{children}</li>;
 }

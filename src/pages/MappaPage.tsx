@@ -11,6 +11,7 @@ import { haPlanimetria } from '../utils/haPlanimetria';
 
 import { urlMappa } from '../utils/navigazioneMappa';
 import { useMemo } from 'react';
+import type { MappaRiassuntoDto } from '../types';
 import { centroAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -31,27 +32,68 @@ export function MappaPage() {
   return chiave ? <RisolviMappa chiave={chiave}>{k => <DettaglioMappa chiave={k} partitaId={attiva?.id ?? null} />}</RisolviMappa> : <IndiceMappe />;
 }
 
+/** Le radici che sono versioni dello stesso luogo formano una scheda sola, come nell'albero. */
+function radiciRaggruppate(mappe: MappaRiassuntoDto[]): Array<{ chiave: string; capofila: MappaRiassuntoDto; versioni: MappaRiassuntoDto[] }> {
+  const gruppi: Array<{ chiave: string; capofila: MappaRiassuntoDto; versioni: MappaRiassuntoDto[] }> = [];
+  const indice = new Map<string, number>();
+  for (const m of mappe.filter(x => !x.genitore)) {
+    const id = m.gruppoImmagini ? `esplicito:${m.gruppoImmagini.id}` : m.immagineCollezione ? `presentazione:${m.immagineCollezione.ambito}` : null;
+    const posto = id !== null ? indice.get(id) : undefined;
+    if (id !== null && posto !== undefined) { gruppi[posto].versioni.push(m); continue; }
+    if (id !== null) indice.set(id, gruppi.length);
+    gruppi.push({ chiave: id ?? m.chiave, capofila: m, versioni: [m] });
+  }
+  return gruppi;
+}
+
 /** Indice: radici (Tokyo, Palazzi, Dedalo) con le mappe figlie. */
 function IndiceMappe() {
   useDocumentTitle('Mappe');
   const albero = useCarica(() => getAlberoMappe(), []);
-  const mappe = albero.dati ?? [];
+  const mappe = useMemo(() => albero.dati ?? [], [albero.dati]);
+  // discendenti e spilli dell'intero sottoalbero: la scheda dice quanto contiene davvero, non solo il primo livello
+  const totali = useMemo(() => {
+    const figliDi = new Map<string | null, MappaRiassuntoDto[]>();
+    for (const m of mappe) figliDi.set(m.genitore, [...(figliDi.get(m.genitore) ?? []), m]);
+    const cache = new Map<string, { mappe: number; spilli: number }>();
+    const conta = (chiave: string, visti: Set<string>): { mappe: number; spilli: number } => {
+      const salvato = cache.get(chiave);
+      if (salvato) return salvato;
+      if (visti.has(chiave)) return { mappe: 0, spilli: 0 };
+      visti.add(chiave);
+      const esito = (figliDi.get(chiave) ?? []).reduce((acc, f) => {
+        const sotto = conta(f.chiave, visti);
+        return { mappe: acc.mappe + 1 + sotto.mappe, spilli: acc.spilli + f.numeroSpilli + sotto.spilli };
+      }, { mappe: 0, spilli: 0 });
+      cache.set(chiave, esito);
+      return esito;
+    };
+    return { conta: (chiave: string) => conta(chiave, new Set()), figliDi };
+  }, [mappe]);
+  const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   return <div className="flex flex-col gap-4">
     <IntestazionePagina titolo="Mappe" sottotitolo="Luoghi e planimetrie di Tokyo, Palazzi e Dedali." />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       <ul className="m-0 p-0 list-none grid gap-3 grid-cols-1 lg:grid-cols-2 items-start" aria-label="Mappe">
-        {mappe.filter(m => !m.genitore).map(radice => {
-          const figli = mappe.filter(m => m.genitore === radice.chiave);
-          const nome = nomePresentazioneMappa(radice);
-          return <li key={radice.chiave} className="card min-w-0 flex flex-col gap-2">
+        {gruppi.map(({ chiave, capofila, versioni }) => {
+          const sotto = versioni.reduce((acc, v) => {
+            const c = totali.conta(v.chiave);
+            return { mappe: acc.mappe + c.mappe, spilli: acc.spilli + c.spilli + v.numeroSpilli };
+          }, { mappe: 0, spilli: 0 });
+          const nome = capofila.gruppoImmagini?.nome ?? nomePresentazioneMappa(capofila);
+          const conFigli = versioni.some(v => (totali.figliDi.get(v.chiave) ?? []).length > 0);
+          return <li key={chiave} className="card min-w-0 flex flex-col gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <Link to={urlMappa(radice.chiave)} className="font-display text-[20px] no-underline text-text break-words">{nome}</Link>
-              <span className="chip text-[11px]">{NOME_TIPO_MAPPA[radice.tipo]}</span>
-              <span className="text-[12px] text-text-muted">{radice.numeroSpilli} spilli · {figli.length} mappe</span>
+              <Link to={urlMappa(capofila.chiave)} className="font-display text-[20px] no-underline text-text break-words">{nome}</Link>
+              <span className="chip text-[11px]">{NOME_TIPO_MAPPA[capofila.tipo]}</span>
+              <span className="text-[12px] text-text-muted">
+                {sotto.spilli} spilli · {sotto.mappe > 0 ? `${sotto.mappe} mappe` : versioni.length > 1 ? `${versioni.length} versioni` : 'una planimetria'}
+              </span>
             </div>
-            {figli.length > 0 && <details>
-              <summary className="touch cursor-pointer py-2 text-[13px] text-text-muted" aria-label={`Mostra le mappe di ${nome}`}>Luoghi e planimetrie ({figli.length})</summary>
-              <AlberoLuoghi mappe={mappe} genitore={radice.chiave} espandibile />
+            {versioni.length > 1 && <ImmaginiLuogo mappe={versioni} nome={nome} />}
+            {conFigli && <details>
+              <summary className="touch cursor-pointer py-2 text-[13px] text-text-muted" aria-label={`Mostra le mappe di ${nome}`}>Luoghi e planimetrie ({sotto.mappe})</summary>
+              {versioni.map(v => <AlberoLuoghi key={v.chiave} mappe={mappe} genitore={v.chiave} espandibile />)}
             </details>}
           </li>;
         })}
