@@ -119,6 +119,69 @@ def abbina_aree(luoghi, aree_per_dungeon):
     return collections.Counter(esiti)
 
 
+def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
+    """Porta sulle planimetrie i pin nativi di cui si conosce il significato.
+
+    Entrano solo i pin che superano due filtri distinti: la loro planimetria deve condividere il
+    riferimento (`riferimento-pin.json`, con l'eventuale fattore di scala) e il loro tipo nativo
+    deve avere un significato dimostrato (`semantica-pin.json`). Tutto il resto resta fuori.
+
+    Dove il quartiere ha un solo luogo che corrisponde a ciò che il pin indica, il pin lo dichiara
+    come riferimento: è così che un negozio, dalla sua scheda, arriva al punto esatto sulla mappa.
+    """
+    from pin_luoghi import PAROLE
+    meta = json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))
+    riferimento = {r['chiave']: r for r in json.loads((out/'riferimento-pin.json').read_text(encoding='utf8'))['mappe']}
+    semantica = {r['tipoNativo']: r for r in json.loads((out/'semantica-pin.json').read_text(encoding='utf8'))['tipi']}
+    quartieri = json.loads((seed/'citta.json').read_text(encoding='utf8'))['quartieri']
+    luoghi_per_quartiere = {q['chiave']: q.get('luoghi', []) for q in quartieri}
+
+    def luogo_del_pin(genitore, nome_sprite):
+        quartiere = genitore.removeprefix('citta-') if genitore and genitore.startswith('citta-') else None
+        parole = PAROLE.get(nome_sprite or '')
+        if not quartiere or not parole:
+            return None, 'quartiere o parole di riconoscimento assenti'
+        candidati = [l for l in luoghi_per_quartiere.get(quartiere, [])
+                     if any(par in (l['nome'] + ' ' + l['chiave']).casefold() for par in parole)]
+        if len(candidati) == 1:
+            return candidati[0], None
+        return None, ('nessun luogo del quartiere corrisponde' if not candidati
+                      else f'{len(candidati)} luoghi del quartiere corrispondono')
+
+    per_chiave = {m['chiave']: m for m in mappe}
+    esiti, posati = collections.Counter(), 0
+    for mappa_nativa in meta['maps']:
+        chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa_nativa['code'].split('_')[1:])
+        voce, rif = per_chiave.get(chiave), riferimento.get(chiave)
+        if voce is None or rif is None or rif['esito'] != 'condiviso':
+            esiti['planimetria senza riferimento condiviso'] += len(mappa_nativa['pins'])
+            continue
+        fattore = rif.get('fattoreScala', 1.0)
+        larghezza, altezza = rif['dimensione']
+        for indice in rif['collocabili']:
+            p = mappa_nativa['pins'][indice]
+            sem = semantica.get(p['nativeType'])
+            if not sem or sem['stato'] != 'determinato':
+                esiti['tipo nativo senza significato dimostrato'] += 1
+                continue
+            luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
+            nota = ['Pin nativo del gioco.']
+            if p['conditional']:
+                nota.append('Il gioco lo mostra a certe condizioni, che non sono ancora tradotte '
+                            f"(bandiera nativa {p['flag']}).")
+            if luogo is None and motivo:
+                nota.append(f'Luogo del catalogo non collegato: {motivo}.')
+            voce['spilli'].append(dict(
+                tipo=sem['tipoSpillo'], nome=luogo['nome'] if luogo else sem['etichetta'],
+                descrizione=' '.join(nota),
+                x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
+                riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
+                collezionabile=False, ordine=len(voce['spilli'])))
+            esiti['posato con luogo collegato' if luogo else 'posato senza luogo collegato'] += 1
+            posati += 1
+    return posati, dict(esiti)
+
+
 def costruisci(out, seed):
     catalogo = json.loads((out/'atlante-identita.json').read_text(encoding='utf8'))
     dungeon = json.loads((seed/'dungeon.json').read_text(encoding='utf8'))
@@ -175,7 +238,8 @@ def costruisci(out, seed):
                                          texpack=c['gruppoTexpack'])
                                     for c in distinti]
             mappe.append(voce)
-    return catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon
+    posati, esiti_pin = pin_delle_planimetrie(out, seed, mappe, luoghi)
+    return catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin
 
 
 # Testo da mostrare per cio' che il gioco non nomina. Non e' un nome del gioco e il catalogo non
@@ -211,7 +275,7 @@ def nota(luogo, immagine, etichetta):
 
 def main(out, seed, destinazione):
     out, seed, destinazione = Path(out), Path(seed), Path(destinazione)
-    catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon = costruisci(out, seed)
+    catalogo, luoghi, mappe, abbinamenti, aree_per_dungeon, posati, esiti_pin = costruisci(out, seed)
     pacchetto = dict(versione=1, mappe=mappe)
     destinazione.write_text(json.dumps(pacchetto, ensure_ascii=False, indent=1), encoding='utf8')
     aree_spaiate = [a['nome'] for v in aree_per_dungeon.values() for a in v if not a.get('preso')]
@@ -221,6 +285,8 @@ def main(out, seed, destinazione):
         conGruppoImmagini=sum('gruppoImmagini' in m for m in mappe),
         conContesti=sum('contesti' in m for m in mappe),
         conEntita=sum(1 for m in mappe if m['entita']),
+        spilliPosati=posati, spilliConLuogo=esiti_pin.get('posato con luogo collegato', 0),
+        pinNonPosati={k: v for k, v in esiti_pin.items() if not k.startswith('posato')},
         abbinamentoAree=dict(abbinamenti),
         areeGuidaSenzaPlanimetria=len(aree_spaiate),
         perGenitore=dict(collections.Counter(m['genitore'] for m in mappe)))

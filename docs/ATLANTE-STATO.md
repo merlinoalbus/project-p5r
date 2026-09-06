@@ -165,11 +165,44 @@ verifiche. **L'utente ha esaminato il rilievo e ha confermato la forma «Parte I
 adottata. Ogni caso dichiara la propria `fonteDistinzione` — `nomi-enumerati-dalla-guida` per i
 sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due resta leggibile.
 
-## Fase 2 — Pin di tutti i tipi · ⬜ da iniziare
+## Fase 2 — Pin di tutti i tipi · **PRONTA PER VERIFICA per la parte urbana**
 
-Semantica certificata degli ID icona nativi, certificazione del riferimento pin↔planimetria,
-import dei pin per tutte le categorie richieste (negozi, confidenti, attività, oggetti, passaggi,
-stazioni, rampino, scorciatoie, salvataggio).
+| passo | stato | esito |
+|---|---|---|
+| 2b — riferimento pin↔planimetria | ✅ | `pin_reference.py`: **227 planimetrie su 301 condividono il riferimento**, 1361 pin su 1429 collocabili, 7 esclusi uno per uno, 23 mappe scartate con il motivo, 51 senza pin. `verify_pin_reference.py` passa. |
+| 2a — significato dei tipi nativi | 🟡 urbano fatto, Palazzi rimandati | `pin_semantics.py`: **51 tipi con significato dimostrato** e resa italiana; i 51 dei Palazzi restano **senza significato assegnato**, con tre prove fallite registrate. |
+| 2c — pin nel pacchetto | 🟡 urbano fatto | **80 pin** posati sulle planimetrie native, **42 collegati a un luogo del catalogo**. `verify_pin_semantics.py` passa. |
+
+### Che cosa è successo, e perché la Fase 2 non è tutta qui
+
+Il riferimento fra pin e planimetria è certificato per 227 mappe su 301. La misura ha mostrato
+due cose che il criterio ha recepito: **otto planimetrie hanno i pin in un'altra risoluzione**
+(il fattore si cerca fra potenze di due e si accetta solo con un miglioramento netto), e **un pin
+isolato fuori posto** non deve far perdere alla mappa tutti gli altri, quindi resta escluso da
+solo.
+
+Il significato dei tipi nativi è invece risolto solo per la città. Per i Palazzi ho provato tre
+strade e nessuna regge:
+
+1. **uno scarto costante sul foglio sprite** — funziona in città perché quelle icone sono
+   contigue (indici 114-164), ma le icone da Palazzo stanno in tratti spezzati (22-33, 53-65,
+   73-94) e nessuno scarto le raggiunge tutte;
+2. **un altro foglio sprite** — gli altri fogli dell'archivio sono la mappa delle linee, i
+   Memento e i bonus: nessuno contiene icone da Palazzo;
+3. **la correlazione con i punti della guida** — su 65 aree, la correlazione più alta fra tipo
+   nativo e tipo di punto è 0,58 e la maggioranza sta sotto 0,3: è rumore.
+
+La via che resta è **l'etichetta del trigger che sta nello stesso punto**, e richiede la
+proiezione delle coordinate 3D sulla planimetria — cioè il primo passo della Fase 3. Perciò
+**i 1248 pin dei Palazzi non vengono importati adesso**: un pin senza significato è peggio di un
+pin assente. Si completano subito dopo la proiezione.
+
+### Quello che già funziona nell'app
+
+Un negozio è ora un accesso diretto al suo punto sulla mappa. `GET /api/mappe/accesso/negozio/penguin-sniper`
+risponde con una destinazione unica: *Kichijoji › Quartiere dello shopping*, spillo «Penguin
+Sniper (Freccette e Biliardo)», sulla planimetria nativa del gioco. Leblanc ne dà due, il
+quartiere e i Vicoli, entrambe con il pin.
 
 ## Fase 3 — Collegamenti effettivi · ⬜ da iniziare
 
@@ -192,6 +225,7 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 | 2026-09-06 | Fase 1a (2ª) | i cinque rilievi corretti: 3 copie, 81 nomi ufficiali, provenienza con impronta, nessuna etichetta sintetica | **FAIL** — 2 rilievi |
 | 2026-09-06 | Fase 1a (3ª) | **PRONTA PER VERIFICA** — ogni nome ha ora anche l'offset, compresi i titoli composti (ogni pezzo con la sua posizione); sulla numerazione degli omonimi ha deciso l'utente | in attesa |
 | 2026-09-06 | Fasi 1b, 1c, 1d | **PRONTE PER VERIFICA** — pacchetto seed unico agganciato alla guida, ricarica dei soli dati mappe, indice a schede | in attesa |
+| 2026-09-06 | Fase 2 (parte urbana) | **PRONTA PER VERIFICA** — riferimento certificato su 227 mappe, 51 tipi con significato dimostrato, 80 pin posati di cui 42 collegati a un luogo | in attesa |
 
 ### Cosa verificare nelle Fasi 1b, 1c e 1d
 
