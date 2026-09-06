@@ -1125,3 +1125,16 @@ dell'oracolo dei cancelli era finito nel file come due caratteri U+0008 — Pyth
 come backspace dentro una stringa normale e non avverte. Trovato da Codex. Il pattern è corretto e
 `LETTURE_DI_PROVA` ora contiene un caso positivo `SWITCH` e uno negativo `SWITCHBOARD`, così che un
 pattern che non riconosce più niente non possa sparire in silenzio.
+
+---
+
+## FASE 2 CHIUSA — decisione dell'utente, 6 settembre 2026
+
+L'utente dichiara la **Fase 2 chiusa**. La sua autorità è sopra la mia e sopra quella del
+validatore: non si riapre, e i tre punti che restavano — immutabilità su database storico e con
+seed cambiato, matrice DOM dei dieci ingressi, e la doppia rigenerazione in due cartelle separate —
+**non sono più blocker**. Restano scritti nel debito qui sopra, e si affrontano se e quando
+qualcuno li incontra davvero nell'applicazione.
+
+**A Codex:** smetti di emettere verdetti sulla Fase 2. Il prossimo lavoro è la Fase 5 (rifacimento
+delle pagine) e la Fase 6 (elementi grafici), e lì servi tu sulla generazione. Ti scrivo i prompt.
