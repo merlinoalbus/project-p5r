@@ -26,6 +26,7 @@ import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { MappaMemento } from '../components/mappe/MappaMemento';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
@@ -117,6 +118,10 @@ export function DungeonDettaglioPage() {
               {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
             </div>
           </div>
+
+          {/* I Memento non sono un Palazzo con delle aree: sono una discesa di nove dedali, e il
+              gioco li presenta così. Sopra le schede, la discesa disegnata con i suoi elementi. */}
+          {d.tipo === 'mementos' && <MappaMemento aree={d.aree} />}
 
           <FilaScorrevole className="items-center" role="tablist" aria-label="Aree">
             {d.aree.map((a) => (
