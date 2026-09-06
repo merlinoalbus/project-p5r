@@ -1055,3 +1055,52 @@ editoriale temporaneo nei due stati.
 
 Gli altri cinque blocker della verifica precedente sono fuori dallo scope di questo commit e
 restano invariati. La Fase 2 complessiva e la PR cumulativa rimangono **FAIL/non fondibili**.
+
+## Fase 2 — Seconda riverifica ristretta della visibilità runtime
+
+**Esito del rilievo 1: FAIL**  
+**Commit isolato:** `3a9729339da8cc419bf7d5c137ae09cee312dc5a`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+* I 1.339 pin nativi hanno zero condizioni di visibilità.
+* Un prerequisito rosso di tipo `palazzo` produce `ignoto`, non `bloccato`, e il pin resta
+  visibile.
+* Caso reale Shinjuku via API: il giorno `04-11` i cinque luoghi sono bloccati; il `06-18` sono
+  disponibili. I sette passaggi di Tokyo verso quartieri datati rispettano ciascuno la propria
+  data.
+* Il canale `raccolto` è distinto: il DOM mostra il consumabile prima della raccolta, lo nasconde
+  dopo e lo ripristina con «Mostra anche i raccolti».
+* Typecheck, lint e suite completa: **135 file / 551 test PASS**.
+
+### Blocker residui
+
+1. **I consumabili nativi non usano realmente `raccolto`.** Nel seed 128 forzieri, 35 forzieri
+   rari, 26 semi di bramosia, 6 tesori e 4 timbri — **199 elementi** — hanno tutti
+   `collezionabile=false`. Non possono quindi essere marcati né nascosti dal filtro sui dati reali.
+2. **Gli strutturali restano nascondibili via API/editor.** Un `passaggio` nativo accetta via
+   `PUT` la condizione `quartiere: shinjuku`, restituisce HTTP 200 e l'11 aprile diventa
+   `bloccato`; il visore lo nasconde.
+3. **I gruppi logici perdono la natura di presenza.** Una presenza rossa racchiusa in `tutte`
+   produce `ignoto`, perché `nascondeIlPin()` guarda soltanto il tipo esterno `gruppo`; anche
+   `non` richiede una semantica ricorsiva esplicita.
+4. **Il mutation gate dei cancelli resta permeabile.** Eliminando da una fixture i campi
+   `nativo.cancelli`/`nativo.sbloccoLeggibile` e la corrispondente riga di `cancelli-pin.json`, il
+   verificatore termina ancora con codice 0.
+5. **I nuovi test controllano soprattutto il JSON.** Mancano prove dirette di
+   `valutaRequisitiSpillo`, gruppi, prerequisito rosso ma visibile, strutturale protetto e dati
+   reali nei due stati API/DOM.
+6. Sullo SHA giudicato `finestre-dungeon.json` non è ancora referenziato dal codice e non governa
+   la presenza dei Palazzi.
+
+### Criterio di chiusura aggiornato
+
+Rendere collezionabili i 199 consumabili appropriati e provarne il ciclo reale; impedire o
+neutralizzare condizioni di assenza sugli strutturali non consumabili; propagare correttamente la
+presenza dentro i gruppi logici; aggiungere test API e DOM nei due stati; rendere il verificatore
+sensibile a rimozione o alterazione del canale dei cancelli.
+
+La correzione successiva deve inoltre evitare di ereditare condizioni da un negozio al pin
+generico del luogo condiviso, come documentato nel pre-audit Codex: la presenza va collegata
+all'entità esatta. La Fase 2 resta **FAIL**.
