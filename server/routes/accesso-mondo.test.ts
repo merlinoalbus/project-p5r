@@ -83,3 +83,32 @@ it('distingue associazione assente, entità inesistente e pin eliminato', async 
   getDb().prepare("UPDATE negozio SET nascosto=1 WHERE chiave='untouchable'").run();
   expect((await accesso('negozio', 'untouchable')).status).toBe(404);
 });
+
+it('un’attività porta al posto che dichiara, e non a uno scelto per somiglianza del nome', async () => {
+  const db = getDb();
+  const attivita = db.prepare("SELECT chiave, nome, luogo_chiave FROM attivita WHERE luogo_chiave IS NOT NULL LIMIT 1").get() as { chiave: string; nome: string; luogo_chiave: string };
+  expect(attivita).toBeTruthy();
+  // un luogo che *contiene* il nome dell'attività ma che nessuno ha dichiarato: non deve essere scelto
+  const esca = `${attivita.luogo_chiave}/esca-${attivita.chiave}`;
+  db.prepare("INSERT OR IGNORE INTO luogo (chiave, quartiere_chiave, ordine, tipo, nome, fonte) VALUES (?,?,?,?,?,?)")
+    .run(esca, attivita.luogo_chiave, 999, 'altro', `Locale con ${attivita.nome} e altro`, 'test');
+  const r = await accesso('attivita', attivita.chiave);
+  expect(r.status).toBe(200);
+  const riferimenti = JSON.stringify(r.body.data);
+  expect(riferimenti).not.toContain(esca);
+  // ma il posto dichiarato c'è
+  expect(riferimenti).toContain(attivita.luogo_chiave);
+});
+
+it('un confidente porta ai luoghi che il catalogo gli attribuisce', async () => {
+  const db = getDb();
+  const riga = db.prepare("SELECT chiave FROM luogo WHERE confidenti_json IS NOT NULL AND confidenti_json <> '[]' LIMIT 1").get() as { chiave: string } | undefined;
+  if (!riga) return;
+  const confidente = db.prepare('SELECT confidenti_json FROM luogo WHERE chiave=?').get(riga.chiave) as { confidenti_json: string };
+  const prima = JSON.parse(confidente.confidenti_json)[0] as { chiave?: string } | string;
+  const chiave = typeof prima === 'string' ? prima : prima.chiave;
+  if (!chiave) return;
+  const r = await accesso('confidente', chiave);
+  expect(r.status).toBe(200);
+  expect(JSON.stringify(r.body.data)).toContain(riga.chiave);
+});

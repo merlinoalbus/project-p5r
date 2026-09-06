@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "misurato": "2026-09-06",
+  "nota": "inventario completo, nessun campione",
+  "perTipo": {
+    "luogo": {
+      "voci": 84,
+      "conAccesso": 61,
+      "conPunto": 61,
+      "senzaAccesso": [
+        "ikebukuro/planetario-ikebukuro",
+        "kanda-jinbocho/chiesa-kanda",
+        "kichijoji/houraku",
+        "kichijoji/kichijoji-galleria-kasumi",
+        "kichijoji/mealport",
+        "mementos/ingresso-mementos",
+        "mementos/negozio-jose",
+        "nakano/nakano-broadway",
+        "shibuya/37-gradi",
+        "shibuya/high-sense",
+        "shibuya/prossimo-asso",
+        "shibuya/stazione-piazza-shibuya",
+        "shibuya/stazione-shibuya",
+        "shibuya/tsurukame",
+        "shibuya/underground-mall-lovers",
+        "shinjuku/chihaya-stand",
+        "shujin-academy/biblioteca-shujin",
+        "shujin-academy/cancello-shujin",
+        "shujin-academy/corridoio-2-piano-shujin",
+        "shujin-academy/infermeria-shujin"
+      ]
+    },
+    "negozio": {
+      "voci": 47,
+      "conAccesso": 30,
+      "conPunto": 30,
+      "senzaAccesso": [
+        "37-gradi-celsius",
+        "taisho-store",
+        "tsurukame-diamond",
+        "high-sense",
+        "prossimo-asso",
+        "venditore-ambulante",
+        "venditore-patate-dolci",
+        "negozio-scolastico",
+        "gachapon-akihabara",
+        "street-food-houraku",
+        "mealport",
+        "tempio-kichijoji",
+        "mercante-sakai",
+        "chiesa-kanda",
+        "negozio-palazzo-niijima",
+        "tanaka-affari-loschi",
+        "home-shopping-tv"
+      ]
+    },
+    "punto": {
+      "voci": 688,
+      "conAccesso": 379,
+      "conPunto": 0,
+      "senzaAccesso": [
+        "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/0",
+        "futaba-02-corridoio-principale-grande-corridoio-della-piramide-prima-s/1",
+        "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/0",
+        "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/1",
+        "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/2",
+        "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/3",
+        "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/4",
+        "futaba-04-caverna-passaggio-sotterraneo-della-piramide-livelli-1p-e-2p/5",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/0",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/1",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/2",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/3",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/4",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/5",
+        "futaba-07-camera-del-rigetto-chamber-of-rejection/6",
+        "futaba-08-camera-del-rimorso-chamber-of-guilt/0",
+        "futaba-08-camera-del-rimorso-chamber-of-guilt/1",
+        "futaba-08-camera-del-rimorso-chamber-of-guilt/2",
+        "futaba-08-camera-del-rimorso-chamber-of-guilt/3",
+        "futaba-08-camera-del-rimorso-chamber-of-guilt/4"
+      ]
+    },
+    "confidente": {
+      "voci": 23,
+      "conAccesso": 12,
+      "conPunto": 12,
+      "senzaAccesso": [
+        "chihaya",
+        "futaba",
+        "gemelle",
+        "hifumi",
+        "igor",
+        "kasumi",
+        "kawakami",
+        "makoto",
+        "maruki",
+        "morgana",
+        "sae"
+      ]
+    },
+    "articolo": {
+      "voci": 499,
+      "conAccesso": 395,
+      "conPunto": 395,
+      "senzaAccesso": [
+        "37-gradi-celsius/anello-del-respiro",
+        "37-gradi-celsius/anello-dell-energia",
+        "37-gradi-celsius/anello-della-vitalita",
+        "37-gradi-celsius/strangolino-dei-chakra",
+        "37-gradi-celsius/strangolino-della-mente",
+        "37-gradi-celsius/strangolino-dell-anima",
+        "37-gradi-celsius/fascia-rossa",
+        "37-gradi-celsius/fascia-blu",
+        "37-gradi-celsius/collana-cremisi",
+        "37-gradi-celsius/braccialetto-argento",
+        "taisho-store/tartufi",
+        "taisho-store/castella",
+        "taisho-store/natto-rugiadoso",
+        "taisho-store/crostatina-angelo",
+        "tsurukame-diamond/anello-del-cuore",
+        "tsurukame-diamond/fasce-colorate",
+        "tsurukame-diamond/braccialetti-tematici",
+        "high-sense/copertina",
+        "high-sense/vaso-di-vetro",
+        "high-sense/ventaglio-sakura"
+      ]
+    },
+    "attivita": {
+      "voci": 30,
+      "conAccesso": 29,
+      "conPunto": 0,
+      "senzaAccesso": [
+        "lettura-metropolitana"
+      ]
+    }
+  },
+  "summary": {
+    "voci": 1371,
+    "conAccesso": 906,
+    "conPunto": 498,
+    "quotaAccesso": 0.6608,
+    "quotaPunto": 0.3632
+  }
+}
