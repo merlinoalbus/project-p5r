@@ -1238,3 +1238,46 @@ consumabile raccolto e un'entità nativa urbana realmente assente. La Fase 2 res
 La chiusura richiede un backfill non distruttivo dei pin seed esistenti che preservi i dati
 manuali; una ricostruzione dei cancelli separata dal produttore; scrittura canonica nei tre
 produttori sorgente e controprova Windows/Linux byte-identica. La Fase 2 resta **FAIL**.
+
+## Fase 2 — Quarta riverifica ristretta della visibilità runtime
+
+**Esito: FAIL — PASS sulla proiezione dei gruppi misti**
+**Commit isolato:** `1dee8f25c27ef8d6fd44b6c5eee3d411bcd8bf00`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. La matrice `tutte(fascia=sera, prerequisito)` è corretta: entrambi gli stati diurni sono
+   `bloccato`; la sera il pin è visibile sia col prerequisito insufficiente (`ignoto`) sia con
+   quello soddisfatto (`disponibile`).
+2. Una porta nativa con presenza rossa resta visibile.
+3. Un forziere reale resta collezionabile e il DTO restituisce `raccolto=true`.
+4. Dopo l'invocazione esplicita della riconciliazione, Akindo rispetta data e fascia.
+
+### Rilievi bloccanti
+
+1. **Il percorso produttivo ordinario non applica la presenza.** Dopo `caricaSeed`, il pin nativo
+   reale Akindo conserva `condizioni_json=NULL` ed è disponibile già l'11 aprile. Diventa corretto
+   soltanto dopo una chiamata manuale ad `applicaPresenzaAiLuoghi`; il test effettua proprio tale
+   chiamata e non prova l'avvio o il reseed normali.
+2. **La riconciliazione è distruttiva.** Un prerequisito manuale `articolo=grimaldello` viene
+   sostituito integralmente da quartiere, fascia e data.
+3. **La presenza derivata obsoleta non viene rimossa.** Se la fonte di Big Bang Burger perde la
+   data `04-18`, la vecchia condizione resta sul pin perché il caso senza nuova presenza esegue
+   `continue`.
+4. **`nota` non è una prova di struttura.** Dei 287 pin nativi classificati `nota`, 280 sono
+   esplicitamente `daVerificare`; immunizzarli da qualsiasi futura presenza temporale non è
+   giustificato.
+5. **La tassonomia unisce concetti distinti.** `TIPI_STRUTTURALI` include anche consumabili quali
+   forzieri, semi, tesori e timbri. Il canale raccolto funziona, ma strutturali non consumabili e
+   consumabili devono restare categorie esplicite separate.
+6. **Copertura entità incompleta.** Fra i nativi, 14 negozi su 35 e 10 attività su 15 non hanno
+   riferimento; non esiste un canale dedicato alla presenza delle attività.
+7. **Manca la prova end-to-end.** I test controllano classificazioni o invocano manualmente il
+   backfill; non dimostrano l'assenza reale del pin temporaneo via API e DOM dopo il percorso
+   produttivo normale.
+
+La chiusura richiede una riconciliazione non distruttiva e idempotente nel percorso ordinario,
+capace di sostituire soltanto la presenza derivata; categorie separate; contabilità esplicita
+degli elementi senza riferimento; canale attività; prove API e DOM senza preparazione manuale.
+La Fase 2 resta **FAIL**.
