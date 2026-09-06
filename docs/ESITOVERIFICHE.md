@@ -282,10 +282,39 @@ e riproducibile da installazione nuova senza dipendere da residui dell'atlante p
 tecniche dal DOM espanso e la stessa etichetta di versione deve provenire da un'unica funzione
 condivisa in tutti gli otto punti elencati nel piano. Le Fasi 1a, 1b e 1c restano approvate.
 
-## Fase 2 — Pin di tutti i tipi, parte urbana (2a, 2b, 2c)
+## Fase 1d — Riesame dopo la correzione delle etichette
 
-**Esito complessivo: WARN**
-**Commit verificati:** `4201e53`, `5b7bcc5`
+**Esito: FAIL**
+**Commit verificato:** `1e7011f`
+**Data verifica:** 6 settembre 2026
+
+### Rilievo chiuso
+
+- Le 26 etichette `risorsa N/N livello N` sono state eliminate. La rigenerazione isolata di
+  `atlante-identita.json` è byte-identica al file versionato, SHA-256
+  `161AF9FA0D1D2DE4D763C658BED904489543AD01FD40A4203A62508FEA5AB7B7`. Nel browser,
+  dopo avere espanso tutte le 13 schede e l'intero albero, il DOM non contiene più alcuna
+  occorrenza del modello tecnico; le sostituzioni descrivono tela e ampiezza del disegno.
+
+### Rilievo ancora bloccante
+
+- L'etichetta della versione non è ancora applicata negli otto punti prescritti dal piano.
+  `etichettaVersione` alimenta miniature e selettori che passano da `etichettaPlanimetria`, ma
+  `MappaPage.tsx` continua a passare al visore `presentaMappa(mappa)`, che usa
+  `nomePresentazioneMappa`; lo stesso accade nel selettore a riga 128. `MappaIncorporata.tsx`
+  passa anch'esso `presentaMappa(mappa)` e il breadcrumb del `VisoreMappa` stampa quei nomi.
+  La prova browser sul Covo dei Ladri mostra infatti miniature «settore d'ingresso»,
+  «planimetria completa» ecc., mentre titolo documento, intestazione e breadcrumb restano
+  soltanto «Covo dei Ladri». Non provengono quindi tutti dalla singola resa condivisa richiesta.
+
+**Decisione:** Fase 1d ancora respinta. Il rilievo sulle etichette tecniche è chiuso; resta da
+uniformare titolo, selettore della pagina, mappa incorporata e breadcrumb del visore alla stessa
+funzione di presentazione già usata negli altri punti.
+
+## Fase 2 — Pin di tutti i tipi (2a, 2b, 2c)
+
+**Esito complessivo: FAIL**
+**Commit verificati:** `4201e53`, `5b7bcc5`, `1e7011f`
 **Data verifica:** 6 settembre 2026
 
 ### Fase 2b — Riferimento fra pin nativi e planimetria: PASS
@@ -300,42 +329,46 @@ condivisa in tutti gli otto punti elencati nel piano. Le Fasi 1a, 1b e 1c restan
    planimetria è interamente opaca e i pin accettati ricadono sul disegno secondo il criterio
    dichiarato. Le 23 esclusioni riportano una motivazione puntuale.
 
-### Fasi 2a e 2c — Sottoinsieme urbano dimostrato: PASS
+### Merito conforme delle Fasi 2a e 2c
 
-1. `pin_semantics.py` rigenera `semantica-pin.json` byte per byte, SHA-256
-   `381793EE0D69BF11273D47C982334EAAF3279A9AF1CA58E0F2A71514C67EA007`; il verificatore
-   dedicato conferma 51 tipi determinati e 51 lasciati senza associazione.
-2. Tutte le 80 occorrenze contemporaneamente determinate e collocabili sono importate in 13
-   planimetrie, senza duplicati e con coordinate nell'intervallo ammesso. Nessuna delle 80 è
-   condizionale. Le 42 associazioni a un luogo del catalogo sono state ricontrollate una per
-   una e risultano semanticamente coerenti; le altre 38 restano correttamente non collegate.
-3. `build_seed_package.py` rigenera contenuti logicamente identici al pacchetto versionato
-   (differenza soltanto CRLF/LF): SHA-256 normalizzato
-   `804363258675BD883E76E467E9F3F89ABED3DF3425E426A714F4D8B77A77431F`. Il rapporto è
-   byte-identico, SHA-256 `CD3A89446C3D3C0476E52FB638BFBF1E23C514EB379C251DA7098B8806E0E58F`.
-4. La prova runtime individua senza ambiguità Penguin Sniper dalla scheda di accesso, conserva
-   correttamente le due destinazioni per Leblanc e mostra nove pin sulla planimetria di
-   Kichijoji; il controllo visivo conferma il pin selezionato e il relativo dettaglio.
+1. Il controllo sulle fonti conferma i 51 tipi urbani e le cinque nuove famiglie ricavate dalle
+   procedure native: porta, meccanismo, forziere, forziere raro e seme della bramosia. Le
+   dominanze dichiarate sono riscontrabili nelle procedure (`5/6`, `57/58`, `122/122`, `32/33`,
+   `21/21`) e le etichette native confermano porte e leve. I restanti 46 tipi non ricevono un
+   significato non dimostrato.
+2. Il verificatore dedicato ricontrolla 56 tipi determinati e 405 pin nel pacchetto, dei quali
+   42 collegati a un luogo. Coordinate, tipo e riferimento geometrico coincidono con le fonti.
+3. `build_seed_package.py` rigenera un pacchetto logicamente identico al versionato (differenza
+   soltanto CRLF/LF), SHA-256 normalizzato
+   `4D0E3A5810E0BAE3B805956BF10EAACBCDCA45FE15E14CD6D374D6AF6B3D7C8A`; il rapporto è
+   byte-identico, SHA-256 `5D8EF8E6BBBF1A25F4F7C057EB8980AAB130BD6950D13781072AC4F818973D04`.
 
-### Avvertenze da correggere
+### Rilievi bloccanti
 
-1. La frase di avanzamento «i 51 dei Palazzi restano senza significato assegnato» non descrive
-   i dati reali: fra i 51 tipi non determinati, 25 compaiono anche in planimetrie urbane e 13
-   compaiono esclusivamente in planimetrie urbane. È quindi approvato il solo blocco urbano
-   dimostrato dei tipi 46–96, non la copertura di tutti i tipi presenti nelle mappe urbane.
-2. Il rapporto del pacchetto contabilizza 80 pin posati, 1.248 esclusi per significato non
-   dimostrato e 94 esclusi per assenza di riferimento condiviso: il totale è 1.422, non 1.429.
-   Mancano dal riepilogo finale i 7 pin esclusi individualmente nelle planimetrie condivise,
-   pur correttamente tracciati in `riferimento-pin.json`.
+1. **324 pin condizionali sono importati come incondizionati.** Il confronto fra
+   `mondo_metadati.json`, il riferimento certificato e il pacchetto trova 324 dei 405 pin
+   importati con `conditional = true`. Nessuno dei 405 oggetti seed possiede `condizioni`; la
+   bandiera è riportata soltanto come frase nella descrizione. Il runtime non interpreta quella
+   frase e mostra quindi sempre i 324 pin. Il piano richiede invece una condizione strutturata
+   `da-configurare` finché la bandiera non è tradotta, e vieta espressamente di trattarli come
+   pin incondizionati.
+2. **`semantica-pin.json` non è riproducibile.** Cinque rigenerazioni isolate consecutive
+   producono cinque SHA-256 differenti. L'ordine dei pari merito in `procedure` ed
+   `etichetteDeiTrigger` dipende dall'iterazione di `set`; una rigenerazione non coincide con il
+   file versionato anche se conteggi e decisioni semantiche restano uguali. Il verificatore
+   dedicato non rileva questa instabilità.
+3. **La contabilità finale non si chiude.** Il rapporto conta 405 pin posati, 923 esclusi per
+   significato non dimostrato e 94 per assenza di riferimento condiviso: 1.422 su 1.429. I 7
+   pin esclusi individualmente dalle planimetrie condivise restano fuori dal riepilogo, benché
+   siano presenti in `riferimento-pin.json`.
 
 ### Regressioni generali
 
 - `npm run typecheck`: PASS;
 - `npm run lint`: PASS;
-- `npm test -- --run`: PASS, 132 file e **534 test su 534**.
+- `npm test -- --run`: PASS, 132 file e **534 test su 534**, su copia isolata del commit.
 
-**Decisione:** il riferimento geometrico della Fase 2b e il sottoinsieme di 80 pin urbani
-dimostrati sono approvati e possono essere usati dalle fasi successive. La Fase 2 complessiva
-non può però essere marcata PASS: occorre correggere la descrizione dell'ambito, chiudere la
-contabilità dei 7 pin esclusi individualmente e mantenere espliciti i tipi ancora non
-determinati fino alla loro successiva classificazione.
+**Decisione:** la Fase 2b resta approvata e le associazioni semantiche dei 56 tipi superano il
+controllo di merito. Le Fasi 2a/2c e la Fase 2 complessiva sono respinte finché i pin
+condizionali non entrano con una condizione strutturata, l'artefatto semantico non diventa
+deterministico e il rapporto non contabilizza esplicitamente tutte le 1.429 occorrenze.
