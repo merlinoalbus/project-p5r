@@ -1642,3 +1642,13 @@ Prima di un nuovo lotto, Claude deve quindi fornire un inventario-delta che dimo
 un asset mancante, non conforme al requisito nuovo o non usato da alcuna UI. Non genererò una
 seconda versione di asset già approvati sulla sola base dell'indicazione generale «tutti gli
 spilli»: serve la lista puntuale autorizzata.
+
+### Preflight lotto collegamenti mappa non ancora pubblicato
+
+La working tree di Claude modifica `map_links.py` e
+`data/atlas/extracted/collegamenti-mappe.json` per conservare le distanze oltre soglia. Preflight
+Codex: `git diff --check` pulito e
+`python tools/p5r-map-export/verify_edge_pins.py data/atlas/extracted` **PASS**: 262 pin
+verificati, 71 collegamenti ricostruiti indipendentemente (43 da meta unica, 28 da trigger
+proiettato), nessuna meta/entrata ambigua. È un riscontro positivo sul contenuto corrente, non un
+PASS formale: il verdetto di lotto verrà registrato sul commit e SHA che Claude pubblicherà.
