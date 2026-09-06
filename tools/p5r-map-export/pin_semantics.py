@@ -672,6 +672,12 @@ def main(out):
     dagli_script = significato_dagli_script(out)
     # Che cosa il gioco disegna davvero, contato nelle schermate: dove il vincolo di conteggio
     # lascia un solo tipo compatibile, quel tipo e' dimostrato per osservazione diretta.
+    # I pin che stanno sul bordo del disegno, uno per direzione: sono le uscite verso le mappe
+    # accanto, e si riconoscono da dove cadono senza bisogno di sapere quale sprite usino.
+    percorso_bordo = out/'pin-di-bordo.json'
+    di_bordo = ({int(k): v for k, v in json.loads(
+        percorso_bordo.read_text(encoding='utf8'))['tipiDimostrati'].items()}
+        if percorso_bordo.exists() else {})
     percorso_osservato = out/'osservazioni-icone-esito.json'
     osservati = ({int(k): v for k, v in json.loads(
         percorso_osservato.read_text(encoding='utf8'))['tipiDimostrati'].items()}
@@ -694,8 +700,14 @@ def main(out):
         voce['proiezione'] = proiezione
         voce['sottoIlPin'] = sotto
         osservato = osservati.get(r['tipoNativo'])
+        bordo = di_bordo.get(r['tipoNativo'])
         voce['osservazione'] = osservato
-        if osservato:
+        voce['bordo'] = bordo
+        if bordo:
+            voce.update(tipoSpillo=bordo['tipoSpillo'], etichetta=bordo['etichetta'],
+                        stato='determinato',
+                        prova='posizione sul bordo della planimetria: ' + bordo['motivo'])
+        elif osservato:
             voce.update(tipoSpillo=osservato['tipoSpillo'], etichetta=osservato['etichetta'],
                         stato='determinato',
                         prova='icone contate nelle schermate del gioco: ' + osservato['motivo'])

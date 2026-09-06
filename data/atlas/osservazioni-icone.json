@@ -12,7 +12,8 @@
       "icone": {
         "stanza-sicura": 1,
         "forziere": 0,
-        "porta-chiusa": 0
+        "porta-chiusa": 0,
+        "freccia-passaggio": 0
       },
       "note": "rombo verde con la lettera S, in una stanzetta a sinistra del corridoio centrale",
       "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
@@ -26,7 +27,8 @@
       ],
       "icone": {
         "stanza-sicura": 1,
-        "porta-chiusa": 1
+        "porta-chiusa": 1,
+        "freccia-passaggio": 1
       },
       "note": "un rombo verde S al centro; nella stessa schermata si vedono anche un lucchetto giallo e una freccia grigia verso il basso",
       "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
@@ -41,7 +43,8 @@
       "icone": {
         "stanza-sicura": 2,
         "forziere": 1,
-        "porta-chiusa": 0
+        "porta-chiusa": 0,
+        "freccia-passaggio": 0
       },
       "note": "due rombi verdi S, uno in alto e uno in basso; un forziere giallo in basso a sinistra",
       "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
@@ -54,7 +57,8 @@
       "icone": {
         "stanza-sicura": 1,
         "forziere": 1,
-        "porta-chiusa": 0
+        "porta-chiusa": 0,
+        "freccia-passaggio": 2
       },
       "note": "rombo verde S in alto, nella stanzetta sopra il pilastro centrale; due frecce grigie ai lati e un'icona gialla al centro",
       "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
@@ -68,7 +72,8 @@
       "icone": {
         "stanza-sicura": 0,
         "forziere": 0,
-        "porta-chiusa": 0
+        "porta-chiusa": 0,
+        "freccia-passaggio": 0
       },
       "note": "nessun rombo verde",
       "contateDa": "lettura delle schermate fatta da me, non dichiarata dall’utente: il conteggio delle icone diverse dal rombo verde è mio e va riletto se una deduzione stona"
@@ -94,6 +99,10 @@
     "scala": {
       "tipoSpillo": "scala",
       "etichetta": "Scala"
+    },
+    "freccia-passaggio": {
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio"
     }
   },
   "limiti": [

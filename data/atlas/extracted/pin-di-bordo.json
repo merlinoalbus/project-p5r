@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "metadati": "mondo_metadati.json",
+    "riferimento": "riferimento-pin.json"
+  },
+  "criterio": {
+    "quotaLato": 0.6,
+    "quotaFuoriDalTratto": 0.5,
+    "minimiPin": 20,
+    "quotaMassimaDeiTipiInterni": 0.485,
+    "forma": "un tipo è una freccia di bordo se cade fuori dal tratto e prevalentemente su un lato, e se quel lato è solo suo"
+  },
+  "tipi": {
+    "4": {
+      "pin": 104,
+      "lato": "sinistra",
+      "quotaLato": 0.346,
+      "quotaFuoriDalTratto": 0.183,
+      "distribuzione": {
+        "sinistra": 36,
+        "alto": 34,
+        "basso": 20,
+        "destra": 14
+      }
+    },
+    "5": {
+      "pin": 76,
+      "lato": "alto",
+      "quotaLato": 0.382,
+      "quotaFuoriDalTratto": 0.092,
+      "distribuzione": {
+        "alto": 29,
+        "sinistra": 25,
+        "basso": 12,
+        "destra": 10
+      }
+    },
+    "10": {
+      "pin": 81,
+      "lato": "alto",
+      "quotaLato": 0.469,
+      "quotaFuoriDalTratto": 0.037,
+      "distribuzione": {
+        "alto": 38,
+        "sinistra": 23,
+        "basso": 10,
+        "destra": 10
+      }
+    },
+    "12": {
+      "pin": 68,
+      "lato": "alto",
+      "quotaLato": 0.485,
+      "quotaFuoriDalTratto": 0.059,
+      "distribuzione": {
+        "alto": 33,
+        "sinistra": 19,
+        "destra": 11,
+        "basso": 5
+      }
+    },
+    "13": {
+      "pin": 66,
+      "lato": "alto",
+      "quotaLato": 0.652,
+      "quotaFuoriDalTratto": 0.576,
+      "distribuzione": {
+        "alto": 43,
+        "sinistra": 13,
+        "basso": 5,
+        "destra": 5
+      }
+    },
+    "14": {
+      "pin": 71,
+      "lato": "destra",
+      "quotaLato": 0.704,
+      "quotaFuoriDalTratto": 0.563,
+      "distribuzione": {
+        "destra": 50,
+        "alto": 8,
+        "sinistra": 7,
+        "basso": 6
+      }
+    },
+    "15": {
+      "pin": 66,
+      "lato": "basso",
+      "quotaLato": 0.758,
+      "quotaFuoriDalTratto": 0.47,
+      "distribuzione": {
+        "basso": 50,
+        "sinistra": 9,
+        "destra": 5,
+        "alto": 2
+      }
+    },
+    "16": {
+      "pin": 59,
+      "lato": "sinistra",
+      "quotaLato": 0.797,
+      "quotaFuoriDalTratto": 0.593,
+      "distribuzione": {
+        "sinistra": 47,
+        "basso": 5,
+        "alto": 4,
+        "destra": 3
+      }
+    },
+    "17": {
+      "pin": 140,
+      "lato": "sinistra",
+      "quotaLato": 0.271,
+      "quotaFuoriDalTratto": 0.064,
+      "distribuzione": {
+        "sinistra": 38,
+        "alto": 38,
+        "destra": 36,
+        "basso": 28
+      }
+    },
+    "19": {
+      "pin": 161,
+      "lato": "sinistra",
+      "quotaLato": 0.317,
+      "quotaFuoriDalTratto": 0.106,
+      "distribuzione": {
+        "sinistra": 51,
+        "basso": 44,
+        "alto": 34,
+        "destra": 32
+      }
+    },
+    "26": {
+      "pin": 38,
+      "lato": "alto",
+      "quotaLato": 0.474,
+      "quotaFuoriDalTratto": 0.289,
+      "distribuzione": {
+        "alto": 18,
+        "sinistra": 9,
+        "basso": 6,
+        "destra": 5
+      }
+    },
+    "28": {
+      "pin": 91,
+      "lato": "sinistra",
+      "quotaLato": 0.407,
+      "quotaFuoriDalTratto": 0.165,
+      "distribuzione": {
+        "sinistra": 37,
+        "alto": 25,
+        "basso": 18,
+        "destra": 11
+      }
+    },
+    "29": {
+      "pin": 40,
+      "lato": "basso",
+      "quotaLato": 0.375,
+      "quotaFuoriDalTratto": 0.3,
+      "distribuzione": {
+        "basso": 15,
+        "alto": 9,
+        "sinistra": 9,
+        "destra": 7
+      }
+    },
+    "30": {
+      "pin": 36,
+      "lato": "alto",
+      "quotaLato": 0.361,
+      "quotaFuoriDalTratto": 0.278,
+      "distribuzione": {
+        "alto": 13,
+        "sinistra": 11,
+        "basso": 7,
+        "destra": 5
+      }
+    },
+    "43": {
+      "pin": 43,
+      "lato": "alto",
+      "quotaLato": 0.465,
+      "quotaFuoriDalTratto": 0.093,
+      "distribuzione": {
+        "alto": 20,
+        "sinistra": 12,
+        "destra": 8,
+        "basso": 3
+      }
+    },
+    "97": {
+      "pin": 23,
+      "lato": "sinistra",
+      "quotaLato": 0.435,
+      "quotaFuoriDalTratto": 0.522,
+      "distribuzione": {
+        "sinistra": 10,
+        "alto": 9,
+        "destra": 3,
+        "basso": 1
+      }
+    }
+  },
+  "tipiDimostrati": {
+    "13": {
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "lato": "alto",
+      "pin": 66,
+      "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+    },
+    "14": {
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "lato": "destra",
+      "pin": 71,
+      "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+    },
+    "15": {
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "lato": "basso",
+      "pin": 66,
+      "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+    },
+    "16": {
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "lato": "sinistra",
+      "pin": 59,
+      "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+    }
+  },
+  "summary": {
+    "tipiEsaminati": 16,
+    "tipiDimostrati": 4,
+    "pinCoperti": 262,
+    "latiCoperti": [
+      "alto",
+      "basso",
+      "destra",
+      "sinistra"
+    ],
+    "quotaMassimaDeiTipiInterni": 0.485
+  },
+  "limits": [
+    "La direzione è quella sulla planimetria, non un punto d’arrivo: dice da che parte si esce, non dove si finisce. L’arrivo è lavoro della fase dei collegamenti.",
+    "Un tipo con pochi pin non entra: il lato prevalente lo deciderebbe il caso."
+  ]
+}

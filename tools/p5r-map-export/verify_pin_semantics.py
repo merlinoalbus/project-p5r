@@ -115,10 +115,13 @@ def main(out, seed=None):
     famiglie_sotto, procedure_sotto = sotto_il_pin(out)
     atteso_bandiera = ps.significato_dalle_bandiere(out)
     famiglie = [(f[0], f[1]) for f in ps.FAMIGLIE]
+    percorso_bordo = out/'pin-di-bordo.json'
+    di_bordo = (json.loads(percorso_bordo.read_text(encoding='utf8'))['tipiDimostrati']
+                if percorso_bordo.exists() else {})
     percorso_osservato = out/'osservazioni-icone-esito.json'
     osservati = (json.loads(percorso_osservato.read_text(encoding='utf8'))['tipiDimostrati']
                  if percorso_osservato.exists() else {})
-    urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = con_condizione = ipotesi = 0
+    urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = bordo_ok = con_condizione = ipotesi = 0
     per_tipo = {r['tipoNativo']: r for r in semantica['tipi']}
     assert len(per_tipo) == len(semantica['tipi']), 'tipi nativi ripetuti'
     assert {r['tipoNativo'] for r in icone['tipiNativi']} == set(per_tipo), 'censimento diverso da quello delle icone'
@@ -139,6 +142,11 @@ def main(out, seed=None):
                           else mi.SCARTO_MY_PALACE)
                 assert r['sprite'] == r['tipoNativo'] + scarto, f'sprite fuori scarto: {r["tipoNativo"]}'
                 urbani += 1
+            elif v['prova'].startswith('posizione sul bordo'):
+                # ha il suo verificatore dedicato: qui basta che il tipo sia fra quelli dedotti
+                assert str(r['tipoNativo']) in di_bordo,                     f'tipo dichiarato di bordo ma assente dall’esito: {r["tipoNativo"]}'
+                assert di_bordo[str(r['tipoNativo'])]['tipoSpillo'] == v['tipoSpillo'],                     f'segnalino diverso da quello dedotto dal bordo: {r["tipoNativo"]}'
+                bordo_ok += 1
             elif v['prova'].startswith('icone contate'):
                 # la deduzione dalle schermate ha il suo verificatore dedicato: qui basta che il
                 # tipo sia davvero fra quelli dedotti li', e che il segnalino coincida
@@ -258,7 +266,8 @@ def main(out, seed=None):
     print('OK', determinati, f'tipi dimostrati ({urbani} dal nome dello sprite,',
           f'{dagli_script_ok} dalle procedure che accendono la bandiera,',
           f'{dai_pin_ok} dalle prove dirette dei propri pin,',
-          f'{osservati_ok} contando le icone nelle schermate),',
+          f'{osservati_ok} contando le icone nelle schermate,',
+          f'{bordo_ok} dalla posizione sul bordo),',
           len(da_bandiera), 'pin riconosciuti uno per uno dalla propria bandiera;',
           f'la lettura geometrica azzecca il {round(misura["accuratezza"]*100)}% su',
           misura['casi'], 'casi di controllo e non determina nulla;',

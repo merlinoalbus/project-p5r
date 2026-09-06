@@ -24,6 +24,19 @@
       "dimostrato": 26,
       "motivo": null
     },
+    "freccia-passaggio": {
+      "osservazioni": 5,
+      "schermate": [
+        "Kamoshida's Palace — Old Castle 1F",
+        "Kamoshida's Palace — Old Castle 2F",
+        "Kamoshida's Palace — Old Castle 3F",
+        "Kamoshida's Palace — Tower: Lower Level",
+        "Kamoshida's Palace — Tower: Upper Level"
+      ],
+      "compatibili": [],
+      "dimostrato": null,
+      "motivo": "nessun tipo è compatibile con tutte le osservazioni: una di esse è sbagliata, oppure la schermata non mostrava tutte le icone"
+    },
     "porta-chiusa": {
       "osservazioni": 5,
       "schermate": [
@@ -83,7 +96,7 @@
     }
   },
   "summary": {
-    "generiOsservati": 3,
+    "generiOsservati": 4,
     "tipiDimostrati": 2,
     "pinCoperti": 142
   },

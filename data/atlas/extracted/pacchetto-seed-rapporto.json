@@ -6,13 +6,13 @@
   "conGruppoImmagini": 228,
   "conContesti": 49,
   "conEntita": 72,
-  "spilliPosati": 523,
+  "spilliPosati": 780,
   "spilliConLuogo": 42,
-  "spilliCondizionati": 433,
+  "spilliCondizionati": 637,
   "pinNonPosati": {
     "escluso dalla certificazione del riferimento": 14,
     "planimetria senza riferimento condiviso": 76,
-    "tipo nativo senza significato": 816
+    "tipo nativo senza significato": 559
   },
   "pinNativi": 1429,
   "pinContati": 1429,

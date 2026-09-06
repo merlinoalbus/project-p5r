@@ -86,6 +86,7 @@
         ],
         "motivo": "su 5 schermate del gioco il numero di icone «stanza-sicura» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
       },
+      "bordo": null,
       "tipoSpillo": "sicura",
       "etichetta": "Stanza sicura",
       "stato": "determinato",
@@ -167,6 +168,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -247,6 +249,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "porta",
       "etichetta": "Porta",
       "stato": "determinato",
@@ -326,6 +329,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "meccanismo",
       "etichetta": "Meccanismo",
       "stato": "determinato",
@@ -399,10 +403,17 @@
         }
       },
       "osservazione": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "bordo": {
+        "tipoSpillo": "passaggio",
+        "etichetta": "Passaggio",
+        "lato": "alto",
+        "pin": 66,
+        "motivo": "65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "posizione sul bordo della planimetria: 65% dei suoi 66 pin cade sul lato alto del disegno e 58% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 14,
@@ -472,10 +483,17 @@
         }
       },
       "osservazione": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "bordo": {
+        "tipoSpillo": "passaggio",
+        "etichetta": "Passaggio",
+        "lato": "destra",
+        "pin": 71,
+        "motivo": "70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "posizione sul bordo della planimetria: 70% dei suoi 71 pin cade sul lato destra del disegno e 56% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 15,
@@ -547,10 +565,17 @@
         }
       },
       "osservazione": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "bordo": {
+        "tipoSpillo": "passaggio",
+        "etichetta": "Passaggio",
+        "lato": "basso",
+        "pin": 66,
+        "motivo": "76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "posizione sul bordo della planimetria: 76% dei suoi 66 pin cade sul lato basso del disegno e 47% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 16,
@@ -616,10 +641,17 @@
         }
       },
       "osservazione": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "bordo": {
+        "tipoSpillo": "passaggio",
+        "etichetta": "Passaggio",
+        "lato": "sinistra",
+        "pin": 59,
+        "motivo": "80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "determinato",
+      "prova": "posizione sul bordo della planimetria: 80% dei suoi 59 pin cade sul lato sinistra del disegno e 59% fuori dal tratto, mentre nessun tipo interno supera il 48% sul proprio lato"
     },
     {
       "tipoNativo": 17,
@@ -691,6 +723,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "forziere",
       "etichetta": "Forziere",
       "stato": "determinato",
@@ -751,6 +784,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -802,6 +836,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -843,6 +878,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -861,6 +897,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -932,11 +969,24 @@
           "motivo": "7 punti su 7 riconosciuti dicono «passaggio», di cui 6 ingressi del campo"
         }
       },
-      "osservazione": null,
+      "osservazione": {
+        "genere": "forziere",
+        "tipoSpillo": "forziere",
+        "etichetta": "Forziere",
+        "osservazioni": 4,
+        "schermate": [
+          "Kamoshida's Palace — Old Castle 1F",
+          "Kamoshida's Palace — Old Castle 3F",
+          "Kamoshida's Palace — Tower: Lower Level",
+          "Kamoshida's Palace — Tower: Upper Level"
+        ],
+        "motivo": "su 4 schermate del gioco il numero di icone «forziere» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
+      },
+      "bordo": null,
       "tipoSpillo": "forziere",
-      "etichetta": "Forziere raro",
+      "etichetta": "Forziere",
       "stato": "determinato",
-      "prova": "procedura che accende la bandiera del pin: (R_TBOX|RARE_TBOX) in 32 casi su 33 riconosciuti"
+      "prova": "icone contate nelle schermate del gioco: su 4 schermate del gioco il numero di icone «forziere» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
     },
     {
       "tipoNativo": 28,
@@ -992,6 +1042,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1066,6 +1117,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1136,6 +1188,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1171,6 +1224,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1220,6 +1274,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1255,6 +1310,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1290,6 +1346,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1327,6 +1384,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1365,6 +1423,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1397,6 +1456,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1453,6 +1513,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1490,6 +1551,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1558,6 +1620,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1576,6 +1639,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1634,6 +1698,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "distributore",
       "etichetta": "Distributore di bevande",
       "stato": "determinato",
@@ -1669,6 +1734,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Lotteria",
       "stato": "determinato",
@@ -1704,6 +1770,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "cercalavoro",
       "etichetta": "Bacheca dei lavori",
       "stato": "determinato",
@@ -1739,6 +1806,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "distributore",
       "etichetta": "Chiosco dei succhi",
       "stato": "determinato",
@@ -1776,6 +1844,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Chiosco",
       "stato": "determinato",
@@ -1815,6 +1884,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Libreria",
       "stato": "determinato",
@@ -1852,6 +1922,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Noleggio di film",
       "stato": "determinato",
@@ -1889,6 +1960,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Ristorante di famiglia",
       "stato": "determinato",
@@ -1926,6 +1998,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Manzo e riso",
       "stato": "determinato",
@@ -1961,6 +2034,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Negozio softair",
       "stato": "determinato",
@@ -2000,6 +2074,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "sala-giochi",
       "etichetta": "Sala giochi",
       "stato": "determinato",
@@ -2035,6 +2110,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Minimarket",
       "stato": "determinato",
@@ -2053,6 +2129,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Palestra",
       "stato": "determinato",
@@ -2090,6 +2167,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Big Bang Burger",
       "stato": "determinato",
@@ -2125,6 +2203,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Farmacia",
       "stato": "determinato",
@@ -2164,6 +2243,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Grande magazzino",
       "stato": "determinato",
@@ -2204,6 +2284,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "cinema",
       "etichetta": "Cinema",
       "stato": "determinato",
@@ -2243,6 +2324,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Fioraio",
       "stato": "determinato",
@@ -2276,6 +2358,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
       "stato": "determinato",
@@ -2311,6 +2394,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Articoli sportivi",
       "stato": "determinato",
@@ -2348,6 +2432,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Articoli tradizionali",
       "stato": "determinato",
@@ -2385,6 +2470,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Gioielleria",
       "stato": "determinato",
@@ -2422,6 +2508,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Accessori",
       "stato": "determinato",
@@ -2461,6 +2548,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Cosmetici",
       "stato": "determinato",
@@ -2500,6 +2588,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Panetteria",
       "stato": "determinato",
@@ -2539,6 +2628,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "nota",
       "etichetta": "Servizi igienici",
       "stato": "determinato",
@@ -2557,6 +2647,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Aula",
       "stato": "determinato",
@@ -2575,6 +2666,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Scuola",
       "stato": "determinato",
@@ -2612,6 +2704,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Bar",
       "stato": "determinato",
@@ -2649,6 +2742,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Casalinghi",
       "stato": "determinato",
@@ -2684,6 +2778,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Retrogiochi",
       "stato": "determinato",
@@ -2719,6 +2814,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Maid café",
       "stato": "determinato",
@@ -2754,6 +2850,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Distributori di capsule",
       "stato": "determinato",
@@ -2789,6 +2886,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Elettronica",
       "stato": "determinato",
@@ -2824,6 +2922,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Gadget",
       "stato": "determinato",
@@ -2859,6 +2958,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Ferramenta",
       "stato": "determinato",
@@ -2896,6 +2996,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "terme",
       "etichetta": "Bagno pubblico",
       "stato": "determinato",
@@ -2914,6 +3015,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "casa",
       "etichetta": "Café Leblanc",
       "stato": "determinato",
@@ -2949,6 +3051,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "lavanderia",
       "etichetta": "Lavanderia automatica",
       "stato": "determinato",
@@ -2967,6 +3070,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Gabbie di battuta",
       "stato": "determinato",
@@ -3004,6 +3108,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Usato",
       "stato": "determinato",
@@ -3039,6 +3144,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Clinica",
       "stato": "determinato",
@@ -3076,6 +3182,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Cartoleria",
       "stato": "determinato",
@@ -3111,6 +3218,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Abbigliamento usato",
       "stato": "determinato",
@@ -3146,6 +3254,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "culto",
       "etichetta": "Tempio",
       "stato": "determinato",
@@ -3164,6 +3273,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Jazz club",
       "stato": "determinato",
@@ -3199,6 +3309,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Pietre",
       "stato": "determinato",
@@ -3217,6 +3328,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Freccette",
       "stato": "determinato",
@@ -3256,6 +3368,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Incensi",
       "stato": "determinato",
@@ -3291,6 +3404,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "ristorante",
       "etichetta": "Fritti",
       "stato": "determinato",
@@ -3326,6 +3440,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
       "stato": "determinato",
@@ -3393,6 +3508,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "seme-bramosia",
       "etichetta": "Seme della bramosia",
       "stato": "determinato",
@@ -3432,6 +3548,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Creatore del Palazzo",
       "stato": "determinato",
@@ -3471,6 +3588,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Musica",
       "stato": "determinato",
@@ -3510,6 +3628,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Televisione",
       "stato": "determinato",
@@ -3549,6 +3668,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Galleria",
       "stato": "determinato",
@@ -3588,6 +3708,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Area giochi",
       "stato": "determinato",
@@ -3629,6 +3750,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": "attivita",
       "etichetta": "Premi",
       "stato": "determinato",
@@ -3676,6 +3798,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3711,6 +3834,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3750,6 +3874,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3789,6 +3914,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3824,6 +3950,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3842,6 +3969,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3860,6 +3988,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3899,6 +4028,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3917,6 +4047,7 @@
       "proiezione": null,
       "sottoIlPin": null,
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -3965,6 +4096,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4008,6 +4140,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4064,6 +4197,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4112,6 +4246,7 @@
         }
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4154,6 +4289,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4195,6 +4331,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4230,6 +4367,7 @@
         "proposta": null
       },
       "osservazione": null,
+      "bordo": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -4998,30 +5136,30 @@
   "letturaGeometrica": {
     "controprova": {
       "domanda": "sui tipi il cui significato è dimostrato per altra via, quante volte il trigger sotto il pin darebbe la risposta giusta",
-      "casi": 40,
-      "giusti": 13,
-      "sbagliati": 27,
-      "accuratezza": 0.325,
+      "casi": 69,
+      "giusti": 37,
+      "sbagliati": 32,
+      "accuratezza": 0.536,
       "perFamiglia": {
         "passaggio": {
-          "giusti": 0,
+          "giusti": 24,
           "sbagliati": 17,
-          "accuratezza": 0.0
+          "accuratezza": 0.585
         },
         "attivita": {
           "giusti": 8,
-          "sbagliati": 0,
-          "accuratezza": 1.0
+          "sbagliati": 1,
+          "accuratezza": 0.889
         },
         "meccanismo": {
           "giusti": 0,
-          "sbagliati": 5,
+          "sbagliati": 7,
           "accuratezza": 0.0
         },
         "forziere": {
           "giusti": 4,
-          "sbagliati": 0,
-          "accuratezza": 1.0
+          "sbagliati": 1,
+          "accuratezza": 0.8
         },
         "ristorante": {
           "giusti": 0,
@@ -5042,6 +5180,11 @@
           "giusti": 0,
           "sbagliati": 1,
           "accuratezza": 0.0
+        },
+        "uscita": {
+          "giusti": 0,
+          "sbagliati": 1,
+          "accuratezza": 0.0
         }
       },
       "scambiPiuFrequenti": {
@@ -5049,74 +5192,14 @@
         "sicura letto come passaggio": 5,
         "forziere letto come passaggio": 3,
         "porta letto come meccanismo": 3,
+        "passaggio letto come meccanismo": 2,
         "negozio letto come passaggio": 2,
         "nota letto come passaggio": 1,
-        "negozio letto come ristorante": 1,
-        "distributore letto come ristorante": 1
+        "negozio letto come ristorante": 1
       },
       "conseguenza": "troppo bassa per farne una prova: la lettura geometrica non determina alcun tipo e nessun pin del pacchetto dipende da lei"
     },
     "materialeNonUsato": [
-      {
-        "chiave": "nativo-rmap-001-1-0",
-        "indicePin": 3,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_001_00",
-        "procedura": "AC_GOTO_CENTER_HACHI",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_CENTER_HACHI»"
-      },
-      {
-        "chiave": "nativo-rmap-001-1-0",
-        "indicePin": 4,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_001_00",
-        "procedura": "AC_GOTO_CENTER_YAMA",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_CENTER_YAMA»"
-      },
-      {
-        "chiave": "nativo-rmap-001-1-0",
-        "indicePin": 6,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_001_00",
-        "procedura": "AC_GOTO_UNDER_YAMA",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_UNDER_YAMA»"
-      },
-      {
-        "chiave": "nativo-rmap-001-1-0",
-        "indicePin": 7,
-        "tipoNativo": 16,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_001_00",
-        "procedura": "GOTO_GINZASEN",
-        "prova": "il trigger sotto questo pin chiama «GOTO_GINZASEN»"
-      },
-      {
-        "chiave": "nativo-rmap-001-1-0",
-        "indicePin": 8,
-        "tipoNativo": 16,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_001_00",
-        "procedura": "AC_GOTO_UNDER_TOKYU",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_UNDER_TOKYU»"
-      },
-      {
-        "chiave": "nativo-rmap-001-3-0",
-        "indicePin": 4,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F001_003_00",
-        "procedura": "AC_GOTO_STATION",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_STATION»"
-      },
       {
         "chiave": "nativo-rmap-001-3-0",
         "indicePin": 33,
@@ -5166,26 +5249,6 @@
         "campo": "F002_004_00",
         "procedura": "AC_GOTO_WEST_1F",
         "prova": "il trigger sotto questo pin chiama «AC_GOTO_WEST_1F»"
-      },
-      {
-        "chiave": "nativo-rmap-002-1-0",
-        "indicePin": 2,
-        "tipoNativo": 14,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F002_001_00",
-        "procedura": "AC_GOTO_AOYAMA",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_AOYAMA»"
-      },
-      {
-        "chiave": "nativo-rmap-002-1-0",
-        "indicePin": 3,
-        "tipoNativo": 16,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F002_001_00",
-        "procedura": "AC_GOTO_AOYAMA02",
-        "prova": "il trigger sotto questo pin chiama «AC_GOTO_AOYAMA02»"
       },
       {
         "chiave": "nativo-rmap-005-1-0",
@@ -5288,66 +5351,6 @@
         "prova": "il trigger sotto questo pin chiama «MyPalace_Image»"
       },
       {
-        "chiave": "nativo-rmap-022-1-4",
-        "indicePin": 4,
-        "tipoNativo": 15,
-        "tipoSpillo": "attivita",
-        "etichetta": "Voce del Covo dei Ladri",
-        "campo": "F022_001_00",
-        "procedura": "MyPalace_Award_Battle",
-        "prova": "il trigger sotto questo pin chiama «MyPalace_Award_Battle»"
-      },
-      {
-        "chiave": "nativo-rmap-151-2-1",
-        "indicePin": 3,
-        "tipoNativo": 15,
-        "tipoSpillo": "meccanismo",
-        "etichetta": "Meccanismo",
-        "campo": "F151_002_00",
-        "procedura": "FENCE_WEST_SWITCH",
-        "prova": "il trigger sotto questo pin chiama «FENCE_WEST_SWITCH»"
-      },
-      {
-        "chiave": "nativo-rmap-151-3-0",
-        "indicePin": 4,
-        "tipoNativo": 13,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F151_015_00",
-        "procedura": "DUCT_151_004_B_OUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_151_004_B_OUT»"
-      },
-      {
-        "chiave": "nativo-rmap-153-2-0",
-        "indicePin": 9,
-        "tipoNativo": 13,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F153_002_00",
-        "procedura": "GOTO_153_01_01",
-        "prova": "il trigger sotto questo pin chiama «GOTO_153_01_01»"
-      },
-      {
-        "chiave": "nativo-rmap-153-5-0",
-        "indicePin": 5,
-        "tipoNativo": 13,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F153_005_00",
-        "procedura": "GOTO_153_06_00",
-        "prova": "il trigger sotto questo pin chiama «GOTO_153_06_00»"
-      },
-      {
-        "chiave": "nativo-rmap-153-6-0",
-        "indicePin": 8,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F153_006_00",
-        "procedura": "GOTO_153_05_01",
-        "prova": "il trigger sotto questo pin chiama «GOTO_153_05_01»"
-      },
-      {
         "chiave": "nativo-rmap-153-9-0",
         "indicePin": 2,
         "tipoNativo": 28,
@@ -5376,16 +5379,6 @@
         "campo": "F154_002_00",
         "procedura": "GOTO_154_001_01",
         "prova": "il trigger sotto questo pin chiama «GOTO_154_001_01»"
-      },
-      {
-        "chiave": "nativo-rmap-154-2-0",
-        "indicePin": 3,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F154_002_00",
-        "procedura": "GOTO_154_003_02",
-        "prova": "il trigger sotto questo pin chiama «GOTO_154_003_02»"
       },
       {
         "chiave": "nativo-rmap-154-5-1",
@@ -5548,16 +5541,6 @@
         "prova": "il trigger sotto questo pin chiama «D156_09_SWITCH_UP»"
       },
       {
-        "chiave": "nativo-rmap-157-12-0",
-        "indicePin": 4,
-        "tipoNativo": 16,
-        "tipoSpillo": "forziere",
-        "etichetta": "Forziere raro",
-        "campo": "F157_012_00",
-        "procedura": "D06_157_12_R_TBOX_02",
-        "prova": "il trigger sotto questo pin chiama «D06_157_12_R_TBOX_02»"
-      },
-      {
         "chiave": "nativo-rmap-159-10-1",
         "indicePin": 1,
         "tipoNativo": 19,
@@ -5578,16 +5561,6 @@
         "prova": "il trigger sotto questo pin chiama «DUCT_159_010_A_IN»"
       },
       {
-        "chiave": "nativo-rmap-159-25-1",
-        "indicePin": 0,
-        "tipoNativo": 16,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F159_025_00",
-        "procedura": "DUCT_159_025_J_B_OUT",
-        "prova": "il trigger sotto questo pin chiama «DUCT_159_025_J_B_OUT»"
-      },
-      {
         "chiave": "nativo-rmap-159-35-0",
         "indicePin": 5,
         "tipoNativo": 43,
@@ -5606,26 +5579,6 @@
         "campo": "F159_009_00",
         "procedura": "D159_09_ELEVATOR_A_SWITCH",
         "prova": "il trigger sotto questo pin chiama «D159_09_ELEVATOR_A_SWITCH»"
-      },
-      {
-        "chiave": "nativo-rmap-161-1-0",
-        "indicePin": 0,
-        "tipoNativo": 13,
-        "tipoSpillo": "uscita",
-        "etichetta": "Uscita",
-        "campo": "F161_001_00",
-        "procedura": "DUNGEON_EXIT",
-        "prova": "il trigger sotto questo pin chiama «DUNGEON_EXIT»"
-      },
-      {
-        "chiave": "nativo-rmap-161-10-0",
-        "indicePin": 1,
-        "tipoNativo": 13,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F161_010_00",
-        "procedura": "GOTO_161_011_wire",
-        "prova": "il trigger sotto questo pin chiama «GOTO_161_011_wire»"
       },
       {
         "chiave": "nativo-rmap-162-11-0",
@@ -5928,16 +5881,6 @@
         "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR_FAILURE»"
       },
       {
-        "chiave": "nativo-rmap-162-15-0",
-        "indicePin": 3,
-        "tipoNativo": 15,
-        "tipoSpillo": "passaggio",
-        "etichetta": "Passaggio",
-        "campo": "F162_015_00",
-        "procedura": "D010_CALL_ELEVATOR",
-        "prova": "il trigger sotto questo pin chiama «D010_CALL_ELEVATOR»"
-      },
-      {
         "chiave": "nativo-rmap-162-15-1",
         "indicePin": 3,
         "tipoNativo": 29,
@@ -5951,17 +5894,18 @@
   },
   "summary": {
     "tipi": 102,
-    "determinati": 63,
+    "determinati": 67,
     "ipotesi": 0,
-    "nonDeterminati": 39,
+    "nonDeterminati": 35,
     "pinConIpotesi": 0,
     "perTipoIpotesi": {},
-    "pinDeterminati": 545,
-    "pinNonDeterminati": 884,
+    "pinDeterminati": 846,
+    "pinNonDeterminati": 583,
     "perTipoSpillo": {
       "sicura": 1,
       "porta": 1,
       "meccanismo": 1,
+      "passaggio": 4,
       "forziere": 2,
       "distributore": 2,
       "attivita": 13,
@@ -5978,15 +5922,17 @@
       "seme-bramosia": 1
     },
     "perProva": {
-      "icone contate nelle schermate del gioco": 1,
+      "icone contate nelle schermate del gioco": 2,
       "prove dirette sui singoli pin": 1,
-      "procedura che accende la bandiera del pin": 4,
+      "procedura che accende la bandiera del pin": 3,
+      "posizione sul bordo della planimetria": 4,
       "nome interno dello sprite del blocco urbano dimostrato": 51,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 6
     },
     "pinPerProva": {
-      "procedura che accende la bandiera del pin": 270,
-      "icone contate nelle schermate del gioco": 104,
+      "posizione sul bordo della planimetria": 301,
+      "procedura che accende la bandiera del pin": 232,
+      "icone contate nelle schermate del gioco": 142,
       "nome interno dello sprite del blocco urbano dimostrato": 81,
       "prove dirette sui singoli pin": 81,
       "nome interno dello sprite del blocco del Covo dei Ladri dimostrato": 9
@@ -5999,12 +5945,12 @@
       "seme-bramosia": 3,
       "sicura": 2
     },
-    "accuratezzaLetturaGeometrica": 0.325,
-    "casiControprova": 40,
+    "accuratezzaLetturaGeometrica": 0.536,
+    "casiControprova": 69,
     "perTipoPuntuale": {},
     "motiviNonDeterminati": {
       "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 2,
-      "nessuna famiglia domina fra le procedure che gli cadono sotto": 31,
+      "nessuna famiglia domina fra le procedure che gli cadono sotto": 27,
       "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono": 6
     }
   },
