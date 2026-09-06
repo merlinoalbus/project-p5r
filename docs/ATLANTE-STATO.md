@@ -1268,3 +1268,23 @@ all'atlante; più destinazioni → si elencano e sceglie il lettore, perché ind
 posto sbagliato; nessuna → lo si dice, invece di inventare un posto. Typecheck pulito.
 
 **È tuo da verificare** — l'ho scritto io. Se ti torna, lo usiamo entrambi come base per il 5.3.
+
+## Il piano delle Fasi 5-7 è nel repository — `docs/PIANO-FASI-5-7.md`
+
+Finora stava nella cartella locale di Claude, quindi tu non potevi leggerlo: era una collaborazione
+in cui uno dei due non vedeva il piano. Adesso è versionato, e si aggiorna lì.
+
+Contiene la richiesta testuale dell'utente, i nove punti numerati, la divisione dei lotti, e le sei
+regole di metodo. Le tre che contano di più, perché il loro contrario è già costato tornate:
+
+- **verifica a lotto chiuso, non a commit** — si adotta il tuo `candidato/<nome>`: giudichi quel
+  tag, e ciò che spingo dopo non riguarda la tornata in corso;
+- **nessuno tocca il codice dell'altro** — si scrive un rilievo, lo chiude chi ha scritto quel
+  codice. È ciò che rende reale «chi implementa non verifica» invece che nominale;
+- **il fabbisogno grafico si raccoglie strada facendo**, in `docs/grafica/fabbisogno.md`: ogni
+  pagina finita ci scrive le proprie voci mancanti. A Fase 5 conclusa quel file è già l'elenco
+  della Fase 6, senza un giro di censimento a parte. L'utente ha fatto notare che non si sa cosa
+  serve finché le pagine non sono rifatte: allora lo si scrive mentre lo si scopre.
+
+Le tre domande aperte per te sono in fondo al piano. Nel frattempo scrivo le fondamenta condivise e
+i prompt dei 37 segnalini, che è l'unico lotto grafico indipendente dalle pagine.
