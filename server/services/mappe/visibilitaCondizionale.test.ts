@@ -53,16 +53,39 @@ describe('visibilità condizionale dei pin', () => {
     }
   });
 
-  it('un quartiere disponibile dall’inizio non nasconde niente', () => {
-    for (const s of condizioniDi('citta-yongen-jaya')) expect(s.condizioni).toEqual([]);
+  it('un quartiere disponibile dall’inizio non aggiunge la propria condizione', () => {
+    // Yongen-Jaya c'è dal primo giorno: nessuno dei suoi pin deve portare `quartiere`. Quel che
+    // può portare è la fascia oraria del singolo locale — la clinica di Takemi, di sera, è
+    // chiusa: quella è presenza del locale, non del quartiere. Il test chiedeva «nessuna
+    // condizione», e passava soltanto finché la presenza dei luoghi non arrivava fino ai pin.
+    // Adesso ci arriva, ed è la cosa giusta: qui si pretende che sia solo presenza e mai il
+    // quartiere, che è più stretto di prima, non più largo.
+    for (const s of condizioniDi('citta-yongen-jaya')) {
+      expect(s.condizioni, s.nome).not.toContainEqual({ tipo: 'quartiere', quartiere: 'yongen-jaya' });
+      for (const c of s.condizioni) {
+        expect(nascondeIlPin((c as { tipo: string }).tipo), `${s.nome}: ${JSON.stringify(c)}`).toBe(true);
+      }
+    }
   });
 
   it('gli elementi fissi delle planimetrie native non hanno condizioni di visibilità', () => {
-    // sono porte, forzieri, stanze sicure, passaggi: ci sono sempre, anche quando sono chiusi
-    const fissi = getDb().prepare(`SELECT COUNT(*) AS n FROM spillo
+    // Porte, forzieri, stanze sicure, passaggi, scale: ci sono sempre, anche quando sono chiusi.
+    // Il conteggio era su *tutti* i pin nativi, e reggeva solo finché nessuna presenza li
+    // raggiungeva; ora un negozio disegnato sulla planimetria eredita l'orario del negozio —
+    // è lo stesso negozio dell'illustrazione del quartiere, e se chiude devono sparire tutti e
+    // due. Quello che non deve mai avere condizioni è ciò che è strutturale, e la lista non è
+    // scritta a mano qui: è `TIPI_STRUTTURALI`, la stessa che protegge il codice.
+    const conCondizioni = getDb().prepare(`SELECT tipo, nome, condizioni_json FROM spillo
       WHERE mappa_chiave LIKE 'nativo-%' AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`)
-      .get() as { n: number };
-    expect(fissi.n).toBe(0);
+      .all() as Array<{ tipo: string; nome: string; condizioni_json: string }>;
+    expect(conCondizioni.filter((s) => eStrutturale(s.tipo))
+      .map((s) => `${s.tipo} «${s.nome}» ${s.condizioni_json}`)).toEqual([]);
+    // e quel che le ha, le ha di sola presenza
+    for (const s of conCondizioni) {
+      for (const c of JSON.parse(s.condizioni_json) as Array<{ tipo: string }>) {
+        expect(nascondeIlPin(c.tipo), `${s.tipo} «${s.nome}»`).toBe(true);
+      }
+    }
     const quanti = getDb().prepare("SELECT COUNT(*) AS n FROM spillo WHERE mappa_chiave LIKE 'nativo-%'")
       .get() as { n: number };
     expect(quanti.n).toBeGreaterThan(1000);
