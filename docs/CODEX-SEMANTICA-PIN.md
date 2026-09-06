@@ -347,7 +347,7 @@ riformulazione in cui la quota fuori-tratto è soltanto descrittiva, a condizion
 artefatto, verificatore e stato non la chiamino più soglia di accettazione e non dichiarino che
 tutti i quattro tipi cadono prevalentemente fuori dal disegno.
 
-## Aggiornamento 6 — trovata la tabella nativa `nativeType` → sprite
+## Aggiornamento 6 — trovata la tabella nativa `nativeType` → `partId`
 
 **Stato:** prova nel renderer con confidenza alta; nessuna nuova etichetta semantica assegnata
 
@@ -367,11 +367,17 @@ Nel renderer:
 5. `0x1412a77e2` legge il primo `uint32` dell'entry e i call-site `0x1412a77f4`, `0x1412a7802`
    e `0x1412a78d1` lo passano come `edx` agli helper di disegno.
 
-Il campo è un `partId` a base uno. La relazione usata dal gioco è dunque:
+Il campo è un `partId` a base uno. La relazione direttamente dimostrata dal codice è dunque:
 
 ```text
-spriteIndex = uint32(tabella + 0x14 * nativeType) - 1
+partId = uint32(tabella + 0x14 * nativeType)
 ```
+
+Per gli identificativi compresi nel foglio `P5MINIMAP_01.SPD`, il renderer li fa corrispondere
+alla voce `partId - 1`; tutte le ancore già note confermano questa seconda relazione. Non va però
+generalizzata oltre il foglio: `P5MINIMAP_01.SPD` contiene 193 sprite, mentre i tipi 113–119
+restituiscono `partId` 200–206. Per questi sette tipi è dimostrato il `partId`, non ancora quale
+altro foglio o tabella di parti lo risolva graficamente.
 
 Le controprove coincidono senza eccezioni con tutte le ancore già indipendentemente note:
 
@@ -386,7 +392,8 @@ realizzi il mapping: quella routine riordina o compatta i separatori di tipo/fla
 
 ### Valori utili fuori dai blocchi già risolti
 
-I seguenti valori sono `nativeType:spriteIndex`, con indice sprite a base zero:
+I seguenti valori sono `nativeType:partId-1`; per 0–192 il secondo numero è anche l'indice
+verificabile in `P5MINIMAP_01.SPD`, mentre 199–205 richiedono ancora la sorgente grafica corretta:
 
 ```text
 4:23 5:27 6:28 7:24 8:27 9:25 10:29 11:29 12:30 13:56 14:58 15:57 16:59
@@ -397,14 +404,51 @@ I seguenti valori sono `nativeType:spriteIndex`, con indice sprite a base zero:
 119:205
 ```
 
+### Join già verificabile con i nomi nativi del foglio SPD
+
+Incrociando la tabella con `data/atlas/extracted/icone-mappa.json`, senza dedurre il significato
+dalla geometria, 28 dei 35 tipi ancora aperti raggiungono già una voce nominata o visibile di
+`P5MINIMAP_01.SPD`:
+
+| tipi nativi | `partId` | sprite | nome nativo | lettura letterale |
+|---|---:|---:|---|---|
+| 5 | 28 | 27 | `ミニマップ：目的地・認知ロックポ…` | destinazione / punto di blocco cognitivo |
+| 19 | 49 | 48 | `ミニマップ：移動先アイコン1` | icona destinazione 1 |
+| 20 | 54 | 53 | `ミニマップ：ベルベット` | Velvet Room |
+| 24, 25, 112 | 62 | 61 | `ミニマップ：EXIT` | uscita |
+| 28 | 12 | 11 | `ミニマップ：自分用アイコン` | icona del giocatore |
+| 29 | 65 | 64 | `ミニマップ：上下移動矢印　上` | movimento verticale, su |
+| 30 | 66 | 65 | `ミニマップ：上下移動矢印　下` | movimento verticale, giù |
+| 32, 33 | 75 | 74 | `ミニマップ：down` | giù |
+| 34, 35 | 77 | 76 | `ミニマップ：up` | su |
+| 36 | 79 | 78 | `矢印左上` | freccia in alto a sinistra |
+| 37 | 80 | 79 | `矢印右上` | freccia in alto a destra |
+| 38 | 81 | 80 | `矢印左下` | freccia in basso a sinistra |
+| 39 | 82 | 81 | `矢印右下` | freccia in basso a destra |
+| 40 | 86 | 85 | `オタカラアイコン` | icona tesoro |
+| 43 | 94 | 93 | `ミニマップ：チェック` | spunta / controllo |
+| 45, 109 | 107 | 106 | `スタンプ` | timbro dei Memento |
+| 104 | 181 | 180 | nome non decodificato; ritaglio a stella | prova soltanto visiva |
+| 105 | 168 | 167 | `ＩＮＦＯ` | informazioni |
+| 106 | 166 | 165 | `中華マン屋` | venditore di panini al vapore |
+| 107 | 169 | 168 | `輸入食品` | alimentari importati |
+| 108 | 167 | 166 | `ジョゼ` | Jose |
+| 110 | 170 | 169 | `教会` | chiesa |
+| 111 | 171 | 170 | `路地アクセサリー売り` | venditore di accessori nel vicolo |
+
+Questa tabella è una prova di identità grafica e nominale, non ancora una decisione automatica
+sul `tipoSpillo` dell'app. I duplicati sono informativi: più `nativeType` possono intenzionalmente
+usare lo stesso `partId`, quindi non vanno fusi senza controllarne campi, condizioni ed effetti.
+
 ### Passaggio operativo richiesto a Claude
 
-La prova chiude il mapping numerico ma non attribuisce da sola un significato testuale allo
-sprite. Nei file di sua proprietà Claude può ora aggiungere un estrattore riproducibile della
-tabella a `0x24557a0`, con un verificatore indipendente che ricontrolli offset, passo `0x14`,
-base uno e le quattro famiglie di ancore sopra. Il risultato va poi unito ai nomi o alle immagini
-del foglio SPD: solo quel join può assegnare nuove semantiche ai 35 tipi ancora aperti.
+La prova chiude il mapping numerico al `partId` e, per 28 tipi aperti, raggiunge già il nome o il
+ritaglio del foglio noto. Nei file di sua proprietà Claude può ora aggiungere un estrattore
+riproducibile della tabella a `0x24557a0`, con un verificatore indipendente che ricontrolli offset, passo `0x14`,
+base uno e le quattro famiglie di ancore sopra. Il risultato va unito ai nomi e alle immagini
+già versionati; i sette `partId` 200–206 devono restare aperti finché non viene trovata la loro
+sorgente, senza indicizzarli fuori dai 193 record di `P5MINIMAP_01.SPD`.
 
 Se occorre convalidare ulteriormente il contratto del draw, il prossimo punto preciso è
 `0x1412ae610`, chiamato a `0x1412a78d1` con `edx=partId`; per l'Atlante, però, il problema
-`nativeType` → sprite è già risolto e conviene proseguire con estrazione e join SPD.
+`nativeType` → `partId` è già risolto e conviene proseguire con estrazione e join SPD.
