@@ -581,3 +581,59 @@ preferibile sostituire le uscite con asserzioni esplicite sull'esistenza della f
 **Decisione:** quattro dei cinque rilievi originari sono chiusi e la nuova copertura è reale.
 Fase 3d resta respinta finché il collegamento di Oggetti non è risolto con associazioni
 strutturate e lo strumento di copertura non distingue gli errori dalle assenze legittime.
+
+## Fase 3d — Terza verifica del fallback al posto dichiarato
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `5e93228`
+**Data verifica:** 6 settembre 2026
+
+### Rilievi chiusi
+
+1. `copertura-accesso.ts` separa ora le eccezioni dalle assenze legittime, registra chiave e
+   messaggio, stampa gli errori e termina con codice 1 quando ne incontra almeno uno. La misura
+   rieseguita su una copia isolata del database termina con **zero errori** e riproduce
+   **1.321 accessi su 1.371 voci (96,35%)**, dei quali 498 con pin preciso.
+2. Le due uscite anticipate nel test dei confidenti sono state sostituite da asserzioni: il test
+   non può più passare senza aver esercitato la fixture attesa.
+3. Sul commit verificato: typecheck PASS, lint PASS, build PASS, test mirati **8/8**, suite
+   completa **537/537**. Il build mantiene soltanto l'avviso già noto sul chunk principale.
+
+### Nuovo rilievo bloccante sul fallback
+
+Il codice dichiara di allargare al quartiere o al Palazzo soltanto quando le associazioni dirette
+non producono una destinazione. L'implementazione però aggiunge `area -> dungeon`,
+`negozio -> quartiere` e `luogo -> quartiere` a `riferimenti` **prima** della prima chiamata a
+`cerca()`. Il blocco successivo protetto da `if (destinazioni.size === 0)` ripete la stessa
+espansione, quando ormai i riferimenti sono già stati aggiunti.
+
+La controprova sull'intero inventario trova **70 entità** che ricevono insieme almeno un pin
+preciso e almeno una destinazione generica. Esempi riproducibili:
+
+* `luogo:akihabara/super-baron` -> pin `akihabara-electric-town:265` più mappa generica
+  `akihabara`;
+* `luogo:kichijoji/jazz-jin` -> pin `kichijoji-quartiere-dello-shopping:305` più mappa generica
+  `kichijoji`;
+* `negozio:body-chop` -> pin `shibuya-centro-comm-sotterraneo:1008` più mappa generica
+  `shibuya`.
+
+Le destinazioni generiche risultano inoltre marcate `entita-mappa`, non `posto-dichiarato`, perché
+`ripiego` è ancora `false` durante la prima ricerca. La deduplicazione finale elimina il generico
+soltanto quando ha la stessa `mappa` normalizzata del pin; non elimina la seconda meta quando il
+pin è su una planimetria figlia e il fallback è sulla mappa d'insieme.
+
+**Correzione richiesta a Claude:** costruire e cercare prima soltanto i riferimenti diretti; se e
+solo se `destinazioni.size === 0`, aggiungere in un secondo insieme i riferimenti al posto
+dichiarato, attivare `ripiego` e cercare quelli. Aggiungere una regressione con pin preciso su una
+planimetria figlia e quartiere su una mappa diversa, verificando una sola destinazione e assenza
+di `posto-dichiarato`. Aggiungere anche un caso senza pin che verifichi criterio
+`posto-dichiarato`.
+
+### Rilievo originario ancora aperto
+
+`src/pages/OggettiPage.tsx` continua a non importare né usare `CollegamentoMappa`. Il backend
+risolve gli articoli, ma la superficie UI richiesta dal piano non espone ancora l'accesso.
+
+**Decisione:** le correzioni alla misura sono approvate e il valore 96,35% è riproducibile, ma
+la Fase 3d resta respinta per il fallback eseguito prematuramente e per il collegamento ancora
+assente nella pagina Oggetti.
