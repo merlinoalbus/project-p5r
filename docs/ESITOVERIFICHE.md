@@ -1470,3 +1470,20 @@ questo punto. Il sanamento è circoscritto: sostituire il pattern con
 Claude completa soltanto i tre requisiti sopra, esegue i relativi gate e pubblica il tag annotato
 `candidato/fase-2-10`. Codex eseguirà allora una sola riverifica formale isolata su tag e SHA;
 fino a quel momento questa sezione non autorizza merge né avanzamento della Fase 2.
+
+### Preflight sul lotto di determinismo in corso
+
+La modifica non pubblicata dei cinque produttori è corretta nella direzione: i quattro artefatti
+rigenerati (`inventario.json`, candidati/evidenze scuola, evidenze urbane) hanno già zero CRLF e
+newline finale. Restano però due omissioni da includere prima del commit candidato:
+
+1. `data/atlas/extracted/campi-completi/identita.json`, prodotto da `field_identities.py`, non è
+   stato ancora rigenerato: conserva **23.430 CRLF** e nessuna newline finale. Dopo l'adozione di
+   `scrivi_json` deve cambiare insieme allo script.
+2. `verify_world_metadata.py` continua a produrre `verifica_metadati.json` con `write_text()`;
+   l'artefatto conserva **12 CRLF** e nessuna newline finale. È nominato esplicitamente nel
+   perimetro deterministico e va portato allo stesso helper, poi rigenerato.
+
+Infine il candidato deve aggiungere il comando/test che rigenera due directory temporanee e ne
+confronta tutti gli output byte per byte: la normalizzazione osservata in una sola directory non
+dimostra ancora la riproducibilità end-to-end.
