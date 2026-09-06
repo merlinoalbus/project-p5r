@@ -137,6 +137,7 @@ def main(out):
 
     per_procedura = destinazioni_per_procedura(collegamenti)
     righe, esiti = [], collections.Counter()
+    scartate = []
     for codice, mappa in sorted(meta.items()):
         chiave = chiave_di(codice)
         rif = riferimento.get(chiave)
@@ -173,10 +174,20 @@ def main(out):
                     x, z = z, x
                 px = x*p['segnoX']*p['scala'] + p['traslazione'][0]
                 py = z*p['segnoY']*p['scala'] + p['traslazione'][1]
-                vicino = min(pin, key=lambda q: (q[1]-px)**2 + (q[2]-py)**2)
+                ordinati = sorted(pin, key=lambda q: (q[1]-px)**2 + (q[2]-py)**2)
+                vicino = ordinati[0]
                 distanza = ((vicino[1]-px)**2 + (vicino[2]-py)**2) ** 0.5 / diagonale
+                secondo = (((ordinati[1][1]-px)**2 + (ordinati[1][2]-py)**2) ** 0.5 / diagonale
+                           if len(ordinati) > 1 else None)
                 if distanza > DISTANZA_ABBINAMENTO:
                     esiti['trigger troppo lontano da ogni pin'] += 1
+                    # La distanza scartata si conserva. Una soglia si giudica dai numeri che
+                    # taglia: se gli scarti si affollano appena oltre, la soglia è stretta e sta
+                    # buttando via abbinamenti buoni; se stanno lontani, sta facendo il suo
+                    # mestiere. Senza questi numeri l'unico modo di saperlo è allargarla e vedere
+                    # che succede, che è il modo sbagliato.
+                    scartate.append(dict(distanza=round(distanza, 4),
+                                         secondo=round(secondo, 4) if secondo else None))
                     continue
                 scelta, esito = meta_unica(destinazioni, mia, esistenti)
                 if esito == 'piu-mete':
@@ -252,7 +263,18 @@ def main(out):
                                   'distanza ammessa; in mancanza di proiezione, solo il caso '
                                   'forzato di un pin e una destinazione',
                       arrivo='posizione dell’entrata citata dalla chiamata, proiettata sulla '
-                             'planimetria di arrivo dove la proiezione è certificata'),
+                             'planimetria di arrivo dove la proiezione è certificata',
+                      # Le distanze che la soglia ha tagliato, in ordine. Servono a giudicarla:
+                      # se si affollassero appena oltre, la soglia starebbe buttando via
+                      # abbinamenti buoni e andrebbe allargata *con questa prova in mano*.
+                      distanzeScartate=sorted(scartate, key=lambda s: s['distanza']),
+                      scartateSottoIlDoppio=sum(1 for s in scartate
+                                                if s['distanza'] <= DISTANZA_ABBINAMENTO*2),
+                      # Quanti scarti hanno il secondo pin almeno tre volte più lontano del primo:
+                      # lì la scelta è netta anche se la distanza assoluta è grande, e un criterio
+                      # di margine li recupererebbe senza inventare nulla.
+                      scartateConMargineNetto=sum(1 for s in scartate
+                                                  if s['secondo'] and s['secondo'] >= s['distanza']*3)),
         collegamenti=righe,
         grafoDelleRisorse=dict(archi=len(grafo), reciproci=reciproci),
         summary=dict(collegamenti=len(righe),
