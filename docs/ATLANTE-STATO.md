@@ -649,6 +649,83 @@ lint puliti.
 | 2026-09-06 | Fase 2 (2ª) | **PRONTA PER VERIFICA** — 324 pin condizionali con condizione strutturata, artefatto semantico deterministico, contabilità chiusa su 1429 | in attesa |
 | 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
 | 2026-09-06 | Fase 2 (6ª) | **PRONTA PER VERIFICA** — docstring allineato alla prova laterale, ricostruzione indipendente di tutti e 71 i collegamenti, unicità pretesa sulla destinazione completa | in attesa |
+| 2026-09-06 | Fase 2 (7ª) | **PRONTA PER VERIFICA** — tabella nativa delle parti estratta e verificata dall'eseguibile, 90 tipi su 102 dimostrati, tutti i 1429 pin collocabili posati | in attesa |
+
+### Fase 2 (7ª) — la tabella nativa e i pin da verificare
+
+**Due cose nuove, e la seconda è una decisione dell'utente.**
+
+**1. Il significato dei pin non era nei dati, ed è saltato fuori nel codice.** Prima di cercarlo
+altrove ho chiuso ogni strada che stava negli archivi: censiti tutti i campi dei 178 `ICON.BIN` su
+1782 record — cinque portano informazione (tipo, x, y, bandiera, attivo), tredici sono
+identicamente zero; censiti `PARTS.BIN` e `DISP.BIN`, mai aperti prima; aperto `MINIMAP.PLG`;
+enumerati tutti e sette i fogli `SPR0` del pacchetto. Nessuna tabella. Codex l'ha trovata nel
+renderer del gioco, e qui è stata estratta e ricontrollata:
+
+```text
+partId = uint32(0x24557a0 + 0x14 * tipoNativo)      # in P5R.exe, identificativo a base uno
+```
+
+`tools/p5r-map-export/pin_part_table.py` la estrae, `verify_pin_part_table.py` la ricontrolla
+rileggendo l'eseguibile. La prova non è il disassemblato ma il fatto che **59 corrispondenze già
+dimostrate per quattro strade indipendenti tornano tutte**: il tipo 4 come stanza sicura dal
+conteggio delle icone, i 51 tipi urbani, i 6 del Covo, il tipo 97. E soprattutto: **nessuna
+lettura spostata ne riproduce nemmeno una** — spostando l'offset di ±4 o ±0x14, cambiando il passo
+o togliendo la base uno, le ancore vanno tutte a zero. È il controllo che distingue una tabella
+trovata da una coincidenza, e sta nel verificatore.
+
+**La conferma che vale di più.** I quattro tipi di bordo, dedotti dalla sola geometria e contestati
+per due tornate, ricevono dalla tabella i nomi `やじるし　↑`, `右`, `下`, `左`: 13 in alto, 14 a
+destra, 15 in basso, 16 a sinistra — **esattamente** come li avevo dedotti. In tutto 7 concordanze
+e **0 discordanze** fra la tabella e le determinazioni prese per altre strade; il controllo è
+automatico e fa fallire la generazione se una discordanza compare. Ne è uscita anche una
+correzione: il tipo 12 non è un «meccanismo» ma `開かない扉`, una porta che non si apre.
+
+**2. I tipi che restano senza significato entrano come `nota` da verificare.** Decisione
+dell'utente del 6 settembre 2026, che supera il divieto precedente («i tipi non decisi restano non
+importati»): questi pin si vedono sulla mappa, dichiarano di essere da verificare, e portano nella
+nota la scheda delle prove raccolte — diffusione, procedure che ne accendono la bandiera, testi che
+il gioco mostra vicino, e il nome nativo dello sprite dove la tabella ci arriva. La verifica la fa
+l'utente sulle schermate del gioco. L'artefatto conserva **tutte** le procedure e le etichette, non
+le prime otto: la scheda leggibile tronca, la prova no.
+
+**Rese ritirate su rilievo di Codex.** Avevo proposto `porta` per la Stanza di Velluto (tipo 20),
+`punto-sensibile` per la spunta (43) e per «destinazione / blocco cognitivo» (5). Nessuna delle tre
+regge: la «V» azzurra non è una serratura, una spunta non dice che cosa si esamini, e un nome che
+ne dice due non ne dimostra uno. Restano da verificare, con il nome nativo nella scheda. Il tipo 19
+resta `passaggio` ma come **punto di spostamento**, non come arco risolto: i collegamenti con
+partenza e arrivo sono la Fase 3b e stanno altrove.
+
+**Misurato:**
+
+| | prima | ora |
+|---|---:|---:|
+| tipi con significato dimostrato | 67 / 102 | **90 / 102** |
+| pin con significato dimostrato | 846 | **1142** |
+| pin posati nel pacchetto | 780 | **1339** |
+| pin senza collocazione | 649 | **90**, tutti per planimetria senza riferimento certificato |
+| contabilità sui pin nativi | 1429 | 1429, chiusa |
+
+**Riproduzione:**
+```bash
+python tools/p5r-map-export/pin_part_table.py data/atlas/extracted
+python tools/p5r-map-export/pin_semantics.py data/atlas/extracted .
+python tools/p5r-map-export/build_seed_package.py data/atlas/extracted data/seed data/seed/mappe/atlante-mondo.json
+python tools/p5r-map-export/verify_pin_part_table.py data/atlas/extracted
+python tools/p5r-map-export/verify_pin_semantics.py data/atlas/extracted data/seed
+npm run typecheck && npm run lint && npm test
+```
+Suite **539/539**, typecheck e lint puliti.
+
+**Nota di correzione su una mia misura precedente.** Avevo riferito «25 verificatori su 25 verdi»:
+non era vero. Il comando che avevo usato mandava l'uscita in `tail`, e il codice di ritorno letto
+era quello di `tail`, sempre zero. Misurati uno per uno con gli argomenti giusti, cinque
+verificatori falliscono — `map_icons`, `texpack_evidence`, `school_candidates`,
+`global_world_audit`, `full_field_connections` — e falliscono **anche sul commit precedente al
+mio lavoro**, quindi non sono una regressione di questo lotto ma un debito aperto. Il sesto,
+`world_connections`, è la regressione delle evidenze che Codex descrive in
+`docs/CODEX-SEMANTICA-PIN.md`: la prossima cosa che chiudo.
+
 
 ### Risposta ai due rilievi della quinta verifica
 
