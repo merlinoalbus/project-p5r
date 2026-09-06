@@ -13,10 +13,11 @@
 // c'è. Le targhe portano il solo nome italiano: le etichette giapponesi ci sarebbero, estratte lì
 // accanto, ma questa è una guida italiana.
 //
-// Quel che la rende una guida e non un poster è il **tempo**. L'11 aprile Shinjuku non c'è — apre
-// il 18 giugno — e la Yamanote non ci arriva: la linea si spezza invece di passare per il vuoto,
-// perché disegnare quel tratto direbbe che si può prendere un treno per un posto che non esiste.
-// Il Palazzo di Kamoshida c'è dal 12 aprile al 2 maggio e poi sparisce. Le condizioni vengono
+// Quel che la rende una guida e non un poster è il **tempo**, e il tempo tocca i posti, non i
+// binari. La rete c'è tutta dal primo giorno, come nel gioco: ogni fermata è un pallino bianco.
+// Quando un quartiere si sblocca, sul suo pallino spuntano la sagoma e la targa; finché non si
+// sblocca resta il solo pallino. L'11 aprile Shinjuku è un pallino e basta — apre il 18 giugno —
+// e il Palazzo di Kamoshida c'è dal 12 aprile al 2 maggio e poi sparisce. Le condizioni vengono
 // dalla Fase 2 — `quartiere.sblocco_data` e `finestre-dungeon.json` — valutate con `ordineGioco`,
 // la stessa funzione del resto dell'app. Senza partita si vede tutto, e lo si dice.
 //
@@ -77,7 +78,7 @@ function Cartellino({ s }: { s: Segno }) {
       }}
       className="w-full object-contain transition-transform group-hover:scale-110"
       style={{ filter: CONTORNO }} />
-    <span className={`-mt-[8%] whitespace-nowrap rounded-[2px] border border-white px-[0.4em] py-[0.05em] text-[7px] font-bold uppercase leading-tight tracking-wide text-white shadow-[0_1px_4px_rgba(0,0,0,0.6)] sm:text-[9px] ${
+    <span className={`-mt-[8%] whitespace-nowrap rounded-[2px] border border-white px-[0.45em] py-[0.05em] font-display text-[8px] uppercase leading-tight tracking-[0.04em] text-white shadow-[0_1px_4px_rgba(0,0,0,0.6)] sm:text-[10px] ${
       s.palazzo ? 'bg-[#8b0000]' : 'bg-black'}`}>{s.nome}</span>
   </>;
   const classe = 'group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline';
@@ -90,36 +91,39 @@ function Cartellino({ s }: { s: Segno }) {
     : <div className={classe} style={stile} title={titolo}>{contenuto}</div>;
 }
 
-/** Le linee, con le fermate a pallino. Una fermata che oggi non c'è spezza la linea. */
-function Rete({ visibili }: { visibili: Set<string> }) {
-  const spezzoni = LINEE_TOKYO.flatMap((linea) => {
+/** Le linee, sempre tutte, con le fermate a pallino bianco.
+ *
+ * I binari non dipendono dal giorno: la rete di Tokyo c'è tutta dal primo giorno, e spezzarla dove
+ * un quartiere non è ancora sbloccato faceva sembrare la mappa incompleta invece che in attesa.
+ * Quel che compare col calendario è **il posto**, non la ferrovia: finché non si sblocca al suo
+ * pallino non c'è nient'altro, e quando si sblocca ci spuntano sopra la sagoma e la targa.
+ */
+function Rete() {
+  const linee = LINEE_TOKYO.map((linea) => {
     const giro = linea.anello ? [...linea.fermate, linea.fermate[0]] : linea.fermate;
-    const pezzi: string[][] = [];
-    let corrente: string[] = [];
-    for (const f of giro) {
-      if (visibili.has(f) && QUARTIERI_TOKYO[f]) corrente.push(f);
-      else { if (corrente.length > 1) pezzi.push(corrente); corrente = []; }
-    }
-    if (corrente.length > 1) pezzi.push(corrente);
-    return pezzi.map((pezzo, i) => ({
-      chiave: `${linea.nome}-${i}`, colore: linea.colore, nome: linea.nome,
-      nodi: pezzo.map((f) => QUARTIERI_TOKYO[f]),
-      punti: pezzo.map((f) => QUARTIERI_TOKYO[f]).map((c) => `${c.x},${c.y}`).join(' '),
-    }));
-  });
+    const nodi = giro.map((f) => QUARTIERI_TOKYO[f]).filter(Boolean);
+    return {
+      chiave: linea.nome, colore: linea.colore, nome: linea.nome, nodi,
+      punti: nodi.map((c) => `${c.x},${c.y}`).join(' '),
+    };
+  }).filter((l) => l.nodi.length > 1);
+  const fermate = new Map<string, Collocazione>();
+  for (const linea of LINEE_TOKYO) {
+    for (const f of linea.fermate) if (QUARTIERI_TOKYO[f]) fermate.set(f, QUARTIERI_TOKYO[f]);
+  }
   return <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden
     className="pointer-events-none absolute inset-0 h-full w-full">
     {/* Tre passate: il bordo scuro che stacca la linea dal fondo rosso, il colore, e i pallini
-        delle fermate. È così che due linee incrociate restano leggibili senza disegnare gli
-        incroci a mano. */}
-    {spezzoni.map((s) => <polyline key={`b-${s.chiave}`} points={s.punti} fill="none"
+        bianchi delle fermate. È così che due linee incrociate restano leggibili senza disegnare
+        gli incroci a mano. */}
+    {linee.map((l) => <polyline key={`b-${l.chiave}`} points={l.punti} fill="none"
       stroke="#1a0004" strokeWidth={13} strokeLinecap="round" strokeLinejoin="round"
       vectorEffect="non-scaling-stroke" />)}
-    {spezzoni.map((s) => <polyline key={s.chiave} points={s.punti} fill="none"
-      stroke={s.colore} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round"
-      vectorEffect="non-scaling-stroke"><title>{s.nome}</title></polyline>)}
-    {spezzoni.flatMap((s) => s.nodi.slice(1, -1).map((n, i) => <circle key={`f-${s.chiave}-${i}`}
-      cx={n.x} cy={n.y} r={0.7} fill="#ffd23f" stroke="#1a0004" strokeWidth={0.2} />))}
+    {linee.map((l) => <polyline key={l.chiave} points={l.punti} fill="none"
+      stroke={l.colore} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round"
+      vectorEffect="non-scaling-stroke"><title>{l.nome}</title></polyline>)}
+    {[...fermate].map(([chiave, n]) => <circle key={`f-${chiave}`}
+      cx={n.x} cy={n.y} r={0.85} fill="#fff" stroke="#1a0004" strokeWidth={0.25} />)}
   </svg>;
 }
 
@@ -174,10 +178,10 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
         <path fill="#c00016" d="M14 22 L36 8 L58 12 L76 20 L88 34 L84 52 L92 62 L74 80 L52 78 L34 88 L16 66 L8 44 Z" />
         <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
       </svg>
-      <Rete visibili={new Set(presenti.map((s) => s.chiave))} />
+      <Rete />
       {presenti.map((s) => <Cartellino key={s.chiave} s={s} />)}
       <Link to="/guida/completamento"
-        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[2px] border border-white bg-black px-1.5 py-0.5 text-[7px] font-bold uppercase text-white no-underline shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-[9px]"
+        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[2px] border border-white bg-black px-1.5 py-0.5 font-display text-[8px] uppercase tracking-[0.04em] text-white no-underline shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-[10px]"
         style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
         title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
     </div>
