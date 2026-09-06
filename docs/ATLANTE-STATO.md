@@ -165,7 +165,7 @@ verifiche. **L'utente ha esaminato il rilievo e ha confermato la forma «Parte I
 adottata. Ogni caso dichiara la propria `fonteDistinzione` — `nomi-enumerati-dalla-guida` per i
 sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due resta leggibile.
 
-## Fase 2 — Pin di tutti i tipi · **PRONTA PER VERIFICA**
+## Fase 2 — Pin di tutti i tipi · **copertura dimostrata 29,6%, in lavorazione**
 
 | passo | stato | esito |
 |---|---|---|
@@ -190,95 +190,85 @@ procedura che quella bandiera accende. Il nome della procedura è parlante:
 
 Le due strade sono indipendenti e concordano dove si incontrano.
 
-### La copertura dei pin, e che cosa la limita ancora
+### La copertura dei pin, e la controprova che ha ribaltato il conto
 
-Aggiornato il 6 settembre 2026, dopo l'ampliamento delle prove. **1300 pin su 1429 sono posati: il 91,0%.** Erano 710 (49,7%) alla dichiarazione precedente.
+Aggiornato il 6 settembre 2026, dopo i rilievi di Codex sulla terza consegna. **Il 91% dichiarato
+poche ore prima era sbagliato: la copertura dimostrata è 423 pin su 1429, il 29,6%.**
 
-| grado di prova | tipi | pin del tipo |
+#### Come è emerso
+
+Codex ha contestato che la strada «procedura del trigger che sta sotto il pin» non fosse
+indipendente dalla proiezione che la genera. Aveva ragione, e la cosa si poteva misurare invece
+che discutere. Esistono tipi il cui significato è dimostrato per vie che con la geometria non
+c'entrano nulla — il nome interno dello sprite, la procedura che accende la bandiera. Su quelli
+si può contare quante volte la lettura geometrica darebbe la risposta giusta.
+
+| famiglia dedotta | giusti | sbagliati | accuratezza |
+|---|---|---|---|
+| passaggio | 0 | 12 | **0%** |
+| attivita | 8 | 0 | 100% |
+| forziere | 4 | 0 | 100% |
+| meccanismo | 0 | 4 | 0% |
+| ristorante | 0 | 2 | 0% |
+| negozio | 1 | 1 | 50% |
+| scala | 0 | 1 | 0% |
+| seme-bramosia | 0 | 1 | 0% |
+| **totale** | **13** | **21** | **38%** |
+
+Gli scambi più frequenti dicono perché: *porta letta come passaggio* (5), *forziere letto come
+passaggio* (3), *porta letta come meccanismo* (3). In un Palazzo i trigger di transito sono
+ovunque, e capitano vicino a qualunque cosa. La famiglia che sbaglia sempre è esattamente quella
+che produceva il grosso della copertura: 15 tipi e 867 pin, quasi tutti letti come «passaggio».
+
+**Conseguenza:** la lettura geometrica non determina più nulla. Resta nel file come materiale, con
+la sua misura accanto, e `verify_pin_semantics.py` ora **impone** che nessun tipo la usi come
+prova — e che la controprova venga rifatta e continui a dare meno del 70%. Se un giorno risultasse
+accurata, il verificatore lo segnalerebbe come errore da correggere usandola.
+
+Sono cadute con lei anche le 40 determinazioni per singolo pin, che poggiavano sulla stessa
+lettura, e i due tipi in stato «ipotesi», che il contratto della Fase 2a non ammetteva importare.
+
+#### Che cosa resta, e quanto è solido
+
+| grado di prova | tipi | pin |
 |---|---|---|
-| **dimostrato** — nome interno dello sprite (blocco urbano o blocco del Covo) | 57 | 90 |
-| **dimostrato** — procedura che accende la bandiera del pin | 5 | 351 |
-| **dimostrato** — procedura del trigger che sta sotto il pin | 15 | 867 |
-| **ipotesi dichiarata** — ciò che la proiezione trova sotto il pin | 2 | 53 |
-| **nessuna prova sul tipo** | 23 | 68 |
+| nome interno dello sprite (blocco urbano, blocco del Covo) | 57 | 90 |
+| procedura che accende la bandiera del pin | 5 | 351 |
+| **nessuna prova** | 40 | 988 |
 
-più **40 pin risolti singolarmente**, uno per uno, dove il tipo resta muto ma quel pin ha sotto di
-sé un trigger che parla.
+**423 pin posati**, di cui 42 collegati a un luogo del catalogo e 333 con condizione da
+configurare. Ogni pin nel pacchetto ha una prova che non dipende dalla geometria.
 
-#### Che cosa ha sbloccato la copertura
+#### Che cosa di questa sessione resta valido
 
-Il limite dichiarato in precedenza — «servirebbe certificare la proiezione su più planimetrie,
-oppure una fonte esterna» — era in buona parte **un mio difetto, non un limite dei dati**. Quattro
-interventi, in ordine di peso:
+1. **Il blocco del Covo dei Ladri**, scarto 76: i tipi 98–103 sugli sprite `マイパレス_…`, con
+   cinque conferme procedurali indipendenti. Sei tipi nuovi dimostrati, e la controprova gli dà
+   100% (8 su 8) — è l'unica famiglia geometrica che regge, perché lì la conferma viene da altro.
+2. **Il difetto del riferimento**: le mappe non certificate non conservavano `pinCollocabili`.
+3. **I livelli della stessa risorsa**: stima congiunta e proiezione riprovata sui gemelli — la
+   proiezione passa da 125 a **169 planimetrie certificate**.
+4. **L'assegnazione uno a uno** (`assegnazione.py`, algoritmo ungherese verificato contro forza
+   bruta su 200 casi): nessun punto del campo può stare sotto due pin.
+5. **La stabilità delle coppie**: 740 su 1070 sopravvivono alla ristima senza il proprio pin.
+6. **La convalida sui riferimenti noti**: le tre planimetrie urbane per cui il gioco dichiara la
+   trasformazione (cursore nel record roadmap, unità 23,44 nel texpack) sono **tutte e tre
+   riprodotte** dalla stima.
+7. **La controprova stessa**, che è lo strumento che mancava: da qui in avanti nessuna strada
+   entra senza essere stata misurata su casi di risposta nota.
 
-1. **Le mappe non certificate non conservavano il proprio riferimento.** Il ramo che le scartava
-   non salvava `pinCollocabili`, e così nessuna di loro poteva nemmeno essere provata con la
-   proiezione di un livello gemello. Corretto.
-2. **I livelli della stessa risorsa condividono la tela.** `ICON_<maggiore>_<minore>.BIN` divide i
-   pin in sezioni con un record separatore: sono livelli grafici della *stessa* zona, quindi la
-   trasformazione è per forza la stessa. Ora i loro pin si stimano **insieme** (26 planimetrie
-   certificate così) e una proiezione provata su un livello si **riprova** sugli altri (18 così,
-   ciascuna rimisurata sui propri pin, e accettata solo se almeno metà ci cade sopra).
-3. **La procedura del trigger sotto il pin.** Con la proiezione si sa quale punto del campo sta
-   sotto ogni pin. Se è un trigger, si sa quale procedura chiama, e il nome dice che cosa vi si
-   fa: `DUCT_…INOUT` un condotto, `AC_GOTO_…` uno spostamento, `CheckStair_…` una scala,
-   `DUNGEON_EXIT` l'uscita. Le procedure `*_minimap_*` **restano fuori dal conto**: accendono
-   l'icona senza dire di che icona si tratti, e contarle gonfierebbe il risultato.
-4. **La prova non deve per forza riguardare il tipo.** Un tipo con tre pin in tutto non potrà mai
-   avere una dominanza statistica, e per quella strada resterebbe muto per sempre. Ma se *quel*
-   pin cade su `DUNGEON_EXIT`, quel pin è un'uscita: 40 pin sono risolti così, uno per uno.
+#### Perché il 100% non si raggiunge allentando i criteri
 
-Una scoperta collaterale ha chiuso un blocco intero: lo scarto **76** porta i tipi 98–103 sugli
-sprite «マイパレス_…», e cinque di quei sei tipi cadono su procedure `MyPalace_*` che dicono la
-stessa identica cosa dello sprite (Maker sul creatore, Sound sulla musica, Image sulla galleria,
-Daifugou sull'area giochi, Award sui premi). Cinque conferme indipendenti, nessuna smentita: sono
-le voci del Covo dei Ladri.
+I 988 pin senza prova appartengono a 40 tipi dei Palazzi. Le strade tentate e misurate sono
+registrate in `semantica-pin.json → provePalazzi` e `letturaGeometrica`. Quello che servirebbe è
+una fonte che dica, per i tipi dei Palazzi, quale sprite disegnano — come `P5MINIMAP_01.SPD` fa
+per la città. Fra i 1480 originali ripristinati non c'è: `MAP_SYMBOL.SPD` ha dieci simboli della
+minimappa in gioco, `P5_MAPDATA.SPD` è la mappa della metropolitana, `MEMENTOS.SPD` è la schermata
+dei Memento. Nessuno indicizza i tipi 4–45 con uno scarto costante, e le ancore note (10 porta,
+12 meccanismo, 17 e 26 forziere, 97 seme) non ammettono alcuno scarto comune.
 
-#### Due tipi di segnalino nuovi
-
-Dalla semantica nativa emergono due cose che nessuno dei 34 tipi esistenti esprime: la **scala**
-(passaggio verticale fra livelli dello stesso luogo, che il gioco distingue) e l'**uscita** (il
-punto da cui si lascia un Palazzo). Sono entrati nel registro `shared/spilli.ts` con la loro
-riserva SVG; il prompt per l'asset in stile va nella Fase 4, come previsto dal piano.
-
-#### Che cosa resta fuori, e perché
-
-I 129 pin non posati, con il motivo per ciascuno:
-
-| motivo | pin |
-|---|---|
-| la planimetria non condivide il riferimento con i suoi pin | 76 |
-| il tipo nativo non ha significato e il pin non ha un trigger sotto | 39 |
-| il pin è escluso singolarmente: cade lontano dal tratto della sua tela | 14 |
-
-Il grosso sta su planimetrie con **un solo pin**, e lì c'è una ragione misurata, non una soglia
-scelta a mano. Con un pin solo la posizione non distingue il riferimento giusto da quello
-sbagliato: il criterio calcola quale frazione della tela sarebbe vicina al tratto almeno quanto
-quel pin, e dove quella frazione supera il 5% la vicinanza non prova nulla. Su queste planimetrie
-il disegno è denso e la frazione è alta, quindi restano fuori — sono 12 pin che una soglia più
-generosa avrebbe fatto entrare senza averne il diritto.
-
-Due strade allargate hanno invece funzionato e sono già dentro: il **tratto della risorsa intera**
-(i livelli sono sovrapposizioni, e un pin del piano superiore può cadere dove quel livello è
-trasparente ma il disegno c'è) e il **fattore di scala suggerito dai dati**, cioè il rapporto fra
-l'estensione del disegno e quella dei pin, oltre alle potenze di due.
-
-Resta aperta una strada che non ho percorso, e la scrivo perché è il prossimo passo naturale:
-per una planimetria con un solo pin si potrebbe confermare il riferimento **dalla proiezione
-ereditata da un livello gemello** — se quel pin cade su un punto del campo, è una prova
-indipendente dalla sua vicinanza al tratto. Vale una dozzina di pin e richiede di rompere la
-circolarità fra riferimento e proiezione, che oggi si leggono in quest'ordine.
-
-Resta quindi un residuo del **9,0%**, tutto documentato pin per pin. Non lo dichiaro un limite
-invalicabile: è il punto in cui è arrivata la misura, con i motivi scritti perché il prossimo
-passo sappia dove guardare.
-
-#### Il riferimento e la proiezione, in numeri
-
-- **217 planimetrie su 250 con pin** condividono il riferimento; 1372 pin sono convertibili in
-  percentuali. Le 51 planimetrie senza pin non fanno numero.
-- **173 proiezioni certificate**, scarto mediano dell'1% della tela, **1187 coppie** fra pin e
-  punti del campo, tutte riprodotte punto per punto da `verify_map_projection.py`.
+Questo è il punto in cui è arrivata la misura, con gli scarti provati e i motivi scritti. Non lo
+chiamo limite invalicabile: chiamo così la differenza fra quello che oggi è provato e quello che
+non lo è, e che nessuna soglia più generosa può colmare.
 
 ### Che cosa è successo, e perché la Fase 2 non è tutta qui
 
