@@ -827,3 +827,18 @@ ha ancora questi errori certi:
 
 Questi rilievi sono riproducibili tramite mutazioni isolate e vanno chiusi prima del candidato
 stabile della Fase 2.
+
+### Gate corrente e strategia del primo merge
+
+Sul working tree corrente typecheck e lint passano. Il run mirato su
+`mappe-editor.test.ts`, `VisoreMappa.test.tsx` e `shared/spilli.test.ts` dà 31 PASS e un FAIL:
+il registro contiene ora 37 tipi dopo l'aggiunta di `forziere-raro`, mentre il test pretende 36
+e conserva nel titolo la dicitura ancora più vecchia «34 tipi». Conteggio, unicità e titolo del
+test devono essere aggiornati insieme e poi coperti dalla suite completa.
+
+Per applicare correttamente la decisione dell'utente «PR e merge in `main` dopo ogni nuovo PASS»
+va considerato che l'attuale ramo/PR ha già accumulato modifiche di Fase 2, 3a, 3b e 3d. Non è
+corretto integrare la PR dopo il PASS di uno solo di questi punti, perché porterebbe in `main`
+anche lavoro ancora respinto o non verificato. Il primo merge può quindi avvenire soltanto dopo
+il PASS formale di tutti i lotti già presenti nella diff della PR. Dal checkpoint successivo, ogni
+nuovo punto deve vivere in un branch/PR isolato e venire fuso subito dopo il proprio PASS.
