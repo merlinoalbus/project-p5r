@@ -10,14 +10,6 @@
   "generato": "2026-09-06",
   "abbinamenti": [
     {
-      "nome": "1UP",
-      "articolo": "distributori-automatici/1up",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
       "nome": "Acqua battesimale",
       "articolo": "chiesa-kanda/acqua-battesimale",
       "negozi": [
@@ -34,22 +26,6 @@
       "via": "nome dell’articolo"
     },
     {
-      "nome": "Acqua della rinascita",
-      "articolo": "distributori-automatici/acqua-della-rinascita",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
-      "nome": "Acqua di Udagawa",
-      "articolo": "distributori-automatici/acqua-di-udagawa",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
       "nome": "Agodashi Oden",
       "articolo": "triple-seven/agodashi-oden",
       "negozi": [
@@ -59,17 +35,9 @@
     },
     {
       "nome": "Amazake definitivo",
-      "articolo": "distributori-automatici/amazake-definitivo",
+      "articolo": "distributore-akihabara-1/amazake-definitivo",
       "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
-      "nome": "Arginade",
-      "articolo": "distributori-automatici/arginade",
-      "negozi": [
-        "distributori-automatici"
+        "distributore-akihabara-1"
       ],
       "via": "nome dell’articolo"
     },
@@ -102,6 +70,14 @@
       "articolo": "venditore-patate-dolci/beni-azuma",
       "negozi": [
         "venditore-patate-dolci"
+      ],
+      "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Bevanda energetica",
+      "articolo": "distributore-akihabara-5/bevanda-energetica",
+      "negozi": [
+        "distributore-akihabara-5"
       ],
       "via": "nome dell’articolo"
     },
@@ -185,14 +161,6 @@
       "via": "nome dell’articolo"
     },
     {
-      "nome": "Creatura",
-      "articolo": "distributori-automatici/creatura",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
       "nome": "Crostatina angelo",
       "articolo": "taisho-store/crostatina-angelo",
       "negozi": [
@@ -210,9 +178,9 @@
     },
     {
       "nome": "Curry alla fragola",
-      "articolo": "distributori-automatici/curry-alla-fragola",
+      "articolo": "distributore-akihabara-4/curry-alla-fragola",
       "negozi": [
-        "distributori-automatici"
+        "distributore-akihabara-4"
       ],
       "via": "nome dell’articolo"
     },
@@ -241,26 +209,10 @@
       "via": "nome dell’articolo"
     },
     {
-      "nome": "Dr. Salt NEO",
-      "articolo": "distributori-automatici/dr-salt-neo",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
       "nome": "Durian au lait",
-      "articolo": "distributori-automatici/durian-au-lait",
+      "articolo": "distributore-shibuya-sottopasso/durian-au-lait",
       "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
-      "nome": "Earl Green",
-      "articolo": "distributori-automatici/earl-green",
-      "negozi": [
-        "distributori-automatici"
+        "distributore-shibuya-sottopasso"
       ],
       "via": "nome dell’articolo"
     },
@@ -449,14 +401,6 @@
       "via": "nome dell’articolo"
     },
     {
-      "nome": "Joylent",
-      "articolo": "distributori-automatici/joylent",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
       "nome": "Kajaclear-R",
       "articolo": "clinica-takemi/kajaclear-r",
       "negozi": [
@@ -505,17 +449,9 @@
     },
     {
       "nome": "Locusta alla maionese",
-      "articolo": "distributori-automatici/locusta-alla-maionese",
+      "articolo": "distributore-akihabara-4/locusta-alla-maionese",
       "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
-      "nome": "Manta",
-      "articolo": "distributori-automatici/manta",
-      "negozi": [
-        "distributori-automatici"
+        "distributore-akihabara-4"
       ],
       "via": "nome dell’articolo"
     },
@@ -537,9 +473,9 @@
     },
     {
       "nome": "Miso di stella marina",
-      "articolo": "distributori-automatici/miso-di-stella-marina",
+      "articolo": "distributore-akihabara-4/miso-di-stella-marina",
       "negozi": [
-        "distributori-automatici"
+        "distributore-akihabara-4"
       ],
       "via": "nome dell’articolo"
     },
@@ -580,14 +516,6 @@
       "articolo": "mantra-ganda/muschio-rs-ag",
       "negozi": [
         "mantra-ganda"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
-      "nome": "Nastea",
-      "articolo": "distributori-automatici/nastea",
-      "negozi": [
-        "distributori-automatici"
       ],
       "via": "nome dell’articolo"
     },
@@ -729,9 +657,9 @@
     },
     {
       "nome": "Punch non filtrato",
-      "articolo": "distributori-automatici/punch-non-filtrato",
+      "articolo": "distributore-shujin-cancello-2/punch-non-filtrato",
       "negozi": [
-        "distributori-automatici"
+        "distributore-shujin-cancello-2"
       ],
       "via": "nome dell’articolo"
     },
@@ -808,6 +736,14 @@
       "via": "nome dell’articolo"
     },
     {
+      "nome": "Salsa rancida",
+      "articolo": "distributore-akihabara-5/salsa-rancida",
+      "negozi": [
+        "distributore-akihabara-5"
+      ],
+      "via": "nome dell’articolo"
+    },
+    {
       "nome": "Sandalo rasta",
       "articolo": "mantra-ganda/sandalo-rasta",
       "negozi": [
@@ -836,14 +772,6 @@
       "articolo": "chiosco-kiyasuku/scaldamani",
       "negozi": [
         "chiosco-kiyasuku"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
-      "nome": "Second Maid",
-      "articolo": "distributori-automatici/second-maid",
-      "negozi": [
-        "distributori-automatici"
       ],
       "via": "nome dell’articolo"
     },
@@ -880,14 +808,6 @@
       "via": "nome dell’articolo"
     },
     {
-      "nome": "Soda di Udagawa",
-      "articolo": "distributori-automatici/soda-di-udagawa",
-      "negozi": [
-        "distributori-automatici"
-      ],
-      "via": "nome dell’articolo"
-    },
-    {
       "nome": "Soma",
       "articolo": "negozio-palazzo-niijima/soma",
       "negozi": [
@@ -920,10 +840,10 @@
       "via": "nome dell’articolo"
     },
     {
-      "nome": "Starvicks",
-      "articolo": "distributori-automatici/starvicks",
+      "nome": "Strano boccone",
+      "articolo": "distributore-akihabara-5/strano-boccone",
       "negozi": [
-        "distributori-automatici"
+        "distributore-akihabara-5"
       ],
       "via": "nome dell’articolo"
     },
@@ -969,9 +889,9 @@
     },
     {
       "nome": "Tè energetico",
-      "articolo": "distributori-automatici/te-energetico",
+      "articolo": "distributore-shujin-cancello-2/te-energetico",
       "negozi": [
-        "distributori-automatici"
+        "distributore-shujin-cancello-2"
       ],
       "via": "nome dell’articolo"
     },
@@ -1045,22 +965,30 @@
         "venditore-patate-dolci"
       ],
       "via": "nome dell’articolo"
+    },
+    {
+      "nome": "Zuppa a pezzettoni",
+      "articolo": "distributore-akihabara-2/zuppa-a-pezzettoni",
+      "negozi": [
+        "distributore-akihabara-2"
+      ],
+      "via": "nome dell’articolo"
     }
   ],
   "summary": {
     "vociGuida": 355,
-    "articoli": 547,
-    "abbinati": 130,
+    "articoli": 575,
+    "abbinati": 121,
     "conPiuNegozi": 0,
     "perVia": {
-      "nome dell’articolo": 127,
+      "nome dell’articolo": 118,
       "trascritto dalla guida": 3
     },
     "problemi": {
       "negozio trascritto che il catalogo non ha": 0,
       "articolo di un’altra sezione della guida (accessori, armi, libri, DVD…)": 123,
       "oggetto della guida con lo stesso nome di un altro": 0,
-      "oggetto senza articolo e non trascritto in nessun negozio": 225
+      "oggetto senza articolo e non trascritto in nessun negozio": 234
     }
   },
   "problemi": {
@@ -1132,23 +1060,23 @@
       "Band-Ace",
       "Balsamo vitale",
       "Pappa reale R",
+      "Starvicks",
+      "Second Maid",
+      "Earl Green",
+      "Manta",
+      "Nastea",
+      "1UP",
+      "Acqua di Udagawa",
+      "Joylent",
+      "Dr. Salt NEO",
       "Oh! Shiruko",
-      "Zuppa a pezzettoni",
+      "Soda di Udagawa",
       "Zuppa di zucca",
       "Carne in scatola spec.",
       "Festa in lattina",
       "Pacco di frutta primav.",
-      "Salgemma infranto",
-      "Caffè del Leblanc",
-      "Caffè acido",
-      "Caffè amaro",
-      "Caffè del maestro",
-      "Curry decente",
-      "Curry di fuoco",
-      "Curry fiammante",
-      "Curry infernale",
-      "Curry del maestro",
-      "Pomodoro solare"
+      "Arginade",
+      "Acqua della rinascita"
     ]
   }
 }
