@@ -1,4 +1,6 @@
 import { riconciliaAreeGuida } from './organizzazioneMappe.js';
+import type { RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
+import { fasciaDaTesto, finestraDaDate, giorniDaTesto, soloPresenza, unisci } from './presenzaEntita.js';
 import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 // ============================================================
 // sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
@@ -86,6 +88,19 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   const quartieriConSblocco = new Set(haSblocco
     ? (db.prepare("SELECT chiave FROM quartiere WHERE sblocco_data IS NOT NULL AND sblocco_data <> ''").all() as Array<{ chiave: string }>).map((q) => q.chiave)
     : []);
+  // Le finestre dei Palazzi, trascritte in `data/seed/finestre-dungeon.json` e caricate in
+  // `dati_guida`: nel catalogo le date sono prosa, e ricavarle con un'espressione regolare
+  // vorrebbe dire sbagliarne qualcuna senza accorgersene.
+  const finestrePerDungeon = new Map<string, RequisitoSpillo[]>();
+  if (tabelle.has('dati_guida')) {
+    const riga = db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
+    if (riga) {
+      try {
+        const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
+        for (const f of dati.finestre ?? []) finestrePerDungeon.set(f.dungeon, finestraDaDate(f.dal, f.al));
+      } catch { /* una trascrizione illeggibile non deve impedire la sincronizzazione */ }
+    }
+  }
   let conSblocco = 0;
   let spilli = 0;
   let riclassificati = 0;
@@ -115,8 +130,22 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     }
   }
   if (tabelle.has('marcatore_luogo') && tabelle.has('luogo')) {
-    const righe = db.prepare(`SELECT m.luogo_chiave, m.x, m.y, m.origine, l.quartiere_chiave, l.tipo, l.nome, l.cosa_offre, l.ordine
-      FROM marcatore_luogo m JOIN luogo l ON l.chiave = m.luogo_chiave`).all() as Array<{ luogo_chiave: string; x: number; y: number; origine: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; ordine: number }>;
+    const colonneLuogo = (db.prepare("SELECT name FROM pragma_table_info('luogo')").all() as Array<{ name: string }>).map((c) => c.name);
+    const quando = colonneLuogo.includes('quando') ? 'l.quando' : "'' AS quando";
+    const giorni = colonneLuogo.includes('giorni') ? 'l.giorni' : "'' AS giorni";
+    // Le condizioni gia' strutturate dei negozi, per luogo: sono la fonte migliore che abbiamo,
+    // perche' qualcuno le ha gia' tradotte una volta invece di lasciarle come frase.
+    const condizioniNegozio = new Map<string, string>();
+    if (tabelle.has('negozio')) {
+      const colonneNegozio = (db.prepare("SELECT name FROM pragma_table_info('negozio')").all() as Array<{ name: string }>).map((c) => c.name);
+      if (colonneNegozio.includes('condizioni_json') && colonneNegozio.includes('luogo_chiave')) {
+        for (const n of db.prepare("SELECT luogo_chiave, condizioni_json FROM negozio WHERE luogo_chiave IS NOT NULL AND condizioni_json IS NOT NULL").all() as Array<{ luogo_chiave: string; condizioni_json: string }>) {
+          condizioniNegozio.set(n.luogo_chiave, n.condizioni_json);
+        }
+      }
+    }
+    const righe = db.prepare(`SELECT m.luogo_chiave, m.x, m.y, m.origine, l.quartiere_chiave, l.tipo, l.nome, l.cosa_offre, l.ordine, ${quando}, ${giorni}
+      FROM marcatore_luogo m JOIN luogo l ON l.chiave = m.luogo_chiave`).all() as Array<{ luogo_chiave: string; x: number; y: number; origine: string; quartiere_chiave: string; tipo: string; nome: string; cosa_offre: string; ordine: number; quando: string | null; giorni: string | null }>;
     for (const r of righe) {
       const mappa = `citta-${r.quartiere_chiave}`;
       if (esiste.get('luogo', r.luogo_chiave) || !mappaEsiste.get(mappa)) continue;
@@ -125,9 +154,16 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       // pin deve sparire dal visore finché la partita non ha raggiunto quella data, altrimenti la
       // guida manda il giocatore in un posto che non c'è ancora. È la sola specie di condizione
       // che nasconde qualcosa — la presenza — e qui la porta il quartiere.
-      if (quartieriConSblocco.has(r.quartiere_chiave)) {
+      // Il pin eredita la presenza da tutto cio' che lo riguarda: il quartiere che si sblocca
+      // piu' avanti, la fascia oraria e i giorni del luogo, e le condizioni gia' strutturate del
+      // negozio che ci sta dentro. Tutte insieme, senza ripetizioni.
+      const presenza = unisci(
+        quartieriConSblocco.has(r.quartiere_chiave) ? [{ tipo: 'quartiere' as const, quartiere: r.quartiere_chiave }] : [],
+        fasciaDaTesto(r.quando), giorniDaTesto(r.giorni),
+        soloPresenza(condizioniNegozio.get(r.luogo_chiave)));
+      if (presenza.length) {
         db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
-          .run(JSON.stringify([{ tipo: 'quartiere', quartiere: r.quartiere_chiave }]), Number(info.lastInsertRowid));
+          .run(JSON.stringify(presenza), Number(info.lastInsertRowid));
         conSblocco++;
       }
       spilli++;
@@ -146,9 +182,15 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       // Anche la via per arrivarci: se il quartiere non è ancora sbloccato, sulla mappa di Tokyo
       // non deve esserci nemmeno il passaggio che ci porta.
       const quartiere = f.chiave.startsWith('citta-') ? f.chiave.slice('citta-'.length) : null;
-      if (quartiere && quartieriConSblocco.has(quartiere)) {
+      const dungeon = f.chiave.startsWith('dungeon-') ? f.chiave.slice('dungeon-'.length) : null;
+      // Un Palazzo esiste solo fra il giorno in cui si apre e quello in cui scade: fuori da quella
+      // finestra il passaggio che ci porta non deve esserci.
+      const presenzaFiglia = unisci(
+        quartiere && quartieriConSblocco.has(quartiere) ? [{ tipo: 'quartiere' as const, quartiere }] : [],
+        dungeon ? (finestrePerDungeon.get(dungeon) ?? []) : []);
+      if (presenzaFiglia.length) {
         db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
-          .run(JSON.stringify([{ tipo: 'quartiere', quartiere }]), Number(passaggio.lastInsertRowid));
+          .run(JSON.stringify(presenzaFiglia), Number(passaggio.lastInsertRowid));
         conSblocco++;
       }
       spilli++;

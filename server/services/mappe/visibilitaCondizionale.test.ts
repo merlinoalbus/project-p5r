@@ -20,6 +20,7 @@ import { closeDb, initDb, getDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
+import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
 
 const DIR_SEED = path.join('data', 'seed');
 
@@ -41,8 +42,10 @@ describe('visibilità condizionale dei pin', () => {
   it('i luoghi di un quartiere che si sblocca più avanti portano la condizione del quartiere', () => {
     const bloccati = condizioniDi('citta-shinjuku');
     expect(bloccati.length).toBeGreaterThan(0);
+    // Il quartiere c'e' sempre; accanto puo' esserci la fascia oraria del locale, che e'
+    // anch'essa presenza — un bar solo di sera, di giorno, non c'e'.
     for (const s of bloccati) {
-      expect(s.condizioni).toEqual([{ tipo: 'quartiere', quartiere: 'shinjuku' }]);
+      expect(s.condizioni).toContainEqual({ tipo: 'quartiere', quartiere: 'shinjuku' });
     }
   });
 
@@ -67,7 +70,10 @@ describe('visibilità condizionale dei pin', () => {
       .all() as Array<{ condizioni_json: string }>) {
       for (const c of JSON.parse(r.condizioni_json) as Array<{ tipo: string }>) tipi.add(c.tipo);
     }
-    // `da-configurare` qui vorrebbe dire che una bandiera nativa è tornata a nascondere un pin
-    expect([...tipi].sort()).toEqual(['quartiere']);
+    // La regola generale, non l'elenco del momento: ogni condizione in uso deve essere di
+    // presenza. `da-configurare` qui vorrebbe dire che una bandiera nativa e' tornata a
+    // nascondere un pin; `dote` o `confidente` che un prerequisito e' tornato a farlo sparire.
+    expect(tipi.size).toBeGreaterThan(0);
+    for (const t of tipi) expect(nascondeIlPin(t)).toBe(true);
   });
 });
