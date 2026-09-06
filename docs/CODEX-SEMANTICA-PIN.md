@@ -799,3 +799,31 @@ entrambi i tipi e le etichette, la procedura decisiva, i campi concordanti/disco
 canonica scelta; il verificatore deve ricalcolare anche queste prove. Nascondere la discordanza o
 forzare la stessa etichetta perderebbe informazione proprio mentre la nuova semantica la rende
 visibile.
+
+### Pre-riesame del verificatore delle copie appena aggiunto
+
+`verify_pin_copie_assorbite.py` è la direzione giusta, ma la versione osservata nel working tree
+ha ancora questi errori certi:
+
+1. `per_canonica` è globale: dopo aver associato i 12 pin di `RMAP_151_3_0`, vieta ai 12 pin di
+   `RMAP_151_4_0` di raggiungere gli stessi indici di `RMAP_151_2_1`. L'unicità deve valere dentro
+   ciascuna copia, non fra copie diverse della stessa canonica;
+2. il controllo legge il record canonico reale per bandiera e distanza, ma non confronta con esso
+   i campi salvati `xCanonica`, `yCanonica` e `tipoNativoCanonica`; una loro mutazione oggi non
+   viene rilevata;
+3. non controlla ancora `conditional`, tipo applicativo ed etichetta di copia/canonica, né la
+   prova procedurale che risolve le due varianti discordanti;
+4. il contatore confronta gli assorbiti con `len(assorbiti) + len(senzaCorrispondenza)`: un pin
+   esplicitamente senza corrispondenza non deve essere contato come assorbito. Le due varianti
+   risolte richiedono una categoria propria, mentre una vera assenza deve lasciare aperta la
+   contabilità e fallire;
+5. il riepilogo (`copie`, `pin`, `assorbiti`, `conTipoDiverso`, `scartoMassimo`) viene stampato ma
+   non è ricalcolato e confrontato campo per campo, quindi può diventare stantio senza fermare il
+   gate;
+6. il verificatore riusa dal generatore `coppie_copia_canonica` e `TOLLERANZA`. Per il controllo
+   realmente indipendente deve almeno ricostruire autonomamente le coppie dal JSON di identità e
+   pretendere la soglia certificata, altrimenti una stessa regressione nel codice condiviso viene
+   accettata da entrambi.
+
+Questi rilievi sono riproducibili tramite mutazioni isolate e vanno chiusi prima del candidato
+stabile della Fase 2.
