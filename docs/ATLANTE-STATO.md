@@ -190,6 +190,32 @@ procedura che quella bandiera accende. Il nome della procedura è parlante:
 
 Le due strade sono indipendenti e concordano dove si incontrano.
 
+### Il tetto della copertura, e dove sta
+
+L'utente chiede copertura al 100%. Ecco a che punto è e che cosa manca perché lo sia.
+
+| grado di prova | tipi | pin |
+|---|---|---|
+| **dimostrato** — nome interno dello sprite urbano, o procedura che accende la bandiera | 56 | 432 |
+| **ipotesi dichiarata** — ciò che la proiezione trova sotto il pin | 6 | 319 |
+| **nessuna prova** | 40 | 678 |
+
+**710 pin su 1429 sono posati** (il resto è escluso anche per riferimento non certificato). La
+proiezione è certificata su **125 planimetrie**, con scarto mediano dell'1% della tela e 1056
+coppie fra pin e punti del campo.
+
+Il grado «ipotesi» non asserisce nulla di falso: ogni pin porta scritto nella descrizione che
+cosa lo sostiene e che è un'ipotesi. Esempio: il tipo 19 cade su un ingresso del campo nel 50%
+dei casi contro il 35% medio, +3,7 deviazioni — il segnale più forte fra tutti — ed è letto come
+passaggio.
+
+**Perché non si arriva a 100%.** I 40 tipi restanti hanno, nell'insieme, meno di dieci coppie
+ciascuno sulle mappe con proiezione certificata: non c'è abbastanza materiale per distinguerli.
+Le strade tentate e fallite sono registrate in `semantica-pin.json → provePalazzi`. Per chiuderli
+servirebbe una delle due cose: **certificare la proiezione su più planimetrie** (oggi 125 su 301;
+il limite sono le mappe con pochi pin, dove la registrazione non ha abbastanza punti), oppure una
+fonte esterna che elenchi le icone della mappa d'insieme dei Palazzi.
+
 ### Che cosa resta indeterminato, e quanto pesa
 
 | | pin | con significato | posati |

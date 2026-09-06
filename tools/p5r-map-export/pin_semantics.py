@@ -117,6 +117,28 @@ CONFERME = {
     'seme-bramosia': ['seme'],
 }
 
+# Secondo grado di prova, per i tipi che le procedure non nominano. Quando la proiezione e'
+# certificata si sa quale trigger o quale ingresso del campo sta sotto ogni pin, e da li':
+#
+#   * accoppiarsi con un **ingresso** del campo molto piu' spesso della media dice che quel tipo
+#     segna un punto per cui si entra o si esce;
+#   * un'**etichetta** dominante fra quelle dei trigger dice che cosa vi si fa.
+#
+# E' un indizio forte, non una dimostrazione, e resta marcato come tale: `stato: ipotesi`.
+ETICHETTE = [
+    ('treno', 'Stazione', ['sali sul treno', 'binario']),
+    ('meccanismo', 'Meccanismo', ['tira leva', 'regolatore', 'interruttore', 'calcia', 'tira mascella', 'leva']),
+    ('scorciatoia', 'Scorciatoia', ['striscia', 'scivola', 'riemergi', 'salta']),
+    ('rampino', 'Aggancio del rampino', ['rampino']),
+    ('sicura', 'Punto di ritorno', ['punto di ritorno', 'safe room', 'stanza sicura']),
+    ('nota', 'Da guardare', ['guarda ', 'vetrina', 'galleria', 'mensola', 'scaffale', 'cartello', 'libri', 'tavolo']),
+]
+# Quanto la quota di ingressi deve superare la media, in deviazioni standard, perche' il tipo sia
+# letto come punto di passaggio; e quanto una famiglia di etichette deve dominare.
+SIGMA_INGRESSI = 2.0
+DOMINANZA_ETICHETTE = 0.4
+MINIME_COPPIE = 10
+
 PROVE_PALAZZI = [
     dict(prova='scarto costante sul foglio sprite',
          esito='fallita',
@@ -226,10 +248,95 @@ def significato_dagli_script(out):
     return esito
 
 
+def famiglia_etichetta(testo):
+    t = (testo or '').casefold()
+    for tipo, etichetta, parole in ETICHETTE:
+        if any(par in t for par in parole):
+            return tipo, etichetta
+    return None
+
+
+def significato_dalla_proiezione(out):
+    """Che cosa sta sotto ogni pin, dove la proiezione e' certificata.
+
+    Con la proiezione si sa a quale trigger o a quale ingresso del campo corrisponde ciascun pin.
+    Da li' due indizi: quanto spesso quel tipo cade su un ingresso rispetto alla media di tutti, e
+    che cosa dicono le etichette dei trigger su cui cade.
+    """
+    import math
+    percorso = out/'proiezioni-mappa.json'
+    if not percorso.exists():
+        return {}
+    meta = {m['code']: m for m in json.loads((out/'mondo_metadati.json').read_text(encoding='utf8'))['maps']}
+    con = json.loads((out/'campi-completi/connessioni.json').read_text(encoding='utf8'))
+    tabelle = json.loads((out/'mondo_etichette.json').read_text(encoding='utf8'))['tables']
+    campi = {f['field']: f for f in con['fields']}
+    proiezioni = json.loads(percorso.read_text(encoding='utf8'))
+
+    def etichetta(t):
+        nome = PROMPTS.get(t.get('promptType'))
+        voci = tabelle.get(nome) or []
+        i = t.get('nameId')
+        if not nome or i is None or i >= len(voci):
+            return None
+        v = voci[i]
+        return v['text'] if v.get('status') == 'valido' and v['text'] not in ('NULL', '') else None
+
+    conteggi = collections.defaultdict(lambda: dict(coppie=0, ingressi=0, etichette=collections.Counter(),
+                                                    famiglie=collections.Counter()))
+    totale = ingressi_totali = 0
+    for r in proiezioni['mappe']:
+        if r['esito'] != 'certificata':
+            continue
+        mappa, p = meta[r['codice']], r['proiezione']
+        campo = campi[p['campo']]
+        punti = [('trigger', t) for t in campo['triggers'] if t.get('position')]
+        punti += [('ingresso', e) for e in (campo.get('entrances') or [])]
+        for i_pin, i_punto in p['accoppiamenti']:
+            tipo = mappa['pins'][r['pinCollocabili'][i_pin]]['nativeType']
+            genere, voce = punti[i_punto]
+            v = conteggi[tipo]
+            v['coppie'] += 1
+            totale += 1
+            if genere == 'ingresso':
+                v['ingressi'] += 1
+                ingressi_totali += 1
+            else:
+                e = etichetta(voce)
+                if e:
+                    v['etichette'][e] += 1
+                    fam = famiglia_etichetta(e)
+                    if fam:
+                        v['famiglie'][fam] += 1
+    media = ingressi_totali/totale if totale else 0.0
+    esito = {}
+    for tipo in sorted(conteggi):
+        v = conteggi[tipo]
+        n = v['coppie']
+        quota = v['ingressi']/n if n else 0.0
+        scarto = ((quota - media)/math.sqrt(media*(1-media)/n)) if n and 0 < media < 1 else 0.0
+        etichettate = sum(v['etichette'].values())
+        famiglia, quante = (sorted(v['famiglie'].items(), key=lambda x: (-x[1], str(x[0]))) or [(None, 0)])[0]
+        proposta = None
+        if n >= MINIME_COPPIE and famiglia and etichettate and quante >= etichettate*DOMINANZA_ETICHETTE:
+            proposta = dict(tipoSpillo=famiglia[0], etichetta=famiglia[1],
+                            motivo=str(quante) + ' etichette su ' + str(etichettate) + ' dicono «' + famiglia[1].lower() + '»')
+        elif n >= MINIME_COPPIE and scarto >= SIGMA_INGRESSI:
+            proposta = dict(tipoSpillo='passaggio', etichetta='Passaggio',
+                            motivo='cade su un ingresso del campo nel ' + str(round(quota*100)) + '% dei casi, contro il '
+                                   + str(round(media*100)) + '% medio (' + format(scarto, '+.1f') + ' deviazioni)')
+        esito[tipo] = dict(coppie=n, ingressi=v['ingressi'], quotaIngressi=round(quota, 3),
+                           scartoDallaMedia=round(scarto, 2), mediaIngressi=round(media, 3),
+                           etichette=dict(sorted(v['etichette'].items(), key=lambda x: (-x[1], x[0]))[:5]),
+                           proposta=proposta)
+    return esito
+
+
 def main(out):
     out = Path(out)
     icone = json.loads((out/'icone-mappa.json').read_text(encoding='utf8'))
     dagli_script = significato_dagli_script(out)
+    dalla_proiezione = significato_dalla_proiezione(out)
     righe = []
     for r in icone['tipiNativi']:
         voce = dict(tipoNativo=r['tipoNativo'], occorrenze=r['occorrenze'],
@@ -238,7 +345,9 @@ def main(out):
                     associazione=r['associazione'])
         significato = SIGNIFICATO.get(r['nomeNativo'] or '')
         script = dagli_script.get(r['tipoNativo'])
+        proiezione = dalla_proiezione.get(r['tipoNativo'])
         voce['script'] = script
+        voce['proiezione'] = proiezione
         if r['associazione'] == 'blocco-urbano-dimostrato' and significato:
             voce.update(tipoSpillo=significato[0], etichetta=significato[1], stato='determinato',
                         prova='nome interno dello sprite del blocco urbano dimostrato')
@@ -248,6 +357,10 @@ def main(out):
                               f"in {script['casiDellaFamiglia']} casi su {script['procedureRiconosciute']} riconosciuti"
                               + (f", con {script['confermeDaiTrigger']} conferme dalle etichette dei trigger"
                                  if script['confermeDaiTrigger'] else ''))
+        elif proiezione and proiezione['proposta']:
+            voce.update(tipoSpillo=proiezione['proposta']['tipoSpillo'], etichetta=proiezione['proposta']['etichetta'],
+                        stato='ipotesi',
+                        prova='cio' + chr(39) + ' che la proiezione trova sotto il pin: ' + proiezione['proposta']['motivo'])
         else:
             voce.update(tipoSpillo=None, etichetta=None, stato='non-determinato',
                         motivo=('nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera'
@@ -255,14 +368,17 @@ def main(out):
                                 else 'né lo sprite né le procedure che accendono la sua bandiera lo dicono'))
         righe.append(voce)
     determinati = [r for r in righe if r['stato'] == 'determinato']
-    senza = [r for r in righe if r['stato'] != 'determinato']
+    ipotesi = [r for r in righe if r['stato'] == 'ipotesi']
+    senza = [r for r in righe if r['stato'] == 'non-determinato']
     mancanti = sorted(set(SIGNIFICATO) - {r['nomeNativo'] for r in righe})
     if mancanti:
         raise ValueError(f'Traduzioni dichiarate per sprite che nessun pin usa: {mancanti}')
     risultato = dict(
         schemaVersion=1, sources=dict(icone='icone-mappa.json', registro='shared/spilli.ts'),
         tipi=righe, provePalazzi=PROVE_PALAZZI,
-        summary=dict(tipi=len(righe), determinati=len(determinati), nonDeterminati=len(senza),
+        summary=dict(tipi=len(righe), determinati=len(determinati), ipotesi=len(ipotesi), nonDeterminati=len(senza),
+                     pinConIpotesi=sum(r['occorrenze'] for r in ipotesi),
+                     perTipoIpotesi=dict(collections.Counter(r['tipoSpillo'] for r in ipotesi)),
                      pinDeterminati=sum(r['occorrenze'] for r in determinati),
                      pinNonDeterminati=sum(r['occorrenze'] for r in senza),
                      perTipoSpillo=dict(collections.Counter(r['tipoSpillo'] for r in determinati)),

@@ -73,7 +73,7 @@ def main(out, seed=None):
     famiglie = [(f[0], f[1]) for f in __import__('pin_semantics').FAMIGLIE]
     import pin_semantics as ps
 
-    urbani = dagli_script_ok = con_condizione = 0
+    urbani = dagli_script_ok = con_condizione = ipotesi = 0
     per_tipo = {r['tipoNativo']: r for r in semantica['tipi']}
     assert len(per_tipo) == len(semantica['tipi']), 'tipi nativi ripetuti'
     assert {r['tipoNativo'] for r in icone['tipiNativi']} == set(per_tipo), 'censimento diverso da quello delle icone'
@@ -81,7 +81,14 @@ def main(out, seed=None):
     for r in icone['tipiNativi']:
         v = per_tipo[r['tipoNativo']]
         assert v['occorrenze'] == r['occorrenze'] and v['associazione'] == r['associazione']
-        if v['stato'] == 'determinato':
+        if v['stato'] == 'ipotesi':
+            # un'ipotesi deve dichiararsi tale e portare la propria misura, e non puo' esistere
+            # dove una prova vera c'era gia'
+            assert v['tipoSpillo'] in registro and v['etichetta'] and v.get('prova')
+            assert v['proiezione'] and v['proiezione']['proposta'], f'ipotesi senza misura: {r["tipoNativo"]}'
+            assert v['proiezione']['coppie'] >= ps.MINIME_COPPIE, f'ipotesi con troppe poche coppie: {r["tipoNativo"]}'
+            ipotesi += 1
+        elif v['stato'] == 'determinato':
             assert v['tipoSpillo'] in registro, f'tipo di segnalino fuori registro: {v["tipoSpillo"]}'
             assert v['etichetta'] and v.get('prova'), f'significato senza etichetta o senza prova: {r["tipoNativo"]}'
             if r['associazione'] == 'blocco-urbano-dimostrato':
@@ -119,20 +126,22 @@ def main(out, seed=None):
         rif = riferimento[m['chiave']]
         assert rif['esito'] == 'condiviso', f'pin su planimetria senza riferimento condiviso: {m["chiave"]}'
         fattore, (larghezza, altezza) = rif['fattoreScala'], rif['dimensione']
-        attese = set()
+        attese = collections.Counter()
         for i in rif['collocabili']:
             p = pin_nativi[m['chiave']][i]
             v = per_tipo[p['nativeType']]
-            if v['stato'] != 'determinato':
+            if v['stato'] not in ('determinato', 'ipotesi'):
                 continue
-            attese.add((v['tipoSpillo'], round(100*p['x']*fattore/larghezza, 3), round(100*p['y']*fattore/altezza, 3)))
-        assert len(propri) == len(attese), f'numero di pin diverso su {m["chiave"]}'
+            attese[(v['tipoSpillo'], round(100*p['x']*fattore/larghezza, 3), round(100*p['y']*fattore/altezza, 3))] += 1
+        assert len(propri) == sum(attese.values()), f'numero di pin diverso su {m["chiave"]}'
+        trovati = collections.Counter((x['tipo'], x['x'], x['y']) for x in propri)
+        assert trovati == attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
         quartiere = m['genitore'].removeprefix('citta-') if (m['genitore'] or '').startswith('citta-') else None
         condizionali = {(per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['tipoSpillo'],
                          round(100*pin_nativi[m['chiave']][i]['x']*fattore/larghezza, 3),
                          round(100*pin_nativi[m['chiave']][i]['y']*fattore/altezza, 3))
                         for i in rif['collocabili'] if pin_nativi[m['chiave']][i]['conditional']
-                        and per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['stato'] == 'determinato'}
+                        and per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['stato'] in ('determinato', 'ipotesi')}
         for s in propri:
             assert (s['tipo'], s['x'], s['y']) in attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
             assert 0 <= s['x'] <= 100 and 0 <= s['y'] <= 100
@@ -154,8 +163,10 @@ def main(out, seed=None):
     assert rapporto['pinNativi'] == nativi, 'il rapporto non conta tutti i pin nativi'
     assert rapporto['pinContati'] == nativi, f'contabilità aperta: {rapporto["pinContati"]} su {nativi}'
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
-    print('OK', determinati, f'tipi con significato dimostrato ({urbani} dallo sprite urbano,',
-          f'{dagli_script_ok} dalle procedure degli script),', len(per_tipo)-determinati, 'lasciati senza;',
+    assert ipotesi == semantica['summary']['ipotesi']
+    print('OK', determinati, f'tipi dimostrati ({urbani} dallo sprite urbano,',
+          f'{dagli_script_ok} dalle procedure degli script) e', ipotesi, 'per ipotesi dichiarata;',
+          len(per_tipo)-determinati-ipotesi, 'lasciati senza;',
           controllati, 'pin nel pacchetto ricontrollati,', con_luogo, 'collegati a un luogo del catalogo,',
           con_condizione, 'con condizione da configurare; contabilità chiusa su', nativi, 'pin nativi')
 

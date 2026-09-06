@@ -32,6 +32,21 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
+      "proiezione": {
+        "coppie": 84,
+        "ingressi": 33,
+        "quotaIngressi": 0.393,
+        "scartoDallaMedia": 0.78,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Riemergi": 2,
+          "Striscia": 2,
+          "Barista": 1,
+          "Corridoio mezzavia tribordo": 1,
+          "Corsi privati": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -68,6 +83,21 @@
         "tipoSpillo": null,
         "etichetta": null,
         "stato": "non-determinato"
+      },
+      "proiezione": {
+        "coppie": 62,
+        "ingressi": 22,
+        "quotaIngressi": 0.355,
+        "scartoDallaMedia": 0.04,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Libri": 3,
+          "Aula studio": 2,
+          "Central Street": 2,
+          "Corsi privati": 2,
+          "Sottopasso": 2
+        },
+        "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
@@ -108,6 +138,25 @@
         "etichetta": "Porta",
         "stato": "determinato"
       },
+      "proiezione": {
+        "coppie": 62,
+        "ingressi": 12,
+        "quotaIngressi": 0.194,
+        "scartoDallaMedia": -2.62,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Striscia": 4,
+          "Apri porta": 3,
+          "Riemergi": 2,
+          "Edificio stazione 2P": 1,
+          "Guarda galleria": 1
+        },
+        "proposta": {
+          "tipoSpillo": "scorciatoia",
+          "etichetta": "Scorciatoia",
+          "motivo": "6 etichette su 15 dicono «scorciatoia»"
+        }
+      },
       "tipoSpillo": "porta",
       "etichetta": "Porta",
       "stato": "determinato",
@@ -147,6 +196,21 @@
         "etichetta": "Meccanismo",
         "stato": "determinato"
       },
+      "proiezione": {
+        "coppie": 57,
+        "ingressi": 7,
+        "quotaIngressi": 0.123,
+        "scartoDallaMedia": -3.63,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sala trasmissioni": 29,
+          "Apri porta": 1,
+          "Corridoio della prigione": 1,
+          "Guarda galleria": 1,
+          "Scendi con l'ascensore": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "meccanismo",
       "etichetta": "Meccanismo",
       "stato": "determinato",
@@ -179,10 +243,29 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "proiezione": {
+        "coppie": 37,
+        "ingressi": 20,
+        "quotaIngressi": 0.541,
+        "scartoDallaMedia": 2.4,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Allenati": 1,
+          "Clinica": 1,
+          "Pavimento ricoperto di rifiuti": 1,
+          "Piazza della stazione": 1,
+          "Riemergi": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "motivo": "cade su un ingresso del campo nel 54% dei casi, contro il 35% medio (+2.4 deviazioni)"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "ipotesi",
+      "prova": "cio' che la proiezione trova sotto il pin: cade su un ingresso del campo nel 54% dei casi, contro il 35% medio (+2.4 deviazioni)"
     },
     {
       "tipoNativo": 14,
@@ -211,6 +294,21 @@
         "tipoSpillo": null,
         "etichetta": null,
         "stato": "non-determinato"
+      },
+      "proiezione": {
+        "coppie": 35,
+        "ingressi": 14,
+        "quotaIngressi": 0.4,
+        "scartoDallaMedia": 0.59,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Aspetta il treno": 1,
+          "Calcia": 1,
+          "Cristalloterapia": 1,
+          "Sala d'ingresso": 1,
+          "Sala giochi": 1
+        },
+        "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
@@ -245,6 +343,21 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
+      "proiezione": {
+        "coppie": 41,
+        "ingressi": 15,
+        "quotaIngressi": 0.366,
+        "scartoDallaMedia": 0.18,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Central Street": 3,
+          "Sottopasso": 2,
+          "Cercalavoro": 1,
+          "Clinica": 1,
+          "Corridoio del Crepuscolo": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -273,6 +386,21 @@
         "tipoSpillo": null,
         "etichetta": null,
         "stato": "non-determinato"
+      },
+      "proiezione": {
+        "coppie": 41,
+        "ingressi": 17,
+        "quotaIngressi": 0.415,
+        "scartoDallaMedia": 0.84,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sottopasso": 3,
+          "Libri": 2,
+          "Aspetta il treno": 1,
+          "Aula di Fisica": 1,
+          "Aula studio": 1
+        },
+        "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
@@ -307,6 +435,21 @@
         "etichetta": "Forziere",
         "stato": "determinato"
       },
+      "proiezione": {
+        "coppie": 97,
+        "ingressi": 22,
+        "quotaIngressi": 0.227,
+        "scartoDallaMedia": -2.59,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Chiama ascensore": 2,
+          "Barista": 1,
+          "Cristalloterapia": 1,
+          "Guarda premi": 1,
+          "Il mio posto": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "forziere",
       "etichetta": "Forziere",
       "stato": "determinato",
@@ -322,10 +465,29 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "proiezione": {
+        "coppie": 142,
+        "ingressi": 71,
+        "quotaIngressi": 0.5,
+        "scartoDallaMedia": 3.69,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Cortile": 3,
+          "Libri": 3,
+          "Angolo studio": 2,
+          "Aula di Fisica": 2,
+          "Riemergi": 2
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "motivo": "cade su un ingresso del campo nel 50% dei casi, contro il 35% medio (+3.7 deviazioni)"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "ipotesi",
+      "prova": "cio' che la proiezione trova sotto il pin: cade su un ingresso del campo nel 50% dei casi, contro il 35% medio (+3.7 deviazioni)"
     },
     {
       "tipoNativo": 20,
@@ -337,10 +499,27 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "proiezione": {
+        "coppie": 12,
+        "ingressi": 8,
+        "quotaIngressi": 0.667,
+        "scartoDallaMedia": 2.28,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Vicolo cieco": 2,
+          "Negozio di udon": 1,
+          "Ramen bar": 1
+        },
+        "proposta": {
+          "tipoSpillo": "passaggio",
+          "etichetta": "Passaggio",
+          "motivo": "cade su un ingresso del campo nel 67% dei casi, contro il 35% medio (+2.3 deviazioni)"
+        }
+      },
+      "tipoSpillo": "passaggio",
+      "etichetta": "Passaggio",
+      "stato": "ipotesi",
+      "prova": "cio' che la proiezione trova sotto il pin: cade su un ingresso del campo nel 67% dei casi, contro il 35% medio (+2.3 deviazioni)"
     },
     {
       "tipoNativo": 24,
@@ -352,6 +531,17 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 5,
+        "ingressi": 1,
+        "quotaIngressi": 0.2,
+        "scartoDallaMedia": -0.71,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sali sul treno": 3
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -367,6 +557,17 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 1,
+        "quotaIngressi": 0.5,
+        "scartoDallaMedia": 0.44,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sali sul treno": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -400,6 +601,21 @@
         "etichetta": "Forziere raro",
         "stato": "determinato"
       },
+      "proiezione": {
+        "coppie": 28,
+        "ingressi": 7,
+        "quotaIngressi": 0.25,
+        "scartoDallaMedia": -1.13,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Barista": 1,
+          "Clinica di agopuntura": 1,
+          "Corsi privati": 1,
+          "Divano elegante": 1,
+          "Mappa dell'area": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "forziere",
       "etichetta": "Forziere raro",
       "stato": "determinato",
@@ -415,6 +631,21 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 84,
+        "ingressi": 34,
+        "quotaIngressi": 0.405,
+        "scartoDallaMedia": 1.01,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Riemergi": 2,
+          "Striscia": 2,
+          "Barista": 1,
+          "Calligrafia": 1,
+          "Cinema": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -448,6 +679,21 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
+      "proiezione": {
+        "coppie": 27,
+        "ingressi": 8,
+        "quotaIngressi": 0.296,
+        "scartoDallaMedia": -0.61,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Vetrina dei trofei": 3,
+          "Dintorni del complesso": 2,
+          "Beef Bowl Shop": 1,
+          "Camera della Vacuità": 1,
+          "Caserma": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -477,6 +723,21 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
+      "proiezione": {
+        "coppie": 29,
+        "ingressi": 9,
+        "quotaIngressi": 0.31,
+        "scartoDallaMedia": -0.47,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Vetrina dei trofei": 2,
+          "Aspetta il treno": 1,
+          "Beef Bowl Shop": 1,
+          "Chiama ascensore": 1,
+          "Corridoio mezzavia tribordo": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -492,6 +753,7 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -521,6 +783,7 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -536,6 +799,7 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -551,6 +815,7 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -566,6 +831,18 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.04,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Corridoio della prigione": 1,
+          "Libreria Taiheido": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -581,6 +858,15 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 3,
+        "ingressi": 2,
+        "quotaIngressi": 0.667,
+        "scartoDallaMedia": 1.14,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -609,6 +895,15 @@
         "tipoSpillo": null,
         "etichetta": null,
         "stato": "non-determinato"
+      },
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.04,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
       },
       "tipoSpillo": null,
       "etichetta": null,
@@ -639,6 +934,18 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
+      "proiezione": {
+        "coppie": 3,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.28,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Scaffale": 1,
+          "Scivola giù": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -654,6 +961,15 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 2,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.92,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -687,10 +1003,29 @@
         "etichetta": null,
         "stato": "non-determinato"
       },
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "proiezione": {
+        "coppie": 43,
+        "ingressi": 6,
+        "quotaIngressi": 0.14,
+        "scartoDallaMedia": -2.92,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Tira leva": 8,
+          "Magazzino audiovisivi": 6,
+          "Usa il regolatore di luminosità": 5,
+          "Negozio di incensi": 3,
+          "Mensa": 2
+        },
+        "proposta": {
+          "tipoSpillo": "meccanismo",
+          "etichetta": "Meccanismo",
+          "motivo": "13 etichette su 28 dicono «meccanismo»"
+        }
+      },
+      "tipoSpillo": "meccanismo",
+      "etichetta": "Meccanismo",
+      "stato": "ipotesi",
+      "prova": "cio' che la proiezione trova sotto il pin: 13 etichette su 28 dicono «meccanismo»"
     },
     {
       "tipoNativo": 45,
@@ -702,6 +1037,7 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -717,6 +1053,21 @@
       "nomeNativo": "アイコン：自販機",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 18,
+        "ingressi": 9,
+        "quotaIngressi": 0.5,
+        "scartoDallaMedia": 1.31,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Distributore automatico": 2,
+          "Angolo studio": 1,
+          "Bar": 1,
+          "Libri": 1,
+          "Macchina fototessere": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "distributore",
       "etichetta": "Distributore di bevande",
       "stato": "determinato",
@@ -732,6 +1083,15 @@
       "nomeNativo": "アイコン：宝くじ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "attivita",
       "etichetta": "Lotteria",
       "stato": "determinato",
@@ -747,6 +1107,15 @@
       "nomeNativo": "アイコン：バイト情報",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 2,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.92,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "cercalavoro",
       "etichetta": "Bacheca dei lavori",
       "stato": "determinato",
@@ -762,6 +1131,15 @@
       "nomeNativo": "アイコン：ジューサーバー",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "distributore",
       "etichetta": "Chiosco dei succhi",
       "stato": "determinato",
@@ -777,6 +1155,17 @@
       "nomeNativo": "アイコン：キヨスク",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Centro comm. sotterraneo": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Chiosco",
       "stato": "determinato",
@@ -792,6 +1181,17 @@
       "nomeNativo": "アイコン：本屋",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 3,
+        "ingressi": 2,
+        "quotaIngressi": 0.667,
+        "scartoDallaMedia": 1.14,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Centro della movida": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Libreria",
       "stato": "determinato",
@@ -807,6 +1207,17 @@
       "nomeNativo": "アイコン：レンタルDVD",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Negozio di videonoleggio": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Noleggio di film",
       "stato": "determinato",
@@ -822,6 +1233,17 @@
       "nomeNativo": "アイコン：ファミレス",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Diner": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "ristorante",
       "etichetta": "Ristorante di famiglia",
       "stato": "determinato",
@@ -837,6 +1259,17 @@
       "nomeNativo": "アイコン：牛丼",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Beef Bowl Shop": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "ristorante",
       "etichetta": "Manzo e riso",
       "stato": "determinato",
@@ -852,6 +1285,15 @@
       "nomeNativo": "アイコン：ミリタリーショップ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Negozio softair",
       "stato": "determinato",
@@ -867,6 +1309,17 @@
       "nomeNativo": "アイコン：ゲーセン",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 1,
+        "quotaIngressi": 0.5,
+        "scartoDallaMedia": 0.44,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Karaoke": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "sala-giochi",
       "etichetta": "Sala giochi",
       "stato": "determinato",
@@ -882,6 +1335,17 @@
       "nomeNativo": "アイコン：コンビニ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sala giochi": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Minimarket",
       "stato": "determinato",
@@ -897,6 +1361,15 @@
       "nomeNativo": "アイコン：ジム",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "attivita",
       "etichetta": "Palestra",
       "stato": "determinato",
@@ -912,6 +1385,15 @@
       "nomeNativo": "アイコン：ビックバンバーガー",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "ristorante",
       "etichetta": "Big Bang Burger",
       "stato": "determinato",
@@ -927,6 +1409,15 @@
       "nomeNativo": "アイコン：ドラッグストア",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Farmacia",
       "stato": "determinato",
@@ -942,6 +1433,17 @@
       "nomeNativo": "アイコン：ドンキ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sottopasso": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Grande magazzino",
       "stato": "determinato",
@@ -957,6 +1459,17 @@
       "nomeNativo": "アイコン：映画館",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 3,
+        "ingressi": 2,
+        "quotaIngressi": 0.667,
+        "scartoDallaMedia": 1.14,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Clinica di agopuntura": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "cinema",
       "etichetta": "Cinema",
       "stato": "determinato",
@@ -972,6 +1485,17 @@
       "nomeNativo": "アイコン：花屋",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 1,
+        "quotaIngressi": 0.5,
+        "scartoDallaMedia": 0.44,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Stanza di Velluto": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Fioraio",
       "stato": "determinato",
@@ -987,6 +1511,17 @@
       "nomeNativo": "アイコン：スーパー",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Tavolo": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
       "stato": "determinato",
@@ -1002,6 +1537,15 @@
       "nomeNativo": "アイコン：スポーツ用品",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Articoli sportivi",
       "stato": "determinato",
@@ -1017,6 +1561,17 @@
       "nomeNativo": "アイコン：和風雑貨",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Negozio d'articoli locali": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Articoli tradizionali",
       "stato": "determinato",
@@ -1032,6 +1587,17 @@
       "nomeNativo": "アイコン：宝石店",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Gioielleria": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Gioielleria",
       "stato": "determinato",
@@ -1047,6 +1613,17 @@
       "nomeNativo": "アイコン：アクセサリー",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Negozio di accessori": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Accessori",
       "stato": "determinato",
@@ -1062,6 +1639,17 @@
       "nomeNativo": "アイコン：コスメ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Negozio di cosmetici": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Cosmetici",
       "stato": "determinato",
@@ -1077,6 +1665,18 @@
       "nomeNativo": "アイコン：パン屋",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 2,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.04,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Libri": 1,
+          "Piazza della stazione": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Panetteria",
       "stato": "determinato",
@@ -1092,6 +1692,19 @@
       "nomeNativo": "アイコン：トイレ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 3,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.28,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Aula computer": 1,
+          "Aula di Cucito": 1,
+          "Libri": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "nota",
       "etichetta": "Servizi igienici",
       "stato": "determinato",
@@ -1107,6 +1720,17 @@
       "nomeNativo": "アイコン：教室",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Calligrafia": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "attivita",
       "etichetta": "Aula",
       "stato": "determinato",
@@ -1122,6 +1746,7 @@
       "nomeNativo": "アイコン：囚人高校",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Scuola",
       "stato": "determinato",
@@ -1137,6 +1762,17 @@
       "nomeNativo": "アイコン：バー",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Cinema": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "ristorante",
       "etichetta": "Bar",
       "stato": "determinato",
@@ -1152,6 +1788,17 @@
       "nomeNativo": "アイコン：雑貨屋",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Cartello": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Casalinghi",
       "stato": "determinato",
@@ -1167,6 +1814,15 @@
       "nomeNativo": "アイコン：レトロゲーム",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Retrogiochi",
       "stato": "determinato",
@@ -1182,6 +1838,15 @@
       "nomeNativo": "アイコン：メイドカフェ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "ristorante",
       "etichetta": "Maid café",
       "stato": "determinato",
@@ -1197,6 +1862,17 @@
       "nomeNativo": "アイコン：カチャガチャ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Mensola articoli": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Distributori di capsule",
       "stato": "determinato",
@@ -1212,6 +1888,15 @@
       "nomeNativo": "アイコン：家電量販店",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Elettronica",
       "stato": "determinato",
@@ -1227,6 +1912,15 @@
       "nomeNativo": "アイコン：グッズショップ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Gadget",
       "stato": "determinato",
@@ -1242,6 +1936,15 @@
       "nomeNativo": "アイコン：工具店",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Ferramenta",
       "stato": "determinato",
@@ -1257,6 +1960,17 @@
       "nomeNativo": "アイコン：銭湯",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Pianta d'appartamento": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "terme",
       "etichetta": "Bagno pubblico",
       "stato": "determinato",
@@ -1272,6 +1986,15 @@
       "nomeNativo": "アイコン：ルブラン",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "casa",
       "etichetta": "Café Leblanc",
       "stato": "determinato",
@@ -1287,6 +2010,17 @@
       "nomeNativo": "アイコン：コインランドリー",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Mensola": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "lavanderia",
       "etichetta": "Lavanderia automatica",
       "stato": "determinato",
@@ -1302,6 +2036,15 @@
       "nomeNativo": "アイコン：バッティング",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "attivita",
       "etichetta": "Gabbie di battuta",
       "stato": "determinato",
@@ -1317,6 +2060,15 @@
       "nomeNativo": "アイコン：リサイクルショップ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Usato",
       "stato": "determinato",
@@ -1332,6 +2084,15 @@
       "nomeNativo": "アイコン：診療所",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Clinica",
       "stato": "determinato",
@@ -1347,6 +2108,17 @@
       "nomeNativo": "アイコン：文房具",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Negozio di telefonia": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Cartoleria",
       "stato": "determinato",
@@ -1362,6 +2134,15 @@
       "nomeNativo": "アイコン：古着屋",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Abbigliamento usato",
       "stato": "determinato",
@@ -1377,6 +2158,15 @@
       "nomeNativo": "アイコン：お寺",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "culto",
       "etichetta": "Tempio",
       "stato": "determinato",
@@ -1392,6 +2182,7 @@
       "nomeNativo": "アイコン：ジャズクラブ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": "attivita",
       "etichetta": "Jazz club",
       "stato": "determinato",
@@ -1407,6 +2198,15 @@
       "nomeNativo": "アイコン：パワーストーン",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Pietre",
       "stato": "determinato",
@@ -1422,6 +2222,17 @@
       "nomeNativo": "アイコン：ダーツ",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Ottico": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "attivita",
       "etichetta": "Freccette",
       "stato": "determinato",
@@ -1437,6 +2248,17 @@
       "nomeNativo": "アイコン：お香",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Bar": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Incensi",
       "stato": "determinato",
@@ -1452,6 +2274,15 @@
       "nomeNativo": "アイコン：揚げ物屋",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "ristorante",
       "etichetta": "Fritti",
       "stato": "determinato",
@@ -1467,6 +2298,15 @@
       "nomeNativo": "スーパー（小）",
       "associazione": "blocco-urbano-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "negozio",
       "etichetta": "Supermercato",
       "stato": "determinato",
@@ -1498,6 +2338,15 @@
         "etichetta": "Seme della bramosia",
         "stato": "determinato"
       },
+      "proiezione": {
+        "coppie": 13,
+        "ingressi": 8,
+        "quotaIngressi": 0.615,
+        "scartoDallaMedia": 1.99,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": "seme-bramosia",
       "etichetta": "Seme della bramosia",
       "stato": "determinato",
@@ -1513,6 +2362,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Avvia Personalizza Covo": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1528,6 +2388,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Avvia lettore musicale": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1543,6 +2414,15 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1558,6 +2438,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda galleria": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1573,6 +2464,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Gioca a Magnate": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1588,6 +2490,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 4,
+        "ingressi": 1,
+        "quotaIngressi": 0.25,
+        "scartoDallaMedia": -0.43,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 2
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1603,6 +2516,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 5,
+        "ingressi": 4,
+        "quotaIngressi": 0.8,
+        "scartoDallaMedia": 2.1,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda galleria": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1618,6 +2542,15 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1633,6 +2566,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Bar": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1648,6 +2592,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Bar": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1663,6 +2618,15 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1678,6 +2642,7 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1693,6 +2658,7 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": null,
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1708,6 +2674,17 @@
       "nomeNativo": null,
       "associazione": "urbano-non-dimostrato",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Negozio d'abbigliamento": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1723,6 +2700,17 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -0.74,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Sali sul treno": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1738,6 +2726,18 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 9,
+        "ingressi": 1,
+        "quotaIngressi": 0.111,
+        "scartoDallaMedia": -1.51,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 6,
+          "Divano elegante": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1753,10 +2753,26 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "proiezione": {
+        "coppie": 10,
+        "ingressi": 3,
+        "quotaIngressi": 0.3,
+        "scartoDallaMedia": -0.35,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 4,
+          "Modello psi-cognitivo Eden": 1
+        },
+        "proposta": {
+          "tipoSpillo": "nota",
+          "etichetta": "Da guardare",
+          "motivo": "4 etichette su 5 dicono «da guardare»"
+        }
+      },
+      "tipoSpillo": "nota",
+      "etichetta": "Da guardare",
+      "stato": "ipotesi",
+      "prova": "cio' che la proiezione trova sotto il pin: 4 etichette su 5 dicono «da guardare»"
     },
     {
       "tipoNativo": 115,
@@ -1768,10 +2784,26 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite né le procedure che accendono la sua bandiera lo dicono"
+      "proiezione": {
+        "coppie": 14,
+        "ingressi": 1,
+        "quotaIngressi": 0.071,
+        "scartoDallaMedia": -2.2,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 8,
+          "Divano elegante": 1
+        },
+        "proposta": {
+          "tipoSpillo": "nota",
+          "etichetta": "Da guardare",
+          "motivo": "8 etichette su 9 dicono «da guardare»"
+        }
+      },
+      "tipoSpillo": "nota",
+      "etichetta": "Da guardare",
+      "stato": "ipotesi",
+      "prova": "cio' che la proiezione trova sotto il pin: 8 etichette su 9 dicono «da guardare»"
     },
     {
       "tipoNativo": 116,
@@ -1783,6 +2815,17 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 6,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.81,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 6
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1798,6 +2841,17 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 4,
+        "ingressi": 1,
+        "quotaIngressi": 0.25,
+        "scartoDallaMedia": -0.43,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 2
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1813,6 +2867,18 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 3,
+        "ingressi": 0,
+        "quotaIngressi": 0.0,
+        "scartoDallaMedia": -1.28,
+        "mediaIngressi": 0.352,
+        "etichette": {
+          "Guarda premi": 2,
+          "Modello psi-cognitivo Eden": 1
+        },
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1828,6 +2894,15 @@
       "nomeNativo": null,
       "associazione": "fuori-dal-blocco-urbano",
       "script": null,
+      "proiezione": {
+        "coppie": 1,
+        "ingressi": 1,
+        "quotaIngressi": 1.0,
+        "scartoDallaMedia": 1.36,
+        "mediaIngressi": 0.352,
+        "etichette": {},
+        "proposta": null
+      },
       "tipoSpillo": null,
       "etichetta": null,
       "stato": "non-determinato",
@@ -1864,9 +2939,16 @@
   "summary": {
     "tipi": 102,
     "determinati": 56,
-    "nonDeterminati": 46,
+    "ipotesi": 6,
+    "nonDeterminati": 40,
+    "pinConIpotesi": 319,
+    "perTipoIpotesi": {
+      "passaggio": 3,
+      "meccanismo": 1,
+      "nota": 2
+    },
     "pinDeterminati": 432,
-    "pinNonDeterminati": 997,
+    "pinNonDeterminati": 678,
     "perTipoSpillo": {
       "porta": 1,
       "meccanismo": 1,
@@ -1890,8 +2972,8 @@
       "nome interno dello sprite del blocco urbano dimostrato": 51
     },
     "motiviNonDeterminati": {
-      "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 2,
-      "né lo sprite né le procedure che accendono la sua bandiera lo dicono": 44
+      "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera": 1,
+      "né lo sprite né le procedure che accendono la sua bandiera lo dicono": 39
     }
   },
   "limits": [

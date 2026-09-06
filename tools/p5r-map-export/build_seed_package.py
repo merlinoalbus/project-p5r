@@ -161,11 +161,14 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
         for indice in rif['collocabili']:
             p = mappa_nativa['pins'][indice]
             sem = semantica.get(p['nativeType'])
-            if not sem or sem['stato'] != 'determinato':
-                esiti['tipo nativo senza significato dimostrato'] += 1
+            if not sem or sem['stato'] not in ('determinato', 'ipotesi'):
+                esiti['tipo nativo senza significato'] += 1
                 continue
             luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
             nota = ['Pin nativo del gioco.']
+            if sem['stato'] == 'ipotesi':
+                # dichiarato per quello che e': un indizio forte, non una dimostrazione
+                nota.append('Che cosa sia e’ un’ipotesi, non una certezza: ' + sem['prova'] + '.')
             # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
             if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')
