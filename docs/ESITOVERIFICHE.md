@@ -1497,3 +1497,15 @@ La conversione in corso copre i JSON, ma quattro output testuali continuano a pa
 la soluzione robusta è usare `scrivi_testo()` anche in questi punti e includerli nella doppia
 rigenerazione. Se qualcuno non fa parte degli artefatti versionati del lotto, va escluso con un
 elenco motivato e il test deve fallire se un file non dichiarato sfugge al confronto.
+
+### Preflight `rigenera_tutto.py` — produttore dichiarato ma non eseguito
+
+Nella bozza non pubblicata di `rigenera_tutto.py`, `SPECIALI` definisce gli argomenti necessari a
+`world_connections.py`, ma `world_connections.py` non compare in `ORDINE`. L'entry di `SPECIALI`
+è dunque morta e `mondo_connessioni_evidenze.json` non viene rigenerato: un confronto fra due
+directory può lasciare identico un file obsoleto e dichiarare falsamente il lotto completo.
+
+**Sanamento:** inserire `world_connections.py` in `ORDINE` con gli argomenti `SPECIALI` e aggiungere
+una prova che l'insieme dei produttori dichiarati in `ORDINE`, quelli speciali e gli output attesi
+sia coerente e completo. La prova deve fallire sia togliendo `world_connections.py` dall'ordine,
+sia aggiungendo una voce a `SPECIALI` senza produttore eseguibile.
