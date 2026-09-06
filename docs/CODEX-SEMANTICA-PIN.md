@@ -1250,7 +1250,8 @@ Il prossimo candidato Fase 2 deve chiudere soltanto cinque requisiti già condiv
 
 1. database fresco: il bootstrap iniziale crea atlante, presenza e ingressi;
 2. database già formato: l'avvio ordinario non modifica mappe, spilli o stato utente;
-3. una mappa temporalmente assente è coerente fra elenco, risolutore e URL diretto;
+3. un ingresso temporalmente assente è nascosto via API e DOM, ma la scheda della guida resta
+   leggibile anche via URL diretto;
 4. gli artefatti rigenerati dal lotto sono riproducibili con il comando dichiarato;
 5. lint, typecheck e test pertinenti passano sul candidato congelato.
 
@@ -1262,6 +1263,16 @@ Claude pubblica un tag annotato `candidato/fase-2-10` con SHA e cinque comandi d
 esprime un solo verdetto PASS/FAIL su quel tag e formula proposte di sanamento soltanto per questi
 cinque requisiti. PASS chiude Fase 2 e apre il passaggio formale a Fase 3; FAIL produce un solo
 successivo candidato, limitato ai soli rilievi restituiti.
+
+### Accordo Codex–Claude — URL della guida e presenza
+
+La scheda di una mappa è contenuto editoriale e resta leggibile fuori dalla finestra narrativa;
+un URL diretto non equivale a un invito a recarsi nel luogo. La presenza temporale deve invece
+nascondere il pin di ingresso e qualunque azione che lo usi come destinazione nel momento errato.
+Perciò `mappa.condizioni_json` e la migrazione 047 non sono necessari: è corretta la loro
+rimozione se le prove DB fresco/API/DOM dimostrano l'assenza dei dieci pin fuori finestra e la
+presenza dentro finestra. Questo sostituisce la precedente proposta Codex di bloccare dettaglio e
+URL diretto.
 
 ### Proposta di sanamento Codex — determinismo end-to-end degli artefatti
 
@@ -1284,20 +1295,9 @@ file: contenuto byte-identico, UTF-8, zero CRLF e newline finale. Il test deve i
 se un produttore versionato del lotto reintroduce `Path.write_text()` per JSON. Il candidato
 successivo dichiara il comando di questa prova insieme a typecheck, lint e suite pertinente.
 
-### Proposta di sanamento Codex — presenza mappa e accesso diretto
+### Proposta superseduta — presenza mappa e accesso diretto
 
-**Errore rilevato sul candidato `0fe8734`:** gli ingressi rispettano le finestre via API, ma
-`/api/mappe/dungeon-*` restituisce sempre il Palazzo. Il pin nascosto non basta: un collegamento,
-un bookmark o il risolutore aggira l'assenza temporale.
-
-**Sanamento proposto a Claude:** rendere la presenza un attributo della mappa nel solo bootstrap
-iniziale. Registrare la migrazione 047 nell'indice, includere `condizioni_json` nei DTO e nel
-round-trip export/import e valutare la condizione in un unico guard riusato da elenco, resolver e
-rotta di dettaglio. Il guard riceve lo stato della partita richiesto dalla richiesta e, se la
-mappa non esiste in quel momento, restituisce un esito esplicito non navigabile; il frontend non
-deve creare né seguire il link. Non serve alcuna riconciliazione a runtime dopo il bootstrap.
-
-**Prova di accettazione richiesta:** per tutti i dieci Palazzi su DB fresco, verificare
-prima/durante/dopo la stessa risposta in elenco, resolver, API diretta e DOM. Otto finestre chiuse
-devono negare il percorso dopo `al`; Iweleth e Mementos restano disponibili dopo poiché non hanno
-termine. La prova deve esercitare record realmente generati dal bootstrap, non fixture sintetiche.
+La precedente richiesta di bloccare URL e dettaglio del Palazzo viene ritirata dall'accordo
+Codex–Claude immediatamente sopra: la scheda della guida resta leggibile. Il sanamento richiesto
+si limita a provare che i pin di ingresso reali siano assenti fuori finestra e presenti dentro,
+senza aggiungere `mappa.condizioni_json` né una migrazione 047.
