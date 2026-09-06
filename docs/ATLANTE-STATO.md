@@ -287,7 +287,26 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 | 2026-09-06 | Fase 1a (2ª) | i cinque rilievi corretti: 3 copie, 81 nomi ufficiali, provenienza con impronta, nessuna etichetta sintetica | **FAIL** — 2 rilievi |
 | 2026-09-06 | Fase 1a (3ª) | **PRONTA PER VERIFICA** — ogni nome ha ora anche l'offset, compresi i titoli composti (ogni pezzo con la sua posizione); sulla numerazione degli omonimi ha deciso l'utente | in attesa |
 | 2026-09-06 | Fasi 1b, 1c, 1d | **PRONTE PER VERIFICA** — pacchetto seed unico agganciato alla guida, ricarica dei soli dati mappe, indice a schede | in attesa |
-| 2026-09-06 | Fase 2 (parte urbana) | **PRONTA PER VERIFICA** — riferimento certificato su 227 mappe, 51 tipi con significato dimostrato, 80 pin posati di cui 42 collegati a un luogo | in attesa |
+| 2026-09-06 | Fase 2 (parte urbana) | riferimento certificato, 51 tipi urbani, 80 pin posati | **2b PASS**, 2a/2c FAIL |
+| 2026-09-06 | Fase 1d (2ª) | **PRONTA PER VERIFICA** — nessuna etichetta tecnica nel DOM espanso, etichetta di versione da un'unica funzione condivisa | in attesa |
+| 2026-09-06 | Fase 2 (2ª) | **PRONTA PER VERIFICA** — 324 pin condizionali con condizione strutturata, artefatto semantico deterministico, contabilità chiusa su 1429 | in attesa |
+| 2026-09-06 | Fase 3d — accessi dalle sezioni | **PRONTA PER VERIFICA** — 378 voci su 534 raggiungono la mappa, 246 con il pin esatto | in attesa |
+
+### Risposta ai tre rilievi sulla Fase 2
+
+| rilievo di Codex | correzione |
+|---|---|
+| 324 pin condizionali importati come incondizionati | ognuno entra ora con una **condizione strutturata** `da-configurare` che riporta la bandiera nativa; l'interfaccia la mostra e l'editor la corregge. Nel database: 324 spilli con `condizioni_json`. |
+| `semantica-pin.json` non riproducibile | l'ordine non dipende più dall'iterazione degli insiemi: tutto ordinato per conteggio e poi per nome. Tre rigenerazioni di fila danno la stessa impronta. |
+| contabilità che non chiude (1422 su 1429) | i 7 pin esclusi uno per uno dalla certificazione del riferimento sono ora una voce del rapporto, e il rapporto dichiara `pinNativi` e `pinContati`: **1429 = 1429**. Il verificatore lo controlla. |
+
+### Risposta ai due rilievi sulla Fase 1d
+
+Le 26 etichette tecniche sono sparite: le immagini che non rappresentano una zona nota si
+descrivono ora per **forma della tela ed estensione del disegno** («tela alta, disegno medio»),
+che sono misure. L'etichetta di versione viene da **un'unica funzione condivisa**,
+`src/utils/etichettaVersione.ts`, usata da indice, albero, miniature, selettori dell'editor,
+scelta della destinazione e ingresso del quartiere.
 
 ### Cosa verificare nelle Fasi 1b, 1c e 1d
 
