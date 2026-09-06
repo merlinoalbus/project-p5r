@@ -240,3 +240,19 @@ Confronto automatico di tutte le 900 azioni di `data/seed/percorso.json` con le 
 - Planimetrie native: pacchetto portabile di 301 canvas verificati pixel per pixel, importazione isolata di 301 immagini e 21 gruppi di risorse, zero mappe saltate; 7 viste urbane conservate a parte. Staging validato; collegamenti fisici e condizioni narrative ancora da integrare.
 - Importatore: validato il limite di 64 MB sulla sola POST di importazione, prima del limite globale di 5 MB; 27 test, typecheck, lint e build superati.
 - Requisiti del mondo: accessibilità e interazioni devono seguire giorno, fascia, meteo, avanzamento, confidenti e Persona della partita attiva. Il livello delle Persona non è ancora tra i requisiti delle mappe. La rigenerazione di un vecchio pin al riavvio, osservata nell’istanza isolata, deve essere risolta prima della migrazione definitiva.
+
+## Fasi 5-7 — interfaccia, grafica e revisione (aggiunte il 6 settembre 2026)
+
+Richiesta dell'utente, da affrontare dopo il completamento delle fasi 0-4. Il dettaglio e la
+divisione del lavoro con Codex stanno in `docs/ATLANTE-STATO.md`, sezione «Ampliamento del piano».
+
+- **Fase 5 — pagine dell'app.** Layout grafico e moderno per desktop, tablet e cellulare su Mappe,
+  Palazzi e Dedali, La città, Negozi e inventario, Attività e doti sociali, Covo dei ladri,
+  Oggetti, Materiali e fabbricazione, più le categorie di oggetti delle guide che oggi non hanno
+  una pagina. Ogni riferimento alla mappa passa dal risolutore dell'atlante unificato, e la
+  posizione si vede già in pagina.
+- **Fase 6 — elementi grafici.** Segnalini rigenerati come PNG con alfa reale e sola figura (la
+  forma del pin la disegna l'app); copertura di tutta l'interfaccia dove oggi manca l'asset. Le
+  immagini le genera Codex, i prompt li scrive e li verifica Claude.
+- **Fase 7 — revisione incrociata.** Passata sui difetti sfuggiti, con la regola che chi implementa
+  non verifica e viceversa.

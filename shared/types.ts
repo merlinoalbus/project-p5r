@@ -1502,6 +1502,35 @@ export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
 
 export interface DestinazioneSpillo { mappa: string; x: number; y: number; zoom: number }
 
+/** Le prove native di uno spillo importato dai dati del gioco.
+ *
+ * `daVerificare` distingue i due casi che contano. Falso: il significato del tipo è dimostrato, e
+ * questi campi sono solo tracciabilità. Vero: il gioco disegna quel pin con una certa icona ma che
+ * cosa indichi non è ancora provato, e allora `prove` porta tutto ciò che si è raccolto — quante
+ * volte compare e dove, quali procedure ne accendono la bandiera, quali testi il gioco mostra lì
+ * vicino — perché qualcuno possa chiudere la questione guardando le schermate. */
+export interface NativoSpilloDto {
+  /** Identificatore del tipo nei record `ICON_*.BIN` del gioco. */
+  tipoNativo: number;
+  /** Posizione del pin dentro il record della sua planimetria. */
+  indicePin: number;
+  /** La bandiera che ne governa la comparsa, dove il pin è condizionato. */
+  bandiera?: number | null;
+  condizionale?: boolean;
+  /** La parte grafica con cui il gioco lo disegna, e lo sprite che le corrisponde. */
+  partId?: number | null;
+  indiceSprite?: number | null;
+  /** Il nome interno dello sprite, in giapponese: è il nome che il gioco stesso gli dà. */
+  nomeNativo?: string | null;
+  png?: string | null;
+  /** Perché la parte grafica non ha una sorgente, dove non ce l'ha. */
+  motivoSenzaSprite?: string | null;
+  /** Il significato del tipo non è dimostrato: questo spillo è un segnaposto da controllare. */
+  daVerificare?: boolean;
+  /** Tutto ciò che si è raccolto sul tipo, per chi va a verificarlo. */
+  prove?: Record<string, unknown> | null;
+}
+
 export interface SpilloDto {
   destinazione?: DestinazioneSpillo | null;
   /** A previous explicit destination was deleted; never fall back to the entity link. */
@@ -1520,6 +1549,12 @@ export interface SpilloDto {
   collezionabile: boolean;
   /** Localizzazione del luogo, senza attestare la disponibilità delle attività. */
   soloPosizione?: boolean;
+  /** Le prove native, per gli spilli che vengono dai dati del gioco.
+   *
+   * Non è un dettaglio tecnico da nascondere: per i tipi il cui significato non è ancora
+   * dimostrato è ciò che permette di verificarli guardando le schermate — il nome che il gioco
+   * dà allo sprite, la parte grafica con cui lo disegna e le tracce raccolte negli script. */
+  nativo?: NativoSpilloDto | null;
   /** Condizioni di visibilità (vuoto = sempre visibile), con testo descrittivo. */
   condizioni: CondizioneSpilloDto[];
   /** Con la partita: esito delle condizioni alla data corrente (bloccato = nascosto sulla mappa). */
@@ -1567,7 +1602,7 @@ export interface EsportazioneMappeDto {
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ soloPosizione?: boolean; nativo?: NativoSpilloDto | null; destinazione?: DestinazioneSpillo | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */

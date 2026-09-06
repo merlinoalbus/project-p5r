@@ -25,6 +25,7 @@ import { AssetImg } from '../shared/AssetImg';
 import { Modal } from '../shared/Modal';
 import { ChipDisponibilita } from '../guida/ChipDisponibilita';
 import { CondizioniSpilloElenco } from './CondizioniSpillo';
+import { ProveNativeSpillo } from './ProveNativeSpillo';
 import type { ImmagineSpilloDto } from '../../types';
 import { formattaYen } from '../../utils/punti';
 import { useSuggerimenti } from '../../stores/suggerimentiStore';
@@ -642,6 +643,7 @@ export function SchedaSpillo<T extends SpilloDto | SchedaContenutoGuidaDto>({ re
         <button type="button" className="btn btn-ghost btn-sm" onClick={onChiudi} aria-label="Chiudi la scheda">×</button>
       </div>
       {s.descrizione && <p className="m-0 text-[13px] text-text-secondary whitespace-pre-line">{s.descrizione}</p>}
+      {s.nativo?.daVerificare && <ProveNativeSpillo nativo={s.nativo} />}
       <CondizioniSpilloElenco condizioni={s.condizioni} disponibilita={s.disponibilita} />
       <GalleriaSpillo immagini={s.immagini} nome={s.nome} />
 

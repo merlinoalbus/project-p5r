@@ -13,7 +13,74 @@ pronto e a ogni punto di lavoro significativo; faccio `git pull` prima di legger
 
 - Worktree: `C:\Repository\project-p5r-main`, ramo `lavoro/atlante-mondo`
 - App: BE 3101 / FE 5273 (`bash scripts/start-all.sh`), DB `data/project-p5r.db` (1 partita dell'utente)
-- Piano completo: le 5 fasi sono descritte qui sotto in sintesi; il dettaglio è nel piano approvato
+- Piano completo: le fasi sono descritte qui sotto in sintesi; il dettaglio è nel piano approvato
+
+---
+
+## Ampliamento del piano — richiesta dell'utente del 6 settembre 2026
+
+Tre fasi nuove, **dopo** il completamento di quelle in corso. Sono scritte qui perché questo è il
+file che Codex legge: servono a organizzarci il lavoro prima di cominciarlo, non dopo.
+
+### Fase 5 — Rifacimento delle pagine dell'applicazione
+
+Layout dichiaratamente grafico e moderno, ottimizzato per **desktop, tablet e cellulare** (l'app si
+usa col tablet in mano mentre si gioca: i bersagli restano ≥ 44px e la lettura viene prima
+dell'ornamento). Pagine interessate:
+
+`Mappe` · `Palazzi e Dedali` · `La città` · `Negozi e inventario` · `Attività e doti sociali` ·
+`Covo dei ladri` · `Oggetti` · `Materiali e fabbricazione` — **più** le altre categorie di oggetti
+che le guide distinguono e che oggi non hanno una loro pagina: armi da mischia, armi a distanza,
+protezioni, accessori, abiti, libri, DVD a noleggio, carte abilità, regali per i confidenti,
+oggetti chiave.
+
+Due regole valgono ovunque:
+
+1. **ogni riferimento alla mappa punta al punto di ancoraggio sull'atlante unificato**, cioè al
+   risolutore `/guida/mondo/<tipo>/<chiave>`, mai alla scheda e mai a un elenco. È lo stesso
+   difetto già trovato in `OggettiPage` e va escluso per costruzione, non pagina per pagina;
+2. **la posizione si vede già in pagina**, in un'area apposta: non basta il collegamento, ci vuole
+   il pezzo di mappa con il pin acceso, così chi consulta sa dov'è senza cambiare schermata.
+
+### Fase 6 — Elementi grafici mancanti
+
+**La generazione delle immagini è di Codex, in esclusiva.** Io scrivo i prompt, verifico il
+risultato e lo integro; non genero immagini.
+
+- **tutti i segnalini vanno rigenerati** come PNG con **canale alfa reale** e con la sola figura
+  (niente cornice, niente goccia, niente ombra): la forma del pin la disegna l'applicazione, e
+  l'immagine ci va dentro. Oggi alcuni asset sono spilli completi, e questo impedisce di cambiare
+  forma o stato senza rifare l'immagine;
+- gli elementi grafici mancanti vanno coperti **in tutta l'interfaccia**, non solo nelle pagine
+  della Fase 5: dove oggi c'è una riserva SVG o un buco, ci va l'asset;
+- ogni prompt porta nome del file di destinazione in `public/asset/…`, dimensione, sfondo
+  trasparente, palette e testo in italiano, come le voci già presenti in
+  `docs/grafica/prompt-immagini.md`.
+
+### Fase 7 — Revisione incrociata finale
+
+Una passata su tutto per i difetti di implementazione sfuggiti. Vale la regola che fin qui ha
+funzionato, e va tenuta stretta:
+
+> **chi implementa non verifica, e chi verifica non implementa.** Mai la stessa entità su
+> entrambi i lati dello stesso pezzo.
+
+Siamo pari grado: per i pezzi che scrive Codex la verifica è mia, con la stessa severità con cui
+lui ha verificato me — e gli esiti li scrivo dove li scrive lui, così restano confrontabili.
+
+### Come ci dividiamo il lavoro (proposta a Codex)
+
+| ambito | implementa | verifica |
+|---|---|---|
+| pagine e componenti dell'app (Fase 5) | io | Codex |
+| prompt grafici (Fase 6) | io | Codex |
+| generazione delle immagini (Fase 6) | **Codex** | **io** |
+| integrazione degli asset nell'app | io | Codex |
+| revisione finale, metà del perimetro ciascuno (Fase 7) | a testa | l'altro |
+
+Perché la Fase 6 non si blocchi in attesa: i prompt li consegno **a lotti** per area
+(segnalini → icone di sezione → illustrazioni), così Codex può generare mentre io continuo sulle
+pagine. Ogni lotto ha una sua voce in `docs/grafica/stato-generazione-asset.md` con lo stato.
 
 ---
 
