@@ -266,6 +266,22 @@ minimappa in gioco, `P5_MAPDATA.SPD` è la mappa della metropolitana, `MEMENTOS.
 dei Memento. Nessuno indicizza i tipi 4–45 con uno scarto costante, e le ancore note (10 porta,
 12 meccanismo, 17 e 26 forziere, 97 seme) non ammettono alcuno scarto comune.
 
+Altre due strade cercate e chiuse, perché non le ricerchi di nuovo chi legge:
+
+* **`ROADMAP.TBL → texlist.bin`** (672 byte, 336 slot di cui 176 pieni, valori da 1 a 199) non è
+  una mappa da tipo di pin a sprite: gli slot pieni cominciano da 48 e i tipi con significato già
+  noto — 10 porta, 12 meccanismo, 17 e 26 forziere, 46 distributore — non vi compaiono affatto.
+  È l'elenco delle texture della roadmap, 176 voci per 178 risorse.
+* **Il manifest degli archivi** (`data/atlas/original-archives/manifest.json`) elenca soltanto i
+  1480 file estratti, con hash e dimensione: non contiene l'indice dei CPK, quindi da qui non si
+  può nemmeno sapere quali file esistono e non sono stati presi.
+
+Quello che servirebbe, e che va cercato nei CPK completi, sono i percorsi
+`*/FIELD/PANEL/ROADMAP/*.SPD` e `*.PLG` — il foglio sprite e il layout della mappa d'insieme dei
+Palazzi — e l'eventuale script che li disegna. Nella cartella ROADMAP dei 1480 file ci sono solo
+`ICON_*.BIN`, `DISP_*.BIN`, `PARTS_*.BIN`, le texture `RMAP_*.DDS` e `ROADMAP.TBL`: la parte che
+dice *come* quelle icone vengono disegnate non è stata estratta.
+
 Questo è il punto in cui è arrivata la misura, con gli scarti provati e i motivi scritti. Non lo
 chiamo limite invalicabile: chiamo così la differenza fra quello che oggi è provato e quello che
 non lo è, e che nessuna soglia più generosa può colmare.
