@@ -1,27 +1,34 @@
 // ============================================================
-// npm run oggetti:crosswalk — lega gli oggetti della guida agli articoli del catalogo
+// npm run oggetti:crosswalk — lega gli oggetti della guida ai negozi e agli articoli
 // ============================================================
 //
-//   npx tsx --env-file=.env scripts/genera-crosswalk-oggetti.ts [--dati <cartella>]
+//   npx tsx --env-file=.env scripts/genera-crosswalk-oggetti.ts [--dati <cartella>] [--out <file>]
 //
-// Gli oggetti della pagina «Oggetti» vengono dalla guida e **non hanno una chiave**: hanno un
-// nome e una riga di testo che dice dove si trovano. Gli articoli del catalogo, invece, una
-// chiave ce l'hanno, e attraverso il negozio arrivano alla mappa. Manca il ponte fra le due cose.
+// Gli oggetti della pagina «Oggetti» vengono dalla guida e **non hanno una chiave**: hanno un nome
+// e una riga di testo che dice dove si trovano. Gli articoli del catalogo, invece, una chiave ce
+// l'hanno, e attraverso il negozio arrivano alla mappa. Manca il ponte fra le due cose.
 //
-// Il ponte non si può fare a runtime con un confronto fra nomi: sarebbe una somiglianza calcolata
-// ogni volta, che cambia se cambia un nome e che nessuno può ispezionare. Si fa invece **una
-// volta**, generando un file versionato che assegna la chiave soltanto dove la corrispondenza è
-// **univoca in entrambe le direzioni** — un solo articolo con quel nome, e quel nome preso da un
-// solo oggetto. Tutti gli altri restano dichiaratamente senza collegamento.
+// Il ponte non si indovina, si legge: `data/seed/oggetti-negozi.json` è la trascrizione della
+// pagina «Elenco dei negozi» della guida, scritta una volta e versionata. Questo comando la
+// **valida** e la unisce alla via esatta — un oggetto il cui nome è già il nome di un articolo del
+// catalogo — producendo il crosswalk che il server serve.
 //
-// Il file prodotto è materiale di catalogo: si rigenera con questo comando, si legge a occhio, e
-// se un abbinamento è sbagliato si vede e si corregge lì.
+// Validare vuol dire dire dove la trascrizione non torna. Un negozio che il catalogo non ha è un
+// errore da correggere e fa fallire il comando. Un articolo che nessun «Oggetto» della guida
+// chiama così, invece, non lo è: la stessa pagina dei negozi vende accessori, armi, libri e DVD,
+// che nella guida hanno pagine loro. Quelli si annotano e basta.
 // ============================================================
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { initDb, closeDb, getDb } from '../server/db/dbService.js';
 import { runMigrations } from '../server/db/migrationRunner.js';
 import type { OggettiGuidaDto } from '../shared/types.js';
+
+interface Trascrizione {
+  fonte: string;
+  negozi: Record<string, string[]>;
+  ambigui?: Record<string, string>;
+}
 
 /** Confronto fra nomi: minuscole, accenti tolti, tutto ciò che non è lettera o cifra a spazio. */
 function normalizza(nome: string): string {
@@ -42,46 +49,103 @@ runMigrations(db);
 
 const guida = JSON.parse(readFileSync(path.join('data', 'seed', 'oggetti-guida.json'), 'utf8')) as OggettiGuidaDto;
 const voci = [...(guida.consumabili ?? []), ...(guida.chiaveEMateriali ?? [])];
+const trascrizione = JSON.parse(readFileSync(path.join('data', 'seed', 'oggetti-negozi.json'), 'utf8')) as Trascrizione;
 
 const articoli = getDb().prepare('SELECT chiave, nome, negozio_chiave FROM articolo WHERE nascosto = 0')
   .all() as Array<{ chiave: string; nome: string; negozio_chiave: string }>;
+const negoziEsistenti = new Set((getDb().prepare('SELECT chiave FROM negozio WHERE nascosto = 0')
+  .all() as Array<{ chiave: string }>).map((r) => r.chiave));
 
 const perNomeArticolo = new Map<string, typeof articoli>();
 for (const a of articoli) {
   const k = normalizza(a.nome);
   perNomeArticolo.set(k, [...(perNomeArticolo.get(k) ?? []), a]);
 }
-const perNomeGuida = new Map<string, number>();
-for (const v of voci) perNomeGuida.set(normalizza(v.nome), (perNomeGuida.get(normalizza(v.nome)) ?? 0) + 1);
+const perNomeGuida = new Map<string, string[]>();
+for (const v of voci) {
+  const k = normalizza(v.nome);
+  perNomeGuida.set(k, [...(perNomeGuida.get(k) ?? []), v.nome]);
+}
 
-const abbinamenti: Array<{ nome: string; articolo: string; negozio: string }> = [];
-const scartati: Record<string, string[]> = { 'più di un articolo con quel nome': [], 'più di un oggetto con quel nome': [], 'nessun articolo con quel nome': [] };
+type Abbinamento = { nome: string; articolo?: string; negozio: string; via: string };
+const abbinamenti = new Map<string, Abbinamento>();
+const problemi: Record<string, string[]> = {
+  'negozio trascritto che il catalogo non ha': [],
+  'articolo di un’altra sezione della guida (accessori, armi, libri, DVD…)': [],
+  'oggetto della guida con lo stesso nome di un altro': [],
+  'oggetto senza articolo e non trascritto in nessun negozio': [],
+};
 
+// ---- via esatta: l'oggetto ha lo stesso nome di un articolo del catalogo -----------------------
 for (const v of voci) {
   const k = normalizza(v.nome);
   const candidati = perNomeArticolo.get(k) ?? [];
-  if (!candidati.length) { scartati['nessun articolo con quel nome'].push(v.nome); continue; }
-  if (candidati.length > 1) { scartati['più di un articolo con quel nome'].push(v.nome); continue; }
-  if ((perNomeGuida.get(k) ?? 0) > 1) { scartati['più di un oggetto con quel nome'].push(v.nome); continue; }
-  abbinamenti.push({ nome: v.nome, articolo: candidati[0].chiave, negozio: candidati[0].negozio_chiave });
+  if (candidati.length !== 1) continue;
+  if ((perNomeGuida.get(k) ?? []).length > 1) {
+    problemi['oggetto della guida con lo stesso nome di un altro'].push(v.nome);
+    continue;
+  }
+  abbinamenti.set(v.nome, { nome: v.nome, articolo: candidati[0].chiave,
+    negozio: candidati[0].negozio_chiave, via: 'nome dell’articolo' });
 }
-abbinamenti.sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
 
+// ---- via trascritta: la guida dice chi lo vende ------------------------------------------------
+const ambigui = new Set(Object.keys(trascrizione.ambigui ?? {}));
+for (const [negozio, articoliDelNegozio] of Object.entries(trascrizione.negozi)) {
+  if (!negoziEsistenti.has(negozio)) {
+    problemi['negozio trascritto che il catalogo non ha'].push(negozio);
+    continue;
+  }
+  for (const nome of articoliDelNegozio) {
+    const k = normalizza(nome);
+    const nomiGuida = perNomeGuida.get(k);
+    if (!nomiGuida) {
+      // Non è un errore: l'elenco dei negozi vende anche accessori, armi, libri e DVD, che nella
+      // guida hanno pagine proprie e non compaiono fra gli «Oggetti». Si annota e si tira avanti.
+      problemi['articolo di un’altra sezione della guida (accessori, armi, libri, DVD…)'].push(`${negozio}: ${nome}`);
+      continue;
+    }
+    if (ambigui.has(nome)) continue;
+    for (const nomeGuida of nomiGuida) {
+      if (abbinamenti.has(nomeGuida)) continue;
+      abbinamenti.set(nomeGuida, { nome: nomeGuida, negozio, via: 'trascritto dalla guida' });
+    }
+  }
+}
+
+for (const v of voci) {
+  if (!abbinamenti.has(v.nome) && !ambigui.has(v.nome)) {
+    problemi['oggetto senza articolo e non trascritto in nessun negozio'].push(v.nome);
+  }
+}
+
+const elenco = [...abbinamenti.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
 const esito = {
-  schemaVersion: 1,
-  cosaE: 'ponte fra gli oggetti della guida, che hanno solo un nome, e gli articoli del catalogo, che hanno una chiave e un negozio',
+  schemaVersion: 2,
+  cosaE: 'ponte fra gli oggetti della guida, che hanno solo un nome, e i negozi e gli articoli del catalogo, che hanno una chiave e arrivano alla mappa',
+  fonti: { trascrizione: 'data/seed/oggetti-negozi.json', pagina: trascrizione.fonte },
   comeSiRigenera: 'npm run oggetti:crosswalk',
-  criterio: 'corrispondenza univoca in entrambe le direzioni fra nomi normalizzati; ogni caso ambiguo resta escluso',
+  criterio: 'due vie: il nome dell’articolo quando coincide in modo univoco, e la trascrizione della pagina «Elenco dei negozi». Gli ambigui dichiarati restano fuori.',
   generato: new Date().toISOString().slice(0, 10),
-  abbinamenti,
+  abbinamenti: elenco,
   summary: {
-    vociGuida: voci.length, articoli: articoli.length, abbinati: abbinamenti.length,
-    scartati: Object.fromEntries(Object.entries(scartati).map(([k, v]) => [k, v.length])),
+    vociGuida: voci.length, articoli: articoli.length, abbinati: elenco.length,
+    perVia: {
+      'nome dell’articolo': elenco.filter((a) => a.via === 'nome dell’articolo').length,
+      'trascritto dalla guida': elenco.filter((a) => a.via === 'trascritto dalla guida').length,
+    },
+    problemi: Object.fromEntries(Object.entries(problemi).map(([k, v]) => [k, v.length])),
   },
-  esempiScartati: Object.fromEntries(Object.entries(scartati).map(([k, v]) => [k, v.slice(0, 5)])),
+  problemi: Object.fromEntries(Object.entries(problemi).map(([k, v]) => [k, v.slice(0, 40)])),
 };
 
 closeDb();
 writeFileSync(destinazione, JSON.stringify(esito, null, 2) + '\n', 'utf8');
 console.log(JSON.stringify(esito.summary, null, 1));
+for (const [k, v] of Object.entries(problemi)) {
+  if (v.length) console.log(`  ${k}: ${v.slice(0, 6).join(', ')}${v.length > 6 ? ` … e altri ${v.length - 6}` : ''}`);
+}
 console.log('scritto', destinazione);
+// Solo un negozio che il catalogo non ha è un errore di trascrizione da correggere: il resto è
+// materia di altre pagine della guida, e va scritto senza far fallire nulla.
+process.exitCode = problemi['negozio trascritto che il catalogo non ha'].length ? 1 : 0;

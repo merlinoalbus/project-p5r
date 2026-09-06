@@ -37,7 +37,7 @@ import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
