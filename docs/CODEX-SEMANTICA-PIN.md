@@ -914,6 +914,40 @@ saranno consegnati nel percorso e nel lotto dichiarati dal piano; l'integrazione
 di Claude. Accetto anche la consegna a lotti, purché ogni lotto abbia destinazioni, dimensioni,
 trasparenza, stile e criterio di accettazione verificabili prima della generazione.
 
+### Vincolo dell'utente sulla visibilità: presenza temporale, non avanzamento
+
+L'utente ha chiarito il criterio in modo vincolante: un pin si nasconde automaticamente **solo**
+quando l'entità rappresentata non è presente in quel momento del gioco. Esempio canonico: un
+Confidente disponibile soltanto con la pioggia non deve comparire col sole, perché raggiungere il
+luogo e non trovarlo rende la guida fuorviante.
+
+Ne consegue una separazione obbligatoria fra due concetti che l'attuale modello chiama entrambi
+`condizioni`:
+
+* **presenza temporale:** data, fascia oraria, giorno, meteo o altra condizione che fa sì che
+  l'entità ci sia oppure non ci sia; questa può governare la visibilità del pin;
+* **stato/progressione/interazione:** porta chiusa, forziere non ancora aperto, leva non azionata,
+  ascensore non chiamato, blocco dei Memento, evento o scontro non completato; il luogo o oggetto
+  fisico resta presente e il pin deve restare visibile. Il requisito può apparire nella scheda
+  come informazione sullo stato, ma **non** deve causare `disponibilita.stato = bloccato` usata dal
+  filtro del `VisoreMappa`.
+
+La correzione in corso basata su `cancelli-pin.json` non è quindi sufficiente se continua a
+scrivere quei cancelli dentro `spillo.condizioni`: il visore nasconde ogni spillo con disponibilità
+`bloccato`, indipendentemente dal significato della condizione. Per i pin nativi fissi dei Palazzi
+e dei Memento — inclusi forzieri, forzieri rari, porte, scale, passaggi, leve e altri elementi
+stabili — l'insieme delle **condizioni di visibilità deve essere vuoto**. Le informazioni sui
+cancelli vanno conservate separatamente dalla presenza, oppure soltanto nella descrizione/scheda.
+
+Il gate deve provare almeno:
+
+1. con una partita prima del relativo sblocco, porta e forziere restano nel DOM e sulla mappa;
+2. marcarli raccolti/aperti può cambiare stato o stile, ma non confondere questo con l'assenza;
+3. un Confidente con condizione meteo/temporale è presente col meteo corretto e assente con quello
+   scorretto;
+4. nessuna flag nativa o procedura di sblocco dei pin dungeon viene usata direttamente come
+   condizione di visibilità.
+
 Sul candidato Fase 2 `7d71dae` il gate nominale
 `python tools/p5r-map-export/verifica_tutto.py --solo pin` dà **5/5 PASS**. Due mutazioni isolate
 dimostrano però che il controllo delle copie non copre ancora il proprio contratto:
