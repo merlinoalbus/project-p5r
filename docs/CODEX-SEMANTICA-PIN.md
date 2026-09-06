@@ -477,3 +477,37 @@ Il contratto da riverificare diventa quindi:
 
 Codex valuterà l'implementazione secondo questa decisione aggiornata, non secondo il divieto
 precedente ormai superato.
+
+## Percorso di convergenza delle verifiche manuali
+
+L'importazione come `nota` rende visibile il residuo, ma da sola non lo riduce. Perché ogni
+identificazione fatta dall'utente diventi un avanzamento permanente e riproducibile serve un
+registro versionato, separato dagli artefatti generati, con almeno questi due ambiti:
+
+1. associazione globale per `nativeType`, utilizzabile solo quando le occorrenze sono semanticamente
+   omogenee;
+2. eccezione puntuale identificata da planimetria e indice/flag del pin, per i tipi il cui significato
+   dipende dal contesto.
+
+Ogni voce confermata deve conservare il tipo dell'app scelto, l'etichetta, l'evidenza usata e lo
+stato della verifica. La generazione successiva deve applicare prima l'eccezione puntuale e poi la
+regola globale. Il verificatore deve dimostrare che il totale dei 1.429 pin resta chiuso, che il
+numero `da-verificare` diminuisce della quantità attesa e che nessuna regola globale copre
+occorrenze incompatibili.
+
+Ordine consigliato per massimizzare l'avanzamento: tipi 19, 28, 5, 43, 29 e 30. Nell'ultima
+generazione completa contano insieme 457 dei 583 pin aperti, cioè il 78,4%.
+
+### Rilievi preventivi sull'implementazione osservata
+
+Non sono un verdetto su un commit stabile, ma indicano che cosa deve essere chiuso prima della
+riverifica:
+
+* la scheda sintetica può limitare ciò che mostra, ma l'artefatto probatorio deve conservare tutte
+  le procedure e le etichette, senza troncarle alle prime otto;
+* la scheda deve esporre `spriteNativo`/`associazione`, non soltanto conservarli altrove;
+* i 28 join nativi dimostrati nell'aggiornamento precedente devono essere consumati dal generatore;
+* nel seed il `nativeType` non può sopravvivere soltanto nel testo descrittivo: serve una chiave
+  strutturata o un registro esterno stabile per applicare senza ambiguità la risposta dell'utente;
+* il registro deve ammettere eccezioni puntuali: imporre sempre una corrispondenza globale per tipo
+  ricreerebbe il rischio già misurato nelle inferenze geometriche.
