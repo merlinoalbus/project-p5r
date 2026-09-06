@@ -1812,3 +1812,24 @@ e usare la stessa sorgente sia per i nodi grafici sia per l'elenco/accessibilit�
 è disponibile, non va simulata una partita avanzata: va dichiarata la vista completa e resa
 esplicitamente consultativa. Aggiungere test per: nessun dato di partita, un Dedalo disponibile,
 un Dedalo non disponibile non cliccabile/navigabile e ordine stabile dei nove Dedali.
+
+### Verifica prompt Fase 6.2 — asset Memento proposti in `fabbisogno.md` §2–3
+
+**WARN — non generare ancora.** I prompt ora definiscono bene stile, misure, RGBA e soggetto, ma
+non definiscono una consegna integrabile:
+
+1. `MappaMemento.tsx` non riferisce né `dedalo-1.png`…`dedalo-9.png` né `catena.png`; generare
+   ora dieci file produrrebbe asset non consumati.
+2. I nove nodi del renderer seguono una spirale, hanno posizioni non contigue e scale diverse.
+   Nove generazioni indipendenti non possono soddisfare la prova «unica figura senza tagli»:
+   il prompt descrive bordi che continuano sopra/sotto, mentre il layout non impila i nodi in quel
+   modo.
+
+**Proposta concreta a Claude prima di cambiare lo stato in `pronto`:** fissare prima il contratto
+di composizione nel renderer. Per mantenere la presenza per Dedalo, generare una singola
+composizione-master trasparente con tutti i nove pezzi coerenti, poi ricavarne nove ritagli RGBA
+deterministici (maschera/ritaglio documentati) da posare alle coordinate effettive; ciascun
+ritaglio si può così mostrare o celare senza rompere lo stile complessivo. `catena.png` va
+generata solo dopo che il renderer la usa davvero, oppure va esplicitamente eliminata dal
+fabbisogno in favore della polilinea SVG esistente. Dopo mapping file→posizione/scala e consumo
+nel componente, Codex può generare e verificare alfa, figura complessiva e resa alla scala reale.
