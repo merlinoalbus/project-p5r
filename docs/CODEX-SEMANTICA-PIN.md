@@ -1150,3 +1150,21 @@ destinazione non puntuale finché manca una coordinata certificata. Per le attiv
 un riferimento `attivita` uno-a-uno: `attivita.luogo_chiave` indica oggi il quartiere e non basta
 a identificare uno dei pin nativi; i casi non collegabili devono restare esplicitamente censiti,
 non abbinati per somiglianza.
+
+### Pre-audit Codex della correzione locale dopo `228eb0d`
+
+**Stato:** osservazione su working tree non pubblicato; non è un verdetto formale.
+
+La bozza limita `applicaPresenzaAiLuoghi` agli spilli con `origine = 'seed'`, per evitare che la
+riconciliazione sovrascriva una modifica dell'utente. Il filtro evita una parte del danno, ma non
+preserva il contratto: l'editor assegna `origine = 'utente'` a ogni pin modificato. Di
+conseguenza, se il giocatore o il curatore rinomina, descrive o corregge un pin temporaneo, quel
+pin esce dalla riconciliazione e perde anche la presenza che gli compete; può quindi restare
+visibile quando l'entità non esiste.
+
+Il filtro per origine non è dunque un sostituto di un canale derivato separato. La correzione
+richiesta resta `presenza_json` (o equivalente) gestito idempotentemente dalla riconciliazione,
+mentre le scelte dell'utente e i prerequisiti restano invariati in un altro campo. Il gate del
+prossimo commit deve mutare un pin temporaneo reale tramite editor, riavviare o reseedare e
+verificare API e DOM nei due stati temporali: la presenza deve restare corretta senza riscrivere
+la modifica manuale.
