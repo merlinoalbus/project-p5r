@@ -71,6 +71,21 @@ QUARTIERI = {
 SENZA_SCHEDA = {'神田': 'kanda', '青岾一丁目': 'aoyama-itchome', '永田町': 'nagatacho',
                 '銀座': 'ginza', '赤坂': 'akasaka', '三浦海岸': 'miura-kaigan', '埋浜': 'umihama'}
 
+# Gli sprite del nome in caratteri latini. Il gioco li scrive sotto al nome giapponese, sulla stessa
+# targa nera, e senza di loro il cartellino di un quartiere non si legge da fuori dal Giappone.
+LATINI = {
+    'SHIBUYA': 'shibuya', 'YONGENJAYA': 'yongen-jaya', 'AOYAMAICHOUME': 'aoyama-itchome',
+    'KANDA': 'kanda', 'SHINJUKU': 'shinjuku', 'AKIHABARA': 'akihabara', 'UENO': 'ueno',
+    'GINZA': 'ginza', 'HARAJUKU': 'harajuku', 'OGIKUBO': 'ogikubo', 'TSUKISHIMA': 'tsukishima',
+    'JINBOCHO': 'kanda-jinbocho', 'NAGATACHO': 'nagatacho', 'ICHIGAYA': 'ichigaya',
+    'IKEBUKURO': 'ikebukuro', 'SUIDOBASHI': 'suidobashi', 'ROPPONGI': 'roppongi',
+    'MIURAKAIGAN': 'miura-kaigan', 'MOTOMACHI CHUKAGAI': 'yokohama-chinatown',
+    'MAIHAMA': 'maihama', 'ASAKUSA': 'asakusa', 'ODAIBA KAIHINKOEN': 'odaiba',
+    'MEIJI JINGUMAE': 'meiji-shrine', 'AKASAKA MITSUKE': 'akasaka',
+    'INOKASHIRA KOEN': 'inokashira-park', 'KICHIJOJI': 'kichijoji', 'SHINAGAWA': 'shinagawa',
+    'NAKANO': 'nakano',
+}
+
 # Gli elementi con cui il gioco disegna i Memento: il corpo, i tentacoli e le vie di luce, ognuno
 # con la propria maschera di trasparenza.
 MEMENTO = {
@@ -93,6 +108,8 @@ def famiglia(nome):
         if base in SENZA_SCHEDA:
             return 'tokyo', SENZA_SCHEDA[base], 'disegno'
         return None, None, None
+    if nome in LATINI:
+        return 'tokyo', LATINI[nome], 'nome-latino'
     if nome in QUARTIERI:
         return 'tokyo', QUARTIERI[nome], 'nome-giapponese'
     if nome in SENZA_SCHEDA:
@@ -150,7 +167,7 @@ def main(out, destinazione=None):
         criterio=dict(
             associazione='tabella scritta a mano: le grafie del gioco non coincidono sempre con '
                          'quelle comuni (渋屋 per Shibuya, 四軒茶屋 per Yongen-Jaya)',
-            vesti='disegno (lo sprite _lm, il landmark), nome-giapponese, elemento (Memento)'),
+            vesti='disegno (lo sprite _lm, il landmark), nome-giapponese, nome-latino, elemento (Memento)'),
         elementi=righe,
         summary=dict(estratti=sum(1 for r in righe if r['png']),
                      senzaRitaglio=sum(1 for r in righe if not r['png']),

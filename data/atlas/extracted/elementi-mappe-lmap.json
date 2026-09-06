@@ -5,9 +5,81 @@
   },
   "criterio": {
     "associazione": "tabella scritta a mano: le grafie del gioco non coincidono sempre con quelle comuni (渋屋 per Shibuya, 四軒茶屋 per Yongen-Jaya)",
-    "vesti": "disegno (lo sprite _lm, il landmark), nome-giapponese, elemento (Memento)"
+    "vesti": "disegno (lo sprite _lm, il landmark), nome-giapponese, nome-latino, elemento (Memento)"
   },
   "elementi": [
+    {
+      "indice": 2,
+      "nome": "SHIBUYA",
+      "mappa": "tokyo",
+      "chiave": "shibuya",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 90,
+      "png": "tokyo/shibuya-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 3,
+      "nome": "YONGENJAYA",
+      "mappa": "tokyo",
+      "chiave": "yongen-jaya",
+      "veste": "nome-latino",
+      "larghezza": 432,
+      "altezza": 72,
+      "png": "tokyo/yongen-jaya-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 4,
+      "nome": "AOYAMAICHOUME",
+      "mappa": "tokyo",
+      "chiave": "aoyama-itchome",
+      "veste": "nome-latino",
+      "larghezza": 474,
+      "altezza": 90,
+      "png": "tokyo/aoyama-itchome-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 5,
+      "nome": "KANDA",
+      "mappa": "tokyo",
+      "chiave": "kanda",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/kanda-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 6,
+      "nome": "SHINJUKU",
+      "mappa": "tokyo",
+      "chiave": "shinjuku",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 90,
+      "png": "tokyo/shinjuku-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 7,
+      "nome": "AKIHABARA",
+      "mappa": "tokyo",
+      "chiave": "akihabara",
+      "veste": "nome-latino",
+      "larghezza": 432,
+      "altezza": 90,
+      "png": "tokyo/akihabara-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
     {
       "indice": 8,
       "nome": "渋屋",
@@ -597,6 +669,234 @@
       "conTrasparenza": true
     },
     {
+      "indice": 89,
+      "nome": "UENO",
+      "mappa": "tokyo",
+      "chiave": "ueno",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/ueno-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 90,
+      "nome": "GINZA",
+      "mappa": "tokyo",
+      "chiave": "ginza",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/ginza-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 91,
+      "nome": "HARAJUKU",
+      "mappa": "tokyo",
+      "chiave": "harajuku",
+      "veste": "nome-latino",
+      "larghezza": 372,
+      "altezza": 78,
+      "png": "tokyo/harajuku-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 92,
+      "nome": "OGIKUBO",
+      "mappa": "tokyo",
+      "chiave": "ogikubo",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/ogikubo-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 93,
+      "nome": "TSUKISHIMA",
+      "mappa": "tokyo",
+      "chiave": "tsukishima",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 78,
+      "png": "tokyo/tsukishima-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 94,
+      "nome": "JINBOCHO",
+      "mappa": "tokyo",
+      "chiave": "kanda-jinbocho",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 78,
+      "png": "tokyo/kanda-jinbocho-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 95,
+      "nome": "NAGATACHO",
+      "mappa": "tokyo",
+      "chiave": "nagatacho",
+      "veste": "nome-latino",
+      "larghezza": 372,
+      "altezza": 78,
+      "png": "tokyo/nagatacho-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 96,
+      "nome": "ICHIGAYA",
+      "mappa": "tokyo",
+      "chiave": "ichigaya",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/ichigaya-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 97,
+      "nome": "IKEBUKURO",
+      "mappa": "tokyo",
+      "chiave": "ikebukuro",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/ikebukuro-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 98,
+      "nome": "SUIDOBASHI",
+      "mappa": "tokyo",
+      "chiave": "suidobashi",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 78,
+      "png": "tokyo/suidobashi-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 99,
+      "nome": "ROPPONGI",
+      "mappa": "tokyo",
+      "chiave": "roppongi",
+      "veste": "nome-latino",
+      "larghezza": 372,
+      "altezza": 78,
+      "png": "tokyo/roppongi-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 100,
+      "nome": "MIURAKAIGAN",
+      "mappa": "tokyo",
+      "chiave": "miura-kaigan",
+      "veste": "nome-latino",
+      "larghezza": 396,
+      "altezza": 78,
+      "png": "tokyo/miura-kaigan-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 101,
+      "nome": "MOTOMACHI CHUKAGAI",
+      "mappa": "tokyo",
+      "chiave": "yokohama-chinatown",
+      "veste": "nome-latino",
+      "larghezza": 528,
+      "altezza": 78,
+      "png": "tokyo/yokohama-chinatown-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 102,
+      "nome": "MAIHAMA",
+      "mappa": "tokyo",
+      "chiave": "maihama",
+      "veste": "nome-latino",
+      "larghezza": 258,
+      "altezza": 78,
+      "png": "tokyo/maihama-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 103,
+      "nome": "ASAKUSA",
+      "mappa": "tokyo",
+      "chiave": "asakusa",
+      "veste": "nome-latino",
+      "larghezza": 592,
+      "altezza": 84,
+      "png": "tokyo/asakusa-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 104,
+      "nome": "ODAIBA KAIHINKOEN",
+      "mappa": "tokyo",
+      "chiave": "odaiba",
+      "veste": "nome-latino",
+      "larghezza": 684,
+      "altezza": 78,
+      "png": "tokyo/odaiba-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 105,
+      "nome": "MEIJI JINGUMAE",
+      "mappa": "tokyo",
+      "chiave": "meiji-shrine",
+      "veste": "nome-latino",
+      "larghezza": 420,
+      "altezza": 78,
+      "png": "tokyo/meiji-shrine-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 106,
+      "nome": "AKASAKA MITSUKE",
+      "mappa": "tokyo",
+      "chiave": "akasaka",
+      "veste": "nome-latino",
+      "larghezza": 420,
+      "altezza": 78,
+      "png": "tokyo/akasaka-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 107,
+      "nome": "INOKASHIRA KOEN",
+      "mappa": "tokyo",
+      "chiave": "inokashira-park",
+      "veste": "nome-latino",
+      "larghezza": 420,
+      "altezza": 78,
+      "png": "tokyo/inokashira-park-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
       "indice": 199,
       "nome": "吉祥寺_lm",
       "mappa": "tokyo",
@@ -617,6 +917,18 @@
       "larghezza": 456,
       "altezza": 210,
       "png": "tokyo/kichijoji-nome-giapponese.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 201,
+      "nome": "KICHIJOJI",
+      "mappa": "tokyo",
+      "chiave": "kichijoji",
+      "veste": "nome-latino",
+      "larghezza": 432,
+      "altezza": 96,
+      "png": "tokyo/kichijoji-nome-latino.png",
       "alfaMinima": 0,
       "conTrasparenza": true
     },
@@ -645,6 +957,18 @@
       "conTrasparenza": true
     },
     {
+      "indice": 204,
+      "nome": "SHINAGAWA",
+      "mappa": "tokyo",
+      "chiave": "shinagawa",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 80,
+      "png": "tokyo/shinagawa-nome-latino.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
       "indice": 205,
       "nome": "中野_lm",
       "mappa": "tokyo",
@@ -665,6 +989,18 @@
       "larghezza": 312,
       "altezza": 138,
       "png": "tokyo/nakano-nome-giapponese.png",
+      "alfaMinima": 0,
+      "conTrasparenza": true
+    },
+    {
+      "indice": 207,
+      "nome": "NAKANO",
+      "mappa": "tokyo",
+      "chiave": "nakano",
+      "veste": "nome-latino",
+      "larghezza": 312,
+      "altezza": 80,
+      "png": "tokyo/nakano-nome-latino.png",
       "alfaMinima": 0,
       "conTrasparenza": true
     },
@@ -982,11 +1318,11 @@
     }
   ],
   "summary": {
-    "estratti": 81,
+    "estratti": 109,
     "senzaRitaglio": 0,
     "quartieri": 29,
     "elementiMemento": 26,
-    "conTrasparenza": 81
+    "conTrasparenza": 109
   },
   "limits": [
     "Il campo `resa` di ogni sprite vale metà larghezza e metà altezza: è il perno, non la posizione sulla mappa. Le collocazioni non stanno in questo foglio.",
