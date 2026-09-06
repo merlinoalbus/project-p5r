@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "cosaE": "Chi vende che cosa, trascritto dalla pagina «Elenco dei negozi» della guida italiana. Serve a far arrivare alla mappa le righe della pagina Oggetti, che dalla guida hanno solo un nome e non una chiave di catalogo.",
+  "perche": "È una configurazione, non un algoritmo: gli abbinamenti sono letti alla fonte e scritti qui una volta, così si possono leggere, correggere e verificare. Dedurli con un confronto fra nomi produrrebbe errori silenziosi a ogni cambio di dato.",
+  "fonte": "https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/",
+  "trascrittoIl": "2026-09-06",
+  "comeSiVerifica": "npm run oggetti:crosswalk — controlla che ogni negozio esista nel catalogo e riporta gli articoli il cui nome non compare fra gli oggetti della guida",
+  "negozi": {
+    "super-muramasa": [
+      "Tris di calamari",
+      "Frutta secca",
+      "Confezione di frutta primaverile",
+      "Dango lunare"
+    ],
+    "venditore-patate-dolci": [
+      "Beni-Azuma",
+      "Yaki-Imo leggendario"
+    ],
+    "yumenoshima": [
+      "Gomitolo di seta",
+      "Fibbia di latta",
+      "Pergamena spessa",
+      "Cuoio conciato",
+      "Mercurio",
+      "Lettore DVD",
+      "Famidrive",
+      "Gambla Goemon",
+      "Laptop rotto",
+      "Kogatana nera"
+    ],
+    "negozio-scolastico": [
+      "Panfritto",
+      "Pane e marmellata",
+      "Panino con yakisoba",
+      "Pane autunnale"
+    ],
+    "body-chop": [
+      "Profumo di design",
+      "Set aromi pregiati",
+      "Rossetto cremisi",
+      "Olio del recupero",
+      "Aroma rinfrescante"
+    ],
+    "37-gradi-celsius": [
+      "Anello del respiro",
+      "Anello dell'energia",
+      "Anello della vitalità",
+      "Strangolino dei chakra",
+      "Strangolino della mente",
+      "Strangolino dell'anima"
+    ],
+    "taisho-store": [
+      "Flan al tè matcha",
+      "Tartufi",
+      "Castella",
+      "Natto rugiadoso",
+      "Crostatina angelo"
+    ],
+    "tsurukame-diamond": [
+      "Anello del cuore",
+      "Braccialetto d'argento",
+      "Fascia rossa",
+      "Fascia blu",
+      "Fascia verde",
+      "Fascia gialla",
+      "Braccialetto stelle",
+      "Braccialetto circolare",
+      "Braccialetto bianco",
+      "Braccialetto nero"
+    ],
+    "high-sense": [
+      "Copertina",
+      "Vaso di vetro",
+      "Ventaglio Sakura"
+    ],
+    "prossimo-asso": [
+      "Collana magnetica",
+      "Frullato iperproteico",
+      "Proteine d'importazione",
+      "Gelatina viennese",
+      "Trambusto S",
+      "Pesi da polso",
+      "Occhiali da sole sportivi",
+      "Canna potente",
+      "Canna hi-tech",
+      "Boilie sospetto",
+      "Esperto a biliardo",
+      "Set di freccette"
+    ],
+    "fiorista-rafflesia": [
+      "Balsamo vegetale",
+      "Sughero",
+      "Bionutrienti"
+    ],
+    "chiosco-kiyasuku": [
+      "Lenzuolo rinfrescante",
+      "Scaldamani",
+      "Gomma non statica",
+      "Wafer dei ladri"
+    ],
+    "panetteria-yon-germain": [
+      "Sandwich",
+      "Danish di frutta",
+      "Sandwich inzuppato",
+      "Melon pan"
+    ],
+    "libreria-taiheido": [
+      "Eredità dell'Impiccato",
+      "Incontri spettrali",
+      "La pulizia del cuore",
+      "Storia di Buchiko",
+      "Minaccia Medjed",
+      "Arte della persuasione",
+      "Pagine ammuffite",
+      "Santuari di Tokyo",
+      "Cieli notturni",
+      "Vague",
+      "Luoghi della movida",
+      "Vedetta lacustre",
+      "Un acquario al giorno",
+      "Esplorando Nakano"
+    ],
+    "farmacia-aohige": [
+      "Benda adesiva",
+      "Sicchenina",
+      "Sicchenina A",
+      "Sicchenina EX",
+      "Gocce per occhioni",
+      "Tè caldo e aspro",
+      "Caramella frizzina"
+    ],
+    "discount-rocinante": [
+      "Frullato proteico",
+      "Snack",
+      "Maschera del ladro",
+      "Lotto estivo S",
+      "Set noodle istantanei",
+      "Multivitaminico",
+      "Energia del giardino"
+    ],
+    "venditore-ambulante": [
+      "Specchio della vendetta",
+      "Portafortuna croce",
+      "Portafortuna teschio",
+      "Cintura Rakshasa",
+      "Cintura Vajra",
+      "Cintura Skanda",
+      "Specchio del rimbotto",
+      "Anello del vento",
+      "Piastrina incisa",
+      "Specchio di rappresaglia"
+    ],
+    "big-bang-burger": [
+      "Big Bang Burger",
+      "Patatine saturnine",
+      "Insalata venere",
+      "Panino terrestre",
+      "Panino supernova",
+      "Panino lunare"
+    ],
+    "triple-seven": [
+      "Re Karaage",
+      "Jagariko",
+      "Nikuman straniero",
+      "Soba calmante",
+      "Agodashi Oden",
+      "Cioccolato osechi"
+    ],
+    "hinokuniya": [
+      "Enciclopedia floreale",
+      "La scienza del baseball",
+      "Lo zen della pesca",
+      "Anima da cineasta",
+      "Segreti di gioco",
+      "L'ABC dell'artigianato",
+      "Maestro a freccette"
+    ],
+    "fioraio-sukebe": [
+      "Cestino di fiori",
+      "Mini cactus",
+      "Bagno di rose",
+      "Megafertilizzante"
+    ],
+    "mran-mran": [
+      "Specchio della stella",
+      "Tazza nera",
+      "Puzzle 3D a 48 lati",
+      "Anelli intrecciati",
+      "Strumenti da cucina",
+      "Cuscino Mochi"
+    ],
+    "akindo": [
+      "Robot aspirapolvere",
+      "Fotocamera digitale",
+      "Maschera di bellezza",
+      "Sveglia chiassosa",
+      "Diffusore di aromi",
+      "Spazzolino elettrico H"
+    ],
+    "tokobushiya": [
+      "Modellino di moto",
+      "Set di mascotte locali",
+      "Spille idol",
+      "Portachiavi katana"
+    ],
+    "akiba": [
+      "Sabbia ferrea",
+      "Lente condensante",
+      "Foglio d'alluminio",
+      "Fosforo rosso",
+      "Cesta di vestiti",
+      "Set di strumenti da PC"
+    ],
+    "super-baron": [
+      "Punch Ouch",
+      "Train of Life",
+      "Power Intuition",
+      "Golfer Sarutahiko",
+      "Featherman Seeker"
+    ],
+    "chiesa-kanda": [
+      "Acqua battesimale",
+      "Acqua benedetta",
+      "Vino della grazia",
+      "Ceneri del pentimento"
+    ],
+    "libreria-nagiuri": [
+      "Spadaccino provetto",
+      "Casanova spregiudicato",
+      "Rivelazioni eroiche",
+      "Come fare karakuri",
+      "Comprendere il cuore"
+    ],
+    "vestiti-usati-kichijoji": [
+      "Incenso del risveglio",
+      "Spray rapido",
+      "Spray detergente",
+      "Spray supremo",
+      "Cintura di Idaten"
+    ],
+    "stoneon": [
+      "Roccia nera",
+      "Collana cremisi",
+      "Collana del ghiaccio",
+      "Collana vento di giada",
+      "Collana fulmine viola",
+      "Collana nucleare",
+      "Collana psicocinetica",
+      "Collana divina",
+      "Collana della notte"
+    ],
+    "cartoleria-mitsubachi": [
+      "Cartolina acquerellata",
+      "Stilografica",
+      "Portapenne in pelle"
+    ],
+    "friggitoria-hagoromo": [
+      "Katsu a pezzettoni"
+    ],
+    "street-food-houraku": [
+      "Nikuman gustoso",
+      "Nikuman alla napoletana",
+      "Nikuman piccante",
+      "Chimaki speciale"
+    ],
+    "mealport": [
+      "Carne in scatola speciale",
+      "Cereali assortiti",
+      "Bomba di popcorn"
+    ],
+    "mantra-ganda": [
+      "Incenso FR",
+      "Incenso MA",
+      "Incenso AG",
+      "Incenso RS",
+      "Incenso FO",
+      "Muschio FR-MA",
+      "Muschio FR-AG",
+      "Muschio MA-RS",
+      "Muschio MA-FO",
+      "Muschio RS-AG",
+      "Sandalo rasta"
+    ],
+    "negozio-palazzo-niijima": [
+      "Catena di perline",
+      "Soma",
+      "Tessera puntate alte",
+      "Bracciale confuso",
+      "Pend. disperazione",
+      "Raggio della vittoria"
+    ]
+  },
+  "note": [
+    "La Biblioteca di Aoyama-Itchome e il videonoleggio Scarlet compaiono nella pagina ma non sono negozi del catalogo: i loro titoli restano senza collegamento finché qualcuno non li registra.",
+    "I prezzi non sono trascritti qui: stanno già nel catalogo degli articoli, e duplicarli vorrebbe dire tenerli allineati a mano.",
+    "Un oggetto venduto in più negozi compare in più elenchi: è giusto così, e l’applicazione mostra tutti i posti dove si trova invece di sceglierne uno.",
+    "I prezzi qui riportati sono solo quelli degli articoli che al catalogo mancavano: per gli altri vale quello già registrato."
+  ],
+  "prezzi": {
+    "super-muramasa": {
+      "Frutta secca": 2800,
+      "Confezione di frutta primaverile": 1200,
+      "Dango lunare": 800
+    },
+    "yumenoshima": {
+      "Kogatana nera": 1000
+    },
+    "negozio-scolastico": {
+      "Pane autunnale": 200
+    },
+    "taisho-store": {
+      "Flan al tè matcha": 2400
+    },
+    "tsurukame-diamond": {
+      "Braccialetto d'argento": 68000,
+      "Fascia rossa": 12800,
+      "Fascia blu": 12800,
+      "Fascia verde": 12800,
+      "Fascia gialla": 12800,
+      "Braccialetto stelle": 12800,
+      "Braccialetto circolare": 12800,
+      "Braccialetto bianco": 12800,
+      "Braccialetto nero": 12800
+    },
+    "chiosco-kiyasuku": {
+      "Wafer dei ladri": 500
+    },
+    "panetteria-yon-germain": {
+      "Danish di frutta": 400,
+      "Sandwich inzuppato": 2000
+    },
+    "libreria-taiheido": {
+      "Pagine ammuffite": 1800
+    },
+    "farmacia-aohige": {
+      "Tè caldo e aspro": 200,
+      "Caramella frizzina": 200
+    },
+    "discount-rocinante": {
+      "Maschera del ladro": 2000,
+      "Lotto estivo S": 500,
+      "Energia del giardino": 500
+    },
+    "venditore-ambulante": {
+      "Portafortuna croce": 2000,
+      "Portafortuna teschio": 2000,
+      "Specchio del rimbotto": 16000
+    },
+    "triple-seven": {
+      "Jagariko": 160,
+      "Agodashi Oden": 900,
+      "Cioccolato osechi": 3000
+    },
+    "hinokuniya": {
+      "L'ABC dell'artigianato": 2800
+    },
+    "akiba": {
+      "Foglio d'alluminio": 4400
+    },
+    "chiesa-kanda": {
+      "Acqua benedetta": 2000,
+      "Ceneri del pentimento": 12000
+    },
+    "mantra-ganda": {
+      "Incenso FR": 4000,
+      "Incenso MA": 4000,
+      "Incenso AG": 4000,
+      "Incenso RS": 4000,
+      "Incenso FO": 4000,
+      "Muschio FR-MA": 8000,
+      "Muschio FR-AG": 8000,
+      "Muschio MA-RS": 8000,
+      "Muschio MA-FO": 8000,
+      "Muschio RS-AG": 8000
+    },
+    "negozio-palazzo-niijima": {
+      "Catena di perline": null,
+      "Tessera puntate alte": null,
+      "Bracciale confuso": null,
+      "Pend. disperazione": null
+    }
+  },
+  "noteSuiPrezzi": {
+    "negozio-palazzo-niijima": "si paga in monete del Palazzo, non in yen"
+  }
+}

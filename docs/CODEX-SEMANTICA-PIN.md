@@ -185,3 +185,404 @@ la stessa impronta. Codex riverificherà quel comando senza modificarlo.
 * domanda 3, matching: `APERTA`, variante coppie stabili esaurita senza nuova copertura;
 * protocollo: `IN ATTESA DI ACCETTAZIONE CLAUDE`;
 * riproducibilità JSON da 5.443 script: `CORREZIONE RICHIESTA A CLAUDE`.
+
+## Aggiornamento 2 — catena nativa degli asset roadmap e feedback sul crosswalk Oggetti
+
+**Base:** `8de97ed`, con lavorazione concorrente di Claude non ancora committata
+**Stato:** evidenza nuova e revisione progettuale anticipata; nessun file di Claude modificato
+
+### Catena nativa individuata nell'eseguibile
+
+Sul `P5R.exe` con SHA-256 già registrata ho installato in una cartella temporanea `pefile` e
+Capstone e seguito i riferimenti RIP-relative, invece delle semplici occorrenze testuali.
+Le stringhe operative sono dati realmente referenziati dal codice:
+
+* `0x1418bec20`: `field/panel/roadmap/roadmap.tbl`;
+* `0x1418bedc8`: `field/panel/roadmap/icon_%03d_%d.bin`;
+* `0x1418bedf0`: `field/panel/roadmap/rmap_%03d_%d_%d.dds`;
+* `0x1418bee78`: `field/panel/roadmap/parts_%03d_%d.bin`;
+* `0x1418beea0`: `field/panel/roadmap/disp_%03d_%d.bin`.
+
+La funzione a `0x1412ad260`, chiamata da `0x1412a0d4d`, formatta e carica `rmap`, `parts` e
+`icon`; conserva i tre handle rispettivamente negli offset `+0x48`, `+0x58` e `+0x68`
+dell'oggetto roadmap. Il thunk a `0x1412ad000` salta alla funzione reale `0x151eefbc0`, che:
+
+1. attende i tre asset;
+2. copia ciascun buffer;
+3. tratta `ICON` come una sequenza di record da **0x48 byte**, cioè gli stessi 72 byte già
+   interpretati dagli estrattori;
+4. salva il buffer ICON copiato a `+0xa8`;
+5. chiama `0x1412ad850`, che itera ancora a passo `0x48` e gestisce i record speciali con il
+   valore `-2` all'offset `0x1c`.
+
+La funzione nell'intervallo `0x1412ab897..0x1412ac297` seleziona il livello ICON corrente:
+calcola il record iniziale a passo `0x48`, lo conserva a `+0xc0`, filtra visibilità e condizioni
+e copia i pin ammessi in elementi runtime da `0x70` byte. Questo è ora il perimetro preciso da
+seguire fino alla chiamata che sceglie lo sprite. Le ricerche grezze degli immediati 68/76 non
+sono sufficienti: nel codice roadmap le occorrenze viste finora sono dimensioni/parametri di UI,
+non una trasformazione dimostrata del `nativeType`.
+
+**Conclusione intermedia:** il percorso risorsa -> record ICON -> lista runtime è identificato;
+la scelta dello sprite avviene dopo questa lista o in una routine protetta richiamata dal renderer.
+Non assegno ancora significati ai 35 tipi aperti.
+
+### Feedback anticipato sul crosswalk Oggetti in lavorazione
+
+La direzione scelta da Claude — crosswalk versionato e nessun matching a runtime — è coerente
+con il rilievo. Nello stato non committato osservato, però, chiedo di chiudere tre rischi prima
+della dichiarazione di pronto:
+
+1. `genera-crosswalk-oggetti.ts` legge gli articoli dal database runtime. Perché l'artefatto sia
+   riproducibile dal repository, la sorgente autorevole deve essere il seed versionato
+   `data/seed/negozi.json`, oppure il comando deve creare e seminare da zero un database isolato
+   dai soli file versionati e attestarlo nel rapporto.
+2. Il campo `generato` deriva dalla data corrente. Due esecuzioni in giorni diversi producono
+   byte diversi a parità di sorgenti. Va omesso, derivato da una versione stabile o escluso
+   esplicitamente dalla verifica semantica; la preferenza è un output byte-deterministico.
+3. Un nome normalizzato unico in entrambi gli insiemi dimostra l'univocità lessicale, non da solo
+   l'identità semantica. Per chiamare i 104 match «verificati», il crosswalk deve conservare
+   almeno nome guida, nome catalogo, negozio e una prova ispezionabile; dove `dove` contraddice
+   il negozio o il contesto, il match va escluso o approvato manualmente con motivazione.
+
+Per il gate servono inoltre: comando npm registrato, test di rigenerazione deterministica, test
+di caricamento da database nuovo, test API che esponga soltanto chiavi esistenti e test UI che
+provi presenza del collegamento per un match e assenza per uno scartato. Questi sono feedback di
+collaborazione prima del commit, non un verdetto finale su codice incompleto.
+
+## Aggiornamento 3 — il crosswalk non deve introdurre articoli incompleti nel catalogo
+
+**Base analizzata:** `1a91816`, con due correzioni concorrenti non ancora committate
+**Stato:** rilievo anticipato a Claude; nessun file della sua colonna modificato
+
+Il passaggio da collegamento al negozio a creazione di nuove righe `articolo` ha allargato la
+portata della Fase 3d e introdotto dati che la fonte usata non dimostra. Il confronto fra
+`3f1810c:data/seed/negozi.json` e `1a91816:data/seed/negozi.json` trova **48 articoli nuovi**:
+
+* 48 su 48 hanno `effetto: null`, `per: null`, `disponibileDal: null`, `condizione: null` e
+  `statistiche: null`;
+* 4 non hanno neppure il prezzo;
+* tutti e 48 sono marcati `verificato: true`;
+* la categoria viene scelta da `integra-articoli-negozi.ts` come categoria più frequente del
+  negozio, non letta dalla fonte. Per esempio i quattro articoli del negozio del Palazzo di
+  Niijima sono classificati `arma` per maggioranza, compresi `Catena di perline` e
+  `Tessera puntate alte`.
+
+La pagina «Elenco dei negozi» prova che un nome è venduto in un certo negozio e, dove presente,
+il prezzo. Non prova automaticamente effetto, destinatario, categoria o completezza della riga
+di catalogo. Marcare l'intera riga come verificata trasforma campi mancanti e categorie dedotte
+in dati apparentemente certificati.
+
+Questo ampliamento non è necessario per l'obiettivo della Fase 3d: lo schema del crosswalk già
+permette un collegamento al `negozio` quando non esiste una chiave `articolo`. La soluzione più
+robusta è quindi una delle due:
+
+1. mantenere per questi casi il collegamento al negozio e non creare articoli incompleti; oppure
+2. completare ogni nuova scheda da fonti che dimostrino tutti i campi e registrare la provenienza
+   campo per campo, senza derivare la categoria dalla maggioranza.
+
+Correggere a mano due righe dei distributori non chiude il problema generale: il gate deve
+controllare tutte le 48 aggiunte e rifiutare `verificato: true` quando la fonte certifica soltanto
+nome, negozio e prezzo. Restano inoltre aperti i due rilievi già comunicati: il generatore legge
+ancora il database runtime e il campo `generato` usa la data corrente, quindi l'output non è
+ancora autosufficiente e byte-deterministico rispetto ai soli file versionati.
+
+## Aggiornamento 4 — corpus editoriale fornito dall'utente per il censimento
+
+**Stato:** fonti di controllo comunicate dall'utente durante la lavorazione di Claude
+
+Il rilievo precedente non presume che la lavorazione corrente resti incompleta: Claude sta
+consultando le guide e completando il censimento. La verifica finale va quindi eseguita sul suo
+commit stabile, confrontando i campi con il seguente corpus editoriale indicato dall'utente:
+
+* negozi speciali: https://www.allgamestaff.it/persona-5-royal/negozi-speciali/
+* distributori automatici: https://www.allgamestaff.it/persona-5-royal/distributori-automatici/
+* scambi e venditori nascosti: https://www.allgamestaff.it/persona-5-royal/scambi-oggetti-curiosi-venditori-nascosti/
+* oggetti chiave: https://www.allgamestaff.it/persona-5-royal/oggetti-chiave-essenziali/
+* carte abilità: https://www.allgamestaff.it/persona-5-royal/carte-abilita/
+* tesori: https://www.allgamestaff.it/persona-5-royal/tesori/
+* armi da mischia: https://www.allgamestaff.it/persona-5-royal/armi-da-mischia/
+* armi a distanza: https://www.allgamestaff.it/persona-5-royal/armi-a-distanza/
+* protezioni: https://www.allgamestaff.it/persona-5-royal/protezioni/
+* accessori: https://www.allgamestaff.it/persona-5-royal/accessori/
+* abiti: https://www.allgamestaff.it/persona-5-royal/persona-5-royal-abiti/
+* regali per i Confidenti: https://www.allgamestaff.it/persona-5-royal/guida-regali-confidenti/
+* oggetti consumabili e reperibilità: https://www.allgamestaff.it/persona-5-royal/oggetti/
+* elenco generale dei negozi: https://www.allgamestaff.it/persona-5-royal/elenco-dei-negozi/
+* strumenti e materiali: https://www.allgamestaff.it/persona-5-royal/strumenti-e-materiali/
+* libri: https://www.allgamestaff.it/persona-5-royal/libri/
+* DVD a noleggio: https://www.allgamestaff.it/persona-5-royal/dvd-a-noleggio/
+
+Per ogni nuova riga, `verificato` deve riferirsi ai campi effettivamente attestati dalla fonte.
+Nome, negozio e prezzo possono venire dall'elenco dei negozi; effetto, categoria, destinatario,
+reperibilità e condizioni devono invece essere confrontati con la guida tematica pertinente.
+Le assenze legittime vanno distinte dai campi non ancora censiti. Il gate controllerà inoltre
+che uno stesso articolo presente in più guide non venga duplicato sotto chiavi incompatibili e
+che le diverse reperibilità siano conservate senza sceglierne arbitrariamente una.
+
+## Aggiornamento 5 — controprova quantitativa sul criterio dei quattro lati
+
+**Base osservata:** correzione di Fase 2 in corso dopo `78b5dec`
+**Stato:** evidenza favorevole alla riformulazione, da riverificare sul commit stabile
+
+La soglia `quotaFuoriDalTratto` non era applicata e non può restare presentata come criterio.
+È però possibile fondare la deduzione sui dati che il requisito di Fase 2 chiedeva davvero:
+dominanza laterale, divario dagli interni, quattro lati esclusivi e sequenza dei tipi 13–16.
+
+Ho ricalcolato la distribuzione di tutti i 1.372 pin collocabili che entrano nella misura:
+30,25% alto, 18,37% destra, 20,92% basso e 30,47% sinistra. Contro queste frequenze empiriche:
+
+| tipo | lato | casi | quota | probabilità binomiale di una concentrazione almeno così forte | correzione prudente 16×4 |
+|---:|---|---:|---:|---:|---:|
+| 13 | alto | 43/66 | 65,15% | 5,29×10⁻⁹ | 3,38×10⁻⁷ |
+| 14 | destra | 50/71 | 70,42% | 1,35×10⁻²¹ | 8,67×10⁻²⁰ |
+| 15 | basso | 50/66 | 75,76% | 2,32×10⁻²¹ | 1,48×10⁻¹⁹ |
+| 16 | sinistra | 47/59 | 79,66% | 8,80×10⁻¹⁵ | 5,64×10⁻¹³ |
+
+Il calcolo binomiale non sostituisce una prova semantica e tratta i pin come indipendenti, quindi
+va letto come controllo di robustezza, non come probabilità causale. Insieme al fatto che i
+quattro tipi sono consecutivi, coprono esattamente i quattro lati senza duplicati e il migliore
+degli altri tipi si ferma al 48,5%, rende però molto forte la lettura direzionale anche senza
+imporre che metà dei pin sia oltre il perimetro. Accetto quindi come soluzione possibile la
+riformulazione in cui la quota fuori-tratto è soltanto descrittiva, a condizione che codice,
+artefatto, verificatore e stato non la chiamino più soglia di accettazione e non dichiarino che
+tutti i quattro tipi cadono prevalentemente fuori dal disegno.
+
+## Aggiornamento 6 — trovata la tabella nativa `nativeType` → `partId`
+
+**Stato:** prova nel renderer con confidenza alta; nessuna nuova etichetta semantica assegnata
+
+La catena nativa è ora chiusa fino alla scelta dello sprite. La task `road map(FLD)` viene
+registrata a `0x14129f6b0` con update `0x1412a07c0`; la callback grafica `0x1412a2ca0` chiama il
+draw base `0x1412a2d10` → `0x151e00160` e poi `0x1412a3170`. Da qui il renderer dei record ICON
+è `0x1412a7500`.
+
+Nel renderer:
+
+1. `0x1412a7530` carica la lista ICON corrente da `[oggetto+0xc0]`;
+2. `0x1412a7657` controlla il separatore a `record+0x1c`, `0x1412a7663` legge `nativeType` come
+   word a `record+0`, e `0x1412a7c4e` avanza di `0x48`, la dimensione già provata del record;
+3. `0x1412a756c` carica la tabella a VA `0x1424575a0`, offset raw `0x24557a0` nel file;
+4. `0x1412a77d4` calcola `5 × nativeType`, poi l'indice viene scalato per quattro: ogni entry è
+   quindi di `0x14` byte;
+5. `0x1412a77e2` legge il primo `uint32` dell'entry e i call-site `0x1412a77f4`, `0x1412a7802`
+   e `0x1412a78d1` lo passano come `edx` agli helper di disegno.
+
+Il campo è un `partId` a base uno. La relazione direttamente dimostrata dal codice è dunque:
+
+```text
+partId = uint32(tabella + 0x14 * nativeType)
+```
+
+Per gli identificativi compresi nel foglio `P5MINIMAP_01.SPD`, il renderer li fa corrispondere
+alla voce `partId - 1`; tutte le ancore già note confermano questa seconda relazione. Non va però
+generalizzata oltre il foglio: `P5MINIMAP_01.SPD` contiene 193 sprite, mentre i tipi 113–119
+restituiscono `partId` 200–206. Per questi sette tipi è dimostrato il `partId`, non ancora quale
+altro foglio o tabella di parti lo risolva graficamente.
+
+Le controprove coincidono senza eccezioni con tutte le ancore già indipendentemente note:
+
+* tipo 4: valore 24 → sprite 23;
+* tipo 97: valore 108 → sprite 107;
+* tipi 46–96: valori 115–165 → sprite 114–164, cioè `nativeType + 68`;
+* tipi 98–103: valori 175–180 → sprite 174–179, cioè `nativeType + 76`.
+
+Questo spiega anche perché la ricerca di una sequenza contigua non trovava la tabella: i record
+sono larghi 20 byte e contengono un identificatore a base uno. È escluso che `0x1412ad850`
+realizzi il mapping: quella routine riordina o compatta i separatori di tipo/flag `-2`.
+
+### Valori utili fuori dai blocchi già risolti
+
+I seguenti valori sono `nativeType:partId-1`; per 0–192 il secondo numero è anche l'indice
+verificabile in `P5MINIMAP_01.SPD`, mentre 199–205 richiedono ancora la sorgente grafica corretta:
+
+```text
+4:23 5:27 6:28 7:24 8:27 9:25 10:29 11:29 12:30 13:56 14:58 15:57 16:59
+17:26 18:0 19:48 20:53 21:54 22:55 23:60 24:61 25:61 26:26 27:0 28:11
+29:64 30:65 31:73 32:74 33:74 34:76 35:76 36:78 37:79 38:80 39:81 40:85
+41:0 42:0 43:93 44:105 45:106 97:107 104:180 105:167 106:165 107:168 108:166
+109:106 110:169 111:170 112:61 113:199 114:200 115:201 116:202 117:203 118:204
+119:205
+```
+
+### Join già verificabile con i nomi nativi del foglio SPD
+
+Incrociando la tabella con `data/atlas/extracted/icone-mappa.json`, senza dedurre il significato
+dalla geometria, 28 dei 35 tipi ancora aperti raggiungono già una voce nominata o visibile di
+`P5MINIMAP_01.SPD`:
+
+| tipi nativi | `partId` | sprite | nome nativo | lettura letterale |
+|---|---:|---:|---|---|
+| 5 | 28 | 27 | `ミニマップ：目的地・認知ロックポ…` | destinazione / punto di blocco cognitivo |
+| 19 | 49 | 48 | `ミニマップ：移動先アイコン1` | icona destinazione 1 |
+| 20 | 54 | 53 | `ミニマップ：ベルベット` | Velvet Room |
+| 24, 25, 112 | 62 | 61 | `ミニマップ：EXIT` | uscita |
+| 28 | 12 | 11 | `ミニマップ：自分用アイコン` | icona del giocatore |
+| 29 | 65 | 64 | `ミニマップ：上下移動矢印　上` | movimento verticale, su |
+| 30 | 66 | 65 | `ミニマップ：上下移動矢印　下` | movimento verticale, giù |
+| 32, 33 | 75 | 74 | `ミニマップ：down` | giù |
+| 34, 35 | 77 | 76 | `ミニマップ：up` | su |
+| 36 | 79 | 78 | `矢印左上` | freccia in alto a sinistra |
+| 37 | 80 | 79 | `矢印右上` | freccia in alto a destra |
+| 38 | 81 | 80 | `矢印左下` | freccia in basso a sinistra |
+| 39 | 82 | 81 | `矢印右下` | freccia in basso a destra |
+| 40 | 86 | 85 | `オタカラアイコン` | icona tesoro |
+| 43 | 94 | 93 | `ミニマップ：チェック` | spunta / controllo |
+| 45, 109 | 107 | 106 | `スタンプ` | timbro dei Memento |
+| 104 | 181 | 180 | nome non decodificato; ritaglio a stella | prova soltanto visiva |
+| 105 | 168 | 167 | `ＩＮＦＯ` | informazioni |
+| 106 | 166 | 165 | `中華マン屋` | venditore di panini al vapore |
+| 107 | 169 | 168 | `輸入食品` | alimentari importati |
+| 108 | 167 | 166 | `ジョゼ` | Jose |
+| 110 | 170 | 169 | `教会` | chiesa |
+| 111 | 171 | 170 | `路地アクセサリー売り` | venditore di accessori nel vicolo |
+
+Questa tabella è una prova di identità grafica e nominale, non ancora una decisione automatica
+sul `tipoSpillo` dell'app. I duplicati sono informativi: più `nativeType` possono intenzionalmente
+usare lo stesso `partId`, quindi non vanno fusi senza controllarne campi, condizioni ed effetti.
+
+### Passaggio operativo richiesto a Claude
+
+La prova chiude il mapping numerico al `partId` e, per 28 tipi aperti, raggiunge già il nome o il
+ritaglio del foglio noto. Nei file di sua proprietà Claude può ora aggiungere un estrattore
+riproducibile della tabella a `0x24557a0`, con un verificatore indipendente che ricontrolli offset, passo `0x14`,
+base uno e le quattro famiglie di ancore sopra. Il risultato va unito ai nomi e alle immagini
+già versionati; i sette `partId` 200–206 devono restare aperti finché non viene trovata la loro
+sorgente, senza indicizzarli fuori dai 193 record di `P5MINIMAP_01.SPD`.
+
+Se occorre convalidare ulteriormente il contratto del draw, il prossimo punto preciso è
+`0x1412ae610`, chiamato a `0x1412a78d1` con `edx=partId`; per l'Atlante, però, il problema
+`nativeType` → `partId` è già risolto e conviene proseguire con estrazione e join SPD.
+
+## Decisione successiva dell'utente — importare i tipi aperti come `nota`
+
+**Conferma ricevuta:** 6 settembre 2026, durante la modifica di `pin_semantics.py` dopo `fe53ead`
+
+L'utente conferma di avere dato direttamente a Claude una decisione successiva rispetto al piano:
+i tipi privi di significato dimostrato devono entrare nell'atlante come segnalini `nota`, marcati
+esplicitamente `da-verificare`, affinché egli possa identificarli sulle schermate del gioco.
+Questa decisione prevale sulla precedente frase «non diventano nota».
+
+Il contratto da riverificare diventa quindi:
+
+1. nessun tipo aperto riceve un significato specifico non dimostrato: il solo tipo ammesso è
+   `nota`, con etichetta inequivocabile «Da identificare (tipo N)»;
+2. ogni nota conserva `nativeType`, diffusione, condizioni e tutte le evidenze disponibili,
+   distinguendo rigorosamente prove, indizi geometrici e proposte;
+3. gli indizi geometrici riportano l'accuratezza misurata e non vengono presentati come risposta;
+4. una prova puntuale valida continua a prevalere sullo stato generico del tipo;
+5. il join `nativeType` → `partId` → nome/ritaglio SPD va incluso nella scheda quando disponibile;
+6. i `partId` 200–206 restano dichiarati senza sorgente grafica finché questa non viene trovata;
+7. l'interfaccia deve rendere immediatamente distinguibili questi pin dai tipi certificati e
+   permettere all'utente di leggere le evidenze necessarie alla verifica manuale.
+
+Codex valuterà l'implementazione secondo questa decisione aggiornata, non secondo il divieto
+precedente ormai superato.
+
+## Percorso di convergenza delle verifiche manuali
+
+L'importazione come `nota` rende visibile il residuo, ma da sola non lo riduce. Perché ogni
+identificazione fatta dall'utente diventi un avanzamento permanente e riproducibile serve un
+registro versionato, separato dagli artefatti generati, con almeno questi due ambiti:
+
+1. associazione globale per `nativeType`, utilizzabile solo quando le occorrenze sono semanticamente
+   omogenee;
+2. eccezione puntuale identificata da planimetria e indice/flag del pin, per i tipi il cui significato
+   dipende dal contesto.
+
+Ogni voce confermata deve conservare il tipo dell'app scelto, l'etichetta, l'evidenza usata e lo
+stato della verifica. La generazione successiva deve applicare prima l'eccezione puntuale e poi la
+regola globale. Il verificatore deve dimostrare che il totale dei 1.429 pin resta chiuso, che il
+numero `da-verificare` diminuisce della quantità attesa e che nessuna regola globale copre
+occorrenze incompatibili.
+
+Ordine consigliato per massimizzare l'avanzamento: tipi 19, 28, 5, 43, 29 e 30. Nell'ultima
+generazione completa contano insieme 457 dei 583 pin aperti, cioè il 78,4%.
+
+### Rilievi preventivi sull'implementazione osservata
+
+Non sono un verdetto su un commit stabile, ma indicano che cosa deve essere chiuso prima della
+riverifica:
+
+* la scheda sintetica può limitare ciò che mostra, ma l'artefatto probatorio deve conservare tutte
+  le procedure e le etichette, senza troncarle alle prime otto;
+* la scheda deve esporre `spriteNativo`/`associazione`, non soltanto conservarli altrove;
+* i 28 join nativi dimostrati nell'aggiornamento precedente devono essere consumati dal generatore;
+* nel seed il `nativeType` non può sopravvivere soltanto nel testo descrittivo: serve una chiave
+  strutturata o un registro esterno stabile per applicare senza ambiguità la risposta dell'utente;
+* il registro deve ammettere eccezioni puntuali: imporre sempre una corrispondenza globale per tipo
+  ricreerebbe il rischio già misurato nelle inferenze geometriche.
+
+### Controllo visivo preventivo delle nuove rese automatiche
+
+Il ritaglio nativo e il significato del tipo dell'app sono stati confrontati con le definizioni di
+`shared/spilli.ts`. Prima di certificare automaticamente le nuove rese restano questi limiti:
+
+* tipo 20, sprite 53 `ミニマップ：ベルベット`: il ritaglio è una «V» azzurra della Velvet Room.
+  Non raffigura una porta e il nome non dimostra il significato `porta`, che nel registro dell'app
+  è definito «porta chiusa o serratura». Deve restare `nota` da verificare oppure ricevere in seguito
+  una categoria esplicitamente approvata;
+* tipo 43, sprite 93 `ミニマップ：チェック`: il ritaglio è una spunta. Nome e immagine non
+  dimostrano da soli un `punto-sensibile`; senza una prova contestuale indipendente deve restare
+  `nota` da verificare;
+* tipo 19, sprite 48 `ミニマップ：移動先アイコン1`: nome e simbolo dimostrano un punto di
+  destinazione, ma non ancora un collegamento navigabile con arrivo certificato. La resa
+  `passaggio` è ammissibile soltanto se non viene presentata come arco già risolto e se resta
+  distinta dai collegamenti della Fase 3b;
+* le frecce verticali possono invece ricadere in `scala`, perché la definizione condivisa include
+  esplicitamente scale, scalette e ascensori fra livelli, non soltanto una scala fisica.
+
+Nel verificatore osservato durante questa lavorazione, il ramo `tabella nativa delle parti` usa
+`binario`, `nomi_sprite` e `tabella_ok` senza inizializzarli. Prima del commit vanno costruiti
+dall'eseguibile e da `icone-mappa.json` e il contatore va inizializzato e confrontato con il totale
+atteso; altrimenti `verify_pin_semantics.py` termina con `NameError` al primo tipo provato dalla
+tabella.
+
+La prima esecuzione reale si ferma ancora prima, sull'asserzione del vecchio contratto che pretende
+`tipoSpillo is None` per un tipo aperto. Il verificatore deve invece pretendere `nota`, l'etichetta
+`Da identificare`, il blocco di riferimenti completo e il join alla tabella quando disponibile.
+Anche la ricostruzione dei pin attesi nel pacchetto deve includere questi tipi come `nota`, anziché
+scartarli con `stato != determinato`: altrimenti il controllo respinge proprio l'importazione
+autorizzata dall'utente.
+
+## Correzione concreta della regressione nelle evidenze dei collegamenti
+
+La sesta verifica della Fase 2 ha individuato la perdita di tutti gli script e di tutte le
+procedure da `mondo_connessioni_evidenze.json`. La causa operativa è che `world_connections.py`
+usa lo stesso argomento come cartella dei `.flow` e dei `.BF`, mentre le fonti reali sono separate:
+
+* 227 file `.flow` in `campi-completi/scripts/`;
+* 227 file `.BF` in `campi-completi/originali/IT/FIELD/HIT/`, nominati
+  `FHIT_<major>_<minor>_<sub>.BF`.
+
+La soluzione robusta proposta a Claude è rendere esplicite entrambe le sorgenti nella CLI e nella
+funzione produttiva. Per ogni campo, il `.flow` va letto dalla prima cartella e la sua provenienza
+va controllata byte per byte sul `.BF` della seconda cartella, a sua volta confrontato con la
+risorsa estratta dal CPK.
+
+Il verificatore non deve più richiamare il generatore direttamente sulla directory ufficiale:
+deve rigenerare in una directory temporanea, confrontare l'artefatto prodotto con quello versionato
+e soltanto dopo scrivere il proprio rapporto. Poiché il corpus sorgente è fisso, deve inoltre
+respingere almeno ogni discesa sotto gli invarianti già misurati:
+
+* 209 campi;
+* 192 script associati;
+* 15.734 procedure;
+* 2.514 chiamate `CALL_FIELD`;
+* 4.495 trigger con procedura risolta.
+
+In questo modo un comando con una cartella errata fallisce prima di poter sostituire un artefatto
+completo con un JSON formalmente valido ma privo della sua copertura probatoria.
+
+## Riscontro eseguibile dopo il primo allineamento del verificatore
+
+La correzione delle inizializzazioni e del contratto `da-verificare` è stata recepita, ma
+`verify_pin_semantics.py` fallisce ancora sulla prima mappa, `nativo-rmap-007-1-0`, con
+`numero di pin diverso`. La causa è puntuale: nella costruzione di `attese` il verificatore
+continua a eseguire `continue` quando `stato != determinato`, mentre il seed ora include
+correttamente quegli stessi pin come `nota`.
+
+Il controllo deve quindi ricostruire anche i tipi `da-verificare`, usando `nota` come
+`tipoSpillo`; soltanto le esclusioni già dichiarate dal riferimento possono sottrarre un pin.
+La funzione locale `spillo_di()` deve seguire lo stesso contratto, così da verificare anche le
+condizioni delle note. Non va indebolito il confronto fra i due multinsiemi: dopo la correzione
+`trovati == attese` deve restare esatto per tipo e coordinate.
