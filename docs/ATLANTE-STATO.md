@@ -165,7 +165,7 @@ verifiche. **L'utente ha esaminato il rilievo e ha confermato la forma «Parte I
 adottata. Ogni caso dichiara la propria `fonteDistinzione` — `nomi-enumerati-dalla-guida` per i
 sei, `ordine-di-attraversamento` per i sette — così la differenza fra le due resta leggibile.
 
-## Fase 2 — Pin di tutti i tipi · **PRONTA PER VERIFICA per la parte urbana**
+## Fase 2 — Pin di tutti i tipi · **PRONTA PER VERIFICA**
 
 | passo | stato | esito |
 |---|---|---|
@@ -190,43 +190,84 @@ procedura che quella bandiera accende. Il nome della procedura è parlante:
 
 Le due strade sono indipendenti e concordano dove si incontrano.
 
-### Il tetto della copertura, e dove sta
+### La copertura dei pin, e che cosa la limita ancora
 
-L'utente chiede copertura al 100%. Ecco a che punto è e che cosa manca perché lo sia.
+Aggiornato il 6 settembre 2026, dopo l'ampliamento delle prove. **1297 pin su 1429 sono posati:
+il 90,8%.** Erano 710 (49,7%) alla dichiarazione precedente.
 
-| grado di prova | tipi | pin |
+| grado di prova | tipi | pin del tipo |
 |---|---|---|
-| **dimostrato** — nome interno dello sprite urbano, o procedura che accende la bandiera | 56 | 432 |
-| **ipotesi dichiarata** — ciò che la proiezione trova sotto il pin | 6 | 319 |
-| **nessuna prova** | 40 | 678 |
+| **dimostrato** — nome interno dello sprite (blocco urbano o blocco del Covo) | 57 | 90 |
+| **dimostrato** — procedura che accende la bandiera del pin | 5 | 351 |
+| **dimostrato** — procedura del trigger che sta sotto il pin | 15 | 867 |
+| **ipotesi dichiarata** — ciò che la proiezione trova sotto il pin | 2 | 53 |
+| **nessuna prova sul tipo** | 23 | 68 |
 
-**710 pin su 1429 sono posati** (il resto è escluso anche per riferimento non certificato). La
-proiezione è certificata su **125 planimetrie**, con scarto mediano dell'1% della tela e 1056
-coppie fra pin e punti del campo.
+più **40 pin risolti singolarmente**, uno per uno, dove il tipo resta muto ma quel pin ha sotto di
+sé un trigger che parla.
 
-Il grado «ipotesi» non asserisce nulla di falso: ogni pin porta scritto nella descrizione che
-cosa lo sostiene e che è un'ipotesi. Esempio: il tipo 19 cade su un ingresso del campo nel 50%
-dei casi contro il 35% medio, +3,7 deviazioni — il segnale più forte fra tutti — ed è letto come
-passaggio.
+#### Che cosa ha sbloccato la copertura
 
-**Perché non si arriva a 100%.** I 40 tipi restanti hanno, nell'insieme, meno di dieci coppie
-ciascuno sulle mappe con proiezione certificata: non c'è abbastanza materiale per distinguerli.
-Le strade tentate e fallite sono registrate in `semantica-pin.json → provePalazzi`. Per chiuderli
-servirebbe una delle due cose: **certificare la proiezione su più planimetrie** (oggi 125 su 301;
-il limite sono le mappe con pochi pin, dove la registrazione non ha abbastanza punti), oppure una
-fonte esterna che elenchi le icone della mappa d'insieme dei Palazzi.
+Il limite dichiarato in precedenza — «servirebbe certificare la proiezione su più planimetrie,
+oppure una fonte esterna» — era in buona parte **un mio difetto, non un limite dei dati**. Quattro
+interventi, in ordine di peso:
 
-### Che cosa resta indeterminato, e quanto pesa
+1. **Le mappe non certificate non conservavano il proprio riferimento.** Il ramo che le scartava
+   non salvava `pinCollocabili`, e così nessuna di loro poteva nemmeno essere provata con la
+   proiezione di un livello gemello. Corretto.
+2. **I livelli della stessa risorsa condividono la tela.** `ICON_<maggiore>_<minore>.BIN` divide i
+   pin in sezioni con un record separatore: sono livelli grafici della *stessa* zona, quindi la
+   trasformazione è per forza la stessa. Ora i loro pin si stimano **insieme** (29 planimetrie
+   certificate così) e una proiezione provata su un livello si **riprova** sugli altri (20 così,
+   ciascuna rimisurata sui propri pin, e accettata solo se almeno metà ci cade sopra).
+3. **La procedura del trigger sotto il pin.** Con la proiezione si sa quale punto del campo sta
+   sotto ogni pin. Se è un trigger, si sa quale procedura chiama, e il nome dice che cosa vi si
+   fa: `DUCT_…INOUT` un condotto, `AC_GOTO_…` uno spostamento, `CheckStair_…` una scala,
+   `DUNGEON_EXIT` l'uscita. Le procedure `*_minimap_*` **restano fuori dal conto**: accendono
+   l'icona senza dire di che icona si tratti, e contarle gonfierebbe il risultato.
+4. **La prova non deve per forza riguardare il tipo.** Un tipo con tre pin in tutto non potrà mai
+   avere una dominanza statistica, e per quella strada resterebbe muto per sempre. Ma se *quel*
+   pin cade su `DUNGEON_EXIT`, quel pin è un'uscita: 40 pin sono risolti così, uno per uno.
 
-| | pin | con significato | posati |
-|---|---|---|---|
-| mappe della città | 288 | 81 | 80 |
-| mappe dei Palazzi | 1141 | 351 | 325 |
+Una scoperta collaterale ha chiuso un blocco intero: lo scarto **76** porta i tipi 98–103 sugli
+sprite «マイパレス_…», e cinque di quei sei tipi cadono su procedure `MyPalace_*` che dicono la
+stessa identica cosa dello sprite (Maker sul creatore, Sound sulla musica, Image sulla galleria,
+Daifugou sull'area giochi, Award sui premi). Cinque conferme indipendenti, nessuna smentita: sono
+le voci del Covo dei Ladri.
 
-I 46 tipi ancora senza significato sono quasi tutti **condivisi fra città e Palazzi** — il più
-pesante è il tipo 19, con 165 occorrenze — e per loro le procedure che accendono la bandiera si
-limitano ad accenderla, senza dire altro. Non li importo: un pin senza significato è peggio di un
-pin assente.
+#### Due tipi di segnalino nuovi
+
+Dalla semantica nativa emergono due cose che nessuno dei 34 tipi esistenti esprime: la **scala**
+(passaggio verticale fra livelli dello stesso luogo, che il gioco distingue) e l'**uscita** (il
+punto da cui si lascia un Palazzo). Sono entrati nel registro `shared/spilli.ts` con la loro
+riserva SVG; il prompt per l'asset in stile va nella Fase 4, come previsto dal piano.
+
+#### Che cosa resta fuori, e perché
+
+I 132 pin non posati, con il motivo per ciascuno:
+
+| motivo | pin |
+|---|---|
+| la planimetria non condivide il riferimento con i suoi pin | 69 |
+| il tipo nativo non ha significato e il pin non ha un trigger sotto | 41 |
+| il pin è escluso singolarmente: cade lontano dal tratto della sua tela | 22 |
+
+I 69 stanno su **23 planimetrie**, quasi tutte con uno, due o tre pin in croce; nove hanno i pin
+completamente fuori dal disegno, anche con il fattore di scala che i dati stessi suggeriscono, il
+che fa pensare che quei pin appartengano visivamente a un altro livello del gruppo. I 22 esclusi
+singolarmente sono la stessa cosa vista da vicino: collocarli significherebbe metterli nel posto
+sbagliato, che è peggio che non metterli.
+
+Resta quindi un residuo del **9,2%**, tutto documentato pin per pin. Non lo dichiaro un limite
+invalicabile: è il punto in cui è arrivata la misura, con i motivi scritti perché il prossimo
+passo sappia dove guardare.
+
+#### Il riferimento e la proiezione, in numeri
+
+- **227 planimetrie su 250 con pin** condividono il riferimento; 1371 pin sono convertibili in
+  percentuali. Le 51 planimetrie senza pin non fanno numero.
+- **176 proiezioni certificate**, scarto mediano dell'1% della tela, **1178 coppie** fra pin e
+  punti del campo, tutte riprodotte punto per punto da `verify_map_projection.py`.
 
 ### Che cosa è successo, e perché la Fase 2 non è tutta qui
 
@@ -305,6 +346,43 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 ---
 
 ## Registro delle dichiarazioni di pronto
+
+### Fase 2 — terza dichiarazione, 6 settembre 2026
+
+Copertura portata da 710 a **1297 pin su 1429 (90,8%)**. Comandi per riprodurre, nell'ordine:
+
+```
+python tools/p5r-map-export/map_icons.py data/atlas/extracted
+python tools/p5r-map-export/pin_reference.py data/atlas/extracted
+python tools/p5r-map-export/map_projection.py data/atlas/extracted
+python tools/p5r-map-export/pin_semantics.py data/atlas/extracted
+python tools/p5r-map-export/build_seed_package.py data/atlas/extracted data/seed data/seed/mappe/atlante-mondo.json
+python tools/p5r-map-export/verify_pin_reference.py data/atlas/extracted
+python tools/p5r-map-export/verify_map_projection.py data/atlas/extracted
+python tools/p5r-map-export/verify_pin_semantics.py data/atlas/extracted
+npm run mappe:ricarica && npm run typecheck && npm run lint && npm test
+```
+
+Misurato dopo la ricarica sul database reale: 334 mappe, **1565 spilli** (erano 978), 1378 con
+mappa; `fuoriDalLivelloMappe` vuoto, partita e catalogo intatti. Suite **535 su 535**, typecheck e
+lint puliti.
+
+**Cosa verificare, oltre alla riproducibilità.** Il merito delle tre estensioni:
+
+1. che lo scarto **76** del blocco del Covo sia davvero confermato dalle procedure e non scelto
+   per far tornare i conti — le cinque conferme sono nel campo `sottoIlPin.procedure` dei tipi
+   98–103 di `semantica-pin.json`;
+2. che la **procedura sotto il pin** non sia una prova circolare: la proiezione è stimata sui pin,
+   e da lì si legge il trigger. Il verificatore ricalcola tutto dalle sorgenti, ma il giudizio su
+   quanto la cosa provi va dato;
+3. che l'esclusione delle procedure `*_minimap_*` dal conto sia rispettata ovunque, e che nessuna
+   famiglia dichiarata in `FAMIGLIE_SOTTO` sia più larga di quanto il suo nome giustifichi;
+4. che le proiezioni **ricevute da un livello gemello** reggano davvero: ciascuna deve essere
+   rimisurata sui pin del livello che la riceve, con almeno la quota dichiarata di pin vicini;
+5. che i due tipi nuovi (`scala`, `uscita`) siano usati solo dove la prova lo dice, e che la
+   palette, la legenda e l'editor li mostrino correttamente.
+
+
 
 | data | fase | dichiarazione | esito Codex |
 |---|---|---|---|
