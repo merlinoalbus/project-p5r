@@ -8,6 +8,7 @@ import type { AccessoMondoDto, DestinazioneMondoDto, TipoAccessoMondo } from '..
 const TABELLE: Record<TipoAccessoMondo, string> = {
   mappa: 'mappa', quartiere: 'quartiere', dungeon: 'dungeon', area: 'dungeon_area',
   luogo: 'luogo', negozio: 'negozio', punto: 'punto_interesse', confidente: 'confidente', articolo: 'articolo',
+  attivita: 'attivita',
 };
 
 /** Risolve soltanto associazioni registrate, senza scegliere una mappa per somiglianza del nome. */
@@ -52,6 +53,29 @@ export function risolviAccessoMondo(tipo: TipoAccessoMondo, chiave: string): Acc
       if (tipo === 'luogo') {
         const n = prepared('SELECT n.chiave FROM luogo l JOIN negozio n ON n.chiave=l.negozio WHERE l.chiave=? AND n.nascosto=0').get(chiave) as { chiave: string } | undefined;
         if (n) riferimenti.push({ tipo: 'negozio', chiave: n.chiave });
+      }
+      // Un'attività si svolge in un luogo, e la scheda ne registra il quartiere. Dentro quel
+      // quartiere il luogo è quello che porta il suo stesso nome — quando ce n'è esattamente uno:
+      // altrimenti resta il quartiere, che è comunque un posto sulla mappa.
+      if (tipo === 'attivita') {
+        const a = prepared('SELECT nome, luogo_chiave FROM attivita WHERE chiave = ?').get(chiave) as { nome: string; luogo_chiave: string | null } | undefined;
+        if (a?.luogo_chiave) {
+          const cerca = (sql: string) => prepared(sql).all(a.luogo_chiave, a.nome) as Array<{ chiave: string }>;
+          // prima il nome uguale, poi il nome contenuto: «Freccette» sta dentro «Penguin Sniper
+          // (Freccette e Biliardo)». Vale solo quando il quartiere ne ha esattamente uno.
+          const esatti = cerca('SELECT chiave FROM luogo WHERE quartiere_chiave = ? AND lower(nome) = lower(?)');
+          const contenuti = esatti.length === 1 ? esatti
+            : cerca("SELECT chiave FROM luogo WHERE quartiere_chiave = ? AND lower(nome) LIKE '%' || lower(?) || '%'");
+          if (contenuti.length === 1) riferimenti.push({ tipo: 'luogo', chiave: contenuti[0].chiave });
+          if (prepared('SELECT 1 FROM quartiere WHERE chiave = ?').get(a.luogo_chiave)) riferimenti.push({ tipo: 'quartiere', chiave: a.luogo_chiave });
+        }
+      }
+      // Un confidente si incontra in luoghi precisi, e il catalogo li elenca: sono quelli, non
+      // una somiglianza di nome.
+      if (tipo === 'confidente') {
+        for (const l of prepared("SELECT chiave FROM luogo WHERE confidenti_json IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(luogo.confidenti_json) WHERE value = ?) ORDER BY chiave").all(chiave) as Array<{ chiave: string }>) {
+          riferimenti.push({ tipo: 'luogo', chiave: l.chiave });
+        }
       }
       if (tipo === 'articolo') {
         const n = prepared('SELECT a.negozio_chiave FROM articolo a JOIN negozio n ON n.chiave=a.negozio_chiave WHERE a.chiave=? AND n.nascosto=0').get(chiave) as { negozio_chiave: string } | undefined;

@@ -20,8 +20,8 @@ describe('collezioni presentative globali',()=>{
  });
  it('dettaglio isolato e sottoinsieme dell’albero conservano indice e totale globali senza toccare nomi o relazioni',()=>{
   const db=initDb(':memory:');runMigrations(db);
-  const node={nome:'Sala',tipo:'generica' as const,genitore:null,ordine:1,immagine:null,asset:'fixture/pianta',larghezza:100,altezza:100,entita:null,note:'',spilli:[]};
-  const p:EsportazioneMappeDto={versione:1,mappe:[{...node,chiave:'nativo-rmap-998-1-1'},{...node,chiave:'nativo-rmap-998-1-0'},{...node,chiave:'nativo-rmap-998-1-2',asset:'mappe/citta-ikebukuro'}]};
+  const node={nome:'Sala',tipo:'generica' as const,genitore:null,ordine:1,immagine:null,asset:'fixture/pianta',ruoloImmagine:'planimetria-nativa' as const,larghezza:100,altezza:100,entita:null,note:'',spilli:[]};
+  const p:EsportazioneMappeDto={versione:1,mappe:[{...node,chiave:'nativo-rmap-998-1-1'},{...node,chiave:'nativo-rmap-998-1-0'},{...node,chiave:'nativo-rmap-998-1-2',asset:'mappe/citta-ikebukuro',ruoloImmagine:'illustrazione-editoriale' as const}]};
   importaMappe(p,{origine:'seed'});const before=db.prepare('SELECT * FROM mappa ORDER BY chiave').all();
   const all=elencaMappe();const one=all.find(m=>m.chiave.endsWith('-b'))??all.find(m=>m.immagineCollezione?.indice===2)!;
   expect(one.immagineCollezione).toMatchObject({indice:2,totale:2});

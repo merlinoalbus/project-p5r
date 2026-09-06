@@ -3,7 +3,8 @@ import { isDeepStrictEqual } from 'node:util';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe.js';
 import path from 'node:path';
-import type { DestinazioneSpillo } from '../../../shared/types.js';
+import type { DestinazioneSpillo, RuoloImmagine } from '../../../shared/types.js';
+import { RUOLI_IMMAGINE } from '../../../shared/types.js';
 import { leggiDestinazioneSpillo, salvaDestinazioneSpillo, verificaDestinazioneSpillo } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
 import { slug } from '../../../shared/slug.js';
@@ -24,7 +25,7 @@ import type { CondizioneSpilloDto, DettaglioSpilloDto, EsportazioneMappeDto, Imm
 import fs from 'node:fs';
 import { creaZip, type VoceZip } from '../../utils/zip.js';
 
-interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string }
+interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
 interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null }
 
@@ -58,11 +59,11 @@ function presentazioneMappa(chiave: string): Pick<MappaRiassuntoDto, 'contesti' 
   return r?{contesti:JSON.parse(r.contesti_json),...(r.gruppo_immagini_json?{gruppoImmagini:JSON.parse(r.gruppo_immagini_json)}:{})}:{};
 }
 
-// Illustrazioni editoriali documentate in docs/grafica/prompt-immagini.md �19.
-const ILLUSTRAZIONI_EDITORIALI = new Set(["mappe/citta-ikebukuro", "mappe/citta-harajuku", "mappe/citta-ueno", "mappe/citta-inokashira-park", "mappe/citta-shinagawa", "mappe/citta-nakano", "mappe/citta-ogikubo", "mappe/citta-yokohama-chinatown", "mappe/citta-maihama", "mappe/citta-roppongi", "mappe/citta-tsukishima", "mappe/citta-meiji-shrine", "mappe/citta-ichigaya", "mappe/citta-suidobashi", "mappe/citta-asakusa", "mappe/citta-mementos"]);
 function collezioniImmagini(){
  const righe=prepared('SELECT * FROM mappa').all() as RigaMappa[];
- return calcolaCollezioniImmagini(righe.map(r=>({chiave:r.chiave,genitore:r.genitore_chiave,nome:r.nome,ordine:r.ordine,...presentazioneMappa(r.chiave),fisica:!!immagineDi(r)||!!(r.asset&&!ILLUSTRAZIONI_EDITORIALI.has(r.asset)&&(r.larghezza??0)>0&&(r.altezza??0)>0)})));
+ // La numerazione delle omonime riguarda le piante del gioco: l'illustrazione di un quartiere
+ // porta lo stesso nome ma è un'altra cosa, e non entra nella collezione.
+ return calcolaCollezioniImmagini(righe.map(r=>({chiave:r.chiave,genitore:r.genitore_chiave,nome:r.nome,ordine:r.ordine,...presentazioneMappa(r.chiave),fisica:r.ruolo_immagine==='planimetria-nativa'})));
 }
 function riassunto(r: RigaMappa, collezioni=collezioniImmagini()): MappaRiassuntoDto {
   const c = conteggi(r.chiave);
@@ -74,6 +75,7 @@ function riassunto(r: RigaMappa, collezioni=collezioniImmagini()): MappaRiassunt
     genitoreNome: r.genitore_chiave ? (prepared('SELECT nome FROM mappa WHERE chiave = ?').get(r.genitore_chiave) as {nome:string}|undefined)?.nome ?? null : null,
     immagineUrl: img ? `/api/immagini/mappa/${encodeURIComponent(img.chiave)}/file` : null,
     asset: assetPredefinitoMappa(chiaveMappa(r.chiave)), assetOriginale:r.asset, entita: r.entita_tipo && r.entita_chiave ? { tipo: r.entita_tipo, chiave: r.entita_chiave } : null,
+    ruoloImmagine: r.ruolo_immagine,
     origine: r.origine, numeroSpilli: c.spilli, numeroFigli: c.figli, updatedAt: r.updated_at,
   };
 }
@@ -593,6 +595,7 @@ export function esportaMappe(radice?: string): EsportazioneMappeDto {
   const mappe: EsportazioneMappeDto['mappe'] = (prepared('SELECT * FROM mappa ORDER BY (genitore_chiave IS NOT NULL), ordine, chiave').all() as RigaMappa[]).filter((m) => !ammesse || ammesse.has(m.chiave)).map((m) => ({
     ...presentazioneMappa(m.chiave),
     chiave: m.chiave, nome: m.nome, tipo: m.tipo, genitore: m.genitore_chiave, ordine: m.ordine, immagine: m.immagine_chiave, asset: m.asset, assetOriginale:m.asset, larghezza: m.larghezza, altezza: m.altezza,
+    ruoloImmagine: m.ruolo_immagine,
     entita: m.entita_tipo && m.entita_chiave ? { tipo: m.entita_tipo, chiave: m.entita_chiave } : null, note: m.note,
     spilli: (prepared('SELECT * FROM spillo WHERE mappa_chiave = ? ORDER BY ordine, id').all(m.chiave) as RigaSpillo[]).map((s) => ({
       ...leggiDestinazioneSpillo(s.id),
@@ -720,13 +723,25 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
       const esistente = prepared('SELECT origine FROM mappa WHERE chiave = ?').get(m.chiave) as { origine: string } | undefined;
       if (esistente && !opz.sovrascrivi && !(origine === 'seed' && esistente.origine === 'seed')) { esito.saltate.push(m.chiave); continue; }
       if (esistente && origine === 'seed' && esistente.origine === 'utente') { esito.saltate.push(m.chiave); continue; }
-      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at)
-        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      // il ruolo dell'immagine lo dichiara il pacchetto; se tace, l'immagine c'è ma non è una pianta del gioco
+      const ruolo: RuoloImmagine = m.ruoloImmagine && (RUOLI_IMMAGINE as readonly string[]).includes(m.ruoloImmagine)
+        ? m.ruoloImmagine
+        : m.asset?.startsWith('palazzi/') ? 'emblema' : (m.asset ?? m.immagine) ? 'illustrazione-editoriale' : 'nessuna';
+      const conRuolo = (prepared('PRAGMA table_info(mappa)').all() as Array<{ name: string }>).some((c) => c.name === 'ruolo_immagine');
+      prepared(`INSERT INTO mappa (chiave, nome, tipo, genitore_chiave, ordine, immagine_chiave, asset, larghezza, altezza, entita_tipo, entita_chiave, origine, note, updated_at${conRuolo ? ', ruolo_immagine' : ''})
+        VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?${conRuolo ? ', ?' : ''})
         ON CONFLICT(chiave) DO UPDATE SET nome = excluded.nome, tipo = excluded.tipo, ordine = excluded.ordine, immagine_chiave = COALESCE(excluded.immagine_chiave, mappa.immagine_chiave), asset = excluded.asset,
-          larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at`)
-        .run(m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null, origine, m.note ?? '', adesso);
+          larghezza = excluded.larghezza, altezza = excluded.altezza, entita_tipo = excluded.entita_tipo, entita_chiave = excluded.entita_chiave, origine = excluded.origine, note = excluded.note, updated_at = excluded.updated_at${conRuolo ? ', ruolo_immagine = excluded.ruolo_immagine' : ''}`)
+        .run(...[m.chiave, m.nome, m.tipo, m.ordine ?? 0, m.immagine ?? null, m.asset ?? null, m.larghezza ?? null, m.altezza ?? null, m.entita?.tipo ?? null, m.entita?.chiave ?? null, origine, m.note ?? '', adesso, ...(conRuolo ? [ruolo] : [])]);
+      // L'entità dichiarata dalla mappa vale anche come associazione consultabile: è così che la
+      // scheda dell'area della guida mostra la sua planimetria e che le altre sezioni la trovano.
+      if (prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_entita'").get()) {
+        prepared('DELETE FROM mappa_entita WHERE mappa_chiave = ?').run(m.chiave);
+        if (m.entita?.tipo && m.entita.chiave) prepared('INSERT OR REPLACE INTO mappa_entita VALUES(?,?,?,?)')
+          .run(m.chiave, m.entita.tipo, m.entita.chiave, JSON.stringify({ origine, dichiarata: 'pacchetto' }));
+      }
       if ((m.contesti !== undefined || m.gruppoImmagini !== undefined) && prepared("SELECT 1 FROM sqlite_master WHERE name='mappa_presentazione'").get()) {
-        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative()}).nullable()});
+        const schema=z.object({contesti:z.array(z.object({id:z.string().min(1).max(160),nome:z.string().min(1).max(240).nullable(),campo:z.string().min(1).max(80),texpack:z.number().int().nonnegative()})).max(1000),gruppo:z.object({id:z.string().min(1).max(120),nome:z.string().min(1).max(160),ordine:z.number().int().nonnegative(),etichetta:z.string().min(1).max(160).optional()}).nullable()});
         const v=schema.safeParse({contesti:m.contesti??[],gruppo:m.gruppoImmagini??null});
         if(!v.success || new Set(v.data.contesti.map(c=>c.id)).size!==v.data.contesti.length)throw httpErrors.badRequest('contesti-non-validi','Contesti della planimetria non validi o duplicati.');
         prepared('INSERT INTO mappa_presentazione VALUES(?,?,?) ON CONFLICT(mappa_chiave) DO UPDATE SET contesti_json=excluded.contesti_json,gruppo_immagini_json=excluded.gruppo_immagini_json').run(m.chiave,JSON.stringify(v.data.contesti),v.data.gruppo?JSON.stringify(v.data.gruppo):null);

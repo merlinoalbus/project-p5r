@@ -15,3 +15,4 @@ export * from './impostazioni';
 export * from './catalogo';
 
 export * from './organizzazioneMappe';
+export * from './accessoMondo';

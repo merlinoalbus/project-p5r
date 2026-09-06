@@ -25,6 +25,7 @@ import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
+import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
 const TIPI = Object.keys(NOME_TIPO) as PuntoInteresseDto['tipo'][];
 
@@ -101,6 +102,7 @@ export function DungeonDettaglioPage() {
                 <h1 className="titolo-display m-0">{d.nome}</h1>
                 {d.sovrano && <span className="chip">{d.sovrano}</span>}
                 {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
+                <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" compatto />
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {d.date.sblocco && <span className="chip" title={d.date.sblocco}>Sblocco {dataBreve(d.date.sblocco)}</span>}

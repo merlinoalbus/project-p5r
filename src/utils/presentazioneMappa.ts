@@ -1,4 +1,5 @@
 import type { MappaDto, MappaRiassuntoDto } from '../types';
+import { nomeConVersione } from './etichettaVersione';
 type IdentitaMappa = Pick<MappaRiassuntoDto, 'nome' | 'contesti' | 'gruppoImmagini' | 'genitoreNome'>;
 type RisoluzioneContesto = { stato: 'assente' | 'non-valido' | 'senza-titolo' | 'multiplo'; titolo: null; ids: string[] } | { stato: 'nominato'; titolo: string; ids: string[] };
 
@@ -24,19 +25,25 @@ export function risolviContesto(mappa: IdentitaMappa, selezione?: string | null)
 export function titoloContesto(mappa: IdentitaMappa, selezione?: string | null): string | null {
   return risolviContesto(mappa, selezione).titolo;
 }
+/** Il nome con cui presentare una mappa: il titolo del contesto scelto, altrimenti il nome del
+ * luogo seguito da ciò che questa versione mostra. È la resa unica: titolo della pagina,
+ * breadcrumb del visore, mappa incorporata e selettori passano tutti di qui, così lo stesso
+ * luogo non compare con due nomi diversi a seconda della schermata. */
 export function nomePresentazioneMappa(mappa: IdentitaMappa, selezione?: string | null): string {
   const titolo = titoloContesto(mappa, selezione);
   if (titolo) return titolo;
   if (mappa.contesti?.some(c => c.nome === null)) return mappa.genitoreNome ? `${mappa.genitoreNome} — Planimetria` : 'Planimetria';
-  return alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
+  const base = alternativeMappa(mappa).map(c => c.nome).join(' / ') || mappa.gruppoImmagini?.nome || mappa.nome;
+  return nomeConVersione(mappa as MappaRiassuntoDto, base);
 }
 export function presentaMappa(mappa: MappaDto, selezione?: string | null): MappaDto {
   const nome = nomePresentazioneMappa(mappa, selezione);
   return { ...mappa, nome, percorso: mappa.percorso.map((p, i) => i === mappa.percorso.length - 1 ? { ...p, nome } : p), figli: mappa.figli.map(f => ({ ...f, nome: nomePresentazioneMappa(f) })) };
 }
-/** Etichetta del selettore con la gerarchia verificata, mai un piano inventato. */
+/** Etichetta del selettore con la gerarchia verificata, mai un piano inventato. La parte che
+ * descrive la versione viene da `etichettaVersione`, la stessa che usano indice e albero. */
 export function etichettaPlanimetria(mappa: MappaRiassuntoDto): string {
   if (mappa.contesti?.some(c => c.nome === null)) return nomePresentazioneMappa(mappa);
-  const nome = mappa.gruppoImmagini ? `${mappa.gruppoImmagini.nome} — immagine ${mappa.gruppoImmagini.ordine + 1}` : nomePresentazioneMappa(mappa);
+  const nome = nomePresentazioneMappa(mappa);
   return mappa.nomeCompleto?.endsWith(mappa.nome) ? mappa.nomeCompleto.slice(0, -mappa.nome.length) + nome : nome;
 }

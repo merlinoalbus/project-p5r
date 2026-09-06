@@ -16,6 +16,7 @@ import { IconChevronLeft } from '../components/shared/icons';
 import type { DialogoConfidenteDto } from '../types';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
 /** Un dialogo di rango: scelte in ordine, con le migliori evidenziate (punti massimi), le romantiche e gli avvisi. */
 export function DialogoRango({ d, aperto, onToggle }: { d: DialogoConfidenteDto; aperto: boolean; onToggle: () => void }) {
@@ -94,6 +95,7 @@ export function ConfidenteDettaglioPage() {
                 <span className="chip chip--attivo">{c.arcanaNome}</span>
                 {mio && <span className="chip">Rango {mio.rango === 10 ? 'MAX' : mio.rango} nella partita</span>}
                 {mio && <CollegamentoVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Aggiorna il rango" to="/partita?scheda=confidenti" />}
+                <CollegamentoMappa tipo="confidente" chiave={c.chiave} compatto />
               </div>
               <div className="text-[13px] text-text-secondary flex flex-col gap-1">
                 <span><strong className="text-text">Dove:</strong> {c.disponibilita.luogo || '—'}</span>

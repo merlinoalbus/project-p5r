@@ -52,14 +52,16 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
     const palazzi = albero.filter((m) => m.tipo === 'palazzo');
     expect(palazzi.length).toBeGreaterThan(3);
-    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'mementos-i-dedali')).toBe(true);
+    // la chiave pubblica del Dedalo è il percorso derivato dal nome del seed («Memento»), non la chiave storica
+    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'memento')).toBe(true);
     const aree = albero.filter((m) => m.tipo === 'area');
     expect(aree.length).toBeGreaterThan(10);
-    // le aree dei Palazzi/Dedali vengono dalla guida (entità «area»); i pacchetti dell'utente possono aggiungere aree anche sotto Tokyo o un quartiere
+    // le aree della guida restano contenuti della guida; una mappa può dichiarare l'area che
+    // rappresenta, ma solo se ha davvero una planimetria: nessuna area diventa una mappa vuota
     const areeDungeon = aree.filter((a) => a.entita?.tipo === 'area');
-    expect(areeDungeon).toHaveLength(0);
+    expect(areeDungeon.every((a) => a.ruoloImmagine === 'planimetria-nativa')).toBe(true);
+    expect(getDb().prepare("SELECT count(*) n FROM mappa WHERE entita_tipo='area' AND ruolo_immagine='nessuna'").get()).toEqual({n:0});
     expect(getDb().prepare('SELECT count(*) n FROM guida_mappa').get()).toEqual({n:116});
-    expect(areeDungeon.every((a) => a.entita?.tipo === 'area')).toBe(true);
     // ogni chiave è instradabile (minuscole, cifre, trattini)
     for (const m of albero) expect(m.chiave).toMatch(/^[a-z0-9][a-z0-9-]{0,179}$/);
     // i marcatori del seed sono diventati spilli (punti nelle aree, luoghi nei quartieri)
