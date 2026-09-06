@@ -119,6 +119,39 @@ def abbina_aree(luoghi, aree_per_dungeon):
     return collections.Counter(esiti)
 
 
+def scheda_da_verificare(tipo, sem):
+    """La nota che accompagna un pin di tipo non ancora identificato.
+
+    Deve servire a chi va a controllare sulle schermate del gioco: dice che cosa non si sa, quanto
+    è diffuso quel tipo, e quali tracce si sono raccolte — prima le più solide (le procedure che lo
+    accendono, le etichette che il gioco mostra), poi la lettura geometrica con la sua avvertenza.
+    Nessuna di queste è una risposta: se lo fosse, il pin non sarebbe un «nota».
+    """
+    r = sem.get('riferimenti') or {}
+    d = r.get('diffusione') or {}
+    pezzi = [f'Tipo nativo {tipo}, significato non ancora dimostrato: '
+             + (r.get('motivoNonDeterminato') or 'nessuna prova sufficiente') + '.']
+    if d:
+        pezzi.append(f"Nel gioco compare {d.get('pin', 0)} volte, su {d.get('planimetrieDungeon', 0)} "
+                     f"planimetrie di Palazzo e {d.get('planimetrieUrbane', 0)} urbane.")
+    proc = (r.get('procedureCheAccendonoLaBandiera') or {}).get('procedure') or {}
+    if proc:
+        pezzi.append('Le procedure che accendono la sua bandiera: '
+                     + ', '.join(f'{k} ({v})' for k, v in proc.items()) + '.')
+    etichette = (r.get('procedureCheAccendonoLaBandiera') or {}).get('etichetteDeiTrigger') or {}
+    etichette = etichette or r.get('etichetteDeiPuntiVicini') or {}
+    if etichette:
+        pezzi.append('Testi che il gioco mostra nei pressi: '
+                     + ', '.join(f'«{k}» ({v})' for k, v in etichette.items()) + '.')
+    sotto = r.get('sottoIlPin') or {}
+    if sotto.get('proposta'):
+        pezzi.append(f"La lettura geometrica suggerirebbe «{sotto['proposta']}», ma su questa "
+                     'strada si sbaglia più della metà delle volte: è un indizio da controllare, '
+                     'non una risposta.')
+    pezzi.append('Da verificare sulle schermate del gioco.')
+    return ' '.join(pezzi)
+
+
 def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
     """Porta sulle planimetrie i pin nativi di cui si conosce il significato.
 
@@ -175,12 +208,14 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
             p = mappa_nativa['pins'][indice]
             sem = semantica.get(p['nativeType'])
             puntuale = da_bandiera.get((chiave, indice)) or puntuali.get((chiave, indice))
-            # Un tipo non dimostrato resta fuori, come vuole il contratto della Fase 2a: una
-            # descrizione che avverte «forse» non rende certificato il tipo assegnato. Entra invece
-            # il pin che ha una prova sua, che dimostrata lo e' eccome.
-            if not sem or (sem['stato'] != 'determinato' and not puntuale):
-                esiti['tipo nativo senza significato'] += 1
+            # Un tipo senza significato dimostrato non resta piu' fuori: per decisione dell'utente
+            # del 6 settembre 2026 entra come segnalino «nota» che dichiara di essere da
+            # verificare e si porta dietro le prove raccolte, cosi' che il controllo si possa
+            # fare sulle schermate del gioco. Il pin che ha una prova sua entra col suo tipo.
+            if not sem:
+                esiti['tipo nativo assente dal registro semantico'] += 1
                 continue
+            da_verificare = sem['stato'] == 'da-verificare' and not puntuale
             luogo, motivo = luogo_del_pin(voce['genitore'], sem['nomeNativo'])
             nota = ['Pin nativo del gioco.']
             # La prova puntuale riguarda proprio questo pin, quindi conta piu' di un'ipotesi sul suo
@@ -190,6 +225,11 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                 nota.append('Riconosciuto singolarmente: ' + puntuale['prova'] + '.')
             else:
                 tipo_spillo, etichetta = sem['tipoSpillo'], sem['etichetta']
+            if da_verificare:
+                nota.append(scheda_da_verificare(p['nativeType'], sem))
+                # e' posato a tutti gli effetti: va contato fra i posati, non fra gli esclusi,
+                # altrimenti la contabilita' sui 1429 pin nativi non chiude piu'
+                esiti['posato da verificare'] += 1
             # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
             if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')

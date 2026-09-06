@@ -666,6 +666,52 @@ def significato_dalla_proiezione(out):
     return esito
 
 
+def riferimenti_da_verificare(riga, script, sotto, proiezione, motivo):
+    """Tutto ciò che si è raccolto su un tipo che resta senza significato dimostrato.
+
+    Decisione dell'utente del 6 settembre 2026: questi pin **entrano lo stesso**, come segnalino
+    `nota`, portandosi dietro le prove raccolte, e la verifica la fa lui sulle schermate del gioco.
+    Il segnalino `nota` non afferma niente — dice «qui c'è qualcosa, ecco cosa se ne sa» — e questo
+    è il punto: un pin dichiarato da verificare è onesto, un pin battezzato per somiglianza no.
+
+    Nella scheda finiscono, in ordine di forza:
+
+    - **quanti pin e dove**, perché la diffusione dice già molto (uno solo per planimetria è un
+      indizio diverso da otto);
+    - **le procedure che ne accendono la bandiera**, che sono la traccia più diretta: sono i nomi
+      che il gioco stesso dà a ciò che rende visibile quel pin;
+    - **le etichette dei trigger** vicini, cioè il testo italiano che il gioco mostra al giocatore;
+    - **la lettura geometrica** — che cosa cade sotto il pin secondo la proiezione — con accanto,
+      sempre, la sua accuratezza misurata. Serve a orientare la verifica, **non** a decidere: sui
+      tipi già noti sbaglia più di quanto azzecchi, e va letta sapendolo.
+    """
+    def primi(d, quanti=8):
+        return dict(sorted((d or {}).items(), key=lambda x: (-x[1], x[0]))[:quanti])
+
+    scheda = dict(
+        motivoNonDeterminato=motivo,
+        diffusione=dict(pin=riga['occorrenze'], planimetrieUrbane=riga['mappeUrbane'],
+                        planimetrieDungeon=riga['mappeDungeon'], condizionali=riga['condizionali']),
+        spriteNativo=riga['nomeNativo'], associazione=riga['associazione'])
+    if script:
+        scheda['procedureCheAccendonoLaBandiera'] = dict(
+            pinConBandieraRisolta=script['pinConBandieraRisolta'],
+            procedure=primi(script['procedure']),
+            etichetteDeiTrigger=primi(script['etichetteDeiTrigger']))
+    if sotto:
+        scheda['sottoIlPin'] = dict(
+            punti=sotto['coppie'], ingressiDelCampo=sotto['ingressi'],
+            famiglie=primi(sotto['famiglie']), procedure=primi(sotto['procedure']),
+            proposta=(sotto.get('proposta') or {}).get('tipoSpillo'))
+    if proiezione and proiezione.get('etichette'):
+        scheda['etichetteDeiPuntiVicini'] = primi(proiezione['etichette'])
+    scheda['avvertenza'] = ('Le due voci geometriche — che cosa cade sotto il pin e le etichette '
+                            'dei punti vicini — orientano la verifica ma non decidono: misurate '
+                            'sui tipi già dimostrati per altra strada azzeccano meno della metà '
+                            'delle volte. Vanno guardate come indizi, non come risposte.')
+    return scheda
+
+
 def main(out):
     out = Path(out)
     icone = json.loads((out/'icone-mappa.json').read_text(encoding='utf8'))
@@ -728,13 +774,15 @@ def main(out):
                               + (f", con {script['confermeDaiTrigger']} conferme dalle etichette dei trigger"
                                  if script['confermeDaiTrigger'] else ''))
         else:
-            voce.update(tipoSpillo=None, etichetta=None, stato='non-determinato',
-                        motivo=('nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera'
-                                if script and script['procedureRiconosciute']
-                                else ('nessuna famiglia domina fra le procedure che gli cadono sotto'
-                                      if sotto and sotto['coppie']
-                                      else 'né lo sprite, né le procedure che accendono la sua bandiera, '
-                                           'né un punto del campo sotto di lui lo dicono')))
+            motivo = ('nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera'
+                      if script and script['procedureRiconosciute']
+                      else ('nessuna famiglia domina fra le procedure che gli cadono sotto'
+                            if sotto and sotto['coppie']
+                            else 'né lo sprite, né le procedure che accendono la sua bandiera, '
+                                 'né un punto del campo sotto di lui lo dicono'))
+            voce.update(tipoSpillo='nota', etichetta='Da identificare (tipo %d)' % r['tipoNativo'],
+                        stato='da-verificare', motivo=motivo,
+                        riferimenti=riferimenti_da_verificare(r, script, sotto, proiezione, motivo))
         righe.append(voce)
     pin_per_prova = collections.Counter()
     for r in righe:
@@ -742,7 +790,7 @@ def main(out):
             pin_per_prova[(r['prova'] or '').split(':')[0]] += r['occorrenze']
     determinati = [r for r in righe if r['stato'] == 'determinato']
     ipotesi = []
-    senza = [r for r in righe if r['stato'] == 'non-determinato']
+    senza = [r for r in righe if r['stato'] == 'da-verificare']
     # Le determinazioni per singolo pin poggiavano sulla stessa lettura geometrica, e la
     # controprova la smentisce: restano registrate come materiale, non come prova.
     puntuali = []
@@ -761,8 +809,10 @@ def main(out):
         summary=dict(tipi=len(righe), determinati=len(determinati), ipotesi=len(ipotesi), nonDeterminati=len(senza),
                      pinConIpotesi=sum(r['occorrenze'] for r in ipotesi),
                      perTipoIpotesi=dict(collections.Counter(r['tipoSpillo'] for r in ipotesi)),
+                     daVerificare=len(senza),
                      pinDeterminati=sum(r['occorrenze'] for r in determinati),
-                     pinNonDeterminati=sum(r['occorrenze'] for r in senza),
+                     pinDaVerificare=sum(r['occorrenze'] for r in senza),
+                     pinNonDeterminati=0,
                      perTipoSpillo=dict(collections.Counter(r['tipoSpillo'] for r in determinati)),
                      perProva=dict(collections.Counter((r.get('prova') or '').split(':')[0] for r in determinati)),
                      pinPerProva=dict(sorted(pin_per_prova.items(), key=lambda x: (-x[1], x[0]))),
@@ -776,7 +826,10 @@ def main(out):
                      perTipoPuntuale=dict(sorted(collections.Counter(
                          r['tipoSpillo'] for r in puntuali).items(), key=lambda x: (-x[1], x[0]))),
                      motiviNonDeterminati=dict(collections.Counter(r.get('motivo') for r in senza))),
-        limits=['I tipi non determinati non vanno importati: un pin senza significato è peggio di un pin assente.',
+        limits=['I tipi senza significato dimostrato entrano come segnalino «nota» dichiarato da '
+                'verificare, con la scheda delle prove raccolte: è una decisione dell’utente del '
+                '6 settembre 2026, che si riserva il controllo sulle schermate del gioco. Non '
+                'sono determinazioni e non vanno lette come tali.',
                 'La lettura geometrica — che cosa sta sotto il pin secondo la proiezione — non determina '
                 'nulla: misurata sui tipi già noti sbaglia più di quanto azzecchi, e la famiglia dei '
                 'transiti sbaglia sempre. Resta nel file come materiale, mai come prova.',

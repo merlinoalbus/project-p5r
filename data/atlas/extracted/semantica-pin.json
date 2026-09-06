@@ -169,10 +169,60 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 5)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+        "diffusione": {
+          "pin": 79,
+          "planimetrieUrbane": 8,
+          "planimetrieDungeon": 26,
+          "condizionali": 79
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 14,
+          "procedure": {
+            "D#_#_e#_#_START": 5,
+            "D#_#_#_CONSOLE_ICON": 3,
+            "D#_#_miniEV_point#": 2,
+            "D#_BIG_SLOT_GAME_DEFAULT": 2,
+            "D#_#_check#_START": 1
+          },
+          "etichetteDeiTrigger": {
+            "Apri porta": 2,
+            "Cinema": 2,
+            "Magazzino audiovisivi": 2
+          }
+        },
+        "sottoIlPin": {
+          "punti": 42,
+          "ingressiDelCampo": 21,
+          "famiglie": {
+            "passaggio|Passaggio": 23
+          },
+          "procedure": {
+            "AC_CENTER_HIKARIE_BUTTON": 1,
+            "AC_GOTO_WEST_3F": 1,
+            "AC_YAMANOTE_BUTTON": 1,
+            "BchoDoorBack_south": 1,
+            "CHK_COUNTER": 1,
+            "CHK_KITCHEN_SPACE": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Biglietteria automatica": 1,
+          "Corsi privati": 1,
+          "Cucina": 1,
+          "Edificio principale 3P": 1,
+          "Entrata della banca": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 10,
@@ -785,10 +835,46 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 19)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 165,
+          "planimetrieUrbane": 17,
+          "planimetrieDungeon": 66,
+          "condizionali": 165
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 87,
+          "ingressiDelCampo": 43,
+          "famiglie": {
+            "passaggio|Passaggio": 48,
+            "negozio|Negozio": 4
+          },
+          "procedure": {
+            "CheckPasswardDoor": 2,
+            "D06_157_11_minimap_03": 2,
+            "D07_159_11_minimap_00": 2,
+            "AC_GOTO_BASE_PASS": 1,
+            "AC_GOTO_WEST_1F": 1,
+            "CHK_BONE_REPAIR": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Riemergi": 2,
+          "Aula computer": 1,
+          "Banco dei pegni": 1,
+          "Bar": 1,
+          "Clinica ortopedica": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 20,
@@ -837,10 +923,41 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 20)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 15,
+          "planimetrieUrbane": 4,
+          "planimetrieDungeon": 11,
+          "condizionali": 12
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 7,
+          "ingressiDelCampo": 4,
+          "famiglie": {
+            "passaggio|Passaggio": 4,
+            "ristorante|Ristorante": 1
+          },
+          "procedure": {
+            "CHK_NOODLE02": 1,
+            "D08_VELVET_HIT": 1,
+            "Main_Udon_1": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Negozio di udon": 1,
+          "Ramen bar": 1,
+          "Vicolo cieco": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 24,
@@ -879,10 +996,38 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 24)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 7,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 6,
+          "condizionali": 5
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 3,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "uscita|Uscita": 2,
+            "attivita|Voce del Covo dei Ladri": 1
+          },
+          "procedure": {
+            "DUNGEON_EXIT": 2,
+            "Leave_MyPalace": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Sali sul treno": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 25,
@@ -898,10 +1043,22 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 25)",
+      "stato": "da-verificare",
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+      "riferimenti": {
+        "motivoNonDeterminato": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+        "diffusione": {
+          "pin": 2,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 2,
+          "condizionali": 2
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 26,
@@ -1043,10 +1200,45 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 28)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 91,
+          "planimetrieUrbane": 9,
+          "planimetrieDungeon": 55,
+          "condizionali": 91
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 50,
+          "ingressiDelCampo": 11,
+          "famiglie": {
+            "passaggio|Passaggio": 15
+          },
+          "procedure": {
+            "D03_SAFETY_ROOM_06_SET": 2,
+            "D06_157_11_WIRE_OBJ_ON": 2,
+            "DUCT_156_007_B_INOUT": 2,
+            "CAGE_159_025_E_IN": 1,
+            "CHK_AUTO_MACHINE02": 1,
+            "CHK_DEADEND05": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Striscia": 4,
+          "Distributore automatico": 1,
+          "Karaoke": 1,
+          "Ragazzo rassegnato": 1,
+          "Salta fuori dal dipinto": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 29,
@@ -1118,10 +1310,57 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 29)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 41,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 26,
+          "condizionali": 41
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 14,
+          "procedure": {
+            "D#_#_#_minimap_#": 13,
+            "EV_UP_GOTO_#_#_#": 1,
+            "IsUppeerOff": 1
+          },
+          "etichetteDeiTrigger": {
+            "Tira leva": 1
+          }
+        },
+        "sottoIlPin": {
+          "punti": 20,
+          "ingressiDelCampo": 4,
+          "famiglie": {
+            "passaggio|Passaggio": 8,
+            "meccanismo|Meccanismo": 1
+          },
+          "procedure": {
+            "GOTO_156_04_01": 2,
+            "D010_CALL_ELEVATOR": 1,
+            "D03_154_014_Go_154_013": 1,
+            "D05_010_TIMELIMIT_EVENT_02": 1,
+            "D05_SAFETY_ROOM_06_SET": 1,
+            "D07_159_02_minimap_01": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Dintorni del complesso": 2,
+          "Beef Bowl Shop": 1,
+          "Caserma": 1,
+          "Corridoio del Crepuscolo": 1,
+          "Interscambio": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 30,
@@ -1189,10 +1428,53 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 30)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 38,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 28,
+          "condizionali": 38
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 22,
+          "procedure": {
+            "D#_#_#_minimap_#": 22
+          },
+          "etichetteDeiTrigger": {}
+        },
+        "sottoIlPin": {
+          "punti": 18,
+          "ingressiDelCampo": 7,
+          "famiglie": {
+            "passaggio|Passaggio": 10,
+            "meccanismo|Meccanismo": 1
+          },
+          "procedure": {
+            "D06_SAFETY_ROOM_05_SET": 2,
+            "CheckDeckRoom": 1,
+            "D010_CALL_ELEVATOR_ENTRANCE": 1,
+            "D010_CALL_ELEVATOR_FAILURE": 1,
+            "D05_156_12_minimap_06": 1,
+            "D156_03_LIFT_B_UP": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Chiama ascensore": 2,
+          "Cristalloterapia": 1,
+          "Fabbrica centrale": 1,
+          "Negozio dell'usato": 1,
+          "Negozio di giocattoli d'importazione": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 32,
@@ -1225,10 +1507,31 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 32)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 3,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 3,
+          "condizionali": 2
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {},
+          "procedure": {
+            "GO_TO_NEXT_SECTION": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 33,
@@ -1275,10 +1578,38 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 33)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 2,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 2,
+          "condizionali": 2
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 1,
+          "procedure": {
+            "MEME_LOCK_CLEAR_#": 1
+          },
+          "etichetteDeiTrigger": {}
+        },
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {},
+          "procedure": {
+            "GO_TO_PREV_SECTION": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 34,
@@ -1311,10 +1642,31 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 34)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 2,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 2,
+          "condizionali": 1
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {},
+          "procedure": {
+            "GO_TO_NEXT_SECTION": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 35,
@@ -1347,10 +1699,31 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 35)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 4,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 4,
+          "condizionali": 1
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {},
+          "procedure": {
+            "GO_TO_PREV_SECTION": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 36,
@@ -1385,10 +1758,33 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 36)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 2,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 2,
+          "condizionali": 2
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "seme-bramosia|Seme della bramosia": 1
+          },
+          "procedure": {
+            "D03_154_05_SEEDicon_3": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 37,
@@ -1424,10 +1820,34 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 37)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 4,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 2,
+          "condizionali": 2
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 2,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "passaggio|Passaggio": 1,
+            "scala|Scala": 1
+          },
+          "procedure": {
+            "Stairs_Shortcut_1": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 38,
@@ -1457,10 +1877,29 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 38)",
+      "stato": "da-verificare",
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+      "riferimenti": {
+        "motivoNonDeterminato": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+        "diffusione": {
+          "pin": 2,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 1,
+          "condizionali": 1
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 1,
+          "procedure": {
+            "D#_#_#_minimap_#": 1
+          },
+          "etichetteDeiTrigger": {}
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 39,
@@ -1514,10 +1953,46 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 39)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 4,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 2,
+          "condizionali": 3
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 2,
+          "procedure": {
+            "D#_#_#_minimap_#": 2
+          },
+          "etichetteDeiTrigger": {}
+        },
+        "sottoIlPin": {
+          "punti": 2,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "passaggio|Passaggio": 1,
+            "scorciatoia|Scorciatoia": 1
+          },
+          "procedure": {
+            "D04_SUBERITDAI_01": 1,
+            "GOTO_ARCADE": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Scivola giù": 1,
+          "Stazione di Yongen-Jaya": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 40,
@@ -1552,10 +2027,33 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 40)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 7,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 7,
+          "condizionali": 2
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 3,
+          "ingressiDelCampo": 0,
+          "famiglie": {},
+          "procedure": {
+            "D01_LOCK_01": 1,
+            "D02_153_09_minimap_11": 1,
+            "D05_156_10_R_TBOX_minimap_03": 1
+          },
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 43,
@@ -1621,10 +2119,58 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 43)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia di procedure domina fra quelle che accendono la sua bandiera",
+        "diffusione": {
+          "pin": 43,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 12,
+          "condizionali": 43
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "procedureCheAccendonoLaBandiera": {
+          "pinConBandieraRisolta": 39,
+          "procedure": {
+            "D#_#_#_minimap_#": 38,
+            "D#_#_SWITCH_#": 1,
+            "D#_#_minimap_SWITCH": 1
+          },
+          "etichetteDeiTrigger": {
+            "Bagno dei ragazzi": 1
+          }
+        },
+        "sottoIlPin": {
+          "punti": 35,
+          "ingressiDelCampo": 3,
+          "famiglie": {
+            "meccanismo|Meccanismo": 5,
+            "passaggio|Passaggio": 3,
+            "scala|Scala": 2
+          },
+          "procedure": {
+            "CheckStair_blue": 2,
+            "CAGE_159_030_C_OUT": 1,
+            "CAGE_159_030_E_OUT": 1,
+            "CheckMarukiNote05": 1,
+            "D01_04_e165_041_AF01_START": 1,
+            "D05_GIM_BLUE_SWITCH01": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Usa il regolatore di luminosità": 6,
+          "Magazzino audiovisivi": 5,
+          "Siediti": 4,
+          "Tira leva": 4,
+          "Guarda premi": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 45,
@@ -1640,10 +2186,22 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 45)",
+      "stato": "da-verificare",
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+      "riferimenti": {
+        "motivoNonDeterminato": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+        "diffusione": {
+          "pin": 3,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 3,
+          "condizionali": 3
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 46,
@@ -3799,10 +4357,37 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 104)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 12,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 12
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "sottoIlPin": {
+          "punti": 5,
+          "ingressiDelCampo": 4,
+          "famiglie": {
+            "passaggio|Passaggio": 4,
+            "attivita|Voce del Covo dei Ladri": 1
+          },
+          "procedure": {
+            "MyPalace_Image": 1
+          },
+          "proposta": "passaggio"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda galleria": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 105,
@@ -3835,10 +4420,31 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 105)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {},
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 106,
@@ -3875,10 +4481,36 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 106)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "ristorante|Ristorante": 1
+          },
+          "procedure": {
+            "Main_Izakaya03": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Bar": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 107,
@@ -3915,10 +4547,36 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 107)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "ristorante|Ristorante": 1
+          },
+          "procedure": {
+            "Main_Izakaya08": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Bar": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 108,
@@ -3951,10 +4609,31 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 108)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {},
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 109,
@@ -3970,10 +4649,22 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 109)",
+      "stato": "da-verificare",
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+      "riferimenti": {
+        "motivoNonDeterminato": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+        "diffusione": {
+          "pin": 3,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 3,
+          "condizionali": 3
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 110,
@@ -3989,10 +4680,22 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 110)",
+      "stato": "da-verificare",
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+      "riferimenti": {
+        "motivoNonDeterminato": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 1
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 111,
@@ -4029,10 +4732,36 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 111)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 1,
+          "planimetrieDungeon": 0,
+          "condizionali": 1
+        },
+        "spriteNativo": null,
+        "associazione": "urbano-non-dimostrato",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "negozio|Negozio": 1
+          },
+          "procedure": {
+            "CHK_CLOTHES_SHOP": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Negozio d'abbigliamento": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 112,
@@ -4048,10 +4777,22 @@
       "sottoIlPin": null,
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 112)",
+      "stato": "da-verificare",
+      "motivo": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+      "riferimenti": {
+        "motivoNonDeterminato": "né lo sprite, né le procedure che accendono la sua bandiera, né un punto del campo sotto di lui lo dicono",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 1
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 113,
@@ -4097,10 +4838,38 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 113)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 9,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 6,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "scala|Scala": 5,
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {
+            "CheckStair_red": 3,
+            "CheckStair_blue": 2
+          },
+          "proposta": "scala"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 5
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 114,
@@ -4141,10 +4910,40 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 114)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 10,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 9,
+          "ingressiDelCampo": 2,
+          "famiglie": {
+            "scala|Scala": 4,
+            "passaggio|Passaggio": 2
+          },
+          "procedure": {
+            "CheckStair_green": 4,
+            "D10_162_11_minimap_05": 1,
+            "D10_162_11_minimap_18": 1,
+            "D10_162_11_minimap_33": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 4
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 115,
@@ -4198,10 +4997,42 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 115)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 14,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 11,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "scala|Scala": 7,
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {
+            "CheckStair_blue": 5,
+            "CheckStair_red": 2,
+            "CheckGate_pink": 1,
+            "D10_162_11_minimap_27": 1,
+            "D10_162_11_minimap_36": 1
+          },
+          "proposta": "scala"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 7,
+          "Avvia Personalizza Covo": 1
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 116,
@@ -4247,10 +5078,38 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 116)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 6,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 6,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "scala|Scala": 6
+          },
+          "procedure": {
+            "CheckStair_yellow": 4,
+            "CheckStair_lightblue": 1,
+            "CheckStair_red": 1
+          },
+          "proposta": "scala"
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 6
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 117,
@@ -4290,10 +5149,39 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 117)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 4,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 4,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "scala|Scala": 2,
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {
+            "CheckStair_blue": 1,
+            "CheckStair_lightblue": 1,
+            "D10_162_11_minimap_23": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 118,
@@ -4332,10 +5220,38 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 118)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 3,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 3,
+          "ingressiDelCampo": 0,
+          "famiglie": {
+            "scala|Scala": 2
+          },
+          "procedure": {
+            "CheckStair_green": 1,
+            "CheckStair_pink": 1,
+            "D10_162_11_minimap_14": 1
+          },
+          "proposta": null
+        },
+        "etichetteDeiPuntiVicini": {
+          "Guarda premi": 2
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     },
     {
       "tipoNativo": 119,
@@ -4368,10 +5284,31 @@
       },
       "osservazione": null,
       "bordo": null,
-      "tipoSpillo": null,
-      "etichetta": null,
-      "stato": "non-determinato",
-      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto"
+      "tipoSpillo": "nota",
+      "etichetta": "Da identificare (tipo 119)",
+      "stato": "da-verificare",
+      "motivo": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+      "riferimenti": {
+        "motivoNonDeterminato": "nessuna famiglia domina fra le procedure che gli cadono sotto",
+        "diffusione": {
+          "pin": 1,
+          "planimetrieUrbane": 0,
+          "planimetrieDungeon": 1,
+          "condizionali": 0
+        },
+        "spriteNativo": null,
+        "associazione": "fuori-dal-blocco-urbano",
+        "sottoIlPin": {
+          "punti": 1,
+          "ingressiDelCampo": 1,
+          "famiglie": {
+            "passaggio|Passaggio": 1
+          },
+          "procedure": {},
+          "proposta": null
+        },
+        "avvertenza": "Le due voci geometriche — che cosa cade sotto il pin e le etichette dei punti vicini — orientano la verifica ma non decidono: misurate sui tipi già dimostrati per altra strada azzeccano meno della metà delle volte. Vanno guardate come indizi, non come risposte."
+      }
     }
   ],
   "provePalazzi": [
@@ -5899,8 +6836,10 @@
     "nonDeterminati": 35,
     "pinConIpotesi": 0,
     "perTipoIpotesi": {},
+    "daVerificare": 35,
     "pinDeterminati": 846,
-    "pinNonDeterminati": 583,
+    "pinDaVerificare": 583,
+    "pinNonDeterminati": 0,
     "perTipoSpillo": {
       "sicura": 1,
       "porta": 1,
@@ -5955,7 +6894,7 @@
     }
   },
   "limits": [
-    "I tipi non determinati non vanno importati: un pin senza significato è peggio di un pin assente.",
+    "I tipi senza significato dimostrato entrano come segnalino «nota» dichiarato da verificare, con la scheda delle prove raccolte: è una decisione dell’utente del 6 settembre 2026, che si riserva il controllo sulle schermate del gioco. Non sono determinazioni e non vanno lette come tali.",
     "La lettura geometrica — che cosa sta sotto il pin secondo la proiezione — non determina nulla: misurata sui tipi già noti sbaglia più di quanto azzecchi, e la famiglia dei transiti sbaglia sempre. Resta nel file come materiale, mai come prova.",
     "Le icone native servono a riconoscere, non a disegnare: l’applicazione usa i propri segnalini."
   ]
