@@ -940,7 +940,7 @@
   "chiave": "madarame",
   "tipo": "palazzo",
   "ordine": 2,
-  "nome": "Palazzo di Madarame (Museo)",
+  "nome": "Palazzo di Madarame",
   "sovrano": "Ichiryusai Madarame (nel combattimento finale la Ombra si presenta come \"Ichiryusai Azazel Madarame\")",
   "arcanaSovrano": "",
   "date": {
@@ -2294,7 +2294,7 @@
   "chiave": "futaba",
   "tipo": "palazzo",
   "ordine": 4,
-  "nome": "Palazzo di Futaba (Piramide dell'Ira / Pyramid of Wrath)",
+  "nome": "Palazzo di Futaba",
   "sovrano": "Futaba Sakura",
   "arcanaSovrano": "Eremita",
   "date": {
@@ -3558,7 +3558,7 @@
   "chiave": "niijima",
   "tipo": "palazzo",
   "ordine": 6,
-  "nome": "Palazzo di Niijima (Sae) — Casinò",
+  "nome": "Palazzo di Niijima",
   "sovrano": "Sae Niijima",
   "arcanaSovrano": "Giudizio (Judgement)",
   "date": {
@@ -6995,7 +6995,7 @@
   "chiave": "mementos",
   "tipo": "mementos",
   "ordine": 10,
-  "nome": "Mementos (i Dedali)",
+  "nome": "Memento",
   "sovrano": "Il pubblico (cognizione collettiva)",
   "arcanaSovrano": "",
   "date": {

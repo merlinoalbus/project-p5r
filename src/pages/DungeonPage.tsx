@@ -33,7 +33,7 @@ export function DungeonPage() {
               const quota = d.gestiti !== null && d.punti > 0 ? d.gestiti / d.punti : null;
               return (
                 <li key={d.chiave}>
-                  <Link to={`/guida/dungeon/${d.chiave}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-4 h-full ${classiSuggerito(sugg.evidenziato('dungeon', d.chiave))}`} aria-label={`${d.nome}${d.sovrano ? `, ${d.sovrano}` : ''}`}>
+                  <Link to={`/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-4 h-full ${classiSuggerito(sugg.evidenziato('dungeon', d.chiave))}`} aria-label={`${d.nome}${d.sovrano ? `, ${d.sovrano}` : ''}`}>
                     <div className="flex flex-col items-center gap-2 shrink-0">
                       <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={84} />
                       {quota !== null && (
@@ -57,7 +57,7 @@ export function DungeonPage() {
                       <span className="text-[12px] text-text-muted">{d.aree} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
                     </div>
                   </Link>
-                  <CollegamentoVisivo to={`/guida/mappe/dungeon-${encodeURIComponent(d.chiave)}`} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Mappa" dettaglio={`${d.aree} aree collegate`} />
+                  <CollegamentoVisivo to={`/guida/mappe/dungeon-${encodeURIComponent(d.chiave)}`} tono="fantasma" compatto className="mt-1" icona={<IconaAzione chiave="mappa" dimensione={20} />} titolo="Mappa" dettaglio={`${d.aree} sezioni della guida`} />
                 </li>
               );
             })}

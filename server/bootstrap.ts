@@ -44,6 +44,8 @@ export function createApp(): Express {
   app.use(requestContextMiddleware);
   app.use(responseShapeMiddleware);
   app.use(cors());
+  // Il pacchetto delle mappe include le immagini: deve essere letto prima del limite globale.
+  app.post('/api/mappe/importa', express.json({ limit: '64mb' }));
   app.use(express.json({ limit: '5mb' }));
 
   // ---- Router di area ----

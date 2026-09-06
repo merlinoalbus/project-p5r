@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
+import { schemaDestinazioneSpillo } from '../services/mappe/destinazioniSpillo.js';
 import { TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO } from '../../shared/spilli.js';
 import { normalizzaRequisitoSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
@@ -30,6 +31,8 @@ export const bodyAggiornaMappa = bodyCreaMappa.omit({ chiave: true, passaggio: t
 /** Passaggio verso un'altra mappa creato dall'albero dell'editor (15.24): il server sceglie un punto libero. */
 export const bodyCreaPassaggio = z.object({ destinazione: chiaveMappa });
 export const bodyCreaSpillo = z.object({
+  soloPosizione: z.boolean().optional(),
+  destinazione: schemaDestinazioneSpillo.nullable().optional(),
   tipo: z.enum(TIPI_SPILLO), nome: z.string().min(1).max(160), descrizione: z.string().max(2000).optional(), x: z.number().min(0).max(100), y: z.number().min(0).max(100),
   riferimento: riferimento.optional(), collezionabile: z.boolean().optional(), ordine: z.number().int().min(0).max(9999).optional(), condizioni,
 });

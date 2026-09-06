@@ -28,7 +28,7 @@ function Prodotto({ a, partitaId, mostraNegozio, onCambiato, onModifica }: Omit<
       <strong className={a.acquistato ? 'line-through' : ''}>{nome}</strong>
       <span className="catalogo-prodotto__meta">{NOME_CATEGORIA_ARTICOLO[a.categoria] ?? a.categoria}{a.per && <> · <span>{a.per}</span></>}</span>
       {a.statistiche && <span className="text-text-secondary">{a.statistiche}</span>}
-      {mostraNegozio && <Link to={`/guida/negozi/${a.negozioChiave}`}>{a.negozioNome}</Link>}
+      {mostraNegozio && <Link to={`/guida/mondo/articolo/${encodeURIComponent(a.chiave)}`}>{a.negozioNome}</Link>}
     </div>
     <div className="catalogo-prodotto__prezzo"><span className="catalogo-prodotto__etichetta">Prezzo</span><strong>{a.prezzo !== null ? `${a.prezzo.toLocaleString('it-IT')} ¥` : 'Non indicato'}</strong></div>
     <div className="catalogo-prodotto__disponibilita"><ChipDisponibilita disponibilita={a.disponibilita} compatto />{!a.condizioni && a.disponibileDal && <span>{a.disponibileDal}</span>}{a.condizioni?.length===0&&<span>Nessun requisito aggiuntivo</span>}{a.condizioni?.length ? <span>{a.condizioni.length} requisiti · apri Dettagli</span>:null}</div>

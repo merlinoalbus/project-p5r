@@ -5,3 +5,17 @@
 *.jpg binary
 *.webp binary
 *.db binary
+
+# Snapshot estratti del gioco, preservazione byte originali
+data/atlas/original-archives/*.part* binary
+*.dds binary
+*.DDS binary
+*.SPD binary
+*.FBN binary
+*.HTB binary
+*.BF binary
+*.FTD binary
+*.BIN binary
+*.TBL binary
+*.dll binary
+*.exe binary

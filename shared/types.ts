@@ -1449,7 +1449,12 @@ export interface ImmagineDto {
 // ---- Mappe a livelli e spilli (Fase 13) ----
 
 export interface MappaRiassuntoDto {
+  /** Ordinale di una collezione presentativa di immagini omonime, mai numero di piano. */
+  immagineCollezione?: {indice:number;totale:number;ambito:string};
+  contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
+  gruppoImmagini?: {id:string;nome:string;ordine:number};
   nomeCompleto?: string;
+  genitoreNome?: string|null;
   assetOriginale?: string|null;
   chiave: string;
   nome: string;
@@ -1482,7 +1487,12 @@ export interface DettaglioSpilloDto {
 /** Condizione di visibilità con il testo in italiano pronto per la scheda. */
 export type CondizioneSpilloDto = RequisitoSpillo & { testo: string };
 
+export interface DestinazioneSpillo { mappa: string; x: number; y: number; zoom: number }
+
 export interface SpilloDto {
+  destinazione?: DestinazioneSpillo | null;
+  /** A previous explicit destination was deleted; never fall back to the entity link. */
+  destinazioneNonDisponibile?: boolean;
   id: number;
   mappaChiave: string;
   tipo: TipoSpillo;
@@ -1495,6 +1505,8 @@ export interface SpilloDto {
   y: number;
   riferimento: { tipo: TipoRiferimento; chiave: string } | null;
   collezionabile: boolean;
+  /** Localizzazione del luogo, senza attestare la disponibilità delle attività. */
+  soloPosizione?: boolean;
   /** Condizioni di visibilità (vuoto = sempre visibile), con testo descrittivo. */
   condizioni: CondizioneSpilloDto[];
   /** Con la partita: esito delle condizioni alla data corrente (bloccato = nascosto sulla mappa). */
@@ -1536,10 +1548,12 @@ export interface EsportazioneMappeDto {
   versione: 1;
   esportato?: string;
   mappe: Array<{
+    contesti?: Array<{id:string;nome:string|null;campo:string;texpack:number}>;
+    gruppoImmagini?: {id:string;nome:string;ordine:number};
     assetOriginale?: string|null;
     chiave: string; nome: string; tipo: TipoMappa; genitore: string | null; ordine: number; immagine: string | null; asset: string | null; larghezza: number | null; altezza: number | null;
     entita: { tipo: string; chiave: string } | null; note: string;
-    spilli: Array<{ tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
+    spilli: Array<{ soloPosizione?: boolean; destinazione?: DestinazioneSpillo | null; destinazioneNonDisponibile?: boolean; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento: { tipo: TipoRiferimento; chiave: string } | null; collezionabile: boolean; ordine: number; condizioni?: RequisitoSpillo[]; immagini?: Array<{ asset?: string | null; mime?: string; base64?: string; didascalia: string }> }>;
   }>;
   immagini?: Record<string, { mime: string; base64: string }>;
   /** Provenienza (informativa) delle immagini di base scaricate dalle guide: sono comunque incluse nel pacchetto. */

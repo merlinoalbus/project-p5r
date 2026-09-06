@@ -1,3 +1,4 @@
+import { urlMappa } from '../utils/navigazioneMappa';
 // ============================================================
 // CittaPage — la città: mappa globale di Tokyo navigabile (quartieri come passaggi) e piastrelle dei quartieri (Fase 8.1, mappe 13.4)
 // ============================================================
@@ -25,11 +26,11 @@ export function CittaPage() {
       {q && (
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="La città" sottotitolo="La mappa di Tokyo con i quartieri come passaggi: tocca un quartiere per aprirne la mappa con negozi, ristoranti, attività e Confidenti. Sotto, le schede dei quartieri con luoghi, orari e sblocchi." />
-          <MappaIncorporata onNaviga={k=>{const quartiere=q.find(v=>v.mappaChiave===k||`citta-${v.chiave}`===k);navigate(quartiere?`/guida/citta/${quartiere.chiave}`:`/guida/mappe/${encodeURIComponent(k)}`);}} chiave="tokyo" altezza="max(520px, calc(100vh - 260px))" />
+          <MappaIncorporata onNaviga={(k,arrivo)=>{if(arrivo){navigate(urlMappa(k,arrivo));return;}const quartiere=q.find(v=>v.mappaChiave===k||`citta-${v.chiave}`===k);navigate(quartiere?`/guida/mondo/quartiere/${encodeURIComponent(quartiere.chiave)}`:`/guida/mappe/${encodeURIComponent(k)}`);}} chiave="tokyo" altezza="max(520px, calc(100vh - 260px))" />
           <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
             {q.map((x) => (
               <li key={x.chiave}>
-                <Link to={`/guida/citta/${x.chiave}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-3 h-full ${classiSuggerito(sugg.evidenziato('quartieri', x.chiave))}`}>
+                <Link to={`/guida/mondo/quartiere/${encodeURIComponent(x.chiave)}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-3 h-full ${classiSuggerito(sugg.evidenziato('quartieri', x.chiave))}`}>
                   <MiniaturaMappa chiave={`citta-${x.chiave}`} etichetta={x.nome} larghezza={112} altezza={84} className="shrink-0" />
                   <span className="flex flex-col gap-1 min-w-0">
                   <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>

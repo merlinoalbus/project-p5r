@@ -3,7 +3,7 @@
  "mappe": [
   {
    "chiave": "yongen-java-banchina-della-metropolitana",
-   "nome": "Yongen-Java - Banchina della metropolitana",
+   "nome": "Banchina della metropolitana di Yongen-Jaya",
    "tipo": "area",
    "genitore": "tokyo",
    "ordine": 0,
@@ -16,8 +16,8 @@
    "spilli": [
     {
      "tipo": "passaggio",
-     "nome": "Yongen-Java Vicoli",
-     "descrizione": "Scale mobili verso Yongen-Java Vicoli",
+     "nome": "Yongen-Jaya Vicoli",
+     "descrizione": "Scale mobili verso Yongen-Jaya Vicoli",
      "x": 75.2,
      "y": 22.1,
      "riferimento": {
@@ -29,8 +29,8 @@
     },
     {
      "tipo": "passaggio",
-     "nome": "Yongen-Java Vicoli",
-     "descrizione": "Sottopasso verso Yongen-Java Vicoli",
+     "nome": "Yongen-Jaya Vicoli",
+     "descrizione": "Sottopasso verso Yongen-Jaya Vicoli",
      "x": 80.8,
      "y": 28.5,
      "riferimento": {

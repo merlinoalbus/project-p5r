@@ -1,3 +1,6 @@
+import { risolviPercorsoMappa, contenutiMappa } from '../services/mappe/contenutiGuidaService.js';
+import { risolviAccessoMondo } from '../services/mappe/accessoMondoService.js';
+import { TIPI_ACCESSO_MONDO, type TipoAccessoMondo } from '../../shared/accessoMondo.js';
 // ============================================================
 // Route /api/mappe — marcatori delle mappe interattive (dati dell'utente, condivisi fra le partite)
 // ============================================================
@@ -17,7 +20,13 @@ const bodyMarcatoreLuogo = z.object({ luogo: z.string().min(1).max(200), x: z.nu
 
 const bodyMarcatore = z.object({ punto: z.string().min(1).max(200), x: z.number().min(0).max(100).nullable(), y: z.number().min(0).max(100).nullable() });
 const router = Router();
+router.get('/risolvi/:chiave', (req,res) => res.json(risolviPercorsoMappa(String(req.params.chiave))));
+router.get('/contenuti/:chiave', validate({ query: queryMappa }), (req,res) => res.json(contenutiMappa(String(req.params.chiave), (req.query as unknown as {partita?:number}).partita)));
 
+/** Accesso comune ai luoghi da città, Palazzi, negozi e articoli. */
+router.get('/accesso/:tipo/:chiave', validate({ params: z.object({ tipo: z.enum(TIPI_ACCESSO_MONDO), chiave: z.string().min(1).max(200) }) }), (req, res) => {
+  res.json(risolviAccessoMondo(req.params.tipo as TipoAccessoMondo, String(req.params.chiave)));
+});
 
 /** Fissa (x, y in percentuale) o rimuove (x/y null) lo spillo del punto sulla mappa della sua area. */
 router.put('/marcatori', validate({ body: bodyMarcatore }), (req, res) => {
@@ -65,7 +74,7 @@ router.get('/esporta.zip', validate({ query: queryEsporta.required({ radice: tru
 });
 
 /** Importa un pacchetto (stesso formato dell'esportazione). */
-router.post('/importa', express.json({ limit: '64mb' }), validate({ body: bodyImporta }), (req, res) => {
+router.post('/importa', validate({ body: bodyImporta }), (req, res) => {
   const b = req.body as { pacchetto: Parameters<typeof importaMappe>[0]; sovrascrivi?: boolean };
   res.json(importaMappe(b.pacchetto, { sovrascrivi: b.sovrascrivi ?? false, origine: 'utente' }));
 });

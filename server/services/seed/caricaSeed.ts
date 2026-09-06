@@ -603,8 +603,8 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
 
     // ---- Mappe dell'editor (Fase 13): albero dalle entità della guida + spilli dai marcatori, poi le mappe pubblicate nel repository ----
     sincronizzaMappe(db);
-    if (seed.mappeEditor.mappe.length > 0) importaMappe(seed.mappeEditor, { origine: 'seed' });
-    for (const pacchetto of seed.mappeExtra) if (pacchetto.mappe.length > 0) importaMappe(pacchetto, { origine: 'seed' });
+    const pacchettiSeed = [seed.mappeEditor, ...seed.mappeExtra];
+    for (const pacchetto of pacchettiSeed) if (pacchetto.mappe.length > 0) importaMappe(pacchetto, { origine: 'seed', pacchettiSeed });
 
     const insMeta = db.prepare('INSERT INTO seed_meta (chiave, valore) VALUES (?, ?) ON CONFLICT(chiave) DO UPDATE SET valore = excluded.valore');
     insMeta.run('hash', seed.hash);

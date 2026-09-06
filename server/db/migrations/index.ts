@@ -1,3 +1,5 @@
+import { migration042 } from './042_contenuti_guida.js';
+import { migration040 } from './040_destinazioni_spilli.js';
 import { migration039 } from './039_ingressi_quartieri.js';
 // ============================================================
 // Registro migrazioni — import espliciti, array ordinato
@@ -49,4 +51,6 @@ import { migration037 } from './037_sblocco_quartieri.js';
 import { migration036 } from './036_condizioni_procedurali.js';
 
 /** Registro append-only applicato dal runner in ordine di `id`. */
-export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028, migration029, migration030, migration031, migration032, migration033, migration034, migration035, migration036, migration037, migration038, migration039];
+import { migration041 } from './041_posizioni_spilli.js';
+
+export const migrations: Migration[] = [migration001, migration002, migration003, migration004, migration005, migration006, migration007, migration008, migration009, migration010, migration011, migration012, migration013, migration014, migration015, migration016, migration017, migration018, migration019, migration020, migration021, migration022, migration023, migration024, migration025, migration026, migration027, migration028, migration029, migration030, migration031, migration032, migration033, migration034, migration035, migration036, migration037, migration038, migration039, migration040, migration041, migration042];

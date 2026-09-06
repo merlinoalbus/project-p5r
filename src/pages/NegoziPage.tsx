@@ -68,7 +68,7 @@ export function NegoziPage() {
               </select>
             </div>
           </div>
-          {cerca && q.trim().length >= 2 && <section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{(lista ?? []).filter(n => `${n.nome} ${n.quartiereNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(q.trim().toLocaleLowerCase('it'))).map(n => <Link className="card touch" key={n.chiave} to={`/guida/negozi/${n.chiave}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link>)}</section>}
+          {cerca && q.trim().length >= 2 && <section aria-label="Negozi trovati" className="catalogo-risultati-negozi"><h2>Negozi trovati</h2>{(lista ?? []).filter(n => `${n.nome} ${n.quartiereNome ?? ''} ${n.luogo}`.toLocaleLowerCase('it').includes(q.trim().toLocaleLowerCase('it'))).map(n => <Link className="card touch" key={n.chiave} to={`/guida/mondo/negozio/${encodeURIComponent(n.chiave)}`}><strong>{n.nome}</strong> · {n.quartiereNome ?? 'Senza quartiere'} · {n.articoli} articoli</Link>)}</section>}
           {cerca ? (
             <PageState isLoading={risultati.caricamento && !risultati.dati} error={risultati.errore} onRetry={() => void risultati.ricarica()}>
               {risultati.dati && (
@@ -85,7 +85,7 @@ export function NegoziPage() {
                 <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label={`Negozi: ${g.nome}`}>
                   {g.negozi.map((n) => (
                     <li key={n.chiave}>
-                      <Link to={`/guida/negozi/${n.chiave}`} className={`card card--cliccabile no-underline text-text flex flex-col gap-1 h-full ${classiSuggerito(sugg.evidenziato('negozi', n.chiave))}`}>
+                      <Link to={`/guida/mondo/negozio/${encodeURIComponent(n.chiave)}`} className={`card card--cliccabile no-underline text-text flex flex-col gap-1 h-full ${classiSuggerito(sugg.evidenziato('negozi', n.chiave))}`}>
                         <span className="flex flex-wrap items-center gap-2"><IconaCategoria categoria={n.tipo} dimensione={30} /><strong className="font-display uppercase text-[18px] leading-none">{n.nome}</strong><span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span><ChipDisponibilita disponibilita={n.disponibilita} compatto />{sugg.evidenziato('negozi', n.chiave) && <TargaSuggerito motivo={sugg.motivo('negozi', n.chiave)} compatta />}</span>
                         <span className="text-[12px] text-text-secondary">{n.articoli} {n.articoli === 1 ? 'articolo' : 'articoli'}{n.verificati < n.articoli ? ` · ${n.articoli - n.verificati} da fonte secondaria` : ''}{n.gestore ? ` · ${n.gestore}` : ''}</span>
                         {n.luogo && <span className="text-[12px] text-text-muted">{n.luogo}</span>}

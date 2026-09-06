@@ -1,3 +1,4 @@
+import { etichettaPlanimetria } from '../../utils/presentazioneMappa';
 import { useState } from 'react';
 import { getAlberoMappe, getMappa, salvaIngressoQuartiere } from '../../services/api';
 import { useCarica } from '../../hooks/useCarica';
@@ -16,14 +17,14 @@ export function IngressoQuartiere({quartiere:q,onSalvato,onChiudi}:{quartiere:Qu
  const src=dati.dati?.immagineUrl??asset??originale;
  const salva=async(reset=false)=>{setOccupato(true);try {await salvaIngressoQuartiere(q.chiave,reset?null:{mappa,x,y,zoom});await onSalvato();notifica('success',reset?'Ingresso predefinito ripristinato.':'Ingresso del quartiere salvato.');onChiudi();} catch(e){notifica('error',e instanceof Error?e.message:'Salvataggio non riuscito.');} finally {setOccupato(false);}};
  const parole=ricerca.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
- const opzioni=(albero.dati??[]).filter(m=>m.chiave===mappa||parole.every(p=>(m.nomeCompleto??m.nome).toLocaleLowerCase().includes(p)));
+ const opzioni=(albero.dati??[]).filter(m=>m.chiave===mappa||parole.every(p=>(etichettaPlanimetria(m)).toLocaleLowerCase().includes(p)));
  return <section className="card flex flex-col gap-3" aria-label="Configura ingresso del quartiere">
   <h2 className="m-0 text-lg">Ingresso da Città</h2>
   <p className="m-0 text-sm text-text-secondary">Scegli la mappa e tocca l’immagine nel punto da centrare all’apertura del quartiere.</p>
   <label className="editor-mappa__campo">Cerca una mappa<input className="form-input" value={ricerca} onChange={e=>setRicerca(e.target.value)} placeholder="Nome, area o quartiere" /></label>
   <label className="editor-mappa__campo">Mappa iniziale<select className="form-input" value={mappa} disabled={occupato||albero.caricamento} onChange={e=>{setMappa(e.target.value);setX(50);setY(50);}}>
    {!opzioni.some(v=>v.chiave===mappa)&&<option value={mappa}>{q.ingresso?.nome??q.nome}</option>}
-   {opzioni.map(m=><option key={m.chiave} value={m.chiave}>{m.nomeCompleto??m.nome}</option>)}
+   {opzioni.map(m=><option key={m.chiave} value={m.chiave}>{etichettaPlanimetria(m)}</option>)}
   </select></label>
   {(albero.errore||dati.errore)&&<p role="alert">{albero.errore??dati.errore} <button type="button" className="btn btn-secondary" onClick={()=>{void albero.ricarica();void dati.ricarica();}}>Riprova</button></p>}
   {dati.caricamento?<p role="status">Caricamento della mappa…</p>:src?<div className="ingresso-quartiere__immagine" role="application" aria-label="Punto iniziale: tocca l’immagine o usa le frecce" tabIndex={0}

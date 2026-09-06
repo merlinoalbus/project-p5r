@@ -1,3 +1,4 @@
+import { riconciliaAreeGuida } from './organizzazioneMappe.js';
 import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 // ============================================================
 // sincronizzaMappe — crea l'albero delle mappe dalle entità della guida e gli spilli dai marcatori esistenti (Fase 13.1)
@@ -56,6 +57,11 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
       const chiave = `dungeon-${d.chiave}`;
       insMappa.run({ chiave, nome: d.nome, tipo: d.tipo === 'mementos' ? 'dedalo' : 'palazzo', genitore: null, ordine: 100 + d.ordine, immagine: null, asset: `palazzi/${d.chiave}`, entitaTipo: 'dungeon', entitaChiave: d.chiave, adesso: t });
       for (const a of db.prepare('SELECT chiave, nome, ordine FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(d.chiave) as Array<{ chiave: string; nome: string; ordine: number }>) {
+        if (tabelle.has('guida_mappa') && !db.prepare('SELECT 1 FROM mappa WHERE chiave=?').get(a.chiave)) {
+          db.prepare("INSERT OR IGNORE INTO guida_mappa(area_chiave,nome,note,metadata_json) VALUES(?,?,'','{}')").run(a.chiave,a.nome);
+          db.prepare('INSERT OR IGNORE INTO guida_alias(chiave,area_chiave) VALUES(?,?)').run(a.chiave,a.chiave);
+          continue;
+        }
         insMappa.run({ chiave: a.chiave, nome: a.nome, tipo: 'area', genitore: chiave, ordine: a.ordine, immagine: immaginiMappa.has(a.chiave) ? a.chiave : null, asset: null, entitaTipo: 'area', entitaChiave: a.chiave, adesso: t });
       }
     }
@@ -73,10 +79,14 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
     const righe = db.prepare(`SELECT m.punto_chiave, m.x, m.y, m.origine, p.area_chiave, p.tipo, p.nome, p.descrizione, p.ordine, p.esauribile
       FROM marcatore_mappa m JOIN punto_interesse p ON p.chiave = m.punto_chiave`).all() as Array<{ punto_chiave: string; x: number; y: number; origine: string; area_chiave: string; tipo: string; nome: string; descrizione: string; ordine: number; esauribile: number }>;
     for (const r of righe) {
-      if (esiste.get('punto', r.punto_chiave) || !mappaEsiste.get(r.area_chiave)) continue;
+      if (esiste.get('punto', r.punto_chiave)) continue;
+      const guida = tabelle.has('guida_mappa') && db.prepare('SELECT 1 FROM guida_mappa WHERE area_chiave=?').get(r.area_chiave);
+      if (!mappaEsiste.get(r.area_chiave) && !guida) continue;
       const tipo = spilloPerPunto(r.tipo);
       const collezionabile = r.esauribile === 1 || DEFINIZIONI_SPILLO[tipo].collezionabile ? 1 : 0;
-      insSpillo.run(r.area_chiave, tipo, r.nome, r.descrizione, r.x, r.y, 'punto', r.punto_chiave, collezionabile, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
+      if (guida && !mappaEsiste.get(r.area_chiave)) {
+        db.prepare(`INSERT INTO spillo(mappa_chiave,area_guida_chiave,ruolo_guida,tipo,nome,descrizione,x,y,riferimento_tipo,riferimento_chiave,collezionabile,ordine,origine,updated_at) VALUES(NULL,?,'punto',?,?,?,?,?,'punto',?,?,?,?,?)`).run(r.area_chiave,tipo,r.nome,r.descrizione,r.x,r.y,r.punto_chiave,collezionabile,r.ordine,r.origine === 'seed'?'seed':'utente',t);
+      } else insSpillo.run(r.area_chiave, tipo, r.nome, r.descrizione, r.x, r.y, 'punto', r.punto_chiave, collezionabile, r.ordine, r.origine === 'seed' ? 'seed' : 'utente', t);
       spilli++;
     }
     // ---- Riclassificazione degli spilli di seed già esistenti: quando la corrispondenza `spilloPerPunto` cambia (per esempio con
@@ -105,12 +115,15 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   for (const radice of db.prepare("SELECT chiave FROM mappa WHERE origine = 'seed' AND (tipo = 'citta' OR tipo = 'palazzo' OR tipo = 'dedalo')").all() as Array<{ chiave: string }>) {
     const figlie = figlieDi.all(radice.chiave) as Array<{ chiave: string; nome: string }>;
     figlie.forEach((f, i) => {
+      // Le planimetrie native richiedono ingressi reali: la griglia non è una connessione del gioco.
+      if (f.chiave.startsWith('nativo-')) return;
       if (esiste.get('mappa', f.chiave)) return;
       const [x, y] = posizionePassaggio(radice.chiave, f.chiave, i, figlie.length);
       insSpillo.run(radice.chiave, 'passaggio', f.nome, '', Math.round(x * 10) / 10, Math.round(y * 10) / 10, 'mappa', f.chiave, 0, i, 'seed', t);
       spilli++;
     });
   }
+  riconciliaAreeGuida(db);
   sincronizzaPercorsiMappe(db);
   return { mappe, spilli, riclassificati };
 }

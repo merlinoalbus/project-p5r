@@ -32,8 +32,8 @@
     },
     {
      "tipo": "passaggio",
-     "nome": "Yongen-Java Banchina della metropolitana",
-     "descrizione": "Sottopasso verso Yongen-Java Banchina della metropolitana",
+     "nome": "Yongen-Jaya Banchina della metropolitana",
+     "descrizione": "Sottopasso verso Yongen-Jaya Banchina della metropolitana",
      "x": 88.3,
      "y": 6.8,
      "riferimento": {
@@ -51,8 +51,8 @@
     },
     {
      "tipo": "passaggio",
-     "nome": "Yongen-Java Banchina della metropolitana",
-     "descrizione": "Vicolo verso Yongen-Java Banchina della metropolitana",
+     "nome": "Yongen-Jaya Banchina della metropolitana",
+     "descrizione": "Vicolo verso Yongen-Jaya Banchina della metropolitana",
      "x": 76.8,
      "y": 83.4,
      "riferimento": {

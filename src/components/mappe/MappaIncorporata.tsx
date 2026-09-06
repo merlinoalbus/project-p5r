@@ -1,3 +1,8 @@
+import { haPlanimetria } from '../../utils/haPlanimetria';
+import { presentaMappa } from '../../utils/presentazioneMappa';
+import { risolviMappa } from '../../services/api';
+import { useCarica } from '../../hooks/useCarica';
+import { PageState } from '../shared/PageState';
 // ============================================================
 // MappaIncorporata — visore a altezza fissa dentro una pagina (Città, quartiere, area di un Palazzo, home della Partita) — Fase 13.4
 // ============================================================
@@ -5,8 +10,9 @@
 // Stesso visore dello schermo intero: navigazione fra i livelli apre la pagina a schermo intero; «Modifica mappa» apre l'editor.
 // ============================================================
 
+import { urlMappa, type NavigaMappa } from '../../utils/navigazioneMappa';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { usePartitaStore } from '../../stores/partitaStore';
 import { useMappaPartita } from '../../hooks/useMappaPartita';
 import { VisoreMappa } from './VisoreMappa';
@@ -17,7 +23,7 @@ import { Spinner } from '../shared/PageState';
 interface Props {
   chiave: string;
   puntoIniziale?: {x:number;y:number;zoom:number}|null;
-  onNaviga?: (chiave:string)=>void;
+  onNaviga?: NavigaMappa;
   /** Cambia per forzare un nuovo caricamento (es. dopo un'azione della pagina ospite). */
   versione?: string | number;
   /** Avvisa la pagina ospite dopo un'azione salvata dal visore (raccolto, punto della Guida, acquisto). */
@@ -31,7 +37,17 @@ interface Props {
   partitaId?: number | null;
 }
 
-export function MappaIncorporata({ chiave, versione, onCambiato, altezza, className, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita }: Props) {
+export function MappaIncorporata(props: Props) {
+  const esito = useCarica(() => risolviMappa(props.chiave), [props.chiave, props.versione]);
+  return <PageState isLoading={esito.caricamento} error={esito.errore} onRetry={esito.ricarica}>
+    {esito.dati?.tipo === 'guida' ? <div className="card flex flex-col gap-2">
+      <h3 className="m-0 text-base">{esito.dati.nome}</h3>
+      <Link to={`/guida/mappe/${encodeURIComponent(esito.dati.mappaPalazzo)}?area=${encodeURIComponent(esito.dati.area)}`}>Apri il luogo e i contenuti della guida</Link>
+    </div> : esito.dati?.tipo === 'mappa' ? <MappaIncorporataRisolta {...props} chiave={esito.dati.mappa} /> : null}
+  </PageState>;
+}
+
+function MappaIncorporataRisolta({ chiave, versione, onCambiato, altezza, className, spilloIniziale, puntoIniziale, onNaviga, partitaId: partitaEsplicita }: Props) {
   const navigate = useNavigate();
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = partitaEsplicita !== undefined ? partitaEsplicita : attiva?.id ?? null;
@@ -53,16 +69,21 @@ export function MappaIncorporata({ chiave, versione, onCambiato, altezza, classN
       </div>
     );
   }
+  if (!haPlanimetria(mappa)) return <section className={`card ${className ?? ''}`}>
+    <h3>{mappa.nome}</h3>
+    <Link to={urlMappa(mappa.chiave)}>Apri il luogo e i contenuti della guida</Link>
+    {!!mappa.figli.length && <ul>{mappa.figli.map(f => <li key={f.chiave}><Link to={urlMappa(f.chiave)}>{f.nome}</Link></li>)}</ul>}
+  </section>;
   return (
     <div className={className} style={altezza !== undefined ? { height: altezza } : className ? undefined : { height: 560 }}>
       <VisoreMappa
         key={`${mappa.chiave}-${spilloIniziale ?? ''}-${puntoIniziale?.x ?? ''}-${puntoIniziale?.y ?? ''}-${puntoIniziale?.zoom ?? ''}`}
         puntoIniziale={puntoIniziale}
-        mappa={mappa}
+        mappa={presentaMappa(mappa)}
         partitaId={partitaId}
         selezioneIniziale={spilloIniziale ?? null}
         incorporato={!intero}
-        onNaviga={onNaviga ?? ((k) => navigate(`/guida/mappe/${encodeURIComponent(k)}`))}
+        onNaviga={onNaviga ?? ((k, arrivo) => navigate(urlMappa(k, arrivo)))}
         onRaccolto={raccolto}
         onStatoPunto={statoPunto}
         onAcquisto={acquisto}

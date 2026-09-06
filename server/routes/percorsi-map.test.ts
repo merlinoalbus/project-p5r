@@ -43,6 +43,6 @@ it('esporta le immagini del repository con il percorso attuale anche dopo una ri
   expect(r.status).toBe(200);const zip=leggiZip(r.body as Buffer);
   expect(zip.map(v=>v.nome)).toContain('public/asset/mappe/shibuya-centro.png');
   const json=JSON.parse(zip.find(v=>v.nome==='data/seed/mappe/shibuya-centro.json')!.contenuto.toString());
-  expect(json.mappe[0].asset).toBe('mappe/shibuya-centro');
+  expect(json.mappe.find((m: {chiave:string})=>m.chiave==='shibuya-centro').asset).toBe('mappe/shibuya-centro');
   expect(zip.find(v=>v.nome==='public/asset/mappe/shibuya-centro.png')!.contenuto.length).toBeGreaterThan(1000);
 });
