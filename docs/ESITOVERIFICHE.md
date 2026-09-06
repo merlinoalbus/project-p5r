@@ -637,3 +637,61 @@ risolve gli articoli, ma la superficie UI richiesta dal piano non espone ancora 
 **Decisione:** le correzioni alla misura sono approvate e il valore 96,35% è riproducibile, ma
 la Fase 3d resta respinta per il fallback eseguito prematuramente e per il collegamento ancora
 assente nella pagina Oggetti.
+
+## Fase 2 — Quarta verifica: pin di bordo, osservazioni e collegamenti
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `3f1810c` (dichiarazione introdotta in `2ac55ee`, file della Fase 2 invariati)
+**Data verifica:** 6 settembre 2026
+
+### Evidenze riprodotte
+
+1. I tre artefatti `pin-di-bordo.json`, `osservazioni-icone-esito.json` e
+   `collegamenti-mappe.json` sono stati rigenerati due volte in cartelle isolate: entrambe le
+   copie hanno la stessa impronta dei file versionati. Su Windows i due generatori che stampano
+   la freccia `→` terminano però con `UnicodeEncodeError` dopo aver scritto il file se non si
+   imposta UTF-8; i comandi documentati vanno resi eseguibili così come sono o devono dichiarare
+   il requisito `PYTHONUTF8=1`.
+2. Le quote laterali si riproducono: tipo 13, 65,2% in alto; tipo 14, 70,4% a destra;
+   tipo 15, 75,8% in basso; tipo 16, 79,7% a sinistra. I lati sono distinti e il migliore dei
+   tipi interni si ferma al 48,5%.
+3. Il vincolo sulle schermate si riproduce: `stanza-sicura` lascia come unico candidato il tipo
+   4 su cinque osservazioni; `forziere` lascia il tipo 26 su quattro. Il pin tipo 4 di
+   `RMAP_151_7_0` è a `(732, 206)`, nella stanzetta superiore descritta dall'osservazione.
+4. I 71 collegamenti sono contabilmente coerenti: 28 da trigger proiettato e 43 da meta unica.
+   La ricostruzione indipendente delle assegnazioni finali trova zero collegamenti scelti fra più
+   mappe valide. Le 71 chiavi sono uniche e appartengono tutte ai 262 pin candidati; gli altri
+   191 non hanno alcuna riga di collegamento.
+
+### Rilievi bloccanti
+
+1. **Uno dei quattro tipi di bordo viola il criterio dichiarato.** `QUOTA_FUORI` vale 0,5, ma
+   il tipo 15 ha `quotaFuoriDalTratto = 0,470`. `edge_pins.py` seleziona i candidati usando
+   soltanto `quotaLato`; la soglia sul fuori-tratto è scritta nell'artefatto e nella descrizione,
+   ma non è applicata. `verify_edge_pins.py` non la controlla. I 262 pin e la copertura 780
+   includono quindi 66 pin che non superano il contratto dichiarato.
+2. **La controprova indipendente sul tipo 26 è presente nei dati ma non viene verificata.** Il
+   tipo 26 ha `script.stato = determinato` e famiglia `R_TBOX|RARE_TBOX` in 32 casi su 33, con
+   lo stesso `tipoSpillo` dell'osservazione. Tuttavia `verify_icon_observations.py` stampa
+   `0 confermati anche da un'altra strada indipendente`: guarda la `prova` finale di
+   `semantica-pin.json`, già sovrascritta da «icone contate», e salta proprio il confronto che
+   promette. Il test deve leggere l'evidenza `script` e pretendere almeno la conferma del tipo 26.
+3. **Le cinque schermate non sono auditabili dal repository.** Sono versionati i conteggi e le
+   note, non i file sorgente né impronte/riferimenti stabili. Si può ricontrollare la soluzione
+   combinatoria contro `mondo_metadati.json`, ma non rileggere visivamente le osservazioni da cui
+   dipende la deduzione.
+
+### Rilievo di robustezza sui collegamenti
+
+Nello stato corrente nessuno dei 71 collegamenti finali sceglie fra più mappe. Tuttavia il ramo
+`trigger proiettato` usa `next(...)` sulla prima destinazione valida senza esigere prima che la
+meta sia unica. Oggi un trigger ambiguo viene scavalcato da un trigger più vicino e univoco, ma
+una variazione dei dati potrebbe renderlo vincente. Il verificatore deve ricostruire le mete
+valide, rifiutare ogni assegnazione ambigua e certificare esplicitamente anche la contabilità
+71 collegate / 191 irrisolte.
+
+**Decisione:** il merito dei conteggi delle icone e la contabilità dei collegamenti sono
+sostanzialmente riprodotti, ma la Fase 2 resta respinta. Prima della riverifica occorre applicare
+e verificare davvero la soglia fuori-tratto, rigenerare a cascata copertura e collegamenti,
+rendere effettiva la controprova sul tipo 26, blindare l'unicità delle mete e rendere stabile la
+provenienza delle cinque schermate.
