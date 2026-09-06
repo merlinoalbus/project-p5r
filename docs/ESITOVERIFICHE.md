@@ -911,3 +911,39 @@ sono gestiti, manca la regressione UI e la dichiarazione non viene aggiornata.
 **Decisione:** tabella nativa, semantica, posizionamento, condizioni, collegamenti e corpus
 superano il controllo di merito, ma la Fase 2 resta **FAIL** finché rapporto, copie assorbite,
 documentazione ed evidenze importate non sono corretti e sottoposti a un nuovo riesame stabile.
+
+## Fase 3d — Quinta verifica: accesso reale dalla superficie Oggetti
+
+**Esito del riesame: FAIL**
+**Commit verificato:** `8448c87`
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. «Sulla mappa» usa la rotta reale `/guida/mondo/<tipo>/<chiave>` e non torna più alle schede
+   editoriali.
+2. Le chiavi contenenti `/` vengono codificate come un singolo segmento e ricostruite
+   correttamente lungo client, router e API.
+3. `Catena di perline`, `Soma`, `Homunculus` e `Tessera puntate alte` non ricevono mete inventate:
+   la pagina distingue gli acquisti di Palazzo e online e comunica che la posizione non è
+   associata.
+4. Due rigenerazioni indipendenti del crosswalk sono byte-identiche al file versionato, con SHA-256
+   `849FE939CB7E7A5288B2F75092F2240879DE09961686FA0E587465322CBF1F2F`.
+5. La misura indipendente ricostruisce 1.460 entità, 1.406 accessi, 503 punti precisi e zero errori;
+   la dichiarazione corrente riporta i conteggi aggiornati.
+6. Sul commit: typecheck, lint e build PASS; 133 file e 542 test PASS; 9 test mirati PASS.
+
+### Rilievo bloccante
+
+Il test aggiunto monta `CollegamentoMappa` isolatamente dentro una rotta chiamata
+`/guida/oggetti`, ma non monta la vera `OggettiPage`. Il test dell'endpoint controlla contenuti e
+conteggi generali, ma non verifica che il crosswalk arricchisca la risposta con le chiavi
+`articolo` o `negozi`. Potrebbero quindi rompersi il caricamento del crosswalk, l'associazione alla
+riga o il rendering del comando nella tabella senza far fallire alcun test.
+
+La chiusura richiede una regressione sulla vera `OggettiPage` con una chiave articolo contenente
+`/`, oppure la combinazione equivalente di un test API sull'iniezione delle chiavi esatte e un
+test della tabella reale. La prova deve includere anche almeno una delle quattro voci senza meta.
+
+**Decisione:** l'implementazione supera il controllo di merito, ma la Fase 3d resta **FAIL** fino
+alla prova automatica della superficie reale Oggetti e a un nuovo riesame su commit stabile.
