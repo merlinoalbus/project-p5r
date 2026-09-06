@@ -24,13 +24,13 @@ verificarlo costa una lettura.
 | **file** | `public/asset/mappe/lmap/tokyo/shujin-academy.png` |
 | **misura** | 760 × 620 px |
 | **sfondo** | trasparente, **alfa reale** che segue la sagoma (non un rettangolo opaco) |
-| **stato** | `da verificare` — prompt di Claude, verifica a Codex |
+| **stato** | **`consegnato`** — generata da Codex il 6 settembre 2026, verificata e in uso |
 | **serve a** | `src/components/mappe/MappaTokyo.tsx` |
 
 **Perché serve.** La mappa di viaggio disegna ogni quartiere con la propria sagoma originale,
 estratta da `P5_MAPDATA.SPD`. Shujin Academy non ce l'ha, perché nel gioco non è una destinazione
 del treno: al suo posto compariva la fotografia del quartiere, che in mezzo a venti sagome in
-bianco e nero è una macchia. Per ora Shujin è tolta dalla mappa; con questa sagoma ci torna.
+bianco e nero era una macchia. Codex l’ha disegnata apposta nello stesso stile.
 
 **Il riferimento è già nel repository**, ed è la cosa più importante di questo prompt: prima di
 generare, guardare `public/asset/mappe/lmap/tokyo/shibuya.png`, `shinjuku.png`, `akihabara.png` e
@@ -69,6 +69,15 @@ generare, guardare `public/asset/mappe/lmap/tokyo/shibuya.png`, `shinjuku.png`, 
 3. nella mappa, con il contorno bianco applicato, la sagoma resta leggibile a 5,5% di larghezza —
    è la misura con cui i cartellini vengono disegnati.
 
-**Quando è consegnata:** rimettere `'shujin-academy'` in `QUARTIERI_TOKYO`
-(`src/components/mappe/collocazioneTokyo.ts`) intorno a `x: 40, y: 40`, e rimettere la linea
-`Shujin` che la lega ad Aoyama-Itchōme.
+**Esito della verifica**
+
+| prova | esito |
+|---|---|
+| alfa reale | **passa** — canale 0..255, angolo `(0,0,0,0)`, 64,6% di pixel trasparenti. Gli originali stanno al 44-48%: la scuola è più sparsa perché ha il cortile, non perché l'alfa sia finta |
+| stile accanto agli originali | **passa** — messa fra Harajuku e Aoyama-Itchōme non si distingue per tratto né per peso del nero |
+| leggibilità alla misura reale | **passa** — resa a 74 px di larghezza sulla mappa, l'edificio, la pensilina e gli alberi restano riconoscibili |
+
+Shujin è tornata in `QUARTIERI_TOKYO` a `x: 40, y: 40`, con la linea `Aoyama–Shujin` che la lega ad
+Aoyama-Itchōme. È **l'unica sagoma della mappa che non viene dal gioco**, e sta scritto lì accanto:
+il resto dell'atlante è estratto e dimostrato, e un disegno fatto apposta non deve poter passare
+per originale.
