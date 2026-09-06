@@ -1353,3 +1353,56 @@ conservati in `cancelli-pin.json`; non sono trigger applicativi. La verifica del
 generazione, se eseguita, appartiene al solo processo esplicito di costruzione del seed e non deve
 essere invocata dall'applicazione a ogni avvio. Il rilievo sull'indipendenza di tale verificatore
 non è un blocker del runtime immutabile.
+
+## Fase 2 — Candidato di convergenza, bootstrap e determinismo
+
+**Esito: FAIL**
+**Commit isolato:** `0fe873463fc23c27b91d51e4869fe2b8ec9543bd`
+**Validatore:** `galaxy-task-validator`, sola lettura
+**Perimetro:** i cinque criteri del protocollo Codex; coordinate/provenienze degli ancoraggi,
+backfill periodico e cancelli runtime esclusi per arbitrato utente.
+
+### Meriti accertati
+
+1. Su database fresco `runMigrations + caricaSeed` crea realmente 10/10 ingressi `dungeon-*`
+   con le rispettive condizioni, senza reset distruttivo.
+2. Le finestre dei dieci ingressi sono corrette via API: prima bloccati, durante disponibili,
+   dopo bloccati per gli otto intervalli chiusi; Iweleth e Mementos restano disponibili senza
+   data finale.
+3. I verificatori sorgente principali passano: metadata 209 campi/301 mappe/1429 pin;
+   connessioni 209 campi, 192 script, 15.734 procedure, 2.514 `CALL_FIELD`, 4.495 trigger;
+   riferimento 250 mappe con pin, 217 condivise e 1.372 pin collocabili. Tre produttori sono
+   già corretti a LF con newline finale.
+4. I quattro typecheck separati e lint passano.
+
+### Rilievi bloccanti e sanamento richiesto
+
+1. **L'avvio muta un database già formato.** Con hash invariato, la seconda `caricaSeed` esegue
+   sincronizzazione, collegamento Palazzi e presenza: `total_changes()` cresce di 829 pur
+   restituendo `caricato:false`. Sanamento: separare bootstrap su DB fresco e avvio; nel secondo
+   caso zero `INSERT`/`UPDATE`, mentre un hash differente segnala un aggiornamento pendente senza
+   applicarlo.
+2. **La finestra è aggirabile dall'URL diretto.** La migrazione 047 non è registrata, il campo
+   non attraversa DTO/query/export/import/valutatore e tutte le 30 richieste dirette
+   `/api/mappe/dungeon-*` riescono prima, durante e dopo. Sanamento: registrare la migrazione,
+   conservare la presenza della mappa nel DTO e valutare la medesima condizione nel risolutore e
+   nella rotta diretta; in stato assente la rotta deve restituire un esito non navigabile coerente
+   con il visore, non il contenuto della mappa.
+3. **Manca la prova DOM reale del bootstrap.** Il filtro generico è verde, ma nessun test apre
+   i dieci ingressi creati dal bootstrap nelle finestre prima/durante/dopo. Sanamento: una sola
+   matrice end-to-end DB fresco → API → DOM → URL diretto sui dieci record, con gli otto intervalli
+   chiusi e i due senza termine.
+4. **Il determinismo resta parziale.** Cinque produttori importano ma non usano `scrivi_json`;
+   gli artefatti hanno CRLF/no newline finale, tra cui `identita.json` (23.430 CRLF),
+   `inventario.json` (309.878), candidati/evidenze scuola, evidenze urbane e
+   `verifica_metadati.json`. Sanamento: usare realmente la scrittura canonica in tutti i
+   produttori e un unico test che rigeneri due directory e pretenda byte identici, UTF-8, LF e
+   newline finale per tutto il corpus del lotto.
+5. **Il gate pertinente è rosso.** Quattro test su 49 falliscono: due in
+   `visibilitaCondizionale` (Yongen e 31 pin nativi condizionati) e due in `mappe-editor`
+   (passaggi Tokyo estranei e presenza Yongen). Sanamento: non aggiornare le aspettative per
+   renderle verdi; isolare la presenza degli elementi temporanei dall'eredità sui pin nativi o
+   luoghi generici, quindi ripristinare l'invariante che i pin fissi non ricevono condizioni.
+
+La Fase 2 resta **FAIL**. Il candidato successivo deve correggere soltanto questi cinque rilievi
+e pubblicare il tag concordato.
