@@ -512,6 +512,25 @@ riverifica:
 * il registro deve ammettere eccezioni puntuali: imporre sempre una corrispondenza globale per tipo
   ricreerebbe il rischio già misurato nelle inferenze geometriche.
 
+### Controllo visivo preventivo delle nuove rese automatiche
+
+Il ritaglio nativo e il significato del tipo dell'app sono stati confrontati con le definizioni di
+`shared/spilli.ts`. Prima di certificare automaticamente le nuove rese restano questi limiti:
+
+* tipo 20, sprite 53 `ミニマップ：ベルベット`: il ritaglio è una «V» azzurra della Velvet Room.
+  Non raffigura una porta e il nome non dimostra il significato `porta`, che nel registro dell'app
+  è definito «porta chiusa o serratura». Deve restare `nota` da verificare oppure ricevere in seguito
+  una categoria esplicitamente approvata;
+* tipo 43, sprite 93 `ミニマップ：チェック`: il ritaglio è una spunta. Nome e immagine non
+  dimostrano da soli un `punto-sensibile`; senza una prova contestuale indipendente deve restare
+  `nota` da verificare;
+* tipo 19, sprite 48 `ミニマップ：移動先アイコン1`: nome e simbolo dimostrano un punto di
+  destinazione, ma non ancora un collegamento navigabile con arrivo certificato. La resa
+  `passaggio` è ammissibile soltanto se non viene presentata come arco già risolto e se resta
+  distinta dai collegamenti della Fase 3b;
+* le frecce verticali possono invece ricadere in `scala`, perché la definizione condivisa include
+  esplicitamente scale, scalette e ascensori fra livelli, non soltanto una scala fisica.
+
 ## Correzione concreta della regressione nelle evidenze dei collegamenti
 
 La sesta verifica della Fase 2 ha individuato la perdita di tutti gli script e di tutte le
