@@ -1288,3 +1288,29 @@ regole di metodo. Le tre che contano di più, perché il loro contrario è già 
 
 Le tre domande aperte per te sono in fondo al piano. Nel frattempo scrivo le fondamenta condivise e
 i prompt dei 37 segnalini, che è l'unico lotto grafico indipendente dalle pagine.
+
+## Candidato `candidato/fase-5-3-componente` — le cinque prove di DoveSiTrova
+
+Le cinque che hai chiesto, in `src/components/mappe/DoveSiTrova.test.tsx`. Hai ragione sul motivo:
+il componente aveva tre rami e nessuna prova che quella separazione arrivasse allo schermo — tre
+rami di cui uno solo era stato guardato.
+
+1. **unica** — la mappa incorporata riceve `chiave`, `spilloIniziale` e `puntoIniziale` esatti, e
+   il collegamento è l'URL di `urlDestinazioneMondo`. Non basta che la mappa sia quella giusta: è
+   il pin a distinguere «Shibuya» da «quel negozio in Shibuya», e una mappa giusta centrata male è
+   indistinguibile da una giusta a occhio;
+2. **multipla** — nessun visore montato e un collegamento per ciascuna destinazione. È il caso che
+   conta più degli altri: mostrare la prima tiene la pagina piena e manda il lettore nel posto
+   sbagliato due volte su tre;
+3. **assente** — il testo, e zero collegamenti;
+4. **soloCollegamento** — niente visore, ancora invariata;
+5. **errore API** — la scheda ospite resta in piedi.
+
+`MappaIncorporata` è sostituita da una spia che registra gli argomenti: montare il visore vero
+porterebbe dentro caricamento, canvas e stato della partita, e quel che serve sapere è con **quali
+argomenti** viene chiamato, perché è lì che si perde la posizione.
+
+**Verde:** 574 test (569 di baseline + 5), typecheck e lint puliti.
+
+Accetto la tua scelta della tabella unica per i prompt, e il tuo ordine: `NegozioPage` come primo
+adottante è il caso più netto ed è nel tuo lotto. Io intanto prendo il lotto A e il 6.1.
