@@ -1911,3 +1911,61 @@ di `DungeonPage`/`DungeonDettaglioPage` alla tassonomia sopra. La prova di chius
 che i nove Palazzi e Iweleth sono raggiungibili con le mappe previste e che `mementos` non e'
 esposto dal percorso Palazzi. Questa decisione prevale sui rilievi precedenti relativi a
 `MappaMemento` e `sbloccati` per questo lotto.
+
+### Specifica di sanamento UX — dettaglio radice «Dedalo di Iweleth»
+
+**Input osservato:** la schermata corrente `MappaPage` per una radice senza planimetria mostra
+una grande card quasi vuota, un elenco di luoghi a testo e miniature 112×96; la gerarchia non
+porta lo sguardo alla prossima area, le planimetrie sembrano allegati e non un percorso, e le
+piccole immagini grigie non consentono di capire quale carta si sta aprendo. E' il contrario della
+consultazione rapida che serve davanti al gioco.
+
+**Obiettivo:** fare del dettaglio Iweleth una pagina-editoriale di percorso, moderna e P5R,
+senza inventare mappe: le planimetrie restano quelle reali gia' presenti, ogni voce deve aprire
+la sua ancorata sullo stesso atlante, e «Dedalo di Iweleth» resta l'unico Dedalo dentro il percorso
+Palazzi.
+
+#### Struttura obbligatoria desktop
+
+1. **Hero compatto, non una card vuota.** Breadcrumb `Mappe / Palazzi / Dedalo di Iweleth`,
+   emblema Iweleth gia' disponibile, titolo display, riga di contesto «12 aree · N planimetrie ·
+   N punti di interesse» e due azioni leggibili: `Apri atlante` e `Scheda del Dedalo`.
+   Il fondo puo' usare texture/rosso/nero gia' nel sistema, ma non un'immagine inventata.
+2. **Navigatore di percorso persistente.** Colonna sinistra (desktop) o barra scorrevole
+   (tablet/mobile) numerata 01–12: ogni area ha stato mappa disponibile/non disponibile,
+   nome completo e link. Nessun semplice elenco a pallini; l'area attiva e' immediatamente
+   distinguibile e la tastiera la percorre nell'ordine reale.
+3. **Pannello centrale “area selezionata”.** Titolo/contesto dell'area, una CTA primaria
+   `Apri mappa interattiva` e la griglia delle sue planimetrie reali. La prima carta e' grande
+   (preview 16:9), le altre sono carte secondarie; ciascuna porta nome, copertura e numero punti.
+   Non usare icone/glyph come sostituti di preview quando la planimetria e' disponibile.
+4. **Colonna di orientamento.** Mostra solo metadati utili: collegamento al Palazzo/Dedalo,
+   presenza di piano, punti e stato della partita. Nessun blocco vuoto, nessuna ripetizione del
+   titolo, nessun testo di amministrazione in prima lettura.
+
+#### Comportamento e responsive
+
+- Desktop: griglia `minmax(210px, 280px) / minmax(0,1fr) / 240px`, hero massimo 220 px;
+  il navigatore resta visibile mentre si scorrono le planimetrie.
+- Tablet: navigatore orizzontale sopra al pannello, preview primaria seguita da due colonne.
+- Mobile: una colonna, navigatori a chip numerati con label troncata, preview a larghezza piena,
+  controlli almeno 44×44 px; mai miniature illeggibili o una card che lasci meta' viewport vuota.
+- Ogni carta planimetria e link deve avere nome accessibile, focus P5R ad alto contrasto e stato
+  attivo; immagini decorative con `alt=""`, planimetrie con alt descrittivo.
+
+#### Vincoli dati e criteri di accettazione
+
+- `AlberoLuoghi` diventa una presentazione di percorso: mantiene ordine/catalogo, non deduce
+  planimetrie e non elimina aree senza immagine; per queste mostra uno stato esplicito, non una
+  finta anteprima.
+- `ImmaginiLuogo` riceve varianti `hero` / `card` oppure un componente dedicato: non deve piu'
+  imporre globalmente `w-28 h-24` al dettaglio Iweleth.
+- Il click su area e planimetria conserva URL e ancora reali; `MappaPage` continua a usare
+  `haPlanimetria`, `urlMappa` e i dati della partita.
+- Test richiesti: ordine delle 12 aree; una area con tre planimetrie rende una hero e tre link;
+  una senza planimetria e' dichiarata tale ma resta raggiungibile; ogni link usa la sua chiave;
+  mobile non perde le azioni principali.
+
+**Proprietario dell'implementazione:** Claude (`MappaPage.tsx`, `AlberoLuoghi.tsx`,
+`ImmaginiLuogo.tsx` e CSS proprietario). Codex riverifica il candidato pubblicato su gerarchia,
+responsivita', semantica dei link, build e regressioni; nessuna modifica diretta ai suoi file.
