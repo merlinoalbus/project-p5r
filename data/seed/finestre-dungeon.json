@@ -1,5 +1,5 @@
 {
-  "cosaE": "La finestra di tempo in cui ciascun Palazzo esiste nel gioco: prima non c'è, dopo la scadenza non è più accessibile. Serve a nascondere sulla mappa i Palazzi che, alla data della partita, non ci sono.",
+  "cosaE": "La finestra di tempo in cui ciascun Palazzo esiste nel gioco e il punto del mondo reale da cui ci si entra. Serve a mostrare il Palazzo sulla mappa della città dove sta davvero, e solo quando c'è.",
   "perche": "Le date stanno già nel catalogo (`dungeon.data_sblocco`, `dungeon.data_scadenza`) ma come prosa — «12 Aprile (Martedì) – prima infiltrazione esplorativa nel Palazzo» — e ricavarne una data con un'espressione regolare vuol dire sbagliarne qualcuna in silenzio. Sono dieci righe, si trascrivono una volta e restano.",
   "formato": "`dal` e `al` in MM-GG del calendario di gioco (aprile → marzo). `al` assente dove il gioco non fissa una scadenza.",
   "fonte": "campi `data_sblocco` e `data_scadenza` del catalogo, letti dalla guida allgamestaff",
@@ -10,49 +10,97 @@
       "dal": "04-12",
       "al": "05-02",
       "testoSblocco": "12 Aprile (Martedì) – prima infiltrazione esplorativa nel Palazzo",
-      "testoScadenza": "2 maggio (ultimo giorno utile; la guida consiglia il furto il 22 aprile)"
+      "testoScadenza": "2 maggio (ultimo giorno utile; la guida consiglia il furto il 22 aprile)",
+      "luogo": {
+        "mappa": "citta-shujin-academy",
+        "nome": "Shujin Academy",
+        "fonte": "script del gioco: il campo 002 (Shujin Academy) chiama il campo 151 (Palazzo di Kamoshida)",
+        "provato": true
+      }
     },
     {
       "dungeon": "madarame",
       "dal": "05-16",
       "al": "06-05",
       "testoSblocco": "16 maggio (Lunedì) – giorno in cui il Palazzo si materializza nel Meta-Nav",
-      "testoScadenza": "5 giugno (ultimo giorno utile; la guida fissa la lettera di sfida entro il 2 giugno)"
+      "testoScadenza": "5 giugno (ultimo giorno utile; la guida fissa la lettera di sfida entro il 2 giugno)",
+      "luogo": {
+        "mappa": "citta-shibuya",
+        "nome": "Shibuya, Central Street",
+        "fonte": "script del gioco: il campo 001 (Shibuya) chiama il campo 153 (Palazzo di Madarame)",
+        "provato": true
+      }
     },
     {
       "dungeon": "kaneshiro",
       "dal": "06-19",
       "al": "07-09",
       "testoSblocco": "19 giugno (domenica) – prima esplorazione/scoperta della banca",
-      "testoScadenza": "9 luglio (ultimo giorno utile; la guida consiglia di chiudere entro il 27 giugno)"
+      "testoScadenza": "9 luglio (ultimo giorno utile; la guida consiglia di chiudere entro il 27 giugno)",
+      "luogo": {
+        "mappa": "citta-shibuya",
+        "nome": "Shibuya, Central Street",
+        "fonte": "indicazione dell’utente del 6 settembre 2026",
+        "provato": false
+      }
     },
     {
       "dungeon": "futaba",
       "dal": "07-25",
       "al": "08-21",
       "testoSblocco": "25 luglio",
-      "testoScadenza": "21 agosto (attacco di Medjed; la guida consiglia di completare entro il 19 agosto)"
+      "testoScadenza": "21 agosto (attacco di Medjed; la guida consiglia di completare entro il 19 agosto)",
+      "luogo": {
+        "mappa": "citta-yongen-jaya",
+        "nome": "Yongen-Jaya, casa di Sojiro",
+        "fonte": "indicazione dell’utente del 6 settembre 2026",
+        "provato": false
+      }
     },
     {
       "dungeon": "okumura",
       "dal": "09-15",
       "al": "10-11",
       "testoSblocco": "15 settembre (giovedì) – prima visita esplorativa",
-      "testoScadenza": "11 ottobre (ultimo giorno utile; la guida consiglia il furto il 6 ottobre)"
+      "testoScadenza": "11 ottobre (ultimo giorno utile; la guida consiglia il furto il 6 ottobre)",
+      "luogo": {
+        "mappa": "tokyo",
+        "nome": "Tokyo",
+        "fonte": "ripiego indicato dall’utente: dove il punto preciso non è dichiarato, il Palazzo si aggancia alla mappa generale",
+        "provato": false,
+        "motivo": "l’utente lo colloca «dove si trova lo Spaceport Palace», che è il Palazzo stesso: il punto del mondo reale non è ancora dichiarato",
+        "ripiego": true
+      }
     },
     {
       "dungeon": "niijima",
       "dal": "10-29",
       "al": "11-20",
       "testoSblocco": "29 ottobre (sabato) – primo accesso",
-      "testoScadenza": "20 novembre (ultimo giorno utile; la guida consiglia il 13 novembre)"
+      "testoScadenza": "20 novembre (ultimo giorno utile; la guida consiglia il 13 novembre)",
+      "luogo": {
+        "mappa": "tokyo",
+        "nome": "Tokyo",
+        "fonte": "ripiego indicato dall’utente: dove il punto preciso non è dichiarato, il Palazzo si aggancia alla mappa generale",
+        "provato": false,
+        "motivo": "il catalogo lo ambienta a Kasumigaseki ma non dice da dove ci si entra",
+        "ripiego": true
+      }
     },
     {
       "dungeon": "shido",
       "dal": "11-24",
       "al": "12-18",
       "testoSblocco": "24 novembre (prima esplorazione, solo prologo); esplorazione libera dal 25 novembre",
-      "testoScadenza": "18 dicembre (elezioni; la guida completa tutto l'11-12 dicembre)"
+      "testoScadenza": "18 dicembre (elezioni; la guida completa tutto l'11-12 dicembre)",
+      "luogo": {
+        "mappa": "tokyo",
+        "nome": "Tokyo",
+        "fonte": "ripiego indicato dall’utente: dove il punto preciso non è dichiarato, il Palazzo si aggancia alla mappa generale",
+        "provato": false,
+        "motivo": "punto d’ingresso non dichiarato",
+        "ripiego": true
+      }
     },
     {
       "dungeon": "iweleth",
@@ -60,7 +108,15 @@
       "al": null,
       "testoSblocco": "24 dicembre (sabato), tramite l'Area 14 del Dedalo di Sheriruth",
       "testoScadenza": null,
-      "nota": "Il gioco non fissa una scadenza: una volta aperto resta accessibile."
+      "nota": "Il gioco non fissa una scadenza: una volta aperto resta accessibile.",
+      "luogo": {
+        "mappa": "tokyo",
+        "nome": "Tokyo",
+        "fonte": "ripiego indicato dall’utente: dove il punto preciso non è dichiarato, il Palazzo si aggancia alla mappa generale",
+        "provato": false,
+        "motivo": "si apre da dentro il Dedalo, non dal mondo reale",
+        "ripiego": true
+      }
     },
     {
       "dungeon": "maruki",
@@ -68,7 +124,15 @@
       "al": "02-03",
       "testoSblocco": "2 gennaio (evento di trama, «Palazzo sconosciuto»)",
       "testoScadenza": "3 febbraio (giorno delle battaglie finali; il percorso va assicurato entro il 2 febbraio)",
-      "nota": "Il terzo semestre si attiva solo portando il Confidente di Maruki al Rango 9 entro il 17 novembre: è un prerequisito, non una finestra, e resta nella scheda del Palazzo."
+      "nota": "Il terzo semestre si attiva solo portando il Confidente di Maruki al Rango 9 entro il 17 novembre: è un prerequisito, non una finestra, e resta nella scheda del Palazzo.",
+      "luogo": {
+        "mappa": "tokyo",
+        "nome": "Tokyo",
+        "fonte": "ripiego indicato dall’utente: dove il punto preciso non è dichiarato, il Palazzo si aggancia alla mappa generale",
+        "provato": false,
+        "motivo": "punto d’ingresso non dichiarato",
+        "ripiego": true
+      }
     },
     {
       "dungeon": "mementos",
@@ -76,7 +140,16 @@
       "al": null,
       "testoSblocco": "9 maggio (prima esplorazione con Morgana)",
       "testoScadenza": null,
-      "nota": "Il Dedalo resta accessibile per tutta la partita."
+      "nota": "Il Dedalo resta accessibile per tutta la partita.",
+      "luogo": {
+        "mappa": "tokyo",
+        "nome": "Tokyo",
+        "fonte": "ripiego indicato dall’utente: dove il punto preciso non è dichiarato, il Palazzo si aggancia alla mappa generale",
+        "provato": false,
+        "motivo": "punto d’ingresso non dichiarato",
+        "ripiego": true
+      }
     }
-  ]
+  ],
+  "luoghi": "Due sono dimostrati dagli script del gioco: il campo di Shujin Academy chiama il Palazzo di Kamoshida, quello di Shibuya chiama il Palazzo di Madarame. Due li ha indicati l'utente (Kaneshiro a Central Street, Futaba a casa di Sojiro). Per gli altri sei il punto del mondo reale non è dichiarato da nessuna fonte — nel gioco ci si entra col Meta-Nav, che non lascia traccia negli script di campo, e la pagina della guida non lo scrive — e per decisione dell'utente si agganciano alla mappa generale di Tokyo con `ripiego: true`, invece di restare irraggiungibili o di inventare un quartiere."
 }

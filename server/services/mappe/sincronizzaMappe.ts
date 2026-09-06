@@ -14,6 +14,7 @@ import { sincronizzaPercorsiMappe } from './percorsiMappe.js';
 //     passaggi verso le mappe figlie (Tokyo → quartieri, Palazzo/Dedalo → aree) disposti in griglia, da posizionare nell'editor.
 // ============================================================
 
+import { nowIso } from '../../db/dbService.js';
 import type { AppDatabase } from '../../db/dbService.js';
 import { DEFINIZIONI_SPILLO, spilloPerLuogo, spilloPerPunto } from '../../../shared/spilli.js';
 
@@ -92,12 +93,28 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   // `dati_guida`: nel catalogo le date sono prosa, e ricavarle con un'espressione regolare
   // vorrebbe dire sbagliarne qualcuna senza accorgersene.
   const finestrePerDungeon = new Map<string, RequisitoSpillo[]>();
+  const luoghiDungeon = new Map<string, { mappa: string; nomeMappa: string; descrizione: string }>();
+  const nomiDungeon = new Map<string, string>(tabelle.has('dungeon')
+    ? (db.prepare('SELECT chiave, nome FROM dungeon').all() as Array<{ chiave: string; nome: string }>).map((d) => [d.chiave, d.nome])
+    : []);
   if (tabelle.has('dati_guida')) {
     const riga = db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
     if (riga) {
       try {
-        const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null }> };
-        for (const f of dati.finestre ?? []) finestrePerDungeon.set(f.dungeon, finestraDaDate(f.dal, f.al));
+        const dati = JSON.parse(riga.json) as { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null; luogo?: { mappa?: string | null; nome?: string | null } }> };
+        for (const f of dati.finestre ?? []) {
+          finestrePerDungeon.set(f.dungeon, finestraDaDate(f.dal, f.al));
+          const l = f.luogo;
+          // solo dove il punto del mondo reale è dichiarato: un ingresso inventato porterebbe il
+          // giocatore nel posto sbagliato, che è peggio di non avere il collegamento
+          if (l?.mappa) {
+            luoghiDungeon.set(f.dungeon, {
+              mappa: l.mappa,
+              nomeMappa: nomiDungeon.get(f.dungeon) ?? f.dungeon,
+              descrizione: `Ingresso nel Metaverso${l.nome ? ` — ${l.nome}` : ''}.`,
+            });
+          }
+        }
       } catch { /* una trascrizione illeggibile non deve impedire la sincronizzazione */ }
     }
   }
@@ -206,4 +223,54 @@ export function sincronizzaMappe(db: AppDatabase): { mappe: number; spilli: numb
   riconciliaAreeGuida(db);
   sincronizzaPercorsiMappe(db);
   return { mappe, spilli, riclassificati, conSblocco };
+}
+
+
+/** Il pin che, dalla mappa dove il Palazzo sta davvero, ci porta dentro.
+ *
+ * Un Palazzo non è un mondo a parte: il castello di Kamoshida è la scuola, il museo di Madarame è
+ * Central Street a Shibuya. Finché la sua mappa restava una radice senza nulla che ci portasse, il
+ * mondo non era uno — e la finestra di tempo del Palazzo non aveva dove posarsi, perché le
+ * condizioni vivono sugli spilli e nessuno spillo ci arrivava.
+ *
+ * Va eseguita **dopo** l'importazione dei pacchetti, non dentro la sincronizzazione: `importaMappe`
+ * ripulisce gli spilli di seed delle mappe che importa, e il pin di Futaba su Yongen-Jaya veniva
+ * creato e subito cancellato da un pacchetto successivo — spariva senza che nulla lo segnalasse.
+ *
+ * Dove il punto del mondo reale non è dichiarato da nessuna fonte, il Palazzo si aggancia alla
+ * mappa generale di Tokyo: raggiungibile e onesto, invece che irraggiungibile o messo a caso.
+ */
+export function collegaPalazziAiLuoghi(db: AppDatabase): number {
+  const t = nowIso();
+  const tabelle = new Set((db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as Array<{ name: string }>).map((x) => x.name));
+  if (!tabelle.has('mappa') || !tabelle.has('dati_guida')) return 0;
+  const riga = db.prepare("SELECT json FROM dati_guida WHERE chiave = 'finestre-dungeon'").get() as { json: string } | undefined;
+  if (!riga) return 0;
+  let dati: { finestre?: Array<{ dungeon: string; dal?: string | null; al?: string | null; luogo?: { mappa?: string | null; nome?: string | null } }> };
+  try { dati = JSON.parse(riga.json) as typeof dati; } catch { return 0; }
+  const nomi = new Map<string, string>(tabelle.has('dungeon')
+    ? (db.prepare('SELECT chiave, nome FROM dungeon').all() as Array<{ chiave: string; nome: string }>).map((d) => [d.chiave, d.nome])
+    : []);
+  const mappaEsiste = db.prepare('SELECT 1 FROM mappa WHERE chiave = ?');
+  const esiste = db.prepare("SELECT 1 FROM spillo WHERE riferimento_tipo = 'mappa' AND riferimento_chiave = ?");
+  const inserisci = db.prepare(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at)
+    VALUES (?, 'passaggio', ?, ?, ?, ?, 'mappa', ?, 0, ?, 'seed', ?)`);
+  let creati = 0;
+  for (const f of dati.finestre ?? []) {
+    const mappaPalazzo = `dungeon-${f.dungeon}`;
+    const dove = f.luogo?.mappa;
+    if (!dove || !mappaEsiste.get(dove) || !mappaEsiste.get(mappaPalazzo) || esiste.get(mappaPalazzo)) continue;
+    const quante = (db.prepare('SELECT COUNT(*) AS n FROM spillo WHERE mappa_chiave = ?').get(dove) as { n: number }).n;
+    const [x, y] = posizionePassaggio(dove, mappaPalazzo, quante, quante + 1);
+    const creato = inserisci.run(dove, nomi.get(f.dungeon) ?? f.dungeon,
+      `Ingresso nel Metaverso${f.luogo?.nome ? ` — ${f.luogo.nome}` : ''}.`,
+      Math.round(x * 10) / 10, Math.round(y * 10) / 10, mappaPalazzo, quante, t);
+    const finestra = finestraDaDate(f.dal, f.al);
+    if (finestra.length) {
+      db.prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
+        .run(JSON.stringify(finestra), Number(creato.lastInsertRowid));
+    }
+    creati += 1;
+  }
+  return creati;
 }
