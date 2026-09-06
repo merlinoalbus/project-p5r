@@ -1061,3 +1061,16 @@ directory temporanea) e confrontare integralmente chiavi, cancelli e rese col fi
 solo dopo può confrontare quel risultato indipendente con il seed e la descrizione. La
 controprova minima deve cancellare la stessa informazione da entrambi gli artefatti derivati e
 ottenere comunque exit 1.
+
+### Pre-audit Codex dei gruppi misti presenza/prerequisito
+
+La regola proposta nella bozza successiva — un gruppo nasconde solo se **tutte** le figlie sono di
+presenza — non rispetta il contratto nei gruppi misti. Esempio:
+`tutte(fascia=sera, dote=3)`. Di giorno l'entità non c'è e il pin deve sparire; di sera c'è e deve
+restare visibile anche se la dote è insufficiente. Classificare l'intero gruppo come
+«non presenza» perché contiene una dote lo lascia invece visibile anche di giorno.
+
+La soluzione robusta è proiettare l'albero logico sul sottoinsieme delle condizioni di presenza e
+valutare quello per la visibilità, mantenendo separato l'albero dei prerequisiti per la scheda. Il
+test deve coprire almeno i quattro casi fascia corretta/errata × prerequisito soddisfatto/rosso;
+la visibilità deve cambiare soltanto con la fascia.
