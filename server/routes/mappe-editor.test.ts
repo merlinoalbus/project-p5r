@@ -75,7 +75,16 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     for (const q of quartieri.filter(q=>q.entita?.tipo==='quartiere')) expect(passaggiTokyo).toContain(q.chiave);
     expect(passaggiTokyo).not.toContain('aoyama-itchome'); // Native hierarchy does not certify a transfer.
     const figlieTokyo = new Set(albero.filter((m) => m.genitore === 'tokyo').map((m) => m.chiave));
-    for (const p of passaggiTokyo) expect(figlieTokyo.has(p)).toBe(true);
+    // I Palazzi non sono figli di Tokyo: sono radici, e nel gioco ci si entra col Meta-Nav, che
+    // non lascia traccia negli script di campo. Per sei di loro il punto del mondo reale non è
+    // dichiarato da nessuna fonte, e per decisione dell'utente si agganciano alla mappa generale
+    // invece di restare irraggiungibili. Sono quindi passaggi da Tokyo verso una mappa che non è
+    // sua figlia: l'eccezione è dichiarata in `finestre-dungeon.json` con `ripiego: true`, e qui
+    // si pretende che le uniche eccezioni siano quelle — niente altro può uscire dall'albero.
+    const radiciNonTokyo = new Set(albero.filter((m) => !m.genitore && m.chiave !== 'tokyo').map((m) => m.chiave));
+    for (const p of passaggiTokyo) {
+      expect(figlieTokyo.has(p) || radiciNonTokyo.has(p), `passaggio da Tokyo verso ${p}`).toBe(true);
+    }
     const kamoshida = (await request(app).get('/api/mappe/dungeon-kamoshida')).body.data as MappaDto;
     expect(kamoshida.spilli).toHaveLength(0); // Hierarchy alone must not manufacture physical passages.
     expect(kamoshida.spilli.every((s) => s.tipo === 'passaggio' && s.dettaglio?.tipo === 'mappa' && s.x >= 0 && s.x <= 100)).toBe(true);
@@ -359,9 +368,15 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     // ogni condizione torna con il testo in italiano (nomi dalla Guida); senza partita nessuna valutazione
     expect(s.condizioni.map((c) => c.testo)).toEqual(['dal 18 giugno', 'dopo il Palazzo di Kamoshida', 'Rango Confidente Sojiro Sakura 3', 'solo domenica']);
     expect(s.disponibilita).toBeUndefined();
-    // gli spilli esistenti restano tutti senza condizioni
+    // Le condizioni appena create restano sul loro spillo e non toccano nessun altro. Il
+    // controllo era «nessuno spillo di Yongen-Jaya ha condizioni», e valeva finché la presenza
+    // dei luoghi non arrivava ai pin: ora la clinica di Takemi porta il proprio orario, che è
+    // giusto. Quel che non deve succedere è che le quattro condizioni scritte qui compaiano
+    // altrove, ed è questo che si pretende.
     const yongen = (await request(app).get('/api/mappe/citta-yongen-jaya')).body.data as MappaDto;
-    expect(yongen.spilli.every((x) => x.condizioni.length === 0)).toBe(true);
+    const estranee = yongen.spilli.flatMap((x) => x.condizioni.map((c) => c.testo))
+      .filter((t) => ['dal 18 giugno', 'dopo il Palazzo di Kamoshida', 'Rango Confidente Sojiro Sakura 3', 'solo domenica'].includes(t));
+    expect(estranee).toEqual([]);
     // validazione: condizioni non calcolabili o malformate → 400; chiavi assenti dalla Guida → 404
     const invia = (c: unknown) => request(app).post('/api/mappe/prova-condizioni/spilli').send({ tipo: 'nota', nome: 'x', x: 1, y: 1, condizioni: [c] });
     expect((await invia({ tipo: 'manuale', testo: 'dopo aver pescato' })).status).toBe(400);

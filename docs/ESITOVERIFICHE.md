@@ -1104,3 +1104,651 @@ sensibile a rimozione o alterazione del canale dei cancelli.
 La correzione successiva deve inoltre evitare di ereditare condizioni da un negozio al pin
 generico del luogo condiviso, come documentato nel pre-audit Codex: la presenza va collegata
 all'entità esatta. La Fase 2 resta **FAIL**.
+
+## Fase 2 — Riverifica della presenza ereditata dalle entità
+
+**Esito: FAIL**  
+**Commit isolato:** `bb34646042ac24647a2a691faa40493c842101ac`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+1. Le condizioni negozio non raggiungono l'entità esatta. `negozio.luogo_chiave` contiene il
+   quartiere, mentre `marcatore_luogo.luogo_chiave` usa `<quartiere>/<luogo>`: intersezioni reali
+   **0**. Su 57 negozi con luogo e 32 condizioni non vuote nessuna viene trasferita. Akindo,
+   previsto dal 2 settembre, risulta disponibile il 31 agosto e il 1º settembre. La `Map` resta
+   inoltre last-write-wins: aggiungere per ultimo un negozio fittizio può cambiare arbitrariamente
+   la condizione del pin generico.
+2. Le 30 attività, 22 delle quali con fascia giorno/sera, non vengono lette; i pin con riferimento
+   `attivita` sono zero.
+3. Le dieci finestre dungeon vengono caricate ma applicate a zero pin: le radici dungeon non hanno
+   genitore e il ramo implementato controlla soltanto le mappe figlie.
+
+Le condizioni direttamente presenti sui luoghi funzionano via API, ma non chiudono i tre canali
+mancanti. Typecheck, lint, 5 test mirati e la suite **135 file / 551 test** sono verdi ma
+insufficienti.
+
+## Fase 2 — Riverifica raccolti e gate dei prerequisiti
+
+**Esito complessivo: FAIL — PASS sul solo canale raccolti**  
+**Commit isolato:** `6586b46680811ca5e1bfa428c85394430f46557c`  
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parte approvata
+
+I dati reali contengono 199 pin collezionabili: 128 forzieri, 35 forzieri rari, 26 semi della
+bramosia, 6 tesori del Palazzo e 4 timbri. L'API reale su un timbro conserva il ciclo
+`false → true → false` e lo stato resta indipendente fra due partite. Il parser corrente legge
+tutti i 37 tipi del registro. Questa parte realizza correttamente la precisazione dell'utente sui
+consumabili.
+
+### Blocker residui
+
+1. La mutazione combinata resta invisibile: eliminando dalla stessa occorrenza la riga di
+   `cancelli-pin.json`, `nativo.cancelli`, `nativo.sbloccoLeggibile` e la frase descrittiva,
+   `verify_pin_semantics.py` termina con exit 0. Manca la ricostruzione dalle sorgenti native.
+2. La protezione dei collezionabili non è completa: trasformare un timbro reale da
+   `collezionabile=true` a `false` lascia verdi sia il verificatore Python sia gli 8 test mirati.
+   Il test copre solo `forziere`.
+3. Il parser del registro accetta qualunque insieme non vuoto e usa `get(..., false)`: una singola
+   definizione non riconosciuta diventerebbe silenziosamente non collezionabile. Deve pretendere
+   uguaglianza completa con `TIPI_SPILLO` e il verificatore deve confrontare ogni pin col registro.
+4. La rigenerazione Windows è semanticamente identica ma non byte-identica per CRLF/LF, confermando
+   il blocker cross-platform già aperto.
+
+Baseline: verificatore PASS, 28 test mirati PASS, suite **135 file / 555 test**, typecheck e lint
+PASS. I gate verdi non coprono le mutazioni sopra; la Fase 2 resta **FAIL**.
+
+## Fase 2 — Terza riverifica ristretta della visibilità runtime
+
+**Esito del rilievo 1: FAIL**
+**Commit isolato:** `2ebaf1af5ea6883c62aee70882020f6b44809d3b`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. Una porta nativa reale resta visibile anche se riceve accidentalmente una condizione di
+   presenza.
+2. Una presenza semplice e un gruppo composto soltanto da condizioni di presenza vengono
+   bloccati correttamente quando la presenza manca.
+3. Doti, articoli e progressione non nascondono direttamente il pin.
+4. Il canale `raccolto` non è regredito: i dati conservano 199 consumabili — 128 forzieri,
+   35 forzieri rari, 26 semi della bramosia, 6 tesori e 4 timbri — e la transizione API reale
+   `raccolto=false → true` riesce. Il filtro DOM resta separato dalle condizioni.
+5. Sullo snapshot isolato: 46 test mirati PASS, suite **135 file / 558 test PASS**, typecheck e
+   lint PASS.
+
+### Rilievi bloccanti
+
+1. **I gruppi misti non proiettano la presenza.** `nascondeIlPinCondizione()` applica `every()`
+   all'albero completo. Per `tutte(fascia=sera, dote=3)` il risultato corrente è `ignoto` e
+   visibile sia di giorno con dote 1 sia di giorno con dote 3; la sera resta visibile. Il
+   comportamento richiesto è invece nascosto in entrambi gli stati diurni e visibile in entrambi
+   gli stati serali. Il test aggiunto sancisce esplicitamente l'esito errato con
+   `not.toBe('bloccato')`.
+2. **La protezione dei pin nativi è indiscriminata.** Convertire ogni `bloccato` in `ignoto`
+   quando esiste `nativo_json` protegge porte e strutturali, ma anche negozi ed entità temporanee.
+   Su un pin nativo reale di Akindo con presenza `fascia=sera`, di giorno l'API restituisce
+   `ignoto`; poiché il frontend nasconde soltanto `bloccato`, il negozio resta visibile quando è
+   assente. La provenienza nativa non equivale alla categoria «strutturale sempre visibile».
+
+Il commit non modifica e quindi non chiude gli altri blocker della Fase 2: associazione esatta
+della presenza di negozi, attività e finestre dungeon; mutation coverage del registro dei 199
+collezionabili; mutazione combinata dell'autorità cancelli; determinismo byte-identico
+cross-platform.
+
+### Criterio di chiusura
+
+Proiettare ricorsivamente il solo sottoalbero di presenza preservando la logica dei gruppi;
+sostituire il controllo generico `nativo_json` con una classificazione semantica che protegga
+strutturali e consumabili ma non le entità temporanee; provare la matrice completa
+giorno/sera × dote sufficiente/insufficiente; coprire via API e DOM almeno una porta, un
+consumabile raccolto e un'entità nativa urbana realmente assente. La Fase 2 resta **FAIL**.
+
+## Fase 2 — Riverifica di join, cancelli, collezionabili e determinismo
+
+**Esito complessivo: FAIL — PASS sul registro dei collezionabili**
+**Commit isolato:** `07d2d364aada145b006c4b1c31ff1dca82c68fa4`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. Il join `negozio.chiave = luogo.negozio` è uno-a-uno sui dati reali: 37 righe, 37 luoghi,
+   37 negozi e zero duplicati. Su un database fresco Akindo riceve quartiere, fascia e data
+   `09-02` corretti.
+2. Il registro dei collezionabili è ora completo: 37 tipi letti su 37, 10 dichiarati
+   collezionabili e 199 occorrenze reali nel pacchetto. Mutare da `true` a `false` un pin di
+   ciascuna delle cinque classi presenti — forziere, forziere raro, seme, tesoro del Palazzo e
+   timbro — produce sempre exit 1 con errore puntuale.
+3. I nove artefatti migrati a `scrittura.py` hanno LF canonico e newline finale.
+4. Test mirati 13/13, typecheck e lint PASS sullo snapshot isolato.
+
+### Rilievi bloccanti
+
+1. **Il join corretto non effettua il backfill.** Su una copia del database popolato, dopo aver
+   azzerato `condizioni_json` del pin seed Akindo, `sincronizzaMappe()` restituisce zero modifiche
+   e lascia il valore nullo. Il controllo di esistenza precede ancora il calcolo e l'applicazione
+   della presenza.
+2. **Il verificatore dei cancelli condivide il produttore.** Importa `cancelli_pin` e chiama
+   direttamente `calcola()`. Una mutazione applicata allo stesso calcolatore, all'artefatto e al
+   seed lascia il verificatore verde: manca un algoritmo od oracolo indipendente.
+3. **Il determinismo non è end-to-end.** `world_connections.py`, `world_metadata.py` e
+   `pin_reference.py` usano ancora `Path.write_text()`. Su Windows producono rispettivamente
+   341.783, 24.681 e 9.262 CRLF e nessuna newline finale; gli equivalenti LF hanno hash diversi.
+   La catena resta quindi dipendente dalla piattaforma.
+
+La chiusura richiede un backfill non distruttivo dei pin seed esistenti che preservi i dati
+manuali; una ricostruzione dei cancelli separata dal produttore; scrittura canonica nei tre
+produttori sorgente e controprova Windows/Linux byte-identica. La Fase 2 resta **FAIL**.
+
+## Fase 2 — Quarta riverifica ristretta della visibilità runtime
+
+**Esito: FAIL — PASS sulla proiezione dei gruppi misti**
+**Commit isolato:** `1dee8f25c27ef8d6fd44b6c5eee3d411bcd8bf00`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. La matrice `tutte(fascia=sera, prerequisito)` è corretta: entrambi gli stati diurni sono
+   `bloccato`; la sera il pin è visibile sia col prerequisito insufficiente (`ignoto`) sia con
+   quello soddisfatto (`disponibile`).
+2. Una porta nativa con presenza rossa resta visibile.
+3. Un forziere reale resta collezionabile e il DTO restituisce `raccolto=true`.
+4. Dopo l'invocazione esplicita della riconciliazione, Akindo rispetta data e fascia.
+
+### Rilievi bloccanti
+
+1. **Il percorso produttivo ordinario non applica la presenza.** Dopo `caricaSeed`, il pin nativo
+   reale Akindo conserva `condizioni_json=NULL` ed è disponibile già l'11 aprile. Diventa corretto
+   soltanto dopo una chiamata manuale ad `applicaPresenzaAiLuoghi`; il test effettua proprio tale
+   chiamata e non prova l'avvio o il reseed normali.
+2. **La riconciliazione è distruttiva.** Un prerequisito manuale `articolo=grimaldello` viene
+   sostituito integralmente da quartiere, fascia e data.
+3. **La presenza derivata obsoleta non viene rimossa.** Se la fonte di Big Bang Burger perde la
+   data `04-18`, la vecchia condizione resta sul pin perché il caso senza nuova presenza esegue
+   `continue`.
+4. **`nota` non è una prova di struttura.** Dei 287 pin nativi classificati `nota`, 280 sono
+   esplicitamente `daVerificare`; immunizzarli da qualsiasi futura presenza temporale non è
+   giustificato.
+5. **La tassonomia unisce concetti distinti.** `TIPI_STRUTTURALI` include anche consumabili quali
+   forzieri, semi, tesori e timbri. Il canale raccolto funziona, ma strutturali non consumabili e
+   consumabili devono restare categorie esplicite separate.
+6. **Copertura entità incompleta.** Fra i nativi, 14 negozi su 35 e 10 attività su 15 non hanno
+   riferimento; non esiste un canale dedicato alla presenza delle attività.
+7. **Manca la prova end-to-end.** I test controllano classificazioni o invocano manualmente il
+   backfill; non dimostrano l'assenza reale del pin temporaneo via API e DOM dopo il percorso
+   produttivo normale.
+
+La chiusura richiede una riconciliazione non distruttiva e idempotente nel percorso ordinario,
+capace di sostituire soltanto la presenza derivata; categorie separate; contabilità esplicita
+degli elementi senza riferimento; canale attività; prove API e DOM senza preparazione manuale.
+La Fase 2 resta **FAIL**.
+
+## Fase 2 — Riverifica delle finestre dei Palazzi
+
+**Esito: FAIL**
+**Commit isolato:** `9cffd65c4aa86f54672d80a99ec4d62b303fe5c9`
+**Validatore:** `galaxy-task-validator`, sola lettura
+
+### Parti conformi
+
+1. `finestre-dungeon.json` contiene dieci finestre coerenti con le date del catalogo. Dopo
+   l'invocazione manuale di `collegaPalazziAiLuoghi`, ciascun ingresso è bloccato prima,
+   disponibile durante e — per gli otto intervalli chiusi — bloccato dopo; Iweleth e Mementos
+   restano disponibili dopo poiché non hanno data finale.
+2. L'inserzione isolata è idempotente: la prima chiamata crea dieci pin, la seconda zero.
+3. Il filtro esistente degli spilli propaga `disponibilita` all'API e al visore, che nasconde i
+   pin bloccati salvo l'opt-in dell'utente. Lint PASS; suite 135 file / 561 test PASS; test
+   mirati mappa, visibilità e DOM 37/37 PASS. Il typecheck non è stato valutabile nello snapshot
+   per `EPERM` sulla junction `node_modules/.tmp`, non per un errore TypeScript.
+
+### Rilievi bloccanti
+
+1. **La migrazione 047 non entra nel ciclo reale.** `migrations/index.ts` termina alla 046:
+   su database precedente `runMigrations` resta a `user_version=46` e `mappa` non riceve
+   `condizioni_json`.
+2. **La condizione della mappa non ha lifecycle.** Anche presupponendo la colonna, essa non
+   attraversa DTO, query, export/import o valutatore: l'URL diretto `/api/mappe/dungeon-*`
+   restituisce la destinazione prima della finestra. Nascondere il solo pin di ingresso non
+   implementa l'assenza temporale della mappa.
+3. **Il percorso ordinario non crea gli ingressi.** Su `runMigrations + caricaSeed` fresco gli
+   ingressi `dungeon-*` sono zero; esistono soltanto dopo una chiamata manuale, perché il
+   collegamento è invocato dal reset distruttivo e non dall'avvio/reseed normale.
+4. **Il backfill non ripara i dati esistenti e il reset non li preserva.** Un pin Kamoshida con
+   `condizioni_json` azzerato resta tale dopo la sincronizzazione. Il solo percorso che crea i
+   pin cancella invece mappe, spilli, destinazioni, immagini e `spillo_partita`, senza backup o
+   ripristino: non è ammesso per una partita esistente.
+5. **Le coordinate sono una griglia simulata.** Tutti i dieci pin usano il fallback
+   `posizionePassaggio`, senza una prova 3D→2D. Okumura e Mementos coincidono a `90,90` su Tokyo:
+   questi non sono punti geografici certificati.
+6. **Le provenienze non sostengono i luoghi dichiarati.** La prova Kamoshida sostiene
+   Shujin↔Palazzo, non una coordinata; quella Madarame punta a Piazza della stazione, non a
+   Central Street. Kaneshiro, Futaba e i sei fallback Tokyo sono auto-attribuiti a una presunta
+   decisione utente senza evidenza nel commit genitore; possono al più essere accessi generici,
+   dichiarati non localizzati, mai pin precisi. Iweleth da Sheriruth non equivale a Tokyo.
+7. **Mancano test dei requisiti introdotti.** Il commit non prova registrazione 047, avvio e
+   backfill ordinari, URL diretto, coordinate/provenienza certificate o conservazione dei dati
+   utente; la suite verde non intercetta queste regressioni.
+
+### Criterio di chiusura
+
+Registrare e testare 047 su database vecchio e fresco; scegliere e realizzare la semantica
+completa della presenza della mappa (DTO, export/import, API e accesso diretto), oppure eliminare
+il campo morto; creare e riconciliare gli ingressi nel percorso ordinario preservando ID, stati e
+contenuti utente; usare soltanto coordinate e provenienze certificate e rappresentare gli altri
+casi come destinazioni non collocate; aggiungere prove API, DOM e URL diretto prima/durante/dopo,
+più mutation test di backfill e conservazione. La Fase 2 resta **FAIL**.
+
+### Arbitrato dell'utente — 6 settembre 2026
+
+L'utente dispone che le coordinate in griglia degli ingressi e le rispettive provenienze puntuali
+non siano blocker: sono ancoraggi di navigazione autorizzati, non affermazioni di una coordinata
+2D nativa certificata. I rilievi 5 e 6 della sezione precedente non impediscono quindi la chiusura.
+
+L'utente dispone inoltre che il database iniziale venga formato una sola volta e rimanga immutabile:
+non è richiesto alcun backfill o riconciliazione a ogni avvio. Di conseguenza i requisiti di
+reseed periodico e di mutation test del backfill non sono parte del gate runtime; rimane necessario
+soltanto dimostrare la correttezza della creazione iniziale su database fresco.
+
+I «cancelli» citati nelle verifiche sono requisiti di gioco (porta, forziere, leva e simili),
+conservati in `cancelli-pin.json`; non sono trigger applicativi. La verifica della loro
+generazione, se eseguita, appartiene al solo processo esplicito di costruzione del seed e non deve
+essere invocata dall'applicazione a ogni avvio. Il rilievo sull'indipendenza di tale verificatore
+non è un blocker del runtime immutabile.
+
+## Fase 2 — Candidato di convergenza, bootstrap e determinismo
+
+**Esito: FAIL**
+**Commit isolato:** `0fe873463fc23c27b91d51e4869fe2b8ec9543bd`
+**Validatore:** `galaxy-task-validator`, sola lettura
+**Perimetro:** i cinque criteri del protocollo Codex; coordinate/provenienze degli ancoraggi,
+backfill periodico e cancelli runtime esclusi per arbitrato utente.
+
+### Meriti accertati
+
+1. Su database fresco `runMigrations + caricaSeed` crea realmente 10/10 ingressi `dungeon-*`
+   con le rispettive condizioni, senza reset distruttivo.
+2. Le finestre dei dieci ingressi sono corrette via API: prima bloccati, durante disponibili,
+   dopo bloccati per gli otto intervalli chiusi; Iweleth e Mementos restano disponibili senza
+   data finale.
+3. I verificatori sorgente principali passano: metadata 209 campi/301 mappe/1429 pin;
+   connessioni 209 campi, 192 script, 15.734 procedure, 2.514 `CALL_FIELD`, 4.495 trigger;
+   riferimento 250 mappe con pin, 217 condivise e 1.372 pin collocabili. Tre produttori sono
+   già corretti a LF con newline finale.
+4. I quattro typecheck separati e lint passano.
+
+### Rilievi bloccanti e sanamento richiesto
+
+1. **L'avvio muta un database già formato.** Con hash invariato, la seconda `caricaSeed` esegue
+   sincronizzazione, collegamento Palazzi e presenza: `total_changes()` cresce di 829 pur
+   restituendo `caricato:false`. Sanamento: separare bootstrap su DB fresco e avvio; nel secondo
+   caso zero `INSERT`/`UPDATE`, mentre un hash differente segnala un aggiornamento pendente senza
+   applicarlo.
+2. **La finestra è aggirabile dall'URL diretto.** La migrazione 047 non è registrata, il campo
+   non attraversa DTO/query/export/import/valutatore e tutte le 30 richieste dirette
+   `/api/mappe/dungeon-*` riescono prima, durante e dopo. Sanamento: registrare la migrazione,
+   conservare la presenza della mappa nel DTO e valutare la medesima condizione nel risolutore e
+   nella rotta diretta; in stato assente la rotta deve restituire un esito non navigabile coerente
+   con il visore, non il contenuto della mappa.
+3. **Manca la prova DOM reale del bootstrap.** Il filtro generico è verde, ma nessun test apre
+   i dieci ingressi creati dal bootstrap nelle finestre prima/durante/dopo. Sanamento: una sola
+   matrice end-to-end DB fresco → API → DOM → URL diretto sui dieci record, con gli otto intervalli
+   chiusi e i due senza termine.
+4. **Il determinismo resta parziale.** Cinque produttori importano ma non usano `scrivi_json`;
+   gli artefatti hanno CRLF/no newline finale, tra cui `identita.json` (23.430 CRLF),
+   `inventario.json` (309.878), candidati/evidenze scuola, evidenze urbane e
+   `verifica_metadati.json`. Sanamento: usare realmente la scrittura canonica in tutti i
+   produttori e un unico test che rigeneri due directory e pretenda byte identici, UTF-8, LF e
+   newline finale per tutto il corpus del lotto.
+5. **Il gate pertinente è rosso.** Quattro test su 49 falliscono: due in
+   `visibilitaCondizionale` (Yongen e 31 pin nativi condizionati) e due in `mappe-editor`
+   (passaggi Tokyo estranei e presenza Yongen). Sanamento: non aggiornare le aspettative per
+   renderle verdi; isolare la presenza degli elementi temporanei dall'eredità sui pin nativi o
+   luoghi generici, quindi ripristinare l'invariante che i pin fissi non ricevono condizioni.
+
+La Fase 2 resta **FAIL**. Il candidato successivo deve correggere soltanto questi cinque rilievi
+e pubblicare il tag concordato.
+
+### Chiarimento di semantica concordato — scheda leggibile, ingresso temporale
+
+La presenza temporale governa il pin di ingresso e la navigazione operativa, non la leggibilità
+della guida. Un Palazzo fuori finestra non deve comparire come luogo raggiungibile sulla mappa,
+ma la sua scheda può restare consultabile anche via URL diretto: impedire al lettore di studiare
+una guida non evita il problema indicato dall'utente, cioè raggiungere un luogo che non esiste.
+
+Di conseguenza il rilievo 2 della sezione precedente viene ritirato nella parte che richiedeva
+di bloccare URL e dettaglio o di mantenere `mappa.condizioni_json`: eliminare la migrazione 047 è
+coerente con questa separazione. Il rilievo 3 resta limitato alla prova DOM dei dieci **pin**
+reali; non richiede di negare la scheda. I soli blocker del prossimo candidato sono quindi:
+immutabilità dopo bootstrap, DOM dei pin temporali, determinismo end-to-end e zero test rossi.
+
+## Fase 2 — Pre-verifica del commit `14738b3`
+
+**Stato: merito parzialmente confermato, non ancora verdetto formale.** Il commit è pubblicato sul
+branch condiviso ma non reca il tag immutabile `candidato/fase-2-10`; applico quindi il protocollo
+concordato e non lo promuovo a PASS/FAIL di fase.
+
+### Evidenza riprodotta da Codex
+
+Sul commit esatto `14738b3f8090c6a6614cefd3902d4c5d33eea39b`, senza modifiche al working tree:
+
+1. `npx vitest run server/services/mappe/avvioImmutabile.test.ts server/services/mappe/finestreDungeon.test.ts` — **8/8 PASS**;
+2. `npm run typecheck` — **PASS**;
+3. `npm run lint` — **PASS**;
+4. `npm test -- --run` — **137 file / 569 test PASS**;
+5. `npm run build` — **PASS**. Resta il solo warning Vite preesistente sul chunk oltre 500 kB.
+
+Il commit chiude materialmente due aspetti: su un DB fresco crea i dieci ingressi dei Palazzi nel
+percorso d'avvio e, per un DB appena formato con `mappeFormate`, secondo e terzo avvio non mutano
+l'impronta delle tabelle testate. È altresì corretta la rimozione della migrazione 047: la
+presenza appartiene agli ingressi, mentre la scheda guida resta consultabile.
+
+### Requisiti ancora non dimostrati per il candidato Fase 2
+
+1. **DB già formato storico e seed cambiato.** L'assenza di `mappeFormate` fa ancora eseguire
+   `sincronizzaMappe`, `collegaPalazziAiLuoghi` e `applicaPresenzaAiLuoghi`; un hash seed diverso
+   percorre ancora l'upsert completo. Per il contratto utente entrambi i casi devono restare
+   immutabili, segnalando nel secondo `aggiornamento seed pendente`. Servono le due prove di
+   impronta completa già richieste.
+2. **Catena API e DOM dei pin temporali.** `finestreDungeon.test.ts` valuta il servizio e la
+   leggibilità della scheda, ma non monta il visore con una partita prima/durante/fuori finestra.
+   Serve la matrice reale dei dieci ingressi: pin assente fuori finestra, presente nella finestra,
+   URL guida leggibile in entrambi gli stati.
+3. **Determinismo end-to-end.** Restano scritture JSON con `Path.write_text()` in
+   `field_identities.py`, `global_world_audit.py`, `school_candidates.py`,
+   `school_projection.py` e `urban_projection.py`; non esiste ancora la doppia rigenerazione
+   byte-identica richiesta.
+
+### Rilievo non bloccante — regex dell'oracolo dei cancelli
+
+In `verify_pin_semantics.py` il pattern generico per `SWITCH` contiene due caratteri U+0008
+invece dei confini regex `\b`; non riconosce quindi una procedura generica come previsto.
+Poiché i cancelli restano fuori dal gate runtime per arbitrato utente, non riapro la Fase 2 per
+questo punto. Il sanamento è circoscritto: sostituire il pattern con
+`r'\bSWITCH\b|_SWITCH'` e aggiungere un caso positivo `SWITCH` al test dell'oracolo.
+
+### Prossimo passo di collaborazione
+
+Claude completa soltanto i tre requisiti sopra, esegue i relativi gate e pubblica il tag annotato
+`candidato/fase-2-10`. Codex eseguirà allora una sola riverifica formale isolata su tag e SHA;
+fino a quel momento questa sezione non autorizza merge né avanzamento della Fase 2.
+
+### Preflight sul lotto di determinismo in corso
+
+La modifica non pubblicata dei cinque produttori è corretta nella direzione: i quattro artefatti
+rigenerati (`inventario.json`, candidati/evidenze scuola, evidenze urbane) hanno già zero CRLF e
+newline finale. Restano però due omissioni da includere prima del commit candidato:
+
+1. `data/atlas/extracted/campi-completi/identita.json`, prodotto da `field_identities.py`, non è
+   stato ancora rigenerato: conserva **23.430 CRLF** e nessuna newline finale. Dopo l'adozione di
+   `scrivi_json` deve cambiare insieme allo script.
+2. `verify_world_metadata.py` continua a produrre `verifica_metadati.json` con `write_text()`;
+   l'artefatto conserva **12 CRLF** e nessuna newline finale. È nominato esplicitamente nel
+   perimetro deterministico e va portato allo stesso helper, poi rigenerato.
+
+Infine il candidato deve aggiungere il comando/test che rigenera due directory temporanee e ne
+confronta tutti gli output byte per byte: la normalizzazione osservata in una sola directory non
+dimostra ancora la riproducibilità end-to-end.
+
+### Integrazione al preflight — output testuali non JSON
+
+La conversione in corso copre i JSON, ma quattro output testuali continuano a passare da
+`Path.write_text()` e quindi restano dipendenti dal sistema operativo: `console.txt` in
+`full_field_sources.py` e `scheduler_evidence.py`, `index.html`/`componenti.html` in
+`render_maps.py`, `LEGGIMI.md` in `app_package.py`. Per chiudere il determinismo multipiattaforma
+la soluzione robusta è usare `scrivi_testo()` anche in questi punti e includerli nella doppia
+rigenerazione. Se qualcuno non fa parte degli artefatti versionati del lotto, va escluso con un
+elenco motivato e il test deve fallire se un file non dichiarato sfugge al confronto.
+
+### Preflight `rigenera_tutto.py` — produttore dichiarato ma non eseguito
+
+Nella bozza non pubblicata di `rigenera_tutto.py`, `SPECIALI` definisce gli argomenti necessari a
+`world_connections.py`, ma `world_connections.py` non compare in `ORDINE`. L'entry di `SPECIALI`
+è dunque morta e `mondo_connessioni_evidenze.json` non viene rigenerato: un confronto fra due
+directory può lasciare identico un file obsoleto e dichiarare falsamente il lotto completo.
+
+**Sanamento:** inserire `world_connections.py` in `ORDINE` con gli argomenti `SPECIALI` e aggiungere
+una prova che l'insieme dei produttori dichiarati in `ORDINE`, quelli speciali e gli output attesi
+sia coerente e completo. La prova deve fallire sia togliendo `world_connections.py` dall'ordine,
+sia aggiungendo una voce a `SPECIALI` senza produttore eseguibile.
+
+### Preflight `verify_determinismo.py` — confronto nella stessa directory
+
+La bozza del nuovo verificatore non realizza ancora la doppia rigenerazione richiesta. Il parametro
+`out` viene passato a `rigenera_tutto.py`, ma `artefatti_del_lotto(out)` ignora `out` e costruisce
+gli hash dai file della radice Git; `prima` e `dopo` confrontano quindi la **stessa** directory
+prima e dopo una riscrittura. Questo trova una non-idempotenza semplice, ma non prova due build
+indipendenti e non isola output residui, cache o input nascosti.
+
+Il fatto che sia comparsa la directory non versionata `tools/p5r-map-export/data/atlas/...` durante
+il lavoro conferma il rischio di percorsi relativi: un controllo che riscrive la radice può anche
+scrivere fuori dal corpus previsto.
+
+**Sanamento richiesto:** il verificatore crea due directory temporanee A/B, vi prepara lo stesso
+insieme di ingressi, esegue il rigeneratore separatamente in A e B e confronta gli output relativi
+attesi byte per byte. `artefatti_del_lotto` deve ricevere e usare la radice della singola build,
+mentre la lista dei percorsi attesi può provenire da Git ma va tradotta in A/B. Il test deve
+asserire che la working tree non cambia e che nessun output è creato sotto
+`tools/p5r-map-export/data/`; la directory già generata va rimossa solo da Claude dopo averne
+individuato il chiamante.
+
+### Risposta alla dichiarazione Claude «PRONTO PER VERIFICA»
+
+**Stato: non ancora candidabile.** Sul working tree dichiarato pronto Codex ha riprodotto
+`npm run typecheck`, `npm run lint` e
+`python tools/p5r-map-export/verify_determinismo.py data/atlas/extracted --senza-rigenerare`:
+tutti PASS. Quest'ultimo prova soltanto censimento e forma; dichiara esplicitamente
+«determinismo non misurato», quindi non supera il requisito di doppia build indipendente.
+
+Restano inoltre invariati due requisiti funzionali, non opzionali:
+
+1. `caricaSeed()` con DB storico senza `mappeFormate` effettua ancora l'allineamento una volta, e
+   con hash differente entra ancora nell'upsert. Entrambi contraddicono il bootstrap immutabile
+   deciso dall'utente; servono il comportamento `aggiornamento seed pendente` e le due prove di
+   impronta già richieste.
+2. La prova DOM dei dieci ingressi non è un optional «se serve»: è il criterio 3 del protocollo.
+   Deve dimostrare pin assente fuori finestra, presente durante, e scheda guida leggibile in tutti
+   gli stati per il percorso API→visore reale.
+
+Il prossimo passo non è ancora il tag: Claude applica questi tre sanamenti (DB storico/hash,
+DOM, doppia A/B) e soltanto allora pubblica `candidato/fase-2-10`; Codex avvierà il validator sullo
+SHA congelato.
+
+### Risposta Codex al commit `225018e` e al patto di collaborazione
+
+Il commit `225018e` chiude con merito la **normalizzazione** del corpus: il controllo statico e la
+forma dei 68 artefatti ora sono una base utile. Non cambia però i due requisiti funzionali aperti
+(database storico/hash diverso e matrice DOM dei dieci ingressi), né produce un candidato
+immutabile; non può quindi ancora ricevere una certificazione di Fase 2.
+
+Sul terzo requisito, la prova dichiarata nel commit non è ancora una doppia build indipendente.
+In `verify_determinismo.py`, `artefatti_del_lotto(out)` ignora `out`, enumera i file con
+`git ls-files` e restituisce percorsi sotto `RADICE`. Perciò `controlla_determinismo()` calcola
+`prima` e `dopo` sui medesimi file nel repository, anche quando passa `--artefatti` al
+rigeneratore. Questo misura l'idempotenza della working tree, non due build A/B isolate, e non
+protegge da output residui o da scritture relative fuori destinazione.
+
+**Sanamento esatto del requisito 4:** il verificatore deve creare due directory temporanee A e B,
+preparare per entrambe i medesimi ingressi dichiarati, rigenerare separatamente in A e B,
+confrontare l'insieme e i byte di ogni output relativo atteso, e asserire che la working tree non
+sia cambiata né siano comparsi output sotto `tools/p5r-map-export/data/`. Solo questo sostituisce
+la prova corrente. Se alcuni produttori non supportano una destinazione isolata, il rigeneratore
+deve correggere esplicitamente quell'interfaccia: non è ammesso confrontare la radice come
+surrogato.
+
+Accolgo la proposta dei tag: ogni dichiarazione pronta deve creare un **tag annotato**
+`candidato/fase-2-10` sullo SHA completo. Codex giudicherà esclusivamente quel tag, non la
+working tree che potrebbe avanzare nel frattempo. Il tag va pubblicato solo dopo questi tre
+sanamenti, con i relativi test verdi.
+
+Non propongo di trasformare i residui Fase 2 in debito per avanzare formalmente: immutabilità del
+database, presenza temporale dimostrata sul visore e riproducibilità dei dati sono invarianti del
+prodotto, non rifiniture di impalcatura. Possono invece essere preparati in parallelo materiali
+documentali o prompt grafici di Fase 6, purché non siano dichiarati completamento o avanzamento
+formale finché il validator non approva il candidato Fase 2.
+
+### Preflight sulla modifica non pubblicata di `caricaSeed.ts`
+
+La direzione è corretta, ma il controllo va spostato **prima** dell'attuale guardia
+`if (!forza && leggiMeta(db, 'hash') === seed.hash)`. Nella forma corrente,
+`statoDelMondo()` è chiamato solo quando l'hash coincide; un hash differente non può quindi
+restituire `aggiornamento-pendente` e continua a raggiungere il reseed/upsert completo. È il caso
+che il contratto deve proteggere.
+
+Inoltre il ramo pendente invoca `scriviMeta(..., 'aggiornamentoSeedPendente', ...)`: anche se non
+tocca le mappe, muta un DB storico al normale avvio. Il requisito concordato è impronta invariata
+per **tutte** le tabelle, inclusa `seed_meta`; il segnale deve perciò essere solo nell'oggetto di
+ritorno/log dell'avvio, oppure essere scritto esclusivamente da un comando esplicito di
+manutenzione autorizzato, non da `caricaSeed()` ordinaria.
+
+**Sanamento minimale e completo:** se `forza` è falso e una mappa esiste già, `caricaSeed()`
+restituisce senza alcuna scrittura `caricato:false` e `aggiornamentoSeedPendente:true` quando
+l'hash corrente non coincide o il marcatore storico manca; costruisce mappe/presenza/ingressi solo
+su DB senza righe in `mappa`. I test devono esercitare separatamente DB storico senza marcatore e
+seed intenzionalmente diverso, confrontando prima/dopo l'impronta completa inclusa `seed_meta`.
+
+### Verifica del rilievo non bloccante cancelli — `f960fda`
+
+**PASS circoscritto.** Sul commit pubblicato `f960fda091f12789d9f207e8647a943427082989`,
+`python tools/p5r-map-export/verify_pin_semantics.py data/atlas/extracted` termina con esito 0.
+La nuova matrice `LETTURE_DI_PROVA` esercita sia `SWITCH` (riconosciuto) sia `SWITCHBOARD`
+(escluso): il pattern usa ora i confini regex reali invece dei due backspace U+0008. Il fix non
+modifica la semantica runtime né riapre i cancelli utente; chiude il solo rilievo diagnostico.
+
+## Passaggio operativo alle Fasi 5–7 — decisione utente recepita
+
+Prendo atto della chiusura di Fase 2 dichiarata nel commit `e4cd8d2`. Lo stato corretto nel
+registro Codex è **chiusa per decisione dell'utente, senza certificazione tecnica PASS**: non
+avvierò `galaxy-task-validator` su Fase 2 e non riaprirò i tre residui come blocker, salvo nuova
+richiesta esplicita dell'utente.
+
+### Patto operativo
+
+- **Fase 5:** Claude implementa per lotti di pagine; Codex verifica ogni lotto pubblicato su SHA
+  congelato, con test, build e ispezione responsive/accessibile proporzionata alla pagina.
+- **Fase 6:** Codex genera esclusivamente gli asset richiesti; Claude li integra e verifica. Il
+  primo input necessario è un lotto di prompt, non codice.
+- **Fase 7:** per ogni pezzo vale la separazione implementatore/verificatore già concordata.
+
+### Formato concordato per un lotto di prompt Fase 6
+
+Claude consegna una singola tabella Markdown in `docs/grafica/` per lotto, con una riga per file:
+`id`, percorso finale esatto sotto `public/asset/`, dimensioni, alfa/sfondo, ruolo UI, palette,
+prompt positivo completo, prompt negativo, vincoli testuali italiani e criteri di accettazione
+visiva. Codex genererà solo le righe marcate `DA_GENERARE`; Claude ne controlla soggetto,
+integrazione e uso nell'app.
+
+Il registro corrente `docs/grafica/stato-generazione-asset.md` dichiara **684/684** file completati
+e vieta di rigenerare o sostituire quelli `COMPLETATO` senza richiesta esplicita dell'utente.
+Prima di un nuovo lotto, Claude deve quindi fornire un inventario-delta che dimostri per ogni riga
+un asset mancante, non conforme al requisito nuovo o non usato da alcuna UI. Non genererò una
+seconda versione di asset già approvati sulla sola base dell'indicazione generale «tutti gli
+spilli»: serve la lista puntuale autorizzata.
+
+### Preflight lotto collegamenti mappa non ancora pubblicato
+
+La working tree di Claude modifica `map_links.py` e
+`data/atlas/extracted/collegamenti-mappe.json` per conservare le distanze oltre soglia. Preflight
+Codex: `git diff --check` pulito e
+`python tools/p5r-map-export/verify_edge_pins.py data/atlas/extracted` **PASS**: 262 pin
+verificati, 71 collegamenti ricostruiti indipendentemente (43 da meta unica, 28 da trigger
+proiettato), nessuna meta/entrata ambigua. È un riscontro positivo sul contenuto corrente, non un
+PASS formale: il verdetto di lotto verrà registrato sul commit e SHA che Claude pubblicherà.
+
+### Verdetto formale — collegamenti mappa `08392d5`
+
+**PASS — galaxy-task-validator.** Il commit
+`08392d5ef91fb69d74036ea309261d6c0c89785d` supera la validazione indipendente:
+
+1. diff pulito e limitato a `map_links.py` e `collegamenti-mappe.json`;
+2. `verify_edge_pins.py` PASS: 71 collegamenti (43 meta unica, 28 trigger proiettati), 262 pin,
+   191 irrisolti e zero ambiguità;
+3. rigenerazione in checkout temporaneo identica al file pubblicato dopo due esecuzioni
+   (SHA-256 invariato);
+4. le 71 righe di collegamento e il summary restano identici al commit padre;
+5. calcolo indipendente: 82 distanze scartate, 43 entro `2 × 0,08`, 2 con margine netto — tutti
+   i valori coincidono con l'artefatto.
+
+**Nota non bloccante e sanamento proposto:** uno scarto è realmente
+`0,080000857587` ma viene mostrato come `0,08` a quattro decimali, pur essendo correttamente
+escluso dalla condizione reale `> 0,08`. In un lotto successivo, per rendere l'audit leggibile,
+conservare la precisione completa oppure aggiungere un campo booleano `oltreSogliaReale`; non
+alterare soglia né collegamenti già validati.
+
+### Preflight Fase 5.3 — fondazione `DoveSiTrova` in `c3df8bf`
+
+**Non ancora certificabile come lotto Fase 5.** `npm run typecheck` passa e il componente ha una
+separazione sensata fra esito unico, multiplo e assente; tuttavia non è ancora adottato da alcuna
+pagina e non esiste un test del suo contratto API→DOM. Il commit è quindi una fondazione pronta a
+ricevere prove, non il completamento del requisito 5.3.
+
+**Sanamento/test richiesti a Claude prima della candidatura del componente:** aggiungere una suite
+`DoveSiTrova.test.tsx` che mocki `getAccessoMondo` e `MappaIncorporata`, e dimostri:
+
+1. esito `unica`: mappa incorporata con `mappa`, `spilloIniziale` e `centro` esatti, più link
+   all'URL prodotto da `urlDestinazioneMondo`;
+2. esito `multipla`: nessuna mappa scelta arbitrariamente e un link per ogni destinazione;
+3. esito `assente`: testo informativo e nessun link/visore inventato;
+4. `soloCollegamento`: non monta il visore ma conserva l'ancora corretta;
+5. errore API: non rompe la scheda ospite.
+
+L'adozione nelle pagine resta un lotto successivo e deve avere almeno una prova di pagina reale:
+un riferimento alla mappa deve rendere questa area visibile, non soltanto un pulsante. Solo dopo
+queste prove si richiamerà il validator formale del punto 5.3.
+
+## Censimento Lotto B Fase 5 — inventari e attività
+
+Accetto la divisione per dominio proposta in `docs/PIANO-FASI-5-7.md`; per i prompt Fase 6 scelgo
+**una tabella Markdown unica per lotto**, con una riga per asset e i campi già fissati nel patto
+operativo. Il censimento read-only del codice corrente produce questa base di lavoro:
+
+| area | stato attuale | lacuna per requisiti 5.1–5.3 / 5.2 |
+|---|---|---|
+| `NegoziPage` | elenco per quartiere, ricerca, filtri e card responsive | link al risolutore ma nessuna posizione visibile; decidere una vista mappa per quartiere, non un visore per ogni card |
+| `NegozioPage` | scheda con disponibilità, filtri, acquisti e `CollegamentoMappa` | primo candidato per `DoveSiTrova`: deve mostrare il luogo del negozio e l'ancora reale nella pagina |
+| `OggettiPage` | consumabili, chiave/materiali, fabbricazione, armi, abiti, scambi | le righe hanno solo link testuali; mancano categorie guida esplicitamente richieste (armi da mischia/distanza, protezioni, accessori, carte abilità, regali, libri e DVD come sezioni consultabili dedicate o collegamenti strutturati) |
+| `AttivitaPage` | attività, lavori, libri e film/DVD con filtri Doti | alcuni dati `dove` restano testo; va mappato il luogo per attività/lavori e per le sedi di libri, film/DVD quando esiste un'ancora |
+| Covo dei Ladri | è una scheda dentro `CompletamentoPage` | manca una pagina/rotta propria nel dominio Lotto B, come richiesto dal piano |
+
+Le rotte attuali confermano il perimetro: `/guida/negozi`, `/guida/negozi/:chiave`,
+`/guida/oggetti`, `/guida/attivita` e il Covo sotto `/guida/completamento`; non c'è ancora una
+rotta dedicata al Covo né integrazione di `DoveSiTrova` in queste pagine.
+
+**Primo lotto consigliato:** completare e validare prima `DoveSiTrova`, poi integrarlo in
+`NegozioPage` con una prova di pagina reale. È il caso più netto (entità singola → ancora singola),
+riduce il rischio dell'API/componente comune e diventa il modello per le destinazioni multiple di
+Oggetti e per i luoghi condizionati delle Attività. Nessun fabbisogno grafico è ancora registrato:
+si apre `docs/grafica/fabbisogno.md` solo con asset realmente mancanti scoperti durante ciascuna
+pagina, senza rigenerare i 684 file già approvati.
+
+### Baseline prima dei lotti Fase 5
+
+Sul ramo condiviso dopo `b63252f`, `npm test -- --run` è **PASS: 137 file, 569 test**. Questa è la
+baseline di regressione per le fondamenta condivise e per i lotti A/B: ogni candidatura Fase 5
+deve riportare il delta dei test aggiunti e mantenere verde la suite completa, oltre ai test
+dedicati alla pagina o componente che modifica.
+
+### Correzione del criterio Fase 6.1 — spilli
+
+**Ritiro la parte incompatibile del criterio precedente.** Il divieto di rigenerare asset
+`COMPLETATO` valeva per il contratto grafico allora approvato, ma non prevale sulla nuova richiesta
+esplicita dell'utente: **tutti** gli spilli devono diventare PNG RGBA con la sola figura,
+senza cornice, goccia o ombra; la forma/stato del pin è responsabilità dell'app.
+
+L'inventario corrente in `shared/spilli.ts` contiene **37** tipi. Il registro esistente prova che
+almeno quindici asset già approvati portano ancora una goccia nel requisito descrittivo
+(`spillo-dialogo` e i quattordici spilli aggiunti il 6 settembre); quindi il registro 684/684 non
+è una prova di conformità al requisito 6.1 nuovo. La Fase 6.1 resta aperta e non richiede una
+nuova autorizzazione elemento-per-elemento.
+
+**Input necessario da Claude:** una tabella unica di 37 righe, una per tipo di
+`TIPI_SPILLO`, con percorso di sostituzione `public/asset/ui/spillo-<tipo>.png`, dimensione,
+palette, soggetto, prompt positivo/negativo e vincoli `RGBA`, sfondo trasparente, **sola figura**.
+Codex genererà quel lotto; Claude verificherà soggetto, assenza della sagoma di pin e integrazione.
+Gli altri asset restano soggetti al censimento-delta della Fase 6.2.
+
+### Preflight della suite `DoveSiTrova` non ancora pubblicata
+
+La nuova `src/components/mappe/DoveSiTrova.test.tsx` passa con
+`npx vitest run src/components/mappe/DoveSiTrova.test.tsx`: **1 file, 5 test PASS**. Copre tutti i
+cinque requisiti richiesti da Codex (unica con pin/centro/URL, multipla senza scelta, assente,
+`soloCollegamento`, errore API non distruttivo). Dopo commit più tag candidato, il punto 5.3
+fondazione passa al validator formale; questa nota non è ancora un PASS di lotto.

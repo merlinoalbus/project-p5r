@@ -80,6 +80,43 @@ export function nascondeIlPin(tipo: string): boolean {
   return (CONDIZIONI_DI_PRESENZA as readonly string[]).includes(tipo);
 }
 
+/** La parte di una condizione che riguarda la presenza, isolata dal resto.
+ *
+ * Serve perché una condizione può mescolare le due cose, e allora non basta chiedersi «questa è
+ * una presenza?»: bisogna chiedersi «che cosa dice, di presenza?». Il caso che conta è
+ * `tutte(fascia sera, dote 3)`: il negozio apre solo di sera **e** vuole una dote. Di giorno il
+ * negozio non c'è, dote o non dote, e il pin deve sparire. Trattare il gruppo come «misto, quindi
+ * non nascondo» lo lasciava visibile di giorno, che è la cosa che si vuole evitare.
+ *
+ * La proiezione tiene solo i rami di presenza:
+ *
+ * - una condizione di presenza resta sé stessa;
+ * - un prerequisito sparisce (`null`): non dice nulla sulla presenza;
+ * - in un `tutte` restano i rami che dicono qualcosa — se tutti tacciono, tace anche il gruppo;
+ * - in un `almeno-una` basta **un** ramo che tace perché il gruppo taccia: la cosa potrebbe
+ *   esserci per quella strada, e non si può concludere che manchi;
+ * - `non` segue ciò che nega.
+ *
+ * Quel che resta si valuta come una condizione qualsiasi: se è rossa, la cosa in quel momento non
+ * c'è, e il pin sparisce.
+ */
+export function proiezioneDiPresenza<T extends { tipo: string; condizioni?: T[]; condizione?: T; modo?: string }>(c: T): T | null {
+  if (c.tipo === 'gruppo') {
+    const figlie = (c.condizioni ?? []).map((f) => proiezioneDiPresenza(f));
+    if (c.modo === 'almeno-una') {
+      return figlie.some((f) => f === null) ? null
+        : { ...c, condizioni: figlie as T[] };
+    }
+    const tenute = figlie.filter((f): f is T => f !== null);
+    return tenute.length ? { ...c, condizioni: tenute } : null;
+  }
+  if (c.tipo === 'non') {
+    const dentro = c.condizione ? proiezioneDiPresenza(c.condizione) : null;
+    return dentro ? { ...c, condizione: dentro } : null;
+  }
+  return nascondeIlPin(c.tipo) ? c : null;
+}
+
 export const SCELTE_CONDIZIONE = [
   { chiave: 'data', nome: 'Da una data in avanti' },
   { chiave: 'intervallo', nome: 'Solo in un periodo' },

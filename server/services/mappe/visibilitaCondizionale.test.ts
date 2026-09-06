@@ -16,12 +16,15 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import path from 'node:path';
-import { closeDb, initDb, getDb } from '../../db/dbService.js';
+import { closeDb, initDb, getDb, prepared } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from '../seed/caricaSeed.js';
 import { sincronizzaMappe } from './sincronizzaMappe.js';
+import { applicaPresenzaAiLuoghi } from './presenzaEntita.js';
 import { nascondeIlPin } from '../../../shared/condizioniSpillo.js';
+import { eStrutturale } from '../../../shared/spilli.js';
 import { valutaRequisitiSpillo } from '../disponibilitaService.js';
+import { dettaglioMappa } from './mappeService.js';
 
 const DIR_SEED = path.join('data', 'seed');
 
@@ -50,16 +53,39 @@ describe('visibilità condizionale dei pin', () => {
     }
   });
 
-  it('un quartiere disponibile dall’inizio non nasconde niente', () => {
-    for (const s of condizioniDi('citta-yongen-jaya')) expect(s.condizioni).toEqual([]);
+  it('un quartiere disponibile dall’inizio non aggiunge la propria condizione', () => {
+    // Yongen-Jaya c'è dal primo giorno: nessuno dei suoi pin deve portare `quartiere`. Quel che
+    // può portare è la fascia oraria del singolo locale — la clinica di Takemi, di sera, è
+    // chiusa: quella è presenza del locale, non del quartiere. Il test chiedeva «nessuna
+    // condizione», e passava soltanto finché la presenza dei luoghi non arrivava fino ai pin.
+    // Adesso ci arriva, ed è la cosa giusta: qui si pretende che sia solo presenza e mai il
+    // quartiere, che è più stretto di prima, non più largo.
+    for (const s of condizioniDi('citta-yongen-jaya')) {
+      expect(s.condizioni, s.nome).not.toContainEqual({ tipo: 'quartiere', quartiere: 'yongen-jaya' });
+      for (const c of s.condizioni) {
+        expect(nascondeIlPin((c as { tipo: string }).tipo), `${s.nome}: ${JSON.stringify(c)}`).toBe(true);
+      }
+    }
   });
 
   it('gli elementi fissi delle planimetrie native non hanno condizioni di visibilità', () => {
-    // sono porte, forzieri, stanze sicure, passaggi: ci sono sempre, anche quando sono chiusi
-    const fissi = getDb().prepare(`SELECT COUNT(*) AS n FROM spillo
+    // Porte, forzieri, stanze sicure, passaggi, scale: ci sono sempre, anche quando sono chiusi.
+    // Il conteggio era su *tutti* i pin nativi, e reggeva solo finché nessuna presenza li
+    // raggiungeva; ora un negozio disegnato sulla planimetria eredita l'orario del negozio —
+    // è lo stesso negozio dell'illustrazione del quartiere, e se chiude devono sparire tutti e
+    // due. Quello che non deve mai avere condizioni è ciò che è strutturale, e la lista non è
+    // scritta a mano qui: è `TIPI_STRUTTURALI`, la stessa che protegge il codice.
+    const conCondizioni = getDb().prepare(`SELECT tipo, nome, condizioni_json FROM spillo
       WHERE mappa_chiave LIKE 'nativo-%' AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`)
-      .get() as { n: number };
-    expect(fissi.n).toBe(0);
+      .all() as Array<{ tipo: string; nome: string; condizioni_json: string }>;
+    expect(conCondizioni.filter((s) => eStrutturale(s.tipo))
+      .map((s) => `${s.tipo} «${s.nome}» ${s.condizioni_json}`)).toEqual([]);
+    // e quel che le ha, le ha di sola presenza
+    for (const s of conCondizioni) {
+      for (const c of JSON.parse(s.condizioni_json) as Array<{ tipo: string }>) {
+        expect(nascondeIlPin(c.tipo), `${s.tipo} «${s.nome}»`).toBe(true);
+      }
+    }
     const quanti = getDb().prepare("SELECT COUNT(*) AS n FROM spillo WHERE mappa_chiave LIKE 'nativo-%'")
       .get() as { n: number };
     expect(quanti.n).toBeGreaterThan(1000);
@@ -121,6 +147,83 @@ describe('visibilità condizionale dei pin', () => {
         expect(nascondeIlPin(c.tipo)).toBe(true);
       }
     }
+  });
+
+  it('una presenza chiusa in un gruppo continua a nascondere', () => {
+    // il caso che sfuggiva: `gruppo` non è di per sé una presenza, e guardando solo il tipo
+    // esterno una fascia oraria dentro un gruppo smetteva di nascondere — il negozio di sera
+    // ricompariva di giorno
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'gruppo', modo: 'tutte', condizioni: [{ tipo: 'fascia', fascia: 'sera' }], testo: 'solo di sera' }],
+      statoVuoto);
+    expect(esito.stato).toBe('bloccato');
+  });
+
+  it('in un gruppo misto conta la parte di presenza: «solo di sera e serve il grimaldello» di giorno sparisce', () => {
+    // il negozio apre la sera **e** vuole il grimaldello: di giorno non c'è, grimaldello o no.
+    // Trattare il gruppo come «misto, quindi non nascondo» lo lasciava visibile di giorno.
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'gruppo', modo: 'tutte', testo: 'misto',
+         condizioni: [{ tipo: 'fascia', fascia: 'sera' }, { tipo: 'articolo', articolo: 'grimaldello' }] }],
+      statoVuoto);
+    expect(esito.stato).toBe('bloccato');
+  });
+
+  it('in un «almeno una» con un ramo che tace sulla presenza non si conclude che manchi', () => {
+    // «di sera **oppure** col grimaldello»: col grimaldello ci si arriva anche di giorno, quindi
+    // dalla sola presenza non si può dire che la cosa non ci sia
+    const esito = valutaRequisitiSpillo(
+      [{ tipo: 'gruppo', modo: 'almeno-una', testo: 'sera o grimaldello',
+         condizioni: [{ tipo: 'fascia', fascia: 'sera' }, { tipo: 'articolo', articolo: 'grimaldello' }] }],
+      statoVuoto);
+    expect(esito.stato).not.toBe('bloccato');
+  });
+
+  it('un negozio disegnato sulla planimetria nativa non è strutturale: di sera chiude e sparisce', () => {
+    // la protezione degli elementi fissi vale per provenienza **e** tipo insieme: un negozio sulla
+    // planimetria resta un negozio, e quando è chiuso il pin non deve esserci
+    expect(eStrutturale('negozio')).toBe(false);
+    expect(eStrutturale('porta')).toBe(true);
+    expect(eStrutturale('passaggio')).toBe(true);
+    expect(eStrutturale('attivita')).toBe(false);
+  });
+
+  it('gli elementi fissi dell’atlante non si nascondono nemmeno se qualcuno ci attacca una presenza', () => {
+    // l'invariante del runtime: vale per provenienza, non per tipo di segnalino, e passa sopra a
+    // qualunque strada di scrittura — API, editor, seed o modifica diretta al database
+    const nativo = getDb().prepare("SELECT id, mappa_chiave FROM spillo WHERE nativo_json IS NOT NULL AND tipo = 'porta' LIMIT 1")
+      .get() as { id: number; mappa_chiave: string } | undefined;
+    expect(nativo).toBeTruthy();
+    getDb().prepare('UPDATE spillo SET condizioni_json = ? WHERE id = ?')
+      .run(JSON.stringify([{ tipo: 'fascia', fascia: 'sera' }]), nativo!.id);
+    prepared("INSERT INTO partita (nome, attiva, livello_protagonista, data_gioco, created_at, updated_at) VALUES ('Prova', 1, 1, '04-11', 'x', 'x')").run();
+    const partita = getDb().prepare("SELECT id FROM partita WHERE nome = 'Prova'").get() as { id: number };
+    const mappa = dettaglioMappa(nativo!.mappa_chiave, partita.id);
+    const spillo = mappa.spilli.find((x) => x.id === nativo!.id);
+    expect(spillo).toBeTruthy();
+    expect(spillo!.disponibilita?.stato).not.toBe('bloccato');
+    getDb().prepare('UPDATE spillo SET condizioni_json = NULL WHERE id = ?').run(nativo!.id);
+    getDb().prepare('DELETE FROM partita WHERE id = ?').run(partita.id);
+  });
+
+  it('un negozio sulla planimetria nativa eredita la presenza del suo luogo, come quello editoriale', () => {
+    // e' lo stesso negozio visto da due mappe: se il quartiere non e' ancora aperto devono
+    // sparire tutti e due, non uno solo. Prima la presenza si attaccava ai soli pin editoriali
+    // e il gemello nativo restava visibile.
+    applicaPresenzaAiLuoghi(getDb());
+    const nativi = getDb().prepare(`SELECT s.condizioni_json FROM spillo s
+      WHERE s.mappa_chiave LIKE 'nativo-%' AND s.tipo = 'negozio'
+        AND s.riferimento_chiave LIKE 'akihabara/%'`).all() as Array<{ condizioni_json: string | null }>;
+    expect(nativi.length).toBeGreaterThan(0);
+    for (const n of nativi) {
+      expect(n.condizioni_json).toBeTruthy();
+      expect(JSON.parse(n.condizioni_json!)).toContainEqual({ tipo: 'quartiere', quartiere: 'akihabara' });
+    }
+    // e gli elementi fissi della stessa planimetria restano senza condizioni
+    const fissi = getDb().prepare(`SELECT COUNT(*) AS n FROM spillo
+      WHERE mappa_chiave LIKE 'nativo-%' AND tipo IN ('porta','forziere','passaggio','scala')
+        AND condizioni_json IS NOT NULL AND condizioni_json NOT IN ('', '[]')`).get() as { n: number };
+    expect(fissi.n).toBe(0);
   });
 
   it('un forziere è collezionabile: lo nasconde il filtro dei raccolti, non una condizione', () => {
