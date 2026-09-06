@@ -1,0 +1,1484 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "connessioni": "campi-completi/connessioni.json",
+    "metadati": "mondo_metadati.json"
+  },
+  "criterio": {
+    "catena": "pin → bandiera → procedura che la accende → trigger a cui è agganciata → cancelli di quel trigger → procedura che accende ciascun cancello",
+    "scartate": "le famiglie di scoperta (minimap, icone): dicono che ci sei già passato, e per una guida non sono un blocco",
+    "rese": [
+      "dopo aver azionato la leva blu",
+      "dopo aver azionato la leva rossa",
+      "dopo aver azionato la leva verde",
+      "dopo aver chiamato l’ascensore",
+      "dopo aver premuto il pulsante",
+      "dopo aver azionato il meccanismo del topo",
+      "dopo aver azionato il meccanismo",
+      "dopo aver trovato la parola d’ordine",
+      "dopo aver trovato il seme della bramosia",
+      "dopo aver rimosso il blocco nei Memento",
+      "dopo aver aperto il forziere",
+      "dopo lo scontro",
+      "dopo aver aperto la porta",
+      "dopo un evento della storia"
+    ]
+  },
+  "pin": [
+    {
+      "mappa": "nativo-rmap-190-3-0",
+      "indicePin": 1,
+      "tipoNativo": 33,
+      "bandiera": 536873600,
+      "cancelli": [
+        {
+          "bandiera": 536874874,
+          "procedura": "MEME_LOCK_CLEAR_02",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874875,
+          "procedura": "MEME_LOCK_CLEAR_03",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874876,
+          "procedura": "MEME_LOCK_CLEAR_04",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874877,
+          "procedura": "MEME_LOCK_CLEAR_05",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874878,
+          "procedura": "MEME_LOCK_CLEAR_06",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874879,
+          "procedura": "MEME_LOCK_CLEAR_07",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        }
+      ],
+      "rese": [
+        "dopo aver rimosso il blocco nei Memento"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-190-3-0",
+      "indicePin": 2,
+      "tipoNativo": 10,
+      "bandiera": 536873598,
+      "cancelli": [
+        {
+          "bandiera": 536874874,
+          "procedura": "MEME_LOCK_CLEAR_02",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874875,
+          "procedura": "MEME_LOCK_CLEAR_03",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874876,
+          "procedura": "MEME_LOCK_CLEAR_04",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874877,
+          "procedura": "MEME_LOCK_CLEAR_05",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874878,
+          "procedura": "MEME_LOCK_CLEAR_06",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        },
+        {
+          "bandiera": 536874879,
+          "procedura": "MEME_LOCK_CLEAR_07",
+          "famiglia": "MEME_LOCK_CLEAR_#",
+          "resa": "dopo aver rimosso il blocco nei Memento"
+        }
+      ],
+      "rese": [
+        "dopo aver rimosso il blocco nei Memento"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-190-51-0",
+      "indicePin": 0,
+      "tipoNativo": 4,
+      "bandiera": 536873597,
+      "cancelli": [
+        {
+          "bandiera": 536871075,
+          "procedura": "TUTO_WAITING_ROOM",
+          "famiglia": "TUTO_WAITING_ROOM",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-155-6-2",
+      "indicePin": 1,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536875958,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        },
+        {
+          "bandiera": 536875958,
+          "procedura": "D07_159_11_ex_battle_START",
+          "famiglia": "D#_#_#_ex_battle_START",
+          "resa": "dopo lo scontro"
+        }
+      ],
+      "rese": [
+        "dopo lo scontro"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-151-2-0",
+      "indicePin": 0,
+      "tipoNativo": 4,
+      "bandiera": 536871263,
+      "cancelli": [
+        {
+          "bandiera": 536871154,
+          "procedura": "D01_03_e161_032_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-151-2-0",
+      "indicePin": 8,
+      "tipoNativo": 17,
+      "bandiera": 536871387,
+      "cancelli": [
+        {
+          "bandiera": 536871387,
+          "procedura": "D01_FLD_MAP_151_14_TBOX",
+          "famiglia": "D#_FLD_MAP_#_#_TBOX",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-151-4-1",
+      "indicePin": 7,
+      "tipoNativo": 10,
+      "bandiera": 536871488,
+      "cancelli": [
+        {
+          "bandiera": 536871160,
+          "procedura": "D151_04_GIM_SWITCH_01",
+          "famiglia": "D#_#_GIM_SWITCH_#",
+          "resa": "dopo aver azionato il meccanismo"
+        }
+      ],
+      "rese": [
+        "dopo aver azionato il meccanismo"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-151-7-0",
+      "indicePin": 7,
+      "tipoNativo": 10,
+      "bandiera": 536875572,
+      "cancelli": [
+        {
+          "bandiera": 536871199,
+          "procedura": "D151_07_doorfence_clear",
+          "famiglia": "D#_#_doorfence_clear",
+          "resa": "dopo aver aperto la porta"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto la porta"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-151-10-1",
+      "indicePin": 4,
+      "tipoNativo": 43,
+      "bandiera": 536871451,
+      "cancelli": [
+        {
+          "bandiera": 536871179,
+          "procedura": "D151_10_SWITCH_KEY_GET",
+          "famiglia": "D#_#_SWITCH_KEY_GET",
+          "resa": "dopo aver azionato il meccanismo"
+        },
+        {
+          "bandiera": 536871179,
+          "procedura": "NAVIGATOR_SAFE_SET",
+          "famiglia": "NAVIGATOR_SAFE_SET",
+          "resa": null
+        },
+        {
+          "bandiera": 536871180,
+          "procedura": "D01_04_e165_041_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        },
+        {
+          "bandiera": 536871180,
+          "procedura": "D01_04_e165_142_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        },
+        {
+          "bandiera": 536871451,
+          "procedura": "D151_10_SWITCH_01",
+          "famiglia": "D#_#_SWITCH_#",
+          "resa": "dopo aver azionato il meccanismo"
+        }
+      ],
+      "rese": [
+        "dopo aver azionato il meccanismo",
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-151-13-0",
+      "indicePin": 1,
+      "tipoNativo": 29,
+      "bandiera": 536871427,
+      "cancelli": [
+        {
+          "bandiera": 536871427,
+          "procedura": "EV_UP_GOTO_151_07_01",
+          "famiglia": "EV_UP_GOTO_#_#_#",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-152-1-0",
+      "indicePin": 1,
+      "tipoNativo": 4,
+      "bandiera": 536871271,
+      "cancelli": [
+        {
+          "bandiera": 536871115,
+          "procedura": "SUB_KFEVT_SchoolEnt",
+          "famiglia": "SUB_KFEVT_SchoolEnt",
+          "resa": null
+        },
+        {
+          "bandiera": 536871127,
+          "procedura": "D01_02_e129_031_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-152-1-0",
+      "indicePin": 4,
+      "tipoNativo": 5,
+      "bandiera": 536871460,
+      "cancelli": [
+        {
+          "bandiera": 536871115,
+          "procedura": "SUB_KFEVT_SchoolEnt",
+          "famiglia": "SUB_KFEVT_SchoolEnt",
+          "resa": null
+        },
+        {
+          "bandiera": 536871250,
+          "procedura": "D01_02_e129_051_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-152-1-1",
+      "indicePin": 1,
+      "tipoNativo": 4,
+      "bandiera": 536871271,
+      "cancelli": [
+        {
+          "bandiera": 536871115,
+          "procedura": "SUB_KFEVT_SchoolEnt",
+          "famiglia": "SUB_KFEVT_SchoolEnt",
+          "resa": null
+        },
+        {
+          "bandiera": 536871127,
+          "procedura": "D01_02_e129_031_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-152-1-1",
+      "indicePin": 4,
+      "tipoNativo": 5,
+      "bandiera": 536871460,
+      "cancelli": [
+        {
+          "bandiera": 536871115,
+          "procedura": "SUB_KFEVT_SchoolEnt",
+          "famiglia": "SUB_KFEVT_SchoolEnt",
+          "resa": null
+        },
+        {
+          "bandiera": 536871250,
+          "procedura": "D01_02_e129_051_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-152-5-0",
+      "indicePin": 1,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536871236,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-154-1-0",
+      "indicePin": 3,
+      "tipoNativo": 12,
+      "bandiera": 536871642,
+      "cancelli": [
+        {
+          "bandiera": 536871932,
+          "procedura": "D03_e259_110_START",
+          "famiglia": "D#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-154-3-0",
+      "indicePin": 1,
+      "tipoNativo": 10,
+      "bandiera": 536871647,
+      "cancelli": [
+        {
+          "bandiera": 536871990,
+          "procedura": "D03_03_BigDoorLook_FIRST",
+          "famiglia": "D#_#_BigDoorLook_FIRST",
+          "resa": "dopo aver aperto la porta"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto la porta"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-154-5-0",
+      "indicePin": 0,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536875958,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        },
+        {
+          "bandiera": 536875958,
+          "procedura": "D07_159_11_ex_battle_START",
+          "famiglia": "D#_#_#_ex_battle_START",
+          "resa": "dopo lo scontro"
+        }
+      ],
+      "rese": [
+        "dopo lo scontro"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-153-9-1",
+      "indicePin": 4,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536875958,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        },
+        {
+          "bandiera": 536875958,
+          "procedura": "D07_159_11_ex_battle_START",
+          "famiglia": "D#_#_#_ex_battle_START",
+          "resa": "dopo lo scontro"
+        }
+      ],
+      "rese": [
+        "dopo lo scontro"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-162-11-1",
+      "indicePin": 11,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536875958,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        },
+        {
+          "bandiera": 536875958,
+          "procedura": "D07_159_11_ex_battle_START",
+          "famiglia": "D#_#_#_ex_battle_START",
+          "resa": "dopo lo scontro"
+        }
+      ],
+      "rese": [
+        "dopo lo scontro"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-162-11-2",
+      "indicePin": 4,
+      "tipoNativo": 10,
+      "bandiera": 536875342,
+      "cancelli": [
+        {
+          "bandiera": 536875119,
+          "procedura": "CheckPasswardDoor",
+          "famiglia": "CheckPasswardDoor",
+          "resa": "dopo aver trovato la parola d’ordine"
+        }
+      ],
+      "rese": [
+        "dopo aver trovato la parola d’ordine"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-162-12-0",
+      "indicePin": 4,
+      "tipoNativo": 10,
+      "bandiera": 536872093,
+      "cancelli": [
+        {
+          "bandiera": 536875116,
+          "procedura": "CheckPasswardDoor",
+          "famiglia": "CheckPasswardDoor",
+          "resa": "dopo aver trovato la parola d’ordine"
+        }
+      ],
+      "rese": [
+        "dopo aver trovato la parola d’ordine"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-162-15-0",
+      "indicePin": 3,
+      "tipoNativo": 15,
+      "bandiera": 536875458,
+      "cancelli": [
+        {
+          "bandiera": 536875458,
+          "procedura": "D10_162_11_EX_GUIDE2",
+          "famiglia": "D#_#_#_EX_GUIDE#",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-0",
+      "indicePin": 6,
+      "tipoNativo": 10,
+      "bandiera": 536875482,
+      "cancelli": [
+        {
+          "bandiera": 536875118,
+          "procedura": "CheckPasswardDoor",
+          "famiglia": "CheckPasswardDoor",
+          "resa": "dopo aver trovato la parola d’ordine"
+        }
+      ],
+      "rese": [
+        "dopo aver trovato la parola d’ordine"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 0,
+      "tipoNativo": 4,
+      "bandiera": 536875411,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 1,
+      "tipoNativo": 15,
+      "bandiera": 536875408,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        },
+        {
+          "bandiera": 536875458,
+          "procedura": "D10_162_11_EX_GUIDE2",
+          "famiglia": "D#_#_#_EX_GUIDE#",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 2,
+      "tipoNativo": 15,
+      "bandiera": 536875409,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 3,
+      "tipoNativo": 29,
+      "bandiera": 536875410,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 4,
+      "tipoNativo": 10,
+      "bandiera": 536875483,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 5,
+      "tipoNativo": 10,
+      "bandiera": 536875484,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 6,
+      "tipoNativo": 26,
+      "bandiera": 536875396,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        },
+        {
+          "bandiera": 536875396,
+          "procedura": "IsUppeerOff",
+          "famiglia": "IsUppeerOff",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-15-1",
+      "indicePin": 7,
+      "tipoNativo": 17,
+      "bandiera": 536875392,
+      "cancelli": [
+        {
+          "bandiera": 536875271,
+          "procedura": "IsUppeerOn",
+          "famiglia": "IsUppeerOn",
+          "resa": null
+        },
+        {
+          "bandiera": 536875392,
+          "procedura": "IsUppeerOff",
+          "famiglia": "IsUppeerOff",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-162-16-2",
+      "indicePin": 2,
+      "tipoNativo": 10,
+      "bandiera": 536875456,
+      "cancelli": [
+        {
+          "bandiera": 536875117,
+          "procedura": "CheckPasswardDoor",
+          "famiglia": "CheckPasswardDoor",
+          "resa": "dopo aver trovato la parola d’ordine"
+        }
+      ],
+      "rese": [
+        "dopo aver trovato la parola d’ordine"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-4-1",
+      "indicePin": 6,
+      "tipoNativo": 17,
+      "bandiera": 536873387,
+      "cancelli": [
+        {
+          "bandiera": 536873387,
+          "procedura": "D06_157_04_N_TBOX_01",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-5-0",
+      "indicePin": 4,
+      "tipoNativo": 14,
+      "bandiera": 536873196,
+      "cancelli": [
+        {
+          "bandiera": 536873196,
+          "procedura": "FLD_D06_05_FIRST_ROOM_HIT",
+          "famiglia": "FLD_D#_#_FIRST_ROOM_HIT",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-157-5-0",
+      "indicePin": 5,
+      "tipoNativo": 17,
+      "bandiera": 536873388,
+      "cancelli": [
+        {
+          "bandiera": 536873388,
+          "procedura": "D06_157_05_N_TBOX_SET_02",
+          "famiglia": "D#_#_#_N_TBOX_SET_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-5-0",
+      "indicePin": 6,
+      "tipoNativo": 17,
+      "bandiera": 536873389,
+      "cancelli": [
+        {
+          "bandiera": 536873389,
+          "procedura": "D06_157_05_N_TBOX_SET_03",
+          "famiglia": "D#_#_#_N_TBOX_SET_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-5-0",
+      "indicePin": 8,
+      "tipoNativo": 10,
+      "bandiera": 536875881,
+      "cancelli": [
+        {
+          "bandiera": 536873490,
+          "procedura": "f157_005_DOOR_0641_HIT",
+          "famiglia": "f#_#_DOOR_#_HIT",
+          "resa": "dopo aver aperto la porta"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto la porta"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-5-0",
+      "indicePin": 9,
+      "tipoNativo": 10,
+      "bandiera": 536875882,
+      "cancelli": [
+        {
+          "bandiera": 536873489,
+          "procedura": "f157_005_DOOR_0000_HIT",
+          "famiglia": "f#_#_DOOR_#_HIT",
+          "resa": "dopo aver aperto la porta"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto la porta"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-5-0",
+      "indicePin": 11,
+      "tipoNativo": 10,
+      "bandiera": 536875884,
+      "cancelli": [
+        {
+          "bandiera": 536873488,
+          "procedura": "f157_005_DOOR_0004_HIT",
+          "famiglia": "f#_#_DOOR_#_HIT",
+          "resa": "dopo aver aperto la porta"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto la porta"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-8-0",
+      "indicePin": 5,
+      "tipoNativo": 26,
+      "bandiera": 536873410,
+      "cancelli": [
+        {
+          "bandiera": 536873410,
+          "procedura": "D06_157_08_R_BOX_04",
+          "famiglia": "D#_#_#_R_BOX_#",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-157-8-0",
+      "indicePin": 6,
+      "tipoNativo": 17,
+      "bandiera": 536873391,
+      "cancelli": [
+        {
+          "bandiera": 536873391,
+          "procedura": "D06_157_08_N_BOX_05",
+          "famiglia": "D#_#_#_N_BOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-8-1",
+      "indicePin": 0,
+      "tipoNativo": 17,
+      "bandiera": 536873397,
+      "cancelli": [
+        {
+          "bandiera": 536873397,
+          "procedura": "D06_157_08_N_BOX_11",
+          "famiglia": "D#_#_#_N_BOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-8-1",
+      "indicePin": 1,
+      "tipoNativo": 17,
+      "bandiera": 536873398,
+      "cancelli": [
+        {
+          "bandiera": 536873398,
+          "procedura": "D06_157_08_N_BOX_12",
+          "famiglia": "D#_#_#_N_BOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-9-0",
+      "indicePin": 2,
+      "tipoNativo": 17,
+      "bandiera": 536873392,
+      "cancelli": [
+        {
+          "bandiera": 536873392,
+          "procedura": "D06_157_09_N_TBOX_06",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-9-1",
+      "indicePin": 2,
+      "tipoNativo": 17,
+      "bandiera": 536873399,
+      "cancelli": [
+        {
+          "bandiera": 536873399,
+          "procedura": "D06_157_09_N_TBOX_13",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-10-1",
+      "indicePin": 2,
+      "tipoNativo": 17,
+      "bandiera": 536873393,
+      "cancelli": [
+        {
+          "bandiera": 536873393,
+          "procedura": "D06_157_10_N_TBOX_07",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-11-1",
+      "indicePin": 0,
+      "tipoNativo": 26,
+      "bandiera": 536873407,
+      "cancelli": [
+        {
+          "bandiera": 536873407,
+          "procedura": "D06_157_11_R_TBOX_01",
+          "famiglia": "D#_#_#_R_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-11-2",
+      "indicePin": 0,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536875958,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        },
+        {
+          "bandiera": 536875958,
+          "procedura": "D07_159_11_ex_battle_START",
+          "famiglia": "D#_#_#_ex_battle_START",
+          "resa": "dopo lo scontro"
+        }
+      ],
+      "rese": [
+        "dopo lo scontro"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-12-0",
+      "indicePin": 5,
+      "tipoNativo": 26,
+      "bandiera": 536873408,
+      "cancelli": [
+        {
+          "bandiera": 536873408,
+          "procedura": "D06_157_12_R_TBOX_02",
+          "famiglia": "D#_#_#_R_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-12-0",
+      "indicePin": 6,
+      "tipoNativo": 17,
+      "bandiera": 536873394,
+      "cancelli": [
+        {
+          "bandiera": 536873394,
+          "procedura": "D06_157_11_N_TBOX_08",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-12-0",
+      "indicePin": 7,
+      "tipoNativo": 17,
+      "bandiera": 536873395,
+      "cancelli": [
+        {
+          "bandiera": 536873395,
+          "procedura": "D06_157_11_N_TBOX_09",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-12-0",
+      "indicePin": 8,
+      "tipoNativo": 17,
+      "bandiera": 536873396,
+      "cancelli": [
+        {
+          "bandiera": 536873396,
+          "procedura": "D06_157_11_N_TBOX_10",
+          "famiglia": "D#_#_#_N_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-157-13-0",
+      "indicePin": 4,
+      "tipoNativo": 26,
+      "bandiera": 536873409,
+      "cancelli": [
+        {
+          "bandiera": 536873409,
+          "procedura": "D06_157_13_R_TBOX_03",
+          "famiglia": "D#_#_#_R_TBOX_#",
+          "resa": "dopo aver aperto il forziere"
+        }
+      ],
+      "rese": [
+        "dopo aver aperto il forziere"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-3-0",
+      "indicePin": 7,
+      "tipoNativo": 10,
+      "bandiera": 536875402,
+      "cancelli": [
+        {
+          "bandiera": 536872801,
+          "procedura": "D05_02_e341_022_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-3-0",
+      "indicePin": 8,
+      "tipoNativo": 10,
+      "bandiera": 536875403,
+      "cancelli": [
+        {
+          "bandiera": 536872738,
+          "procedura": "D05_02_e341_023_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 7,
+      "tipoNativo": 97,
+      "bandiera": 536875958,
+      "cancelli": [
+        {
+          "bandiera": 536875958,
+          "procedura": "D01_152_05_CHECK01_START",
+          "famiglia": "D#_#_#_CHECK#_START",
+          "resa": null
+        },
+        {
+          "bandiera": 536875958,
+          "procedura": "D07_159_11_ex_battle_START",
+          "famiglia": "D#_#_#_ex_battle_START",
+          "resa": "dopo lo scontro"
+        }
+      ],
+      "rese": [
+        "dopo lo scontro"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 8,
+      "tipoNativo": 12,
+      "bandiera": 536872762,
+      "cancelli": [
+        {
+          "bandiera": 536872769,
+          "procedura": "D05_02_e342_013_pre",
+          "famiglia": "D#_#_e#_#_pre",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 9,
+      "tipoNativo": 12,
+      "bandiera": 536872762,
+      "cancelli": [
+        {
+          "bandiera": 536872769,
+          "procedura": "D05_02_e342_013_pre",
+          "famiglia": "D#_#_e#_#_pre",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 10,
+      "tipoNativo": 12,
+      "bandiera": 536872762,
+      "cancelli": [
+        {
+          "bandiera": 536872769,
+          "procedura": "D05_02_e342_013_pre",
+          "famiglia": "D#_#_e#_#_pre",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 11,
+      "tipoNativo": 12,
+      "bandiera": 536872762,
+      "cancelli": [
+        {
+          "bandiera": 536872769,
+          "procedura": "D05_02_e342_013_pre",
+          "famiglia": "D#_#_e#_#_pre",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 12,
+      "tipoNativo": 12,
+      "bandiera": 536872762,
+      "cancelli": [
+        {
+          "bandiera": 536872769,
+          "procedura": "D05_02_e342_013_pre",
+          "famiglia": "D#_#_e#_#_pre",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-5-0",
+      "indicePin": 15,
+      "tipoNativo": 12,
+      "bandiera": 536872762,
+      "cancelli": [
+        {
+          "bandiera": 536872769,
+          "procedura": "D05_02_e342_013_pre",
+          "famiglia": "D#_#_e#_#_pre",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 0,
+      "tipoNativo": 5,
+      "bandiera": 536873082,
+      "cancelli": [
+        {
+          "bandiera": 536872753,
+          "procedura": "D156_13_check01_START",
+          "famiglia": "D#_#_check#_START",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 2,
+      "tipoNativo": 5,
+      "bandiera": 536873084,
+      "cancelli": [
+        {
+          "bandiera": 536872784,
+          "procedura": "D156_13_miniEV_point01",
+          "famiglia": "D#_#_miniEV_point#",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 3,
+      "tipoNativo": 5,
+      "bandiera": 536873085,
+      "cancelli": [
+        {
+          "bandiera": 536872784,
+          "procedura": "D156_13_miniEV_point01",
+          "famiglia": "D#_#_miniEV_point#",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 4,
+      "tipoNativo": 5,
+      "bandiera": 536873086,
+      "cancelli": [
+        {
+          "bandiera": 536872750,
+          "procedura": "D05_02_e341_031_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 5,
+      "tipoNativo": 5,
+      "bandiera": 536873087,
+      "cancelli": [
+        {
+          "bandiera": 536872750,
+          "procedura": "D05_02_e341_031_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 11,
+      "tipoNativo": 10,
+      "bandiera": 536875404,
+      "cancelli": [
+        {
+          "bandiera": 536872751,
+          "procedura": "D05_02_e341_035_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        },
+        {
+          "bandiera": 536872751,
+          "procedura": "D05_02_e341_035_START____",
+          "famiglia": "D#_#_e#_#_START____",
+          "resa": null
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 12,
+      "tipoNativo": 10,
+      "bandiera": 536875405,
+      "cancelli": [
+        {
+          "bandiera": 536872751,
+          "procedura": "D05_02_e341_035_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        },
+        {
+          "bandiera": 536872751,
+          "procedura": "D05_02_e341_035_START____",
+          "famiglia": "D#_#_e#_#_START____",
+          "resa": null
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-156-13-0",
+      "indicePin": 13,
+      "tipoNativo": 10,
+      "bandiera": 536875406,
+      "cancelli": [
+        {
+          "bandiera": 536872750,
+          "procedura": "D05_02_e341_031_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-159-3-0",
+      "indicePin": 7,
+      "tipoNativo": 5,
+      "bandiera": 536873850,
+      "cancelli": [
+        {
+          "bandiera": 536873617,
+          "procedura": "D_EXIT_EV_FIRST",
+          "famiglia": "D_EXIT_EV_FIRST",
+          "resa": "dopo un evento della storia"
+        },
+        {
+          "bandiera": 536873626,
+          "procedura": "D07_01_e407_031_START",
+          "famiglia": "D#_#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        },
+        {
+          "bandiera": 536873626,
+          "procedura": "D07_e407_101_START",
+          "famiglia": "D#_e#_#_START",
+          "resa": "dopo un evento della storia"
+        }
+      ],
+      "rese": [
+        "dopo un evento della storia"
+      ]
+    },
+    {
+      "mappa": "nativo-rmap-159-11-0",
+      "indicePin": 5,
+      "tipoNativo": 13,
+      "bandiera": 536875921,
+      "cancelli": [
+        {
+          "bandiera": 536873700,
+          "procedura": "D159_11_c_01_START",
+          "famiglia": "D#_#_c_#_START",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-159-11-1",
+      "indicePin": 5,
+      "tipoNativo": 13,
+      "bandiera": 536875921,
+      "cancelli": [
+        {
+          "bandiera": 536873700,
+          "procedura": "D159_11_c_01_START",
+          "famiglia": "D#_#_c_#_START",
+          "resa": null
+        }
+      ],
+      "rese": []
+    },
+    {
+      "mappa": "nativo-rmap-159-35-0",
+      "indicePin": 4,
+      "tipoNativo": 17,
+      "bandiera": 536873903,
+      "cancelli": [
+        {
+          "bandiera": 536873755,
+          "procedura": "MOUSE_SWITCH",
+          "famiglia": "MOUSE_SWITCH",
+          "resa": "dopo aver azionato il meccanismo del topo"
+        }
+      ],
+      "rese": [
+        "dopo aver azionato il meccanismo del topo"
+      ]
+    }
+  ],
+  "summary": {
+    "esiti": {
+      "nessun trigger accende la sua bandiera": 786,
+      "non condizionato: niente lo governa": 234,
+      "con un cancello tradotto": 55,
+      "con cancelli, nessuno traducibile": 20,
+      "solo cancelli di scoperta: per la guida non blocca": 315,
+      "trigger senza cancelli: niente lo blocca": 19
+    },
+    "pinConCancello": 75,
+    "pinConResa": 55,
+    "famiglieSenzaResa": {
+      "IsUppeerOn": 8,
+      "D#_#_#_CHECK#_START": 7,
+      "SUB_KFEVT_SchoolEnt": 4,
+      "D#_#_#_EX_GUIDE#": 2,
+      "IsUppeerOff": 2,
+      "D#_#_miniEV_point#": 2,
+      "D#_#_e#_#_START____": 2,
+      "D#_#_c_#_START": 2,
+      "TUTO_WAITING_ROOM": 1,
+      "D#_FLD_MAP_#_#_TBOX": 1,
+      "NAVIGATOR_SAFE_SET": 1,
+      "EV_UP_GOTO_#_#_#": 1,
+      "FLD_D#_#_FIRST_ROOM_HIT": 1,
+      "D#_#_#_R_BOX_#": 1,
+      "D#_#_check#_START": 1
+    }
+  },
+  "limits": [
+    "I forzieri e la gran parte degli oggetti non hanno una procedura di interazione negli script di campo: sono oggetti del motore, e per loro un cancello negli script non esiste. Che non ne abbiano non è un buco dell’estrazione.",
+    "Un cancello dice che qualcosa deve essere avvenuto, non quando: la data non c’è."
+  ]
+}

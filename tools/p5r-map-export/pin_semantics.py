@@ -111,7 +111,10 @@ DALLA_TABELLA_DELLE_PARTI = {
     # icone, la posizione sul bordo e le procedure. Dove non la dice, uno dei due sbaglia e va
     # visto — è così che è saltato fuori che il tipo 12 non è un meccanismo ma una porta chiusa.
     'ミニマップ：セーフルームアイコン': ('sicura', 'Stanza sicura'),
-    'ミニマップ：宝箱': ('forziere', 'Forziere'),
+    # `ミニマップ：宝箱` non c'e': quello sprite lo usano **due** tipi nativi, il 17 e il 26, e
+    # una sola icona per due cose non puo' decidere quale sia quale. Che siano due cose lo
+    # dicono le procedure — `N_TBOX` per il 17, `R_TBOX`/`RARE_TBOX` per il 26 — e convivono su
+    # 21 planimetrie. La tabella prova che il gioco li disegna uguali, non che siano uguali.
     'ミニマップ：開かない扉': ('porta', 'Porta che non si apre'),
     'ミニマップ：特殊鍵・共犯者クエス': ('porta', 'Porta a chiave speciale'),
     'ミニマップ：やじるし　↑': ('passaggio', 'Passaggio verso l’alto'),
@@ -161,7 +164,7 @@ DALLA_TABELLA_DELLE_PARTI = {
 # L'ordine conta: la prima famiglia che riconosce il nome vince, e le varianti rare vanno prima
 # della forma generica.
 FAMIGLIE = [
-    (r'(R_TBOX|RARE_TBOX)', 'forziere', 'Forziere raro'),
+    (r'(R_TBOX|RARE_TBOX)', 'forziere-raro', 'Forziere raro'),
     (r'(TBOX|_BOX_)', 'forziere', 'Forziere'),
     (r'SEEDicon', 'seme-bramosia', 'Seme della bramosia'),
     (r'(GIM_\w*SWITCH|_SWITCH|gate_\w*chenge)', 'meccanismo', 'Meccanismo'),
@@ -188,6 +191,7 @@ MINIME_CONFERME = 2
 # Parole che, nell'etichetta di un trigger, confermano la famiglia.
 CONFERME = {
     'forziere': ['forzier', 'tesoro'],
+    'forziere-raro': ['forzier', 'tesoro'],
     'meccanismo': ['leva', 'interruttore', 'pulsante'],
     'porta': ['porta', 'portone'],
     'sicura': ['safe room', 'stanza sicura', 'punto di ritorno'],
@@ -209,7 +213,7 @@ FAMIGLIE_SOTTO = [
     (r'DUNGEON_EXIT', 'uscita', 'Uscita'),
     (r'CheckStair|Stairs_|_STAIRS', 'scala', 'Scala'),
     (r'Shortcut|SUBERIDAI|SUBERITDAI|WIRE_ON|_ROPE', 'scorciatoia', 'Scorciatoia'),
-    (r'(R_TBOX|RARE_TBOX)', 'forziere', 'Forziere raro'),
+    (r'(R_TBOX|RARE_TBOX)', 'forziere-raro', 'Forziere raro'),
     (r'TBOX', 'forziere', 'Forziere'),
     (r'SEEDicon', 'seme-bramosia', 'Seme della bramosia'),
     (r'(GIM_\w*SWITCH|_SWITCH|LEVER)', 'meccanismo', 'Meccanismo'),

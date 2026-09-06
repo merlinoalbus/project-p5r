@@ -103,6 +103,9 @@ def main(out, radice=None):
 
 
 MODI_AMMESSI = ('trigger proiettato', 'meta unica della planimetria')
+# L'ingrandimento con cui il collegamento porta sulla mappa di arrivo, dichiarato qui e non letto
+# dal produttore: se lo cambiasse, il controllo deve accorgersene invece di adeguarsi.
+ZOOM_ATTESO = 3
 
 
 def _proietta(p, xyz):
@@ -111,6 +114,35 @@ def _proietta(p, xyz):
     if p['scambiaAssi']:
         x, z = z, x
     return x*p['segnoX']*p['scala'] + p['traslazione'][0], z*p['segnoY']*p['scala'] + p['traslazione'][1]
+
+
+def _punto_di_arrivo(codice, ingresso, meta, campi, proiezioni):
+    """Dove si arriva sulla planimetria di destinazione, ricalcolato qui.
+
+    Il produttore ha la sua funzione per questo, e riusarla sarebbe comodo: se però quella
+    funzione avesse un errore sistematico — un asse scambiato, un segno sbagliato — l'errore
+    passerebbe identico nel produttore e nel controllo, e nessuno se ne accorgerebbe. Il conto è
+    quindi rifatto da capo, dalla stessa entrata e dalla stessa proiezione certificata.
+    """
+    if ingresso is None:
+        return None
+    riga = proiezioni.get(codice)
+    if not riga or riga['esito'] != 'certificata' or codice not in meta:
+        return None
+    campo = campi.get(riga['proiezione']['campo'])
+    if not campo:
+        return None
+    voci = campo.get('entrances') or []
+    scelta = next((e for e in voci if e.get('entranceId') == ingresso), None) or \
+        next((e for e in voci if e.get('index') == ingresso), None)
+    if not scelta:
+        return None
+    px, py = _proietta(riga['proiezione'], scelta['xyz'])
+    larghezza, altezza = riga['dimensione']
+    fx, fy = 100*px/larghezza, 100*py/altezza
+    if not (0 <= fx <= 100 and 0 <= fy <= 100):
+        return None
+    return dict(x=round(fx, 3), y=round(fy, 3), zoom=ZOOM_ATTESO)
 
 
 def _destinazione_unica(destinazioni, mia, esistenti):
@@ -239,7 +271,7 @@ def controlla_collegamenti(out):
                 mio.setdefault(indice, (unica, None, 'meta unica della planimetria'))
         for indice, (scelta, distanza, modo) in mio.items():
             arrivo = 'RMAP_%03d_%d_%d' % tuple(scelta[:3])
-            punto, _ = ml.punto_di_arrivo(arrivo, scelta[3], meta, campi, proiezioni)
+            punto = _punto_di_arrivo(arrivo, scelta[3], meta, campi, proiezioni)
             atteso[(chiave, indice)] = (ml.chiave_di(arrivo), scelta[3], distanza, modo, punto)
 
     collegamenti = dati['collegamenti']

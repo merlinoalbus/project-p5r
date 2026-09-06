@@ -8,10 +8,11 @@
   "conEntita": 72,
   "spilliPosati": 1339,
   "spilliConLuogo": 42,
-  "spilliCondizionati": 1130,
+  "spilliCondizionati": 0,
   "pinNonPosati": {
+    "assorbito dalla planimetria canonica": 33,
     "escluso dalla certificazione del riferimento": 14,
-    "planimetria senza riferimento condiviso": 76
+    "planimetria senza riferimento condiviso": 43
   },
   "pinNativi": 1429,
   "pinContati": 1429,

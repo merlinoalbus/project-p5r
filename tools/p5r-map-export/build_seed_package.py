@@ -119,6 +119,21 @@ def abbina_aree(luoghi, aree_per_dungeon):
     return collections.Counter(esiti)
 
 
+def collezionabili_del_registro(radice):
+    """Quali tipi di segnalino il registro dell'app dichiara collezionabili.
+
+    Si legge da `shared/spilli.ts` invece di riscriverne l'elenco qui: due elenchi della stessa
+    cosa divergono, e il registro è quello che l'applicazione usa davvero.
+    """
+    testo = (radice/'shared/spilli.ts').read_text(encoding='utf8')
+    fuori = {}
+    for m in re.finditer(r"'?([a-z0-9-]+)'?\s*:\s*\{[^}]*collezionabile:\s*(true|false)", testo):
+        fuori[m.group(1)] = m.group(2) == 'true'
+    if not fuori:
+        raise ValueError('registro dei segnalini non leggibile: collezionabilità sconosciuta')
+    return fuori
+
+
 def scheda_da_verificare(tipo, sem):
     """La nota che accompagna un pin di tipo non ancora identificato.
 
@@ -195,12 +210,29 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
                       else f'{len(candidati)} luoghi del quartiere corrispondono')
 
     per_chiave = {m['chiave']: m for m in mappe}
+    COLLEZIONABILI = collezionabili_del_registro(Path(__file__).resolve().parents[2])
+    percorso_cancelli = out/'cancelli-pin.json'
+    cancelli = ({(r['mappa'], r['indicePin']): r for r in
+                 json.loads(percorso_cancelli.read_text(encoding='utf8'))['pin']}
+                if percorso_cancelli.exists() else {})
+    percorso_copie = out/'pin-copie-assorbite.json'
+    copie_assorbite = ({r['copia'] for r in json.loads(percorso_copie.read_text(encoding='utf8'))['assorbiti']}
+                       if percorso_copie.exists() else set())
     esiti, posati, condizionati = collections.Counter(), 0, [0]
+    con_cancello = [0]
     for mappa_nativa in meta['maps']:
         chiave = 'nativo-rmap-%03d-%d-%d' % tuple(int(v) for v in mappa_nativa['code'].split('_')[1:])
         voce, rif = per_chiave.get(chiave), riferimento.get(chiave)
         if voce is None or rif is None or rif['esito'] != 'condiviso':
-            esiti['planimetria senza riferimento condiviso'] += len(mappa_nativa['pins'])
+            # Due assenze diverse, che prima finivano nello stesso mucchio e dicevano una cosa
+            # falsa. Una planimetria che e' **copia** di un'altra non entra nell'atlante, ma i suoi
+            # pin ci sono gia': stanno sulla canonica, e `pin-copie-assorbite.json` dice a quale
+            # pin ciascuno corrisponde. Chiamarli «senza riferimento» era sbagliato — il
+            # riferimento ce l'hanno, e' la loro canonica ad averlo.
+            if chiave in copie_assorbite:
+                esiti['assorbito dalla planimetria canonica'] += len(mappa_nativa['pins'])
+            else:
+                esiti['planimetria senza riferimento condiviso'] += len(mappa_nativa['pins'])
             continue
         fattore = rif.get('fattoreScala', 1.0)
         larghezza, altezza = rif['dimensione']
@@ -233,30 +265,59 @@ def pin_delle_planimetrie(out, seed, mappe, luogo_di_mappa):
             # la nota sul luogo mancante ha senso solo dove un luogo del catalogo poteva esserci
             if luogo is None and motivo and (voce['genitore'] or '').startswith('citta-'):
                 nota.append(f'Luogo del catalogo non collegato: {motivo}.')
-            spillo = dict(
-                tipo=tipo_spillo, nome=luogo['nome'] if luogo else etichetta,
-                descrizione=' '.join(nota),
-                x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
-                riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
-                collezionabile=False, ordine=len(voce['spilli']))
+            # Le prove native come dato, non come frase. La descrizione le racconta a chi legge;
+            # qui restano interrogabili — quali spilli hanno il tipo nativo 19? — e soprattutto
+            # non spariscono senza che un controllo se ne accorga. Per i tipi ancora da
+            # identificare e' l'unico modo perche' la risposta dell'utente, una volta data, si
+            # possa applicare a tutte le loro occorrenze in una volta sola.
+            tab = (sem.get('tabellaParti') or {}) if sem else {}
+            nativo = dict(
+                tipoNativo=p['nativeType'], indicePin=indice,
+                bandiera=p.get('flag'), condizionale=bool(p['conditional']),
+                partId=tab.get('partId'), indiceSprite=tab.get('indiceSprite'),
+                nomeNativo=tab.get('nomeNativo'), png=tab.get('png'),
+                motivoSenzaSprite=tab.get('motivoSenzaSprite'),
+                daVerificare=bool(da_verificare),
+                prove=sem.get('riferimenti') if da_verificare else None)
+            # Il collegamento e il prerequisito sono informazione, e vanno raccolti **prima** di
+            # comporre la descrizione: aggiungerli dopo li faceva finire in una lista che nessuno
+            # rileggeva piu'.
             legame = collegamenti.get((chiave, indice))
+            destinazione = None
             if legame:
                 nota.append('Porta a ' + legame['arrivo'] + '.')
                 if legame['punto']:
-                    spillo['destinazione'] = dict(mappa=legame['arrivo'], **legame['punto'])
+                    destinazione = dict(mappa=legame['arrivo'], **legame['punto'])
                 else:
                     # la mappa di arrivo si sa, il punto no: si dichiara invece di inventarlo
                     nota.append('Il punto preciso di arrivo non e’ noto: '
                                 + (legame['motivoSenzaPunto'] or 'proiezione mancante') + '.')
-            # Il gioco mostra questo pin solo a certe condizioni, e la bandiera che le governa non è
-            # ancora tradotta nel vocabolario dell'applicazione. Entra allora come condizione da
-            # configurare, che l'interfaccia sa mostrare e l'editor sa correggere: trattarlo come
-            # incondizionato lo farebbe comparire sempre, che è falso.
-            if p['conditional']:
-                spillo['condizioni'] = [dict(tipo='da-configurare',
-                                             nota=f"Il gioco lo mostra alla bandiera nativa {p['flag']}, "
-                                                  'non ancora tradotta in una condizione della guida.')]
-                condizionati[0] += 1
+
+            # Un cancello **non** e' una condizione di visibilita'. Una porta chiusa si vede: e'
+            # li', semplicemente non si apre ancora. Nasconderla finche' non hai la chiave
+            # vorrebbe dire che la guida ti dice dov'e' la porta solo dopo che l'hai aperta, cioe'
+            # quando non serve piu'. Il prerequisito e' informazione: sta nella descrizione e,
+            # come dato, dentro `nativo`.
+            cancello = cancelli.get((chiave, indice))
+            if cancello and cancello['rese']:
+                nota.append('Nel gioco si sblocca ' + ' e '.join(cancello['rese']) + '.')
+                nativo['cancelli'] = cancello['cancelli']
+                nativo['sbloccoLeggibile'] = cancello['rese']
+                con_cancello[0] += 1
+
+            spillo = dict(
+                tipo=tipo_spillo, nome=luogo['nome'] if luogo else etichetta,
+                descrizione=' '.join(nota), nativo=nativo,
+                x=round(100*p['x']*fattore/larghezza, 3), y=round(100*p['y']*fattore/altezza, 3),
+                riferimento=dict(tipo='luogo', chiave=luogo['chiave']) if luogo else None,
+                # Un forziere si spunta: e' l'unico modo legittimo di toglierlo dalla vista, e
+                # lo decide il giocatore. Entrava non collezionabile, quindi restava li' anche
+                # dopo averlo aperto e non c'era verso di segnarlo — mentre il registro dice da
+                # sempre quali tipi lo sono.
+                collezionabile=bool(COLLEZIONABILI.get(tipo_spillo, False)),
+                ordine=len(voce['spilli']))
+            if destinazione:
+                spillo['destinazione'] = destinazione
             spillo['descrizione'] = ' '.join(nota)
             voce['spilli'].append(spillo)
             esiti['posato con luogo collegato' if luogo else 'posato senza luogo collegato'] += 1

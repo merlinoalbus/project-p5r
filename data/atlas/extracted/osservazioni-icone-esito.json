@@ -21,8 +21,12 @@
       "compatibili": [
         26
       ],
-      "dimostrato": 26,
-      "motivo": null
+      "gruppoIcona": [
+        17,
+        26
+      ],
+      "dimostrato": null,
+      "motivo": "l’icona di questo genere è condivisa dai tipi [17, 26]: il conteggio dice quanti sono in tutto, non quale sia quale"
     },
     "freccia-passaggio": {
       "osservazioni": 5,
@@ -34,6 +38,7 @@
         "Kamoshida's Palace — Tower: Upper Level"
       ],
       "compatibili": [],
+      "gruppoIcona": [],
       "dimostrato": null,
       "motivo": "nessun tipo è compatibile con tutte le osservazioni: una di esse è sbagliata, oppure la schermata non mostrava tutte le icone"
     },
@@ -47,6 +52,7 @@
         "Kamoshida's Palace — Tower: Upper Level"
       ],
       "compatibili": [],
+      "gruppoIcona": [],
       "dimostrato": null,
       "motivo": "nessun tipo è compatibile con tutte le osservazioni: una di esse è sbagliata, oppure la schermata non mostrava tutte le icone"
     },
@@ -60,6 +66,9 @@
         "Kamoshida's Palace — Tower: Upper Level"
       ],
       "compatibili": [
+        4
+      ],
+      "gruppoIcona": [
         4
       ],
       "dimostrato": 4,
@@ -80,25 +89,12 @@
         "Kamoshida's Palace — Tower: Upper Level"
       ],
       "motivo": "su 5 schermate del gioco il numero di icone «stanza-sicura» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
-    },
-    "26": {
-      "genere": "forziere",
-      "tipoSpillo": "forziere",
-      "etichetta": "Forziere",
-      "osservazioni": 4,
-      "schermate": [
-        "Kamoshida's Palace — Old Castle 1F",
-        "Kamoshida's Palace — Old Castle 3F",
-        "Kamoshida's Palace — Tower: Lower Level",
-        "Kamoshida's Palace — Tower: Upper Level"
-      ],
-      "motivo": "su 4 schermate del gioco il numero di icone «forziere» coincide con il numero di pin di questo tipo, e nessun altro tipo regge tutte le osservazioni"
     }
   },
   "summary": {
     "generiOsservati": 4,
-    "tipiDimostrati": 2,
-    "pinCoperti": 142
+    "tipiDimostrati": 1,
+    "pinCoperti": 104
   },
   "limits": [
     "Il conteggio prova qualcosa solo se la schermata mostra tutte le icone di quel genere: una partita a metà ne nasconde, e il vincolo diventa un «almeno».",

@@ -3,7 +3,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { RETTIFICHE_NOMI_SEED } from './rettificheNomiSeed.js';
 import type { SchedaContenutoGuidaDto } from '../../../shared/organizzazioneMappe.js';
 import path from 'node:path';
-import type { DestinazioneSpillo, RuoloImmagine } from '../../../shared/types.js';
+import type { DestinazioneSpillo, NativoSpilloDto, RuoloImmagine } from '../../../shared/types.js';
 import { RUOLI_IMMAGINE } from '../../../shared/types.js';
 import { leggiDestinazioneSpillo, salvaDestinazioneSpillo, verificaDestinazioneSpillo } from './destinazioniSpillo.js';
 import { idMappa, chiaveMappa, nomePercorso, sincronizzaPercorsiMappe } from './percorsiMappe.js';
@@ -17,7 +17,7 @@ import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
-import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from '../disponibilitaService.js';
+import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { DEFINIZIONI_SPILLO, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
@@ -27,7 +27,7 @@ import { creaZip, type VoceZip } from '../../utils/zip.js';
 
 interface RigaMappa { chiave: string; nome: string; tipo: TipoMappa; genitore_chiave: string | null; ordine: number; immagine_chiave: string | null; asset: string | null; larghezza: number | null; altezza: number | null; entita_tipo: string | null; entita_chiave: string | null; origine: 'seed' | 'utente'; note: string; updated_at: string; ruolo_immagine: RuoloImmagine }
 interface RigaImmagineSpillo { id: number; spillo_id: number; ordine: number; immagine_chiave: string | null; asset: string | null; didascalia: string; updated_at: string }
-interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null }
+interface RigaSpillo { area_guida_chiave?: string|null; solo_posizione: number; id: number; mappa_chiave: string; tipo: TipoSpillo; nome: string; descrizione: string; x: number; y: number; riferimento_tipo: TipoRiferimento | null; riferimento_chiave: string | null; collezionabile: number; ordine: number; origine: 'seed' | 'utente'; updated_at: string; condizioni_json: string | null; seed_identita_json: string | null; nativo_json?: string | null }
 
 function rigaMappa(chiave: string): RigaMappa {
   const r = prepared('SELECT * FROM mappa WHERE chiave = ?').get(idMappa(chiave)) as RigaMappa | undefined;
@@ -150,6 +150,23 @@ function negozioDettaglio(chiave: string, partitaId?: number): NonNullable<Detta
   }
 }
 
+/** Le prove native dello spillo, se ne ha.
+ *
+ * Un JSON illeggibile non deve far cadere la mappa: se il campo e' corrotto lo spillo resta,
+ * semplicemente senza prove. Ma non si inventa un oggetto vuoto al suo posto, perche' «prove
+ * assenti» e «prove che non si riescono a leggere» sono due cose diverse.
+ */
+/** Se lo schema corrente ha gia' la colonna delle prove native (migrazione 046). */
+function colonnaNativoJson(): boolean {
+  const colonne = getDb().prepare("SELECT name FROM pragma_table_info('spillo')").all() as Array<{ name: string }>;
+  return colonne.some((c) => c.name === 'nativo_json');
+}
+
+function nativoDiSpillo(r: RigaSpillo): NativoSpilloDto | null {
+  if (!r.nativo_json) return null;
+  try { return JSON.parse(r.nativo_json) as NativoSpilloDto; } catch { return null; }
+}
+
 function immaginiDiSpillo(spilloId: number): ImmagineSpilloDto[] {
   return (prepared('SELECT * FROM spillo_immagine WHERE spillo_id = ? ORDER BY ordine, id').all(spilloId) as RigaImmagineSpillo[]).map((i) => ({
     id: i.id, url: i.immagine_chiave && leggiImmagine('spillo', i.immagine_chiave) ? `/api/immagini/spillo/${encodeURIComponent(i.immagine_chiave)}/file` : null, asset: i.asset, didascalia: i.didascalia, ordine: i.ordine,
@@ -201,13 +218,13 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esitoVisibilita = ctx.st ? valutaRequisiti(perValutazione, ctx.st) : undefined;
+  const esitoVisibilita = ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined;
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',
     nome: r.nome, descrizione: r.descrizione,
     riferimento: r.riferimento_tipo && r.riferimento_chiave ? { tipo: r.riferimento_tipo, chiave: r.riferimento_tipo==='mappa'?chiaveMappa(r.riferimento_chiave):r.riferimento_chiave } : null,
-    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
+    soloPosizione: r.solo_posizione === 1, collezionabile: r.collezionabile === 1, ...(nativoDiSpillo(r) ? { nativo: nativoDiSpillo(r) } : {}), condizioni, ...(disponibilita ? { disponibilita } : {}), ordine: r.ordine, origine: r.origine, raccolto, dettaglio, immagini: immaginiDiSpillo(r.id), updatedAt: r.updated_at,
   };
 }
 
@@ -775,6 +792,16 @@ export function importaMappe(pacchetto: EsportazioneMappeDto, opz: { sovrascrivi
         const info = prepared(`INSERT INTO spillo (mappa_chiave, tipo, nome, descrizione, x, y, riferimento_tipo, riferimento_chiave, collezionabile, ordine, origine, updated_at, condizioni_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
           .run(m.chiave, s.tipo, s.nome, s.descrizione ?? '', x, y, s.riferimento?.tipo ?? null, s.riferimento?.chiave ?? null, s.collezionabile ? 1 : 0, s.ordine ?? 0, origine, adesso, jsonCondizioni(valide));
         prepared('UPDATE spillo SET solo_posizione = ? WHERE id = ?').run(s.soloPosizione ? 1 : 0, Number(info.lastInsertRowid));
+        // Le prove native del pin — tipo, parte grafica, nome dello sprite, e per i tipi ancora da
+        // identificare tutto ciò che serve a verificarli — vanno conservate come dato. Nella sola
+        // descrizione si potevano cancellare senza che nulla se ne accorgesse, e la verifica
+        // manuale sarebbe rimasta senza appigli.
+        // La colonna arriva con la migrazione 046, ma il seed puo' essere caricato mentre lo
+        // schema e' ancora indietro (nei test le migrazioni si applicano a scaglioni, per
+        // riprodurre un'installazione vecchia): dove non c'e', le prove non si scrivono invece di
+        // far fallire l'import.
+        if (s.nativo && colonnaNativoJson()) prepared('UPDATE spillo SET nativo_json = ? WHERE id = ?')
+          .run(JSON.stringify(s.nativo), Number(info.lastInsertRowid));
         const spilloId = Number(info.lastInsertRowid);
         arrivi.push({id:spilloId,valore:s.destinazione,invalidata:s.destinazioneNonDisponibile??false});
         (s.immagini ?? []).forEach((img, ordine) => {

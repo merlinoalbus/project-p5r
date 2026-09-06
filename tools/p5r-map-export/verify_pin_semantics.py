@@ -13,9 +13,13 @@ Quattro controlli:
 4. **i pin nel pacchetto** — ognuno viene da un tipo determinato, sta su una planimetria che
    condivide il riferimento, ha le coordinate che si ottengono applicando il fattore dichiarato,
    e se cita un luogo quel luogo esiste nel quartiere della sua mappa;
-5. **i condizionali restano condizionali** — un pin che il gioco mostra a una bandiera deve avere
-   una condizione strutturata `da-configurare`, non una frase nella descrizione: senza condizione
-   comparirebbe sempre, che è falso. E chi non è condizionale non deve averne;
+5. **il contratto di visibilità** — un pin nativo non ha condizioni. Sono elementi fissi del
+   mondo, e ci sono sempre: la bandiera nativa dice «ci sei già passato», che per una guida non è
+   una condizione, e nemmeno un prerequisito lo è — una porta chiusa si vede. Le condizioni
+   restano riservate alla presenza (data, fascia, meteo, sblocco del quartiere), che riguarda le
+   entità della guida. Il prerequisito viaggia sul suo canale — `nativo.cancelli`,
+   `nativo.sbloccoLeggibile` e la descrizione — e quel canale viene ricontrollato per intero:
+   toglierne un pezzo fa cadere il controllo;
 6. **la contabilità chiude** — posati più esclusi devono fare esattamente i pin nativi: nessuna
    occorrenza può sparire dal riepilogo.
 """
@@ -123,6 +127,12 @@ def main(out, seed=None):
                  if percorso_osservato.exists() else {})
     urbani = dagli_script_ok = sotto_ok = dai_pin_ok = osservati_ok = bordo_ok = con_condizione = ipotesi = 0
     tabella_ok = 0
+    da_verificare_nel_pacchetto = [0]
+    con_prerequisito = [0]
+    cancelli = {(r['mappa'], r['indicePin']): r for r in json.loads(
+        (out/'cancelli-pin.json').read_text(encoding='utf8'))['pin']}
+    parti = {r['tipoNativo']: r for r in json.loads(
+        (out/'tabella-parti-pin.json').read_text(encoding='utf8'))['tipi']}
     # La tabella nativa si ricontrolla dall'eseguibile, non dall'artefatto: e' la sola sorgente
     # che non si puo' aggiustare a mano senza che il controllo se ne accorga.
     import pin_part_table as ppt
@@ -285,20 +295,74 @@ def main(out, seed=None):
             # anche i tipi da verificare hanno il loro segnalino, «nota»: sono posati come gli altri
             return per_tipo[pin_nativi[m['chiave']][i]['nativeType']]['tipoSpillo']
 
-        condizionali = {(spillo_di(i),
-                         round(100*pin_nativi[m['chiave']][i]['x']*fattore/larghezza, 3),
-                         round(100*pin_nativi[m['chiave']][i]['y']*fattore/altezza, 3))
-                        for i in rif['collocabili'] if pin_nativi[m['chiave']][i]['conditional']
-                        and spillo_di(i) is not None}
+        # Una condizione va **solo** dove un cancello leggibile la giustifica. Non piu' a ogni pin
+        # condizionato: la bandiera di un pin dice quasi sempre «ci sei gia' passato», e in una
+        # guida — che si consulta prima di arrivarci — quella non e' una condizione. Il controllo
+        # pretende la corrispondenza esatta nei due sensi: niente condizioni inventate, e nessun
+        # cancello dimenticato.
+        # Il contratto di visibilita', in una riga: **un pin nativo non ha condizioni**.
+        #
+        # Sono elementi fissi del mondo — passaggi, porte, forzieri, stanze sicure, scale, semi,
+        # uscite — e ci sono sempre. Nasconderli finche' il giocatore non li ha trovati vorrebbe
+        # dire che la guida mostra un posto solo dopo che ci sei stato, cioe' quando non serve
+        # piu'. Anche un prerequisito (la porta che si apre con la leva blu) non nasconde niente:
+        # la porta si vede, e la descrizione dice che cosa ci vuole per aprirla.
+        #
+        # `condizioni` resta riservato alla **presenza nel momento della visita** — data, fascia,
+        # meteo, sblocco del quartiere — e quella riguarda le entita' della guida, non i pin
+        # nativi: nei Palazzi non piove. Se un giorno un pin nativo ne avesse una davvero, andra'
+        # dimostrata qui prima di passare.
+        condizionali = set()
         for s in propri:
             assert (s['tipo'], s['x'], s['y']) in attese, f'pin fuori posto o di tipo diverso su {m["chiave"]}'
             assert 0 <= s['x'] <= 100 and 0 <= s['y'] <= 100
             atteso_condizionale = (s['tipo'], s['x'], s['y']) in condizionali
             ha = bool(s.get('condizioni'))
             assert ha == atteso_condizionale, f'condizione mancante o di troppo su {m["chiave"]}'
-            if ha:
-                assert all(c['tipo'] == 'da-configurare' and c.get('nota') for c in s['condizioni']),                     f'condizione senza forma valida su {m["chiave"]}'
-                con_condizione += 1
+            # Il canale dei prerequisiti, ricontrollato per intero e nei due sensi. E' l'altra
+            # meta' del contratto: i cancelli non nascondono, ma **devono esserci**. Toglierne uno
+            # da `cancelli-pin.json`, o svuotare `nativo.cancelli` nel pacchetto, o cancellare la
+            # frase dalla descrizione, deve far cadere il controllo — altrimenti l'informazione
+            # sparisce in silenzio e il pin resta muto, che e' il difetto di prima al contrario.
+            atteso_cancello = cancelli.get((m['chiave'], (s.get('nativo') or {}).get('indicePin')))
+            rese = (atteso_cancello or {}).get('rese') or []
+            nat = s.get('nativo') or {}
+            if rese:
+                assert nat.get('sbloccoLeggibile') == rese,                     (f'il prerequisito di {m["chiave"]} pin {nat.get("indicePin")} non arriva nel '
+                     'pacchetto: cancelli-pin.json lo ha, lo spillo no')
+                assert nat.get('cancelli') == atteso_cancello['cancelli'],                     f'le prove del prerequisito non coincidono su {m["chiave"]}'
+                for t in rese:
+                    assert t in (s.get('descrizione') or ''),                         f'il prerequisito non e’ scritto nella descrizione su {m["chiave"]}'
+                con_prerequisito[0] += 1
+            else:
+                assert not nat.get('sbloccoLeggibile') and not nat.get('cancelli'),                     (f'lo spillo di {m["chiave"]} dichiara un prerequisito che cancelli-pin.json '
+                     'non conosce')
+            # Le prove native devono arrivare nel pacchetto come dato, non come frase. Per gli
+            # spilli di un tipo ancora da identificare sono l'unica cosa che rende possibile la
+            # verifica manuale: se sparissero, resterebbe un pin muto e nessuno se ne accorgerebbe,
+            # perche' il conteggio tornerebbe lo stesso. Qui non torna.
+            nat = s.get('nativo')
+            assert nat, f'spillo nativo senza le sue prove strutturate su {m["chiave"]}'
+            assert isinstance(nat.get('tipoNativo'), int) and isinstance(nat.get('indicePin'), int), \
+                f'prove native senza tipo o indice del pin su {m["chiave"]}'
+            atteso_nativo = pin_nativi[m['chiave']][nat['indicePin']]
+            assert atteso_nativo['nativeType'] == nat['tipoNativo'], \
+                f'le prove citano un tipo nativo diverso da quello del pin su {m["chiave"]}'
+            tab = parti.get(nat['tipoNativo']) or {}
+            for campo in ('partId', 'indiceSprite', 'nomeNativo', 'png', 'motivoSenzaSprite'):
+                assert nat.get(campo) == tab.get(campo), \
+                    f'prove native discordi dalla tabella delle parti ({campo}) su {m["chiave"]}'
+            stato = per_tipo[nat['tipoNativo']]['stato']
+            scelto_a_parte = (m['chiave'], nat['indicePin']) in da_bandiera
+            assert bool(nat.get('daVerificare')) == (stato == 'da-verificare' and not scelto_a_parte), \
+                f'«da verificare» dichiarato male su {m["chiave"]} pin {nat["indicePin"]}'
+            if nat.get('daVerificare'):
+                prove = nat.get('prove') or {}
+                assert prove.get('diffusione') and prove.get('avvertenza'), \
+                    f'spillo da verificare senza la scheda delle prove su {m["chiave"]}'
+                assert prove == per_tipo[nat['tipoNativo']]['riferimenti'], \
+                    f'le prove nel pacchetto non sono quelle del registro semantico su {m["chiave"]}'
+                da_verificare_nel_pacchetto[0] += 1
             if s['riferimento']:
                 assert s['riferimento']['tipo'] == 'luogo'
                 assert quartiere and s['riferimento']['chiave'] in quartieri[quartiere], \
@@ -311,6 +375,21 @@ def main(out, seed=None):
     assert rapporto['pinNativi'] == nativi, 'il rapporto non conta tutti i pin nativi'
     assert rapporto['pinContati'] == nativi, f'contabilità aperta: {rapporto["pinContati"]} su {nativi}'
     assert rapporto['spilliCondizionati'] == con_condizione, 'i condizionati dichiarati non sono quelli trovati'
+    # Ogni pin posato di un tipo ancora da identificare deve portare le sue prove: il conto atteso
+    # si ricava dal registro semantico, non dal pacchetto, cosi' toglierle non passa inosservato.
+    atteso_da_verificare = 0
+    for m in pacchetto['mappe']:
+        for s in (m.get('spilli') or []):
+            n = s.get('nativo') or {}
+            if 'tipoNativo' not in n:
+                continue
+            if per_tipo[n['tipoNativo']]['stato'] == 'da-verificare' and \
+                    (m['chiave'], n.get('indicePin')) not in da_bandiera:
+                atteso_da_verificare += 1
+    assert da_verificare_nel_pacchetto[0] == atteso_da_verificare, \
+        (f'{atteso_da_verificare} spilli sono di un tipo da verificare ma solo '
+         f'{da_verificare_nel_pacchetto[0]} portano le prove')
+    assert atteso_da_verificare > 0, 'nessuno spillo da verificare: il controllo non starebbe controllando nulla'
     assert ipotesi == semantica['summary']['ipotesi']
     print('OK', determinati, f'tipi dimostrati ({tabella_ok} dalla tabella nativa delle parti '
           f'ricontrollata sull’eseguibile, {urbani} dal nome dello sprite,',

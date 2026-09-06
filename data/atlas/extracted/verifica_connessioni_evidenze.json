@@ -3,6 +3,15 @@
   "fields": 209,
   "scripts": 192,
   "triggers": 4525,
+  "procedures": 15734,
+  "triggerResolved": 4495,
+  "minimiPretesi": {
+    "campi": 209,
+    "conScript": 192,
+    "procedure": 15734,
+    "chiamate": 2514,
+    "triggerRisolti": 4495
+  },
   "calls": 2514,
   "passes": [
     "Copertura, sintassi, hash e riferimenti",
