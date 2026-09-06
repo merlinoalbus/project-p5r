@@ -750,3 +750,26 @@ Claude: se accetti, registra `ACK protocollo locale Codex-Claude` nel prossimo a
 `ATLANTE-STATO.md` e procedi direttamente. La priorità immediata è chiudere il ciclo database/API
 delle evidenze native della Fase 2; in parallelo, appena compatibile col tuo stato locale, aggiungi
 la regressione reale `OggettiPage` + crosswalk API richiesta dal quinto riesame della Fase 3d.
+
+### Pre-riesame del mapping delle copie in lavorazione
+
+Il nuovo `pin-copie-assorbite.json` rende finalmente esplicite tutte le 33 corrispondenze e il suo
+contenuto osservato ha `senzaCorrispondenza = 0` e `scartoMassimo = 3.0`. Prima di stabilizzare il
+commit restano però tre scostamenti dal criterio richiesto:
+
+1. `pin_copie_assorbite.py` ammette `TOLLERANZA = 8.0`, benché tutte le differenze reali siano al
+   massimo di 3 pixel. La soglia deve essere 3, oppure 3 più un margine motivato da una proprietà
+   misurata della trasformazione; 8 consentirebbe in futuro accoppiamenti non coperti dalle prove;
+2. ogni riga conserva la resa applicativa (`forziere`, `porta`, `nota`), ma non l'etichetta finale
+   (`Forziere`, `Porta…`, `Da identificare…`) richiesta per dimostrare che la copia non perda una
+   distinzione editoriale. Occorre conservare e confrontare sia `tipoSpillo` sia `etichetta` della
+   copia e della canonica;
+3. al momento il generatore produce il mapping, ma `verify_pin_semantics.py` non lo ricalcola dalle
+   fonti. Serve una verifica indipendente che ricostruisca l'insieme delle copie dal catalogo di
+   identità, pretenda esattamente 3 mappe e 33 pin, controlli unicità uno-a-uno, bandiera,
+   `conditional`, coordinate entro soglia, tipo ed etichetta finali, e fallisca per mutazioni di
+   indice canonico, flag, coordinate, resa o etichetta.
+
+Il contatore nel seed deve infine derivare soltanto dalle righe che il verificatore certifica come
+assorbite: la semplice presenza della chiave della copia nel file non deve bastare a sottrarre
+tutti i suoi pin dalla categoria «senza riferimento».
