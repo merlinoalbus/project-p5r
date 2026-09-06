@@ -372,3 +372,98 @@ funzione di presentazione già usata negli altri punti.
 controllo di merito. Le Fasi 2a/2c e la Fase 2 complessiva sono respinte finché i pin
 condizionali non entrano con una condizione strutturata, l'artefatto semantico non diventa
 deterministico e il rapporto non contabilizza esplicitamente tutte le 1.429 occorrenze.
+
+## Fase 1d — Terza verifica della presentazione
+
+**Esito: PASS**
+**Commit verificato:** `5f2411a`
+**Data verifica:** 6 settembre 2026
+
+### Evidenze
+
+1. `nomePresentazioneMappa` compone ora il nome del luogo con l'etichetta dimostrata della
+   versione tramite `nomeConVersione`. Titolo della pagina, breadcrumb del visore, mappa
+   incorporata e selettori passano quindi dalla stessa resa; `etichettaPlanimetria` non la
+   ricompone più separatamente.
+2. La prova browser sul Covo dei Ladri restituisce in modo coerente
+   «Covo dei Ladri — settore d'ingresso» nel titolo documento, nell'intestazione, nel percorso
+   accessibile della mappa e nella presentazione della versione. L'ordinale resta confinato alle
+   sole miniature senza etichetta dimostrata e non viene usato come identità del luogo.
+3. Il controllo precedente sull'albero interamente espanso resta valido: nessuna etichetta
+   `risorsa N/N livello N` è presente nel DOM.
+4. Sul commit isolato: typecheck PASS, lint PASS, 132 file e **535 test su 535** PASS.
+
+**Decisione:** Fase 1d approvata. Entrambi i rilievi originari — etichette tecniche e resa
+divergente delle versioni — sono chiusi.
+
+## Fase 2 — Seconda verifica dopo le correzioni
+
+**Esito del riesame: PASS**
+**Commit verificato:** `911f241`
+**Data verifica:** 6 settembre 2026
+
+### Evidenze
+
+1. I 324 pin nativi condizionali importati hanno ora esattamente una condizione strutturata
+   `da-configurare`; ogni nota conserva il numero della bandiera nativa. La costruzione di un
+   database isolato dal seed produce 324 `condizioni_json` valorizzati e il verificatore
+   dedicato controlla numero e forma delle condizioni.
+2. Cinque rigenerazioni isolate consecutive di `semantica-pin.json` producono tutte lo stesso
+   SHA-256 `6A7283F5D95F43588858B80E3997AC5F82E5C8C963187283D3360D4AA507A3EA`, identico al file
+   versionato. L'ordinamento secondario per nome elimina l'instabilità dei pari merito.
+3. Il rapporto rigenerato è byte-identico al versionato, SHA-256
+   `4965F580A86AA1093C247C8DD1B783932B3673013CA86E272A04EF52899BAD9F`, e chiude la
+   contabilità: 405 posati + 7 esclusi individualmente + 94 senza riferimento condiviso + 923
+   senza significato dimostrato = **1.429 pin nativi**.
+4. Il pacchetto rigenerato è logicamente identico al versionato dopo normalizzazione degli EOL,
+   SHA-256 `48ECCE281CD0CF797CDFF91C0861C85CF0BDC3AC0733F9717A2A482EEF8B0C5F`.
+5. Sul commit isolato: typecheck PASS, lint PASS, 132 file e **534 test su 534** PASS.
+
+**Decisione:** i tre rilievi bloccanti del precedente esame sono chiusi. Le parti consegnate
+2a/2c sono approvate insieme alla 2b già approvata; la Fase 2 resta dichiaratamente parziale
+finché i 46 tipi ancora privi di significato non saranno risolti o esclusi in via definitiva.
+
+## Fase 3d — Accessi dalle altre sezioni
+
+**Esito: FAIL**
+**Commit verificato:** `6dafa16` (ricontrollato sullo stato `5f2411a`)
+**Data verifica:** 6 settembre 2026
+
+### Parti conformi
+
+1. `attivita` è stato aggiunto a `TIPI_ACCESSO_MONDO` e al registro delle tabelle del resolver;
+   il barrel API esporta ora `accessoMondo`.
+2. Il componente comune `CollegamentoMappa` è usato nelle pagine di negozi, attività,
+   confidenti e dettaglio Palazzo. Il resolver raggiunge correttamente i riferimenti strutturati
+   già presenti per negozi, luoghi, articoli e confidenti.
+3. Il ricalcolo indipendente sul database in memoria riproduce i conteggi dichiarati per le
+   prime 200 righe degli articoli e, sull'inventario completo, trova 833 voci, 633 con accesso e
+   501 con pin esatto. La suite completa resta verde: **535 test su 535**.
+
+### Rilievi bloccanti
+
+1. **Manca il collegamento nella pagina Oggetti.** Il piano cita espressamente
+   `OggettiPage.tsx`, ma il file non importa né usa `CollegamentoMappa`; gli articoli sono
+   risolvibili dal backend ma non hanno l'accesso «dove si trova» nella loro superficie UI.
+2. **Le quattro chiavi costruite a mano non sono state sostituite.** Restano
+   `dungeon-${chiave}` in `DungeonPage.tsx`, i fallback `citta-${chiave}` in
+   `QuartierePage.tsx` e `IngressoQuartiere.tsx`, e la comparazione/costruzione manuale in
+   `CittaPage.tsx`. Il punto 3d richiedeva di passare da `getMappaPerEntita` o dal resolver.
+3. **L'accesso preciso delle attività è ottenuto con una somiglianza di nome non registrata.**
+   `accessoMondoService.ts` cerca `lower(nome) = lower(?)` e poi `LIKE '%nome%'` dentro il
+   quartiere, nonostante il contratto della funzione dichiari che risolve soltanto associazioni
+   registrate. Questo produce il pin di Freccette/Biliardo per corrispondenza testuale, non per
+   un legame strutturato, e può cambiare o creare falsi abbinamenti al variare dei nomi.
+4. **La copertura dichiarata non è l'intero inventario.** Il totale 534 tronca gli articoli ai
+   «primi 200», mentre nel seed risultano 499 articoli visibili. Il totale effettivamente
+   percorso è 833; i conteggi completi sono 633 accessi e 501 pin. La dichiarazione «copertura
+   misurata sull'intero inventario» è quindi falsa anche se il campione riportato è
+   riproducibile.
+5. Il commit non aggiunge test dedicati per i nuovi rami `attivita` e `confidente`, per la
+   presenza del collegamento comune nelle pagine, né per l'assenza di associazioni nominali
+   spurie. La suite verde non esercita questi nuovi comportamenti.
+
+**Decisione:** Fase 3d respinta. Per il riesame servono il collegamento anche negli Oggetti, la
+rimozione di tutte le quattro famiglie di chiavi costruite a mano, associazioni delle attività
+strutturate anziché nominali, conteggi sull'inventario completo e test specifici dei nuovi
+percorsi.
