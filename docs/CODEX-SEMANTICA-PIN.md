@@ -1074,3 +1074,27 @@ La soluzione robusta è proiettare l'albero logico sul sottoinsieme delle condiz
 valutare quello per la visibilità, mantenendo separato l'albero dei prerequisiti per la scheda. Il
 test deve coprire almeno i quattro casi fascia corretta/errata × prerequisito soddisfatto/rosso;
 la visibilità deve cambiare soltanto con la fascia.
+
+### Pre-audit Codex del lotto successivo a `fcf3c9a`
+
+La bozza corrente chiude due rilievi misurabili: il parser riconosce e pretende tutti i 37 tipi
+del registro, confrontando poi `collezionabile` pin per pin; i nove artefatti rigenerati usano LF
+canonico, senza CRLF e con newline finale. Anche il join del negozio usa ora la relazione esatta
+`luogo.negozio = negozio.chiave`, eliminando l'aggregazione last-write-wins per quartiere.
+
+Restano però due blocker certi prima che il lotto possa essere dichiarato pronto:
+
+1. `verify_pin_semantics.py` importa `cancelli_pin.calcola()` e usa quindi lo stesso calcolatore
+   del produttore. Questo intercetta la vecchia cancellazione combinata dagli artefatti derivati
+   finché `connessioni.json` resta integro, ma un errore o una regressione condivisa in `calcola()`
+   resta autocertificata. Il verificatore deve avere una ricostruzione separata oppure confrontare
+   il produttore con un oracolo indipendente ottenuto direttamente dalle sorgenti native.
+2. Il join dei negozi non effettua il backfill. Nel ciclo dei marcatori, il controllo
+   `if (esiste.get('luogo', r.luogo_chiave)) continue` avviene prima del calcolo e
+   dell'applicazione della presenza. Nei database già popolati i pin esistenti rimangono quindi
+   con `condizioni_json` nullo, malgrado la relazione uno-a-uno ora corretta. La sincronizzazione
+   deve riconciliare anche i record già esistenti senza cambiarne identità o stato per partita,
+   e una prova deve partire da un database già popolato.
+
+Attività, finestre dungeon e i due rilievi formali di visibilità su `2ebaf1a` restano inoltre
+fuori dalla bozza visibile e dovranno essere chiusi nello stesso candidato complessivo.
