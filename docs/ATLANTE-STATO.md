@@ -40,31 +40,72 @@ Decisioni dell'utente che governano il lavoro:
 
 ---
 
-## Fase 0 — Sblocco delle fonti e test rosso · **IN CORSO**
+## Fase 0 — Sblocco delle fonti e test rosso · **PRONTA PER VERIFICA**
 
 Obiettivo: portare in chiaro le fonti native mai usate e chiudere l'unico test rosso.
 
 | passo | stato | esito |
 |---|---|---|
-| ripristino dei 1480 originali dai CPK | ✅ fatto | `python tools/p5r-map-export/restore_originals.py` → «Originali ripristinati e verificati: 1480» in `data/atlas/extracted/originali/` (ignorati da git, rigenerabili a hash verificati) |
-| correzione `server/routes/mappe-editor.test.ts:55` | ✅ fatto | la chiave pubblica del Dedalo è `memento` (percorso derivato dal nome di seed «Memento»), non più `mementos-i-dedali`; da riconfermare con la suite completa |
-| `whole_map_names.py` — nomi ufficiali IT delle mappe d'insieme | ⬜ da fare | da `FLDWHOLEMAPTABLE.FTD` + `FLDWHOLEMAPTABLEDNG.FTD` |
-| `dungeon_place_index.py` — indice luoghi dei dungeon | ⬜ da fare | da `FLDDNGPLACENO.FTD` + `FLDATDNGPLACENO.FTD`; sblocca i 59 nomi residui e i 16 `???` di Maruki |
-| `map_icons.py` — atlanti icone per la semantica dei pin | ⬜ da fare | 178 `ICON_*.BIN`, indicizzati da `nativeType` |
-| `subway_network.py` — rete della metropolitana | ⬜ da fare | da `FLDLMAPSTATION/LINE/FARE.FTD` |
+| ripristino dei 1480 originali dai CPK | ✅ | `python tools/p5r-map-export/restore_originals.py` → «Originali ripristinati e verificati: 1480» in `data/atlas/extracted/originali/` (ignorati da git, rigenerabili a hash verificati) |
+| correzione `server/routes/mappe-editor.test.ts:55` | ✅ | la chiave pubblica del Dedalo è `memento` (percorso derivato dal nome di seed «Memento»), non più `mementos-i-dedali` |
+| `whole_map_names.py` → `extracted/nomi-mappe-ufficiali.json` | ✅ | 106 record (95 città + 11 Palazzi), **530 destinazioni ufficiali** con nome italiano |
+| `dungeon_place_index.py` → `extracted/indice-luoghi-dungeon.json` | ✅ | 192 record, 159 con gruppo valido, **113 nomi distinti** per i campi `major ≥ 150` |
+| `map_icons.py` → `extracted/icone-mappa.json` + `extracted/icone-mappa/` | ✅ | 193 sprite con nome interno, **144 PNG ritagliati**, 1429 pin censiti, **51 tipi nativi urbani dimostrati** |
+| `subway_network.py` → `extracted/metropolitana.json` | ✅ | 31 stazioni valide, 91 tratte, 64 archi distinti, matrice tariffe 33×36 |
 
-### Risorse sbloccate dal ripristino
+### Verifiche eseguite
 
-Erano nell'archivio compresso e non erano mai state portate in chiaro:
+| comando | esito |
+|---|---|
+| `python tools/p5r-map-export/verify_whole_map_names.py data/atlas/extracted` | OK — 106 record e 2014 voci ricontrollati byte per byte |
+| `python tools/p5r-map-export/verify_dungeon_place_index.py data/atlas/extracted` | OK — 192 record ricontrollati sui titoli nativi |
+| `python tools/p5r-map-export/verify_map_icons.py data/atlas/extracted` | OK — 193 sprite, 144 PNG ricalcolati pixel per pixel, 1429 pin ricontati |
+| `python tools/p5r-map-export/verify_subway_network.py data/atlas/extracted` | OK — 31 stazioni, 91 tratte, 33 righe di tariffa |
+| `npm test` | **534 PASS su 534** (era 533/534) — 132 file |
+| `npm run typecheck` | PASS |
+| `npm run lint` | PASS |
 
-| risorsa | n | a cosa serve |
-|---|---|---|
-| `BASE/FIELD/PANEL/ROADMAP/ICON_*.BIN` | 178 | dà il significato certo dei 104 `nativeType` dei 1429 pin nativi |
-| `IT/FIELD/PANEL/FLDWHOLEMAPTABLE(.DNG).FTD` | 2 | nomi ufficiali italiani delle mappe d'insieme |
-| `BASE/FIELD/FTD/FLDDNGPLACENO.FTD` | 190 record | i nomi mancanti dei dungeon |
-| `BASE/FIELD/FTD/FLDATDNGPLACENO.FTD` | — | luoghi dei Memento |
-| `IT/…/LMAP/FLDLMAPSTATION/LINE/FARE.FTD` | 3 | stazioni, linee e tratte della metropolitana |
-| `IT/…/MIDDLE_MAP/FLDMDLMAPITEM.FTD` | — | voci della mappa intermedia |
+### Scoperte che cambiano il seguito del lavoro
+
+**1. La tabella ufficiale delle destinazioni esiste ed è in italiano.**
+`FLDWHOLEMAPTABLE.FTD` / `FLDWHOLEMAPTABLEDNG.FTD` sono il menu di viaggio della mappa
+d'insieme: per ogni luogo di partenza, il titolo e fino a 19 destinazioni con il nome che il
+gioco mostra al giocatore. Esempi reali estratti:
+
+- *Stazione di Shibuya* → Piazza della stazione, Central Street, Sottopasso, Centro comm.
+  sotterraneo, Tornello della linea Ginza, Negozio softair, Stanza di Velluto, Sala giochi,
+  Big Bang Burger, Diner, Beef Bowl Shop, Convenience store, Cinema, Palestra, Fioraio
+- *Cancello del castello* (Palazzo di Kamoshida) → Safe Room precedente, Prigione sotterranea,
+  Edificio ovest 1P, Sala centrale 2P, **Edificio est 3P**, **Edificio est, dépendance**,
+  **Torre centrale**, Sala del trono
+
+Le tre voci in grassetto sono esattamente i nomi che `kamoshida-nomi-campi.json` proponeva senza
+prova: ora la prova c'è. Questa tabella è la sorgente autorevole per la **Fase 1** (nomi) e per
+la **Fase 3** (collegamenti), e supera per qualità sia i titoli texpack sia gli indici FTD.
+
+**2. La semantica dei pin urbani è risolta, con prova incrociata.**
+`ICON_*.BIN` non è un atlante di immagini ma la **tabella di piazzamento** dei pin (72 byte per
+record). Le icone stanno in `P5MINIMAP_01.SPD`, foglio `SPR0` di 193 sprite, ognuno con il
+**nome interno in Shift-JIS**. La corrispondenza è `sprite = tipoNativo + 68` per il blocco
+urbano 46-96, dimostrata perché i negozi che ne risultano coincidono, mappa per mappa, con le
+destinazioni della tabella ufficiale:
+
+| mappa | tipi nativi | icone risultanti | riscontro nella tabella ufficiale |
+|---|---|---|---|
+| Yongen-Jaya (`009_2`) | 82-87 | bagno pubblico, Leblanc, lavanderia, gabbie di battuta, usato, clinica | Bagno pubblico, Café Leblanc, Lavanderia automatica, Gabbie di battuta, Clinica |
+| Shibuya Central St. (`001_3`) | 51-62 | libreria, DVD, ristorante, beef bowl, softair, sala giochi, minimarket, palestra, Big Bang Burger, farmacia, Don Quijote, cinema | Negozio softair, Sala giochi, Big Bang Burger, Diner, Beef Bowl Shop, Convenience store, Cinema, Palestra |
+| Akihabara (`007_1`) | 76-81 | retrogaming, maid café, gachapon, elettronica, gadget, ferramenta | — |
+| Kichijoji (`005_1`) | 88-95 | cartoleria, usato, tempio, jazz club, pietre, freccette, incensi, fritti | — |
+
+Sono **51 tipi nativi su 102**, cioè tutti i pin urbani. I 38 tipi usati nei Palazzi restano
+**deliberatamente senza significato assegnato**: si risolvono in Fase 2 incrociandoli con le
+etichette dei trigger, non per somiglianza. I 144 PNG ritagliati stanno in
+`data/atlas/extracted/icone-mappa/` come materiale di riconoscimento — **non sono asset
+dell'app**, che continua a disegnare i propri segnalini.
+
+**3. La rete della metropolitana è completa.** 31 stazioni con nome, descrizione e curiosità in
+italiano, 91 tratte dichiarate (64 archi distinti) e la matrice delle tariffe. È la base dei pin
+`treno` e dei collegamenti di rete della Fase 3.
 
 ---
 
@@ -95,6 +136,18 @@ esistenti, in `docs/grafica/prompt-immagini.md` e `docs/grafica/stato-generazion
 
 ## Registro delle dichiarazioni di pronto
 
-| data | fase | dichiarazione |
-|---|---|---|
-| — | — | nessuna ancora |
+| data | fase | dichiarazione | esito Codex |
+|---|---|---|---|
+| 2026-09-06 | Fase 0 | **PRONTA PER VERIFICA** — fonti native in chiaro, 4 estrattori con 4 verificatori indipendenti, suite 534/534 | in attesa |
+
+### Cosa verificare nella Fase 0
+
+1. `python tools/p5r-map-export/restore_originals.py` deve ristampare «1480» senza modificare nulla
+   (lo script rifiuta di sovrascrivere file con hash diverso).
+2. I quattro estrattori rigenerano i JSON in modo riproducibile:
+   `python tools/p5r-map-export/{whole_map_names,dungeon_place_index,map_icons,subway_network}.py data/atlas/extracted`.
+3. I quattro `verify_*.py` corrispondenti passano su file rigenerati e su file già presenti.
+4. `npm run typecheck && npm run lint && npm test` → 534/534.
+5. Il merito: che la corrispondenza `tipoNativo + 68` sia davvero dimostrata e non assunta, e che
+   nessun tipo dei Palazzi abbia ricevuto un significato. In `icone-mappa.json` il campo
+   `associazione` deve valere `blocco-urbano-dimostrato` solo per i 51 tipi urbani.
