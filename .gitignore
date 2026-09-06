@@ -35,3 +35,6 @@ data/atlas/extracted/originali/
 
 # Cache dei moduli Python degli strumenti
 __pycache__/
+
+# Cartella di lavoro temporanea del verificatore
+.codex-temp/
