@@ -17,7 +17,7 @@ import { httpErrors } from '../../utils/httpError.js';
 import { t } from '../traduzioniService.js';
 import { eliminaImmagine, fileImmagine, leggiImmagine, salvaImmagine } from '../immaginiService.js';
 import { dettaglioNegozio } from '../negoziService.js';
-import { statoDisponibilitaPartita, valutaRequisiti, type StatoDisponibilita } from '../disponibilitaService.js';
+import { statoDisponibilitaPartita, valutaRequisitiSpillo, type StatoDisponibilita } from '../disponibilitaService.js';
 import { z } from 'zod';
 import { descriviRequisitoSpillo, leggiCondizioniSalvate, normalizzaRequisitoSpillo, normalizzaCondizioniSpillo, type NomiCondizioni, type RequisitoSpillo } from '../../../shared/condizioniSpillo.js';
 import { DEFINIZIONI_SPILLO, TIPI_MAPPA, TIPI_RIFERIMENTO, TIPI_SPILLO, assetPredefinitoMappa, type TipoMappa, type TipoRiferimento, type TipoSpillo } from '../../../shared/spilli.js';
@@ -218,7 +218,7 @@ function dettagliSpillo(r: RigaSpillo, ctx: ContestoSpilli = {}): DettagliSpillo
   // con la partita ogni condizione ha il suo semaforo: rosso ⇒ lo spillo è nascosto sulla mappa. La richiesta si valuta col nome
   // (il valutatore dei semafori lo usa nel dettaglio e riconosce sia la chiave sia il nome), nel DTO resta la chiave per l'editor.
   const perValutazione = condizioni.map((c) => (c.tipo === 'richiesta' ? { ...c, richiesta: nomi.richieste?.[c.richiesta] ?? c.richiesta } : c));
-  const esitoVisibilita = ctx.st ? valutaRequisiti(perValutazione, ctx.st) : undefined;
+  const esitoVisibilita = ctx.st ? valutaRequisitiSpillo(perValutazione, ctx.st) : undefined;
   const disponibilita = r.solo_posizione === 1 && esitoVisibilita?.stato === 'disponibile' ? undefined : esitoVisibilita;
   return {
     id: r.id, tipo: r.tipo, tipoNome: DEFINIZIONI_SPILLO[r.tipo]?.nome ?? r.tipo, colore: DEFINIZIONI_SPILLO[r.tipo]?.colore ?? '#888',

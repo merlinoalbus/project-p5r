@@ -15,6 +15,7 @@
 import { prepared } from '../db/dbService.js';
 import { confidenti, dotiSociali } from './partiteService.js';
 import { dataLeggibile, statoPartitaSemafori, valuta, type RigaRequisito, type StatoPartitaSemafori } from './semaforiService.js';
+import { nascondeIlPin } from '../../shared/condizioniSpillo.js';
 import type { RequisitoSeed } from '../../shared/seed.js';
 import { descriviRequisitoSpillo, type RequisitoSpillo, dataSbloccoQuartiere, ordineGioco } from '../../shared/condizioniSpillo.js';
 import type { DisponibilitaDto, SemaforoRequisitoDto } from '../../shared/types.js';
@@ -285,6 +286,25 @@ export function valutaDisponibilita(testi: Array<string | null | undefined>, st:
 }
 
 /** Stessa regola per requisiti già strutturati (condizioni di visibilità degli spilli). */
+/** Come sopra, ma per uno spillo: **solo la presenza nasconde**.
+ *
+ * Un requisito che non riguarda la presenza — una dote da alzare, un Confidente da portare a un
+ * rango, una porta che vuole una chiave — non deve far sparire il pin: la cosa c'è, e la guida
+ * serve proprio a dire dov'è prima che tu possa usarla. Resta scritto accanto al pin, e concorre
+ * al massimo a un «ignoto».
+ *
+ * Il rosso di una condizione di presenza invece toglie il pin, ed è quello che si vuole: se il
+ * quartiere apre a giugno, in aprile quel negozio non c'è, e mostrarlo manda il giocatore a
+ * cercare una cosa che non esiste ancora.
+ */
+export function valutaRequisitiSpillo(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
+  const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
+  const bloccante = requisiti.some((q, i) => q.stato === 'rosso' && nascondeIlPin(elenco[i].tipo));
+  const stato = bloccante ? 'bloccato'
+    : requisiti.some((q) => q.stato === 'rosso' || q.stato === 'grigio') ? 'ignoto' : 'disponibile';
+  return { stato, requisiti };
+}
+
 export function valutaRequisiti(elenco: RequisitoDisponibilita[], st: StatoDisponibilita): DisponibilitaDto {
   const requisiti = elenco.map((r, i) => valutaRequisito(r, i, st));
   const stato = requisiti.some((q) => q.stato === 'rosso') ? 'bloccato' : requisiti.some((q) => q.stato === 'grigio') ? 'ignoto' : 'disponibile';
