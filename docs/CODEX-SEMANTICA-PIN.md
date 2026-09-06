@@ -1168,3 +1168,19 @@ mentre le scelte dell'utente e i prerequisiti restano invariati in un altro camp
 prossimo commit deve mutare un pin temporaneo reale tramite editor, riavviare o reseedare e
 verificare API e DOM nei due stati temporali: la presenza deve restare corretta senza riscrivere
 la modifica manuale.
+
+### Arbitrato dell'utente — database iniziale immutabile
+
+L'utente ha chiarito che non esiste una riconciliazione prevista a ogni avvio: la base dati
+iniziale viene formata una sola volta e poi resta immutabile. Le proposte precedenti di
+`presenza_json` idempotente a ogni startup e le richieste di backfill/reseed ricorrente vanno
+pertanto lette come ritirate dal perimetro runtime. La verifica corretta è una sola costruzione
+iniziale da database fresco; il processo non deve poi modificare spilli o dati utente in avvio.
+
+Nello stesso arbitrato, coordinate a griglia e provenienze puntuali degli ingressi dei Palazzi
+sono ancoraggi di navigazione autorizzati e non richiedono certificazione 3D→2D. Non li tratto più
+come blocker, purché l'interfaccia non li descriva falsamente come coordinate native dimostrate.
+
+I «cancelli» menzionati nei rilievi sono condizioni di gioco di porte, forzieri e leve, non un
+processo da eseguire periodicamente. Il loro eventuale verificatore appartiene alla costruzione
+esplicita del seed; l'indipendenza di quel controllo non è un requisito del runtime immutabile.
