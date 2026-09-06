@@ -3,6 +3,7 @@
 P5R transform reference: Sewer56/CriFsV2Lib, Encryption/Game/P5RCrypto.cs.
 UTF table parsing recovered from the previous local extraction attempt.
 """
+from scrittura import scrivi_json
 import collections
 import hashlib
 import io
@@ -258,7 +259,7 @@ def main(game=GAME, out=OUT):
     manifest = dict(images=images, sources=sources, inventories=inventories, errors=errors,
         extraction='P5R attribute-driven XOR, strict CRILAYLA, original DDS decoded by Pillow; no block swapping',
         previews='Cropped to nonzero alpha and reduced on dark background; PNG originals retain full canvas and alpha')
-    (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
+    scrivi_json(OUT/'manifest.json', manifest)
     print('RESULT',len(images),'images',len(sources),'sources',len(errors),'errors',flush=True)
     if errors:
         raise SystemExit(1)

@@ -13,13 +13,24 @@ from pathlib import Path
 import json
 
 
-def scrivi_json(percorso, dati, indent=2):
-    """Un artefatto JSON con fine riga stabile e una riga finale."""
-    testo = json.dumps(dati, ensure_ascii=False, indent=indent)
+def scrivi_json(percorso, dati, indent=2, ammetti_nan=True):
+    """Un artefatto JSON con fine riga stabile e una riga finale.
+
+    `ammetti_nan=False` rifiuta `NaN` e `Infinity`. Python li scriverebbe tali e quali, ma non sono
+    JSON valido: un lettore che non sia Python si ferma lì. Serve a chi produce misure in virgola
+    mobile, dove un valore non finito non è un dato ma il segno che il calcolo è andato storto —
+    meglio fermarsi subito che salvarlo in un file che poi nessun altro riesce a leggere.
+    """
+    testo = json.dumps(dati, ensure_ascii=False, indent=indent, allow_nan=ammetti_nan)
     scrivi_testo(percorso, testo if testo.endswith('\n') else testo + '\n')
 
 
 def scrivi_testo(percorso, testo):
-    """Testo con fine riga `\\n` su qualunque piattaforma."""
+    """Testo con fine riga `\\n` su qualunque piattaforma e una sola riga vuota in fondo.
+
+    La riga finale non è pignoleria: senza, l'ultima riga del file non è una riga, e ogni
+    strumento che lavora per righe — `diff`, `git`, `tail`, il confronto fra due rigenerazioni —
+    la tratta come un caso a parte. Una sola, sempre: se il testo ne porta già tre, ne resta una.
+    """
     with open(Path(percorso), 'w', encoding='utf8', newline='\n') as f:
-        f.write(testo)
+        f.write(testo.rstrip('\n') + '\n')

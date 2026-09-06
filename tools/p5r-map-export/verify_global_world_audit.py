@@ -1,4 +1,5 @@
 """Independent completeness and native entrance-byte verification for global inventory."""
+from scrittura import scrivi_json
 import collections,hashlib,json,struct,sys
 from pathlib import Path
 
@@ -59,6 +60,6 @@ def main(out,connection_file='mondo_connessioni_evidenze.json',target_dir='mondo
         assert d['previousComparison']=={'occurrencesPreserved':len(old['occurrences']),'newOccurrences':len(now)-len(old['occurrences']),'statusChanges':changes}
     report={'status':'PASS-global-inventory-only','fields':len(allfields),'maps':len(d['maps']),'occurrencesChecked':len(expected),'nativeFbnHashesChecked':sourcesChecked,
       'deduplicatedEdgesChecked':len(groups),'statuses':dict(collections.Counter(o['status'] for o in occurrences)),'operationalPinsGenerated':0}
-    (target/'verifica.json').write_text(json.dumps(report,indent=2),encoding='utf-8');print(json.dumps(report))
+    scrivi_json(target/'verifica.json', report);print(json.dumps(report))
 
 if __name__=='__main__':main(*sys.argv[1:])

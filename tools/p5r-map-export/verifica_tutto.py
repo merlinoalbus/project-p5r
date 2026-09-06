@@ -52,6 +52,13 @@ ARGOMENTI = {
     'verify_export.py': [GIOCO/'CPK'],
     # l'eseguibile, dove sta la tabella che lega il tipo di pin allo sprite
     'verify_pin_part_table.py': [GIOCO/'P5R.exe'],
+    # Qui la sola parte a costo zero: forma degli artefatti e censimento dei produttori. La prova
+    # di determinismo vera rifà l'intero lotto e dura ore — lanciata dentro questo comando ha
+    # trasformato una verifica da tre minuti in una da due ore, e un controllo che nessuno ha più
+    # voglia di lanciare non protegge niente. Si lancia da sola, ed è dichiarata:
+    #   python tools/p5r-map-export/rigenera_tutto.py
+    #   python tools/p5r-map-export/verify_determinismo.py data/atlas/extracted
+    'verify_determinismo.py': ['--senza-rigenerare'],
 }
 
 

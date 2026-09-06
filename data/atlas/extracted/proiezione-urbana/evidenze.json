@@ -1,10 +1,10 @@
 {
   "status": "unverified-urban-projection",
   "sources": {
-    "campi-completi/connessioni.json": "506d6546ca14adf36daa2143cbb71cb04eb3ed9b088b81adc44f9c6ee629b9c2",
+    "campi-completi/connessioni.json": "d8a10f4205ac38894e6ea3e2959ec9da5f0ec8f2803967f769442afe51129e81",
     "campi-completi/grafo/inventario.json": "248e30b1a1db1fad26a96de551a7e396ec17863cd81e5ab7782b400bed3b8c1b",
     "mondo_metadati.json": "cc7a16af91007087f1db7b98ddabea3d53e2b5a51dd3c9b20e750f97f8432085",
-    "mondo_texpack_evidenze.json": "e14eecee8e1af87409de11645be63b6ba48fbde421a3e690847df8700f6eaf94",
+    "mondo_texpack_evidenze.json": "02e975c91cf0081dc32ae6bfcf237965de7016f61a346370063aef3ec02c8546",
     "originali/IT/FIELD/PANEL/ROADMAP/ROADMAP.TBL": "97b8f1b7d067f23238895eb2dedc207c63b632fc8e83acb4e80e7b2a5f4ee787",
     "campi-completi/originali/BASE/FIELD/DATA/F001_003_00.FBN": "89bd74706fd5abe629289d874961037bcb7bc83b00c08b7bc7ab73243dde0ebc",
     "png/BASE/FIELD/PANEL/ROADMAP/RMAP_001_3_0.png": "948a8fabbea5f314fd46462443be1a0d5169b419c4a1fe8e72c96bc3acc3687f",

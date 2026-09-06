@@ -25,6 +25,7 @@ Tre cose rendono l'accoppiamento una corrispondenza e non un'attrazione:
 abbastanza.** Le altre restano non certificate: una proiezione sbagliata metterebbe i pin nel
 posto di un altro, che è peggio di non metterli.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import collections
 import itertools
@@ -379,7 +380,7 @@ def main(out):
                 'La similitudine ad assi allineati non copre inquadrature ruotate o prospettiche.',
                 'Solo le coppie stabili valgono come prova di che cosa sia un pin: le altre restano '
                 'nel file per trasparenza, ma non vanno usate per dedurre significati.'])
-    (out/'proiezioni-mappa.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'proiezioni-mappa.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False, indent=1))
     return risultato
 

@@ -10,6 +10,7 @@ le stringhe consecutive del file, che risulta 52 byte per settantanove volte su 
 che precede il nome **non è un indice progressivo** — gli stessi luoghi tornano per salvataggi
 diversi — quindi si tiene l'ordine di lettura e il valore grezzo, senza pretendere che salga.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import collections
 import json
@@ -68,8 +69,7 @@ def main(out):
         limits=['I nomi sono quelli del gioco e non vanno tradotti di nuovo.',
                 'Un «???» è un segnaposto del gioco, non un nome mancante: va lasciato tale.',
                 'Lo stesso luogo compare più volte: l’elenco è dei salvataggi, non dei posti.'])
-    (out/'luoghi-salvataggio.json').write_text(
-        json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'luoghi-salvataggio.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     print('passo misurato:', passo, 'su', quante, 'stringhe')
     for n in distinti[:12]:

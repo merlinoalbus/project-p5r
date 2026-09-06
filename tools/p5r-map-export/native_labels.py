@@ -1,4 +1,5 @@
 """Etichette native delle interazioni, con riferimenti ai byte originali."""
+from scrittura import scrivi_json
 from pathlib import Path
 import json
 import struct
@@ -80,7 +81,7 @@ def main(out,charset,cpk=GAME):
         limits=['Prompt14 non associato a FLDDNGCHECKNAME senza prova specifica.',
             'I byte identificativi dei salvataggi sono evidenze autonome, non associazioni confermate.',
             'Nessuna coordinata o destinazione navigabile aggiunta.'])
-    (out/'mondo_etichette.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf8')
+    scrivi_json(out/'mondo_etichette.json', result)
     print('INTERAZIONI',len(rows),'ETICHETTATE',sum(r['status']=='valido' for r in rows))
     return result
 

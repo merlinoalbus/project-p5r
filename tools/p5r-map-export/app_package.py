@@ -1,3 +1,4 @@
+from scrittura import scrivi_json, scrivi_testo
 """Build a portable staging import, preserving the native coordinate canvas.
 
 This package deliberately contains no inferred physical links or unconditional
@@ -30,7 +31,7 @@ def read(path):
 
 
 def write(path, obj):
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding='utf-8')
+    scrivi_json(path, obj)
 
 
 def build(out):
@@ -125,7 +126,7 @@ def build(out):
         limits=['Staging only: organizational hierarchy is not the physical graph.',
                 'No native event flags interpreted as save conditions.',
                 'No unverified native pins imported as always available.']))
-    (target / 'LEGGIMI.md').write_text(
+    scrivi_testo(target / 'LEGGIMI.md',
         '# Planimetrie native per l’app\n\n'
         'Pacchetto di prova: 301 planimetrie con immagini incorporate e coordinate originali. '
         'Importare planimetrie-native.json con l’importatore delle mappe, in un ambiente isolato. '
@@ -136,7 +137,7 @@ def build(out):
         'L’importazione non completa la navigazione continua: restano da certificare uscite, ingressi, '
         'posizioni e condizioni narrative dei pin. I flag originali sono conservati nelle evidenze.\n\n'
         'Rigenerazione: `python app_package.py CARTELLA_EXPORT`. '
-        'Verifica indipendente: `python verify_app_package.py CARTELLA_EXPORT`.\n', encoding='utf-8')
+        'Verifica indipendente: `python verify_app_package.py CARTELLA_EXPORT`.\n')
     print(json.dumps({'maps': len(maps), 'resourceGroups': len(roots), 'images': len(images), 'urban': len(urban)}))
     return package
 

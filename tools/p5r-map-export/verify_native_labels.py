@@ -1,4 +1,5 @@
 """Verifica copertura, provenienza, byte delle etichette e riproducibilita."""
+from scrittura import scrivi_json
 from pathlib import Path
 import ast
 import collections
@@ -50,7 +51,7 @@ def verify(out):
     report=dict(status='PASS',interactions=4525,statuses=dict(collections.Counter(r['status'] for r in d['interactions'])),
         passes=['Sintassi, copertura, riferimenti e hash','Rilettura indipendente offset e payload, regressione GO','Codifica, input malformati e determinismo'],
         scope='Etichette native; nessuna nuova associazione navigabile certificata')
-    (out/'verifica_etichette.json').write_text(json.dumps(report,indent=2),encoding='utf8');print(json.dumps(report))
+    scrivi_json(out/'verifica_etichette.json', report);print(json.dumps(report))
 
 
 if __name__=='__main__':verify(sys.argv[1])

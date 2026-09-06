@@ -1,4 +1,5 @@
 """Bank-aware flag/counter census; preserves complete procedure context."""
+from scrittura import scrivi_json
 import ast,hashlib,json,re,sys
 from pathlib import Path
 
@@ -51,6 +52,6 @@ def main(out):
         result['files'].append({'source':entry,'procedures':rows,'references':references})
     result['summary']={'files':len(result['files']),'reads':sum(r['access']=='read' for f in result['files'] for r in f['references']),
       'writes':sum(r['access']=='write' for f in result['files'] for r in f['references']),'dynamicAddresses':sum(r['address'] is None for f in result['files'] for r in f['references'])}
-    (root/'riferimenti.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8');print(json.dumps(result['summary']))
+    scrivi_json(root/'riferimenti.json', result);print(json.dumps(result['summary']))
 
 if __name__=='__main__':main(sys.argv[1])

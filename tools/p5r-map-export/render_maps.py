@@ -1,4 +1,5 @@
 """Create named, readable area maps and honest per-place overview sheets."""
+from scrittura import scrivi_json, scrivi_testo
 from pathlib import Path
 import collections
 import csv
@@ -199,7 +200,7 @@ def main(out):
           'I piani procedurali dei Memento non hanno una planimetria universale estraibile. Sono incluse le aree fisse disponibili e le Profondita.',
           'Icone dinamiche, oggetti, nemici e nebbia di esplorazione non vengono sovrapposti.',
           'Alcuni nomi sono oscurati nel gioco o ambigui: il codice area e sempre mantenuto.'])
-    (out/'mappe_indice.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
+    scrivi_json(out/'mappe_indice.json', report)
     with (out/'mappe_indice.csv').open('w',encoding='utf-8-sig',newline='') as f:
         fields=['group','title','code','file','naming']
         writer=csv.DictWriter(f,fieldnames=fields,extrasaction='ignore');writer.writeheader();writer.writerows(maps)
@@ -223,12 +224,12 @@ def write_gallery(out,report,manifest):
 <script>const cards=[...document.querySelectorAll('article')],s=document.querySelector('#search'),g=document.querySelector('#group');function filter(){let n=0;for(const c of cards){const show=(!g.value||c.dataset.group===g.value)&&c.dataset.search.includes(s.value.toLowerCase());c.hidden=!show;if(show)n++}document.querySelector('#count').textContent=n+' mappe visualizzate su '+cards.length;}s.addEventListener('input',filter);g.addEventListener('change',filter);filter();</script></html>'''
     for key,value in [('__SHEETS__',sheets),('__LIMITS__',limits),('__OPTIONS__',options),('__CARDS__',''.join(cards))]:
         page=page.replace(key,value)
-    (out/'index.html').write_text(page,encoding='utf8')
+    scrivi_testo(out/'index.html', page)
     parts=['<!doctype html><html lang="it"><meta charset="utf-8"><title>P5R - Componenti originali</title><style>body{background:#23262e;color:white;font:16px system-ui}a{color:lightblue}.grid{display:flex;flex-wrap:wrap}figure{width:280px}img{width:280px;height:190px;object-fit:contain}figcaption{overflow-wrap:anywhere}</style><h1>Componenti originali</h1><p>Questa sezione contiene anche tasselli, simboli, nomi e atlanti: non sono mappe complete.</p><a href="index.html">Torna alle mappe dei luoghi</a><div class="grid">']
     for x in manifest['images']:
         parts.append(f'<figure><a href="{html.escape(x["file"],quote=True)}"><img loading="lazy" src="{x["preview"]}" alt=""></a><figcaption>{html.escape(x["category"])}<br>{html.escape(x["source"])} [{x["texture_index"]}]</figcaption></figure>')
     parts.append('</div></html>')
-    (out/'componenti.html').write_text(''.join(parts),encoding='utf8')
+    scrivi_testo(out/'componenti.html', ''.join(parts))
 
 
 if __name__=='__main__':

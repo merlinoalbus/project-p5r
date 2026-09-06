@@ -1,4 +1,5 @@
 """Verify identity references directly against native table offsets."""
+from scrittura import scrivi_json
 import hashlib,json,struct,sys
 from pathlib import Path
 from native_labels import Decoder
@@ -30,6 +31,6 @@ def main(out):
         assert f['canonicalName'] is None and f['roadmap']==fm.get(f['field'])
         assert f['mapCandidates']==[r['code'] for r in meta['maps'] if f['field'] in r['fields']]
     result={'status':'PASS-native-identity-references','fields':len(d['fields']),'rawTitleReferencesChecked':checked,'roadmapFieldsUnchanged':len(fm),'scope':'Native references; candidate variant not canonical floor.'}
-    (root/'verifica-identita.json').write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result))
+    scrivi_json(root/'verifica-identita.json', result);print(json.dumps(result))
 
 if __name__=='__main__':main(sys.argv[1])

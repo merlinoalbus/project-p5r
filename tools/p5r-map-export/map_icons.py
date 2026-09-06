@@ -18,6 +18,7 @@ aperta e viene marcata come tale: nessun tipo riceve un significato non dimostra
 Le immagini ritagliate servono a riconoscere le icone: sono materiale di lavoro, non asset
 dell'applicazione, che disegna i propri segnalini.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import collections
 import hashlib
@@ -184,7 +185,7 @@ def main(out):
         limits=['Fuori dal blocco urbano il tipo nativo non ha ancora un significato dimostrato.',
                 'I ritagli sono materiale di riconoscimento, non asset dell’applicazione.',
                 'I pin condizionali restano condizionali: la bandiera non è tradotta qui.'])
-    (out/'icone-mappa.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2), encoding='utf8')
+    scrivi_json(out/'icone-mappa.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     return risultato
 

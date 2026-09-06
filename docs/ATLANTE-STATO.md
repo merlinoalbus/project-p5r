@@ -1012,3 +1012,84 @@ Se la risposta è «si parte», il primo lotto di prompt che ti consegno è quel
 tipi, PNG con alfa reale e sola figura, senza cornice — la forma del pin la disegna l'app. Dimmi
 in che formato li vuoi (un file per prompt in `docs/grafica/`, o una tabella unica) e li preparo
 in quella forma.
+
+---
+
+## Lotto: bootstrap immutabile e determinismo del lotto — PRONTO PER VERIFICA
+
+Chiude i cinque requisiti che hai fissato per il candidato di convergenza della Fase 2.
+
+### 1. Database fresco: il bootstrap crea atlante, presenza e ingressi
+
+`server/services/mappe/finestreDungeon.test.ts` (nuovo, 6 controlli). Il database è nuovo e riceve
+`runMigrations` + `caricaSeed` e nient'altro — nessuna chiamata a mano a `collegaPalazziAiLuoghi`,
+nessun reset. I dieci ingressi ci sono, ciascuno sulla mappa del luogo dichiarato.
+
+La finestra non è provata su tre giorni scelti bene: il controllo passa su **tutte** le date del
+calendario di gioco e pretende che il verdetto sia bloccato esattamente fuori dalla finestra, senza
+un giorno di scarto in nessuno dei due versi.
+
+### 2. Database già formato: l'avvio ordinario non modifica nulla
+
+`server/services/mappe/avvioImmutabile.test.ts` (nuovo). Prende l'impronta di dieci tabelle —
+righe intere, tutte le colonne, `updated_at` compreso — più una riga in `spillo_partita`, riavvia
+e pretende la stessa impronta; e di nuovo al terzo avvio.
+
+Ha trovato un difetto vero: `mappa_alias` cresceva di una riga al secondo avvio, perché il percorso
+pubblico di una mappa si assestava solo all'ultima ricostruzione. Il segno `mappeFormate` in
+`seed_meta` porta l'hash del seed con cui il livello mappe è stato costruito: se coincide, l'avvio
+non tocca niente. Se manca — un database formato da una versione precedente, come quello
+dell'utente — si allinea una volta e si marca.
+
+### 3. Ingresso assente fuori finestra, scheda leggibile
+
+Recepito il tuo chiarimento. `mappa.condizioni_json` e la migrazione 047 sono **rimossi**: la
+colonna non aveva un solo lettore. C'è un test che pretende che la colonna non esista e che la
+scheda di ciascuno dei dieci Palazzi si apra comunque, così che ribaltare la scelta sia una scelta.
+
+Il DOM: i pin bloccati sono già filtrati dal visore e la suite lo copre; se ti serve una prova DOM
+specifica sui dieci ingressi prima/durante/dopo, dimmelo e la aggiungo.
+
+### 4. Determinismo end-to-end
+
+- I cinque produttori che nominavi — `field_identities`, `global_world_audit`, `school_candidates`,
+  `school_projection`, `urban_projection` — usano `scrivi_json`. Con loro **tutti** gli altri: non
+  restava un solo `Path.write_text()` per JSON in `tools/p5r-map-export`.
+- `scrivi_testo` impone ora anche una sola riga finale, per SVG, HTML e Markdown.
+- `scrivi_json(..., ammetti_nan=False)` conserva la guardia di `texpack_evidence`, che la
+  conversione automatica aveva perso.
+- **`rigenera_tutto.py`** (nuovo) è il comando dichiarato: ordine e argomenti di ogni produttore in
+  un posto solo. `esporta.py`, `full_field_sources.py` e `scheduler_evidence.py` vogliono strumenti
+  esterni al repository e lo dicono a voce alta invece di essere saltati in silenzio.
+- **`verify_determinismo.py`** (nuovo) fa quattro controlli: statico (nessuno scrive JSON da sé),
+  censimento (nessun produttore senza posto in `rigenera_tutto`), contenuto (UTF-8, zero CRLF, una
+  riga finale) e determinismo (rigenera e pretende lo stesso sha256, file per file).
+- I 20 artefatti fuori dal lotto sono elencati con il motivo, e l'elenco è controllato nei due
+  versi: una voce che non corrisponde più a nessun file fa fallire il controllo.
+
+Nessuna conversione manuale: i 33 artefatti cambiati sono stati **rifatti**, e le sole differenze
+di contenuto sono cinque sha256 di dipendenze rigenerate.
+
+### 5. Verde
+
+```bash
+python tools/p5r-map-export/rigenera_tutto.py
+python tools/p5r-map-export/verifica_tutto.py
+python tools/p5r-map-export/verify_determinismo.py data/atlas/extracted
+npm run typecheck && npm run lint && npx vitest run
+```
+
+31 su 31 rigenerati · 28 verificatori su 28 · 68 artefatti identici byte per byte dopo una
+rigenerazione · typecheck e lint puliti · **569 test su 569**.
+
+Le quattro rosse della tornata precedente venivano dal mio commit `0fe8734`: descrivevano il
+comportamento di prima, quando la presenza dei luoghi non arrivava ai pin nativi. Riscritte più
+strette, non più larghe — solo presenza e mai il quartiere dove il quartiere c'è dal primo giorno,
+e niente condizioni su ciò che è strutturale secondo `TIPI_STRUTTURALI`.
+
+### Oracolo dei cancelli
+
+Chiuso anche il rilievo sull'indipendenza, che avevi poi dichiarato non bloccante per il runtime.
+L'oracolo ridichiara le proprie convenzioni invece di importarle dal produttore: importandole, una
+manomissione cambiava insieme il calcolo e il controllo — allargando `SCOPERTA` il verificatore
+restava verde, provato. Ora la stessa manomissione lo fa fallire.

@@ -1,3 +1,4 @@
+from scrittura import scrivi_json
 """Independently verify pixels, identities, portability and package structure."""
 import base64
 import collections
@@ -95,7 +96,7 @@ def verify(out):
     report = dict(result='PASS', maps=301, pixelComparisons=301, portableUrbanImages=7,
                   groups=len(rows)-301, statusCounts=dict(collections.Counter(m['status'] for m in evidence['maps'])),
                   packageSha256=hashlib.sha256((target/'planimetrie-native.json').read_bytes()).hexdigest())
-    (target / 'verifica-pacchetto.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+    scrivi_json(target / 'verifica-pacchetto.json', report)
     print(json.dumps(report))
 
 

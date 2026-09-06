@@ -1,4 +1,5 @@
 """Verify complete urban diagnostic geometry against original bytes."""
+from scrittura import scrivi_json
 import hashlib,json,math,struct,sys
 from pathlib import Path
 from PIL import Image
@@ -30,6 +31,6 @@ def main(out):
     graph=json.loads((out/'campi-completi/grafo/inventario.json').read_text(encoding='utf-8'));targets={'F003_010_00','F010_019_00','F010_005_00','F005_002_00','F005_003_00','F009_003_00'}
     assert d['cases']==[o for o in graph['occurrences'] if o['targetField'] in targets]
     result={'status':'PASS-diagnostic-calculation','pointsChecked':n,'fields':counts,'cases':len(d['cases']),'scope':'Formula arithmetic and raw coverage; visual semantics require independent review.'}
-    (dest/'verifica.json').write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result))
+    scrivi_json(dest/'verifica.json', result);print(json.dumps(result))
 
 if __name__=='__main__':main(sys.argv[1])

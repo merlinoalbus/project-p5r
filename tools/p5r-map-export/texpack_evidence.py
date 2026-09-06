@@ -1,4 +1,5 @@
 """Lossless texpack records and per-layer naming evidence; no inferred edges."""
+from scrittura import scrivi_json
 import collections
 import json
 import math
@@ -77,7 +78,7 @@ def main(out):
             'Per-layer index at byte52 points to texelem, not directly to a string table.',
             'School scripts retain BIT96 and SUB_KFEVT branches. No unconditional exits emitted.',
             'Texture group associations may cover multiple fields and must not imply a shared XYZ transform.'])
-    (out/'mondo_texpack_evidenze.json').write_text(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False), encoding='utf-8')
+    scrivi_json(out/'mondo_texpack_evidenze.json', report, ammetti_nan=False)
     print(json.dumps(dict(records=len(records), sentinels=sum(r['sentinel'] for r in records),
         layers=sum(len(r['layers']) for r in records), titles=len(titles), schoolFields=len(school))))
 

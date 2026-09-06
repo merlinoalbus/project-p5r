@@ -1,3 +1,4 @@
+from scrittura import scrivi_json
 import hashlib,json,struct,sys
 from pathlib import Path
 
@@ -21,6 +22,6 @@ def main(out):
         for p in c['procedures']:assert p==next(o for o in fields[c['sourceField']]['procedures'] if o['name']==p['name'])
     report={'status':'PASS-candidate-evidence-only','candidates':len(d['candidates']),'spatialCandidates':sum(c['arrival']['xy'] is not None for c in d['candidates']),
       'unresolvedLocalArrivals':sum(c['arrival']['xy'] is None for c in d['candidates']),'sourceHashes':len(d['sources']),'appEdgesGenerated':0}
-    (out/'proiezione-scuola/verifica-candidati.json').write_text(json.dumps(report,indent=2),encoding='utf-8');print(json.dumps(report))
+    scrivi_json(out/'proiezione-scuola/verifica-candidati.json', report);print(json.dumps(report))
 
 if __name__=='__main__':main(sys.argv[1])

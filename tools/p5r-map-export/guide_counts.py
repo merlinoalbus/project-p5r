@@ -20,6 +20,7 @@ Un tipo è dimostrato quando, su un numero di aree non piccolo, coincide molto p
 chiunque altro — e il secondo classificato è staccato. Se due tipi vanno quasi uguale non si
 sceglie: si dichiara che non si sa.
 """
+from scrittura import scrivi_json
 from pathlib import Path
 import collections
 import json
@@ -135,8 +136,7 @@ def main(out, seed=None):
         limits=['La guida è editoriale: conta ciò che serve al giocatore, non ciò che la mappa '
                 'disegna. Per questo non si pretende l’accordo perfetto, e la quota è scritta.',
                 'Una planimetria è una versione dell’area: si confronta quella con più pin.'])
-    (out/'conteggi-guida.json').write_text(json.dumps(risultato, ensure_ascii=False, indent=2),
-                                           encoding='utf8')
+    scrivi_json(out/'conteggi-guida.json', risultato)
     print(json.dumps(risultato['summary'], ensure_ascii=False))
     for genere, v in sorted(esito.items()):
         print(f"  {genere:16s} {v['aree']:3d} aree ->",
