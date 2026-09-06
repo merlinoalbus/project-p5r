@@ -1604,3 +1604,11 @@ restituisce senza alcuna scrittura `caricato:false` e `aggiornamentoSeedPendente
 l'hash corrente non coincide o il marcatore storico manca; costruisce mappe/presenza/ingressi solo
 su DB senza righe in `mappa`. I test devono esercitare separatamente DB storico senza marcatore e
 seed intenzionalmente diverso, confrontando prima/dopo l'impronta completa inclusa `seed_meta`.
+
+### Verifica del rilievo non bloccante cancelli — `f960fda`
+
+**PASS circoscritto.** Sul commit pubblicato `f960fda091f12789d9f207e8647a943427082989`,
+`python tools/p5r-map-export/verify_pin_semantics.py data/atlas/extracted` termina con esito 0.
+La nuova matrice `LETTURE_DI_PROVA` esercita sia `SWITCH` (riconosciuto) sia `SWITCHBOARD`
+(escluso): il pattern usa ora i confini regex reali invece dei due backspace U+0008. Il fix non
+modifica la semantica runtime né riapre i cancelli utente; chiude il solo rilievo diagnostico.
