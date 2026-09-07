@@ -214,6 +214,25 @@
   .btn-visivo--colonna .btn-visivo__titolo { font-size: 12px; white-space: normal; line-height: 1.05; }
   .btn-visivo--colonna .btn-visivo__dettaglio { white-space: normal; line-height: 1.15; }
   .chip--icona { gap: 6px; }
+
+  /* Le schede della Partita: prima l'immagine, poi la parola.
+     Erano pastiglie di testo con un'iconcina da 16 px accanto e, messe in fila per dieci, si
+     leggevano tutte uguali — si cercava il nome invece di riconoscere il segno. Qui l'icona e'
+     grande e sta sopra, l'etichetta e' piccola e sta sotto: da lontano si riconosce la figura, da
+     vicino si legge il nome. Il bersaglio resta oltre i 44 px richiesti dal tocco. */
+  .piastrella-scheda {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    min-width: 84px; padding: 8px 10px; border-radius: 10px;
+    border: 1px solid var(--color-border); background: var(--color-surface);
+    color: var(--color-text-secondary); font-size: 11px; line-height: 1.15; text-align: center;
+    cursor: pointer; transition: border-color .12s, color .12s, background-color .12s;
+  }
+  .piastrella-scheda > svg { flex-shrink: 0; }
+  .piastrella-scheda:hover { border-color: var(--color-primary); color: var(--color-text); }
+  .piastrella-scheda--attiva {
+    border-color: var(--color-primary); background: color-mix(in oklab, var(--color-primary) 16%, var(--color-surface));
+    color: var(--color-text); font-weight: 600;
+  }
   .chip--icona > svg { flex-shrink: 0; }
 
   /* ---- Modali ---- */
