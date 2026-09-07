@@ -135,7 +135,9 @@ export function FilmPage() {
     const percentuale = film.dove === 'cinema' ? Number(iniziato) * 100 : Math.round((progresso / film.totaleSessioni) * 100);
     return <li key={film.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${completato ? 'border-success/50' : ''}`}>
       <div className="flex items-start gap-3">
-        <IconaCategoria categoria="film" dimensione={44} />
+        {/* Il disco per i DVD, la pellicola per il cinema: la figura era la stessa per tutti e
+            due, e sono due cose diverse — dove si guarda, quante sessioni, che prezzo. */}
+        <IconaCategoria categoria={film.dove === 'dvd' ? 'dvd' : 'film'} dimensione={44} />
         <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2>{film.nomeIt && film.nomeIt !== film.nome && <p className="m-0 text-xs text-text-muted">{film.nome}</p>}<p className="m-0 text-xs text-text-secondary">{film.periodo}</p></div>
         <span className="flex flex-col items-end gap-1">
           <span className={`chip ${completato ? 'chip--attivo' : ''}`}>{completato ? 'Completato' : iniziato ? 'In corso' : film.dove === 'cinema' ? 'Da vedere' : 'Da iniziare'}</span>

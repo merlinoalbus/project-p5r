@@ -6,9 +6,15 @@
 // Ombre sciagura, la bottega di Jose. Una pagina fatta solo di paragrafi si legge male non perché
 // il testo sia troppo, ma perché **non ha appigli**: l'occhio non trova un punto da cui ripartire.
 //
-// Il fregio è quell'appiglio: una figura a tema col contenuto, **decorativa e basta** — sta nel
-// fondo della carta, sfumata, e non porta nessuna informazione. Chi legge con uno screen reader
-// non la incontra proprio (`aria-hidden`), e chi ha la grafica predefinita spenta non la vede.
+// Il fregio è quell'appiglio: una figura a tema col contenuto, **decorativa e basta**. Non porta
+// nessuna informazione: chi legge con uno screen reader non la incontra proprio (`aria-hidden`), e
+// chi ha la grafica predefinita spenta non la vede.
+//
+// **Occupa il suo spazio, non sta dietro al testo.** Era un fondo al 16% di opacità, sfumato verso
+// le righe per non disturbarle: così nascosto che l'utente ha creduto le immagini non fossero mai
+// state consegnate. Correzione sua: «i decori li voglio non come sfondo dietro ma come immagini
+// che spostano il contenuto di testo con opacità al 100%». Adesso la carta è una griglia, il testo
+// sta in una colonna e la figura nell'altra — piena, senza maschera.
 //
 // **La chiave è il censimento.** Il fregio cerca `decori/<chiave>`: finché Codex non ha consegnato
 // l'immagine, resta la riserva — una macchia di colore del tema, che alleggerisce comunque la
