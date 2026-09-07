@@ -24,6 +24,7 @@ import { createApp } from './bootstrap.js';
 import { caricaSeed } from './services/seed/caricaSeed.js';
 import { sincronizzaCondizioniLetture } from './db/migrations/052_condizioni_letture_attivita.js';
 import { traduciNomiSpilli } from './db/migrations/053_nomi_spilli_in_italiano.js';
+import { collegaLuoghiAllePlanimetrie } from './db/migrations/054_luoghi_con_la_loro_planimetria.js';
 
 try {
   initDb();
@@ -55,6 +56,10 @@ try {
   // nome giapponese dello sprite, e un reseed dell'atlante lo riporterebbe.
   const tradotti = traduciNomiSpilli(initDb());
   if (tradotti > 0) logger.info({ spilli: tradotti }, 'nomi degli spilli non identificati resi in italiano');
+  // E il legame fra un luogo della guida e la planimetria che porta il suo nome: è una regola sui
+  // dati, quindi si rifà quando i dati cambiano, non una volta sola.
+  const collegati = collegaLuoghiAllePlanimetrie(initDb());
+  if (collegati > 0) logger.info({ luoghi: collegati }, 'luoghi collegati alla planimetria che porta il loro nome');
 } catch (err) {
   console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
   process.exit(1);
