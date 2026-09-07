@@ -65,6 +65,26 @@ describe('API città e attività', () => {
     expect(perChiave.get('shibuya')!.bloccoMotivo).toBeNull();
   });
 
+  it('ogni quartiere è raggiungibile: nessuna regola scritta a mano lo chiude per sempre', async () => {
+    // È la prova che conta di più su una tabella scritta a mano, e non c'entra col comportamento
+    // di un giorno preciso: **una chiave sbagliata blocca un quartiere per sempre**, e non se ne
+    // accorgerebbe nessuno. Un libro che nel catalogo si chiama `dolci-cinesi` scritto
+    // `chinese-sweets`, un Confidente `yusuke` scritto `emperor`: il valutatore risponde «non
+    // soddisfatta», per sempre, in silenzio. Qui si porta una partita alla fine del gioco con
+    // tutto letto e tutti i ranghi al massimo, e si pretende che il mondo sia **tutto** aperto.
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Fine del gioco' })).body.data as { id: number }).id;
+    const db = getDb();
+    db.prepare("UPDATE partita SET data_gioco = '01-31' WHERE id = ?").run(id);
+    db.prepare('UPDATE confidente_partita SET sbloccato = 1, rango = 10 WHERE partita_id = ?').run(id);
+    for (const l of db.prepare('SELECT chiave FROM libro').all() as Array<{ chiave: string }>) {
+      db.prepare("INSERT OR IGNORE INTO lettura_partita (partita_id, tipo, chiave, updated_at) VALUES (?, 'libro', ?, '')").run(id, l.chiave);
+    }
+    const q = (await request(app).get(`/api/compendio/citta?partita=${id}`)).body.data as QuartiereRiassuntoDto[];
+    const chiusi = q.filter((x) => x.disponibile === false).map((x) => `${x.chiave}: ${x.bloccoMotivo}`);
+    expect(chiusi, 'un quartiere che non si apre nemmeno a fine gioco ha una regola sbagliata').toEqual([]);
+    expect(q.length).toBeGreaterThanOrEqual(20);
+  });
+
   it('attività, lavori, libri e film con Doti; letture per partita con evento, riapertura, validazione, reseed stabile', async () => {
     const a = (await request(app).get('/api/compendio/attivita')).body.data as AttivitaTutteDto;
     expect(a.attivita.length).toBeGreaterThanOrEqual(20);

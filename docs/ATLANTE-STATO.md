@@ -1796,3 +1796,23 @@ agganciato a un negozio: una prova che non trova niente da provare deve dirlo, n
 
 **Verde:** 586 test, typecheck e lint puliti. La verifica a schermo la faccio appena Codex mi
 restituisce il backend: in questo momento le porte 3101 e 5273 sono sue.
+
+---
+
+# Una prova che le venti regole scritte a mano non chiudano un quartiere per sempre
+
+È il rischio vero di una tabella autorata, e non si vede guardandola: **una chiave sbagliata blocca
+un quartiere per sempre, in silenzio**. Un libro che nel catalogo si chiama `dolci-cinesi` scritto
+`chinese-sweets`, un Confidente `yusuke` scritto `emperor` — il valutatore risponde «condizione non
+soddisfatta», e continua a rispondere così fino alla fine del gioco. Nessun test sul comportamento
+di un giorno preciso lo scoprirebbe: all'11 aprile quel quartiere è chiuso comunque, e ha ragione.
+
+La prova porta quindi una partita **alla fine del gioco** — 31 gennaio, tutti i Confidenti a rango
+10, tutti i 46 libri letti — e pretende che il mondo sia **tutto** aperto. Se un quartiere non si
+apre nemmeno lì, la sua regola è sbagliata.
+
+**E l'ho verificata rompendola**, perché un test che non fallisce mai non è una prova: cambiando
+`dolci-cinesi` in `chinese-sweets` nel seed, la prova fallisce nominando esattamente
+`yokohama-chinatown: Ancora da completare nella Guida`. Rimessa la chiave giusta, torna verde.
+
+**Verde:** 587 test, typecheck e lint puliti.
