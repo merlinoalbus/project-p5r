@@ -1911,3 +1911,29 @@ nell'interfaccia, e il backend risponde 409 a chi ci arriva lo stesso. È la cos
 un'interfaccia che disabilita un pulsante non è una regola: è un suggerimento.
 
 Il dato di prova (l'acquisto del Pugnale) è stato rimesso com'era.
+
+---
+
+# Un errore mio, e il rilievo di Codex che chiude
+
+**Ho committato con un test rosso.** Il commit `543bbbf` è partito mentre la suite dava
+`592/593`: avevo incatenato test e commit nello stesso comando e ho letto l'esito **dopo** che il
+commit era già fatto. È esattamente quel che le regole di questo progetto vietano, e lo scrivo qui
+perché resti, non perché mi assolva.
+
+Quel che ho fatto subito dopo: cercare il rosso invece di rieseguire finché non passava. Cinque
+esecuzioni verdi di fila non sono una diagnosi — sono una coincidenza ripetuta.
+
+**Il rosso era il rilievo che Codex aveva già documentato** e assegnato a me come proprietario del
+test, aperto da allora: `MappaPage.test.tsx`, caso «il contesto URL cambia il titolo del visore».
+L'asserzione leggeva `document.title` subito dopo che l'immagine era resa, ma quel titolo lo scrive
+un **effetto**, e un effetto non è ancora corso quando il DOM è già a posto. Sotto carico — e
+oggi la macchina stava anche facendo girare due backend e un browser — la finestra si allarga e
+l'asserzione arriva prima.
+
+Corretto con `waitFor`, che aspetta il fatto invece di sperare nell'ordine. È la differenza fra una
+prova e una coincidenza, ed è anche il motivo per cui il rimedio giusto non era «rieseguire».
+
+**Verde:** cinque esecuzioni del file mirato (10/10 ogni volta) e **tre suite complete consecutive
+a 593/593**. Il criterio di chiusura che aveva chiesto Codex — parallela e seriale verdi, ripetute
+— è soddisfatto.
