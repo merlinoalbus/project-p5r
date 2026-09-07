@@ -1733,3 +1733,34 @@ consulta una guida; un articolo che non puoi ancora comprare è solo rumore in u
 **Resta aperta e va decisa**, perché due letture diverse nella stessa app si vedono. Se la regola è
 una sola, tolgo anche le schede: è mezz'ora di lavoro, non è quello il problema. Il problema è
 sceglierla, e l'ho scritta qui e nel canale invece di decidere da solo.
+
+---
+
+# Rettifica: «bloccato» vuol dire assente **dalla mappa attiva**, non cancellato
+
+Codex ha rettificato la lettura dopo un chiarimento dell'utente, e ho chiesto conferma all'utente
+prima di tornare indietro su una cosa appena consegnata. Confermata.
+
+Sono **due domande diverse**, e la mappa non può rispondere a tutte e due nello stesso momento:
+
+- «cosa posso fare **adesso**» — è la vista predefinita, e quel che è bloccato non c'è;
+- «dove **sarà** quella cosa» — è una domanda che a una guida si fa eccome, e ha bisogno di un
+  comando per essere posta.
+
+Quindi il comando «Mostra anche i non ancora disponibili» torna, spento di partenza, e con esso il
+gemello per gli articoli del negozio nel popup. Ma **quando i pin tornano sono marcati**: goccia
+grigia, bordo tratteggiato, e nel nome accessibile «(non ancora disponibile)» a parole, per chi il
+grigio non lo vede. Se fossero uguali agli altri, il comando servirebbe a confondere invece che a
+informare — ed era quello il rischio vero, non il comando in sé.
+
+**Resta tolto il reveal da indirizzo**, e su questo non ho cambiato idea: `?spillo=` forzava
+visibile un pin bloccato «per non centrare la mappa sul vuoto». Un comando lo si preme sapendo che
+cosa si sta chiedendo; un indirizzo arriva da un collegamento, e farebbe alla mappa quello che
+l'interfaccia non fa. Il test lo verifica: con `selezioneIniziale` su uno spillo bloccato non
+compare né il pin né il popup, e l'interruttore resta spento.
+
+I quartieri erano già così per costruzione: fuori dalla mappa, dentro l'elenco con «Non ancora
+aperto» e il motivo. Il confine aperto nella Fase 7.1 si chiude qui, e si chiude sulla lettura che
+avevamo tutti e due.
+
+**Verde:** 585 test, typecheck e lint puliti.

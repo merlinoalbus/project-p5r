@@ -388,6 +388,12 @@
   .spillo-mappa__goccia > * { transform: rotate(45deg); }
   .spillo-mappa:hover .spillo-mappa__goccia, .spillo-mappa--selezionato .spillo-mappa__goccia { transform: rotate(-45deg) scale(1.18); border-color: var(--color-primary); }
   .spillo-mappa--raccolto .spillo-mappa__goccia { opacity: .45; filter: grayscale(.6); }
+  /* Uno spillo non ancora disponibile, quando lo si e' chiesto con «Mostra anche i non ancora
+     disponibili»: **marcato**, mai confondibile con uno vero. Grigio, semitrasparente e con il
+     bordo tratteggiato, che e' il segno di una cosa che non c'e' ancora. Il nome accessibile lo
+     dice a parole, per chi non vede il colore. */
+  .spillo-mappa--bloccato .spillo-mappa__goccia { opacity: .5; filter: grayscale(1); border-style: dashed; }
+  .spillo-mappa--bloccato:hover .spillo-mappa__goccia, .spillo-mappa--bloccato.spillo-mappa--selezionato .spillo-mappa__goccia { opacity: .85; }
   /* La figura dentro lo spillo. Gli asset `ui/spillo-<tipo>` hanno l'alfa vera apposta per
      amalgamarsi al corpo colorato: niente dischetto sotto, solo un'ombra appena accennata che da'
      rilievo senza staccarli. */
