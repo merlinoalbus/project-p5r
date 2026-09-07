@@ -2589,6 +2589,18 @@ commit atteso `629eb6f98a367e7967028d41d053ebf3755865f1` in un worktree isolato.
 La review non ha modificato il codice di Opus. Il candidato Covo e' approvato per il perimetro
 dichiarato.
 
+## Gate `galaxy-task-validator` sul candidato Lotto B integrato v17
+
+**Verdetto: PASS**, sul tag annotato immutabile `candidato/lotto-b-v17` (merge commit
+`035d002def23775c76ae83250391701b81e5e0de`, genitori Lotto B v16 e `github/main`).
+
+Il gate ha confermato l'assenza di conflitti residui, la coda serializzata dei videogiochi isolata
+per partita, la protezione dalle risposte stantie, il rollback degli errori, il pannello unico
+`DoveSiTrova` per le Attività, la sezione Inventari con test anti-Cartolina e la matrice 5.2 con
+fonti revisionabili. Typecheck, lint e build sono PASS (solo il warning Vite noto sul chunk); la
+suite completa è **151 file, 644/644 test PASS**. Nessuna regressione rilevata su Libri, Film,
+Videogiochi, Attività o cataloghi.
+
 ## Gate `galaxy-task-validator` sul candidato Libri v1
 
 **Verdetto: PASS**, sul tag annotato remoto `candidato/lotto-b-libri-v1` (oggetto tag
