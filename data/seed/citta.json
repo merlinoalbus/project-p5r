@@ -1442,6 +1442,25 @@
      "note": "Corrispondenza col titolo \"Vague\" presente nell'elenco libri Taiheido: coincidenza plausibile ma non confermata esplicitamente riga per riga.",
      "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
      "verificato": false
+    },
+    {
+     "chiave": "harajuku/takenoko-street",
+     "ordine": 1,
+     "tipo": "punto-interesse",
+     "nome": "Takenoko Street",
+     "cosaOffre": "Vicolo della moda e dei dolciumi di Harajuku, con negozi di abbigliamento e crepes.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "lettura del libro «Vague»",
+     "confidenti": [],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Aggiunto per la stessa ragione del Tokyo Skytree: il libro «Vague» dichiara di sbloccare Takenoko Street e la via compare nelle immagini del quartiere, ma non esisteva come luogo.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
+     "verificato": false
     }
    ]
   },
@@ -1881,6 +1900,25 @@
      "piatti": null,
      "note": null,
      "fonte": "https://samurai-gamers.com/persona-5/hangout-spots-list/",
+     "verificato": false
+    },
+    {
+     "chiave": "asakusa/tokyo-skytree",
+     "ordine": 1,
+     "tipo": "punto-interesse",
+     "nome": "Area del Tokyo Skytree",
+     "cosaOffre": "Area panoramica ai piedi della torre, con negozi e punti di ristoro; luogo di hangout.",
+     "quando": null,
+     "giorni": null,
+     "sblocco": "lettura del libro «Shitamachi rinato»",
+     "confidenti": [],
+     "attivita": [
+      "hangout"
+     ],
+     "negozio": null,
+     "piatti": null,
+     "note": "Aggiunto perche' il libro «Shitamachi rinato» dichiara di sbloccare l'area del Tokyo Skytree e la sua provenienza territoriale punta ad Asakusa, ma nel catalogo dei luoghi non c'era nulla: leggere il libro non poteva far comparire niente.",
+     "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
      "verificato": false
     }
    ]
