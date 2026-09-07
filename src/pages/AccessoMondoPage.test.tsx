@@ -7,6 +7,9 @@ import { centroAccessoMondo } from '../utils/accessoMondo';
 
 const { getAccessoMondo } = vi.hoisted(() => ({ getAccessoMondo: vi.fn() }));
 vi.mock('../services/api/accessoMondo', () => ({ getAccessoMondo }));
+// L'albero delle mappe serve solo alle anteprime delle carte: qui non c'è, e la pagina deve
+// funzionare lo stesso — è il motivo per cui non passa da `PageState` e non blocca niente.
+vi.mock('../services/api', () => ({ getAlberoMappe: vi.fn(async () => []) }));
 const destinazione: DestinazioneMondoDto = { mappa: 'shibuya', nomeMappa: 'Shibuya', spillo: 207, nomeSpillo: 'Untouchable', centro: null, provenienze: [] };
 const risposta = (destinazioni: DestinazioneMondoDto[]): AccessoMondoDto => ({ entita: { tipo: 'negozio', chiave: 'untouchable' }, esito: destinazioni.length === 0 ? 'assente' : destinazioni.length === 1 ? 'unica' : 'multipla', destinazioni });
 function Indirizzo() { const l = useLocation(); return <div data-testid="indirizzo">{l.pathname}{l.search}</div>; }
@@ -27,7 +30,10 @@ it('apre il pin unico anche per chiavi di articolo contenenti slash', async () =
 it('mantiene una scelta esplicita per destinazioni multiple', async () => {
   getAccessoMondo.mockResolvedValue(risposta([destinazione, { ...destinazione, mappa: 'yongen', nomeMappa: 'Yongen', spillo: 8 }]));
   monta();
-  const link = await screen.findByRole('link', { name: 'Yongen — Untouchable' });
+  // La carta si distingue per il nome della **mappa**, che e' la cosa che cambia fra le due: lo
+  // spillo si chiama «Untouchable» in tutti e due i posti, ed etichettare con quello dava due
+  // scelte identiche.
+  const link = (await screen.findByText('Yongen')).closest('a')!;
   expect(screen.queryByTestId('indirizzo')).not.toBeInTheDocument();
   fireEvent.click(link);
   expect(await screen.findByTestId('indirizzo')).toHaveTextContent('/guida/mappe/yongen?spillo=8');
@@ -36,10 +42,10 @@ it('mantiene il catalogo raggiungibile quando associazione è assente o il servi
   getAccessoMondo.mockResolvedValue(risposta([]));
   const vista = monta();
   expect(await screen.findByText(/non ha una posizione sulla mappa/)).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Apri scheda e informazioni' })).toHaveAttribute('href', '/guida/negozi/untouchable');
+  expect(screen.getByRole('link', { name: 'Scheda e informazioni' })).toHaveAttribute('href', '/guida/negozi/untouchable');
   vista.unmount();getAccessoMondo.mockRejectedValue(new Error('Servizio indisponibile'));monta();
   expect(await screen.findByText('Servizio indisponibile')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Apri scheda e informazioni' })).toHaveAttribute('href', '/guida/negozi/untouchable');
+  expect(screen.getByRole('link', { name: 'Scheda e informazioni' })).toHaveAttribute('href', '/guida/negozi/untouchable');
 });
 it('ignora risposte tardive della precedente entità', async () => {
   let prima!: (r: AccessoMondoDto) => void;
@@ -66,5 +72,5 @@ it('mantiene i contenuti guida distinti da un arrivo geografico', async () => {
   const link = screen.getByRole('link', { name: 'Biblioteca' });
   expect(link).toHaveAttribute('href', '/guida/mappe/palazzo?area=castello%2Fbiblioteca');
   expect(screen.queryByText(/non ha una posizione sulla mappa/)).not.toBeInTheDocument();
-  expect(screen.getByRole('link', { name: 'Apri scheda e informazioni' })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: 'Scheda e informazioni' })).toBeInTheDocument();
 });

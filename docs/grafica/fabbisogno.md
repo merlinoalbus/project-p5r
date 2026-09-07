@@ -102,3 +102,241 @@ sprecato — è una differenza di tratto che si vede, ed è un pezzo di mappa ch
 autentico. La sagoma di Shujin (voce 1) resta legittima perché quella nel gioco **non c'è**: la
 scuola non è una destinazione del treno, e l'ho verificato nel foglio degli sprite prima di
 chiedere il disegno.
+
+---
+
+## 4 — RITIRATA: la sagoma del Covo c'era già, ed è la terza volta
+
+Avevo scritto un prompt per **far disegnare** la sagoma del Covo dei Ladri per la mappa di viaggio.
+Era sbagliato da chiedere, e me l'ha mostrato **Codex**, che ha applicato la regola meglio di come
+l'avevo applicata io: aveva cercato in tutto `data/atlas/extracted`, non solo dentro
+`P5_MAPDATA.SPD`. Il Covo esiste come **Luogo 022**, e i suoi originali sono lì da giorni:
+
+- `png/BASE/FIELD/PANEL/ROADMAP/RMAP_022_1_0.png` … `_1_4.png` — la pianta del Covo, in cinque
+  vesti (nera, grigia, e le varianti colorate);
+- `panoramiche/Luogo 022 - tavola 01.jpg` — la tavola d'insieme;
+- `png/IT/FIELD/PANEL/PLACE_PICT/PLC_022_001_00.png` — **la scritta «COVO DEI LADRI» del gioco, in
+  italiano**;
+- `icone-mappa/sprite-022.png` — la freccia dell'indicatore.
+
+**Il mio errore, per nome:** avevo verificato l'assenza nel foglio della mappa di viaggio e ne
+avevo concluso l'assenza *dal gioco*. Sono due cose diverse. Nel foglio dei quartieri il Covo non
+c'è perché non è una fermata del treno — quello era giusto — ma il Covo ha un suo luogo, e quel
+luogo ha le sue immagini. È lo stesso errore delle voci 2 e 3, e questa è **la terza volta** che la
+regola «prima si guarda fra gli originali» salva un pezzo di mappa dall'essere disegnato al posto
+di quello vero. La prima volta è stata una lezione; la terza è un procedimento, e ora sta scritto
+anche nello script.
+
+### Che cosa è stato fatto al posto della generazione
+
+`RMAP_022_1_0` è la pianta del Covo **nello stesso linguaggio grafico delle sagome dei quartieri**:
+nero pieno, dettagli ricavati in negativo bianco, alfa reale. Sul foglio sta in un angolo di una
+tela 1024 × 1024 quasi tutta vuota, quindi l'unica operazione necessaria era portarla al proprio
+riquadro. La fa `tools/p5r-map-export/covo_sagoma.py`, che **ritaglia e non genera**:
+
+```
+originale   1024x1024
+riquadro    (203, 157, 542, 540)
+sagoma      339x383
+alfa minima 0 (0 = ritaglio reale)
+trasparenti 25.8%
+angolo      (255, 255, 255, 0)
+```
+
+Il file è `public/asset/mappe/lmap/tokyo/covo-dei-ladri.png`, cioè esattamente il percorso che
+`assetCovoLadri()` cercava da ieri: **la metà applicativa era già pronta e non ha richiesto una
+riga di codice.**
+
+### Non si ingrandisce, e perché
+
+Il ritaglio esce a 339 × 383, più piccolo delle sagome dei quartieri (600-800 px). Lo script ha un
+**tetto, non un bersaglio**: rimpicciolisce se serve, non ingrandisce mai. Ingrandire un originale
+lo sgrana, e di pixel ce n'è in abbondanza — sulla mappa un cartellino è largo il 5% della tela, e
+Shibuya, che è 726 px, viene resa a 74.
+
+### La domanda che restava, e come l'ho decisa guardando
+
+La pianta è un disegno **di un altro genere**: i quartieri sono profili di edifici in prospettiva,
+questa è una planimetria vista dall'alto, e per giunta con tre caselle a stella colorate. Una
+planimetria in mezzo a venti profili poteva stonare, e non era una cosa da decidere a parole.
+
+Montate le quattro figure fianco a fianco alla misura vera — 30 px, quella della mappa — e poi
+ingrandite, il Covo **sta in famiglia**: alla misura d'uso legge come una massa nera compatta con
+dettagli bianchi, esattamente come le altre, e il colore delle stelle è un accento di pochi pixel.
+Ingrandito si vede che è una pianta, ma a quella misura nessuno lo guarda. **Deciso di tenere
+l'originale**: fra un originale che si distingue un poco e un disegno che assomiglia molto, in
+questo progetto vince l'originale.
+
+E c'è una ragione in più: il Covo **non è un posto di Tokyo**. È una schermata del menu. Che il suo
+segno sia di un altro genere non è un difetto, è un'informazione.
+
+### La scritta del gioco, trovata e non usata
+
+`PLC_022_001_00.png` è la targa «COVO DEI LADRI» disegnata dal gioco, in italiano. Non la uso, e
+va detto perché: sulla mappa le targhe sono **tutte** testo reso dall'app, con lo stesso corpo in
+`cqw` e lo stesso andare a capo. Una targa-immagine in mezzo a ventinove targhe di testo si
+comporterebbe diversamente a ogni larghezza, e romperebbe la sola cosa che tiene insieme la
+collocazione. È registrata qui perché esiste e perché la scelta sia una scelta.
+
+### Prova rifatta con la sagoma vera
+
+La promessa era: quando l'asset arriva, si rifà la prova delle sovrapposizioni di `docs/MAPPE.md`.
+Rifatta, nel caso peggiore (tutte le date tolte **e** tutti i blocchi aperti: 68 pezzi resi, il
+massimo che quella mappa possa mostrare):
+
+| larghezza | pezzi resi | non resi | sovrapposizioni | fuori dalla tela |
+|---|---|---|---|---|
+| 375 px | 68 | 0 | **0** | **0** |
+| 820 px | 68 | 0 | **0** | **0** |
+| 1280 px | 68 | 0 | **0** | **0** |
+| 1440 px | 68 | 0 | **0** | **0** |
+
+`non resi: 0` è la riga che prima valeva 1: era la sagoma che non c'era.
+---
+
+## Non serve un disegno, serve un colore — gli otto spilli troppo chiari
+
+Non è una voce di fabbisogno grafico e sta qui perché è emersa nello stesso lavoro: montando i 37
+spilli nuovi uno accanto all'altro si vede che otto hanno una tinta troppo chiara per reggere una
+figura anch'essa chiara — `forziere-raro` (#fde047), `terme` (#67e8f9), `casa` (#fdba74),
+`lavanderia` (#c4b5fd), `nemico` (#b0b0c0), `porta` (#a3a3a3), `nota` (#9ca3af), `scala` (#2dd4bf).
+
+Si leggono, ma sono il caso peggiore. Si sarebbe risolto in `shared/spilli.ts`, scurendo quegli
+otto senza toccare la grafica: le figure vanno bene, è il fondo che non fa da fondo.
+
+**Chiuso: l'utente ha deciso di lasciarli come sono**, ed è registrato in `docs/DECISIONI.md` alla
+data del 7 settembre 2026. Resta scritto qui perché non venga «corretto» d'iniziativa da chi
+rivede gli spilli fra sei mesi e li trova chiari: è una scelta, non una dimenticanza.
+
+---
+
+## 5. Covo dei Ladri — illustrazione per la piastrella della Guida
+
+| | |
+|---|---|
+| **file** | `public/asset/guida/covo.png` |
+| **misura** | 256 × 256 px |
+| **sfondo** | trasparente, **alfa reale** attorno alla figura (come le altre sedici) |
+| **stato** | **`da verificare`** — prompt scritto da Claude il 7 settembre 2026, tocca a Codex leggerlo |
+| **serve a** | `src/components/guida/sezioniGuida.tsx`, chiave `guida/covo` |
+
+**Perché serve, e come l'ho scoperto.** Il Covo dei Ladri era la terza linguetta della pagina dei
+trofei e ora ha una pagina sua, quindi l'indice della Guida ha **diciassette** piastrelle. Le
+illustrazioni in `public/asset/guida/` sono **sedici**: manca esattamente questa, ed è la voce che
+il rifacimento ha creato. Senza il file la piastrella non si rompe — mostra la riserva vettoriale,
+la maschera — ma è l'unica dell'indice a non avere un disegno, e in una griglia si vede subito.
+
+**Resta aperta anche dopo il ritiro della voce 4**, e il perché va detto. La 4 si è chiusa con un
+*ritaglio* perché la pianta originale del Covo parla già la lingua delle sagome: nero pieno,
+dettagli in negativo bianco. Qui la lingua è un'altra — contorno spesso, campiture bianche, un
+accento rosso, alla misura di un'icona da 40 px — e **nessuno** degli originali del Luogo 022 è
+quello: le RMAP sono planimetrie, `PLC_022_001_00` è la scritta, `sprite-022` è una freccia. Qui la
+lacuna è reale e un disegno serve davvero.
+
+**Il soggetto però lo detta l'originale, non la mia fantasia.** È il rilievo di Codex, ed è
+fondato: la prima stesura di questo prompt chiedeva una poltrona con una medaglia, inventate di
+sana pianta, mentre le RMAP mostrano il motivo autentico del Covo — **pianta a poligono chiuso,
+quasi circolare, e caselle a stella**. Riscritto su quello.
+
+**Il riferimento è nel repository, e va guardato prima di generare.** È la regola che questo
+progetto ha imparato sbagliando: `public/asset/guida/dungeon.png` (la maschera sulla pietra
+spaccata), `public/asset/guida/completamento.png` (la coppa nell'alloro) e
+`public/asset/guida/citta.png` (il treno sotto il sole rosso). La resa deve stare in mezzo a
+quelle senza distinguersi: **contorno nero spesso e uniforme, campiture bianche, un solo accento
+rosso, nessuno sfondo, figura centrata con un piccolo margine e un sottile alone bianco esterno,
+come un adesivo ritagliato.**
+
+**Il soggetto: la stella del Covo, dentro la sua pianta.** Guardando `RMAP_022_1_0` — e la sagoma
+appena ritagliata in `public/asset/mappe/lmap/tokyo/covo-dei-ladri.png`, che è più comoda — si
+vedono due segni e solo due: il **poligono chiuso, quasi circolare**, che è la sala, e le **caselle
+a stella a cinque punte** che marcano i posti dei premi. Sono il Covo, e non li ho inventati io.
+
+Niente maschera: quella è già la piastrella dei Palazzi, e due piastrelle con lo stesso segno si
+confondono in una griglia da diciassette — che è precisamente il difetto da evitare in un indice.
+
+**Prompt**
+
+> Illustrazione a icona in stile Persona 5 Royal, **contorno nero spesso e uniforme, campiture
+> bianche, un solo accento rosso**, su fondo completamente trasparente.
+>
+> Il soggetto: una **stella piena a cinque punte**, spigolosa e leggermente storta, al centro; e
+> attorno, come una cornice aperta, il **profilo di una sala poligonale quasi circolare** — un
+> anello spezzato di lati dritti, con qualche rientranza e due o tre varchi, come la pianta di una
+> stanza vista dall'alto. La stella sta dentro l'anello e lo tocca appena.
+>
+> Dentro l'anello, ai lati della stella, **due caselle quadrate più piccole** viste dall'alto, ognuna
+> con una stellina incisa: sono i posti dei premi. Ridotte a due quadrati e due stelline, niente
+> più.
+>
+> **L'accento rosso è solo sulla stella centrale.** L'anello e le due caselle sono bianchi con il
+> contorno nero. Nessun grigio, nessuna sfumatura, nessuna ombreggiatura morbida: le ombre, se
+> servono, sono macchie nere piatte.
+>
+> Il taglio è **grafico e spigoloso**, da adesivo: linee dritte, angoli netti, il tratto più spesso
+> sul contorno esterno e più sottile nei dettagli interni.
+>
+> Nessuna cornice esterna, nessun riquadro, nessun testo, nessuna scritta, nessuna maschera da
+> ladro, nessun personaggio, nessuna poltrona, nessuna coppa. La figura occupa quasi tutta la tela,
+> centrata, con un margine di poche decine di pixel e un sottile alone bianco che la stacca dal
+> fondo.
+
+**Come si verifica quando arriva**
+
+1. l'alfa è reale e l'angolo è `(0,0,0,0)`, come nelle altre sedici;
+2. messa in griglia con `guida/dungeon.png` e `guida/completamento.png` alla stessa misura, non si
+   distingue per spessore del contorno né per quantità di rosso;
+3. **a 40 px** — la misura vera della piastrella — la stella si riconosce e non si confonde con la
+   maschera dei Palazzi né con la coppa dei trofei. È lì che un soggetto affollato smette di dire
+   qualcosa.
+
+### La metà dell'app è già pronta
+
+La piastrella esiste già in `sezioniGuida.tsx` con la chiave `covo` e la riserva vettoriale: quando
+il file arriva in `public/asset/guida/covo.png` il plugin lo mette nel manifest e la piastrella lo
+usa **senza che nessuno tocchi il codice**, esattamente come per le altre sedici. C'è una prova che
+lo garantisce, in `src/pages/GuidaPage.test.tsx`: monta l'indice con e senza manifest e conta le
+riserve, quindi si accorge se una piastrella smettesse di accettare la propria illustrazione.
+
+
+---
+
+## Il censimento dell'interfaccia: fatto, e non manca nient'altro
+
+La Fase 6.2 chiede la grafica per **tutte** le parti d'interfaccia dove manca, non solo per le
+sezioni rifatte. Censito il 7 settembre 2026, contando i file presenti contro le chiavi che il
+codice cerca davvero — **non contro quelle che uno si aspetta**: ogni riga è stata misurata
+leggendo il registro nel sorgente e la cartella, e dove le due liste non combaciano è scritto in
+quale delle due manca qualcosa. Le sagome dei quartieri e i tipi di spillo combaciano esattamente,
+in tutte e due le direzioni: nessuna chiave senza file e nessun file orfano.
+
+| famiglia | chiave nel codice | chiavi | file | mancanti |
+|---|---|---|---|---|
+| icone azione | `ui/azione-<chiave>` | 48 | 48 | — |
+| icone scheda | `ui/scheda-<chiave>` | 8 | 18 | — |
+| spilli della mappa | `ui/spillo-<tipo>` | 37 | 37 | — |
+| piastrelle della Guida | `guida/<chiave>` | 17 | 16 | **`covo`** → voce 5 |
+| sfondi di sezione e identità | `sfondi/…`, `identita/…` | 7 | 7 | — |
+| sagome dei quartieri | `mappe/lmap/tokyo/<chiave>` | 29 | 29 | — |
+| illustrazioni dei Palazzi e Memento | `palazzi/<chiave>` | 10 | 10 | — |
+| Covo sulla mappa | `mappe/lmap/tokyo/covo-dei-ladri` | 1 | 1 | — (ritagliato dall’originale, voce 4 ritirata) |
+
+Resta aperta **solo la voce 5**, la piastrella del Covo: la 4 si è chiusa senza generare niente,
+ritagliando l’originale del Luogo 022 che Codex ha trovato.
+
+### Un conteggio sbagliato, e come si è visto che lo era
+
+Il primo passaggio di questo censimento aveva prodotto una voce 6 — *«le otto icone della Fusione
+mancano»* — con otto prompt già scritti. **Era falsa**, e la causa merita di stare qui perché è un
+errore facile da rifare: in `IconaAzione.tsx` convivono **due** registri, `RISERVA_AZIONE` che
+cerca `ui/azione-<chiave>` e `RISERVA_SCHEDA` che cerca `ui/scheda-<chiave>`. Avevo raccolto le
+chiavi di tutti e due con una sola espressione regolare e le avevo confrontate con i soli file
+`azione-*`: le otto chiavi della Fusione risultavano senza file perché i loro file si chiamano
+`scheda-fusione-*.png` **e ci sono tutti**.
+
+La differenza fra il conteggio sbagliato e quello giusto è un `indexOf` che separa i due blocchi
+prima di leggerli. Il conteggio sbagliato avrebbe fatto generare a Codex otto immagini inutili, e
+avrebbe messo in `public/asset/ui/` otto file con il nome sbagliato, che nessuno avrebbe caricato:
+sarebbero rimasti lì a far credere che il lavoro fosse fatto.
+
+**La regola che ne esce**, sorella di quella dei Memento: prima di dichiarare che un asset manca,
+si guarda **con che nome il codice lo cerca**, non con che nome ce lo si aspetta.

@@ -1647,3 +1647,585 @@ Due osservazioni, nessuna delle quali cambia l'esito:
    crescesse di un ordine di grandezza.
 2. Il conteggio degli articoli per negozio ora fa una lettura sola per tutta la pagina invece di
    una per negozio: è meglio di prima, non peggio.
+
+---
+
+# Il lotto A è chiuso — `candidato/lotto-a-mondo-v2`
+
+Tutte le pagine del mondo sono rifatte e verificate a schermo. Il tag precedente
+(`candidato/lotto-a-mondo`) è superato: **si giudica questo**.
+
+| pagina | cosa è cambiato |
+|---|---|
+| `CittaPage` | una sola Tokyo; schede e mappa si accendono a vicenda; sagome al posto delle miniature vuote; i quartieri chiusi restano un pallino |
+| `MappaTokyo` | riquadro definito, zoom e trascinamento; zero sovrapposizioni misurate; il clic apre l'ingresso configurato |
+| `DungeonPage` | «Palazzi», nove schede, niente collegamento ridondante fuori dal riquadro |
+| `DungeonDettaglioPage` | rifatta: linea del tempo, aree come elenco, tre colonne progressive — e la mappa dell'area, che non compariva mai |
+| `MappaPage` | indice a griglia con anteprime; il ramo «senza planimetria» non è più tre collegamenti nudi |
+| `QuartierePage` | mappa e luoghi affiancati; l'ingresso è la didascalia della mappa |
+| `AccessoMondoPage` | dice che cosa si cerca; ogni scelta porta l'anteprima della planimetria |
+| `VisoreMappa` | quel che è bloccato non c'è, e non c'è modo di riaprirlo |
+
+E i due rilievi di Codex chiusi: filtro positivo `tipo === 'palazzo'`, e le riaperture dei
+bloccati — comprese quella da indirizzo, che lui non aveva nominato ma c'era.
+
+**585 test verdi, typecheck e lint puliti.** Verificato nel browser a 375, 768, 1280 e 1440 px.
+
+## Quel che resta, e non è nascosto
+
+1. **Il Covo dei Ladri non ha una figura sulla mappa** — voce 4 di `docs/grafica/fabbisogno.md`,
+   prompt scritto, da verificare a Codex e poi da generare. Quando arriva va rifatta la prova
+   delle sovrapposizioni, perché il riquadro del Covo cambia.
+2. ~~**Gli otto colori di spillo troppo chiari**~~ — **chiuso**: l'utente ha scelto di lasciarli
+   come sono, ed è registrato in `docs/DECISIONI.md`.
+3. **Un confine da chiarire con Codex.** Lui ha riportato la regola dell'utente come «una voce
+   bloccata non deve comparire affatto: né lista, né ricerca, né azione di mappa/pin», e per
+   negozi e articoli l'ha applicata così. Io per i **quartieri** ho tenuto la scheda in elenco con
+   scritto «Non ancora aperto», e li ho tolti solo dalla mappa — che è la lettera di quel che
+   l'utente ha chiesto a me («non va visualizzato **in mappa**»). La ragione è che un quartiere non
+   è merce: sapere che Kichijoji esiste e apre il 5 giugno è metà del motivo per cui si consulta
+   una guida, mentre un articolo che non puoi comprare è solo rumore. Se la regola vale uguale per
+   tutti, tolgo anche le schede — ma è una decisione, non un dettaglio, e la lascio all'utente.
+4. **`OggiMappa`** monta ancora il visore dell'atlante su `tokyo` dentro la pagina Partita. Codex
+   dice di tenerlo perché lì è operativo e contestuale all'azione del giorno, non una seconda
+   rappresentazione editoriale. **Sono d'accordo con lui** e chiudo il rilievo che avevo aperto io.
+
+---
+
+# Fase 7.1 — quel che attraversa il confine fra i due lotti
+
+Il piano dice che la revisione finale non è una seconda revisione di tutto: se ciascuno ha
+verificato il lotto dell'altro, resta da guardare **solo ciò che passa da una parte all'altra**.
+Sono tre cose, e le ho controllate tutte e tre.
+
+## 1. I collegamenti verso il mondo, da ogni sezione
+
+Prova eseguita nel browser: raccolti tutti gli `href` verso `/guida/mondo/…`, `/guida/mappe/…`,
+`/guida/citta/…`, `/guida/dungeon/…` e `/guida/negozi/…` dalle cinque sezioni che li producono —
+Città, Palazzi, Negozi, Mappe, Attività — e interrogata l'API dietro a ciascuno.
+
+**450 collegamenti, 450 controllati, 0 rotti.** Non «sembrano giusti»: ognuno è stato chiesto al
+servizio che lo deve risolvere. È la prova che conta, perché un href verso una chiave che non
+esiste è indistinguibile da uno buono finché non lo si clicca.
+
+Le nove sezioni della Guida aprono tutte senza errori e senza scorrimento orizzontale.
+
+## 2. Il pezzo condiviso che ho corretto, e che tocca le sue pagine
+
+`DoveSiTrova` è mio ma lo usa lui, in `NegozioPage` e in `NegoziPage`. Il rilievo dei due pulsanti
+omonimi era suo, ed era codice mio: adesso l'etichetta è il nome della mappa. La correzione arriva
+gratis anche alle sue pagine, ed è il motivo per cui le fondamenta comuni si scrivono prima.
+
+Lo stesso vale per gli **spilli**: la ricostruzione dello spillo attorno alla figura (`IconaSpillo`,
+mio) si vede nel popup del negozio dentro il visore, che è roba sua.
+
+## 3. La regola «bloccato = assente», che è l'unica cosa su cui non siamo allineati
+
+Lui la applica a negozi e articoli in modo pieno: spariscono da elenco, ricerca, conteggi e
+acquisto diretto. Io per i **quartieri** ho tolto il cartellino dalla mappa e ho tenuto la scheda
+in elenco con scritto «Non ancora aperto».
+
+Non è una svista, è una lettura diversa di due parole diverse dell'utente: a lui ha detto «non deve
+comparire affatto», a me «non va visualizzato **in mappa**». E c'è una ragione di merito: un
+quartiere non è merce. Sapere che Kichijoji esiste e apre il 5 giugno è metà del motivo per cui si
+consulta una guida; un articolo che non puoi ancora comprare è solo rumore in una lista di prezzi.
+
+**Resta aperta e va decisa**, perché due letture diverse nella stessa app si vedono. Se la regola è
+una sola, tolgo anche le schede: è mezz'ora di lavoro, non è quello il problema. Il problema è
+sceglierla, e l'ho scritta qui e nel canale invece di decidere da solo.
+
+---
+
+# Rettifica: «bloccato» vuol dire assente **dalla mappa attiva**, non cancellato
+
+Codex ha rettificato la lettura dopo un chiarimento dell'utente, e ho chiesto conferma all'utente
+prima di tornare indietro su una cosa appena consegnata. Confermata.
+
+Sono **due domande diverse**, e la mappa non può rispondere a tutte e due nello stesso momento:
+
+- «cosa posso fare **adesso**» — è la vista predefinita, e quel che è bloccato non c'è;
+- «dove **sarà** quella cosa» — è una domanda che a una guida si fa eccome, e ha bisogno di un
+  comando per essere posta.
+
+Quindi il comando «Mostra anche i non ancora disponibili» torna, spento di partenza, e con esso il
+gemello per gli articoli del negozio nel popup. Ma **quando i pin tornano sono marcati**: goccia
+grigia, bordo tratteggiato, e nel nome accessibile «(non ancora disponibile)» a parole, per chi il
+grigio non lo vede. Se fossero uguali agli altri, il comando servirebbe a confondere invece che a
+informare — ed era quello il rischio vero, non il comando in sé.
+
+**Resta tolto il reveal da indirizzo**, e su questo non ho cambiato idea: `?spillo=` forzava
+visibile un pin bloccato «per non centrare la mappa sul vuoto». Un comando lo si preme sapendo che
+cosa si sta chiedendo; un indirizzo arriva da un collegamento, e farebbe alla mappa quello che
+l'interfaccia non fa. Il test lo verifica: con `selezioneIniziale` su uno spillo bloccato non
+compare né il pin né il popup, e l'interruttore resta spento.
+
+I quartieri erano già così per costruzione: fuori dalla mappa, dentro l'elenco con «Non ancora
+aperto» e il motivo. Il confine aperto nella Fase 7.1 si chiude qui, e si chiude sulla lettura che
+avevamo tutti e due.
+
+**Verde:** 585 test, typecheck e lint puliti.
+
+---
+
+# La metà che mi ha chiesto Codex: il pin di un negozio vale quanto il negozio **adesso**
+
+Suo il rilievo, e ha ragione. Uno spillo porta le condizioni **copiate** nel database quando
+l'atlante è stato sincronizzato; un negozio le sue, che vivono nel catalogo e cambiano quando il
+catalogo cambia. Fidarsi della sola copia vuol dire che ogni modifica al negozio lascia dietro un
+pin che dice una cosa non più vera, e nessuno se ne accorge finché non è tardi.
+
+Adesso i due esiti si combinano in **AND**, che è l'unica combinazione sensata: se il negozio oggi
+non c'è non c'è nemmeno il suo pin, qualunque cosa dica la copia; e se il pin ha una condizione
+propria che non regge — è di sera, e adesso è giorno — non basta che il negozio esista. L'**OR**
+resta dove è sempre stato: **dentro** un gruppo `almeno-una`, che è la forma delle alternative («o
+il libro, o l'invito del 3 agosto»). I motivi si sommano invece di sostituirsi, così chi apre il
+pin legge tutte e due le ragioni e non l'ultima che ha vinto.
+
+## E un errore che avrei consegnato, se non l'avessi provato
+
+La prima stesura cercava il negozio con `dettaglio.tipo === 'negozio'`. **Nessun pin dell'atlante
+punta a un negozio**: i trentasei pin dei negozi puntano a un `luogo`, e il negozio è agganciato
+lì. La funzione non avrebbe fatto niente su nessuno spillo — e sarebbe passata verde, perché non
+rompere non è funzionare.
+
+L'ha scoperto la prova, non la lettura: il test chiude un negozio nel catalogo **dopo** la
+sincronizzazione, senza toccare lo spillo, e pretende che il pin se ne accorga. È scritto così di
+proposito — se l'avessi scritto sui dati com'erano, avrebbe verificato la copia invece della
+verità. Ed è il motivo per cui adesso c'è anche un `expect` che fallisce se nessun pin risulta
+agganciato a un negozio: una prova che non trova niente da provare deve dirlo, non passare.
+
+**Verde:** 586 test, typecheck e lint puliti. La verifica a schermo la faccio appena Codex mi
+restituisce il backend: in questo momento le porte 3101 e 5273 sono sue.
+
+---
+
+# Una prova che le venti regole scritte a mano non chiudano un quartiere per sempre
+
+È il rischio vero di una tabella autorata, e non si vede guardandola: **una chiave sbagliata blocca
+un quartiere per sempre, in silenzio**. Un libro che nel catalogo si chiama `dolci-cinesi` scritto
+`chinese-sweets`, un Confidente `yusuke` scritto `emperor` — il valutatore risponde «condizione non
+soddisfatta», e continua a rispondere così fino alla fine del gioco. Nessun test sul comportamento
+di un giorno preciso lo scoprirebbe: all'11 aprile quel quartiere è chiuso comunque, e ha ragione.
+
+La prova porta quindi una partita **alla fine del gioco** — 31 gennaio, tutti i Confidenti a rango
+10, tutti i 46 libri letti — e pretende che il mondo sia **tutto** aperto. Se un quartiere non si
+apre nemmeno lì, la sua regola è sbagliata.
+
+**E l'ho verificata rompendola**, perché un test che non fallisce mai non è una prova: cambiando
+`dolci-cinesi` in `chinese-sweets` nel seed, la prova fallisce nominando esattamente
+`yokohama-chinatown: Ancora da completare nella Guida`. Rimessa la chiave giusta, torna verde.
+
+**Verde:** 587 test, typecheck e lint puliti.
+
+## Verifica a schermo dell'AND, fatta come si deve
+
+Non basta un test verde: volevo **vedere** il pin sparire. Ho chiuso la Clinica Takemi nel
+catalogo — condizione `data dal 12-01`, con la partita all'11 aprile — **senza toccare lo spillo**,
+che continua a portare la sua copia vecchia.
+
+| momento | esito |
+|---|---|
+| prima | 16 spilli su Yongen-Jaya, «Confidente: Clinica Medica Takemi» presente, 1 bloccato nascosto |
+| chiuso il negozio nel catalogo | **15 spilli**, Takemi sparito, il contatore passa a **2** |
+| premuto «Mostra anche i non ancora disponibili» | 17 spilli, e Takemi torna col nome «Clinica Medica Takemi **(non ancora disponibile)**», goccia `grayscale(1)` e bordo `dashed` |
+| ripristinato il catalogo | 16 spilli, Takemi normale, contatore di nuovo a 1 |
+
+Il dato di prova è stato rimesso com'era. Il pin non è mai stato modificato: è l'AND con la
+disponibilità viva a farlo sparire e tornare, che è esattamente quel che Codex chiedeva.
+
+Anche il pin marcato è verificato **nei fatti** e non solo nel test: grigio, tratteggiato, e col
+motivo scritto nel nome accessibile.
+
+---
+
+# Verifica del candidato `candidato/lotto-b-negozi-catalogo-v3` di Codex
+
+Stesso metodo del v2: il **tag** in un worktree isolato, backend suo su porta sua (3103), database
+creato da zero dal seed. Nessun file suo toccato.
+
+**Esito: PASS.** Il contratto rettificato — «catalogo sempre consultabile, presenza attiva
+nascosta, acquisto vietato» — è implementato per intero, e l'ho misurato.
+
+| piano del contratto | misurato |
+|---|---|
+| catalogo sempre consultabile | **60 negozi / 575 articoli con la partita, e 60/575 senza**: identici. Il v2 dava 48/380 |
+| lo stato si **dichiara**, non si nasconde | 12 negozi resi e marcati `bloccato` (`37-gradi-celsius`, `prossimo-asso`, …) |
+| scheda di un negozio bloccato | **200**, con `disponibilita.stato = 'bloccato'` e i suoi 10 articoli. Nel v2 era 404 |
+| ricerca | `totale` **575**, cioè calcolato sull'intero catalogo e prima del tetto; 300 resi |
+| articolo bloccato | presente nella scheda (`untouchable/kogatana-nera`) e dichiarato |
+| acquisto vietato | `PUT /partite/:id/acquisti` con `fatto: true` → **409 `articolo-non-disponibile`** |
+| togliere la spunta | **200** — e va bene così: una spunta messa per sbaglio si deve poter togliere anche dopo che l'articolo è tornato bloccato, per esempio spostando il giorno della partita |
+
+Suite completa sul suo albero: **591 test verdi**, typecheck e lint puliti. Non ci sono più i due
+rossi di base del giro precedente, perché ha integrato il mio ramo: è la prima volta che i due
+lotti stanno insieme e la suite è tutta verde.
+
+**Il rovescio, e va detto perché è una conseguenza voluta:** ora che i negozi bloccati tornano
+nell'elenco, i loro **pin** spariscono comunque dalla mappa — è l'AND con la disponibilità viva che
+ho implementato io. I due comportamenti non si contraddicono: sono i due piani del contratto. La
+scheda si consulta, il posto sulla mappa no; e il comando «Mostra anche i non ancora disponibili»
+li riporta marcati. Verificato a schermo chiudendo la Clinica Takemi.
+
+---
+
+# I due lotti sono uno solo — merge di `lavoro/lotto-b-inventari`
+
+Fatto dopo il PASS reciproco: il suo `candidato/lotto-b-negozi-catalogo-v3` verificato da me, il
+mio `candidato/lotto-a-mondo-v3` pubblicato. Da qui in avanti **c'è un'istanza sola** che mostra
+tutto, invece di due mondi separati che si contendono la porta 3101.
+
+**Il merge non ha avuto conflitti**, e non è un caso: la divisione per dominio ha retto. Lui ha
+lavorato su `negoziService`, `NegoziPage`, `NegozioPage`, `ArticoliTabella`; io su `mappeService`,
+`cittaService`, `MappaTokyo`, `CittaPage`, `MappaPage`, `QuartierePage`, `DungeonPage`,
+`DungeonDettaglioPage`, `AccessoMondoPage`, `VisoreMappa`. Nessun file in comune in quattro mesi di
+lavoro compresso in un giorno.
+
+**593 test verdi**, typecheck e lint puliti. E verificato a schermo che le due metà si incastrino
+davvero, che era la domanda vera:
+
+| | |
+|---|---|
+| Negozi | 60 carte, «60 negozi con 575 articoli» — il catalogo è consultabile per intero |
+| Città | una sola mappa di Tokyo, 4 cartellini all'11 aprile, 23 schede di quartiere |
+| Visore di Yongen-Jaya | 16 spilli, e il comando «Mostra anche i non ancora disponibili (1)» |
+| Scheda del Palazzo | il visore dell'area c'è |
+
+I due piani del contratto convivono come dovevano: un negozio bloccato **si legge** nella sua
+scheda e **non compare** come pin sulla mappa, e il comando lo riporta marcato.
+
+## E la verifica a schermo delle sue pagine, che mi mancava
+
+Del lotto B avevo verificato l'**API** e i **test**; le sue pagine le avevo solo contate. L'utente
+ha chiesto se le avessi verificate davvero, e la risposta onesta era «per metà». Chiusa adesso, sul
+ramo unito, cioè nella condizione in cui le userà davvero.
+
+| prova | esito |
+|---|---|
+| `/guida/negozi` | 60 carte, «60 negozi con 575 articoli»; **12 marcate «Non ancora»** e 23 «Da verificare»: lo stato si dichiara |
+| `/guida/negozi/37-gradi-celsius` (bloccato) | la pagina **si apre**, una sola `DoveSiTrova`, lo stato dichiarato, e **tutte e 10 le spunte d'acquisto disattivate** |
+| `/guida/negozi/untouchable` | 218 spunte, **57 disattivate** (gli articoli bloccati); comprato «Pugnale della tormenta» e tolta la spunta: 200 e 200, e il dato è tornato com'era |
+| a 375 px | `/guida/negozi` e la scheda: nessuno scorrimento orizzontale, nessun errore |
+
+L'azione vietata è vietata **due volte**, e le due difese sono indipendenti: la spunta è disattivata
+nell'interfaccia, e il backend risponde 409 a chi ci arriva lo stesso. È la cosa giusta, perché
+un'interfaccia che disabilita un pulsante non è una regola: è un suggerimento.
+
+Il dato di prova (l'acquisto del Pugnale) è stato rimesso com'era.
+
+---
+
+# Un errore mio, e il rilievo di Codex che chiude
+
+**Ho committato con un test rosso.** Il commit `543bbbf` è partito mentre la suite dava
+`592/593`: avevo incatenato test e commit nello stesso comando e ho letto l'esito **dopo** che il
+commit era già fatto. È esattamente quel che le regole di questo progetto vietano, e lo scrivo qui
+perché resti, non perché mi assolva.
+
+Quel che ho fatto subito dopo: cercare il rosso invece di rieseguire finché non passava. Cinque
+esecuzioni verdi di fila non sono una diagnosi — sono una coincidenza ripetuta.
+
+**Il rosso era il rilievo che Codex aveva già documentato** e assegnato a me come proprietario del
+test, aperto da allora: `MappaPage.test.tsx`, caso «il contesto URL cambia il titolo del visore».
+L'asserzione leggeva `document.title` subito dopo che l'immagine era resa, ma quel titolo lo scrive
+un **effetto**, e un effetto non è ancora corso quando il DOM è già a posto. Sotto carico — e
+oggi la macchina stava anche facendo girare due backend e un browser — la finestra si allarga e
+l'asserzione arriva prima.
+
+Corretto con `waitFor`, che aspetta il fatto invece di sperare nell'ordine. È la differenza fra una
+prova e una coincidenza, ed è anche il motivo per cui il rimedio giusto non era «rieseguire».
+
+**Verde:** cinque esecuzioni del file mirato (10/10 ogni volta) e **tre suite complete consecutive
+a 593/593**. Il criterio di chiusura che aveva chiesto Codex — parallela e seriale verdi, ripetute
+— è soddisfatto.
+
+---
+
+# Il Covo dei Ladri diventa una pagina, e il bilancio che ci avevo messo è stato tolto
+
+Il Covo era la **terza linguetta** di «Trofei, finali e Covo dei Ladri»: 52 sfide in un elenco
+puntato e 36 righe di catalogo in fondo, senza una ricerca e senza un numero. Ma non è un capitolo
+dei trofei — è un'area del gioco con una valuta sua — e ora ha `/guida/covo`: due colonne (sfide e
+catalogo) dal tablet in orizzontale in su, una ricerca sola che le attraversa entrambe, e in cima
+i conti.
+
+Ho preso questa voce dal lotto di Codex dichiarandolo nel canale alle 09:46, con l'impegno a
+fermarmi all'istante in caso di obiezione: sono file nuovi, il Covo è già un cartellino sulla mia
+mappa di Tokyo, e Codex era appena passato alla 5.2. Resta un **candidato da verificare**, come
+tutti gli altri.
+
+## L'errore che ho commesso e corretto prima di consegnare
+
+La prima versione della pagina apriva con un **bilancio**: medaglie guadagnabili, medaglie spese
+dal catalogo, differenza. Aritmeticamente esatto, e **falso**. L'ho scoperto interrogando l'API
+invece di fidarmi della mia struttura dati:
+
+```
+sfide 52 · premi 36 · guadagno 0 · senzaValore 52 · spesa 201 · senzaPrezzo 4
+```
+
+Due cose, tutte e due decisive:
+
+1. **Nessuna delle 52 sfide dichiara il proprio valore.** La guida dà solo il totale complessivo
+   (2.420 Medaglie P) e il dato lo dice esplicitamente: `medaglie` è `null` *apposta*, per non
+   riportare cifre non verificate. Il mio riquadro sommava 52 `null` e scriveva «si guadagnano 0».
+2. **Le 36 righe dei premi non sono 36 oggetti**, sono categorie: «Personae della Stanza di
+   Velluto» sono tredici elementi da 5 medaglie l'uno. La somma 201 non è la spesa di nessuno.
+
+Il risultato a schermo sarebbe stato un cartello rosso «**Mancano 201 medaglie — non basta per
+tutto il catalogo**»: una conclusione inventata, con l'aria di un dato, esattamente il tipo di
+errore che passa verde in ogni test perché il test misura la somma, non il senso.
+
+Al suo posto ci sono i conti che i dati reggono: **52 sfide** (con la nota che il valore della
+singola non è dichiarato), **36 voci di catalogo** (32 con prezzo), **prezzi da 3 a 10 medaglie per
+elemento**, e la cautela scritta accanto ai numeri e non in fondo. Il totale delle medaglie
+ottenibili lo dichiara la guida, nel testo che la pagina riporta per intero.
+
+Il bilancio **ricompare da solo** il giorno in cui tutte le sfide avranno un valore: `conti()`
+calcola il totale solo se `sfideConValore === sfide.length`. Un totale parziale sarebbe la stessa
+bugia, più piccola. Una prova fissa tutte e due le direzioni: con i dati veri il totale non deve
+comparire, con valori completi deve comparire e valere 15.
+
+Sparita anche la colonna delle medaglie accanto alle sfide: oggi sarebbe una colonna di 52
+trattini, che è rumore travestito da dato. Il valore compare solo se c'è. E il glifo «⊙» che avevo
+inventato per le medaglie è diventato la parola: `5 medaglie`, che si legge anche ad alta voce.
+
+## Le altre due estremità del collegamento
+
+Chi cercava il Covo dov'era non trova il vuoto: la pagina dei trofei si chiama ora «Trofei e
+finali» e porta in cima un rimando esplicito. Le tre entrate sono verificate nel DOM:
+la piastrella `/guida/covo` nell'indice della Guida (17 piastrelle), il cartellino sulla mappa di
+Tokyo, il rimando dai trofei. Le linguette rimaste sono sei, senza più «Covo dei Ladri».
+
+## Prove
+
+Misure a schermo su `localhost:5273` (DOM, non fotogrammi): 52 sfide e 36 premi resi, ricerca
+`cruciverb` → 1 sfida e 0 premi, `galleria` → 0 sfide e 9 premi. **Nessuno sbordamento e nessuno
+scorrimento orizzontale** a 375, 768, 1024 e 1280; le due colonne si affiancano da 1024 in su
+(374 px l'una accanto alla barra laterale) e si impilano sotto, dove i requisiti sono paragrafi
+lunghi e due colonne strette sarebbero peggio di due elenchi.
+
+**Verde:** tre cicli consecutivi typecheck + lint + suite completa, **597/597** ogni volta, più
+`npm run build`.
+
+---
+
+# I Memento tornano sulla mappa di Tokyo: una regola che si smentiva da sola
+
+Rileggendo il piano per capire che cosa restasse davvero aperto ho trovato una mia decisione che
+contraddice un'istruzione esplicita dell'utente. Le sue parole, del 6 settembre:
+
+> nella mappa di tokyo aggiungi i PNG posizionati a dovere dei palazzi quando attivi e del covo
+> fantasma e **delle altre mappe root quando attive**
+>
+> Il Covo dei Ladri e **i mementos** possono essere posizionati in aree libere dal resto delle
+> linee di tokio
+
+I Memento non c'erano. Li avevo tolti io, con questa motivazione scritta in
+`collocazioneTokyo.ts`: «i Memento sono fuori dall'atlante e non hanno un ingresso sulla mappa di
+viaggio».
+
+**La motivazione è vera e non regge**, perché vale identica per cose che sulla mappa ci sono: i
+cinque Palazzi del Meta-Nav non hanno un ingresso su nessuna fermata — è scritto tre righe sopra,
+ed è il motivo per cui stanno sul bordo di nord-est — e il Covo nemmeno, che si apre da menu. Una
+regola che esclude i Memento e ammette quei sei non è una regola: è un'eccezione travestita.
+
+## Come ci sono arrivato: un filtro usato per due domande diverse
+
+La causa tecnica è precisa. `soloPalazzi` era nato per l'**elenco** dei Palazzi, dove i Memento
+giustamente non stanno: non si visitano per aree, i piani sono generati a ogni discesa, e chi ci
+arrivava dall'indice trovava planimetrie di strutture fisse senza contesto. Poi `CittaPage` ha
+riusato lo stesso filtro per decidere **il contenuto della mappa**, che risponde a tutt'altra
+domanda: non «cosa posso visitare per aree» ma «dove posso andare oggi».
+
+Un solo filtro per due domande dà la risposta giusta a una e sbagliata all'altra, e la sbagliata
+non si vede: la mappa continuava a funzionare, semplicemente senza un pezzo.
+
+Ora i filtri sono due, entrambi per inclusione, entrambi condivisi: `soloPalazzi` per l'elenco,
+`radiciMetaverso` per la mappa. Il perché sta scritto in `src/utils/palazzi.ts`, dove chiunque
+riapra il file trova la distinzione prima del codice.
+
+## Il resto c'era già
+
+Non ho dovuto inventare nulla: la finestra dei Memento è in `finestre-dungeon.json` da sempre
+(**dal 9 maggio, e non si chiude**), la sagoma è `public/asset/palazzi/mementos.png`, e
+`/api/mappe/accesso/dungeon/mementos` risolve già alla mappa `memento`. Mancava solo la
+collocazione, che ho messo accanto a Iweleth — nel gruppo di ciò che si apre col Meta-Nav e non da
+una fermata — a `x 82.5, y 17`.
+
+## Prove
+
+**La finestra, misurata al giorno esatto** sulla partita di prova: al 05-08 il cartellino non c'è,
+al 05-09 c'è, con targa «MEMENTO» e collegamento `/guida/mondo/dungeon/mementos`. La partita è
+stata rimessa al 04-11, com'era. La stessa cosa è ora fissata da una prova in
+`CittaPage.test.tsx`, che monta la pagina ai due giorni e controlla tutte e due le direzioni.
+
+**Le sovrapposizioni, rifatte nel caso peggiore** (tutte le date tolte, 27 cartellini, 53 pezzi
+resi): **0 sovrapposizioni e 0 fuori dalla tela a 375, 820, 1280 e 1440 px**.
+
+Nel rifarle ho corretto anche lo script di `docs/MAPPE.md`: contava fra i pezzi anche i disegni
+**non ancora esistenti**, che si nascondono da soli e misurano 0×0 all'origine, e per questo
+segnalava la sagoma del Covo come «fuori dalla tela». Era un falso positivo, e un falso positivo in
+uno strumento di misura è peggio di nessuno strumento: la prossima persona lo insegue. Ora lo
+script scarta i pezzi non resi e li dichiara a parte (`nonResi`).
+
+**Verde:** tre cicli consecutivi typecheck + lint + suite completa, **601/601** ogni volta, più
+`npm run build`.
+
+---
+
+# Verifica del candidato `candidato/lotto-b-libri-v1` di Codex
+
+Commit `4e31e40`, verificato in sola lettura nel worktree `C:\Repository\p5r-verifica` con backend e
+frontend propri (3103 e 5275), su un database separato. **Verdetto: PASS.**
+
+## Il contratto, punto per punto
+
+| punto dichiarato | esito |
+|---|---|
+| 46 volumi, pagina autonoma `/guida/libri` | **passa** — 46 righe rese, titolo, KPI, filtri per stato e per Dote |
+| avanzamento a sessioni persistente | **passa** — `+`, `−` e «Completa» scrivono, e il valore sopravvive al ricaricamento |
+| completamento canonico **solo al totale** | **passa** — a 1 di 2 lo stato è «In corso» e i completati restano 0; a 2 di 2 diventa «Completato» e il contatore sale |
+| revoca e ricompletamento | **passa** — da 2 a 1 torna «In corso» e il KPI scende; da 1 a 2 risale. Nessuna traccia rimasta |
+| idempotenza | **passa** — la stessa scrittura ripetuta non cambia nulla, e 20 richieste concorrenti sullo stesso libro convergono a uno stato coerente |
+| isolamento per partita | **passa** — completato nella partita 5, la partita 6 resta a 0 |
+| limiti | **passa** — avanzamento 3 su 2 → `avanzamento-non-valido` col messaggio giusto; −1 respinto dalla validazione |
+| provenienze territoriali col pannello | **passa** — 11 posizioni su 17 campionate risolvono a uno spillo reale, e l'ancora porta il pin: `?spillo=205`, `?spillo=1760` |
+| redirect dal vecchio tab | **passa** — `/guida/attivita?scheda=libri` → `/guida/libri` |
+| le 46 righe sommano a 74 e non 75 | **passa, e va dato atto**: la discrepanza è dichiarata invece che aggiustata. La somma misurata sull'API è 74 |
+| adattamento | **passa** — 375, 768 e 1440 px senza scorrimento orizzontale |
+
+## Tre cose trovate, e **due sono mie**
+
+Il punto della verifica incrociata è questo: guardando il suo lavoro sono venuti fuori difetti del
+mio.
+
+**1. «MODIFICA MAPPA» dentro una pagina di lettura — difetto mio, corretto.** Nel pannello «Mostra
+posizione» dei Libri compariva un pulsante che porta all'editor dell'atlante. Il primo istinto è
+stato scriverlo come rilievo per Codex; poi ho guardato da dove viene, ed è
+`MappaIncorporata` — **mio**, usato attraverso `DoveSiTrova` — **mio**. In `CittaPage` l'avevo già
+tolto, ma per un'altra strada (togliendo del tutto quel visore), quindi il difetto era rimasto in
+piedi ovunque si usi il pannello: Libri, Negozi, Attività.
+
+Corretto con `conEditor`, predefinito `true`. Le pagine dell'atlante — Quartiere, Palazzo — tengono
+il pulsante, perché lì si sta curando la mappa; `DoveSiTrova` lo spegne, perché lì il visore è
+**citato** dentro un'altra pagina e chi legge dove si compra un libro non sta curando l'atlante.
+Verificato a schermo: `/guida/citta/shibuya` e `/guida/dungeon/kamoshida` hanno ancora il
+collegamento, `/guida/negozi/libreria-taiheido` e `/guida/negozi/untouchable` non ce l'hanno più.
+
+**2. La biblioteca della Shujin non è uno spillo — lacuna dell'atlante, mia.** Per i libri della
+biblioteca scolastica il pannello apre la mappa di Shujin senza pin, perché
+`/api/mappe/accesso/luogo/shujin-academy/biblioteca-shujin` risponde `spillo: null`: su quella
+mappa esistono due soli spilli, il passaggio al Palazzo e i distributori. Il pannello si comporta
+bene — mostra la mappa giusta e la intitola «Biblioteca della Shujin Academy» — ma l'ancora non
+c'è perché nell'atlante non c'è il posto. **Non è un difetto dei Libri**, è una voce mancante
+dell'atlante, e la registro qui come lavoro mio.
+
+**3. La suite non regge due esecuzioni contemporanee — difetto condiviso, dell'infrastruttura.**
+La prima esecuzione della suite sul suo tag ha dato **603/604**; le quattro successive 604/604.
+Invece di archiviarlo come «rumore» l'ho riprodotto: due suite in parallelo fanno fallire
+`caricaSeed.test.ts` e `mappe-editor.test.ts` con `Test timed out in 5000ms`. Sono test che
+caricano il seed intero (232 Persona, 525 skill) e da soli stanno sui 3,6 s: sotto carico doppio
+sforano.
+
+**Non è suo**: l'ho riprodotto anche sul mio ramo, che i Libri non ce li ha, e lì cade
+`conservazione.test.ts` per la stessa ragione. È un difetto che ci riguarda tutti e due, e ha una
+conseguenza pratica: **«tre cicli verdi» non è una prova se l'altro sta girando la sua suite nello
+stesso momento.** Il rimedio è un `testTimeout` più largo per i test che caricano il seed, in
+`vitest.config.ts` — file condiviso, quindi lo propongo invece di cambiarlo.
+
+**Una nota di metodo, sull'infrastruttura condivisa.** `vite.config.ts` ha il bersaglio del proxy
+scritto fisso su `localhost:3101`. Avviando il frontend di verifica con la configurazione normale,
+avrei interrogato — e potenzialmente modificato — **il backend di Codex**, che in quel momento
+stava lavorando proprio su 3101. Me ne sono accorto perché il proxy ha risposto con dati che non
+erano del mio database. Ho fermato subito e sono ripartito con una configurazione separata, e
+propongo che quel bersaglio diventi una variabile d'ambiente: finché è una costante, la verifica in
+parallelo dipende dal fatto che nessuno dei due se ne dimentichi.
+
+**Verde sul mio ramo dopo la correzione:** tre cicli typecheck + lint + suite completa, 601/601
+ogni volta, più `npm run build`.
+
+---
+
+# Il rilievo di Codex sui prompt: aveva ragione, e la voce 4 si chiude senza generare niente
+
+Codex ha sospeso la generazione delle due immagini del Covo e mi ha chiesto una risposta motivata.
+**Il rilievo è fondato e l'ho accolto per intero.** Aveva applicato la regola meglio di me: aveva
+cercato in tutto `data/atlas/extracted`, non solo dentro `P5_MAPDATA.SPD`.
+
+Il Covo dei Ladri è il **Luogo 022** e i suoi originali erano nel repository da giorni: cinque
+piante `RMAP_022_1_*`, la tavola d'insieme, la freccia dell'indicatore, e — cosa che non mi
+aspettavo — `PLC_022_001_00.png`, cioè **la scritta «COVO DEI LADRI» disegnata dal gioco, in
+italiano**.
+
+**Il mio errore ha un nome preciso:** avevo verificato l'assenza del Covo nel foglio della mappa di
+viaggio e ne avevo concluso l'assenza *dal gioco*. Sono due cose diverse. Che il Covo non sia una
+fermata del treno era giusto; che quindi non esistesse un suo disegno era un salto.
+
+È la **terza volta** che la regola «prima si guarda fra gli originali» salva un pezzo di mappa: le
+prime due sono state le voci 2 e 3, i pezzi dei Memento. La prima volta è una lezione, la terza è
+un procedimento — e adesso sta scritto anche dentro `tools/p5r-map-export/covo_sagoma.py`, così la
+prossima persona lo trova dove serve invece che in un verbale.
+
+## La voce 4 non è stata riscritta: è stata sostituita da un ritaglio
+
+`RMAP_022_1_0` è la pianta del Covo **nella stessa lingua grafica delle sagome dei quartieri**:
+nero pieno, dettagli in negativo bianco, alfa reale. Serviva solo portarla al proprio riquadro
+dentro una tela 1024 × 1024 quasi vuota. Lo fa uno script nella catena di estrazione già esistente,
+che **ritaglia e non genera**: riquadro `(203, 157, 542, 540)`, sagoma `339 × 383`, alfa minima 0,
+angolo `(255,255,255,0)`.
+
+Il file è finito esattamente dove `assetCovoLadri()` lo cercava da ieri, quindi **la metà
+applicativa non ha richiesto una riga**: era la scommessa che avevo fatto scrivendo il codice prima
+dell'asset, ed è l'unica cosa di quella voce che ha retto.
+
+**Non si ingrandisce.** Il ritaglio è più piccolo delle sagome dei quartieri e lo script ha un
+tetto, non un bersaglio: ingrandire un originale lo sgrana, e sulla mappa un cartellino è largo il
+5% della tela — Shibuya, che è 726 px, viene resa a 74.
+
+## La domanda che restava l'ho decisa guardando, non ragionando
+
+La pianta è un disegno di un altro genere: i quartieri sono profili di edifici in prospettiva,
+questa è una planimetria dall'alto, per giunta con tre caselle a stella colorate. Poteva stonare, e
+non era una cosa da decidere a parole.
+
+Montate le quattro figure fianco a fianco **alla misura vera** — 30 px, quella della mappa — il
+Covo sta in famiglia: legge come una massa nera compatta con dettagli bianchi, come le altre, e il
+colore delle stelle è un accento di pochi pixel. Ingrandito si vede che è una pianta, ma a quella
+misura nessuno lo guarda.
+
+**Tenuto l'originale.** Fra un originale che si distingue un poco e un disegno che assomiglia
+molto, qui vince l'originale. E c'è una ragione in più: il Covo **non è un posto di Tokyo**, è una
+schermata del menu. Che il suo segno sia di un altro genere non è un difetto, è un'informazione.
+
+## La scritta del gioco: trovata, e non usata
+
+`PLC_022_001_00.png` è la targa «COVO DEI LADRI» del gioco. Non la uso, e va detto perché: sulla
+mappa le targhe sono **tutte** testo reso dall'app, con lo stesso corpo in `cqw` e lo stesso andare
+a capo. Una targa-immagine in mezzo a ventinove di testo si comporterebbe diversamente a ogni
+larghezza e romperebbe la sola cosa che tiene insieme la collocazione. Registrata perché esiste e
+perché la scelta sia una scelta, non una svista.
+
+## La voce 5 resta, ma con un altro soggetto
+
+La piastrella della Guida resta necessaria — le RMAP sono planimetrie, non icone da 40 px con
+contorno spesso e accento rosso — ma Codex ha ragione anche qui: **il soggetto lo detta
+l'originale.** La prima stesura chiedeva una poltrona con una medaglia, inventate di sana pianta.
+Riscritta sui due segni che il Covo ha davvero: il **poligono chiuso quasi circolare** della sala e
+le **caselle a stella**. Niente maschera, che è già il segno dei Palazzi.
+
+## Prova rifatta, con la sagoma vera
+
+La promessa era rifare le sovrapposizioni quando l'asset fosse arrivato. Rifatte nel caso peggiore
+— tutte le date tolte **e** tutti i blocchi aperti, 68 pezzi resi, il massimo che quella mappa
+possa mostrare:
+
+| larghezza | pezzi | non resi | sovrapposizioni | fuori dalla tela |
+|---|---|---|---|---|
+| 375 px | 68 | 0 | **0** | **0** |
+| 820 px | 68 | 0 | **0** | **0** |
+| 1280 px | 68 | 0 | **0** | **0** |
+| 1440 px | 68 | 0 | **0** | **0** |
+
+`non resi: 0` è la riga che prima valeva 1: era la sagoma che non c'era.
+
+**Verde:** tre cicli typecheck + lint + suite completa, 601/601 ogni volta, più `npm run build`.

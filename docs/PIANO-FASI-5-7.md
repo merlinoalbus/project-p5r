@@ -126,13 +126,53 @@ fondamenta condivise (A scrive, B verifica)
 
 ## 6. Stato
 
+Aggiornato il 7 settembre 2026.
+
 | | |
 |---|---|
-| fondamenta condivise | in corso — `DoveSiTrova` fatto, typecheck pulito, **da verificare a Codex** |
-| lotto A | non iniziato |
-| lotto B | non iniziato |
-| 6.1 pin | non iniziato |
-| `docs/grafica/fabbisogno.md` | non ancora creato |
+| fondamenta condivise | **fatto** — `DoveSiTrova` scritto da Claude, verificato da Codex e corretto sul suo rilievo (due destinazioni omonime); lo usano tutte e due le parti |
+| lotto A — le pagine del mondo | **fatto**, tag `candidato/lotto-a-mondo-v2`: Città, MappaTokyo, Palazzi, scheda del Palazzo, Mappe (indice e dettaglio), Quartiere, Accesso al mondo, visore. Da verificare a Codex |
+| lotto B — gli inventari | **in corso** — `candidato/lotto-b-negozio-posizione-v1` e `candidato/lotto-b-negozi-contesto-v2`, il secondo **verificato PASS da Claude** il 7 settembre |
+| 6.1 pin | **fatto** — 37 asset rigenerati da Codex come sola figura su alfa; lo spillo (colore, misura, punta, stati) lo costruisce il codice |
+| 6.2 grafica mancante | **in corso** — `docs/grafica/fabbisogno.md`: voce 1 consegnata (Shujin), 2 e 3 ritirate (i pezzi dei Memento c'erano già), 4 aperta (il Covo dei Ladri) |
+| Covo dei Ladri | **fatto** — pagina propria `/guida/covo` (voce presa dal lotto B previo annuncio nel canale): sfide e catalogo affiancati, ricerca unica, conti onesti. Il bilancio della prima stesura è stato **tolto** perché falso: il perché in `docs/ATLANTE-STATO.md`. Da verificare a Codex |
+| confine «bloccato = assente» | **chiuso** — il contratto a tre piani del v3 di Codex (catalogo consultabile · presenza sulla mappa nascosta · azione vietata dal backend) è la stessa regola che il lotto A applica ai quartieri. Da confermare a Codex |
+| 7.1 revisione incrociata | **in corso** — ciascuno verifica i candidati dell'altro; resta quel che attraversa il confine |
+
+### Quel che manca, scritto per non doverlo ricostruire a memoria
+
+1. **Lotto B**: 5.2 (gli altri tipi di oggetti delle guide), `AttivitaPage` e le doti, e le tre
+   nuove sezioni Libri / Film-DVD / Videogiochi con il progresso per sessioni, che l'utente ha
+   assegnato a Codex. Il **Covo dei Ladri come pagina propria** l'ho preso io, dichiarandolo nel
+   canale prima di cominciare: sono file nuovi, non tocca niente di suo, ed è già un cartellino
+   sulla mia mappa di Tokyo. Consegnato come candidato, da verificare come tutti gli altri.
+2. **Grafica**: resta aperta **una sola voce**, la 5 — la piastrella `guida/covo.png` — e va
+   generata da Codex. ~~La voce 4, la sagoma del Covo per la mappa~~ è **chiusa senza generare
+   niente**: su rilievo di Codex è saltato fuori che l'originale esisteva (Luogo 022), ed è stato
+   ritagliato invece che disegnato. ~~La decisione sugli otto colori di spillo troppo chiari~~ è
+   **chiusa**: l'utente ha scelto di lasciarli come sono (`docs/DECISIONI.md`, 7 settembre).
+3. ~~**Un confine da decidere insieme**: se «bloccato = assente» valga anche per le schede dei
+   quartieri o solo per i loro cartellini sulla mappa.~~ **Chiuso, e senza bisogno di decidere
+   niente di nuovo: i due lotti si sono incontrati sulla stessa regola.** Il contratto di Codex
+   nel `candidato/lotto-b-negozi-catalogo-v3` distingue tre piani — (1) catalogo e schede sempre
+   consultabili, (2) presenza attiva sulla mappa nascosta se bloccata, (3) azione vietata, con il
+   backend autoritativo — ed è parola per parola quel che il lotto A fa con i quartieri: restano
+   in elenco con scritto «Non ancora aperto» e spariscono dalla mappa. Il disaccordo era sul
+   comportamento del **v2**, dove negozi e articoli sparivano anche dal catalogo; il v3 l'ha
+   tolto. La regola comune è quindi: **una scheda è documentazione e non si nasconde mai; la mappa
+   dice dove si può andare adesso e nasconde ciò che non si può; l'azione la vieta il backend.**
+   Resta da confermare a Codex che la legga com'io la leggo — chiesto nel canale.
+4. **L'integrazione**: il lotto B verificato può entrare in `lavoro/atlante-mondo`, così c'è
+   un'istanza sola che mostra tutto invece di due mondi separati su una porta sola.
+5. **Una lacuna dell'atlante, non del piano — mia, trovata verificando i Libri di Codex.** La
+   guida conosce **sei** luoghi dentro Shujin Academy — biblioteca, cancello, corridoio del 2°
+   piano, infermeria, aula, distributori — e la mappa dell'atlante ne ha **due** come spilli. Per
+   questo il pannello «dove si trova» dei libri della biblioteca scolastica apre la mappa giusta
+   senza poterci puntare il dito: `accesso/luogo/shujin-academy/biblioteca-shujin` risponde
+   `spillo: null`. Non è un difetto del lotto B né una voce del piano, ed è scritto qui perché è
+   lavoro dell'atlante che qualcuno prima o poi deve fare — con una avvertenza: le posizioni degli
+   spilli non si inventano, e per gli interni di Shujin va prima cercata una fonte, come per tutto
+   il resto.
 
 ## 7. Domande aperte a Codex
 

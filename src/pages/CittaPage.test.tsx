@@ -10,9 +10,9 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { CittaPage } from './CittaPage';
 import { QuartierePage } from './QuartierePage';
 import { usePartitaStore } from '../stores/partitaStore';
-import type { MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
+import type { DungeonRiassuntoDto, MappaDto, PartitaDto, QuartiereDettaglioDto, QuartiereRiassuntoDto } from '../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async () => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn(() => '/api/immagini/mappa/x/file'), getImmagini: vi.fn(() => Promise.resolve([])) }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(async (mappa: string) => ({tipo:'mappa',mappa})), getQuartieri: vi.fn(), getDungeons: vi.fn(async (): Promise<DungeonRiassuntoDto[]> => []), getQuartiere: vi.fn(), getMappa: vi.fn(), scaricaPiantaQuartiere: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), urlImmagine: vi.fn(() => '/api/immagini/mappa/x/file'), getImmagini: vi.fn(() => Promise.resolve([])) }));
 vi.mock('../services/api', () => api);
 
 const mappa = (chiave: string, nome: string): MappaDto => ({ chiave, nome, tipo: chiave === 'tokyo' ? 'citta' : 'quartiere', genitore: chiave === 'tokyo' ? null : 'tokyo', ordine: 0, immagineUrl: `/asset/mappe/${chiave}.png`, asset: null, entita: null, origine: 'seed', numeroSpilli: 1, numeroFigli: 0, updatedAt: '', larghezza: 1000, altezza: 600, note: '', genitoreNome: chiave === 'tokyo' ? null : 'Tokyo', percorso: chiave === 'tokyo' ? [{ chiave: 'tokyo', nome: 'Tokyo' }] : [{ chiave: 'tokyo', nome: 'Tokyo' }, { chiave, nome }], figli: [],
@@ -55,6 +55,36 @@ describe('CittaPage', () => {
     expect(within(mappa).getByTitle('Shibuya')).toHaveAttribute('href', '/guida/mappe/shibuya-sottopasso?x=42.5&y=61&zoom=3');
     // e chi non l'ha configurato continua ad aprire il proprio nodo, com'è giusto
     expect(within(mappa).getByTitle('Ueno')).toHaveAttribute('href', '/guida/mappe/citta-ueno');
+  });
+
+  it('i Memento stanno sulla mappa di Tokyo, dentro la loro finestra e non prima', async () => {
+    // Li avevo tolti riusando `soloPalazzi`, il filtro dell'*elenco* dei Palazzi, per decidere
+    // anche il contenuto della mappa: due domande diverse con una risposta sola. L'utente li
+    // aveva chiesti per nome («il Covo dei Ladri e i mementos possono essere posizionati in aree
+    // libere»), e la loro finestra — dal 9 maggio, e non si chiude — esiste già nel seed.
+    api.getQuartieri.mockResolvedValue([{ chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '' }] as QuartiereRiassuntoDto[]);
+    api.getDungeons.mockResolvedValue([
+      { chiave: 'mementos', tipo: 'mementos', nome: 'Memento', finestra: { dal: '05-09', al: null } },
+      { chiave: 'kamoshida', tipo: 'palazzo', nome: 'Palazzo di Kamoshida', finestra: { dal: '04-12', al: '05-02' } },
+    ] as DungeonRiassuntoDto[]);
+
+    // il giorno prima: non ci sono, come il Palazzo già chiuso
+    usePartitaStore.setState({ attiva: { id: 1, nome: 'Prova', dataGioco: '05-08' } as PartitaDto });
+    const primo = render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    let mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    // Il `title` dice nome **e** finestra («Memento — dal 05-09»): si cerca per inizio, non
+    // esatto, o la prova fallisce per un trattino e sembra un difetto che non c'è.
+    expect(within(mappa).queryByTitle(/^Memento/)).toBeNull();
+    expect(within(mappa).queryByTitle(/^Palazzo di Kamoshida/)).toBeNull();
+    primo.unmount();
+
+    // il giorno dopo: ci sono, con la targa corta e il collegamento alla loro mappa
+    usePartitaStore.setState({ attiva: { id: 1, nome: 'Prova', dataGioco: '05-09' } as PartitaDto });
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    const memento = await within(mappa).findByTitle(/^Memento/);
+    expect(memento).toHaveAttribute('href', '/guida/mondo/dungeon/mementos');
+    expect(memento.querySelector('img')).toHaveAttribute('src', '/asset/palazzi/mementos.png');
   });
 
   it('la scheda del quartiere mostra la stessa sagoma della mappa composta', async () => {

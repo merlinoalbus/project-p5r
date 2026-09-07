@@ -18,7 +18,7 @@ import { ModuloCatalogo } from '../components/guida/ModuloCatalogo';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import type { ElementoCatalogoDto } from '../types';
-import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 
 export function NegozioPage() {
   const { chiave = '' } = useParams();
@@ -37,12 +37,10 @@ export function NegozioPage() {
   const [elementoArticolo, setElementoArticolo] = useState<ElementoCatalogoDto | null>(null);
   const [elementoNegozio, setElementoNegozio] = useState<ElementoCatalogoDto | null>(null);
   const [nascondiAcquistati, setNascondiAcquistati] = useState(false);
-  // con una partita attiva l'elenco mostra solo ciò che è raggiungibile alla data corrente; i bloccati si possono riaprire
-  const [soloDisponibili, setSoloDisponibili] = useState(true);
   const categorie = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.categoria))], [n]);
   const destinatari = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.per).filter((p): p is string => !!p && p !== 'tutti'))], [n]);
-  const bloccati = useMemo(() => (n?.articoliElenco ?? []).filter((a) => a.disponibilita?.stato === 'bloccato').length, [n]);
-  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato) && (!partitaId || !soloDisponibili || a.disponibilita?.stato !== 'bloccato')), [n, categoria, per, nascondiAcquistati, soloDisponibili, partitaId]);
+  // Anche un articolo non ancora acquistabile resta consultabile con condizioni e semaforo.
+  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato)), [n, categoria, per, nascondiAcquistati]);
   return (
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (
@@ -54,7 +52,6 @@ export function NegozioPage() {
               <span className="chip">{NOME_TIPO_NEGOZIO[n.tipo] ?? n.tipo}</span>
               {n.confidente && <Link to={`/confidenti/${n.confidente.chiave}`} className="chip chip--attivo no-underline">{n.confidente.nome}</Link>}
               <ChipDisponibilita disponibilita={n.disponibilita} />
-              <CollegamentoMappa tipo="negozio" chiave={n.chiave} compatto />
             </div>
             <details className="catalogo-informazioni"><summary className="touch">Informazioni sul negozio{n.quartiereNome ? ` · ${n.quartiereNome}` : ''}</summary>
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-text-secondary">
@@ -75,6 +72,7 @@ export function NegozioPage() {
             {modulo === 'negozio' && elementoNegozio && <ModuloCatalogo tipo="negozio" elemento={elementoNegozio} onChiudi={() => setModulo(null)} onSalvato={() => { setModulo(null); void dati.ricarica(); }} />}
             <p className="m-0 text-[12px] text-text-muted">{n.articoli} articoli{n.verificati < n.articoli ? ` (${n.articoli - n.verificati} da fonte secondaria)` : ''}{partitaId ? ` · ${n.acquistati} acquistati nella partita «${attiva?.nome}»` : ' · attiva una partita per segnare gli acquisti'}.</p>
           </div>
+          <DoveSiTrova tipo="negozio" chiave={n.chiave} altezza={300} />
           {n.articoliElenco.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
               {categorie.length > 1 && (
@@ -90,7 +88,6 @@ export function NegozioPage() {
                 </select>
               )}
               {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={nascondiAcquistati} onChange={(e) => setNascondiAcquistati(e.target.checked)} /> Nascondi acquistati</label>}
-              {partitaId && bloccati > 0 && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDisponibili} onChange={(e) => setSoloDisponibili(e.target.checked)} /> Solo disponibili ora <span className="text-text-muted">({bloccati} non ancora)</span></label>}
             </div>
           )}
           {n.articoliElenco.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>
