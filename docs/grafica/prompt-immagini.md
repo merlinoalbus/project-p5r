@@ -319,3 +319,67 @@ Stessa famiglia delle icone delle sezioni della Guida (§13): tratto bianco spes
 ### Aggiunta del 2026-09-05 — dialoghi (corretta su conferma utente)
 ui/spillo-dialogo.png (consegnato come `spillo-dialoghi.png`, rinominato al merge del 2026-09-05: l'app cerca `ui/spillo-dialogo`) — 128×128 PNG RGBA. Spillo completo a goccia gialla come spillo-attivita, fumetto bianco con tre punti neri al posto della stella, contorno nero e accento rosso. Alfa reale generato nativamente, nessuno scontorno; solo ridimensionamento proporzionale.
 Prompt Imagegen: Create a transparent-background PNG asset. One complete yellow map pin, same family and silhouette as spillo-attivita: yellow teardrop, black outline, narrow red accent offset to right. Replace star with a white speech balloon outlined black containing three black dots. Flat solid colors. Actual native transparent alpha background, no painted checkerboard. Square canvas, complete uncropped marker, transparent margins.
+
+## 21. Icone delle azioni nuove (6) — `ui/azione-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07 (rifacimento delle pagine)
+Stesse regole della §17: tratto bianco spesso, ombra rossa sfalsata, nessun testo, leggibili su fondo rosso acceso e su fondo scuro. Sono i sei
+gesti comparsi rifacendo Libri, Film, Videogiochi, Richieste, Palazzi e Mappe: **nessun pulsante dell'app resta di solo testo**, e finché il file
+non c'è al suo posto sta un'icona SVG disegnata in codice (`iconeGuida.tsx`), che è una riserva, non il traguardo.
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `azione-piu.png` | Aggiungi una sessione di lettura, una visione, un round | segno «+» spesso dentro un cerchio aperto |
+| `azione-meno.png` | Togli una sessione, una visione, un round | segno «−» spesso dentro un cerchio aperto |
+| `azione-completati.png` | Mostra o nascondi il gruppo dei completati | elenco di tre righe con due spunte a sinistra |
+| `azione-dettagli.png` | Apri i dettagli di una scheda (Richieste, Palazzi) | foglio con l'angolo piegato e una lente d'ingrandimento sovrapposta |
+| `azione-pianta.png` | Vista «pianta della guida» di un'area | planimetria schematica: rettangolo con una parete interna e un'apertura |
+| `azione-posizione.png` | «Mostra posizione» di un libro o di un film | spillo da mappa a goccia con il foro tondo |
+
+## 22. Icone di categoria (22) — `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
+Le figure che stanno **dentro il cartiglio rosso a taglio diagonale** delle schede: tipo di negozio, categoria di oggetto, tipo di attività, tipo di
+azione del percorso. L'app le mostra a 18–44 px sopra il cartiglio, quindi il soggetto deve leggersi anche piccolo: silhouette piena, niente
+dettagli sottili, nessun testo. Erano — e finché il file manca restano — icone SVG in codice: il libretto sui Libri, la pellicola sui Film, il pad sui
+Videogiochi. L'utente le ha indicate per nome: «anche l'icona dei libri… dei DVD, del film al cinema, del videogame… ogni elemento grafico
+provvisorio deve essere sostituito con la relativa grafica generata».
+| File | Uso nell'app | Soggetto |
+|---|---|---|
+| `categoria-libri.png` | Libri (catalogo e schede) | libro chiuso di taglio, con il segnalibro |
+| `categoria-film.png` | Film e DVD | bobina di pellicola con la coda di nastro |
+| `categoria-dvd.png` | Titolo in DVD | disco con il riflesso a spicchio |
+| `categoria-minigiochi.png` | Videogiochi e mini-giochi | pad da sala giochi con leva e due tasti |
+| `categoria-lavori.png` | Lavori part-time | valigetta con la maniglia |
+| `categoria-studio.png` | Studio | quaderno aperto con la penna |
+| `categoria-armi.png` | Negozio di armi | pugnale con il filo in evidenza |
+| `categoria-protezioni.png` | Protezioni | scudo a punta |
+| `categoria-accessori.png` | Accessori | anello con una gemma |
+| `categoria-oggetti.png` | Oggetti | sacchetto della spesa |
+| `categoria-regali.png` | Regali | pacchetto con il fiocco |
+| `categoria-abiti.png` | Abiti e costumi | gruccia con una giacca |
+| `categoria-cibo.png` | Cibo | ciotola di ramen fumante |
+| `categoria-online.png` | Acquisti online | monitor con il carrello |
+| `categoria-distributore.png` | Distributore automatico | lattina con la linguetta |
+| `categoria-materiali.png` | Materiali | ingranaggio e barretta di metallo |
+| `categoria-misto.png` | Negozio misto | insegna con la tendina a righe |
+| `categoria-cura.png` | Oggetti di cura | fiala con la croce |
+| `categoria-sp.png` | Recupero SP | goccia con il bagliore |
+| `categoria-stato.png` | Stati alterati | scudo incrinato |
+| `categoria-battaglia.png` | Oggetti da battaglia | saetta spezzata |
+| `categoria-esplorazione.png` | Esplorazione | bussola |
+
+## 23. Fregi decorativi delle sezioni (10) — `decori/<chiave>.png` (1024×1024, trasparente) — richiesti il 2026-09-07
+**Immagini decorative e basta**: stanno nel fondo di una carta, sfumate al 16% di opacità e mascherate verso il testo, per alleggerire le sezioni
+che sono per forza di prosa. Non portano informazione, non contengono testo e non devono competere con il contenuto: silhouette larghe, poco
+dettaglio, un solo soggetto ben riconoscibile anche a metà trasparenza. Il file assente non rompe niente: al suo posto resta una macchia rossa
+del tema. Richiesta dell'utente: «nelle pagine di puro testo pensa a delle immagini puramente decorative… immagini a tema con il contenuto dei
+paragrafi».
+| File | Sezione | Soggetto |
+|---|---|---|
+| `battaglia-negoziazione.png` | Aiuto in battaglia → Quando e come | maschera d'Ombra e un fumetto vuoto che si sovrappongono |
+| `battaglia-regole.png` | Aiuto in battaglia → Regole | mano di carte da negoziazione a ventaglio |
+| `battaglia-tecnico.png` | Danno tecnico → Esiti del colpo | impatto a stella con onde concentriche |
+| `battaglia-staffetta.png` | Staffetta | due silhouette che si passano il testimone |
+| `battaglia-speciali.png` | Speciali | due sagome spalla a spalla dentro un lampo |
+| `battaglia-assalto.png` | Rapina, Assalto e Parla | sagoma in corsa con il mantello e il mirino |
+| `battaglia-ombre-sciagura.png` | Ombre sciagura | ombra con l'aura a raggi e gli occhi accesi |
+| `battaglia-mietitore.png` | Il Mietitore | figura incappucciata con le catene |
+| `battaglia-demoni-tesoro.png` | Demoni del Tesoro | forziere con le gambe che scappa |
+| `jose-fiori.png` | Richieste → foglio di Jose | bambino con l'auto giocattolo e i fiori dei Mementos |
+| `jose-scambi.png` | Richieste → tabella degli scambi | banco di scambio con fiori e timbri, formato a fascia (1536×864) |

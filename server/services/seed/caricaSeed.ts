@@ -38,7 +38,7 @@ import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'libri-posizioni.json', 'film-posizioni.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'libri-posizioni.json', 'film-posizioni.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'sblocco-luoghi.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -56,6 +56,7 @@ interface SeedCompleto {
   finestreDungeon: string;
   /** Quando un quartiere entra nel mondo, come regola valutabile: va in `dati_guida` così com'è. */
   sbloccoQuartieri: string;
+  sbloccoLuoghi: string;
   persone: PersonaSeed[];
   skill: SkillSeed[];
   oggetti: OggettoSeed[];
@@ -144,6 +145,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     oggettiCrosswalk: contenuti['oggetti-crosswalk.json'],
     finestreDungeon: contenuti['finestre-dungeon.json'],
     sbloccoQuartieri: contenuti['sblocco-quartieri.json'],
+    sbloccoLuoghi: contenuti['sblocco-luoghi.json'],
     doti: JSON.parse(contenuti['doti.json']) as DoteSeed[],
     hash: `${versione}:${hash.digest('hex')}`,
   };
@@ -443,6 +445,7 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     // il lettore automatico dei negozi non riconosce quella forma e spezza gli «oppure» in
     // requisiti che poi pretende tutti, cioe' bloccherebbe quartieri aperti.
     db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('sblocco-quartieri', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(seed.sbloccoQuartieri);
+    db.prepare("INSERT INTO dati_guida (chiave, json) VALUES ('sblocco-luoghi', ?) ON CONFLICT(chiave) DO UPDATE SET json = excluded.json").run(seed.sbloccoLuoghi);
 
     // ---- Aiuto in battaglia (Fase 7.3): sezioni della guida e indice delle Ombre (le chiavi dei dungeon devono esistere) ----
     for (const o of seed.battaglia.ombre) if (!chiaviDungeon.has(o.dungeonChiave)) throw new Error(`Seed battaglia: dungeon sconosciuto '${o.dungeonChiave}' per l'Ombra '${o.ombra ?? o.persona ?? ''}'.`);
@@ -467,37 +470,50 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     }
     for (const r of db.prepare('SELECT chiave FROM luogo').all() as Array<{ chiave: string }>) if (!chiaviLuoghi.has(r.chiave)) db.prepare('DELETE FROM luogo WHERE chiave = ?').run(r.chiave);
     for (const r of db.prepare('SELECT chiave FROM quartiere').all() as Array<{ chiave: string }>) if (!chiaviQuartieri.has(r.chiave)) db.prepare('DELETE FROM quartiere WHERE chiave = ?').run(r.chiave);
+    // Il caricatore aggiorna e cancella **solo le righe della guida**: quelle aggiunte o corrette
+    // dall'utente restano dove sono, come già succede per negozi e articoli dalla Fase 16.1.
+    // Il controllo sulla colonna serve ai test di upgrade, che eseguono il seed anche su schemi
+    // storici dove `origine` non esiste ancora: lì il predicato è vuoto e tutto si comporta come
+    // prima.
+    const haOrigine = (t: string): boolean => (db.prepare(`SELECT COUNT(*) n FROM pragma_table_info('${t}') WHERE name='origine'`).get() as { n: number }).n === 1;
+    const soloSeed = (t: string): string => (haOrigine(t) ? " WHERE origine = 'seed'" : '');
+    const soloSeedConflitto = (t: string): string => (haOrigine(t) ? ` WHERE ${t}.origine = 'seed'` : '');
     const haSessioniAttivita = (db.prepare("SELECT COUNT(*) n FROM pragma_table_info('attivita') WHERE name='sessioni'").get() as { n: number }).n === 1;
     const insA = haSessioniAttivita ? db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, sessioni, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
       VALUES (@chiave, @ordine, @nome, @tipo, @luogo, @luogo_chiave, @fascia, @costo, @sblocco, @sessioni, @doti_json, @altri_effetti, @regole, @premi, @paga, @fonte, @verificato)
       ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, tipo = excluded.tipo, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, fascia = excluded.fascia, costo = excluded.costo, sblocco = excluded.sblocco,
-        sessioni = excluded.sessioni, doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato`) : db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
+        sessioni = excluded.sessioni, doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('attivita')}`) : db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
       VALUES (@chiave, @ordine, @nome, @tipo, @luogo, @luogo_chiave, @fascia, @costo, @sblocco, @doti_json, @altri_effetti, @regole, @premi, @paga, @fonte, @verificato)
       ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, tipo = excluded.tipo, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, fascia = excluded.fascia, costo = excluded.costo, sblocco = excluded.sblocco,
-        doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato`);
+        doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('attivita')}`);
     const chiaviAttivita = new Set<string>();
     for (const a of seed.attivita.attivita) {
       chiaviAttivita.add(a.chiave);
       insA.run({ chiave: a.chiave, ordine: a.ordine, nome: a.nome, tipo: a.tipo, luogo: a.luogo, luogo_chiave: a.luogoChiave && chiaviQuartieri.has(a.luogoChiave) ? a.luogoChiave : null, fascia: a.fascia, costo: a.costo, sblocco: a.sblocco, sessioni: a.sessioni ?? 1, doti_json: JSON.stringify(a.doti), altri_effetti: a.altriEffetti, regole: a.regole, premi: a.premi, paga: a.paga, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
     }
-    for (const r of db.prepare('SELECT chiave FROM attivita').all() as Array<{ chiave: string }>) if (!chiaviAttivita.has(r.chiave)) db.prepare('DELETE FROM attivita WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare(`SELECT chiave FROM attivita${soloSeed('attivita')}`).all() as Array<{ chiave: string }>) if (!chiaviAttivita.has(r.chiave)) db.prepare('DELETE FROM attivita WHERE chiave = ?').run(r.chiave);
     const insLib = db.prepare(`INSERT INTO libro (chiave, ordine, nome, nome_it, dove, prezzo, disponibile_dal, dote, note, sblocca, sessioni, dettagli, fonte, verificato)
       VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @prezzo, @disponibile_dal, @dote, @note, @sblocca, @sessioni, @dettagli, @fonte, @verificato)
-      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, prezzo = excluded.prezzo, disponibile_dal = excluded.disponibile_dal, dote = excluded.dote, note = excluded.note, sblocca = excluded.sblocca, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`);
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, prezzo = excluded.prezzo, disponibile_dal = excluded.disponibile_dal, dote = excluded.dote, note = excluded.note, sblocca = excluded.sblocca, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('libro')}`);
     const chiaviLibri = new Set<string>();
     for (const l of seed.attivita.libri) { chiaviLibri.add(l.chiave); insLib.run({ chiave: l.chiave, ordine: l.ordine, nome: l.nome, nome_it: l.nomeIt, dove: l.dove, prezzo: l.prezzo, disponibile_dal: l.disponibileDal, dote: l.dote, note: l.note, sblocca: l.sblocca, sessioni: l.sessioni, dettagli: l.dettagli, fonte: l.fonte, verificato: l.verificato ? 1 : 0 }); }
-    for (const r of db.prepare('SELECT chiave FROM libro').all() as Array<{ chiave: string }>) if (!chiaviLibri.has(r.chiave)) db.prepare('DELETE FROM libro WHERE chiave = ?').run(r.chiave);
+    // `soloSeed`: le righe aggiunte dall'utente non si cancellano perché non stanno nel file della
+    // guida — è esattamente il motivo per cui le ha aggiunte. Senza questa condizione un libro
+    // aggiunto a mano sparirebbe al primo reseed, cioè al primo riavvio dopo un aggiornamento dei
+    // dati. Il controllo sulla colonna serve ai test di upgrade, che eseguono il seed su schemi
+    // storici in cui `origine` non c'è ancora.
+    for (const r of db.prepare(`SELECT chiave FROM libro${soloSeed('libro')}`).all() as Array<{ chiave: string }>) if (!chiaviLibri.has(r.chiave)) db.prepare('DELETE FROM libro WHERE chiave = ?').run(r.chiave);
     const haSessioniFilm = (db.prepare("SELECT COUNT(*) n FROM pragma_table_info('film') WHERE name='sessioni'").get() as { n: number }).n === 1;
     const insFilm = haSessioniFilm
       ? db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, sessioni, dettagli, fonte, verificato)
           VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @sessioni, @dettagli, @fonte, @verificato)
-          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`)
+          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('film')}`)
       : db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, dettagli, fonte, verificato)
           VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @dettagli, @fonte, @verificato)
-          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`);
+          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato${soloSeedConflitto('film')}`);
     const chiaviFilm = new Set<string>();
     for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
-    for (const r of db.prepare('SELECT chiave FROM film').all() as Array<{ chiave: string }>) if (!chiaviFilm.has(r.chiave)) db.prepare('DELETE FROM film WHERE chiave = ?').run(r.chiave);
+    for (const r of db.prepare(`SELECT chiave FROM film${soloSeed('film')}`).all() as Array<{ chiave: string }>) if (!chiaviFilm.has(r.chiave)) db.prepare('DELETE FROM film WHERE chiave = ?').run(r.chiave);
     if (haSessioniFilm) {
       const chiaviMappate = new Set(Object.keys(seed.filmPosizioni.film));
       if (chiaviMappate.size !== chiaviFilm.size || [...chiaviFilm].some((k) => !chiaviMappate.has(k))) {
@@ -683,6 +699,17 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
     sincronizzaCondizioniCatalogo(db);
+    // Le condizioni scritte nel seed vincono su quelle ricavate dalla prosa, e si applicano
+    // **dopo** la sincronizzazione, che altrimenti le sovrascriverebbe. È il campo che rende
+    // fedele l'esportazione: una condizione costruita nell'editor — un gruppo «almeno una», un
+    // fatto di sistema, una negazione — nessuna frase la esprime, e senza questo passaggio
+    // tornerebbe indietro trasformata al primo reseed.
+    const condN = db.prepare('UPDATE negozio SET condizioni_json = ? WHERE chiave = ?');
+    const condA = db.prepare('UPDATE articolo SET condizioni_json = ? WHERE chiave = ?');
+    for (const n of seed.negozi.negozi) {
+      if (n.condizioni) condN.run(JSON.stringify(n.condizioni), n.chiave);
+      for (const a of n.articoli) if (a.condizioni) condA.run(JSON.stringify(a.condizioni), a.chiave);
+    }
     sincronizzaDateQuartieri(db);
     // ---- Meta ----
     // ---- Requisiti per rango dei Confidenti (Fase 12.3): ricaricati integralmente dal seed ----

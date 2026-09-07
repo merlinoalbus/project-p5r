@@ -18,7 +18,7 @@ const dungeon = (extra: Partial<DungeonRiassuntoDto>): DungeonRiassuntoDto => ({
   chiave: 'kamoshida', tipo: 'palazzo', ordine: 1, nome: 'Palazzo di Kamoshida', sovrano: 'Suguru Kamoshida', arcanaSovrano: '', arcanaSovranoNome: '',
   date: { sblocco: '12 Aprile (Martedì) — prima infiltrazione esplorativa nel Palazzo', scadenza: '2 maggio (ultimo giorno utile)', furtoConsigliato: '22 Aprile' },
   finestra: { dal: '04-12', al: '05-02' },
-  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, ...extra,
+  livelloConsigliato: 'Non esplicitato testualmente da allgamestaff. Il boss finale è di Livello 11.', aree: 18, punti: 58, esauribili: 41, gestiti: 29, collezionabili: 34, collezionabiliGestiti: 17, ...extra,
 });
 
 beforeEach(() => {
@@ -28,7 +28,7 @@ beforeEach(() => {
 
 describe('DungeonPage', () => {
   it('mostra le schede con emblema di riserva, avanzamento e date in breve', async () => {
-    getDungeons.mockResolvedValue([dungeon({}), dungeon({ chiave: 'madarame', ordine: 2, nome: 'Palazzo di Madarame (Museo)', sovrano: 'Ichiryusai Madarame', arcanaSovrano: 'Emperor', arcanaSovranoNome: 'Imperatore', gestiti: null, date: { sblocco: '16 maggio (Lunedì)', scadenza: '5 giugno', furtoConsigliato: '' } })]);
+    getDungeons.mockResolvedValue([dungeon({}), dungeon({ chiave: 'madarame', ordine: 2, nome: 'Palazzo di Madarame (Museo)', sovrano: 'Ichiryusai Madarame', arcanaSovrano: 'Emperor', arcanaSovranoNome: 'Imperatore', gestiti: null, collezionabiliGestiti: null, date: { sblocco: '16 maggio (Lunedì)', scadenza: '5 giugno', furtoConsigliato: '' } })]);
     render(<MemoryRouter><DungeonPage /></MemoryRouter>);
     const kamoshida = await screen.findByRole('link', { name: 'Palazzo di Kamoshida, Suguru Kamoshida' });
     // La carta apre la **scheda** del Palazzo: cliccarla è quello, e il collegamento «Scheda del
@@ -37,7 +37,7 @@ describe('DungeonPage', () => {
     expect(kamoshida).toHaveAttribute('href', '/guida/dungeon/kamoshida');
     expect(screen.queryByRole('link', { name: /Scheda del Palazzo/ })).toBeNull();
     expect(getDungeons).toHaveBeenCalledWith(1);
-    // anello di avanzamento: 29 su 58 = 50%
+    // anello di avanzamento: 17 collezionabili su 34 = 50% (le sicure e i boss non contano)
     expect(screen.getByRole('progressbar', { name: /Avanzamento in Palazzo di Kamoshida/ })).toHaveAttribute('aria-valuenow', '50');
     expect(screen.getByText('50%')).toBeInTheDocument();
     // date e livello in breve, dettaglio nel title

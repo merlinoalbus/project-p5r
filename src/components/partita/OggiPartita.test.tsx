@@ -12,7 +12,7 @@ import { usePartitaStore } from '../../stores/partitaStore';
 import { useSuggerimentiStore } from '../../stores/suggerimentiStore';
 import type { MappaDto, PartitaDto, PercorsoGiornoDto, PercorsoIndiceDto } from '../../types';
 
-const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getAgenda: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
+const api = vi.hoisted(() => ({ risolviMappa: vi.fn(), getAgenda: vi.fn(), getPercorsoIndice: vi.fn(), getPercorsoGiorno: vi.fn(), impostaGiornoCorrente: vi.fn(), impostaFasciaGioco: vi.fn(), getSuggerimenti: vi.fn(), impostaAzionePercorso: vi.fn(), getMappa: vi.fn(), impostaSpilloRaccolto: vi.fn(), impostaStatoPunto: vi.fn(), impostaAcquisto: vi.fn(), getImmagini: vi.fn().mockResolvedValue([]), getQuartieri: vi.fn().mockResolvedValue([]), getDungeons: vi.fn().mockResolvedValue([]), urlImmagine: vi.fn(() => '/x'), caricaImmagine: vi.fn(), eliminaImmagine: vi.fn(), importaImmagineDaUrl: vi.fn() }));
 vi.mock('../../services/api', () => api);
 
 const indice: PercorsoIndiceDto = { giorni: [{ giorno: '04-12', giornoSettimana: 'mar', azioni: 2, fatte: 0, coperto: true } as PercorsoIndiceDto['giorni'][number]], dataCorrente: '04-12', totaleGiorni: 346, giorniCoperti: 300 };
@@ -34,6 +34,11 @@ describe('OggiPartita', () => {
     api.getPercorsoIndice.mockResolvedValue(indice);
     api.getPercorsoGiorno.mockResolvedValue(giorno);
     api.getImmagini.mockResolvedValue([]);
+    // La mappa disegnata di Tokyo carica quartieri e radici del Metaverso: senza queste due,
+    // `beforeEach` le azzera insieme alle altre e il componente riceve `undefined` al posto di una
+    // promessa. Vanno riarmate qui, non solo dichiarate nell'oggetto dei finti.
+    api.getQuartieri.mockResolvedValue([]);
+    api.getDungeons.mockResolvedValue([]);
     api.getMappa.mockImplementation((chiave: string) => Promise.resolve(mappa(chiave, chiave === 'tokyo' ? 'Tokyo' : 'Shibuya')));
   });
 
@@ -45,8 +50,12 @@ describe('OggiPartita', () => {
     expect(screen.getByText('Consigliata · requisiti del rango 2 soddisfatti')).toBeInTheDocument();
     expect(screen.getByText('Bloccata: Coraggio rango 2 (rango 1 di 2)')).toBeInTheDocument();
     expect(screen.getByText('1 consigliate · 1 bloccate')).toBeInTheDocument();
-    expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
-    expect(api.getMappa).toHaveBeenCalledWith('tokyo', 4);
+    // Al livello di Tokyo c'e' la mappa **disegnata**, la stessa de «La citta'»: era la
+    // planimetria dell'atlante, cioe' una seconda rappresentazione della stessa citta' dentro la
+    // stessa app. Percio' `getMappa('tokyo')` non viene piu' chiamata: quel livello non e' un
+    // nodo da caricare, e' un disegno.
+    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
+    expect(api.getMappa).not.toHaveBeenCalledWith('tokyo', 4);
     expect(screen.getByRole('link', { name: 'Guida completa' })).toHaveAttribute('href', '/guida/percorso/04-12');
   });
 
@@ -59,7 +68,7 @@ describe('OggiPartita', () => {
     expect(await screen.findByRole('dialog', { name: 'Cortile della Shujin' })).toBeInTheDocument();
     expect(within(screen.getByRole('list', { name: 'Azioni di giorno' })).getByRole('listitem')).toHaveAttribute('aria-current', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Torna a Tokyo' }));
-    expect(await screen.findByRole('application', { name: 'Mappa: Tokyo' })).toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: /^Mappa di Tokyo con/ })).toBeInTheDocument();
   });
 
   it('«Giorno»/«Sera» cambiano il momento della giornata della partita: la PUT aggiorna lo store e la mappa incorporata si ricarica', async () => {
@@ -75,7 +84,11 @@ describe('OggiPartita', () => {
     // la sezione del momento corrente porta il chip «Adesso» (15.27): di giorno è «Di giorno»
     expect(screen.getByText('Adesso').closest('section')).toHaveTextContent('Di giorno');
     expect(screen.getByText('Adesso').closest('section')).toHaveAttribute('aria-current', 'true');
-    await screen.findByRole('application', { name: 'Mappa: Tokyo' });
+    // Si scende a un quartiere prima di cambiare fascia: la ricarica riguarda il **visore
+    // dell'atlante**, che disegna gli spilli e la loro disponibilita'. Al livello di Tokyo c'e'
+    // ora la mappa disegnata, che di spilli non ne ha e non ha niente da ricaricare.
+    fireEvent.click(await screen.findByRole('button', { name: /Sulla mappa: Parla con Ryuji/ }));
+    await screen.findByRole('application', { name: 'Mappa: Shibuya' });
     const caricamentiMappa = api.getMappa.mock.calls.length;
     fireEvent.click(gruppo.getByRole('button', { name: /Sera/ }));
     await waitFor(() => expect(api.impostaFasciaGioco).toHaveBeenCalledWith(4, 'sera'));

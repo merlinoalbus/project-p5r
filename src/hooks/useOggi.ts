@@ -38,6 +38,9 @@ export interface Oggi {
   mappa: StatoMappaOggi;
   sullaMappa: (a: AzionePercorsoDto) => void;
   tornaAllaMappaGlobale: () => void;
+  /** Scende a una mappa dell'atlante restando nella scheda «Oggi»: il clic su un quartiere della
+   *  mappa di Tokyo non deve portare via dal giorno che si sta guardando. */
+  apriMappa: (chiave: string) => void;
 }
 
 /** Carica il giorno corrente della partita (o quello scelto) con le sue azioni e tiene lo stato della mappa collegata. */
@@ -102,5 +105,6 @@ export function useOggi(partitaId: number): Oggi {
     mappa,
     sullaMappa: (a) => { if (a.mappa) setMappa({ chiave: a.mappa.chiave, spilloId: a.mappa.spilloId, azione: a.indice }); },
     tornaAllaMappaGlobale: () => setMappa({ chiave: 'tokyo', spilloId: null, azione: null }),
+    apriMappa: (chiave) => setMappa({ chiave, spilloId: null, azione: null }),
   };
 }

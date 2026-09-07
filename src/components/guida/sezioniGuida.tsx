@@ -24,6 +24,11 @@ export const SEZIONI_GUIDA: SezioneGuida[] = [
   { chiave: 'calendario', to: '/guida/calendario', titolo: 'Calendario di gioco', descrizione: 'Meteo, eventi, scadenze dei Palazzi, consigli per settimana', icona: <IconStar size={DIM} /> },
   { chiave: 'mappe', to: '/guida/mappe', titolo: 'Mappe', descrizione: 'Tokyo, quartieri e aree dei Palazzi: mappe a livelli con spilli, collezionabili raccolti, negozi ed editor', icona: <IconMappa size={DIM} /> },
   { chiave: 'dungeon', to: '/guida/dungeon', titolo: 'Palazzi', descrizione: 'Aree, punti di interesse, boss e mappe interattive con avanzamento; il Dedalo di Iweleth sta qui, i Memento hanno la loro pagina', icona: <IconMask size={DIM} /> },
+  // I Memento hanno una pagina propria da quando non stanno più nell'elenco dei Palazzi — non si
+  // visitano per aree, i piani sono generati a ogni discesa — ma ci si arrivava solo passando per
+  // le Richieste o per un collegamento dentro un'altra pagina. Dall'indice della Guida non c'era
+  // modo di aprirli, ed è la prima cosa che uno cerca qui dentro.
+  { chiave: 'mementos', to: '/guida/dungeon/mementos', titolo: 'Memento', descrizione: 'Il dedalo sotto Tokyo: i livelli, il pozzo, Jose e i suoi fiori, le Ombre che ci si incontrano e la mappa disegnata coi pezzi del gioco', icona: <IconMask size={DIM} /> },
   { chiave: 'richieste', to: '/guida/richieste', titolo: 'Richieste dei Mementos', descrizione: '33 Richieste con bersaglio, debolezze, ricompense e stato; fiori e timbri di Jose', icona: <IconBook size={DIM} /> },
   { chiave: 'battaglia', to: '/guida/battaglia', titolo: 'Aiuto in battaglia', descrizione: 'Debolezze delle Ombre per area, negoziazione, danno tecnico, Staffetta, Speciali, Mietitore e Demoni del Tesoro', icona: <IconBolt size={DIM} /> },
   { chiave: 'citta', to: '/guida/citta', titolo: 'La città', descrizione: 'Quartieri e luoghi: negozi, ristoranti, attività, Confidenti, orari e sblocchi', icona: <IconHome size={DIM} /> },

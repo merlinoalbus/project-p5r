@@ -9,6 +9,7 @@ import { registraEvento } from './storicoService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, DungeonRiassuntoDto, PiantaAreaDto, PuntoInteresseDto, StatoPunto } from '../../shared/types.js';
 import { importaImmagineDaUrl } from './immaginiService.js';
 import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
+import { eCollezionabile } from '../../shared/puntiDungeon.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
@@ -114,7 +115,9 @@ function finestreDungeon(): Map<string, { dal: string; al: string | null }> {
 export function invalidaFinestreDungeon(): void { finestreCache = null; }
 
 function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, conPartita: boolean): DungeonRiassuntoDto {
-  const punti = prepared('SELECT p.chiave, p.esauribile FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number }>;
+  const punti = prepared('SELECT p.chiave, p.esauribile, p.tipo FROM punto_interesse p JOIN dungeon_area a ON a.chiave = p.area_chiave WHERE a.dungeon_chiave = ?').all(r.chiave) as Array<{ chiave: string; esauribile: number; tipo: string }>;
+  // Il denominatore della percentuale: quel che si raccoglie, non quel che si attraversa.
+  const collezionabili = punti.filter((p) => eCollezionabile(p.tipo));
   return {
     chiave: r.chiave, tipo: r.tipo, ordine: r.ordine, nome: r.nome, sovrano: r.sovrano, arcanaSovrano: r.arcana_sovrano, arcanaSovranoNome: r.arcana_sovrano ? t('arcana', r.arcana_sovrano) : '',
     date: { sblocco: r.data_sblocco, scadenza: r.data_scadenza, furtoConsigliato: r.furto_consigliato },
@@ -122,6 +125,8 @@ function riassunto(r: RigaDungeon, stati: Map<string, StatoPunto>, conPartita: b
     aree: (prepared('SELECT COUNT(*) AS n FROM dungeon_area WHERE dungeon_chiave = ?').get(r.chiave) as { n: number }).n,
     punti: punti.length, esauribili: punti.filter((p) => p.esauribile === 1).length,
     gestiti: conPartita ? punti.filter((p) => stati.has(p.chiave)).length : null,
+    collezionabili: collezionabili.length,
+    collezionabiliGestiti: conPartita ? collezionabili.filter((p) => stati.has(p.chiave)).length : null,
   };
 }
 
