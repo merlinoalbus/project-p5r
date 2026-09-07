@@ -37,12 +37,11 @@ export function NegozioPage() {
   const [elementoArticolo, setElementoArticolo] = useState<ElementoCatalogoDto | null>(null);
   const [elementoNegozio, setElementoNegozio] = useState<ElementoCatalogoDto | null>(null);
   const [nascondiAcquistati, setNascondiAcquistati] = useState(false);
-  // con una partita attiva l'elenco mostra solo ciò che è raggiungibile alla data corrente; i bloccati si possono riaprire
-  const [soloDisponibili, setSoloDisponibili] = useState(true);
   const categorie = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.categoria))], [n]);
   const destinatari = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.per).filter((p): p is string => !!p && p !== 'tutti'))], [n]);
-  const bloccati = useMemo(() => (n?.articoliElenco ?? []).filter((a) => a.disponibilita?.stato === 'bloccato').length, [n]);
-  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato) && (!partitaId || !soloDisponibili || a.disponibilita?.stato !== 'bloccato')), [n, categoria, per, nascondiAcquistati, soloDisponibili, partitaId]);
+  // Difesa lato client: il backend non invia i bloccati con una partita attiva, e la scheda non
+  // offre alcun comando per riaprirli se una risposta obsoleta dovesse ancora contenerli.
+  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato) && (!partitaId || a.disponibilita?.stato !== 'bloccato')), [n, categoria, per, nascondiAcquistati, partitaId]);
   return (
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (
@@ -90,7 +89,6 @@ export function NegozioPage() {
                 </select>
               )}
               {partitaId && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={nascondiAcquistati} onChange={(e) => setNascondiAcquistati(e.target.checked)} /> Nascondi acquistati</label>}
-              {partitaId && bloccati > 0 && <label className="flex items-center gap-1.5 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDisponibili} onChange={(e) => setSoloDisponibili(e.target.checked)} /> Solo disponibili ora <span className="text-text-muted">({bloccati} non ancora)</span></label>}
             </div>
           )}
           {n.articoliElenco.length === 0 ? <p className="m-0 text-[13px] text-text-muted">Nessun articolo acquistabile confermato per questo luogo.</p>

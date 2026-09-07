@@ -85,3 +85,13 @@ it('nasconde una voce bloccata e la rende disponibile soltanto dopo lo sblocco',
   expect(await screen.findByText('Libreria segreta')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Mostra posizione di Libreria segreta' })).toBeInTheDocument();
 });
+
+it('mostra nell’intestazione e nella scheda i conteggi disponibili restituiti dal backend', async () => {
+  usePartitaStore.setState({ attiva: { id: 8, nome: 'Conteggi' } as PartitaDto });
+  getNegozi.mockResolvedValueOnce([{ ...negoziBase[1], articoli: 1, verificati: 1, disponibilita: { stato: 'disponibile' as const, requisiti: [] } }]);
+  render(<MemoryRouter><NegoziPage /></MemoryRouter>);
+
+  expect(await screen.findByText(/1 negozio o punto di acquisto con 1 articolo disponibile/)).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /Officina/ })).toHaveTextContent('1 articolo');
+  expect(screen.queryByText(/da fonte secondaria/)).toBeNull();
+});

@@ -2062,10 +2062,48 @@ oppure eliminare la duplicazione nel risolutore/dati, mantenendo un solo proprie
   fallimenti gia' riprodotti sulla base (`citta.test.ts`: 84 attesi, 82 reali;
   `mappe-editor.test.ts`: vecchia attesa del Dedalo Memento nell'albero).
 
-### Vincolo di integrazione assegnato a Opus
+### Vincolo di integrazione e ripartizione aggiornata
 
-La nuova gestione dei libri e' di proprieta' Opus: l'avanzamento parziale non completa il
-requisito `lettura`; solo l'ultima parte/sessione lo rende vero. Fino ad allora l'entita' collegata
-deve restare assente anche da pin, ricerca e collegamenti indiretti. Se lo sblocco ammette
-alternative, basta una qualsiasi condizione vera. I Palazzi, inoltre, compaiono in mappa soltanto
-nella rispettiva finestra di apertura e sono assenti fuori periodo.
+Per decisione successiva dell'utente, la gestione progressiva di libri, film/DVD e videogiochi e'
+parte del Lotto B: saranno tre nuove sezioni autonome della Guida, con progresso per parti/sessioni
+e completamento che alimenta gli sblocchi. Opus integra soltanto lo stato risultante nelle pagine
+del mondo di sua proprieta'. Fino al completamento l'entita' collegata deve restare assente anche
+da pin, ricerca e collegamenti indiretti; se lo sblocco ammette alternative, basta una qualsiasi
+condizione vera. I Palazzi compaiono in mappa soltanto nella rispettiva finestra di apertura e
+sono assenti fuori periodo.
+
+### Esito del `galaxy-task-validator` sul tag v1: FAIL
+
+Il tag immutabile `candidato/lotto-b-negozi-contesto-v1` resta respinto. Il client nascondeva le
+righe rosse, ma il backend calcolava `articoli`, `verificati` e `totale` sul catalogo completo:
+intestazione e card dichiaravano quindi come disponibili anche articoli bloccati. La ricerca,
+inoltre, applicava prima `LIMIT 300` e soltanto dopo il filtro client, quindi il totale visibile
+non era dimostrabile per cataloghi oltre 300 righe. Il tag non viene spostato ne' riutilizzato.
+
+### Correzione preparata per il candidato v2
+
+- `elencaNegozi` calcola per ogni negozio `articoli` e `verificati` dopo la valutazione della
+  partita ed elimina i negozi con stato finale `bloccato`;
+- `dettaglioNegozio` risponde 404 per un negozio bloccato ed elimina gli articoli bloccati prima
+  di restituire elenco e conteggi;
+- `ricercaArticoli` valuta l'intero insieme, calcola `totale` sui soli disponibili e applica il
+  limite 300 soltanto alla risposta;
+- l'acquisto diretto di un articolo bloccato risponde 404; la scheda non contiene piu' il vecchio
+  interruttore che permetteva di riaprire gli articoli non ancora disponibili;
+- il frontend usa il totale restituito dal backend e conserva un filtro difensivo contro risposte
+  obsolete, senza offrire comandi di rivelazione.
+
+Prove mirate: 23/23 PASS su servizio, rotte, elenco e dettaglio. Una fixture rende disponibile
+soltanto `untouchable/kogatana-nera` e blocca gli altri 217 articoli, verificando 1/1 in elenco,
+scheda e ricerca. Una seconda fixture rende disponibili tutte le righe e verifica `totale=575`
+con 300 risultati restituiti. Runtime isolato reale sulla porta 3102, database nuovo: il 9 aprile
+48 negozi e 380 articoli visibili, ricerca `totale=380`, 300 restituiti, zero bloccati; la Kogatana
+e' assente e l'acquisto diretto risponde 404, poi compare il 1 agosto. Frontend isolato 5276
+controllato a schermo: il 9 aprile intestazione 48/380, ricerca Kogatana con due risultati e nessun
+Untouchable; il 1 agosto tre risultati incluso Untouchable. La scheda Untouchable passa da 161 a
+162 articoli e non offre alcun comando per rivelare i bloccati. La prova sul 5274 dell'utente
+resta da riallineare dopo la finestra concordata sul backend condiviso 3101.
+
+Le suite complete sequenziali restituiscono 578/580 con i due difetti esterni gia' noti. Una
+tornata ha mostrato anche un fallimento temporaneo sul titolo di `MappaPage`, immediatamente
+passato 8/8 in isolamento e non collegato al diff; viene dichiarato invece di essere occultato.
