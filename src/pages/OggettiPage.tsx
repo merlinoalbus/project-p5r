@@ -14,10 +14,24 @@ import { normalizzaTesto } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { IconaScheda } from '../components/shared/IconaAzione';
 import { RitrattoPersonaggio } from '../components/guida/RitrattoPersonaggio';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
-const SCHEDE = [['consumabili', 'Consumabili'], ['equipaggiamento', 'Equipaggiamento'], ['chiave', 'Chiave e materiali'], ['fabbricazione', 'Fabbricazione'], ['armi', 'Personalizzazione armi'], ['abiti', 'Abiti e lavanderia'], ['scambi', 'Scambi']] as const;
+/** Le sette schede, con la figura che ciascuna mostra sopra la propria etichetta.
+ *
+ * `categoria` per quelle che sono davvero una famiglia di oggetti (i consumabili, gli
+ * equipaggiamenti, i materiali, gli abiti); `scheda` per le due che sono un'attività e non una
+ * famiglia — la personalizzazione da Iwai e gli scambi coi venditori speciali. */
+const SCHEDE = [
+  ['consumabili', 'Consumabili', 'categoria', 'cura'],
+  ['equipaggiamento', 'Equipaggiamento', 'categoria', 'armi'],
+  ['chiave', 'Chiave e materiali', 'categoria', 'oggetti-chiave'],
+  ['fabbricazione', 'Fabbricazione', 'categoria', 'materiali'],
+  ['armi', 'Personalizzazione armi', 'scheda', 'personalizzazione'],
+  ['abiti', 'Abiti e lavanderia', 'categoria', 'abiti'],
+  ['scambi', 'Scambi', 'scheda', 'scambi'],
+] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_CATEGORIA: Record<string, string> = { cura: 'Cura HP', sp: 'Recupero SP', stato: 'Stati alterati', battaglia: 'Battaglia', esplorazione: 'Esplorazione', altro: 'Altro' };
 
@@ -294,7 +308,16 @@ export function OggettiPage() {
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Oggetti, materiali e fabbricazione" sottotitolo={<>{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Armi, protezioni e accessori hanno la loro scheda qui accanto; i prezzi dei negozi stanno in Negozi e inventario.</>} />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
-            {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'consumabili' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
+            {/* L'immagine sopra la parola: sette pastiglie di solo testo si leggevano tutte
+                uguali, ed è il rilievo dell'utente sul rapporto fra grafica e testo. */}
+            {SCHEDE.map(([k, l, tipo, icona]) => (
+              <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
+                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
+                onClick={() => setParams(k === 'consumabili' ? {} : { scheda: k }, { replace: true })}>
+                {tipo === 'categoria' ? <IconaCategoria categoria={icona} dimensione={28} /> : <IconaScheda chiave={icona} dimensione={28} />}
+                <span>{l}</span>
+              </button>
+            ))}
           </FilaScorrevole>
           {scheda === 'consumabili' && <SchedaConsumabili d={d} />}
           {scheda === 'equipaggiamento' && <SchedaEquipaggiamento />}

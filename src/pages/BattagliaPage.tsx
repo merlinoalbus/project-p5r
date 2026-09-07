@@ -329,7 +329,7 @@ export function BattagliaPage() {
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Aiuto in battaglia" sottotitolo="Debolezze delle Ombre per area, risposte in negoziazione, danno tecnico, Staffetta, Speciali e nemici speciali dalla guida allgamestaff." />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
-            {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })}><IconaCategoria categoria={icona} dimensione={20} />{l}</button>)}
+            {SCHEDE.map(([k, l, icona]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'ombre' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={icona} dimensione={28} /><span>{l}</span></button>)}
           </FilaScorrevole>
           {scheda === 'ombre' && <SchedaOmbre ombre={d.ombre} />}
           {scheda === 'negoziazione' && <SchedaNegoziazione d={d} />}
