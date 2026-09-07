@@ -26,14 +26,15 @@
 // ============================================================
 
 import { Link } from 'react-router-dom';
-import { useMemo } from 'react';
-import { ordineGioco } from '../../../shared/condizioniSpillo';
+import { useCallback, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
+import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
+import { dataLeggibile } from '../../../shared/condizioniSpillo';
+import { urlMappa } from '../../utils/navigazioneMappa';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
-
-const BASE = '/asset/mappe/lmap/tokyo';
+import { assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
@@ -53,22 +54,32 @@ interface Props {
   dungeon?: DungeonRiassuntoDto[];
   /** Data della partita in MM-GG. Senza, si mostra il mondo intero. */
   dataGioco?: string | null;
+  /** La chiave accesa: si illumina d'oro e passa davanti alle vicine. La stessa che accende la
+   *  scheda corrispondente, perché mappa e schede sono **una** selezione vista in due modi. */
+  evidenziato?: string | null;
+  onEvidenzia?: (chiave: string | null) => void;
   className?: string;
 }
 
-function dentro(oggi: string, dal: string, al: string | null): boolean {
-  const g = ordineGioco(oggi);
-  return g >= ordineGioco(dal) && (!al || g <= ordineGioco(al));
+
+/** Sulla targa va il nome, non la qualifica.
+ *
+ * «Palazzo di Okumura» è una targa larga il doppio di «Okumura», e su una mappa la larghezza è
+ * spazio tolto ai vicini: nove targhe così, in fila, si accavallavano fra loro e sopra i
+ * quartieri. Il nome per intero resta nel `title` e nella scheda, dove non costa niente. */
+function nomeSullaTarga(nome: string): string {
+  return nome.replace(/^(Palazzo|Dedalo) di /, '');
 }
 
 interface Segno {
   chiave: string;
+  /** Per il `title` e per il testo alternativo: quello lungo. */
   nome: string;
-  png: string;
-  /** Immagine di ripiego se il disegno originale non esiste per questo luogo. */
-  ripiego: string;
+  /** Sulla targa: quello corto. */
+  targa: string;
+  /** L'indirizzo del disegno, già risolto: `assetTokyoQuartiere` o `assetPalazzo`. */
+  src: string;
   dove: Collocazione;
-  /** Vuoto per le fermate che la guida non ha come scheda: restano cartellini, non collegamenti. */
   href: string;
   presente: boolean;
   quando: string | null;
@@ -76,33 +87,41 @@ interface Segno {
   palazzo: boolean;
 }
 
-function Cartellino({ s }: { s: Segno }) {
-  const contenuto = <>
-    <img src={`${BASE}/${s.png}`} alt="" aria-hidden
-      onError={(e) => {
-        const im = e.currentTarget;
-        if (im.dataset.ripiego || !s.ripiego) { im.style.visibility = 'hidden'; return; }
-        im.dataset.ripiego = '1';
-        im.src = s.ripiego;
-      }}
-      className="w-full object-contain transition-transform duration-150 group-hover:scale-[1.18]"
-      style={{ filter: CONTORNO }}
-      onMouseEnter={(e) => { if (s.href) e.currentTarget.style.filter = CONTORNO_ORO; }}
-      onMouseLeave={(e) => { e.currentTarget.style.filter = CONTORNO; }} />
-    <span className={`-mt-[6%] whitespace-nowrap rounded-[2px] border-2 border-white px-[0.5em] py-[0.12em] font-display text-[11px] uppercase leading-none tracking-[0.05em] text-white shadow-[0_2px_6px_rgba(0,0,0,0.7)] sm:text-[15px] lg:text-[17px] ${
-      s.palazzo ? 'bg-[#8b0000]' : 'bg-black'} ${
-      s.href ? 'group-hover:border-[#ffd23f] group-hover:text-[#ffd23f]' : ''}`}>{s.nome}</span>
-  </>;
+/** Un posto in cui si può andare: la sagoma, la targa, e l'oro quando è quello scelto.
+ *
+ * Ci finiscono **solo** i luoghi raggiungibili. Quelli chiusi — non ancora sbloccati dal
+ * calendario, o fermate che la guida non ha come scheda — restano il solo pallino bianco della
+ * rete: una figura con la targa dice «vieni qui», e dirlo a proposito di un posto dove non si può
+ * entrare è una promessa che la mappa non mantiene. Il nome resta comunque, sul pallino. */
+function Cartellino({ s, acceso, onEvidenzia }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void }) {
+  const filtro = acceso ? CONTORNO_ORO : CONTORNO;
   // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
   // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
-  const classe = 'group absolute z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30';
-  const stile = { left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` };
-  const titolo = s.quando ? `${s.nome} — ${s.quando}` : s.nome;
-  // Portare a una pagina vuota è peggio che non portare da nessuna parte: le fermate senza scheda
-  // restano cartellini.
-  return s.href
-    ? <Link to={s.href} className={classe} style={stile} title={titolo}>{contenuto}</Link>
-    : <div className={classe} style={stile} title={titolo}>{contenuto}</div>;
+  return <Link
+    to={s.href}
+    className={`group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
+    style={{ left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` }}
+    title={s.quando ? `${s.nome} — ${s.quando}` : s.nome}
+    onMouseEnter={() => onEvidenzia?.(s.chiave)}
+    onMouseLeave={() => onEvidenzia?.(null)}
+    onFocus={() => onEvidenzia?.(s.chiave)}
+    onBlur={() => onEvidenzia?.(null)}
+  >
+    <img src={s.src} alt="" aria-hidden onError={nascondiSagomaAssente}
+      className={`w-full object-contain transition-transform duration-150 group-hover:scale-[1.18] ${acceso ? 'scale-[1.18]' : ''}`}
+      style={{ filter: filtro }} />
+    {/* Due cose, e tutte e due servono a non far toccare le targhe fra loro.
+        **Va a capo**: restava su una riga sola, e «Odaiba / Seaside Park» occupava un quinto della
+        tela — su una mappa la larghezza è spazio tolto ai vicini.
+        **Il corpo è in `cqw`, cioè in frazioni della tela**, non in pixel a scaglioni. Con una
+        misura fissa la targa cresceva *in proporzione* quando la tela si stringeva, e a 780 px
+        tornavano dodici sovrapposizioni che a 1020 px non c'erano: una collocazione buona a una
+        larghezza e sbagliata all'altra. Legandola alla tela, le proporzioni non cambiano più e una
+        sola tabella di posizioni vale a ogni larghezza. */}
+    <span className={`-mt-[6%] w-max max-w-[7em] text-center rounded-[2px] border-[max(1px,0.19cqw)] px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] shadow-[0_2px_6px_rgba(0,0,0,0.7)] group-hover:border-[#ffd23f] group-hover:text-[#ffd23f] ${
+      s.palazzo ? 'bg-[#8b0000]' : 'bg-black'} ${
+      acceso ? 'border-[#ffd23f] text-[#ffd23f]' : 'border-white text-white'}`}>{s.targa}</span>
+  </Link>;
 }
 
 /** Le linee, sempre tutte, con le fermate a pallino bianco.
@@ -111,8 +130,13 @@ function Cartellino({ s }: { s: Segno }) {
  * un quartiere non è ancora sbloccato faceva sembrare la mappa incompleta invece che in attesa.
  * Quel che compare col calendario è **il posto**, non la ferrovia: finché non si sblocca al suo
  * pallino non c'è nient'altro, e quando si sblocca ci spuntano sopra la sagoma e la targa.
+ *
+ * Il pallino porta il nome in un `<title>`, ed è l'unico posto in cui il nome di una fermata
+ * chiusa resta leggibile: la fermata non ha cartellino perché non ci si può andare, ma sapere
+ * *cosa* è quel punto — e da quando apre — è metà del motivo per cui si guarda una mappa in una
+ * guida. Perciò questo `<svg>` non è più `aria-hidden`.
  */
-function Rete() {
+function Rete({ nomi }: { nomi: Map<string, string> }) {
   const linee = LINEE_TOKYO.map((linea) => {
     const giro = linea.anello ? [...linea.fermate, linea.fermate[0]] : linea.fermate;
     const nodi = giro.map((f) => QUARTIERI_TOKYO[f]).filter(Boolean);
@@ -125,8 +149,8 @@ function Rete() {
   for (const linea of LINEE_TOKYO) {
     for (const f of linea.fermate) if (QUARTIERI_TOKYO[f]) fermate.set(f, QUARTIERI_TOKYO[f]);
   }
-  return <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden
-    className="pointer-events-none absolute inset-0 h-full w-full">
+  return <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="presentation"
+    className="absolute inset-0 h-full w-full [&>polyline]:pointer-events-none">
     {/* Tre passate: il bordo scuro che stacca la linea dal fondo rosso, il colore, e i pallini
         bianchi delle fermate. È così che due linee incrociate restano leggibili senza disegnare
         gli incroci a mano. */}
@@ -137,26 +161,86 @@ function Rete() {
       stroke={l.colore} strokeWidth={9} strokeLinecap="round" strokeLinejoin="round"
       vectorEffect="non-scaling-stroke"><title>{l.nome}</title></polyline>)}
     {[...fermate].map(([chiave, n]) => <circle key={`f-${chiave}`}
-      cx={n.x} cy={n.y} r={0.85} fill="#fff" stroke="#1a0004" strokeWidth={0.25} />)}
+      cx={n.x} cy={n.y} r={0.85} fill="#fff" stroke="#1a0004" strokeWidth={0.25}>
+      {nomi.has(chiave) && <title>{nomi.get(chiave)}</title>}
+    </circle>)}
   </svg>;
 }
 
-export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' }: Props) {
-  const { presenti, assenti } = useMemo(() => {
+const ZOOM_MAX = 4;
+const ZOOM_PASSO = 1.4;
+
+export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, className = '' }: Props) {
+  // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
+  // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
+  const cornice = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const trascinamento = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+
+  /** Lo spostamento non può portare la tela fuori dal riquadro: a zoom 1 non c'è margine, a zoom
+   *  maggiori il margine è quanto la tela sborda da ciascun lato. Senza questo, un trascinamento
+   *  lascia il riquadro vuoto e non c'è modo di capire dove si è finiti. */
+  const limita = useCallback((p: { x: number; y: number }, z: number) => {
+    const r = cornice.current?.getBoundingClientRect();
+    if (!r) return p;
+    const mx = Math.max(0, (r.width * z - r.width) / 2);
+    const my = Math.max(0, (r.height * z - r.height) / 2);
+    return { x: Math.max(-mx, Math.min(mx, p.x)), y: Math.max(-my, Math.min(my, p.y)) };
+  }, []);
+
+  const cambiaZoom = useCallback((fattore: number) => {
+    setZoom((z) => {
+      const nuovo = Math.min(ZOOM_MAX, Math.max(1, z * fattore));
+      setPan((p) => limita({ x: p.x * (nuovo / z), y: p.y * (nuovo / z) }, nuovo));
+      return nuovo;
+    });
+  }, [limita]);
+
+  const adatta = useCallback(() => { setZoom(1); setPan({ x: 0, y: 0 }); }, []);
+
+  const iniziaTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    // Solo quando c'è qualcosa da spostare, e mai partendo da un cartellino: lì il gesto è un clic.
+    if (zoom <= 1 || (e.target as HTMLElement).closest('a')) return;
+    trascinamento.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }, [zoom, pan]);
+
+  const muoviTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    const t = trascinamento.current;
+    if (!t) return;
+    setPan(limita({ x: t.px + (e.clientX - t.x), y: t.py + (e.clientY - t.y) }, zoom));
+  }, [limita, zoom]);
+
+  const fineTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!trascinamento.current) return;
+    trascinamento.current = null;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+  }, []);
+
+  const { presenti, assenti, nomiFermate } = useMemo(() => {
     const segni: Segno[] = [];
     for (const q of quartieri) {
       const dove = QUARTIERI_TOKYO[q.chiave];
       if (!dove) continue;
       segni.push({
-        chiave: q.chiave, nome: q.nome, png: `${q.chiave}.png`,
-        ripiego: `/asset/mappe/citta-${q.chiave}.png`, dove, palazzo: false,
+        chiave: q.chiave, nome: q.nome, targa: q.nome, src: assetTokyoQuartiere(q.chiave), dove, palazzo: false,
         // Si entra **nella mappa** del quartiere, non nella sua scheda: da una mappa si passa a
-        // una mappa. Il risolutore resta il ripiego per i pochi che non hanno un nodo proprio.
-        href: q.mappaChiave
-          ? `/guida/mappe/${encodeURIComponent(q.mappaChiave)}`
-          : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
-        presente: !dataGioco || !q.sbloccoData || dentro(dataGioco, q.sbloccoData, null),
-        quando: q.sbloccoData ? `dal ${q.sbloccoData}` : null,
+        // una mappa. Quale mappa, e centrata dove, **lo decide chi cura la guida**: è l'ingresso
+        // configurato dalla scheda del quartiere («Configura ingresso da Città»), che porta la
+        // planimetria e il punto da centrare. Esisteva già ed era salvato, ma questa mappa lo
+        // ignorava e apriva sempre il nodo d'atlante del quartiere: si poteva scegliere il punto
+        // d'ingresso e non vederlo mai usato. Senza configurazione resta il nodo del quartiere, e
+        // il risolutore è il ripiego per i pochi che non ne hanno uno.
+        href: q.ingresso
+          ? urlMappa(q.ingresso.mappa, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })
+          : q.mappaChiave
+            ? urlMappa(q.mappaChiave)
+            : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
+        presente: quartiereAperto(q, dataGioco),
+        // Che cosa manca, detto come lo dice il valutatore: «Yusuke: rango 1 di 3». Quando la
+        // condizione è una data si dice la data, che è più corta e più chiara.
+        quando: q.sbloccoData ? `dal ${q.sbloccoData}` : q.bloccoMotivo ?? null,
       });
     }
     for (const d of dungeon) {
@@ -164,49 +248,83 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, className = '' 
       if (!dove) continue;
       const f = d.finestra;
       segni.push({
-        chiave: `dungeon-${d.chiave}`, nome: d.nome,
+        chiave: `dungeon-${d.chiave}`, nome: d.nome, targa: nomeSullaTarga(d.nome),
         // I Palazzi non stanno nel foglio della mappa di viaggio — nel gioco lì non compaiono — e
         // tengono la loro illustrazione, che l'utente ha chiesto di lasciare com'è.
-        png: `../../../palazzi/${d.chiave}.png`, ripiego: '', dove, palazzo: true,
+        src: assetPalazzo(d.chiave), dove, palazzo: true,
         href: `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
-        presente: !dataGioco || !f || dentro(dataGioco, f.dal, f.al),
+        presente: !dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al),
         quando: f ? (f.al ? `dal ${f.dal} al ${f.al}` : `dal ${f.dal}`) : null,
       });
     }
-    // Le fermate che il gioco ha e la guida no: ci sono sempre, e non portano da nessuna parte.
+    // Il nome di ogni fermata, cartellino o non cartellino. Serve ai pallini: quando una fermata
+    // è chiusa — non ancora sbloccata, o senza una scheda nella guida — il pallino è tutto quel
+    // che resta, e senza il nome sarebbe un puntino muto.
+    const nomi = new Map<string, string>();
+    for (const s of segni) if (QUARTIERI_TOKYO[s.chiave]) nomi.set(s.chiave, s.quando && !s.presente ? `${s.nome} — ${s.quando}` : s.nome);
+    // Le fermate che il gioco ha e la guida no: Ginza, Kanda, Nagatachō, Akasaka-Mitsuke,
+    // Aoyama-Itchōme, la spiaggia di Miura. Restano **solo il pallino**, col nome sopra. Avevano
+    // sagoma e targa come le altre e non si potevano aprire: una figura con la targa dice «vieni
+    // qui», e non è vero. Toglierle del tutto lascerebbe la Yamanote senza mezze fermate.
     for (const [chiave, nome] of Object.entries(SENZA_SCHEDA_TOKYO)) {
-      const dove = QUARTIERI_TOKYO[chiave];
-      if (!dove || segni.some((s) => s.chiave === chiave)) continue;
-      segni.push({ chiave, nome, png: `${chiave}.png`, ripiego: '', dove, palazzo: false,
-        href: '', presente: true, quando: null });
+      if (QUARTIERI_TOKYO[chiave] && !nomi.has(chiave)) nomi.set(chiave, nome);
     }
-    return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente) };
+    return { presenti: segni.filter((s) => s.presente), assenti: segni.filter((s) => !s.presente), nomiFermate: nomi };
   }, [quartieri, dungeon, dataGioco]);
 
   return <div className={`flex flex-col gap-2 ${className}`}>
-    <div
-      className="relative w-full overflow-hidden rounded-lg"
-      style={{ aspectRatio: '10 / 7', background: '#e2001a' }}
-      role="img"
-      aria-label={`Mappa di Tokyo con ${presenti.length} luoghi raggiungibili`}
+    {/* Il riquadro: bordo, fondo e proporzione fissa, come ogni altra mappa dell'app. Dentro, una
+        tela che si ingrandisce e si trascina — questa mappa era l'unica a non farlo, e su una tela
+        piena di sagome accostate lo zoom non è un lusso: è il modo di leggere le targhe piccole e
+        di separare due cartellini che si sfiorano.
+        Su uno schermo stretto la mappa si vede **tutta**, piccola, e si ingrandisce: prima si
+        allargava a forza a 680 px e si scorreva, ma quella larghezza minima su un telefono
+        schiacciava la tela — 680×231 invece di 680×476 — e le posizioni, che sono percentuali di
+        una tela 10:7, finivano tutte nel posto sbagliato. Così invece le proporzioni non cambiano
+        mai, e la collocazione verificata vale a ogni larghezza. */}
+    <div ref={cornice}
+      className={`mappa-tokyo ${zoom > 1 ? 'mappa-tokyo--spostabile' : ''}`}
+      onPointerDown={iniziaTrascinamento} onPointerMove={muoviTrascinamento}
+      onPointerUp={fineTrascinamento} onPointerCancel={fineTrascinamento}
     >
-      {/* Le macchie più scure sono la terraferma, come nella schermata del gioco: danno un fondo
-          alla rete invece di lasciarla galleggiare su un rosso piatto. */}
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden className="absolute inset-0 h-full w-full">
-        <path fill="#c00016" d="M14 22 L36 8 L58 12 L76 20 L88 34 L84 52 L92 62 L74 80 L52 78 L34 88 L16 66 L8 44 Z" />
-        <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
-      </svg>
-      <Rete />
-      {presenti.map((s) => <Cartellino key={s.chiave} s={s} />)}
-      <Link to="/guida/completamento"
-        className="absolute -translate-x-1/2 -translate-y-1/2 rounded-[2px] border-2 border-white bg-black px-2 py-0.5 font-display text-[11px] uppercase tracking-[0.05em] text-white no-underline shadow-[0_2px_8px_rgba(0,0,0,0.7)] sm:text-[15px] lg:text-[17px]"
-        style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
-        title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
+      <div
+        className="mappa-tokyo__tela"
+        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+        role="img"
+        aria-label={`Mappa di Tokyo con ${presenti.length} luoghi raggiungibili`}
+      >
+        {/* Le macchie più scure sono la terraferma, come nella schermata del gioco: danno un fondo
+            alla rete invece di lasciarla galleggiare su un rosso piatto. */}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden className="absolute inset-0 h-full w-full">
+          <path fill="#c00016" d="M14 22 L36 8 L58 12 L76 20 L88 34 L84 52 L92 62 L74 80 L52 78 L34 88 L16 66 L8 44 Z" />
+          <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
+        </svg>
+        <Rete nomi={nomiFermate} />
+        {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} />)}
+        <Link to="/guida/completamento"
+          className={`absolute z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[2px] border-[max(1px,0.19cqw)] bg-black px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] no-underline shadow-[0_2px_8px_rgba(0,0,0,0.7)] hover:border-[#ffd23f] hover:text-[#ffd23f] ${
+            evidenziato === 'covo' ? 'border-[#ffd23f] text-[#ffd23f]' : 'border-white text-white'}`}
+          style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
+          onMouseEnter={() => onEvidenzia?.('covo')} onMouseLeave={() => onEvidenzia?.(null)}
+          onFocus={() => onEvidenzia?.('covo')} onBlur={() => onEvidenzia?.(null)}
+          title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
+      </div>
+      {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
+      <div className="visore-mappa__controlli">
+        <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(ZOOM_PASSO)} disabled={zoom >= ZOOM_MAX} aria-label="Ingrandisci">+</button>
+        <span className="visore-mappa__zoom" aria-live="polite">{Math.round(zoom * 100)}%</span>
+        <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(1 / ZOOM_PASSO)} disabled={zoom <= 1} aria-label="Riduci">−</button>
+        <button type="button" className="visore-mappa__controllo" onClick={adatta} disabled={zoom === 1 && pan.x === 0 && pan.y === 0} aria-label="Adatta alla finestra">⤢</button>
+      </div>
     </div>
     {dataGioco && assenti.length > 0 && <p className="m-0 text-[12px] text-text-muted">
-      {/* Non spariscono e basta: si dice quali e da quando, altrimenti la mappa sembra incompleta
-          invece che aggiornata al giorno della partita. */}
-      Non ancora nel mondo il {dataGioco}: {assenti.map((s) => `${s.nome} (${s.quando ?? '—'})`).join(' · ')}
+      {/* Non spariscono e basta: si dice **quali**, altrimenti la mappa sembra incompleta invece
+          che aggiornata al giorno della partita. Il perché sta sul nome, al passaggio del mouse:
+          da quando le condizioni non sono più solo date — un rango di Confidente, un libro da
+          leggere — scriverle tutte per esteso faceva venti righe di testo sotto la mappa. */}
+      Non ancora nel mondo, al {dataLeggibile(dataGioco)}: {assenti.map((s, i) => <span key={s.chiave}>
+        {i > 0 && ' · '}<span className="cursor-help underline decoration-dotted underline-offset-2" title={s.quando ?? 'condizione non indicata'}>{s.nome}</span>
+      </span>)}
     </p>}
     {!dataGioco && <p className="m-0 text-[12px] text-text-muted">
       Nessuna partita attiva: la mappa mostra il mondo intero, quartieri e Palazzi compresi.

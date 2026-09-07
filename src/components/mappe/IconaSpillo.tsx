@@ -1,5 +1,22 @@
 // ============================================================
-// IconaSpillo — icona di uno spillo per tipo: asset `ui/spillo-<tipo>` (prompt §18) con riserva SVG in codice (Fase 13.2)
+// IconaSpillo — la figura di uno spillo, e lo spillo che le si costruisce attorno
+// ============================================================
+//
+// Gli asset `ui/spillo-<tipo>` **sono cambiati**, ed è il motivo per cui questo file è stato
+// rifatto. Prima ciascuno era uno spillo finito: forma, colore e cornice dentro il PNG. Ora sono
+// **solo la figura**, su alfa vera, senza cornice — 128×128, il forziere, la vetrina del negozio,
+// la maschera del boss — e lo spillo lo costruisce l'app.
+//
+// È un cambio di divisione del lavoro, non di grafica: il colore del tipo, la misura, il bordo,
+// l'ombra, gli stati (raccolto, suggerito, selezionato) e la punta ancorata al punto sono cose che
+// **devono** stare nel codice, perché cambiano con lo stato della partita e con lo zoom. Dentro un
+// PNG non potevano cambiare, e infatti 37 immagini portavano 37 copie della stessa cornice.
+//
+// Lo spillo è la goccia classica — quadrato con tre angoli tondi, ruotato di 45°, così l'angolo
+// vivo cade in basso sul punto — riempita col colore del tipo. La figura non ci sta sopra
+// direttamente: sta su un **piattello chiaro**, perché i disegni sono a tratto nero e su un blu
+// notte (`cinema`) o un viola scuro (`culto`) sparirebbero. Il colore resta quindi il corpo dello
+// spillo, che è dove si legge da lontano, e la figura resta leggibile su qualunque tinta.
 // ============================================================
 
 import type { CSSProperties, ReactNode } from 'react';
@@ -63,29 +80,44 @@ export function IconaSpillo({ tipo, dimensione = 20, className }: Props) {
   return <AssetImg nome={`ui/spillo-${tipo}`} alt="" decorativa className={className ?? 'object-contain'} style={{ width: dimensione, height: dimensione }} fallback={(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(dimensione)} />;
 }
 
+/** Quel che sta dentro lo spillo: la figura consegnata, o il disegno di riserva se manca.
+ *
+ * La figura sta **direttamente sul colore**, senza niente sotto: l'alfa è vera apposta perché si
+ * amalgami allo spillo. C'era per un momento un dischetto chiaro sotto, per il contrasto: faceva
+ * di ogni spillo una bollina da applicazione, che non è quello che il gioco disegna. Resta solo
+ * un'ombra appena accennata, che dà rilievo senza staccare la figura dal corpo. */
+function Dentro({ tipo, url, lato }: { tipo: TipoSpillo; url: string | null; lato: number }) {
+  if (!url) return <>{(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(Math.round(lato * 0.9))}</>;
+  return <img src={url} alt="" draggable={false} className="spillo-mappa__disegno" style={{ width: lato, height: lato }} />;
+}
+
 /**
- * Spillo sulla mappa. Le immagini `ui/spillo-<tipo>` consegnate sono già uno spillo completo (forma e colore compresi):
- * quando l'asset c'è viene mostrato intero, con la punta sul punto ancorato; in sua assenza resta la goccia colorata
- * con il disegno di riserva al centro.
+ * Lo spillo sulla mappa: goccia del colore del tipo, figura sul piattello, punta sul punto.
+ *
+ * `spillo-mappa__goccia` resta il nome della classe anche ora che dentro c'è un'immagine, e non è
+ * pigrizia: gli stati — raccolto, selezionato, suggerito, categoria nascosta — sono regole CSS che
+ * puntano a quel nome, e sono le stesse in tutti e quattro i casi. Rinominarla avrebbe voluto dire
+ * riscriverle tutte per ottenere esattamente ciò che già facevano.
  */
-export function SpilloGrafico({ tipo, colore, altezza = 40 }: { tipo: TipoSpillo; colore: string; altezza?: number }) {
+export function SpilloGrafico({ tipo, colore, altezza = 38 }: { tipo: TipoSpillo; colore: string; altezza?: number }) {
   const url = useAsset(`ui/spillo-${tipo}`);
-  if (url) return <img src={url} alt="" className="spillo-mappa__figura" style={{ height: altezza }} draggable={false} />;
   return (
-    <span className="spillo-mappa__goccia" style={{ '--colore-spillo': colore } as CSSProperties}>
-      {(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(18)}
+    <span className="spillo-mappa__goccia" style={{ '--colore-spillo': colore, width: altezza, height: altezza } as CSSProperties}>
+      <Dentro tipo={tipo} url={url} lato={Math.round(altezza * 0.76)} />
     </span>
   );
 }
 
-/** Pallino di legenda, elenco e popup: la stessa immagine dello spillo in piccolo, oppure il cerchio colorato col disegno. */
+/** Pallino di legenda, elenco e popup: lo stesso spillo senza la punta, perché lì non ancora niente.
+ *
+ * Il colore ci vuole anche qui: la legenda serve a dire «questo pallino è quel colore là sulla
+ * mappa», e una figura senza colore non lo dice. */
 export function PuntoSpillo({ tipo, colore, grande }: { tipo: TipoSpillo; colore: string; grande?: boolean }) {
   const url = useAsset(`ui/spillo-${tipo}`);
-  const dimensione = grande ? 20 : 12;
-  if (url) return <img src={url} alt="" className={`spillo-mappa__punto-figura ${grande ? 'spillo-mappa__punto-figura--grande' : ''}`} draggable={false} />;
+  const lato = grande ? 34 : 22;
   return (
     <span className={`spillo-mappa__punto ${grande ? 'spillo-mappa__punto--grande' : ''}`} style={{ background: colore }} aria-hidden="true">
-      {(RISERVA_SPILLO[tipo] ?? RISERVA_SPILLO.nota)(dimensione)}
+      <Dentro tipo={tipo} url={url} lato={Math.round(lato * 0.78)} />
     </span>
   );
 }

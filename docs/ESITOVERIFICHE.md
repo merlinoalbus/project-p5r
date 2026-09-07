@@ -2124,3 +2124,276 @@ soli due difetti della base gia' separati. Ha verificato specificamente:
 
 Nessuna richiesta correttiva. Il gate procedurale e' chiuso; resta il verdetto incrociato di Opus
 previsto dalla collaborazione alla pari.
+### Chiarimento vincolante sul WIP Memento
+
+Il WIP corrente di `cittaService`/`mappeService` rimuove la radice Memento da Citta' e indice
+Mappe, ma la documentazione del codice conserva la pagina `/guida/dungeon/mementos` come sua
+destinazione. Questo **non soddisfa** la decisione utente: il percorso `/guida/dungeon` e' ora
+Palazzi, e l'unico Dedalo che vi resta con mappe e' Iweleth.
+
+Quindi non va introdotto alcun nuovo invito, link o fallback pubblico verso
+`/guida/dungeon/mementos` nelle pagine Citta', Mappe, Richieste o Palazzi. Le Richieste dei
+Mementos possono restare una sezione editoriale autonoma con i loro dati, ma non devono riaprire
+la navigazione alle mappe/dedali esclusi. Il filtro dell'API/pagina e le route devono produrre un
+esito esplicito e non navigabile per `mementos`, mentre Iweleth continua a puntare alle sue mappe
+reali. Aggiornare anche commenti e test: non basta nascondere la radice dall'albero.
+
+### Regressione riprodotta nel WIP di esclusione Memento
+
+La suite mirata `server/routes/citta.test.ts server/routes/mappe-editor.test.ts` non e' verde:
+`16/17 PASS`, con fallimento di `mappe-editor.test.ts` nel passaggio Tokyo → Memento. L'albero
+ora filtra `dungeon-mementos`, ma il dato di Tokyo conserva ancora uno spillo/passaggio verso
+quella chiave; il test lo dimostra cercando ogni passaggio di Tokyo fra le figlie o le radici
+esposte e ottenendo `false` per Memento.
+
+Non si deve semplicemente aggiornare l'asserzione a `false`: sarebbe accettare un link orfano nel
+visore. Il sanamento completo deve far sparire/non rendere navigabile il passaggio Tokyo →
+`dungeon-mementos` nello stesso perimetro in cui la mappa e' esclusa, oppure renderlo un elemento
+editoriale senza destinazione se deve restare come riferimento narrativo. La prova corretta e':
+nessun passaggio navigabile da Tokyo o Richieste porta a Memento, nessuna chiave nascosta resta
+come target del visore, Iweleth resta risolubile e i test del nuovo contratto passano.
+
+### Regressione UX — La Citta' mostra Tokyo due volte
+
+`src/pages/CittaPage.tsx` monta in sequenza sia `MappaTokyo` (la visuale costruita con la rete e
+gli elementi nativi) sia `MappaIncorporata chiave="tokyo"` (il visore dell'atlante). Sono due
+mappe della stessa citta' nello stesso percorso, con due interazioni e due gerarchie visive: il
+secondo blocco e' ridondante e trasforma la pagina in un pastrocchio.
+
+**Correzione della specifica:** `MappaTokyo` non e' una mappa primaria accanto a un atlante
+separato: **e' la mappa canonica di Tokyo** che l'utente ha chiesto di costruire. Non deve dunque
+esistere alcuna CTA verso un secondo «atlante Tokyo» che ne riproponga una diversa versione.
+
+**Sanamento richiesto a Claude:** rimuovere `MappaIncorporata chiave="tokyo"` e il relativo
+codice di navigazione da Citta'. Ogni quartiere/Palazzo attivo nella `MappaTokyo` canonica deve
+continuare a portare alla propria mappa/ancora reale. Anche il percorso `Mappe → Tokyo`, se
+mantiene una voce Tokyo, deve montare o reindirizzare alla stessa `MappaTokyo`, mai al precedente
+visore duplicato. Aggiornare test affinche' contino una sola rappresentazione di Tokyo e
+verifichino i link dei nodi della mappa canonica. Nessuna duplicazione desktop, tablet o mobile.
+
+### Regressione UX — miniature delle schede quartiere disallineate dalla mappa canonica
+
+Le piastrelle dei quartieri sotto la `MappaTokyo` canonica non devono caricare la vecchia
+anteprima del nodo-atlante `citta-<quartiere>` tramite `MiniaturaMappa`: e' una sorgente diversa,
+puo' essere assente e non corrisponde alla sagoma che il lettore ha appena selezionato sulla mappa
+composta. Ogni scheda deve invece riutilizzare il medesimo asset nativo `lmap/tokyo` gia' usato da
+`MappaTokyo`, cioe' `/asset/mappe/lmap/tokyo/<chiave>.png` (con `shujin-academy.png` per
+Shujin). Il contenitore puo' ritagliare con `object-contain`, ma non deve ridisegnare, ricampionare
+o sostituire la figura con una miniatura generica.
+
+Serve un solo resolver condiviso fra `MappaTokyo` e le card di `CittaPage` (per esempio
+`assetTokyoQuartiere(chiave)`), cosi' chiave, fallback e gestione `onError` non divergono. Il
+fallback e' ammesso soltanto quando il corrispondente asset della mappa composta manca davvero;
+deve restare trasparente/neutral e non mostrare un'immagine estranea. Test richiesti: ogni
+quartiere renderizzato usa la sorgente canonica; Shibuya e Shujin usano i rispettivi file; non
+resta alcun `MiniaturaMappa`/`citta-...` nella griglia; la mappa composta compare una sola volta.
+
+### Esito della riverifica WIP — filtro Memento ancora incoerente
+
+Esecuzione reale: `npm test -- --run server/routes/citta.test.ts
+server/routes/mappe-editor.test.ts server/services/mappe/finestreDungeon.test.ts` => **22/23
+PASS, 1 FAIL**. Il fallimento e' in `mappe-editor.test.ts`: `tokyo.numeroFigli` e' `25`, mentre
+i nodi pubblicati con `genitore === 'tokyo'` sono `24`. Il filtro di `elencaMappe()` rimuove
+`citta-mementos`, ma `riassunto()` continua a calcolare `numeroFigli` direttamente dal database,
+quindi pubblica un conteggio che include il figlio nascosto.
+
+Il sanamento non e' allentare il test: il contratto della risposta deve restare internamente
+coerente. Il conteggio dei figli va calcolato sul medesimo insieme filtrato che viene restituito
+(o sovrascritto dopo il filtro), e la prova deve richiedere `numeroFigli === figli esposti`.
+Inoltre i commenti WIP che indicano `/guida/dungeon/mementos` e le Richieste come percorso
+pubblico sono incompatibili con la decisione vincolante gia' sopra: vanno rimossi insieme ai
+target navigabili, non lasciati come documentazione del comportamento futuro.
+
+### Seconda causa riprodotta — spilli seed Memento preesistenti
+
+La successiva esecuzione della stessa suite conferma il conteggio corretto ma fallisce ancora sul
+contratto dei passaggi: `passaggio da Tokyo verso entrata-dei-memento`. Ispezione diretta del DB:
+Tokyo conserva **due** spilli seed verso destinazioni escluse, `citta-mementos` (Entrata dei
+Memento) e `dungeon-mementos` (Memento). Il WIP salta la creazione futura dell'ingresso Memento,
+ma non rimuove gli spilli gia' generati: il reseed idempotente li conserva, cosi' il visore
+continua a ricevere un target senza nodo pubblico.
+
+Sanamento richiesto: nella sincronizzazione/reseed riconciliare e rimuovere soltanto gli spilli
+`origine='seed'` con `riferimento_tipo='mappa'` e riferimento `citta-mementos` o
+`dungeon-mementos` (compresi eventuali alias storici risolti dal seed), senza toccare spilli
+utente. La prova di accettazione e': nessun passaggio Tokyo punta ai due nodi esclusi, il test
+dei passaggi e' verde, Iweleth e ogni Palazzo restano raggiungibili, e un secondo reseed non
+reintroduce il collegamento.
+
+#### Stato dopo la correzione di creazione
+
+La suite sul DB fresco e' ora verde: **3 file, 23/23 test PASS**. La modifica che salta
+`citta-mementos` nella sincronizzazione risolve la creazione iniziale. Non conclude pero' il
+sanamento dell'istanza gia' esistente: controllo read-only del DB operativo rileva ancora gli
+spilli seed `id=258` (Tokyo → `citta-mementos`) e `id=1626` (Tokyo → `dungeon-mementos`). Resta
+necessaria la riconciliazione idempotente indicata sopra, con test su DB preesistente dopo reseed;
+solo allora il risultato e' valido sia per installazioni nuove sia per quella in uso.
+
+### Riverifica commit `ec74bce` — esito parziale, non approvato per lo scope utente
+
+Il commit rende verde il caso di DB fresco, ma non realizza ancora l'intera decisione: commenti e
+contratto del codice dichiarano che Mementos restano raggiungibili dalla loro pagina e dalle
+Richieste. L'istruzione utente e' invece piu' netta: nel percorso **Palazzi** deve rimanere il
+solo Dedalo di Iweleth con le sue mappe, e Mementos/altri Dedali non devono essere esposti o
+navigabili da Citta', Mappe, Richieste o Palazzi. Finche' quegli ingressi/route restano pubblici
+il commit e' solo un passo di pulizia, non la chiusura del requisito.
+
+La ricerca del frontend corrente conferma inoltre che nessuno dei lavori UX e' ancora entrato nel
+candidato: `DungeonPage` e `sezioniGuida` espongono ancora «Palazzi e Dedali»; `MappaPage` lo
+descrive ancora; `CittaPage` importa ancora `MiniaturaMappa` per le card. Il prossimo candidato
+deve includere queste modifiche insieme ai loro test; non e' lecito dichiarare il lavoro concluso
+in base alla sola suite backend verde.
+
+#### Rettifica di ambito dopo lettura del piano aggiornato
+
+Il piano aperto aggiornato da Claude precisa correttamente il confine: **Mementos mantiene la sua
+pagina autonoma**. Non deve pero' ricomparire come Dedalo nel percorso `Palazzi`, come quartiere
+in `Citta'`, ne' come radice nell'indice Mappe generico. Le precedenti note di questa verifica che
+parlavano di rimuovere ogni route/pubblico ingresso Mementos sono quindi sostituite da questo
+contratto: la sua pagina dedicata e le Richieste possono puntarvi; non possono esistere passaggi
+orfani da Tokyo o una seconda navigazione nell'atlante generico. Il commit `ec74bce` resta
+valutabile positivamente per questo perimetro backend dopo la pulizia degli spilli seed esistenti.
+
+---
+
+## Ripartenza Fasi 5-7 — gate di soluzione del punto 1 (7 settembre 2026)
+
+**Validatore:** `galaxy-task-validator`, sola lettura
+**Stato:** **WARN sulla soluzione complessiva; PASS funzionale condizionato a un candidato**
+
+Il contratto dati risolve senza euristiche il confine della pagina: `iweleth` e' registrato con
+`tipo: 'palazzo'`, mentre `mementos` e' l'unico record con `tipo: 'mementos'`. La selezione robusta
+per il percorso editoriale «Palazzi» e' quindi **positiva** (`d.tipo === 'palazzo'`), non il WIP
+`d.tipo !== 'mementos'`: la seconda forma ammetterebbe in futuro qualsiasi nuovo tipo estraneo.
+Il risultato atteso sul seed corrente e' di nove schede, Iweleth incluso e Mementos escluso.
+
+Il filtro appartiene alle viste `Palazzi`, Citta'/Tokyo e all'indice Mappe generico. Non deve
+impoverire l'API/catalogo dei dungeon ne' eliminare la route autonoma
+`/guida/dungeon/mementos`: la pagina dei Mementos e le CTA delle Richieste restano operative,
+come stabilito dal piano aggiornato. L'indice Mappe deve invece escludere radice e discendenza
+Mementos senza lasciare spilli o target navigabili orfani.
+
+### Criteri del candidato del punto 1
+
+1. document title, intestazione e descrizioni/etichette accessibili di `DungeonPage` diventano
+   «Palazzi»;
+2. la piastrella e la descrizione in `sezioniGuida.tsx` e il sottotitolo di `MappaPage` sono
+   coerenti; non si sostituiscono globalmente diciture di dominio corrette come «Palazzi e
+   Mementos»;
+3. un dataset di prova misto dimostra nove risultati, tutti `tipo === 'palazzo'`, Iweleth presente
+   e Mementos assente;
+4. route Mementos e CTA delle Richieste restano funzionanti; Citta', Tokyo e indice Mappe non
+   espongono Mementos e non producono collegamenti orfani;
+5. typecheck, lint, suite completa e verifica browser desktop/tablet/mobile passano nei tre cicli
+   prescritti.
+
+Il WIP sporco non e' una consegna e non e' stato giudicato. Il punto 1 e l'intero Lotto A restano
+di proprieta' di Opus; Codex verifichera' soltanto il tag candidato e scrivera' qui l'esito.
+
+### Rilievo operativo post-merge
+
+`github/main` punta al merge finale `7d38607`; il ramo remoto `lavoro/atlante-mondo` e' stato
+cancellato intenzionalmente e non va ricreato. Il ramo locale omonimo e' fermo al secondo genitore
+`16440a6`, ha upstream `[gone]` e contiene WIP non committato: non va riallineato finche' l'autore
+non lo ha messo in sicurezza.
+
+Per i prossimi punti il protocollo durevole diventa: nuovo ramo di lavoro creato da
+`github/main`, tag `candidato/<nome-univoco>` non spostabile sul commit esatto, push di ramo e tag,
+verifica del tag in worktree isolato, integrazione via PR. `ATLANTE-STATO` ed
+`ESITOVERIFICHE` restano i registri autoritativi; il filesystem condiviso permette notifiche
+immediate, ma non sostituisce il candidato immutabile. I riferimenti al vecchio ramo in
+`RIPARTENZA`, `ATLANTE-STATO` e `PIANO-FASI-5-7` vanno aggiornati da Opus, proprietario di quei
+documenti, nel prossimo ramo.
+
+---
+
+## Censimento e proposta Lotto B — inventari (7 settembre 2026)
+
+Questa sezione e' **analisi preliminare**, non una dichiarazione di completamento. E' stata
+prodotta leggendo codice, seed e asset e osservando le pagine reali nel browser prima di
+progettare modifiche.
+
+### Evidenza corrente
+
+- `NegoziPage` rende 60 punti di acquisto e 575 articoli nell'istanza corrente. La griglia e'
+  gia' coerente col linguaggio P5R; la posizione resta pero' solo un collegamento.
+- `NegozioPage` puo' contenere oltre 200 articoli. Desktop e mobile sono leggibili, ma la scheda
+  monta ancora `CollegamentoMappa`, non `DoveSiTrova`.
+- `OggettiPage` espone 247 consumabili, 108 oggetti chiave/materiali, 10 ricette, 55 abiti e
+  cinque gruppi di scambi. Il catalogo separato contiene anche 223 equipaggiamenti: 36 armi da
+  mischia, 32 armi da fuoco, 30 protezioni e 125 accessori. Non e' ancora provato che questi
+  insiemi coprano tutti i tipi individuati dalle guide.
+- `AttivitaPage` espone 30 attivita', 46 libri e 21 film/DVD. Le card sono adattive, ma mostrano
+  solo la CTA alla mappa.
+- il Covo dei Ladri non ha una route propria: e' una scheda di `CompletamentoPage`, con 52 sfide e
+  36 premi. Su mobile l'apertura e' un muro di testo e la navigazione mescola il Covo con trofei,
+  finali, DLC, meteo e Nuova Partita+.
+- gli asset approvati `public/asset/guida/negozi.png`, `attivita.png` e `oggetti.png` esistono
+  gia'. La ricerca iniziale negli originali ha trovato anche
+  `IT/FIELD/PANEL/P5_MEMENTOS_SHOP.SPD`, da catalogare prima di qualunque prompt relativo al
+  negozio di Jose.
+
+### Soluzione proposta, per pezzi verificabili
+
+1. **NegozioPage:** primo adottante di `DoveSiTrova`; hero compatto e griglia
+   contenuto/posizione su desktop, posizione sotto la scheda su tablet/mobile, filtri sempre
+   raggiungibili e una sola mappa. Gli esiti unica/multipla/assente restano quelli del componente.
+2. **NegoziPage:** riepilogo utile, barra ricerca/filtri chiara e sezioni per quartiere. Le card
+   restano accessi al dettaglio: non si montano decine di mappe nell'indice. Si riusano asset,
+   `IconaCategoria`, `ChipDisponibilita` e token condivisi.
+3. **OggettiPage e 5.2:** prima una matrice guide → categorie/seed/UI che identifichi le lacune
+   reali; poi nuova gerarchia delle sei schede senza perdere ricerca, fonti, stato secondario e
+   destinazioni multiple. Nelle righe fitte resta il collegamento; la posizione incorporata va
+   nel dettaglio o nel riquadro selezionato, non una mappa per ogni riga.
+4. **AttivitaPage:** hero e riepilogo per Doti, filtri e card piu' scansionabili; la selezione
+   mostra `DoveSiTrova` nell'area dedicata, preservando spunte e condizioni.
+5. **Covo dei Ladri:** route e pagina autonome, mantenendo un ingresso da `CompletamentoPage`;
+   hero dedicato, riepilogo Medaglie P, sfide e premi filtrabili. Il deep link
+   `?scheda=covo` resta compatibile tramite reindirizzamento o CTA esplicita.
+6. **Gate:** test di comportamento/accessibilita', typecheck, lint, suite completa e browser
+   desktop/tablet/mobile; tre cicli e tag candidato immutabile. Opus verifica il Lotto B: Codex
+   non certifica il proprio codice.
+
+Prima dell'implementazione il `galaxy-task-validator` deve approvare questa soluzione. Ogni nuovo
+fabbisogno grafico entra in `docs/grafica/fabbisogno.md` solo dopo ricerca negli originali e
+osservazione del riferimento; gli asset esistenti vengono riusati per primi.
+
+### Rettifiche richieste dal gate Lotto B
+
+**Verdetto iniziale:** WARN. L'ordine dei cinque pezzi e' approvato; la soluzione viene precisata
+come segue prima di implementare.
+
+1. `NegoziPage` non monta 60 mappe, ma offre **un solo pannello contestuale** `DoveSiTrova`
+   collegato al negozio selezionato; la card conserva il dettaglio come destinazione primaria.
+2. La matrice del 5.2 e' un deliverable e gate autonomo, precedente a modifiche di DTO, seed o UI.
+   Non assume che le sei schede attuali siano definitive. Censisce almeno armi da mischia, armi da
+   fuoco, protezioni, accessori, abiti, libri, DVD, carte abilita', regali, oggetti chiave e
+   materiali. Per ogni famiglia registra fonte guida, seed/API corrente, conteggio, destinazione
+   UI, aggancio mappa, lacuna e decisione contro duplicazioni.
+3. `/guida/completamento?scheda=covo` reindirizza **automaticamente con `replace`** alla nuova
+   route canonica del Covo. `CompletamentoPage` conserva anche un ingresso esplicito. I test
+   coprono apertura diretta, refresh e back.
+4. Gli originali pertinenti al Covo esistono gia': le cinque viste
+   `public/asset/mappe/native/nativo-rmap-022-1-0..4.png`, registrate come gruppo Covo. La pagina
+   autonoma le riusa tramite l'atlante/collezione esistente, una vista per volta, prima di
+   qualsiasi prompt. `P5_MEMENTOS_SHOP.SPD` riguarda invece il negozio di Jose e non sostituisce
+   questa ricerca.
+5. `MappaTokyo` oggi collega il Covo a `/guida/completamento`, ma e' Lotto A: Codex non la
+   modifica. Dopo la route B scrive un rilievo a Opus per aggiornare quel collegamento e le
+   eventuali piastrelle globali. Ogni file mantiene un solo proprietario.
+
+Ogni pezzo ha un proprio candidato immutabile, verifica di Opus e gate
+`galaxy-task-validator`; non si accumulano i cinque lavori per una sola verifica finale.
+
+### Gate della soluzione Lotto B
+
+**Verdetto:** PASS del `galaxy-task-validator` in sola lettura (7 settembre 2026).
+
+Il validatore conferma che le cinque rettifiche sono recepite senza ambiguita': pannello
+contestuale unico in `NegoziPage`; matrice 5.2 autonoma e completa prima di DTO/seed/UI; redirect
+storico del Covo con `replace`; riuso una vista per volta degli originali
+`nativo-rmap-022-1-0..4.png` prima di qualunque prompt; ownership di `MappaTokyo` mantenuta nel
+Lotto A con rilievo a Opus. Confermati anche candidato e gate separati per ciascun pezzo.
+
+La soluzione del Lotto B e' quindi approvata a partire da `NegozioPage`, ma l'implementazione
+resta subordinata alla chiusura verificata dei punti precedenti nell'ordine globale concordato.

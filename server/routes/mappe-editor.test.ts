@@ -52,8 +52,12 @@ describe('API mappe a livelli (Fase 13.1)', () => {
     expect(tokyo.numeroFigli).toBeGreaterThanOrEqual(quartieri.length);
     const palazzi = albero.filter((m) => m.tipo === 'palazzo');
     expect(palazzi.length).toBeGreaterThan(3);
-    // la chiave pubblica del Dedalo è il percorso derivato dal nome del seed («Memento»), non la chiave storica
-    expect(albero.some((m) => m.tipo === 'dedalo' && m.chiave === 'memento')).toBe(true);
+    // I Memento **non stanno nell'albero delle mappe**, e non e' una dimenticanza: non si visitano
+    // per aree come un Palazzo — i piani sono generati a ogni discesa — e la loro pagina li disegna
+    // per intero. Chi ci arrivava dall'indice trovava otto planimetrie di strutture fisse senza
+    // contesto. Ne' la radice ne' la sua discendenza devono comparire qui.
+    expect(albero.some((m) => m.tipo === 'dedalo')).toBe(false);
+    expect(albero.some((m) => m.chiave.startsWith('nativo-rmap-19'))).toBe(false);
     const aree = albero.filter((m) => m.tipo === 'area');
     expect(aree.length).toBeGreaterThan(10);
     // le aree della guida restano contenuti della guida; una mappa può dichiarare l'area che

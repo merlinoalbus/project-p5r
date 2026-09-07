@@ -27,7 +27,10 @@ describe('API città e attività', () => {
     const q = (await request(app).get('/api/compendio/citta')).body.data as QuartiereRiassuntoDto[];
     expect(q.length).toBeGreaterThanOrEqual(20);
     expect(q[0]).toMatchObject({ chiave: 'yongen-jaya', nome: 'Yongen-Jaya' });
-    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(84);
+    // 82 e non 84: «Entrata dei Memento» non e' un quartiere e non compare piu' qui. I suoi due
+    // luoghi non sono spariti — si raggiungono dalla pagina dei Memento, che e' il posto giusto.
+    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(82);
+    expect(q.some((x) => x.chiave === 'mementos')).toBe(false);
     expect(q.every((x) => x.luoghi > 0 && x.verificati <= x.luoghi)).toBe(true);
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
     expect(s.luoghi).toHaveLength(22);
@@ -38,6 +41,28 @@ describe('API città e attività', () => {
     const y = (await request(app).get('/api/compendio/citta/yongen-jaya')).body.data as QuartiereDettaglioDto;
     expect(y.luoghi.some((l) => l.piatti !== null && l.piatti.length > 0)).toBe(true);
     expect((await request(app).get('/api/compendio/citta/atlantide')).status).toBe(404);
+  });
+
+  it('con una partita dice quali quartieri sono davvero nel mondo, non solo quelli con una data', async () => {
+    // È il punto della decisione dell'utente: un quartiere che si apre col rango di un Confidente
+    // o con un libro è **chiuso** finché non hai quel rango o quel libro, esattamente come uno che
+    // apre a giugno è chiuso ad aprile. Prima si guardava solo `sbloccoData`, e i sedici quartieri
+    // la cui condizione non è una data risultavano aperti dal primo giorno.
+    const senza = (await request(app).get('/api/compendio/citta')).body.data as QuartiereRiassuntoDto[];
+    expect(senza.every((x) => x.disponibile !== false)).toBe(true);
+
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Sblocchi' })).body.data as { id: number }).id;
+    const q = (await request(app).get(`/api/compendio/citta?partita=${id}`)).body.data as QuartiereRiassuntoDto[];
+    // Una partita nuova comincia l'11 aprile: si può stare a Yongen-Jaya, a Shibuya e a scuola.
+    expect(q.filter((x) => x.disponibile !== false).map((x) => x.chiave)).toEqual(['yongen-jaya', 'shibuya', 'shujin-academy']);
+
+    const perChiave = new Map(q.map((x) => [x.chiave, x]));
+    expect(perChiave.get('shinjuku')!.bloccoMotivo).toContain('18 giugno');
+    // un rango di Confidente: e il motivo dice a che punto sei, non solo che sei fermo
+    expect(perChiave.get('ueno')!.bloccoMotivo).toMatch(/yusuke.*0 di 3/);
+    expect(perChiave.get('yokohama-chinatown')!.bloccoMotivo).toContain('completare');
+    // chi non ha condizioni non ha nemmeno un motivo
+    expect(perChiave.get('shibuya')!.bloccoMotivo).toBeNull();
   });
 
   it('attività, lavori, libri e film con Doti; letture per partita con evento, riapertura, validazione, reseed stabile', async () => {

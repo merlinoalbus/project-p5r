@@ -42,32 +42,32 @@ export const QUARTIERI_TOKYO: Record<string, Collocazione> = {
   // ---- la corona della Yamanote, in senso orario da nord ----
   ikebukuro: { x: 51, y: 11, scala: 5.5 },
   ueno: { x: 74, y: 23, scala: 5.5 },
-  akihabara: { x: 79, y: 42, scala: 7.5 },
+  akihabara: { x: 80.2, y: 42, scala: 7.5 },
   kanda: { x: 75, y: 53, scala: 5.5 },
   ginza: { x: 68, y: 72, scala: 5.5 },
-  shinagawa: { x: 41.5, y: 72, scala: 5.5 },
-  shibuya: { x: 34, y: 50, scala: 7.5 },
-  harajuku: { x: 33, y: 36, scala: 5.5 },
+  shinagawa: { x: 39.9, y: 74.7, scala: 5.5 },
+  shibuya: { x: 33.4, y: 51.8, scala: 7.5 },
+  harajuku: { x: 30.5, y: 39.8, scala: 5.5 },
   // l'unica sagoma non originale: vedi la nota qui sopra
-  'shujin-academy': { x: 40, y: 40, scala: 5.5 },
-  shinjuku: { x: 38, y: 22, scala: 7.5 },
+  'shujin-academy': { x: 41.7, y: 38.4, scala: 5.5 },
+  shinjuku: { x: 38.8, y: 22, scala: 7.5 },
   // ---- la Chuo, che taglia da ovest a est sopra l'anello ----
   ogikubo: { x: 26, y: 5, scala: 5.5 },
-  nakano: { x: 30, y: 15, scala: 5.5 },
-  ichigaya: { x: 49, y: 30, scala: 5.5 },
-  suidobashi: { x: 70, y: 36, scala: 5.5 },
+  nakano: { x: 29.5, y: 15.5, scala: 5.5 },
+  ichigaya: { x: 49, y: 26.8, scala: 5.5 },
+  suidobashi: { x: 68.8, y: 36, scala: 5.5 },
   'kanda-jinbocho': { x: 67, y: 48.5, scala: 5.5 },
   // ---- ovest: la Inokashira ----
-  kichijoji: { x: 13.5, y: 16.5, scala: 7 },
-  'inokashira-park': { x: 17, y: 26, scala: 5.5 },
+  kichijoji: { x: 13.5, y: 15.3, scala: 7 },
+  'inokashira-park': { x: 15.6, y: 27.2, scala: 5.5 },
   // ---- sud-ovest ----
-  'yongen-jaya': { x: 19, y: 51, scala: 7.5 },
-  'meiji-shrine': { x: 27, y: 30, scala: 5.5 },
+  'yongen-jaya': { x: 19.3, y: 50.1, scala: 7.5 },
+  'meiji-shrine': { x: 28, y: 27.8, scala: 5.5 },
   // ---- il centro, dentro l'anello ----
   'aoyama-itchome': { x: 46.5, y: 51, scala: 7.5 },
   akasaka: { x: 58, y: 60, scala: 5.5 },
   nagatacho: { x: 57, y: 46, scala: 5.5 },
-  roppongi: { x: 49, y: 68, scala: 5.5 },
+  roppongi: { x: 50.6, y: 68, scala: 5.5 },
   // ---- nord-est ----
   asakusa: { x: 87, y: 32, scala: 7 },
   // ---- la baia, a est ----
@@ -75,7 +75,7 @@ export const QUARTIERI_TOKYO: Record<string, Collocazione> = {
   odaiba: { x: 51, y: 92, scala: 7 },
   maihama: { x: 89, y: 70, scala: 6.5 },
   // ---- fuori città, a sud ----
-  'yokohama-chinatown': { x: 10, y: 67, scala: 7 },
+  'yokohama-chinatown': { x: 10, y: 67.5, scala: 7 },
   'miura-kaigan': { x: 31, y: 86, scala: 6.5 },
 };
 
@@ -115,23 +115,36 @@ export const LINEE_TOKYO: Linea[] = [
  *
  * Solo quattro hanno un posto dichiarato — Kamoshida a Shujin, Madarame e Kaneshiro a Shibuya,
  * Futaba a Yongen-Jaya — e stanno accanto a quel quartiere. Gli altri nel gioco si raggiungono
- * col Meta-Nav, che non parte da un luogo: stanno in fila lungo il bordo alto, staccati
- * dall'anello, dove si legge che ci sono senza affermare che stiano lì. */
+ * col Meta-Nav, che non parte da un luogo: stanno lungo il bordo di nord-est, staccati
+ * dall'anello, dove si legge che ci sono senza affermare che stiano lì.
+ *
+ * **Le posizioni non si sfiorano, e non è un caso.** Sono state calcolate: si misurano i riquadri
+ * di figura e targa nel browser e si separano finché non resta una sovrapposizione, poi si
+ * riverifica alle tre larghezze. Prima erano in fila lungo il bordo alto ed erano il grosso delle
+ * 38 sovrapposizioni contate all'inizio — targhe l'una sull'altra e sopra i quartieri. La prova si
+ * rifà con lo script in `docs/MAPPE.md`.
+ *
+ * `dungeon-mementos` non c'è più: i Memento sono fuori dall'atlante e non hanno un ingresso sulla
+ * mappa di viaggio. */
 export const RADICI_TOKYO: Record<string, Collocazione> = {
-  'dungeon-kamoshida': { x: 44, y: 37, scala: 4.5 },
-  'dungeon-madarame': { x: 22, y: 65, scala: 4.6 },
-  'dungeon-kaneshiro': { x: 32, y: 66, scala: 4.6 },
-  'dungeon-futaba': { x: 11, y: 74, scala: 4.6 },
-  'dungeon-okumura': { x: 5, y: 6, scala: 4.2 },
-  'dungeon-niijima': { x: 14, y: 6, scala: 4.2 },
-  'dungeon-shido': { x: 23, y: 6, scala: 4.2 },
-  'dungeon-maruki': { x: 32, y: 6, scala: 4.2 },
-  'dungeon-iweleth': { x: 41, y: 6, scala: 4.2 },
-  'dungeon-mementos': { x: 50, y: 6, scala: 4.2 },
+  // i quattro con un posto dichiarato, accanto al loro quartiere
+  'dungeon-kamoshida': { x: 53.5, y: 43, scala: 4.5 },
+  'dungeon-madarame': { x: 26.7, y: 64.2, scala: 4.6 },
+  'dungeon-kaneshiro': { x: 38.9, y: 63.6, scala: 4.6 },
+  'dungeon-futaba': { x: 8.7, y: 56.6, scala: 4.6 },
+  // i cinque del Meta-Nav, sul bordo di nord-est, dove non c'è rete da attraversare
+  'dungeon-okumura': { x: 64, y: 5, scala: 4.2 },
+  'dungeon-niijima': { x: 74, y: 5, scala: 4.2 },
+  'dungeon-shido': { x: 84, y: 5, scala: 4.2 },
+  'dungeon-maruki': { x: 93, y: 5, scala: 4.2 },
+  'dungeon-iweleth': { x: 93, y: 17, scala: 4.2 },
 };
 
-/** Il Covo dei Ladri: la soffitta del Leblanc, a Yongen-Jaya. */
-export const COVO_TOKYO: Collocazione = { x: 9, y: 65, scala: 4.6 };
+/** Il Covo dei Ladri: la soffitta del Leblanc, a Yongen-Jaya.
+ *
+ * Sta nell'angolo libero in basso a sinistra e non addosso a Yongen-Jaya, dove copriva Chinatown:
+ * è un rifugio, non una fermata, e l'utente ha detto che può stare in un'area sgombra. */
+export const COVO_TOKYO: Collocazione = { x: 13, y: 92, scala: 4.6 };
 
 /** I quartieri che stanno sulla mappa del gioco ma non sono una scheda dell'app.
  *

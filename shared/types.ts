@@ -1132,6 +1132,15 @@ export interface QuartiereRiassuntoDto {
   descrizione: string;
   luoghi: number;
   verificati: number;
+  /** Il quartiere è già nel mondo, al punto in cui è la partita?
+   *
+   * Vero anche senza partita: senza non c'è niente da decidere. Le regole stanno in
+   * `sblocco-quartieri.json` e non solo nella data: sette quartieri su ventitré ne hanno una, gli
+   * altri si aprono col rango di un Confidente, con un libro letto o durante un Palazzo — e sono
+   * chiusi lo stesso. La mappa di Tokyo mostra solo i quartieri disponibili. */
+  disponibile?: boolean;
+  /** Perché è chiuso, nelle parole del valutatore: «Yusuke: rango 1 di 3». Null se è aperto. */
+  bloccoMotivo?: string | null;
 }
 
 export interface LuogoDto {
@@ -1337,6 +1346,15 @@ export interface AreaDungeonDto {
   pianta: PiantaAreaDto | null;
   /** Motivo dell'assenza della pianta, se noto (es. piani generati proceduralmente). */
   piantaAssente: string | null;
+  /** Le planimetrie native dell'atlante legate a quest'area (`mappa_entita`), in ordine.
+   *
+   * Servono alla scheda del Palazzo per **mostrare la mappa invece di un rimando**. L'area della
+   * guida non è un nodo dell'atlante — il risolutore, interrogato sulla sua chiave, risponde
+   * «contenuto di guida» — quindi chiedergli la mappa dell'area dava sempre niente, e sulla scheda
+   * al posto del visore compariva un riquadro vuoto con dentro un collegamento. Il legame però
+   * c'è ed è dichiarato: 72 aree su 116 hanno una planimetria nativa. Qui viene esposto, così la
+   * scheda la monta. Vuoto per le aree che non ne hanno (i piani dei Memento, per esempio). */
+  mappe: Array<{ chiave: string; nome: string }>;
   punti: PuntoInteresseDto[];
 }
 

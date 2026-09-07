@@ -58,6 +58,24 @@ describe('API dungeon', () => {
     expect((await request(app).get('/api/compendio/dungeon?partita=99999')).status).toBe(404);
   });
 
+  it('ogni area porta le planimetrie native dell’atlante che le sono legate', async () => {
+    // Senza questo campo la scheda del Palazzo non poteva montare la mappa: il risolutore,
+    // interrogato sulla chiave di un'area della guida, risponde «contenuto di guida» — corretto
+    // per lui — e al posto del visore compariva un riquadro vuoto con dentro un collegamento, su
+    // tutte le aree di tutti i Palazzi. Il legame c'è, sta in `mappa_entita`, e va esposto.
+    const k = (await request(app).get('/api/compendio/dungeon/kamoshida')).body.data as DungeonDettaglioDto;
+    const ingresso = k.aree.find((a) => a.chiave.startsWith('kamoshida-01'))!;
+    expect(ingresso.mappe.length).toBeGreaterThan(0);
+    // la chiave è quella pubblica del nodo dell'atlante, non quella dell'area della guida
+    expect(ingresso.mappe[0].chiave).not.toBe(ingresso.chiave);
+    expect(ingresso.mappe[0].nome).toContain('Kamoshida');
+    // Le aree senza planimetria nativa restano con l'elenco **vuoto**, non assente: la scheda ci
+    // si appoggia per dirlo, invece di mostrare un riquadro muto.
+    expect(k.aree.every((a) => Array.isArray(a.mappe))).toBe(true);
+    const m = (await request(app).get('/api/compendio/dungeon/mementos')).body.data as DungeonDettaglioDto;
+    expect(m.aree.every((a) => a.mappe.length === 0)).toBe(true);
+  });
+
   it('stato dei punti per partita (ottenuto/esaurito/riapri) con evento, avanzamento nell\'elenco, marcatori delle mappe', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Dungeon' })).body.data as { id: number }).id;
     const k = (await request(app).get(`/api/compendio/dungeon/kamoshida?partita=${id}`)).body.data as DungeonDettaglioDto;
