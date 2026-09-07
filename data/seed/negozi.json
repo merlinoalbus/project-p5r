@@ -6985,7 +6985,7 @@
           "effetto": "Sblocca trucchi per i videogiochi",
           "statistiche": null,
           "disponibileDal": null,
-          "condizione": "dopo aver giocato a un videogioco almeno una volta",
+          "condizione": "dopo il completamento di un videogioco",
           "nota": null,
           "fonte": "https://www.allgamestaff.it/persona-5-royal/libri/",
           "verificato": true

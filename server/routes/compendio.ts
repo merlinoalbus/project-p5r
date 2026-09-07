@@ -10,7 +10,7 @@ import { dettaglioDungeon, elencaDungeon } from '../services/dungeonService.js';
 import { richieste } from '../services/richiesteService.js';
 import { battaglia } from '../services/battagliaService.js';
 import { dettaglioQuartiere, elencaQuartieri, impostaIngressoQuartiere } from '../services/cittaService.js';
-import { attivitaTutte } from '../services/attivitaService.js';
+import { attivitaTutte, filmDvdTutti, videogiochiTutti, libriTutti } from '../services/attivitaService.js';
 import { cruciverba } from '../services/cruciverbaService.js';
 import { dettaglioNegozio, elencaNegozi, ricercaArticoli } from '../services/negoziService.js';
 import { giornoPercorso, indicePercorso } from '../services/percorsoService.js';
@@ -134,6 +134,15 @@ router.get('/citta/:chiave', validate({ params: z.object({ chiave: z.string().mi
 });
 router.get('/attivita', validate({ query: queryDomande }), (req, res) => {
   res.json(attivitaTutte((req.query as unknown as { partita?: number }).partita));
+});
+router.get('/libri', validate({ query: queryDomande }), (req, res) => {
+  res.json(libriTutti((req.query as unknown as { partita?: number }).partita));
+});
+router.get('/film', validate({ query: queryDomande }), (req, res) => {
+  res.json(filmDvdTutti((req.query as unknown as { partita?: number }).partita));
+});
+router.get('/videogiochi', validate({ query: queryDomande }), (req, res) => {
+  res.json(videogiochiTutti((req.query as unknown as { partita?: number }).partita));
 });
 router.get('/battaglia', (_req, res) => {
   res.json(battaglia());
