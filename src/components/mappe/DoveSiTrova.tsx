@@ -94,11 +94,16 @@ export function DoveSiTrova({ tipo, chiave, altezza = 260, soloCollegamento = fa
       <h3 className="m-0 text-base">{titolo}</h3>
       <span className="text-sm text-text-secondary">{d.nomeSpillo ? `${d.nomeSpillo} · ${d.nomeMappa}` : d.nomeMappa}</span>
     </div>
+    {/* Senza l'editor: qui il visore è **citato**, non è la pagina. Chi legge dove si compra un
+        libro non sta curando l'atlante, e «Modifica mappa» in mezzo alla scheda di un libro
+        invita a modificarlo da un posto dove nessuno se ne accorgerebbe. Difetto trovato
+        verificando i Libri di Codex — ma il pulsante veniva da `MappaIncorporata`, cioè da me. */}
     {!soloCollegamento && <MappaIncorporata
       chiave={d.mappa}
       spilloIniziale={d.spillo}
       puntoIniziale={d.centro}
       altezza={altezza}
+      conEditor={false}
     />}
     <Link to={urlDestinazioneMondo(d)} className="btn btn-ghost btn-sm touch self-start inline-flex items-center gap-1.5">
       <IconaAzione chiave="mappa" dimensione={16} />Apri sull’atlante
