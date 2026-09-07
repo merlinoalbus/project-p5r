@@ -2619,3 +2619,246 @@ Tokyo solo dal 9 maggio, secondo la rettifica del requisito. Runtime documentato
 overlap o contenuto fuori tela a 375/820/1280/1440, incluso il Covo originale. Il candidato
 incorpora il Lotto A v3 gia' verificato; i cicli documentati riportano typecheck/lint/build e
 601/601 test verdi. Nessun file e' stato modificato dal validatore.
+
+
+---
+
+## Verifica in sola lettura — esportazione del seed, chiavi delle categorie, Equipaggiamento (7 settembre 2026)
+
+Passata di verifica **emulata** con il protocollo del `galaxy-task-validator`: sola lettura del
+codice e dei dati, nessuna modifica durante il giudizio, e ogni affermazione misurata invece che
+supposta. Copre i tre punti chiusi oggi (15.30, 15.31, 15.32) e le consegne grafiche di Codex.
+
+### 15.30 — il catalogo corretto diventa seed anche per libri, film e attività
+
+- Giro completo a tavolo pulito: `npm run seed:esporta` dichiara «già allineato, niente da
+  scrivere» su **entrambi** i file. Il confronto è byte a byte, non semantico.
+- Tre difetti trovati e chiusi durante la lavorazione, tutti dello stesso tipo — l'esportazione che
+  «migliora» il file invece di conservarlo: le condizioni riscritte per 23 libri, il rientro
+  diverso (1912 righe aggiunte per una modifica che ne toccava 23) e `"sessioni": 1` comparso su 23
+  attività per via del valore predefinito della colonna.
+- Test: 5 in `esportaSeed.test.ts`, di cui due nuovi (identità dell'esportazione, videogioco
+  aggiunto con le sue Doti e riga nascosta lasciata fuori).
+
+### 15.31 — le figure di categoria e le chiavi dei dati
+
+- **Difetto reale, trovato prima della consegna all'utente**: le 22 illustrazioni si chiamano al
+  plurale, i dati parlano al singolare. Misurato sul database dell'istanza: `arma` 143 righe,
+  `protezione` 62, `accessorio` 72, più `regalo`, `materiale`, `abito`; il percorso usa `libro`
+  (61) e `lavoro` (10). `ui/categoria-arma` non esiste e non esisterà: quelle righe avrebbero
+  tenuto il cartiglio di riserva **pur avendo la figura pronta**.
+- Controllo d'insieme sulle altre famiglie di asset dinamici (`ui/spillo-`, `elementi/`, `doti/`,
+  `meteo/`, `palazzi/`, `arcani/icona/`, `persona/`): **nessun altro scarto di nome**. I due
+  sospetti (`meteo/possibile pioggia`, `persona/emperor-s-amulet`) sono falsi positivi: il primo
+  passa da `segmentiMeteo`, il secondo dallo `slug` condiviso che toglie gli apostrofi.
+- Buco del censimento §22 misurato sul percorso di una partita intera: 13 tipi di azione, **uno
+  solo** con la figura. Aperta la §24 con gli undici soggetti mancanti.
+
+### 15.32 — Equipaggiamento in Oggetti
+
+- Verificato che il difetto fosse reale prima di rimediarlo: `getOggetti` non compare in nessun
+  `.tsx`, e il sottotitolo della pagina rimandava al Compendio, dove i 223 pezzi non ci sono.
+- API misurata: 223 righe, 125 accessori, 36 armi da mischia, 32 a distanza, 30 protezioni,
+  **zero** righe senza nome italiano.
+- Verifica nel browser a 600 px e a 375 px: 223 righe, nessuno scorrimento orizzontale, ritratti
+  effettivamente caricati (`naturalWidth` 768), collegamento profondo `?scheda=equipaggiamento`
+  funzionante.
+- **Rilievo emerso e corretto durante la verifica**: la prima stesura metteva i dieci volti anche
+  sui 125 pezzi senza vincolo — **1474 immagini in pagina**, su un'app che si usa col tablet in
+  mano. Ora i volti restano dove c'è davvero una restrizione (98 righe) e il resto dice «Tutti»:
+  224 immagini, e la colonna si scorre.
+
+### Consegne grafiche di Codex
+
+- `candidato/grafica-categorie-finali-v1`: PASS. Diff esclusivo di 22 PNG rispetto al punto già
+  giudicato, tutte 128×128 RGBA con alfa reale; cercando i pixel **visibili** in tonalità 25–70°
+  con saturazione > 0.25 il conteggio dell'oro è **zero su tutte e 22**.
+- `candidato/grafica-decori-battaglia-v1`: PASS. Due fregi 1024×1024, simulati come li rende l'app
+  (16% di opacità, maschera sfumata, carta `#14141a`): restano un'ombra e non competono col testo.
+  Rilievo non bloccante sul peso (1001 kB e 425 kB per immagini larghe al massimo 420 px).
+- **Nota di processo, non di merito**: la PR #38 risulta mergiata ma lo è stata quando il ramo
+  conteneva le sole sei icone d'azione. `github/main` non contiene nessun `categoria-*` né
+  `decori/*`, e sul repository non c'è nessuna PR aperta: le 24 immagini verificate sono ferme sul
+  ramo di Codex. Segnalato nel canale; serve una PR nuova.
+
+### Consegne grafiche di Codex — la §23 chiusa (7 settembre 2026, seguito)
+
+- `candidato/grafica-decori-ombre-v1` (otto fregi) e `candidato/grafica-decori-finali-v1` (gli
+  ultimi tre, `jose-scambi` nel formato a fascia 1536×864): **PASS**. Diff esclusivi di soli PNG,
+  1024×1024 RGBA con alfa reale, soggetti conformi alla §23, oro visibile fra 0 e 7 pixel su
+  ~250 000 campionati per immagine — bordi antialiasati, non oro dipinto.
+- Con questi il fabbisogno censito è consegnato per §21 (6 azioni), §22 (22 categorie) e §23 (11
+  fregi). Resta la **§24**, aperta oggi.
+- **Rilievo misurato sul peso, non bloccante:** gli undici fregi pesano ~9,2 MB e sono immagini
+  mostrate al 16% di opacità, larghe al massimo 420 px. Ridotte a 768 px con palette a 256 colori
+  diventano ~0,9 MB, senza differenza osservabile a quell'opacità. Chiesto a Codex di generare già
+  ridotto da qui in avanti; la riconversione dei consegnati si può fare senza rigenerarli.
+
+### Gli spilli che parlavano giapponese (7 settembre 2026)
+
+Trovato guardando la Shujin Academy per un'altra ragione: **280 spilli su 1617** si presentavano
+come `Da identificare: «ミニマップ：自分用アイコン» (tipo 28)`. Il nome nativo accanto a «Da
+identificare» è la scelta giusta dell'estrazione — è la traccia per identificarlo — ma arrivava in
+giapponese sotto gli occhi di chi gioca; dodici arrivavano perfino come stringa esadecimale, cioè i
+byte Shift-JIS mai decodificati (`837d8343…` = `マイパレス_アイテム配置したとき`).
+
+La migrazione 053 traduce **il nome e non il significato**: lo spillo resta `nota` e resta «Da
+identificare», perché stabilire che cosa sia vuole le prove del pipeline dell'atlante. Le rese
+rispettano il troncamento a sedici caratteri della tabella del gioco, e un nome nativo che non
+sappiamo tradurre resta intatto. Applicata sull'istanza: **233 spilli tradotti, zero nomi
+giapponesi rimasti**; si rifà a ogni avvio come la 052, così un reseed non li riporta. Le cinque
+decodifiche sono state passate a Codex per la promozione in `DALLA_TABELLA_DELLE_PARTI`, dove il
+nome dello sprite è la prova e il tipo può essere deciso con la procedura giusta.
+
+### Shujin Academy — che cosa manca davvero
+
+Il rilievo «la guida conosce sei luoghi, la mappa ne ha due» va precisato dopo la verifica:
+`aula-shujin` **ha** il suo spillo (sulla planimetria del secondo piano) e `distributori-shujin` ce
+l'ha sulla mappa della scuola. Restano senza punto `biblioteca-shujin`, `cancello-shujin`,
+`infermeria-shujin` e `corridoio-2-piano-shujin`: per le prime due esiste già la planimetria nativa
+dedicata («Biblioteca», «Cancello della scuola») e il collegamento si può fare senza inventare
+coordinate; per infermeria e corridoio no, e **non si inventano**: andrebbero posizionati su una
+planimetria dei piani con una prova, che è lavoro dell'atlante.
+
+### Domande e cruciverba correggibili — verifica (7 settembre 2026)
+
+- **Il difetto era reale e misurato**: 78 domande e 38 righe di cruciverba erano le uniche famiglie
+  consultate *durante* il gioco a restare di sola lettura. L'identità delle domande era la
+  posizione nel file: aggiungerne una a maggio avrebbe fatto scalare tutte le successive e una
+  correzione sarebbe finita sulla domanda sbagliata. La chiave ora è il giorno; verificato che le
+  chiavi restano uniche (78 su 78, cinque giorni con due domande).
+- **Round trip completo via API**, non solo unità: correzione con risposta a due passaggi →
+  comparsa in `/api/compendio/domande` → **reseed forzato** che non la riporta indietro →
+  «Ripristina» che rimette la riga della guida. Lo stesso per il cruciverba. Coperto da un test
+  nuovo in `server/routes/catalogo.test.ts`.
+- **Regressione trovata e chiusa durante la verifica**: `organizzazioneMappe.test.ts` ferma le
+  migrazioni alla 41 e poi carica il seed; il caricatore nuovo dava per scontate le colonne della
+  055 e falliva. Ora guarda che colonne ci sono davvero (`colonneDi`) e sullo schema vecchio torna
+  al comportamento di prima. È la stessa cosa che serve a un ripristino da un backup più vecchio.
+- **Esportazione**: quattro file su quattro identici byte per byte a tavolo pulito. L'ultima
+  differenza era l'a-capo finale, che `negozi.json` e `attivita.json` hanno e gli altri due no: si
+  prende dal file invece di imporlo, come già si faceva per il rientro.
+- Verifica nel browser: 83 pulsanti «Correggi» sulle domande (78 righe più le cinque «prossime»
+  ripetute in cima), 38 sul cruciverba, il modulo si apre con le risposte già dentro e senza
+  l'editor delle condizioni, che per queste due tabelle non avrebbe niente da salvare.
+
+### Consegne grafiche — stato al 7 settembre 2026, sera
+
+`candidato/grafica-decori-ottimizzati-v2` ha gli stessi blob di v1 (diff vuoto fra i tag): il PASS
+vale per entrambi. **PR #39** raccoglie finalmente tutto il lavoro grafico — 22 icone di categoria e
+11 fregi già alleggeriti (10,0 → 3,3 MB) — ed è `CLEAN`. Il fabbisogno censito resta scoperto solo
+per la §24 (le undici icone dei tipi di azione della Guida del giorno).
+
+### `candidato/lotto-b-v5` e `v6` — contenuto approvato, candidato non integrabile (7 settembre 2026)
+
+**Verdetto: il contenuto passa, il candidato no.** Merge-base `b1ce57d`, che sta **prima** di due
+commit già su `main`: `dcc2cca` (Videogiochi riscritta nella lingua dell'app) e `6f149c1` (i
+pulsanti del catalogo su quelle pagine). Integrarlo avrebbe riportato la pagina precedente, tolto i
+pulsanti «Aggiungi»/«Correggi» e rimesso il pulsante «Completa» che l'utente aveva chiesto di
+togliere. Non è un difetto del lavoro: è un candidato aperto su file che nel frattempo erano stati
+riscritti.
+
+Il contenuto invece copre due mancanze vere, **una delle quali era mia**: la pagina dei Videogiochi
+serializzava una richiesta per volta con i pulsanti disabilitati, e i tocchi rapidi che cadevano
+durante l'attesa sparivano. Portato sulla pagina di adesso (commit `8dbd355`) con una correzione al
+lavoro di Codex: il passo si conta sull'ultimo valore **chiesto** e non su quello disegnato, perché
+due tocchi nello stesso fotogramma leggevano lo stesso numero e valevano per uno solo — difetto
+visibile nel browser e invisibile a `fireEvent`, che fra un evento e l'altro lascia ridisegnare.
+
+`DoveSiTrova` aggiunto a Videogiochi (un pannello solo per pagina) e ad Attività, dove la
+fisarmonica resta a più schede aperte e la mappa sta dietro un pulsante: aprire una scheda per
+leggerne le regole non deve montare un visore. Il test API di Codex
+(`server/routes/videogiochi.test.ts`) è stato preso tale e quale, con l'attribuzione: non tocca
+l'interfaccia e passa sulla `main` di adesso.
+
+**Regola di processo che ne esce:** un candidato con merge-base vecchio non si giudica solo sul
+contenuto. `git log --oneline github/main -- <file>` prima di aprire un lotto costa niente e dice
+se qualcuno ci ha lavorato.
+
+### Lotto B v7, v8 e v9 — un candidato che si ripete (7 settembre 2026, sera)
+
+Cinque candidati (`lotto-b-v5` … `v9`) con lo **stesso merge-base** `b1ce57d`, ognuno che rifà il
+precedente. Esito consolidato:
+
+- **integrato**: coda dei round e `DoveSiTrova` (commit `8dbd355`, con una correzione al lavoro di
+  Codex), il test API dei videogiochi tale e quale, la matrice degli inventari 5.2 (`bc789ff`),
+  completata con l'archivio dei 223 equipaggiamenti che le mancava;
+- **respinto con la ragione**: `InventariPage`. La pagina dei Negozi fa già la stessa cosa — stessa
+  `ricercaArticoli`, stessa `ArticoliTabella`, selettore «Categoria» già presente — e sarebbe stata
+  la terza porta sugli stessi scaffali. Il bisogno però era reale: quel filtro **non era
+  raggiungibile**, perché viveva solo nello stato del componente. Risolto dove stava il buco
+  (`6cac69a`): i filtri stanno nell'indirizzo, `/guida/negozi?categoria=arma` apre l'elenco già
+  filtrato, e la riga della matrice diventa un collegamento vero.
+
+**Riserve SVG distinte per i tipi di azione** (`123b3a3`): «richiesta», «esame» e «libro» avevano
+tutti e tre lo stesso libretto e «trama» la stessa stella di «dote» — quattro azioni diverse, due
+segni, a 40 px nella schermata più usata dell'app. Ora sono tredici segni distinti, con un test che
+lo tiene fermo. Restano riserve: le figure vere sono la §24, l'ultima cosa aperta del fabbisogno.
+
+### Passata finale sul ramo `lavoro/verifica-lotto-b` (7 settembre 2026, sera)
+
+**Installazione da zero.** Migrazioni 1→55 su un database vuoto più il caricamento del seed: 78
+domande e 38 righe di cruciverba tutte con la loro chiave, **zero** spilli col nome giapponese (233
+tradotti al volo), 3 luoghi collegati alla planimetria che porta il loro nome, 223 equipaggiamenti e
+575 articoli. È la garanzia che conta: quello che ho aggiunto non serve solo a questa istanza, vale
+per una installazione nuova.
+
+**Runtime.** Undici pagine toccate percorse a 1200, 600 e 375 px — Equipaggiamento, Domande,
+Cruciverba, Videogiochi, Attività, Negozi filtrati per categoria, indice delle Mappe, Palazzo di
+Kamoshida, Libri, Film, Richieste: **zero errori in console**, zero `role="alert"`, nessuno
+scorrimento orizzontale a nessuna larghezza, e nessun errore nei log di BE e FE.
+
+**Suite.** 671 test, typecheck e lint puliti. Ventidue commit sul ramo.
+
+### `candidato/lotto-b-v17` — la prima regressione silenziosa (7 settembre 2026, sera)
+
+Codex ha ribasato: base `7fc4012`, l'ultimo commit di `main`, zero commit indietro. La base è
+quindi corretta, e il suo `galaxy-task-validator` ha dato PASS. **Respinto lo stesso**, e questo è
+il caso che vale la pena ricordare: il file non è stato ribasato, è stato **riscritto sopra**.
+
+Conteggi su `src/pages/VideogiochiPage.tsx`, non impressioni:
+
+| marcatore | `main` prima | `lotto-b-v17` | ramo `lavoro/verifica-lotto-b` |
+|---|---:|---:|---:|
+| `AggiungiAlCatalogo` | 2 | **0** | 2 |
+| `CorreggiElemento` | 2 | **0** | 2 |
+| gruppo dei completati | sì | **no** | sì |
+| `ChipDisponibilita` | sì | **no** | sì |
+| `IconaCategoria` | 2 | **0** | 2 |
+| pulsante «Completa»/«Azzera» | assente | **presente** | assente |
+| coda dei round | assente | presente | presente |
+| `DoveSiTrova` | assente | presente | presente |
+
+Le ultime due righe sono il contributo di Codex, già integrato con la sua attribuzione; le prime
+cinque sono quello che il merge avrebbe portato via, compreso il rientro del pulsante «Completa»
+che l'utente aveva chiesto esplicitamente di togliere.
+
+**La lezione, che è più importante del candidato.** Finché il merge-base era vecchio, il difetto si
+vedeva dal merge-base. Con la base giusta la regressione diventa invisibile sia al gate del
+candidato — che gira su un albero coerente con sé stesso — sia a chi guarda solo la base. L'unico
+controllo che la vede è `git diff github/main -- <file>` **letto sulle righe tolte**: se spariscono
+righe che l'autore del candidato non ha scritto, non è un rebase, è una sovrascrittura. Regola
+aggiunta al protocollo dei candidati.
+
+### PR #40 — «riallineata preservando» ma cancella: verifica del 7 settembre 2026, 22:30
+
+Codex ha aperto la PR #40 (`lavoro/lotto-b-inventari`) dichiarando il ramo «riallineato a
+`github/main` preservando le correzioni dei due lotti», con merge commit, CI verde e PASS del
+proprio validator. **La verifica dice il contrario.** Conteggi `main` → PR #40 su
+`VideogiochiPage.tsx`: `AggiungiAlCatalogo` 2 → 0, `CorreggiElemento` 2 → 0, `mostraFatti` 4 → 0,
+`IconaCategoria` 2 → 0, pulsante «Completa» 0 → 1; le stesse due righe del catalogo spariscono anche
+da `AttivitaPage.tsx`.
+
+Righe citate dal diff, fra quelle **tolte**: gli import di `AzioniCatalogo` e `IconaCategoria`, la
+sezione «Da giocare», il gruppo «Mostra i completati», il chip di stato, i due pulsanti del
+catalogo. In cambio rientra `{fatto ? 'Azzera' : 'Completa'}`.
+
+L'utente è stato avvisato di non mergiarla. La PR non è stata toccata: non è nostra, e commentarla
+non compete a chi verifica.
+
+**Perché nessun gate l'ha vista, e la regola che ne segue.** Un CI verde e un validator in sola
+lettura sul candidato non possono vedere questa classe di difetto: il candidato è coerente con sé
+stesso, i suoi test passano, la sua base è giusta. La vede solo il confronto con ciò che c'era —
+`git diff github/main -- <file> | grep '^-'` — letto sulle **righe tolte**. Se fra quelle c'è codice
+che l'autore del candidato non ha scritto, non è un rebase riuscito. Questa riga entra nel
+protocollo dei candidati accanto al controllo del merge-base, che da solo non basta più.

@@ -22,11 +22,13 @@ import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '..
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'],
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte'],
-  libro: ['nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
-  film: ['nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
-  attivita: ['nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
+  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
+  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
+  attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
+  domanda: ['data', 'tipo', 'chi', 'domanda', 'risposte_json', 'ricompensa', 'note', 'fonte'],
+  cruciverba: ['data', 'indizio', 'risposta', 'risposta_en', 'fonte'],
 };
-const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'articolo', libro: 'libro', film: 'film', attivita: 'attivita' };
+const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'articolo', libro: 'libro', film: 'film', attivita: 'attivita', domanda: 'domanda', cruciverba: 'cruciverba' };
 
 /** Quel che cambia da un tipo all'altro, raccolto in un posto solo.
  *
@@ -40,25 +42,35 @@ const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'a
  *   Una riga aggiunta a mano parte da «non verificata», che è la verità;
  * - `padre`: il riferimento che deve esistere davvero — un articolo senza il suo negozio, o
  *   un'attività in un quartiere inventato, sparirebbe dalle pagine senza dire perché;
- * - `raggruppaOrdinePer`: dove l'ordine è relativo al genitore invece che globale. */
+ * - `raggruppaOrdinePer`: dove l'ordine è relativo al genitore invece che globale;
+ * - `campoNome`: la colonna che fa da titolo. Quasi ovunque è `nome`; una domanda in classe si
+ *   chiama con **la domanda** e una riga del cruciverba col suo **indizio**, perché quelle tabelle
+ *   una colonna `nome` non ce l'hanno e senza questo l'elenco mostrerebbe la chiave, cioè una data;
+ * - `etichettaCampoNome`: come chiamarlo quando manca, nel messaggio d'errore;
+ * - `nomeTipo`: come nominare la riga nei messaggi, articolo determinativo compreso. */
 const PROFILO: Record<TipoCatalogo, {
   condizioniDa?: (d: Record<string, unknown>) => Array<string | null>;
   haVerificato: boolean;
   padre?: { campo: string; tabella: string; codice: string; nome: string };
   raggruppaOrdinePer?: string;
+  campoNome: string;
+  etichettaCampoNome: string;
+  nomeTipo: string;
 }> = {
-  negozio: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: false },
-  articolo: { condizioniDa: (d) => [d.disponibile_dal as string | null, d.condizione as string | null], haVerificato: true, padre: { campo: 'negozio_chiave', tabella: 'negozio', codice: 'negozio-sconosciuto', nome: 'Il negozio' }, raggruppaOrdinePer: 'negozio_chiave' },
-  libro: { haVerificato: true },
-  film: { haVerificato: true },
-  attivita: { haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' } },
+  negozio: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: false, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il negozio' },
+  articolo: { condizioniDa: (d) => [d.disponibile_dal as string | null, d.condizione as string | null], haVerificato: true, padre: { campo: 'negozio_chiave', tabella: 'negozio', codice: 'negozio-sconosciuto', nome: 'Il negozio' }, raggruppaOrdinePer: 'negozio_chiave', campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'articolo" },
+  libro: { condizioniDa: (d) => [d.disponibile_dal as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il libro' },
+  film: { condizioniDa: (d) => [d.periodo as string | null], haVerificato: true, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: 'Il film' },
+  attivita: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' }, campoNome: 'nome', etichettaCampoNome: 'Il nome', nomeTipo: "L'attività" },
+  domanda: { haVerificato: false, campoNome: 'domanda', etichettaCampoNome: 'Il testo della domanda', nomeTipo: 'La domanda' },
+  cruciverba: { haVerificato: false, campoNome: 'indizio', etichettaCampoNome: "L'indizio", nomeTipo: 'La riga del cruciverba' },
 };
 
 type Riga = Record<string, unknown> & { chiave: string; origine: string; nascosto: number; seed_json: string | null; updated_at: string | null };
 
 function riga(tipo: TipoCatalogo, chiave: string): Riga {
   const r = prepared(`SELECT * FROM ${TABELLA[tipo]} WHERE chiave = ?`).get(chiave) as Riga | undefined;
-  if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${tipo === 'negozio' ? 'Il negozio' : "L'articolo"} '${chiave}' non esiste.`);
+  if (!r) throw httpErrors.notFound(`${tipo}-non-trovato`, `${PROFILO[tipo].nomeTipo} '${chiave}' non esiste.`);
   return r;
 }
 
@@ -66,7 +78,7 @@ function dto(tipo: TipoCatalogo, r: Riga): ElementoCatalogoDto {
   const dati: Record<string, unknown> = {};
   for (const c of CAMPI[tipo]) dati[c] = r[c] ?? null;
   return {
-    tipo, chiave: r.chiave, nome: String(r.nome ?? r.chiave), origine: r.origine === 'utente' ? 'utente' : 'seed',
+    tipo, chiave: r.chiave, nome: String(r[PROFILO[tipo].campoNome] ?? r.chiave), origine: r.origine === 'utente' ? 'utente' : 'seed',
     modificata: r.origine === 'utente' && r.seed_json !== null, nascosta: r.nascosto === 1,
     aggiornata: r.updated_at, dati,
   };
@@ -112,7 +124,10 @@ export function riepilogoCatalogo(): RiepilogoCatalogoDto {
 
 /** Righe del catalogo toccate dall'utente (create, corrette o nascoste), per tipo. */
 export function elencaCatalogo(tipo: TipoCatalogo): ElementoCatalogoDto[] {
-  const righe = prepared(`SELECT * FROM ${TABELLA[tipo]} WHERE origine = 'utente' OR nascosto = 1 ORDER BY nome`).all() as Riga[];
+  // Le tabelle senza colonna `nome` — domande e cruciverba — si ordinano per chiave, che per loro
+  // è il giorno: è anche l'ordine in cui uno le cerca.
+  const per = PROFILO[tipo].campoNome === 'nome' ? 'nome' : 'chiave';
+  const righe = prepared(`SELECT * FROM ${TABELLA[tipo]} WHERE origine = 'utente' OR nascosto = 1 ORDER BY ${per}`).all() as Riga[];
   return righe.map((r) => dto(tipo, r));
 }
 
@@ -129,8 +144,8 @@ function ordineSuccessivo(tipo: TipoCatalogo, dati: Record<string, unknown>): nu
 
 /** Crea una riga del catalogo (origine «utente»): la chiave nasce dal nome e non collide mai con quelle del seed. */
 export function creaElemento(tipo: TipoCatalogo, dati: Record<string, unknown>): ElementoCatalogoDto {
-  const nome = typeof dati.nome === 'string' ? dati.nome.trim() : '';
-  if (!nome) throw httpErrors.badRequest('nome-mancante', 'Il nome è obbligatorio.');
+  const nome = typeof dati[PROFILO[tipo].campoNome] === 'string' ? String(dati[PROFILO[tipo].campoNome]).trim() : '';
+  if (!nome) throw httpErrors.badRequest('nome-mancante', `${PROFILO[tipo].etichettaCampoNome} è obbligatorio.`);
   if(typeof dati.condizioni_json === 'string') verificaCondizioni(JSON.parse(dati.condizioni_json));
   verificaRiferimenti(tipo, dati);
   const chiave = chiaveLibera(tipo, nome, typeof dati.negozio_chiave === 'string' ? dati.negozio_chiave : undefined);

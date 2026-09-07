@@ -3,8 +3,8 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { getOggettiGuida } from '../services/api';
+import { Link, useSearchParams } from 'react-router-dom';
+import { getOggetti, getOggettiGuida } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
@@ -14,9 +14,10 @@ import { normalizzaTesto } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { RitrattoPersonaggio } from '../components/guida/RitrattoPersonaggio';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
-const SCHEDE = [['consumabili', 'Consumabili'], ['chiave', 'Chiave e materiali'], ['fabbricazione', 'Fabbricazione'], ['armi', 'Personalizzazione armi'], ['abiti', 'Abiti e lavanderia'], ['scambi', 'Scambi']] as const;
+const SCHEDE = [['consumabili', 'Consumabili'], ['equipaggiamento', 'Equipaggiamento'], ['chiave', 'Chiave e materiali'], ['fabbricazione', 'Fabbricazione'], ['armi', 'Personalizzazione armi'], ['abiti', 'Abiti e lavanderia'], ['scambi', 'Scambi']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_CATEGORIA: Record<string, string> = { cura: 'Cura HP', sp: 'Recupero SP', stato: 'Stati alterati', battaglia: 'Battaglia', esplorazione: 'Esplorazione', altro: 'Altro' };
 
@@ -28,6 +29,21 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
 }
 function Secondaria({ v }: { v: boolean }) {
   return v ? null : <span className="chip text-[11px]" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
+}
+
+/** La cella di una categoria o di un tipo: **la figura**, non la parola ripetuta.
+ *
+ * Duecento righe con scritto «Cura HP» accanto alla stessa identica icona sono duecento volte la
+ * stessa informazione detta due volte, e una colonna larga il doppio del necessario. Il nome resta
+ * dove serve: nel titolo al passaggio del mouse, per chi legge con uno screen reader, e in chiaro
+ * sotto i 640 px, dove la tabella diventa una scheda e l'icona da sola sarebbe un indovinello. */
+function CellaCategoria({ categoria, nome }: { categoria: string; nome: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5" title={nome}>
+      <IconaCategoria categoria={categoria} dimensione={24} etichetta={nome} />
+      <span className="sm:hidden">{nome}</span>
+    </span>
+  );
 }
 
 function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
@@ -47,7 +63,7 @@ function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Categoria</th><th>Effetto</th><th>Dove</th><th>Prezzo</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><span className="inline-flex items-center gap-1.5"><IconaCategoria categoria={x.categoria} dimensione={22} />{NOME_CATEGORIA[x.categoria] ?? x.categoria}</span></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><CellaCategoria categoria={x.categoria} nome={NOME_CATEGORIA[x.categoria] ?? x.categoria} /></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
                 : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo="Sulla mappa" compatto /></span>)}</td><td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{x.prezzo !== null ? `${x.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td></tr>)}</tbody>
         </table>
       </div>
@@ -73,7 +89,7 @@ function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Tipo</th><th>Uso</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo">{x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'}</td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo"><CellaCategoria categoria={x.tipo === 'chiave' ? 'oggetti-chiave' : 'materiali'} nome={x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'} /></td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
                 : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo="Sulla mappa" compatto /></span>)}</td></tr>)}</tbody>
         </table>
       </div>
@@ -93,8 +109,10 @@ function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
       </section>
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
-          <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Prodotti</th><th>Sblocco</th></tr></thead>
-          <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}><td data-etichetta="Attrezzo"><strong>{r.attrezzo}</strong> <Secondaria v={r.verificato} /></td><td data-etichetta="Effetto">{r.effetto}</td><td data-etichetta="Materiali">{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</td><td data-etichetta="Prodotti" className="tabular-nums">{r.prodotti ?? '—'}</td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td></tr>)}</tbody>
+          {/* Niente colonna «Prodotti»: la guida non la compila per **nessuna** ricetta, quindi
+              era una colonna di trattini — larghezza tolta a «Materiali», che invece serve. */}
+          <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Sblocco</th></tr></thead>
+          <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}><td data-etichetta="Attrezzo"><strong>{r.attrezzo}</strong> <Secondaria v={r.verificato} /></td><td data-etichetta="Effetto">{r.effetto}</td><td data-etichetta="Materiali">{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
     </div>
@@ -148,17 +166,106 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Abito</th><th>Per</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.nome}</strong></td><td data-etichetta="Per">{x.per}</td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.nome}</strong></td><td data-etichetta="Per"><RitrattoPersonaggio chi={x.per} /></td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
         </table>
       </div>
     </div>
   );
 }
 
+/** Come si legge il vincolo di un equipaggiamento, in una frase che i ritratti sanno risolvere.
+ *
+ * Il dataset dice `Men`, `Women`, `Unisex` o un nome proprio, e la traduzione ne fa «Solo uomini»,
+ * «Solo donne», «Unisex», «Solo Ann». Le prime due bastano ai ritratti; «Unisex» no, perché non
+ * nomina nessuno: negli abiti del gioco vuol dire uomini **e** donne, cioè tutti tranne Morgana,
+ * che ha i suoi. Il pezzo senza vincolo non passa di qui: lo mette chiunque, e si scrive. */
+function chiLoUsa(vincolo: string, vincoloNome: string | null): string {
+  if (vincolo === 'Unisex') return 'Uomini e donne';
+  return vincoloNome ?? vincolo;
+}
+
+/** Armi, protezioni e accessori: 223 pezzi che l'app aveva già tradotti e non mostrava a nessuno.
+ *
+ * I dati c'erano — nomi italiani, effetti, chi può equipaggiarli — e l'API `/compendio/oggetti`
+ * pure, ma **nessuna pagina la chiamava**: il sottotitolo di questa pagina rimandava al Compendio,
+ * dove non c'erano. Era il buco della 5.2 sul lato armi/protezioni/accessori.
+ *
+ * Si carica solo quando si apre la scheda: sono 223 righe che non servono a chi cerca un
+ * consumabile. */
+function SchedaEquipaggiamento() {
+  const dati = useCarica(() => getOggetti(), []);
+  const [q, setQ] = useState('');
+  const [categoria, setCategoria] = useState('');
+  const [per, setPer] = useState('');
+  const tutti = useMemo(() => dati.dati ?? [], [dati.dati]);
+  const categorie = useMemo(() => [...new Map(tutti.map((o) => [o.categoria, o.categoriaNome])).entries()], [tutti]);
+  const vincoli = useMemo(() => [...new Map(tutti.filter((o) => o.vincolo).map((o) => [o.vincolo!, o.vincoloNome ?? o.vincolo!])).entries()].sort((a, b) => a[1].localeCompare(b[1], 'it')), [tutti]);
+  const visibili = useMemo(() => {
+    const n = normalizzaTesto(q);
+    return tutti.filter((o) => (!categoria || o.categoria === categoria)
+      && (!per || (per === 'nessuno' ? o.vincolo === null : o.vincolo === per))
+      && (!n || normalizzaTesto(`${o.nomeIt ?? ''} ${o.nome} ${o.descrizioneNome} ${o.descrizione}`).includes(n)));
+  }, [tutti, q, categoria, per]);
+  return (
+    <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
+      <div className="flex flex-col gap-2 text-[13px]">
+        <p className="m-0 text-text-secondary">
+          Quel che si indossa e si impugna: {tutti.length} pezzi con il loro effetto e chi può equipaggiarli.
+          Dove si comprano e a che prezzo sta in <Link to="/guida/negozi" className="text-primary">Negozi e inventario</Link>.
+        </p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <div className="min-w-[200px] flex-1"><CampoRicerca valore={q} onCambia={setQ} segnaposto="Cerca un'arma, un effetto…" /></div>
+          <select className="form-input w-auto" value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Tipo">
+            <option value="">Tutti i tipi</option>
+            {categorie.map(([k, n]) => <option key={k} value={k}>{n}</option>)}
+          </select>
+          <select className="form-input w-auto" value={per} onChange={(e) => setPer(e.target.value)} aria-label="Per chi">
+            <option value="">Per chiunque</option>
+            <option value="nessuno">Senza vincolo</option>
+            {vincoli.map(([k, n]) => <option key={k} value={k}>{n}</option>)}
+          </select>
+        </div>
+        <p className="m-0 text-[12px] text-text-muted" role="status">{visibili.length} pezzi su {tutti.length}.</p>
+        <div className="overflow-x-auto">
+          <table className="tabella tabella--adattiva text-[12px]">
+            <thead><tr><th>Equipaggiamento</th><th>Tipo</th><th>Per</th><th>Effetto</th></tr></thead>
+            <tbody>{visibili.map((o) => (
+              <tr key={o.id}>
+                <td data-etichetta="Equipaggiamento"><strong>{o.nomeIt ?? o.nome}</strong>{o.nomeIt && o.nomeIt !== o.nome && <span className="text-text-muted"> ({o.nome})</span>}</td>
+                <td data-etichetta="Tipo"><CellaCategoria categoria={o.categoria.toLowerCase()} nome={o.categoriaNome} /></td>
+                {/* Senza vincolo non si mettono i dieci volti: sarebbero la stessa fila ripetuta su
+                    125 accessori — 1474 immagini in pagina alla prima prova — e non direbbero
+                    niente. Le facce servono a far vedere **la restrizione**: così la colonna si
+                    scorre e le righe con i volti sono quelle che riguardano qualcuno in
+                    particolare. */}
+                <td data-etichetta="Per">{o.vincolo
+                  ? <RitrattoPersonaggio chi={chiLoUsa(o.vincolo, o.vincoloNome)} dimensione={20} />
+                  : <span className="text-text-muted">Tutti</span>}</td>
+                <td data-etichetta="Effetto">{o.descrizioneNome}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+        {visibili.length === 0 && tutti.length > 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Nessun pezzo con questi filtri.</p>}
+      </div>
+    </PageState>
+  );
+}
+
 function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
+  // **Jose sta nelle Richieste dei Mementos**, dove ha il suo foglio con i fiori, i timbri e la
+  // tabella degli scambi. Ripeterlo qui era la stessa bottega scritta due volte in due pagine
+  // diverse, e prima o poi due volte diverse: qui resta il rimando, che dice dov'è.
+  const altrove = d.scambi.filter((s) => /jose/i.test(s.venditore));
+  const venditori = d.scambi.filter((s) => !/jose/i.test(s.venditore));
   return (
     <div className="flex flex-col gap-2 text-[13px]">
-      {d.scambi.map((s) => (
+      {altrove.length > 0 && (
+        <p className="m-0 text-[12px] text-text-muted">
+          Gli scambi di Jose stanno con le <Link to="/guida/richieste?foglio=jose" className="text-primary">Richieste dei Mementos</Link>, insieme ai fiori e ai timbri.
+        </p>
+      )}
+      {venditori.map((s) => (
         <section key={s.venditore} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.venditore}</h2><span className="chip">{s.dove}</span><Secondaria v={s.verificato} /></div>
           {s.quando && <Voce titolo="Quando">{s.quando}</Voce>}
@@ -185,11 +292,12 @@ export function OggettiPage() {
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Oggetti, materiali e fabbricazione" sottotitolo={<>{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Le armi, le protezioni e gli accessori sono nel Compendio; i prezzi dei negozi in Negozi e inventario.</>} />
+          <IntestazionePagina titolo="Oggetti, materiali e fabbricazione" sottotitolo={<>{d.consumabili.length} consumabili, {d.chiaveEMateriali.length} oggetti chiave e materiali, {d.fabbricazione.ricette.length} ricette degli attrezzi da infiltrazione, la personalizzazione delle armi da Iwai, {d.abiti.elenco.length} abiti con la lavanderia e gli scambi dei venditori speciali. Armi, protezioni e accessori hanno la loro scheda qui accanto; i prezzi dei negozi stanno in Negozi e inventario.</>} />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
             {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'consumabili' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
           </FilaScorrevole>
           {scheda === 'consumabili' && <SchedaConsumabili d={d} />}
+          {scheda === 'equipaggiamento' && <SchedaEquipaggiamento />}
           {scheda === 'chiave' && <SchedaChiave d={d} />}
           {scheda === 'fabbricazione' && <SchedaFabbricazione d={d} />}
           {scheda === 'armi' && <SchedaArmi d={d} />}

@@ -17,13 +17,15 @@
  *    deve comunque avere il suo comando, che porta al risolutore: è lì che si dice che una
  *    posizione non c'è, e toglierlo lascerebbe l'utente senza risposta invece che con una.
  */
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { OggettiPage } from './OggettiPage';
 import type { OggettiGuidaDto } from '../types';
+import { useAssetStore } from '../stores/assetStore';
+import { usePreferenzeStore } from '../stores/preferenzeStore';
 
-const { getOggettiGuida } = vi.hoisted(() => ({ getOggettiGuida: vi.fn() }));
-vi.mock('../services/api', () => ({ getOggettiGuida }));
+const { getOggettiGuida, getOggetti } = vi.hoisted(() => ({ getOggettiGuida: vi.fn(), getOggetti: vi.fn() }));
+vi.mock('../services/api', () => ({ getOggettiGuida, getOggetti }));
 
 const vuoto = {
   consumabili: [], chiaveEMateriali: [], scambi: [],
@@ -51,7 +53,26 @@ function monta() {
   return render(<MemoryRouter><OggettiPage /></MemoryRouter>);
 }
 
-beforeEach(() => { getOggettiGuida.mockReset(); getOggettiGuida.mockResolvedValue(dati); });
+const equipaggiamento = [
+  { id: 1, nome: 'Paradise Lost', nomeIt: 'Paradiso perduto', categoria: 'Weapon', categoriaNome: 'Arma da mischia',
+    vincolo: 'Joker', vincoloNome: 'Solo Joker', descrizione: 'High attack', descrizioneNome: 'Attacco altissimo' },
+  { id: 2, nome: 'Aid Charm', nomeIt: 'Portaf. del supporto', categoria: 'Accessory', categoriaNome: 'Accessorio',
+    vincolo: null, vincoloNome: null, descrizione: '+Dia', descrizioneNome: '+Dia (cura piccola a un alleato)' },
+  { id: 3, nome: 'Archangel Bra', nomeIt: 'Reggiseno arcangelo', categoria: 'Protector', categoriaNome: 'Protezione',
+    vincolo: 'Women', vincoloNome: 'Solo donne', descrizione: 'Defense up', descrizioneNome: 'Difesa alta' },
+];
+
+/** I ritratti della squadra nel manifest, altrimenti `AssetImg` ripiega sulle iniziali e non c'è
+ *  nessuna immagine da interrogare per sapere *chi* può usare un pezzo. */
+const SQUADRA_ASSET = ['personaggi/joker', 'confidenti/morgana', 'confidenti/ryuji', 'confidenti/ann', 'confidenti/yusuke',
+  'confidenti/makoto', 'confidenti/futaba', 'confidenti/haru', 'confidenti/akechi', 'confidenti/kasumi'];
+
+beforeEach(() => {
+  getOggettiGuida.mockReset(); getOggettiGuida.mockResolvedValue(dati);
+  getOggetti.mockReset(); getOggetti.mockResolvedValue(equipaggiamento);
+  usePreferenzeStore.setState({ graficaPredefinita: true });
+  useAssetStore.setState({ caricato: true, mancanti: {}, manifest: { generato: 'T', totale: SQUADRA_ASSET.length, file: Object.fromEntries(SQUADRA_ASSET.map((k) => [k, `/asset/${k}.png`])) } });
+});
 
 async function riga(nome: string) {
   const cella = await screen.findByText(nome);
@@ -93,4 +114,55 @@ it('senza chiave e senza negozi non promette una mappa che non c’è', async ()
   monta();
   const r = await riga('Oggetto orfano');
   expect(r.queryByRole('link', { name: /Sulla mappa/ })).toBeNull();
+});
+
+/* La scheda «Equipaggiamento»: 223 pezzi che l'app aveva già tradotti e non mostrava a nessuno.
+ *
+ * Qui si sorveglia la catena intera: la scheda chiama `/compendio/oggetti` (che nessuna pagina
+ * chiamava), i filtri restringono davvero, e il vincolo diventa i volti di chi può indossarlo —
+ * compreso il caso «Solo donne», che i ritratti non riconoscevano perché la guida dice
+ * «personaggi femminili» e il vincolo dice «donne». */
+describe('scheda Equipaggiamento', () => {
+  async function apri() {
+    monta();
+    fireEvent.click(await screen.findByRole('tab', { name: 'Equipaggiamento' }));
+    return screen.findByText('Paradiso perduto');
+  }
+
+  it('mostra i pezzi con nome italiano, originale ed effetto', async () => {
+    await apri();
+    expect(getOggetti).toHaveBeenCalledTimes(1);
+    const r = await riga('Paradiso perduto');
+    expect(r.getByText('(Paradise Lost)')).toBeInTheDocument();
+    expect(r.getByText('Attacco altissimo')).toBeInTheDocument();
+    expect(screen.getByText('3 pezzi su 3.')).toBeInTheDocument();
+  });
+
+  it('filtra per tipo e per chi lo può equipaggiare', async () => {
+    await apri();
+    fireEvent.change(screen.getByRole('combobox', { name: 'Tipo' }), { target: { value: 'Accessory' } });
+    expect(screen.queryByText('Paradiso perduto')).toBeNull();
+    expect(screen.getByText('Portaf. del supporto')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Tipo' }), { target: { value: '' } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Per chi' }), { target: { value: 'Women' } });
+    expect(screen.getByText('Reggiseno arcangelo')).toBeInTheDocument();
+    expect(screen.queryByText('Portaf. del supporto')).toBeNull();
+    expect(screen.getByText('1 pezzi su 3.')).toBeInTheDocument();
+  });
+
+  it('il vincolo diventa i volti: uno per «Solo Joker», le cinque ragazze per «Solo donne», tutti se non c’è', async () => {
+    await apri();
+    const per = async (nome: string) => {
+      const tr = (await screen.findByText(nome)).closest('tr')!;
+      const cella = tr.querySelector('td[data-etichetta="Per"]')!;
+      return [...cella.querySelectorAll('img')].map((i) => i.getAttribute('alt'));
+    };
+    expect(await per('Paradiso perduto')).toEqual(['Protagonista']);
+    expect(await per('Reggiseno arcangelo')).toEqual(['Ann', 'Makoto', 'Futaba', 'Haru', 'Sumire/Kasumi']);
+    // Senza vincolo si scrive «Tutti»: dieci volti ripetuti su 125 accessori non dicono niente e
+    // riempivano la pagina di 1474 immagini.
+    expect(await per('Portaf. del supporto')).toEqual([]);
+    expect((await riga('Portaf. del supporto')).getByText('Tutti')).toBeInTheDocument();
+  });
 });

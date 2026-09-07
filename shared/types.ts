@@ -775,6 +775,8 @@ export interface PianoSalvatoDto {
 
 export interface DomandaDto {
   id: number;
+  /** Chiave del catalogo (il giorno): serve a correggere la riga, `null` finché la migrazione non l'ha assegnata. */
+  chiave: string | null;
   /** Data di gioco «MM-GG». */
   data: string;
   tipo: 'classe' | 'esame-medio' | 'esame-finale' | 'altro';
@@ -1103,6 +1105,8 @@ export interface RicercaArticoliDto {
 export interface CruciverbaDto {
   /** 'MM-GG' del calendario di gioco. */
   giorno: string;
+  /** Chiave del catalogo (giorno e posizione): serve a correggere la riga. */
+  chiave: string | null;
   indizio: string;
   risposta: string;
   rispostaEn: string | null;
@@ -1162,6 +1166,16 @@ export interface LuogoDto {
   verificato: boolean;
   /** Posizione dello spillo sulla mappa del quartiere (percentuali), se fissato. */
   marcatore: { x: number; y: number } | null;
+  /** La regola di **presenza** del luogo, quando ce n'è una scritta in `sblocco-luoghi.json`.
+   *
+   * `sblocco` qui sopra è la prosa della guida — «lettura del libro “Shitamachi rinato”» — e
+   * nessuno la valutava: trentasette luoghi su ottantaquattro portavano una condizione che l'app
+   * non guardava mai, e si vedevano tutti sempre. Questa è la stessa cosa nella forma che il
+   * valutatore capisce. Null dove la guida non pone condizioni, o dove la condizione riguarda
+   * l'**uso** e non l'esistenza (un lavoro che chiede Fascino 2: il posto c'è lo stesso). */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se il luogo, al punto in cui è la partita, è già nel mondo. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface QuartiereDettaglioDto {
@@ -1200,6 +1214,11 @@ export interface AttivitaDto {
   paga: string | null;
   fonte: string;
   verificato: boolean;
+  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+   *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface LibroDto {
@@ -1224,6 +1243,11 @@ export interface LibroDto {
   progresso: number;
   /** Completamento canonico nella partita: non deriva dal solo progresso. */
   fatto: boolean;
+  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+   *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface LibriDto {
@@ -1254,6 +1278,11 @@ export interface FilmDto {
   iniziato: boolean;
   /** Fruizione completata: una visione al cinema o tutte le sessioni richieste da un DVD. */
   fatto: boolean;
+  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+   *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface FilmDvdDto {
@@ -1721,8 +1750,13 @@ export interface EsitoRipristinoDto {
  *
  * Erano due — negozio e articolo — perche' erano le uniche tabelle con le colonne `origine`,
  * `nascosto` e `seed_json`. Dalla migrazione 051 le hanno anche libri, film e attivita', e le
- * pagine nuove possono finalmente offrire l'aggiunta invece di essere di sola lettura. */
-export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita'] as const;
+ * pagine nuove possono finalmente offrire l'aggiunta invece di essere di sola lettura.
+ *
+ * Dalla 055 ci sono anche le **domande in classe** e il **cruciverba**: sono le due cose che si
+ * consultano mentre il gioco aspetta una risposta, e quelle in cui un errore si scopre nel modo
+ * peggiore — hai risposto come diceva l'app e il gioco ti ha dato torto. Fino a ieri quell'errore
+ * non si poteva correggere. */
+export const TIPI_CATALOGO = ['negozio', 'articolo', 'libro', 'film', 'attivita', 'domanda', 'cruciverba'] as const;
 export type TipoCatalogo = (typeof TIPI_CATALOGO)[number];
 
 /** Una riga del catalogo con la sua provenienza: creata dall'utente, corretta sopra il seed, o nascosta. */

@@ -16,7 +16,7 @@ const base: LibroDto = {
   disponibileDal: '18 aprile', dote: 'conoscenza', note: 3, sblocca: 'Sblocca un luogo', sessioni: 2,
   dettagli: null, fonte: 'https://www.allgamestaff.it/persona-5-royal/libri/', verificato: true,
   posizioni: [{ tipo: 'negozio', chiave: 'libreria-taiheido', etichetta: 'Libreria Taiheido' }],
-  totaleSessioni: 2, progresso: 0, fatto: false,
+  totaleSessioni: 2, progresso: 0, fatto: false, condizioni: null, disponibilita: null,
 };
 const dto = (libro: LibroDto): LibriDto => ({ libri: [libro], completati: Number(libro.fatto), sessioniFatte: libro.progresso, sessioniTotali: 2 });
 

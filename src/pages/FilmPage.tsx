@@ -12,6 +12,7 @@ import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { NOME_DOTE } from '../utils/citta';
 import type { FilmDto, FilmDvdDto } from '../types';
@@ -136,7 +137,10 @@ export function FilmPage() {
       <div className="flex items-start gap-3">
         <IconaCategoria categoria="film" dimensione={44} />
         <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2>{film.nomeIt && film.nomeIt !== film.nome && <p className="m-0 text-xs text-text-muted">{film.nome}</p>}<p className="m-0 text-xs text-text-secondary">{film.periodo}</p></div>
-        <span className={`chip ${completato ? 'chip--attivo' : ''}`}>{completato ? 'Completato' : iniziato ? 'In corso' : film.dove === 'cinema' ? 'Da vedere' : 'Da iniziare'}</span>
+        <span className="flex flex-col items-end gap-1">
+          <span className={`chip ${completato ? 'chip--attivo' : ''}`}>{completato ? 'Completato' : iniziato ? 'In corso' : film.dove === 'cinema' ? 'Da vedere' : 'Da iniziare'}</span>
+          <ChipDisponibilita disponibilita={film.disponibilita ?? undefined} compatto />
+        </span>
       </div>
       <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{film.dove === 'cinema' ? `${progresso} ${progresso === 1 ? 'visione' : 'visioni'}` : `${progresso} di ${film.totaleSessioni} sessioni`}</span><span>{film.dove === 'cinema' ? 'Cinema' : 'DVD'}</span></div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={film.dove === 'cinema' ? Math.max(1, progresso) : film.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
       {/* Due pulsanti larghi uguali: il gesto è la visione. In mezzo c'era «Completa», grande il

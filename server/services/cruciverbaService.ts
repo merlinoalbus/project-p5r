@@ -7,9 +7,9 @@ import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
 import type { CruciverbaDto, CruciverbaTuttiDto } from '../../shared/types.js';
 
-interface Riga { data: string; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
+interface Riga { data: string; chiave: string | null; ordine: number; indizio: string; risposta: string; risposta_en: string | null; fonte: string }
 
-const dto = (r: Riga, fatti: Set<string>): CruciverbaDto => ({ giorno: r.data, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fonte: r.fonte, fatto: fatti.has(r.data) });
+const dto = (r: Riga, fatti: Set<string>): CruciverbaDto => ({ giorno: r.data, chiave: r.chiave ?? null, indizio: r.indizio, risposta: r.risposta, rispostaEn: r.risposta_en, fonte: r.fonte, fatto: fatti.has(r.data) });
 
 function fattiPartita(partitaId: number | undefined): Set<string> {
   if (partitaId === undefined) return new Set();

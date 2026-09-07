@@ -56,10 +56,10 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'dove', etichetta: 'Dove si trova', tipo: 'testo', aiuto: 'Per esempio: Libreria Taiheido (Shibuya)' },
     { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero', aiuto: 'Vuoto o 0 se è gratis' },
     { nome: 'disponibile_dal', etichetta: 'Disponibile dal', tipo: 'testo', aiuto: 'La data come la scrive la guida: «dal 18 aprile»' },
-    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE },
-    { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà: è il numero, non un testo' },
+    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la lettura nella guida giorno per giorno' },
+    { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà: è il numero, non un testo. Con la Dote qui sopra fa i punti (♪ = 2, ♪♪ = 3, ♪♪♪ = 5, e 7 per un libro)' },
     { nome: 'sessioni', etichetta: 'Sessioni di lettura', tipo: 'numero', aiuto: 'Quante volte va letto per finirlo' },
-    { nome: 'sblocca', etichetta: 'Che cosa sblocca', tipo: 'testo' },
+    { nome: 'sblocca', etichetta: 'Che cosa sblocca', tipo: 'testo', aiuto: 'Testo per te. Perché l’app lo sappia davvero, scrivi la regola in «Condizioni» qui sotto' },
     { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
     { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
@@ -69,8 +69,8 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'dove', etichetta: 'Dove si vede', tipo: 'select', opzioni: { cinema: 'Al cinema', dvd: 'In DVD' } },
     { nome: 'periodo', etichetta: 'Periodo', tipo: 'testo', aiuto: 'Quando è in programmazione: «dal 24 aprile», «Maggio-Giugno»' },
     { nome: 'prezzo', etichetta: 'Prezzo in yen', tipo: 'numero' },
-    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE },
-    { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero' },
+    { nome: 'dote', etichetta: 'Dote che alza', tipo: 'select', opzioni: NOME_DOTE, aiuto: 'Campo che l’app usa: diventa punti veri quando spunti la visione nella guida giorno per giorno' },
+    { nome: 'note', etichetta: 'Note della Dote (1-3)', tipo: 'numero', aiuto: 'Quante ♪ dà. Con «Anima da cineasta» letto, film e DVD salgono di uno scalino' },
     { nome: 'sessioni', etichetta: 'Visioni per completarlo', tipo: 'numero', aiuto: 'Un film al cinema 1, un DVD 2' },
     { nome: 'dettagli', etichetta: 'Dettagli', tipo: 'testolungo' },
     { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
@@ -84,13 +84,143 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'costo', etichetta: 'Costo in yen', tipo: 'numero' },
     { nome: 'paga', etichetta: 'Quanto paga', tipo: 'testo', aiuto: 'Solo per i lavori' },
     { nome: 'sessioni', etichetta: 'Round o sessioni', tipo: 'numero', aiuto: 'Per i videogiochi: quanti round per finirlo' },
-    { nome: 'sblocco', etichetta: 'Come si sblocca', tipo: 'testo' },
+    { nome: 'sblocco', etichetta: 'Come si sblocca', tipo: 'testo', aiuto: 'Testo per te. Perché l’app lo valuti davvero, scrivi la regola in «Condizioni» qui sotto' },
     { nome: 'regole', etichetta: 'Regole', tipo: 'testolungo' },
-    { nome: 'premi', etichetta: 'Premi', tipo: 'testolungo' },
+    { nome: 'premi', etichetta: 'Premi', tipo: 'testolungo', aiuto: 'Nota per te: qui «Coraggio +3» resta una frase. Quello che alza una Dote va dichiarato in «Doti alzate»' },
     { nome: 'altri_effetti', etichetta: 'Altri effetti', tipo: 'testolungo' },
     { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
+  // La risposta non è qui: sta in «Risposte giuste», l'editor a righe qui sotto, perché è il dato
+  // che l'app usa per dirti che cosa rispondere e un campo di testo l'avrebbe reso illeggibile.
+  domanda: [
+    { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-12»' },
+    { nome: 'tipo', etichetta: 'Quando', tipo: 'select', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', altro: 'Altro' } },
+    { nome: 'chi', etichetta: 'Chi la fa', tipo: 'testo', aiuto: 'Per esempio: Prof. Ushimaru' },
+    { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo' },
+    { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza +1 nota' },
+    { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
+  cruciverba: [
+    { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-18»' },
+    { nome: 'indizio', etichetta: 'Indizio', tipo: 'testolungo' },
+    { nome: 'risposta', etichetta: 'Risposta', tipo: 'testo' },
+    { nome: 'risposta_en', etichetta: 'Risposta in inglese', tipo: 'testo', aiuto: 'Solo se ti serve: è la parola con cui la risolve chi gioca in inglese' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
 };
+
+/** Come si chiama una riga di ogni tipo, nei titoli e nei messaggi. */
+const NOME_TIPO: Record<TipoCatalogo, { nuovo: string; singolare: string }> = {
+  negozio: { nuovo: 'Nuovo negozio', singolare: 'Negozio' },
+  articolo: { nuovo: 'Nuovo articolo', singolare: 'Articolo' },
+  libro: { nuovo: 'Nuovo libro', singolare: 'Libro' },
+  film: { nuovo: 'Nuovo film o DVD', singolare: 'Film' },
+  attivita: { nuovo: 'Nuova attività', singolare: 'Attività' },
+  domanda: { nuovo: 'Nuova domanda', singolare: 'Domanda' },
+  cruciverba: { nuovo: 'Nuova riga del cruciverba', singolare: 'Riga del cruciverba' },
+};
+
+/** I tipi che hanno davvero la colonna `condizioni_json`: agli altri l'editor non va mostrato. */
+const CON_CONDIZIONI = new Set<TipoCatalogo>(['negozio', 'articolo', 'libro', 'film', 'attivita']);
+
+/** Una Dote alzata da un'attività: quale, quante note, e l'eventuale condizione della guida. */
+interface DoteAttivita {
+  dote: string | null;
+  note: number | null;
+  condizione?: string | null;
+}
+
+/** L'editor delle Doti: righe che si aggiungono e si tolgono, non un campo di testo.
+ *
+ * Le note (♪) sono l'unità con cui la guida misura quel che un'attività dà, e sono l'unità che il
+ * motore sa convertire in punti. Un menu a tendina con tre voci è quindi tutto quel che serve —
+ * scriverlo a mano vorrebbe dire riportare il problema al punto di partenza. */
+function EditorDoti({ doti, onCambia, disabilitato }: { doti: DoteAttivita[]; onCambia: (d: DoteAttivita[]) => void; disabilitato?: boolean }) {
+  const cambia = (i: number, campo: keyof DoteAttivita, valore: string) => {
+    const nuove = doti.map((d, j) => (j === i ? { ...d, [campo]: campo === 'note' ? (valore ? Number(valore) : null) : (valore || null) } : d));
+    onCambia(nuove);
+  };
+  return (
+    <fieldset className="regole-editor flex flex-col gap-2">
+      <legend>Doti alzate</legend>
+      <p className="m-0 text-[12px] text-text-muted">
+        Quello che scrivi in «Premi» resta una nota per te. Le Doti dichiarate qui invece l’app le
+        usa: spuntando l’azione nella guida giorno per giorno, i punti si alzano davvero.
+      </p>
+      {doti.length === 0 && <p className="m-0 text-[12px] text-text-muted" role="status">Nessuna Dote dichiarata.</p>}
+      {doti.map((d, i) => (
+        <div key={i} className="flex flex-wrap items-end gap-2">
+          <label className="editor-mappa__campo min-w-[160px] flex-1">
+            Dote
+            <select className="form-input" value={d.dote ?? ''} disabled={disabilitato} onChange={(e) => cambia(i, 'dote', e.target.value)}>
+              <option value="">Dote variabile</option>
+              {Object.entries(NOME_DOTE).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
+            </select>
+          </label>
+          <label className="editor-mappa__campo w-[130px]">
+            Note
+            <select className="form-input" value={d.note ?? ''} disabled={disabilitato} onChange={(e) => cambia(i, 'note', e.target.value)}>
+              <option value="">Non indicate</option>
+              <option value="1">♪ (1)</option>
+              <option value="2">♪♪ (2)</option>
+              <option value="3">♪♪♪ (3)</option>
+            </select>
+          </label>
+          <label className="editor-mappa__campo min-w-[200px] flex-[2]">
+            Quando (facoltativo)
+            <input className="form-input" type="text" maxLength={400} value={d.condizione ?? ''} disabled={disabilitato}
+              onChange={(e) => cambia(i, 'condizione', e.target.value)} placeholder="Per esempio: solo completando la sfida" />
+          </label>
+          <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato}
+            onClick={() => onCambia(doti.filter((_, j) => j !== i))} aria-label={`Togli la Dote ${i + 1}`}>Togli</button>
+        </div>
+      ))}
+      <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />}
+        titolo="Aggiungi una Dote" disabled={disabilitato} onClick={() => onCambia([...doti, { dote: null, note: null, condizione: null }])} />
+    </fieldset>
+  );
+}
+
+/** Una risposta giusta a una domanda: che cosa rispondere, e in che ordine se i passaggi sono più d'uno. */
+interface RispostaDomanda {
+  ordine: number;
+  testo: string;
+}
+
+/** L'editor delle risposte: righe in ordine, non un campo di testo.
+ *
+ * È il dato per cui la pagina esiste — «che cosa rispondo?» — e va nella forma che l'app sa usare.
+ * L'ordine conta: certe domande d'esame si rispondono in due o tre passaggi, e la guida li elenca
+ * proprio così. Scriverli in un campo libero vorrebbe dire ritrovarseli in dieci formati diversi e
+ * doverli leggere a occhio ogni volta, che è esattamente il difetto per cui le Doti hanno avuto il
+ * loro editor. */
+function EditorRisposte({ risposte, onCambia, disabilitato }: { risposte: RispostaDomanda[]; onCambia: (r: RispostaDomanda[]) => void; disabilitato?: boolean }) {
+  const cambia = (i: number, testo: string) => onCambia(risposte.map((r, j) => (j === i ? { ...r, testo } : r)));
+  const togli = (i: number) => onCambia(risposte.filter((_, j) => j !== i).map((r, j) => ({ ...r, ordine: j + 1 })));
+  return (
+    <fieldset className="regole-editor flex flex-col gap-2">
+      <legend>Risposte giuste</legend>
+      <p className="m-0 text-[12px] text-text-muted">
+        Che cosa rispondere, nell’ordine. Una sola riga per le domande in classe; più righe dove il gioco chiede una sequenza di risposte.
+      </p>
+      {risposte.map((r, i) => (
+        <div key={i} className="flex flex-wrap items-end gap-2">
+          <span className="chip shrink-0" aria-hidden>{i + 1}</span>
+          <label className="editor-mappa__campo min-w-[220px] flex-[3]">
+            <span className="sr-only">Risposta {i + 1}</span>
+            <input className="form-input" type="text" maxLength={300} value={r.testo} disabled={disabilitato}
+              onChange={(e) => cambia(i, e.target.value)} placeholder="La risposta come la dà il gioco" aria-label={`Risposta ${i + 1}`} />
+          </label>
+          <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato}
+            onClick={() => togli(i)} aria-label={`Togli la risposta ${i + 1}`}>Togli</button>
+        </div>
+      ))}
+      <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />}
+        titolo="Aggiungi una risposta" disabled={disabilitato} onClick={() => onCambia([...risposte, { ordine: risposte.length + 1, testo: '' }])} />
+    </fieldset>
+  );
+}
 
 interface Props {
   tipo: TipoCatalogo;
@@ -115,6 +245,15 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
   };
   const [valori, setValori] = useState<Record<string, string>>(iniziali);
   const [condizioni,setCondizioni]=useState<RequisitoSpillo[]>(()=>JSON.parse(String(elemento?.dati.condizioni_json ?? '[]')));
+  // Le Doti di un'attività stanno in `doti_json`, che è già una colonna e già un campo accettato
+  // dall'API: mancava solo il modo di scriverlo.
+  const [doti, setDoti] = useState<DoteAttivita[]>(() => {
+    try { return JSON.parse(String(elemento?.dati.doti_json ?? '[]')) as DoteAttivita[]; } catch { return []; }
+  });
+  // Le risposte giuste di una domanda: stessa storia delle Doti, altro dato.
+  const [risposte, setRisposte] = useState<RispostaDomanda[]>(() => {
+    try { return JSON.parse(String(elemento?.dati.risposte_json ?? '[]')) as RispostaDomanda[]; } catch { return []; }
+  });
   const regoleValide=condizioni.every(c=>normalizzaRequisitoSpillo(c)!==null);
   const [occupato, setOccupato] = useState(false);
   const nuovo = !elemento;
@@ -123,6 +262,21 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
     setOccupato(true);
     try {
       const dati: Record<string, unknown> = { condizioni_json: condizioni };
+      // Solo dove la tabella ce l'ha: le righe vuote non si salvano, e una Dote «variabile» senza
+      // note non è una dichiarazione, è un buco.
+      // L'API vuole l'**elenco**, non la stringa: è lei a serializzarlo (`doti_json` nello schema
+      // è un array che si trasforma in JSON). Mandare già la stringa faceva fallire la convalida.
+      if (tipo === 'attivita') {
+        dati.doti_json = doti
+          .filter((d) => d.dote || d.note)
+          .map((d) => ({ dote: d.dote ?? null, note: d.note ?? null, condizione: d.condizione?.trim() || null }));
+      }
+      if (tipo === 'domanda') {
+        dati.risposte_json = risposte
+          .map((r) => ({ ordine: r.ordine, testo: r.testo.trim() }))
+          .filter((r) => r.testo)
+          .map((r, i) => ({ ordine: i + 1, testo: r.testo }));
+      }
       for (const c of CAMPI[tipo]) {
         const grezzo = valori[c.nome]?.trim() ?? '';
         if (c.tipo === 'numero') dati[c.nome] = grezzo === '' ? null : Number(grezzo);
@@ -131,10 +285,10 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
       if (tipo === 'articolo' && nuovo) dati.negozio_chiave = negozioChiave;
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, dati);
-        notifica('success', `${tipo === 'negozio' ? 'Negozio' : 'Articolo'} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
+        notifica('success', `${NOME_TIPO[tipo].singolare} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
       } else {
         await aggiornaElementoCatalogo(tipo, elemento.chiave, dati);
-        notifica('success', `${tipo === 'negozio' ? 'Negozio' : 'Articolo'} corretto: «Ripristina» rimette i dati della guida.`);
+        notifica('success', `${NOME_TIPO[tipo].singolare} corretto: «Ripristina» rimette i dati della guida.`);
       }
       onSalvato();
     } catch (err) {
@@ -172,9 +326,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
     }
   };
 
-  const titolo = nuovo
-    ? (tipo === 'negozio' ? 'Nuovo negozio' : 'Nuovo articolo')
-    : `${tipo === 'negozio' ? 'Negozio' : 'Articolo'}: ${elemento.nome}`;
+  const titolo = nuovo ? NOME_TIPO[tipo].nuovo : `${NOME_TIPO[tipo].singolare}: ${elemento.nome}`;
 
   return (
     <Modal
@@ -223,7 +375,19 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             </label>
           ))}
         </div>
-        <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato}/>
+        {/* **Le Doti sono il campo che l'app sa usare davvero.** Un premio scritto «Coraggio +3»
+            resta una frase che nessuno legge; dichiarata qui, la Dote con le sue note (♪) diventa
+            punti veri con la regola del gioco — `puntiDaNote`, scalini 2/3/5, più uno scalino con
+            «Anima da cineasta» — nel momento in cui l'azione viene spuntata nella guida giorno per
+            giorno. Libri e film il campo l'avevano già; le attività e i videogiochi ce l'hanno in
+            tabella (`doti_json`) e il modulo non lo mostrava: si potevano aggiungere senza poter
+            dire che cosa alzano. */}
+        {tipo === 'attivita' && <EditorDoti doti={doti} onCambia={setDoti} disabilitato={occupato} />}
+        {tipo === 'domanda' && <EditorRisposte risposte={risposte} onCambia={setRisposte} disabilitato={occupato} />}
+        {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
+            domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la
+            condizione: mostrare l'editor lì vorrebbe dire offrire un campo che non viene salvato. */}
+        {CON_CONDIZIONI.has(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato}/>}
         {!regoleValide&&<p role="alert">Completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         {!nuovo && elemento.origine === 'seed' && (
           <div className="flex justify-end">
