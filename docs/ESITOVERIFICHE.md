@@ -2605,6 +2605,21 @@ Raccomandazione non bloccante: rendere autonomi i nomi accessibili dei comandi r
 il titolo del libro (`Aggiungi una sessione a ...`, `Azzera ...`, `Mostra posizione di ...`). Il
 contenitore espone gia' il titolo, quindi il candidato resta approvato; la rifinitura andra'
 inclusa in un candidato successivo, senza spostare il tag immutabile v1.
+## Gate `galaxy-task-validator` — candidato Lotto A v5 (7 settembre 2026)
+
+**Verdetto: PASS** sul tag annotato immutabile `candidato/lotto-a-mondo-v5` (oggetto tag
+`403580351e70192483b9b93d1b65421054ea47db`, commit dereferenziato
+`50b22a43fb770190065f17eee6b4bd4aa08376df`).
+
+La verifica statica ha confermato i punti 1-5: filtro positivo ai soli Palazzi con Iweleth,
+una sola `MappaTokyo` in Citta', alias Tokyo risolti verso `/guida/citta`, sagome native dei
+quartieri, dettaglio Palazzo responsive con planimetrie native e rimozione del duplicato
+«Scheda del Palazzo». Mementos esclusi dall'indice come quartieri e presenti sulla radice
+Tokyo solo dal 9 maggio, secondo la rettifica del requisito. Runtime documentato: nessun
+overlap o contenuto fuori tela a 375/820/1280/1440, incluso il Covo originale. Il candidato
+incorpora il Lotto A v3 gia' verificato; i cicli documentati riportano typecheck/lint/build e
+601/601 test verdi. Nessun file e' stato modificato dal validatore.
+
 
 ---
 
