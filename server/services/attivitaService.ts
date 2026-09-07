@@ -5,30 +5,48 @@
 import { getDb, nowIso, prepared } from '../db/dbService.js';
 import { httpErrors } from '../utils/httpError.js';
 import { registraEvento } from './storicoService.js';
-import type { AttivitaDto, AttivitaTutteDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto } from '../../shared/types.js';
+import type { AttivitaDto, AttivitaTutteDto, CondizioneSpilloDto, DisponibilitaDto, FilmDto, FilmDvdDto, LibroDto, LibriDto, TipoLettura, VideogiocoDto, VideogiochiDto } from '../../shared/types.js';
+import { statoDisponibilitaPartita, valutaRequisiti, type RequisitoDisponibilita, type StatoDisponibilita } from './disponibilitaService.js';
+import { descriviRequisitoSpillo, normalizzaCondizioniSpillo, type RequisitoSpillo } from '../../shared/condizioniSpillo.js';
 
-interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; fonte: string; verificato: number }
-interface RigaLibro { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number }
-interface RigaFilm { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number }
+interface RigaAttivita { chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null; fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null; doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaLibro { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null; disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null; sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+interface RigaFilm { chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; prezzo: number | null; sessioni: number; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null }
+
+/** La disponibilità di una riga, dalle condizioni strutturate (migrazione 052).
+ *
+ * Prima queste tre famiglie avevano solo prosa — «dal 18 aprile», «dal 24 aprile», «5 giugno,
+ * evento con Ryuji Sakamoto» — e nessuno la leggeva: l'elenco mostrava come già acquistabile un
+ * libro che esce a settembre. La condizione non nasconde niente: dice «non ancora», che in una
+ * guida è un'informazione, non un ostacolo. */
+function conDisponibilita(condizioniJson: string | null, st: StatoDisponibilita | null): { condizioni: CondizioneSpilloDto[] | null; disponibilita: DisponibilitaDto | null } {
+  let grezze: RequisitoSpillo[] = [];
+  try { grezze = normalizzaCondizioniSpillo(condizioniJson ? (JSON.parse(condizioniJson) as unknown) : []); } catch { grezze = []; }
+  if (grezze.length === 0) return { condizioni: null, disponibilita: null };
+  const condizioni = grezze.map((c) => ({ ...c, testo: descriviRequisitoSpillo(c) }));
+  return { condizioni, disponibilita: st ? valutaRequisiti(condizioni as RequisitoDisponibilita[], st) : null };
+}
 interface RigaPosizioneLibro { libro_chiave: string; tipo: LibroDto['posizioni'][number]['tipo']; chiave: string; etichetta: string }
 interface RigaPosizioneFilm { film_chiave: string; tipo: FilmDto['posizioni'][number]['tipo']; chiave: string; etichetta: string; ruolo: FilmDto['posizioni'][number]['ruolo'] }
 
-const attivitaDto = (r: RigaAttivita): AttivitaDto => ({
+const attivitaDto = (r: RigaAttivita, st: StatoDisponibilita | null = null): AttivitaDto => ({
   chiave: r.chiave, nome: r.nome, tipo: r.tipo as AttivitaDto['tipo'], luogo: r.luogo, luogoChiave: r.luogo_chiave, fascia: r.fascia as AttivitaDto['fascia'], costo: r.costo, sblocco: r.sblocco, sessioni: r.sessioni,
   doti: JSON.parse(r.doti_json) as AttivitaDto['doti'], altriEffetti: r.altri_effetti, regole: r.regole, premi: r.premi, paga: r.paga, fonte: r.fonte, verificato: r.verificato === 1,
+  ...conDisponibilita(r.condizioni_json, st),
 });
 interface StatoLetture { fatti: Set<string>; progressiLibri: Map<string, number>; progressiFilm: Map<string, number>; progressiVideogiochi: Map<string, number> }
 const totaleLibro = (r: RigaLibro) => Math.max(r.sessioni ?? 1, 1);
-const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>): LibroDto => {
+const libroDto = (r: RigaLibro, stato: StatoLetture, posizioni: Map<string, LibroDto['posizioni']>, st: StatoDisponibilita | null = null): LibroDto => {
   const fatto = stato.fatti.has(`libro/${r.chiave}`);
   const totaleSessioni = totaleLibro(r);
   const grezzo = stato.progressiLibri.get(r.chiave) ?? 0;
   return {
     chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, prezzo: r.prezzo, disponibileDal: r.disponibile_dal, dote: r.dote as LibroDto['dote'], note: r.note, sblocca: r.sblocca, sessioni: r.sessioni, dettagli: r.dettagli, fonte: r.fonte, verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso: fatto ? totaleSessioni : Math.min(Math.max(grezzo, 0), totaleSessioni), fatto,
+    ...conDisponibilita(r.condizioni_json, st),
   };
 };
-const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDto['posizioni']>): FilmDto => {
+const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDto['posizioni']>, st: StatoDisponibilita | null = null): FilmDto => {
   const totaleSessioni = Math.max(r.sessioni, 1);
   const grezzo = Math.max(stato.progressiFilm.get(r.chiave) ?? 0, 0);
   const progresso = r.dove === 'dvd' ? Math.min(grezzo, totaleSessioni) : grezzo;
@@ -36,6 +54,7 @@ const filmDto = (r: RigaFilm, stato: StatoLetture, posizioni: Map<string, FilmDt
   return {
     chiave: r.chiave, nome: r.nome, nomeIt: r.nome_it, dove: r.dove, periodo: r.periodo, dote: r.dote as FilmDto['dote'], note: r.note, prezzo: r.prezzo, dettagli: r.dettagli, fonte: r.fonte, verificato: r.verificato === 1,
     posizioni: posizioni.get(r.chiave) ?? [], totaleSessioni, progresso, iniziato, fatto: r.dove === 'cinema' ? iniziato : progresso >= totaleSessioni,
+    ...conDisponibilita(r.condizioni_json, st),
   };
 };
 
@@ -49,15 +68,16 @@ function letturePartita(partitaId: number | undefined): StatoLetture {
   return { fatti, progressiLibri, progressiFilm, progressiVideogiochi };
 }
 
-const videogiocoDto = (r: RigaAttivita, stato: StatoLetture): VideogiocoDto => {
+const videogiocoDto = (r: RigaAttivita, stato: StatoLetture, st: StatoDisponibilita | null = null): VideogiocoDto => {
   const totaleRound = Math.max(r.sessioni ?? 1, 1);
   const progresso = Math.min(Math.max(stato.progressiVideogiochi.get(r.chiave) ?? 0, 0), totaleRound);
-  return { ...attivitaDto(r), tipo: 'videogioco', totaleRound, progresso, iniziato: progresso > 0, fatto: progresso >= totaleRound };
+  return { ...attivitaDto(r, st), tipo: 'videogioco', totaleRound, progresso, iniziato: progresso > 0, fatto: progresso >= totaleRound };
 };
 
 export function videogiochiTutti(partitaId?: number): VideogiochiDto {
   const stato = letturePartita(partitaId);
-  const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato));
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const videogiochi = (prepared("SELECT * FROM attivita WHERE tipo='videogioco' ORDER BY ordine").all() as RigaAttivita[]).map((r) => videogiocoDto(r, stato, st));
   return { videogiochi, iniziati: videogiochi.filter((v) => v.iniziato).length, completati: videogiochi.filter((v) => v.fatto).length, roundFatti: videogiochi.reduce((n, v) => n + v.progresso, 0), roundObiettivo: videogiochi.reduce((n, v) => n + v.totaleRound, 0) };
 }
 
@@ -84,7 +104,8 @@ function posizioniLibri(): Map<string, LibroDto['posizioni']> {
 function elencoLibri(partitaId?: number): LibroDto[] {
   const stato = letturePartita(partitaId);
   const posizioni = posizioniLibri();
-  return (prepared('SELECT * FROM libro ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni));
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  return (prepared('SELECT * FROM libro ORDER BY ordine').all() as RigaLibro[]).map((r) => libroDto(r, stato, posizioni, st));
 }
 
 export function libriTutti(partitaId?: number): LibriDto {
@@ -95,7 +116,8 @@ export function libriTutti(partitaId?: number): LibriDto {
 export function filmDvdTutti(partitaId?: number): FilmDvdDto {
   const stato = letturePartita(partitaId);
   const posizioni = posizioniFilm();
-  const film = (prepared('SELECT * FROM film ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni));
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const film = (prepared('SELECT * FROM film ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st));
   return {
     film,
     iniziati: film.filter((f) => f.iniziato).length,
@@ -109,10 +131,11 @@ export function filmDvdTutti(partitaId?: number): FilmDvdDto {
 /** Attività, lavori, libri e film; con partita, libri letti e film visti. */
 export function attivitaTutte(partitaId?: number): AttivitaTutteDto {
   const stato = letturePartita(partitaId);
-  const attivita = (prepared('SELECT * FROM attivita ORDER BY ordine').all() as RigaAttivita[]).map(attivitaDto);
+  const st = partitaId === undefined ? null : statoDisponibilitaPartita(partitaId);
+  const attivita = (prepared('SELECT * FROM attivita ORDER BY ordine').all() as RigaAttivita[]).map((r) => attivitaDto(r, st));
   const libri = elencoLibri(partitaId);
   const posizioni = posizioniFilm();
-  const film = (prepared('SELECT * FROM film ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni));
+  const film = (prepared('SELECT * FROM film ORDER BY ordine').all() as RigaFilm[]).map((r) => filmDto(r, stato, posizioni, st));
   return { attivita: attivita.filter((a) => a.tipo !== 'lavoro'), lavori: attivita.filter((a) => a.tipo === 'lavoro'), libri, film, libriLetti: libri.filter((l) => l.fatto).length, filmVisti: film.filter((f) => f.iniziato).length };
 }
 

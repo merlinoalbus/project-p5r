@@ -15,6 +15,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { NOME_DOTE } from '../utils/citta';
 import type { LibroDto, LibriDto } from '../types';
 
@@ -130,7 +131,12 @@ export function LibriPage() {
             quindi la grafica di Codex non poteva sostituirla nemmeno quando arriva. */}
         <IconaCategoria categoria="libri" dimensione={44} />
         <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2>{libro.nomeIt && libro.nomeIt !== libro.nome && <p className="m-0 text-xs text-text-muted">{libro.nome}</p>}</div>
-        <span className={`chip ${libro.fatto ? 'chip--attivo' : ''}`}>{libro.fatto ? 'Completato' : progresso ? 'In corso' : 'Da leggere'}</span>
+        <span className="flex flex-col items-end gap-1">
+          <span className={`chip ${libro.fatto ? 'chip--attivo' : ''}`}>{libro.fatto ? 'Completato' : progresso ? 'In corso' : 'Da leggere'}</span>
+          {/* «Dal 18 aprile» era prosa che nessuno leggeva: adesso e' una regola, e la scheda dice
+              se il libro in questa partita si puo' gia' comprare. */}
+          <ChipDisponibilita disponibilita={libro.disponibilita ?? undefined} compatto />
+        </span>
       </div>
       <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{progresso} di {libro.totaleSessioni} sessioni</span><span>{percentuale}%</span></div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={libro.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
       {/* **Il gesto è la sessione**, e sono i due pulsanti larghi uguali. In mezzo ci stava

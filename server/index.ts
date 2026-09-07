@@ -22,6 +22,7 @@ import { runBootBackup } from './db/backupService.js';
 import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
 import { caricaSeed } from './services/seed/caricaSeed.js';
+import { sincronizzaCondizioniLetture } from './db/migrations/052_condizioni_letture_attivita.js';
 
 try {
   initDb();
@@ -42,6 +43,13 @@ try {
 try {
   const esito = caricaSeed(initDb());
   logger.info(esito, esito.caricato ? 'seed del compendio caricato' : 'seed del compendio già aggiornato');
+  // Le condizioni di libri, film e attività si **ricavano** dalla prosa della guida, quindi
+  // dipendono dal lettore e non solo dai dati: quando il lettore migliora — ed è appena successo,
+  // «18 aprile» in `disponibile_dal` prima finiva in «da configurare» — il seed non si ricarica,
+  // perché i dati non sono cambiati, e le regole resterebbero quelle vecchie per sempre. Sono
+  // centosei righe, la riscrittura è idempotente e tocca solo quelle della guida: si rifà a ogni
+  // avvio, e le condizioni scritte da te restano come le hai scritte.
+  sincronizzaCondizioniLetture(initDb());
 } catch (err) {
   console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
   process.exit(1);

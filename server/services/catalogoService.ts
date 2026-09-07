@@ -22,9 +22,9 @@ import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '..
 const CAMPI: Record<TipoCatalogo, readonly string[]> = {
   negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'],
   articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte'],
-  libro: ['nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
-  film: ['nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
-  attivita: ['nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
+  libro: ['condizioni_json', 'nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
+  film: ['condizioni_json', 'nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
+  attivita: ['condizioni_json', 'nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
 };
 const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'articolo', libro: 'libro', film: 'film', attivita: 'attivita' };
 
@@ -49,9 +49,9 @@ const PROFILO: Record<TipoCatalogo, {
 }> = {
   negozio: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: false },
   articolo: { condizioniDa: (d) => [d.disponibile_dal as string | null, d.condizione as string | null], haVerificato: true, padre: { campo: 'negozio_chiave', tabella: 'negozio', codice: 'negozio-sconosciuto', nome: 'Il negozio' }, raggruppaOrdinePer: 'negozio_chiave' },
-  libro: { haVerificato: true },
-  film: { haVerificato: true },
-  attivita: { haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' } },
+  libro: { condizioniDa: (d) => [d.disponibile_dal as string | null], haVerificato: true },
+  film: { condizioniDa: (d) => [d.periodo as string | null], haVerificato: true },
+  attivita: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' } },
 };
 
 type Riga = Record<string, unknown> & { chiave: string; origine: string; nascosto: number; seed_json: string | null; updated_at: string | null };
