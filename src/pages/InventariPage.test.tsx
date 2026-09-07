@@ -19,7 +19,9 @@ describe('InventariPage', () => {
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'riso' } });
     expect(await screen.findByDisplayValue('riso')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Carte abilità' }));
-    await screen.findByText(/Nessuna carta abilità/);
+    await screen.findByText(/catalogo locale delle carte abilità non è ancora materializzato/);
     expect(ricercaArticoli).toHaveBeenLastCalledWith({ categoria: undefined, q: undefined }, undefined);
+    expect(screen.queryByText('Cartolina')).not.toBeInTheDocument();
+    expect(screen.getByText(/catalogo locale delle carte abilità non è ancora materializzato/)).toBeInTheDocument();
   });
 });
