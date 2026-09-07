@@ -57,6 +57,10 @@ const RISERVA_SPILLO: Record<TipoSpillo, (d: number) => ReactNode> = {
   distributore: (d) => <svg {...base(d)}><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M8 6h5v7H8z" /><path d="M15 7h1M15 10h1" /><path d="M8 17h8" /></svg>,
   treno: (d) => <svg {...base(d)}><rect x="5" y="3" width="14" height="14" rx="3" /><path d="M5 10h14" /><path d="M9 14h.01M15 14h.01" /><path d="M7 17l-2 4M17 17l2 4" /></svg>,
   nota: (d) => <svg {...base(d)}><path d="M6 4h9l4 4v12H6z" /><path d="M15 4v4h4" /><path d="M9 12h6M9 16h6" /></svg>,
+  // ---- I due varchi: la porta blu del Velluto (una porta con la sua maniglia, chiusa) e la
+  //      soglia dei Dedali (l'arco della metropolitana con i binari che ci spariscono dentro) ----
+  velluto: (d) => <svg {...base(d)}><rect x="6" y="3" width="12" height="18" rx="1" /><path d="M9 3v18" /><circle cx="14.5" cy="12" r="1" /><path d="M12 6h3M12 18h3" /></svg>,
+  mementos: (d) => <svg {...base(d)}><path d="M4 20V11a8 8 0 0 1 16 0v9" /><path d="M9 20v-6a3 3 0 0 1 6 0v6" /><path d="M2 20h20" /><path d="M12 8v3" /></svg>,
   // ---- Città (15.24): sigaretta col fumo, rivista con lente, valigetta, vasca con vapori, lavatrice, ciak, libri, torii, joypad, casa ----
   sigarette: (d) => <svg {...base(d)}><rect x="3" y="13" width="15" height="4" rx="1" /><path d="M18 15h3" /><path d="M6 10c0-1.5 1.2-2 1.2-3.5M10 10c0-1.5 1.2-2 1.2-3.5" /><path d="M14 13v4" /></svg>,
   cercalavoro: (d) => <svg {...base(d)}><path d="M4 4h11v16H4z" /><path d="M7 8h5M7 11h5M7 14h3" /><circle cx="17" cy="16" r="3" /><path d="M19.2 18.2L22 21" /></svg>,

@@ -257,13 +257,13 @@ describe('EditorMappaPage', () => {
     expect(f.getByRole('button',{name:'Crea'})).toBeDisabled();
   });
 
-  it('la palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Altro) con i nuovi tipi e «Bevande» al posto di «Distributore»', async () => {
+  it('la palette di «Aggiungi» è a gruppi (Spostamenti, Città, Persone, Palazzi e Mementos, Varchi, Altro) con i nuovi tipi e «Bevande» al posto di «Distributore»', async () => {
     monta();
     expect(await screen.findByText('Modifica')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi/ }));
     const palette = within(screen.getByRole('group', { name: 'Tipo del nuovo spillo' }));
-    for (const g of ['Spostamenti', 'Città', 'Persone', 'Palazzi e Mementos', 'Altro']) expect(palette.getByText(g)).toBeInTheDocument();
-    expect(palette.getAllByRole('button')).toHaveLength(37);
+    for (const g of ['Spostamenti', 'Città', 'Persone', 'Palazzi e Mementos', 'Varchi', 'Altro']) expect(palette.getByText(g)).toBeInTheDocument();
+    expect(palette.getAllByRole('button')).toHaveLength(39);
     for (const nome of ['Bevande', 'Sigarette', 'Cercalavoro', 'Lavoro part-time', 'Bagno pubblico', 'Timbro dei Mementos', 'Punto del rampino', 'Porta chiusa']) expect(palette.getByRole('button', { name: nome })).toBeInTheDocument();
     expect(palette.queryByRole('button', { name: 'Distributore' })).toBeNull();
   });

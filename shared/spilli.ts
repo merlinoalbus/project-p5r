@@ -14,6 +14,12 @@ export const TIPI_SPILLO = [
   'negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita',
   'confidente', 'dialogo',
   'forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia',
+  // I due ingressi che non sono né un negozio né una stanza di un Palazzo, e che finora non
+  // avevano un segno proprio. L'**ingresso ai Memento** portava lo spillo della stazione
+  // ferroviaria, perché il suo luogo è classificato `trasporto`: sulla mappa di Shibuya la porta
+  // dei Dedali era indistinguibile da una banchina della metropolitana. La **Stanza di Velluto**
+  // non aveva niente del tutto, pur avendo la sua figura consegnata da tempo.
+  'velluto', 'mementos',
   'nota',
 ] as const;
 export type TipoSpillo = (typeof TIPI_SPILLO)[number];
@@ -48,6 +54,9 @@ export const GRUPPI_SPILLO: ReadonlyArray<{ nome: string; tipi: readonly TipoSpi
   { nome: 'Città', tipi: ['negozio', 'ristorante', 'distributore', 'sigarette', 'cercalavoro', 'lavoro', 'terme', 'lavanderia', 'cinema', 'biblioteca', 'culto', 'sala-giochi', 'casa', 'attivita'] },
   { nome: 'Persone', tipi: ['confidente', 'dialogo'] },
   { nome: 'Palazzi e Mementos', tipi: ['forziere', 'forziere-raro', 'tesoro', 'tesoro-palazzo', 'seme-bramosia', 'oggetto-chiave', 'timbro', 'boss', 'miniboss', 'nemico', 'punto-sensibile', 'meccanismo', 'rampino', 'porta', 'sicura', 'scorciatoia'] },
+  // Un gruppo loro: la porta del Velluto e la soglia dei Dedali sono due varchi verso un altrove,
+  // e in «Città» sembrerebbero due esercizi commerciali fra il fioraio e la sala giochi.
+  { nome: 'Varchi', tipi: ['velluto', 'mementos'] },
   { nome: 'Altro', tipi: ['nota'] },
 ];
 
@@ -121,6 +130,13 @@ export const DEFINIZIONI_SPILLO: Record<TipoSpillo, DefinizioneSpillo> = {
   porta: { nome: 'Porta chiusa', colore: '#b91c1c', collezionabile: false, riferimento: 'punto' },
   sicura: { nome: 'Stanza sicura', colore: '#38bdf8', collezionabile: false, riferimento: 'punto' },
   scorciatoia: { nome: 'Scorciatoia', colore: '#9ca3af', collezionabile: false, riferimento: 'punto' },
+  // ---- I due ingressi ----
+  /** La porta blu della Stanza di Velluto. **Nessun riferimento tipico**: segna dove si entra, e
+   *  quel che c'è dietro non è una mappa di questo mondo. Chi vuole collegarci qualcosa lo sceglie
+   *  a mano, come per un dialogo o un punto del rampino. */
+  velluto: { nome: 'Stanza di Velluto', colore: '#3730a3', collezionabile: false, riferimento: null },
+  /** L'ingresso ai Memento, nella stazione di Shibuya. Non è una banchina: è la soglia dei Dedali. */
+  mementos: { nome: 'Ingresso ai Memento', colore: '#7f1d1d', collezionabile: false, riferimento: 'luogo' },
   // ---- Altro ----
   nota: { nome: 'Nota', colore: '#ececf1', collezionabile: false, riferimento: null },
 };
@@ -150,6 +166,8 @@ export function spilloPerLuogo(tipoLuogo: string): TipoSpillo {
     case 'confidente': return 'confidente';
     case 'distributore': return 'distributore';
     case 'trasporto': return 'treno';
+    case 'velluto': return 'velluto';
+    case 'mementos': return 'mementos';
     case 'attivita': case 'servizio': case 'scuola': return 'attivita';
     default: return 'nota';
   }
