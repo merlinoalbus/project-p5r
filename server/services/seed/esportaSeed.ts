@@ -29,7 +29,8 @@
 
 import { prepared } from '../../db/dbService.js';
 import { migraTestiCondizioni } from '../../../shared/migraCondizioni.js';
-import type { NegoziSeed } from '../../../shared/seed.js';
+import type { AttivitaSeed, NegoziSeed } from '../../../shared/seed.js';
+import { conPreposizione } from '../../db/migrations/052_condizioni_letture_attivita.js';
 
 interface RigaNegozio {
   chiave: string; ordine: number; nome: string; luogo: string; luogo_chiave: string | null; tipo: string;
@@ -137,6 +138,89 @@ export function esportaNegoziSeed(precedente?: NegoziSeed): NegoziSeed {
       };
     }),
   };
+}
+
+interface RigaAttivitaSeed {
+  chiave: string; ordine: number; nome: string; tipo: string; luogo: string; luogo_chiave: string | null;
+  fascia: string | null; costo: number | null; sblocco: string | null; sessioni: number | null;
+  doti_json: string; altri_effetti: string | null; regole: string; premi: string | null; paga: string | null;
+  fonte: string; verificato: number; condizioni_json: string | null;
+}
+interface RigaLibroSeed {
+  chiave: string; ordine: number; nome: string; nome_it: string | null; dove: string; prezzo: number | null;
+  disponibile_dal: string | null; dote: string | null; note: number | null; sblocca: string | null;
+  sessioni: number | null; dettagli: string | null; fonte: string; verificato: number; condizioni_json: string | null;
+}
+interface RigaFilmSeed {
+  chiave: string; ordine: number; nome: string; nome_it: string | null; dove: 'cinema' | 'dvd'; periodo: string;
+  dote: string | null; note: number | null; prezzo: number | null; sessioni: number; dettagli: string | null;
+  fonte: string; verificato: number; condizioni_json: string | null;
+}
+
+/** Attività, libri e film come stanno adesso, nella forma di `data/seed/attivita.json`.
+ *
+ * Stesse tre garanzie dei negozi, e per le stesse ragioni: le righe **nascoste** non tornano nel
+ * seed — nasconderle è una decisione, e riportarle le farebbe rispuntare alla prossima
+ * installazione —, i campi che il file ha e il database no si riportano dove stavano, e l'ordine
+ * delle chiavi resta quello del file, perché un `git diff` di diecimila righe nasconde la riga che
+ * è cambiata davvero.
+ *
+ * Il campo `condizioni` si scrive solo quando la prosa non basta a ricostruirlo, ed è nuovo per
+ * queste tre famiglie: la colonna delle condizioni ce l'hanno dalla migrazione 052. */
+export function esportaAttivitaSeed(precedente?: AttivitaSeed): AttivitaSeed {
+  const indice = <T extends { chiave: string }>(righe: T[] | undefined): Map<string, Record<string, unknown>> =>
+    new Map((righe ?? []).map((r) => [r.chiave, r as unknown as Record<string, unknown>]));
+  const primaAttivita = indice(precedente?.attivita);
+  const primaLibri = indice(precedente?.libri);
+  const primaFilm = indice(precedente?.film);
+
+  const attivita = (prepared('SELECT * FROM attivita WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, chiave').all() as RigaAttivitaSeed[]).map((a) => {
+    // **La stessa normalizzazione che ha scritto la condizione.** Senza, il confronto fallisce
+    // sempre — la regola nel database viene da «dal 18 aprile», la prosa nel file dice «18
+    // aprile» — e il file si riempirebbe di blocchi `condizioni` identici a quel che il
+    // caricatore ricava da solo: rumore in ogni riga, e la correzione vera introvabile nel diff.
+    const cond = condizioniDaScrivere(a.condizioni_json, [conPreposizione(a.sblocco)], null);
+    const prodotto = {
+      chiave: a.chiave, ordine: a.ordine, nome: a.nome, tipo: a.tipo, luogo: a.luogo, luogoChiave: a.luogo_chiave,
+      fascia: a.fascia, costo: a.costo, sblocco: a.sblocco,
+      // `attivita.sessioni` è `NOT NULL DEFAULT 1`: le righe che nel file non lo dicevano lo
+      // riprendono dal database come 1, e riscriverlo aggiungerebbe ventitré righe che non
+      // dicono niente di nuovo. Si scrive solo se il file ce l'aveva o se il valore è un altro.
+      ...(primaAttivita.get(a.chiave)?.sessioni !== undefined || a.sessioni !== 1 ? { sessioni: a.sessioni } : {}),
+      doti: JSON.parse(a.doti_json) as AttivitaSeed['attivita'][number]['doti'],
+      altriEffetti: a.altri_effetti, regole: a.regole, premi: a.premi, paga: a.paga, fonte: a.fonte,
+      verificato: a.verificato === 1,
+      ...(cond ? { condizioni: cond } : {}),
+    };
+    const p = primaAttivita.get(a.chiave);
+    return conOrdineDi(p, { ...prodotto, ...campiEstranei(p, prodotto) });
+  });
+
+  const libri = (prepared('SELECT * FROM libro WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, chiave').all() as RigaLibroSeed[]).map((l) => {
+    const cond = condizioniDaScrivere(l.condizioni_json, [conPreposizione(l.disponibile_dal)], null);
+    const prodotto = {
+      chiave: l.chiave, ordine: l.ordine, nome: l.nome, nomeIt: l.nome_it, dove: l.dove, prezzo: l.prezzo,
+      disponibileDal: l.disponibile_dal, dote: l.dote, note: l.note, sblocca: l.sblocca, sessioni: l.sessioni,
+      dettagli: l.dettagli, fonte: l.fonte, verificato: l.verificato === 1,
+      ...(cond ? { condizioni: cond } : {}),
+    };
+    const p = primaLibri.get(l.chiave);
+    return conOrdineDi(p, { ...prodotto, ...campiEstranei(p, prodotto) });
+  });
+
+  const film = (prepared('SELECT * FROM film WHERE COALESCE(nascosto, 0) = 0 ORDER BY ordine, chiave').all() as RigaFilmSeed[]).map((f) => {
+    const cond = condizioniDaScrivere(f.condizioni_json, [conPreposizione(f.periodo)], null);
+    const prodotto = {
+      chiave: f.chiave, ordine: f.ordine, nome: f.nome, nomeIt: f.nome_it, dove: f.dove, periodo: f.periodo,
+      dote: f.dote, note: f.note, prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte,
+      verificato: f.verificato === 1,
+      ...(cond ? { condizioni: cond } : {}),
+    };
+    const p = primaFilm.get(f.chiave);
+    return conOrdineDi(p, { ...prodotto, ...campiEstranei(p, prodotto) });
+  });
+
+  return { attivita, libri, film } as unknown as AttivitaSeed;
 }
 
 /** Quanto pesa l'esportazione, per dirlo prima di scrivere il file. */
