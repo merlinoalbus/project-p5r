@@ -18,6 +18,7 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
+import { AssetImg } from '../components/shared/AssetImg';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
@@ -35,7 +36,15 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
   const [aperta, setAperta] = useState(false);
   const sugg = useSuggerimenti();
   return (
-    <li className={`card flex flex-col gap-1 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
+    <li className={`card flex gap-3 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
+      {/* **La figura dell'attività**, che dice di che posto si tratta prima ancora del nome: le
+          freccette del Penguin Sniper, la mansarda di Leblanc, il laghetto di Ichigaya. Finché
+          l'illustrazione non c'è resta l'icona del tipo, che almeno distingue un lavoro da un
+          mini-gioco — è una riserva, e la riga nel censimento §26 dice che non è il traguardo. */}
+      <AssetImg nome={`attivita/${a.chiave}`} alt="" decorativa className="shrink-0 rounded-md object-contain"
+        style={{ width: 56, height: 56 }}
+        fallback={<span className="shrink-0"><IconaCategoria categoria={a.tipo} dimensione={56} /></span>} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
       <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((x) => !x)} aria-expanded={aperta}>
         <strong className="text-[15px]">{a.nome}</strong>
         <span className="chip">{NOME_TIPO_ATTIVITA[a.tipo] ?? a.tipo}</span>
@@ -80,6 +89,7 @@ function Attivita({ a, onCambiata, mappaAperta, onMappa }: { a: AttivitaDto; onC
           </div>
         </div>
       )}
+      </div>
     </li>
   );
 }
