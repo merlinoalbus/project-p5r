@@ -2107,3 +2107,20 @@ resta da riallineare dopo la finestra concordata sul backend condiviso 3101.
 Le suite complete sequenziali restituiscono 578/580 con i due difetti esterni gia' noti. Una
 tornata ha mostrato anche un fallimento temporaneo sul titolo di `MappaPage`, immediatamente
 passato 8/8 in isolamento e non collegato al diff; viene dichiarato invece di essere occultato.
+
+### Verdetto indipendente `galaxy-task-validator`: PASS
+
+Il validatore ha giudicato in sola lettura il tag remoto annotato
+`candidato/lotto-b-negozi-contesto-v2` (oggetto `c972be7a`, commit `4bacca68`) e non ha modificato
+file. Ha riprodotto 23/23 test mirati, typecheck, lint e build PASS; suite completa 578/580 con i
+soli due difetti della base gia' separati. Ha verificato specificamente:
+
+- conteggi `articoli`/`verificati` sui soli stati finali non bloccati;
+- 404 per dettaglio negozio e acquisto diretto bloccati;
+- totale ricerca calcolato prima di `slice(0, 300)`;
+- fixture 1/218 coerente su elenco, scheda e ricerca e fixture 575/300;
+- catalogo senza partita invariato a 60 negozi e 575 articoli;
+- rimozione del toggle di riapertura e conservazione dell'OR `almeno-una`.
+
+Nessuna richiesta correttiva. Il gate procedurale e' chiuso; resta il verdetto incrociato di Opus
+previsto dalla collaborazione alla pari.
