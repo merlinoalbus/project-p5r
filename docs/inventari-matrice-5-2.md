@@ -11,12 +11,11 @@ Videogiochi hanno cataloghi autonomi e avanzamento per partita.
 | Protezioni | 62 articoli, categoria `protezione` | Negozi → Protezioni | negozio | consultabile |
 | Accessori | 72 articoli, categoria `accessorio` | Negozi → Accessori | negozio | consultabile |
 | Abiti | catalogo abiti in `OggettiPage` | Oggetti → Abiti e lavanderia | testo/negozio quando presente | consultabile |
-| Carte abilità | catalogo carte nel negozio/compendio; non duplicare la riga negozio | Negozi → ricerca | negozio | consultabile |
 | Regali | 55 articoli, categoria `regalo` | Negozi → Regali | negozio | consultabile |
 | Oggetti chiave | `OggettiPage` → Chiave e materiali | Oggetti | collegamento articolo/negozio se presente | consultabile |
 | Materiali | 35 articoli, categoria `materiale` + `OggettiPage` | Oggetti → Chiave e materiali | negozio/articolo | consultabile |
 | Consumabili e cibo | 101 consumabili, 37 cibi | Inventari → Consumabili / Cibo | negozio/articolo | consultabile |
-| Carte abilità | fonte ufficiale dedicata; non materializzate come articoli negozio | Inventari → Carte abilità, link alla guida | nessun pin senza ancoraggio verificato | consultabile |
+| Carte abilità | API catalogo `articolo` quando presente; fonte ufficiale dedicata come fallback | Inventari → Carte abilità | `DoveSiTrova` solo per una riga con negozio verificato | consultabile |
 | Libri / DVD / Videogiochi | 46 libri, 30 film/DVD, videogiochi dal catalogo attività | pagine autonome con sessioni/round | pannello unico `DoveSiTrova` | completamento per partita |
 
 Regola di non duplicazione: la scheda dell'oggetto resta nel catalogo della famiglia; il prezzo,
