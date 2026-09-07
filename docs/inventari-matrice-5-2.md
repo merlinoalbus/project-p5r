@@ -49,6 +49,16 @@ questo caso: qui c'è che cos'è e a chi serve, nella scheda del negozio c'è qu
 trova. La colonna «Per» mostra i volti di chi può indossarlo invece della frase; dove non c'è
 vincolo dice «Tutti» e basta, perché i dieci volti ripetuti su 125 accessori non dicono niente.
 
+**«Negozi → filtro categoria» ora è un indirizzo.** La riga della matrice diceva il vero — quella
+pagina sa già elencare tutte le armi comprabili con prezzo e negozio, con la stessa API e la stessa
+tabella che userebbe una pagina a parte — ma la scelta viveva solo nello stato del componente,
+quindi non c'era modo di **arrivarci**: né da qui, né da un'altra pagina, né da un indirizzo
+salvato. Adesso `/guida/negozi?categoria=arma` apre l'elenco già filtrato (`protezione`,
+`accessorio`, `abito`, `regalo`, `consumabile`, `materiale` allo stesso modo), e questo è anche il
+motivo per cui **non serve una pagina «Inventari» separata**: sarebbe la terza porta sugli stessi
+scaffali, dopo i Negozi e l'Equipaggiamento, e le tre risposte sono già divise bene — dove si
+compra, che cosa fa, quanto costa.
+
 Da correggere anche una riga della matrice: le famiglie del catalogo dei negozi si chiamano al
 **singolare** (`arma`, `protezione`, `accessorio`, `regalo`, `materiale`), e questo aveva un effetto
 che non si vedeva — le illustrazioni di categoria, che si chiamano al plurale, non venivano trovate

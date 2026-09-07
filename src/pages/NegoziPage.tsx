@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getNegozi, ricercaArticoli } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -32,9 +32,25 @@ export function NegoziPage() {
   // giorno corrente e fascia della giornata decidono la disponibilità: al cambio si ricarica
   const momento = `${attiva?.dataGioco ?? ''}|${attiva?.fasciaGioco ?? ''}`;
   const negozi = useCarica(() => getNegozi(partitaId ?? undefined), [partitaId, momento]);
-  const [q, setQ] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [per, setPer] = useState('');
+  // **I filtri stanno nell'indirizzo.** «Armi» qui dentro è già l'elenco di tutte le armi comprabili
+  // con prezzo e negozio — la stessa API e la stessa tabella che userebbe una pagina a parte — ma
+  // finché la scelta viveva solo nello stato non c'era modo di **arrivarci** con un collegamento:
+  // né dalla matrice degli inventari, né da un'altra pagina, né da un indirizzo salvato. Ora
+  // `/guida/negozi?categoria=arma` apre l'elenco già filtrato, e chi torna indietro lo ritrova.
+  const [params, setParams] = useSearchParams();
+  const q = params.get('q') ?? '';
+  const categoria = params.get('categoria') ?? '';
+  const per = params.get('per') ?? '';
+  const impostaFiltro = (campo: 'q' | 'categoria' | 'per', valore: string) => {
+    setParams((precedenti) => {
+      const nuovi = new URLSearchParams(precedenti);
+      if (valore) nuovi.set(campo, valore); else nuovi.delete(campo);
+      return nuovi;
+    }, { replace: true });
+  };
+  const setQ = (v: string) => impostaFiltro('q', v);
+  const setCategoria = (v: string) => impostaFiltro('categoria', v);
+  const setPer = (v: string) => impostaFiltro('per', v);
   const [negozioSelezionato, setNegozioSelezionato] = useState<NegozioRiassuntoDto | null>(null);
   // negozio aggiunto dall'utente: resta anche quando i dati della guida vengono aggiornati (16.1)
   const [nuovoNegozio, setNuovoNegozio] = useState(false);
