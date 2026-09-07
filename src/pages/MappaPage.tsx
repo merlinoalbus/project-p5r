@@ -10,7 +10,7 @@ import { haPlanimetria } from '../utils/haPlanimetria';
 // ============================================================
 
 import { urlMappa } from '../utils/navigazioneMappa';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { MappaDto, MappaRiassuntoDto } from '../types';
 import { AnteprimaMappa } from '../components/mappe/AnteprimaMappa';
 import { centroAccessoMondo, schedaAccessoMondo } from '../utils/accessoMondo';
@@ -183,22 +183,72 @@ function LuogoSenzaPlanimetria({ mappa, nome, albero }: {
     </header>
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       {contenute.length > 0
-        ? <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 xl:grid-cols-4" aria-label={`Mappe di ${nome}`}>
-            {contenute.map((m) => <li key={m.chiave} className="flex">
-              <Link to={urlMappa(m.chiave)} className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text">
-                <AnteprimaMappa mappa={m} className="aspect-[4/3] w-full" />
-                <span className="flex flex-col gap-0.5">
-                  <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{nomePresentazioneMappa(m)}</span>
-                  <span className="text-[11px] text-text-muted">
-                    {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{m.numeroFigli > 0 ? ` · ${m.numeroFigli} dentro` : ''}
-                  </span>
-                </span>
-              </Link>
-            </li>)}
-          </ul>
+        ? <GriglieDelLuogo contenute={contenute} nome={nome} />
         : <p className="m-0 text-[13px] text-text-muted" role="status">Qui non c’è ancora nessuna planimetria. Puoi aggiungerne una dall’editor.</p>}
     </PageState>
   </div>;
+}
+
+/** Le mappe di un Palazzo, divise per **utilita'** e non per ordine di estrazione.
+ *
+ * La pagina di un Palazzo mostrava trentaquattro riquadri uguali, in fila, con nomi come
+ * «Palazzo di Kamoshida — Immagini native che nessun campo usa — tela quadrata, disegno medio —
+ * la piu' estesa». Erano tre problemi in uno: le aree vere mescolate agli scarti
+ * dell'estrazione, il nome del Palazzo ripetuto trentaquattro volte in una pagina che si chiama
+ * col suo nome, e un vocabolario da estrattore («immagini native che nessun campo usa») dato in
+ * pasto a chi gioca.
+ *
+ * Qui davanti vanno **le aree con gli spilli** — quelle in cui c'e' qualcosa da trovare, cioe'
+ * quelle per cui si apre una guida — e i fogli senza spilli finiscono in un gruppo che si apre a
+ * richiesta. Non si buttano: sono planimetrie vere, servono a chi cura l'atlante, ma non sono la
+ * risposta alla domanda «dove devo andare».
+ */
+function GriglieDelLuogo({ contenute, nome }: { contenute: MappaRiassuntoDto[]; nome: string }) {
+  const [mostraSenzaSpilli, setMostraSenzaSpilli] = useState(false);
+  // I fogli che l'estrazione ha trovato ma che nessun campo del gioco usa portano un nome che e'
+  // una descrizione tecnica — «Immagini native che nessun campo usa — tela larga, disegno minuto»
+  // — e non un posto. Hanno spilli, quindi restano fra le aree, ma vanno in fondo: davanti ci
+  // stanno le stanze con un nome, che sono quelle che uno cerca.
+  const senzaNomeVero = (m: MappaRiassuntoDto) => /nessun campo usa/i.test(nomePresentazioneMappa(m));
+  const conSpilli = contenute.filter((m) => m.numeroSpilli > 0)
+    .sort((a, b) => Number(senzaNomeVero(a)) - Number(senzaNomeVero(b)));
+  const senzaSpilli = contenute.filter((m) => m.numeroSpilli === 0);
+  return <div className="flex flex-col gap-4">
+    {conSpilli.length > 0 && <Griglia mappe={conSpilli} nome={nome} etichetta={`Aree di ${nome}`} />}
+    {senzaSpilli.length > 0 && <section className="flex flex-col gap-2" aria-label="Planimetrie senza spilli">
+      <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraSenzaSpilli} onClick={() => setMostraSenzaSpilli((v) => !v)}>
+        {mostraSenzaSpilli ? 'Nascondi' : 'Mostra'} le planimetrie senza spilli · {senzaSpilli.length}
+      </button>
+      {mostraSenzaSpilli && <Griglia mappe={senzaSpilli} nome={nome} etichetta={`Planimetrie di ${nome} senza spilli`} />}
+    </section>}
+  </div>;
+}
+
+/** Il nome del Palazzo non si ripete su ogni riquadro: la pagina si chiama gia' cosi'. */
+function senzaPrefisso(titolo: string, nome: string): string {
+  const p = `${nome} — `;
+  return titolo.startsWith(p) ? titolo.slice(p.length) : titolo;
+}
+
+function Griglia({ mappe, nome, etichetta }: { mappe: MappaRiassuntoDto[]; nome: string; etichetta: string }) {
+  return <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3 2xl:grid-cols-4" aria-label={etichetta}>
+    {mappe.map((m) => <li key={m.chiave} className="flex">
+      <Link to={urlMappa(m.chiave)} className="card card--cliccabile group flex w-full flex-col gap-2 no-underline text-text">
+        <span className="relative">
+          <AnteprimaMappa mappa={m} className="aspect-[4/3] w-full" />
+          {/* Il numero degli spilli sta **sull'anteprima**, non sotto il nome: e' il dato che fa
+              scegliere quale aprire, e nella riga sotto si perdeva in mezzo al resto. */}
+          {m.numeroSpilli > 0 && <span aria-hidden className="chip chip--attivo absolute right-1.5 top-1.5 text-[11px]">{m.numeroSpilli}</span>}
+        </span>
+        <span className="flex flex-col gap-0.5">
+          <span className="text-[13px] font-semibold leading-tight group-hover:text-primary">{senzaPrefisso(nomePresentazioneMappa(m), nome)}</span>
+          <span className="text-[11px] text-text-muted">
+            {m.numeroSpilli > 0 ? `${m.numeroSpilli} spilli` : 'nessuno spillo'}{m.numeroFigli > 0 ? ` · ${m.numeroFigli} dentro` : ''}
+          </span>
+        </span>
+      </Link>
+    </li>)}
+  </ul>;
 }
 
 /** Visore a schermo intero con lo stato della partita attiva. */
