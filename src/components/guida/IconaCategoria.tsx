@@ -4,7 +4,7 @@
 
 import type { ReactNode } from 'react';
 import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../shared/icons';
-import { IconBussola, IconCuore, IconFilm, IconGioco, IconGoccia, IconNegozio, IconScudo, IconValigetta } from '../shared/iconeGuida';
+import { IconBussola, IconChiave, IconCuore, IconFilm, IconGioco, IconGoccia, IconNegozio, IconScudo, IconValigetta } from '../shared/iconeGuida';
 import { AssetImg } from '../shared/AssetImg';
 
 const ICONE: Record<string, (size: number) => ReactNode> = {
@@ -14,6 +14,7 @@ const ICONE: Record<string, (size: number) => ReactNode> = {
   distributore: (s) => <IconGoccia size={s} />, materiali: (s) => <IconNegozio size={s} />, misto: (s) => <IconNegozio size={s} />, altro: (s) => <IconStar size={s} />,
   // oggetti
   cura: (s) => <IconCuore size={s} />, sp: (s) => <IconGoccia size={s} />, stato: (s) => <IconScudo size={s} />, battaglia: (s) => <IconBolt size={s} />, esplorazione: (s) => <IconBussola size={s} />,
+  'oggetti-chiave': (s) => <IconChiave size={s} />,
   // attività
   minigiochi: (s) => <IconGioco size={s} />, lavori: (s) => <IconValigetta size={s} />, studio: (s) => <IconBook size={s} />, libri: (s) => <IconBook size={s} />, film: (s) => <IconFilm size={s} />,
   // azioni del percorso

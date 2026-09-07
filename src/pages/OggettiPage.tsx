@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getOggettiGuida } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -14,6 +14,7 @@ import { normalizzaTesto } from '../utils/testo';
 import type { OggettiGuidaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { RitrattoPersonaggio } from '../components/guida/RitrattoPersonaggio';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
 const SCHEDE = [['consumabili', 'Consumabili'], ['chiave', 'Chiave e materiali'], ['fabbricazione', 'Fabbricazione'], ['armi', 'Personalizzazione armi'], ['abiti', 'Abiti e lavanderia'], ['scambi', 'Scambi']] as const;
@@ -28,6 +29,21 @@ function Voce({ titolo, children }: { titolo: string; children: ReactNode }) {
 }
 function Secondaria({ v }: { v: boolean }) {
   return v ? null : <span className="chip text-[11px]" title="Dato da fonte secondaria, non dalla guida italiana">da fonte secondaria</span>;
+}
+
+/** La cella di una categoria o di un tipo: **la figura**, non la parola ripetuta.
+ *
+ * Duecento righe con scritto «Cura HP» accanto alla stessa identica icona sono duecento volte la
+ * stessa informazione detta due volte, e una colonna larga il doppio del necessario. Il nome resta
+ * dove serve: nel titolo al passaggio del mouse, per chi legge con uno screen reader, e in chiaro
+ * sotto i 640 px, dove la tabella diventa una scheda e l'icona da sola sarebbe un indovinello. */
+function CellaCategoria({ categoria, nome }: { categoria: string; nome: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5" title={nome}>
+      <IconaCategoria categoria={categoria} dimensione={24} etichetta={nome} />
+      <span className="sm:hidden">{nome}</span>
+    </span>
+  );
 }
 
 function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
@@ -47,7 +63,7 @@ function SchedaConsumabili({ d }: { d: OggettiGuidaDto }) {
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Categoria</th><th>Effetto</th><th>Dove</th><th>Prezzo</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><span className="inline-flex items-center gap-1.5"><IconaCategoria categoria={x.categoria} dimensione={22} />{NOME_CATEGORIA[x.categoria] ?? x.categoria}</span></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.categoria}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Categoria"><CellaCategoria categoria={x.categoria} nome={NOME_CATEGORIA[x.categoria] ?? x.categoria} /></td><td data-etichetta="Effetto">{x.effetto}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
                 : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo="Sulla mappa" compatto /></span>)}</td><td data-etichetta="Prezzo" className="tabular-nums whitespace-nowrap">{x.prezzo !== null ? `${x.prezzo.toLocaleString('it-IT')} ¥` : '—'}</td></tr>)}</tbody>
         </table>
       </div>
@@ -73,7 +89,7 @@ function SchedaChiave({ d }: { d: OggettiGuidaDto }) {
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Oggetto</th><th>Tipo</th><th>Uso</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo">{x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'}</td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.tipo}`}><td data-etichetta="Oggetto"><strong>{x.nome}</strong>{x.nomeEn && x.nomeEn !== x.nome && <span className="text-text-muted"> ({x.nomeEn})</span>} <Secondaria v={x.verificato} /></td><td data-etichetta="Tipo"><CellaCategoria categoria={x.tipo === 'chiave' ? 'oggetti-chiave' : 'materiali'} nome={x.tipo === 'chiave' ? 'Oggetto chiave' : 'Materiale'} /></td><td data-etichetta="Uso">{x.uso}</td><td data-etichetta="Dove">{x.dove || '—'}{x.articolo ? <> <CollegamentoMappa tipo="articolo" chiave={x.articolo} testo="Sulla mappa" compatto /></>
                 : x.negozi?.map((n) => <span key={n}> <CollegamentoMappa tipo="negozio" chiave={n} testo="Sulla mappa" compatto /></span>)}</td></tr>)}</tbody>
         </table>
       </div>
@@ -93,8 +109,10 @@ function SchedaFabbricazione({ d }: { d: OggettiGuidaDto }) {
       </section>
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
-          <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Prodotti</th><th>Sblocco</th></tr></thead>
-          <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}><td data-etichetta="Attrezzo"><strong>{r.attrezzo}</strong> <Secondaria v={r.verificato} /></td><td data-etichetta="Effetto">{r.effetto}</td><td data-etichetta="Materiali">{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</td><td data-etichetta="Prodotti" className="tabular-nums">{r.prodotti ?? '—'}</td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td></tr>)}</tbody>
+          {/* Niente colonna «Prodotti»: la guida non la compila per **nessuna** ricetta, quindi
+              era una colonna di trattini — larghezza tolta a «Materiali», che invece serve. */}
+          <thead><tr><th>Attrezzo</th><th>Effetto</th><th>Materiali</th><th>Sblocco</th></tr></thead>
+          <tbody>{f.ricette.map((r) => <tr key={r.attrezzo}><td data-etichetta="Attrezzo"><strong>{r.attrezzo}</strong> <Secondaria v={r.verificato} /></td><td data-etichetta="Effetto">{r.effetto}</td><td data-etichetta="Materiali">{r.materiali.map((m) => `${m.nome}${m.quantita !== null ? ` ×${m.quantita}` : ''}`).join(', ') || '—'}</td><td data-etichetta="Sblocco">{r.sblocco ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
     </div>
@@ -148,7 +166,7 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
       <div className="overflow-x-auto">
         <table className="tabella tabella--adattiva text-[12px]">
           <thead><tr><th>Abito</th><th>Per</th><th>Dove</th></tr></thead>
-          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.nome}</strong></td><td data-etichetta="Per">{x.per}</td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
+          <tbody>{visibili.map((x) => <tr key={`${x.nome}-${x.per}`}><td data-etichetta="Abito"><strong>{x.nome}</strong></td><td data-etichetta="Per"><RitrattoPersonaggio chi={x.per} /></td><td data-etichetta="Dove">{x.dove}</td></tr>)}</tbody>
         </table>
       </div>
     </div>
@@ -156,9 +174,19 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
 }
 
 function SchedaScambi({ d }: { d: OggettiGuidaDto }) {
+  // **Jose sta nelle Richieste dei Mementos**, dove ha il suo foglio con i fiori, i timbri e la
+  // tabella degli scambi. Ripeterlo qui era la stessa bottega scritta due volte in due pagine
+  // diverse, e prima o poi due volte diverse: qui resta il rimando, che dice dov'è.
+  const altrove = d.scambi.filter((s) => /jose/i.test(s.venditore));
+  const venditori = d.scambi.filter((s) => !/jose/i.test(s.venditore));
   return (
     <div className="flex flex-col gap-2 text-[13px]">
-      {d.scambi.map((s) => (
+      {altrove.length > 0 && (
+        <p className="m-0 text-[12px] text-text-muted">
+          Gli scambi di Jose stanno con le <Link to="/guida/richieste?foglio=jose" className="text-primary">Richieste dei Mementos</Link>, insieme ai fiori e ai timbri.
+        </p>
+      )}
+      {venditori.map((s) => (
         <section key={s.venditore} className="card flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2"><h2 className="m-0 text-[15px] font-semibold">{s.venditore}</h2><span className="chip">{s.dove}</span><Secondaria v={s.verificato} /></div>
           {s.quando && <Voce titolo="Quando">{s.quando}</Voce>}

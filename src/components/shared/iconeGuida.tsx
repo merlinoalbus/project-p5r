@@ -585,3 +585,12 @@ export function IconPosizione(p: IconProps) {
     </svg>
   );
 }
+
+/** Chiave: gli oggetti chiave, quelli che aprono qualcosa. */
+export function IconChiave(p: IconProps) {
+  return (
+    <svg {...base(p)}>
+      <circle cx="8" cy="8" r="4" /><path d="M11 11l8 8M16 16l2 2M14 14l2 2" />
+    </svg>
+  );
+}
