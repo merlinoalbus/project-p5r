@@ -41,6 +41,22 @@ describe('CittaPage', () => {
     expect(cartellino).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
   });
 
+  it('il clic su un quartiere apre l’ingresso configurato, non sempre il nodo d’atlante', async () => {
+    // «devo poter scegliere il punto di apertura del click»: l'ingresso si configura dalla scheda
+    // del quartiere e porta mappa + punto + ingrandimento. Era già salvato, ma questa mappa lo
+    // ignorava: si poteva sceglierlo e non vederlo mai usato.
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: '',
+        ingresso: { mappa: 'shibuya-sottopasso', nome: 'Sottopasso di Shibuya', x: 42.5, y: 61, zoom: 3 } },
+      { chiave: 'ueno', nome: 'Ueno', mappaChiave: 'citta-ueno', luoghi: 3, verificati: 3, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const mappa = await screen.findByRole('img', { name: /^Mappa di Tokyo con/ });
+    expect(within(mappa).getByTitle('Shibuya')).toHaveAttribute('href', '/guida/mappe/shibuya-sottopasso?x=42.5&y=61&zoom=3');
+    // e chi non l'ha configurato continua ad aprire il proprio nodo, com'è giusto
+    expect(within(mappa).getByTitle('Ueno')).toHaveAttribute('href', '/guida/mappe/citta-ueno');
+  });
+
   it('la scheda del quartiere mostra la stessa sagoma della mappa composta', async () => {
     // Shujin è il caso che smaschera una tabella di corrispondenza inventata: la chiave del
     // quartiere è `shujin-academy` ed è anche il nome del file. Se la scheda cercasse
