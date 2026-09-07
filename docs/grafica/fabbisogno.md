@@ -355,7 +355,7 @@ censimento**, perché la riserva non diventi il traguardo.
 |---|---|---|---|---|
 | icone delle azioni nuove | `ui/azione-<chiave>` | 6 | §21 | consegnate il 2026-09-07 (`grafica-azioni-v1`) |
 | icone di categoria | `ui/categoria-<chiave>` | 22 | §22 | consegnate il 2026-09-07 (`grafica-categorie-finali-v1`) |
-| fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | **da consegnare** |
+| fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | consegnati il 2026-09-07 (`grafica-decori-finali-v1`) |
 | icone di categoria delle azioni del giorno | `ui/categoria-<chiave>` | 11 | §24 | **da consegnare** |
 
 Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che

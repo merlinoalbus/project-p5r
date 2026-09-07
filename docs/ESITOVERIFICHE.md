@@ -2665,3 +2665,42 @@ supposta. Copre i tre punti chiusi oggi (15.30, 15.31, 15.32) e le consegne graf
   conteneva le sole sei icone d'azione. `github/main` non contiene nessun `categoria-*` né
   `decori/*`, e sul repository non c'è nessuna PR aperta: le 24 immagini verificate sono ferme sul
   ramo di Codex. Segnalato nel canale; serve una PR nuova.
+
+### Consegne grafiche di Codex — la §23 chiusa (7 settembre 2026, seguito)
+
+- `candidato/grafica-decori-ombre-v1` (otto fregi) e `candidato/grafica-decori-finali-v1` (gli
+  ultimi tre, `jose-scambi` nel formato a fascia 1536×864): **PASS**. Diff esclusivi di soli PNG,
+  1024×1024 RGBA con alfa reale, soggetti conformi alla §23, oro visibile fra 0 e 7 pixel su
+  ~250 000 campionati per immagine — bordi antialiasati, non oro dipinto.
+- Con questi il fabbisogno censito è consegnato per §21 (6 azioni), §22 (22 categorie) e §23 (11
+  fregi). Resta la **§24**, aperta oggi.
+- **Rilievo misurato sul peso, non bloccante:** gli undici fregi pesano ~9,2 MB e sono immagini
+  mostrate al 16% di opacità, larghe al massimo 420 px. Ridotte a 768 px con palette a 256 colori
+  diventano ~0,9 MB, senza differenza osservabile a quell'opacità. Chiesto a Codex di generare già
+  ridotto da qui in avanti; la riconversione dei consegnati si può fare senza rigenerarli.
+
+### Gli spilli che parlavano giapponese (7 settembre 2026)
+
+Trovato guardando la Shujin Academy per un'altra ragione: **280 spilli su 1617** si presentavano
+come `Da identificare: «ミニマップ：自分用アイコン» (tipo 28)`. Il nome nativo accanto a «Da
+identificare» è la scelta giusta dell'estrazione — è la traccia per identificarlo — ma arrivava in
+giapponese sotto gli occhi di chi gioca; dodici arrivavano perfino come stringa esadecimale, cioè i
+byte Shift-JIS mai decodificati (`837d8343…` = `マイパレス_アイテム配置したとき`).
+
+La migrazione 053 traduce **il nome e non il significato**: lo spillo resta `nota` e resta «Da
+identificare», perché stabilire che cosa sia vuole le prove del pipeline dell'atlante. Le rese
+rispettano il troncamento a sedici caratteri della tabella del gioco, e un nome nativo che non
+sappiamo tradurre resta intatto. Applicata sull'istanza: **233 spilli tradotti, zero nomi
+giapponesi rimasti**; si rifà a ogni avvio come la 052, così un reseed non li riporta. Le cinque
+decodifiche sono state passate a Codex per la promozione in `DALLA_TABELLA_DELLE_PARTI`, dove il
+nome dello sprite è la prova e il tipo può essere deciso con la procedura giusta.
+
+### Shujin Academy — che cosa manca davvero
+
+Il rilievo «la guida conosce sei luoghi, la mappa ne ha due» va precisato dopo la verifica:
+`aula-shujin` **ha** il suo spillo (sulla planimetria del secondo piano) e `distributori-shujin` ce
+l'ha sulla mappa della scuola. Restano senza punto `biblioteca-shujin`, `cancello-shujin`,
+`infermeria-shujin` e `corridoio-2-piano-shujin`: per le prime due esiste già la planimetria nativa
+dedicata («Biblioteca», «Cancello della scuola») e il collegamento si può fare senza inventare
+coordinate; per infermeria e corridoio no, e **non si inventano**: andrebbero posizionati su una
+planimetria dei piani con una prova, che è lavoro dell'atlante.
