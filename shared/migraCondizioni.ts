@@ -8,6 +8,11 @@ export function migraTestiCondizioni(testi: Array<string|null|undefined>, confid
     const t=originale.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replaceAll('’',"'");
     let m:RegExpMatchArray|null;
     if(/^(sempre disponibile|sempre acquistabile)$/.test(t)) return [];
+    if(t==="dopo essere andati al cinema o aver visto un dvd almeno una volta") {
+      return [{tipo:'stato',chiave:'visione-film-dvd-completata',confronto:'almeno',valore:1}];
+    }
+    if (t === 'dopo il completamento di un videogioco')
+      return [{tipo:'stato',chiave:'videogioco-completato',confronto:'almeno',valore:1}];
     if((m=t.match(/^(?:disponibile )?dal (\d{1,2}|primo) ([a-z]+)$/))){
       const mese=mesi.indexOf(m[2])+1, data=String(mese).padStart(2,'0')+'-'+String(m[1]==='primo'?1:Number(m[1])).padStart(2,'0');
       if(dataValida(data))return [{tipo:'data',dal:data}];

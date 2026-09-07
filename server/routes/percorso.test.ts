@@ -135,6 +135,10 @@ describe('API percorso giorno per giorno', () => {
 
   it('«Anima da cineasta» alza di uno scalino i punti di film e DVD alla spunta, solo se il libro risulta letto', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Cineasta' })).body.data as { id: number }).id;
+    // Una sessione parziale non deve attivare il bonus: il percorso legge soltanto il
+    // completamento canonico in `lettura_partita`.
+    getDb().prepare("UPDATE libro SET sessioni=2 WHERE chiave='anima-da-cineasta'").run();
+    expect((await request(app).put(`/api/partite/${id}/letture`).send({ tipo: 'libro', chiave: 'anima-da-cineasta', avanzamento: 1 })).status).toBe(200);
     // cerco il primo DVD della guida che dà una Dote
     let trovato: { giorno: string; indice: number; note: number; dote: string } | null = null;
     const indice = (await request(app).get('/api/compendio/percorso')).body.data as { giorni: Array<{ giorno: string }> };
