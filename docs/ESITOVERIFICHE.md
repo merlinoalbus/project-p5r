@@ -2588,3 +2588,20 @@ commit atteso `629eb6f98a367e7967028d41d053ebf3755865f1` in un worktree isolato.
 
 La review non ha modificato il codice di Opus. Il candidato Covo e' approvato per il perimetro
 dichiarato.
+
+## Gate `galaxy-task-validator` sul candidato Libri v1
+
+**Verdetto: PASS**, sul tag annotato remoto `candidato/lotto-b-libri-v1` (oggetto tag
+`4fa5fd49750e5c441d70c70838aa51e21552aca3`), dereferenziato al commit atteso
+`4e31e40c72c0d15e4c4aa23f5422335ac13b4807`.
+
+Il validatore ha ripetuto typecheck, lint, build, 18/18 test mirati e l'intera suite (**141 file,
+604/604 PASS**), oltre a migrazione, backfill, cascata, semantica del completamento, revoca,
+ricompletamento, idempotenza, regressioni film/percorso, 46 libri, 74 sessioni, 48 riferimenti e
+coda UI isolata per partita. La prova runtime e' passata a 1440x900, 1024x768 e 390x844, con
+pannello posizione unico e console pulita.
+
+Raccomandazione non bloccante: rendere autonomi i nomi accessibili dei comandi ripetuti includendo
+il titolo del libro (`Aggiungi una sessione a ...`, `Azzera ...`, `Mostra posizione di ...`). Il
+contenitore espone gia' il titolo, quindi il candidato resta approvato; la rifinitura andra'
+inclusa in un candidato successivo, senza spostare il tag immutabile v1.
