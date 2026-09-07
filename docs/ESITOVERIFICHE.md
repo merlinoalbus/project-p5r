@@ -2605,3 +2605,63 @@ Raccomandazione non bloccante: rendere autonomi i nomi accessibili dei comandi r
 il titolo del libro (`Aggiungi una sessione a ...`, `Azzera ...`, `Mostra posizione di ...`). Il
 contenitore espone gia' il titolo, quindi il candidato resta approvato; la rifinitura andra'
 inclusa in un candidato successivo, senza spostare il tag immutabile v1.
+
+---
+
+## Verifica in sola lettura — esportazione del seed, chiavi delle categorie, Equipaggiamento (7 settembre 2026)
+
+Passata di verifica **emulata** con il protocollo del `galaxy-task-validator`: sola lettura del
+codice e dei dati, nessuna modifica durante il giudizio, e ogni affermazione misurata invece che
+supposta. Copre i tre punti chiusi oggi (15.30, 15.31, 15.32) e le consegne grafiche di Codex.
+
+### 15.30 — il catalogo corretto diventa seed anche per libri, film e attività
+
+- Giro completo a tavolo pulito: `npm run seed:esporta` dichiara «già allineato, niente da
+  scrivere» su **entrambi** i file. Il confronto è byte a byte, non semantico.
+- Tre difetti trovati e chiusi durante la lavorazione, tutti dello stesso tipo — l'esportazione che
+  «migliora» il file invece di conservarlo: le condizioni riscritte per 23 libri, il rientro
+  diverso (1912 righe aggiunte per una modifica che ne toccava 23) e `"sessioni": 1` comparso su 23
+  attività per via del valore predefinito della colonna.
+- Test: 5 in `esportaSeed.test.ts`, di cui due nuovi (identità dell'esportazione, videogioco
+  aggiunto con le sue Doti e riga nascosta lasciata fuori).
+
+### 15.31 — le figure di categoria e le chiavi dei dati
+
+- **Difetto reale, trovato prima della consegna all'utente**: le 22 illustrazioni si chiamano al
+  plurale, i dati parlano al singolare. Misurato sul database dell'istanza: `arma` 143 righe,
+  `protezione` 62, `accessorio` 72, più `regalo`, `materiale`, `abito`; il percorso usa `libro`
+  (61) e `lavoro` (10). `ui/categoria-arma` non esiste e non esisterà: quelle righe avrebbero
+  tenuto il cartiglio di riserva **pur avendo la figura pronta**.
+- Controllo d'insieme sulle altre famiglie di asset dinamici (`ui/spillo-`, `elementi/`, `doti/`,
+  `meteo/`, `palazzi/`, `arcani/icona/`, `persona/`): **nessun altro scarto di nome**. I due
+  sospetti (`meteo/possibile pioggia`, `persona/emperor-s-amulet`) sono falsi positivi: il primo
+  passa da `segmentiMeteo`, il secondo dallo `slug` condiviso che toglie gli apostrofi.
+- Buco del censimento §22 misurato sul percorso di una partita intera: 13 tipi di azione, **uno
+  solo** con la figura. Aperta la §24 con gli undici soggetti mancanti.
+
+### 15.32 — Equipaggiamento in Oggetti
+
+- Verificato che il difetto fosse reale prima di rimediarlo: `getOggetti` non compare in nessun
+  `.tsx`, e il sottotitolo della pagina rimandava al Compendio, dove i 223 pezzi non ci sono.
+- API misurata: 223 righe, 125 accessori, 36 armi da mischia, 32 a distanza, 30 protezioni,
+  **zero** righe senza nome italiano.
+- Verifica nel browser a 600 px e a 375 px: 223 righe, nessuno scorrimento orizzontale, ritratti
+  effettivamente caricati (`naturalWidth` 768), collegamento profondo `?scheda=equipaggiamento`
+  funzionante.
+- **Rilievo emerso e corretto durante la verifica**: la prima stesura metteva i dieci volti anche
+  sui 125 pezzi senza vincolo — **1474 immagini in pagina**, su un'app che si usa col tablet in
+  mano. Ora i volti restano dove c'è davvero una restrizione (98 righe) e il resto dice «Tutti»:
+  224 immagini, e la colonna si scorre.
+
+### Consegne grafiche di Codex
+
+- `candidato/grafica-categorie-finali-v1`: PASS. Diff esclusivo di 22 PNG rispetto al punto già
+  giudicato, tutte 128×128 RGBA con alfa reale; cercando i pixel **visibili** in tonalità 25–70°
+  con saturazione > 0.25 il conteggio dell'oro è **zero su tutte e 22**.
+- `candidato/grafica-decori-battaglia-v1`: PASS. Due fregi 1024×1024, simulati come li rende l'app
+  (16% di opacità, maschera sfumata, carta `#14141a`): restano un'ombra e non competono col testo.
+  Rilievo non bloccante sul peso (1001 kB e 425 kB per immagini larghe al massimo 420 px).
+- **Nota di processo, non di merito**: la PR #38 risulta mergiata ma lo è stata quando il ramo
+  conteneva le sole sei icone d'azione. `github/main` non contiene nessun `categoria-*` né
+  `decori/*`, e sul repository non c'è nessuna PR aperta: le 24 immagini verificate sono ferme sul
+  ramo di Codex. Segnalato nel canale; serve una PR nuova.

@@ -178,9 +178,8 @@ function SchedaAbiti({ d }: { d: OggettiGuidaDto }) {
  * Il dataset dice `Men`, `Women`, `Unisex` o un nome proprio, e la traduzione ne fa «Solo uomini»,
  * «Solo donne», «Unisex», «Solo Ann». Le prime due bastano ai ritratti; «Unisex» no, perché non
  * nomina nessuno: negli abiti del gioco vuol dire uomini **e** donne, cioè tutti tranne Morgana,
- * che ha i suoi. Il vincolo assente vuol dire che lo mette chiunque. */
-function chiLoUsa(vincolo: string | null, vincoloNome: string | null): string {
-  if (!vincolo) return 'Tutti';
+ * che ha i suoi. Il pezzo senza vincolo non passa di qui: lo mette chiunque, e si scrive. */
+function chiLoUsa(vincolo: string, vincoloNome: string | null): string {
   if (vincolo === 'Unisex') return 'Uomini e donne';
   return vincoloNome ?? vincolo;
 }
@@ -234,7 +233,14 @@ function SchedaEquipaggiamento() {
               <tr key={o.id}>
                 <td data-etichetta="Equipaggiamento"><strong>{o.nomeIt ?? o.nome}</strong>{o.nomeIt && o.nomeIt !== o.nome && <span className="text-text-muted"> ({o.nome})</span>}</td>
                 <td data-etichetta="Tipo"><CellaCategoria categoria={o.categoria.toLowerCase()} nome={o.categoriaNome} /></td>
-                <td data-etichetta="Per"><RitrattoPersonaggio chi={chiLoUsa(o.vincolo, o.vincoloNome)} dimensione={20} /></td>
+                {/* Senza vincolo non si mettono i dieci volti: sarebbero la stessa fila ripetuta su
+                    125 accessori — 1474 immagini in pagina alla prima prova — e non direbbero
+                    niente. Le facce servono a far vedere **la restrizione**: così la colonna si
+                    scorre e le righe con i volti sono quelle che riguardano qualcuno in
+                    particolare. */}
+                <td data-etichetta="Per">{o.vincolo
+                  ? <RitrattoPersonaggio chi={chiLoUsa(o.vincolo, o.vincoloNome)} dimensione={20} />
+                  : <span className="text-text-muted">Tutti</span>}</td>
                 <td data-etichetta="Effetto">{o.descrizioneNome}</td>
               </tr>
             ))}</tbody>
