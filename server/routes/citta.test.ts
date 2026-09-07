@@ -43,6 +43,28 @@ describe('API città e attività', () => {
     expect((await request(app).get('/api/compendio/citta/atlantide')).status).toBe(404);
   });
 
+  it('con una partita dice quali quartieri sono davvero nel mondo, non solo quelli con una data', async () => {
+    // È il punto della decisione dell'utente: un quartiere che si apre col rango di un Confidente
+    // o con un libro è **chiuso** finché non hai quel rango o quel libro, esattamente come uno che
+    // apre a giugno è chiuso ad aprile. Prima si guardava solo `sbloccoData`, e i sedici quartieri
+    // la cui condizione non è una data risultavano aperti dal primo giorno.
+    const senza = (await request(app).get('/api/compendio/citta')).body.data as QuartiereRiassuntoDto[];
+    expect(senza.every((x) => x.disponibile !== false)).toBe(true);
+
+    const id = ((await request(app).post('/api/partite').send({ nome: 'Sblocchi' })).body.data as { id: number }).id;
+    const q = (await request(app).get(`/api/compendio/citta?partita=${id}`)).body.data as QuartiereRiassuntoDto[];
+    // Una partita nuova comincia l'11 aprile: si può stare a Yongen-Jaya, a Shibuya e a scuola.
+    expect(q.filter((x) => x.disponibile !== false).map((x) => x.chiave)).toEqual(['yongen-jaya', 'shibuya', 'shujin-academy']);
+
+    const perChiave = new Map(q.map((x) => [x.chiave, x]));
+    expect(perChiave.get('shinjuku')!.bloccoMotivo).toContain('18 giugno');
+    // un rango di Confidente: e il motivo dice a che punto sei, non solo che sei fermo
+    expect(perChiave.get('ueno')!.bloccoMotivo).toMatch(/yusuke.*0 di 3/);
+    expect(perChiave.get('yokohama-chinatown')!.bloccoMotivo).toContain('completare');
+    // chi non ha condizioni non ha nemmeno un motivo
+    expect(perChiave.get('shibuya')!.bloccoMotivo).toBeNull();
+  });
+
   it('attività, lavori, libri e film con Doti; letture per partita con evento, riapertura, validazione, reseed stabile', async () => {
     const a = (await request(app).get('/api/compendio/attivita')).body.data as AttivitaTutteDto;
     expect(a.attivita.length).toBeGreaterThanOrEqual(20);

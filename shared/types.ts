@@ -1132,6 +1132,15 @@ export interface QuartiereRiassuntoDto {
   descrizione: string;
   luoghi: number;
   verificati: number;
+  /** Il quartiere è già nel mondo, al punto in cui è la partita?
+   *
+   * Vero anche senza partita: senza non c'è niente da decidere. Le regole stanno in
+   * `sblocco-quartieri.json` e non solo nella data: sette quartieri su ventitré ne hanno una, gli
+   * altri si aprono col rango di un Confidente, con un libro letto o durante un Palazzo — e sono
+   * chiusi lo stesso. La mappa di Tokyo mostra solo i quartieri disponibili. */
+  disponibile?: boolean;
+  /** Perché è chiuso, nelle parole del valutatore: «Yusuke: rango 1 di 3». Null se è aperto. */
+  bloccoMotivo?: string | null;
 }
 
 export interface LuogoDto {

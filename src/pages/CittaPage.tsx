@@ -29,8 +29,10 @@ import { soloPalazzi } from '../utils/palazzi';
 export function CittaPage() {
   const sugg = useSuggerimenti();
   useDocumentTitle('La città');
-  const dati = useCarica(() => getQuartieri(), []);
   const attiva = usePartitaStore((s) => s.attiva);
+  // La partita serve all'API, non solo alla pagina: senza, non può dire se un quartiere che si
+  // apre col rango di un Confidente o con un libro sia già nel mondo.
+  const dati = useCarica(() => getQuartieri(attiva?.id), [attiva?.id]);
   // Mappa e schede sono **una** selezione vista in due modi, come nei Memento: si passa sopra a
   // una scheda e si accende la sagoma lassù, si passa sopra a una sagoma e si accende la scheda.
   // Su una mappa fatta di figure accostate, ritrovare «quale delle due è Ogikubo» è il lavoro che
@@ -55,7 +57,7 @@ export function CittaPage() {
             evidenziato={acceso} onEvidenzia={setAcceso} />
           <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-3" aria-label="Quartieri">
             {q.map((x) => {
-              const aperto = quartiereAperto(x.sbloccoData, attiva?.dataGioco ?? null);
+              const aperto = quartiereAperto(x, attiva?.dataGioco ?? null);
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
               return (
               <li key={x.chiave} className="flex">
@@ -73,7 +75,7 @@ export function CittaPage() {
                     {/* Il quartiere chiuso resta in elenco — la guida serve anche a sapere cosa
                         arriverà — ma la scheda lo dice, perché lassù non c'è una sagoma da
                         accendere e il collegamento sembrerebbe rotto. */}
-                    {!aperto && <span className="chip text-[11px]">Non ancora aperto{x.sbloccoData ? ` · dal ${x.sbloccoData}` : ''}</span>}
+                    {!aperto && <span className="chip text-[11px]" title={x.bloccoMotivo ?? undefined}>Non ancora aperto{x.sbloccoData ? ` · dal ${x.sbloccoData}` : ''}</span>}
                   </span>
                   {suggerito && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
                   <span className="text-[12px] text-text-secondary">{x.luoghi} {x.luoghi === 1 ? 'luogo' : 'luoghi'}{x.verificati < x.luoghi ? ` · ${x.luoghi - x.verificati} da fonte secondaria` : ''}</span>

@@ -29,6 +29,7 @@ import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
+import { dataLeggibile } from '../../../shared/condizioniSpillo';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
@@ -178,8 +179,10 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         href: q.mappaChiave
           ? `/guida/mappe/${encodeURIComponent(q.mappaChiave)}`
           : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
-        presente: quartiereAperto(q.sbloccoData, dataGioco),
-        quando: q.sbloccoData ? `dal ${q.sbloccoData}` : null,
+        presente: quartiereAperto(q, dataGioco),
+        // Che cosa manca, detto come lo dice il valutatore: «Yusuke: rango 1 di 3». Quando la
+        // condizione è una data si dice la data, che è più corta e più chiara.
+        quando: q.sbloccoData ? `dal ${q.sbloccoData}` : q.bloccoMotivo ?? null,
       });
     }
     for (const d of dungeon) {
@@ -243,9 +246,13 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     </div>
     </div>
     {dataGioco && assenti.length > 0 && <p className="m-0 text-[12px] text-text-muted">
-      {/* Non spariscono e basta: si dice quali e da quando, altrimenti la mappa sembra incompleta
-          invece che aggiornata al giorno della partita. */}
-      Non ancora nel mondo il {dataGioco}: {assenti.map((s) => `${s.nome} (${s.quando ?? '—'})`).join(' · ')}
+      {/* Non spariscono e basta: si dice **quali**, altrimenti la mappa sembra incompleta invece
+          che aggiornata al giorno della partita. Il perché sta sul nome, al passaggio del mouse:
+          da quando le condizioni non sono più solo date — un rango di Confidente, un libro da
+          leggere — scriverle tutte per esteso faceva venti righe di testo sotto la mappa. */}
+      Non ancora nel mondo, al {dataLeggibile(dataGioco)}: {assenti.map((s, i) => <span key={s.chiave}>
+        {i > 0 && ' · '}<span className="cursor-help underline decoration-dotted underline-offset-2" title={s.quando ?? 'condizione non indicata'}>{s.nome}</span>
+      </span>)}
     </p>}
     {!dataGioco && <p className="m-0 text-[12px] text-text-muted">
       Nessuna partita attiva: la mappa mostra il mondo intero, quartieri e Palazzi compresi.

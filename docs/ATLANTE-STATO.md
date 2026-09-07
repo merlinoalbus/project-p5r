@@ -1549,3 +1549,66 @@ riquadro vuoto; a 1280, 768 e 375 px nessuno scorrimento orizzontale e nessuna c
 contenitore; la colonna delle aree c'è da 1024 px in su e la fila scorrevole sotto.
 
 **Verde:** 582 test (581 + 1 sul contratto nuovo), typecheck e lint puliti.
+
+---
+
+# Un quartiere bloccato è bloccato, anche quando non lo dice una data
+
+Richiesta dell'utente: «un luogo che è bloccato da un rango di un confidente è cmq bloccato non va
+visualizzato in mappa… lo stesso per i luoghi che si sbloccano dopo aver visitato un Palazzo».
+
+Il problema era nei dati: nella tabella `quartiere` lo sblocco è **prosa** — «Confidente Emperor
+(Yusuke) Rango 3», «lettura del libro "Chinese Sweets"», «sbloccato durante l'infiltrazione al
+Palazzo di Okumura» — e solo **sette quartieri su ventitré** hanno anche una data. La mappa
+guardava solo la data, quindi i sedici che si aprono in un altro modo risultavano nel mondo dal
+primo giorno.
+
+## Come si è deciso di leggerla
+
+L'utente ha scelto fra tre strade e ha preso la prima: **scrivere le condizioni a mano**, una per
+quartiere, in `data/seed/sblocco-quartieri.json`, nella forma `RequisitoSpillo` che l'app già sa
+valutare per gli spilli.
+
+Non con un lettore automatico, e il motivo è concreto: il lettore che l'app ha per i negozi non
+riconosce «Confidente Emperor (Yusuke) Rango 3» e — peggio — spezza gli «oppure» in requisiti
+separati che poi pretende **tutti**. Su queste frasi, dove quasi ogni quartiere ha due o tre strade
+alternative, avrebbe bloccato quartieri aperti. Un errore silenzioso, su una condizione che decide
+che cosa si vede.
+
+Venti righe scritte, verificabili una per una, con una `nota` dove la guida è ambigua. Le note
+sono la parte importante: dicono dove questa tabella è incompleta invece di far finta di niente.
+Due esempi:
+
+- **Ikebukuro** — la guida cita «invito di Makoto del 30 luglio dopo il suo Palazzo». Non è
+  tradotto in regola: «il suo Palazzo» è ambiguo (Makoto entra dopo il Palazzo di Kaneshiro, ma il
+  *suo* è quello di Niijima, che viene a novembre), e una data sulla lettura sbagliata aprirebbe il
+  quartiere quando non è aperto. Restano il 1° settembre e il libro.
+- **Roppongi** — «sbloccato durante l'infiltrazione al Palazzo di Okumura (circa 19 settembre)».
+  Ci sono tutte e due le strade: la data copre l'apertura vera, che avviene *durante*, e il Palazzo
+  completato copre chi a quella data non ci è ancora arrivato.
+
+Due libri che la guida cita col titolo inglese («Chinese Sweets», «Theme Park Escort») sono nel
+catalogo dei libri come «Dolci cinesi» e «Parchi divertimento», con scritto che sbloccano
+rispettivamente Chinatown e il parco di Maihama: la corrispondenza viene dai dati, non da me.
+
+## La regola
+
+`GET /api/compendio/citta?partita=<id>` aggiunge `disponibile` e `bloccoMotivo`. **Solo il rosso
+nasconde**: quando una condizione non è verificabile — la partita non ha ancora un giorno — resta
+un dubbio, e un dubbio non toglie un quartiere dalla mappa. Un rango basso o un libro non letto
+sono invece fatti che l'app conosce, e sono un no. Senza partita si vede tutto.
+
+**Rifinisce un contratto condiviso, e va detto:** in `shared/condizioniSpillo.ts` il rango di un
+Confidente è un *prerequisito*, non una *presenza* — «la cosa c'è, semplicemente non puoi ancora
+usarla» — e per un negozio dentro un quartiere resta esattamente così. Per il **quartiere stesso**,
+che è una destinazione radice, il rango decide se ci puoi arrivare: cioè se, per te, c'è. La
+distinzione è scritta in `cittaService`, accanto al codice che la applica.
+
+**Verificato a schermo:** con una partita all'11 aprile la mappa mostra **tre** quartieri —
+Yongen-Jaya, Shibuya, Shujin Academy — e tutto il resto è un pallino bianco col nome sopra; l'API
+dà venti quartieri bloccati con il motivo giusto per ciascuno («yusuke: rango 0 di 3», «Disponibile
+dal 18 giugno, oggi è il 11 aprile», «Ancora da completare nella Guida»). La riga sotto la mappa
+elenca i nomi e tiene il perché sul passaggio del mouse: da quando le condizioni non sono più solo
+date, scriverle per esteso faceva venti righe di testo.
+
+**Verde:** 583 test, typecheck e lint puliti.
