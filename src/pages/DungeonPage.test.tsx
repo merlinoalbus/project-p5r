@@ -45,4 +45,21 @@ describe('DungeonPage', () => {
     // senza partita gestita nel secondo palazzo non c'è anello
     expect(screen.getAllByRole('progressbar')).toHaveLength(1);
   });
+
+  it('è l’elenco dei Palazzi: Iweleth sì, i Memento no', async () => {
+    // La prova sta qui e non nel backend perché il filtro è una scelta di questa sezione: l’API
+    // continua a servire i Memento a chi li chiede (la loro pagina, l’editor delle condizioni).
+    // Iweleth invece resta, ed è il punto: è un Dedalo, ma si visita per aree come un Palazzo.
+    getDungeons.mockResolvedValue([
+      dungeon({}),
+      dungeon({ chiave: 'iweleth', ordine: 8, nome: 'Dedalo di Iweleth', sovrano: 'Yaldabaoth', gestiti: null }),
+      dungeon({ chiave: 'mementos', tipo: 'mementos', ordine: 10, nome: 'Memento', sovrano: 'Il pubblico', gestiti: null }),
+    ]);
+    render(<MemoryRouter><DungeonPage /></MemoryRouter>);
+    expect(await screen.findByRole('link', { name: /Dedalo di Iweleth/ })).toHaveAttribute('href', '/guida/mondo/dungeon/iweleth');
+    expect(screen.queryByRole('link', { name: /^Memento/ })).toBeNull();
+    expect(screen.queryByText('Memento')).toBeNull();
+    expect(screen.getByRole('list', { name: 'Palazzi' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Palazzi' })).toBeInTheDocument();
+  });
 });

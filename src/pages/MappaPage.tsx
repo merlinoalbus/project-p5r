@@ -46,7 +46,7 @@ function radiciRaggruppate(mappe: MappaRiassuntoDto[]): Array<{ chiave: string; 
   return gruppi;
 }
 
-/** Indice: radici (Tokyo, Palazzi, Dedalo) con le mappe figlie. */
+/** Indice: radici (Tokyo, Palazzi) con le mappe figlie. */
 function IndiceMappe() {
   useDocumentTitle('Mappe');
   const albero = useCarica(() => getAlberoMappe(), []);
@@ -72,7 +72,7 @@ function IndiceMappe() {
   }, [mappe]);
   const gruppi = useMemo(() => radiciRaggruppate(mappe), [mappe]);
   return <div className="flex flex-col gap-4">
-    <IntestazionePagina titolo="Mappe" sottotitolo="Luoghi e planimetrie di Tokyo, Palazzi e Dedali." />
+    <IntestazionePagina titolo="Mappe" sottotitolo="Luoghi e planimetrie di Tokyo e dei Palazzi." />
     <PageState isLoading={albero.caricamento} error={albero.errore} onRetry={albero.ricarica}>
       <ul className="m-0 p-0 list-none grid gap-3 grid-cols-1 lg:grid-cols-2 items-start" aria-label="Mappe">
         {gruppi.map(({ chiave, capofila, versioni }) => {

@@ -27,7 +27,10 @@ describe('API città e attività', () => {
     const q = (await request(app).get('/api/compendio/citta')).body.data as QuartiereRiassuntoDto[];
     expect(q.length).toBeGreaterThanOrEqual(20);
     expect(q[0]).toMatchObject({ chiave: 'yongen-jaya', nome: 'Yongen-Jaya' });
-    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(84);
+    // 82 e non 84: «Entrata dei Memento» non e' un quartiere e non compare piu' qui. I suoi due
+    // luoghi non sono spariti — si raggiungono dalla pagina dei Memento, che e' il posto giusto.
+    expect(q.reduce((s, x) => s + x.luoghi, 0)).toBe(82);
+    expect(q.some((x) => x.chiave === 'mementos')).toBe(false);
     expect(q.every((x) => x.luoghi > 0 && x.verificati <= x.luoghi)).toBe(true);
     const s = (await request(app).get('/api/compendio/citta/shibuya')).body.data as QuartiereDettaglioDto;
     expect(s.luoghi).toHaveLength(22);

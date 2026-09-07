@@ -16,6 +16,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
+import { soloPalazzi } from '../utils/palazzi';
 
 export function CittaPage() {
   const navigate=useNavigate();
@@ -24,8 +25,9 @@ export function CittaPage() {
   const dati = useCarica(() => getQuartieri(), []);
   const attiva = usePartitaStore((s) => s.attiva);
   // I Palazzi servono alla mappa disegnata: portano la finestra in cui esistono, ed è quella a
-  // decidere se compaiono. Senza partita non decide nulla e si vedono tutti.
-  const dungeon = useCarica(() => getDungeons(), []);
+  // decidere se compaiono. Senza partita non decide nulla e si vedono tutti. `soloPalazzi` tiene
+  // fuori i Memento: non sono un luogo di Tokyo e non hanno un ingresso sulla mappa di viaggio.
+  const dungeon = useCarica(async () => soloPalazzi(await getDungeons()), []);
   const q = dati.dati;
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
