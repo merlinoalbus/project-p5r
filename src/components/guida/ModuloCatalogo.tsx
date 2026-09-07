@@ -90,7 +90,39 @@ const CAMPI: Record<TipoCatalogo, Campo[]> = {
     { nome: 'altri_effetti', etichetta: 'Altri effetti', tipo: 'testolungo' },
     { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
   ],
+  // La risposta non è qui: sta in «Risposte giuste», l'editor a righe qui sotto, perché è il dato
+  // che l'app usa per dirti che cosa rispondere e un campo di testo l'avrebbe reso illeggibile.
+  domanda: [
+    { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-12»' },
+    { nome: 'tipo', etichetta: 'Quando', tipo: 'select', opzioni: { classe: 'Domanda in classe', 'esame-medio': 'Esame di metà semestre', 'esame-finale': 'Esame finale', altro: 'Altro' } },
+    { nome: 'chi', etichetta: 'Chi la fa', tipo: 'testo', aiuto: 'Per esempio: Prof. Ushimaru' },
+    { nome: 'domanda', etichetta: 'Domanda', tipo: 'testolungo' },
+    { nome: 'ricompensa', etichetta: 'Che cosa dà', tipo: 'testo', aiuto: 'Per esempio: Conoscenza +1 nota' },
+    { nome: 'note', etichetta: 'Note', tipo: 'testolungo' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
+  cruciverba: [
+    { nome: 'data', etichetta: 'Giorno', tipo: 'testo', aiuto: 'Nel formato del calendario di gioco, mese-giorno: «04-18»' },
+    { nome: 'indizio', etichetta: 'Indizio', tipo: 'testolungo' },
+    { nome: 'risposta', etichetta: 'Risposta', tipo: 'testo' },
+    { nome: 'risposta_en', etichetta: 'Risposta in inglese', tipo: 'testo', aiuto: 'Solo se ti serve: è la parola con cui la risolve chi gioca in inglese' },
+    { nome: 'fonte', etichetta: 'Fonte', tipo: 'testo' },
+  ],
 };
+
+/** Come si chiama una riga di ogni tipo, nei titoli e nei messaggi. */
+const NOME_TIPO: Record<TipoCatalogo, { nuovo: string; singolare: string }> = {
+  negozio: { nuovo: 'Nuovo negozio', singolare: 'Negozio' },
+  articolo: { nuovo: 'Nuovo articolo', singolare: 'Articolo' },
+  libro: { nuovo: 'Nuovo libro', singolare: 'Libro' },
+  film: { nuovo: 'Nuovo film o DVD', singolare: 'Film' },
+  attivita: { nuovo: 'Nuova attività', singolare: 'Attività' },
+  domanda: { nuovo: 'Nuova domanda', singolare: 'Domanda' },
+  cruciverba: { nuovo: 'Nuova riga del cruciverba', singolare: 'Riga del cruciverba' },
+};
+
+/** I tipi che hanno davvero la colonna `condizioni_json`: agli altri l'editor non va mostrato. */
+const CON_CONDIZIONI = new Set<TipoCatalogo>(['negozio', 'articolo', 'libro', 'film', 'attivita']);
 
 /** Una Dote alzata da un'attività: quale, quante note, e l'eventuale condizione della guida. */
 interface DoteAttivita {
@@ -150,6 +182,46 @@ function EditorDoti({ doti, onCambia, disabilitato }: { doti: DoteAttivita[]; on
   );
 }
 
+/** Una risposta giusta a una domanda: che cosa rispondere, e in che ordine se i passaggi sono più d'uno. */
+interface RispostaDomanda {
+  ordine: number;
+  testo: string;
+}
+
+/** L'editor delle risposte: righe in ordine, non un campo di testo.
+ *
+ * È il dato per cui la pagina esiste — «che cosa rispondo?» — e va nella forma che l'app sa usare.
+ * L'ordine conta: certe domande d'esame si rispondono in due o tre passaggi, e la guida li elenca
+ * proprio così. Scriverli in un campo libero vorrebbe dire ritrovarseli in dieci formati diversi e
+ * doverli leggere a occhio ogni volta, che è esattamente il difetto per cui le Doti hanno avuto il
+ * loro editor. */
+function EditorRisposte({ risposte, onCambia, disabilitato }: { risposte: RispostaDomanda[]; onCambia: (r: RispostaDomanda[]) => void; disabilitato?: boolean }) {
+  const cambia = (i: number, testo: string) => onCambia(risposte.map((r, j) => (j === i ? { ...r, testo } : r)));
+  const togli = (i: number) => onCambia(risposte.filter((_, j) => j !== i).map((r, j) => ({ ...r, ordine: j + 1 })));
+  return (
+    <fieldset className="regole-editor flex flex-col gap-2">
+      <legend>Risposte giuste</legend>
+      <p className="m-0 text-[12px] text-text-muted">
+        Che cosa rispondere, nell’ordine. Una sola riga per le domande in classe; più righe dove il gioco chiede una sequenza di risposte.
+      </p>
+      {risposte.map((r, i) => (
+        <div key={i} className="flex flex-wrap items-end gap-2">
+          <span className="chip shrink-0" aria-hidden>{i + 1}</span>
+          <label className="editor-mappa__campo min-w-[220px] flex-[3]">
+            <span className="sr-only">Risposta {i + 1}</span>
+            <input className="form-input" type="text" maxLength={300} value={r.testo} disabled={disabilitato}
+              onChange={(e) => cambia(i, e.target.value)} placeholder="La risposta come la dà il gioco" aria-label={`Risposta ${i + 1}`} />
+          </label>
+          <button type="button" className="btn btn-ghost btn-sm touch" disabled={disabilitato}
+            onClick={() => togli(i)} aria-label={`Togli la risposta ${i + 1}`}>Togli</button>
+        </div>
+      ))}
+      <PulsanteVisivo tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="piu" dimensione={20} />}
+        titolo="Aggiungi una risposta" disabled={disabilitato} onClick={() => onCambia([...risposte, { ordine: risposte.length + 1, testo: '' }])} />
+    </fieldset>
+  );
+}
+
 interface Props {
   tipo: TipoCatalogo;
   /** Presente = modifica di una riga esistente; assente = creazione. */
@@ -178,6 +250,10 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
   const [doti, setDoti] = useState<DoteAttivita[]>(() => {
     try { return JSON.parse(String(elemento?.dati.doti_json ?? '[]')) as DoteAttivita[]; } catch { return []; }
   });
+  // Le risposte giuste di una domanda: stessa storia delle Doti, altro dato.
+  const [risposte, setRisposte] = useState<RispostaDomanda[]>(() => {
+    try { return JSON.parse(String(elemento?.dati.risposte_json ?? '[]')) as RispostaDomanda[]; } catch { return []; }
+  });
   const regoleValide=condizioni.every(c=>normalizzaRequisitoSpillo(c)!==null);
   const [occupato, setOccupato] = useState(false);
   const nuovo = !elemento;
@@ -195,6 +271,12 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
           .filter((d) => d.dote || d.note)
           .map((d) => ({ dote: d.dote ?? null, note: d.note ?? null, condizione: d.condizione?.trim() || null }));
       }
+      if (tipo === 'domanda') {
+        dati.risposte_json = risposte
+          .map((r) => ({ ordine: r.ordine, testo: r.testo.trim() }))
+          .filter((r) => r.testo)
+          .map((r, i) => ({ ordine: i + 1, testo: r.testo }));
+      }
       for (const c of CAMPI[tipo]) {
         const grezzo = valori[c.nome]?.trim() ?? '';
         if (c.tipo === 'numero') dati[c.nome] = grezzo === '' ? null : Number(grezzo);
@@ -203,10 +285,10 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
       if (tipo === 'articolo' && nuovo) dati.negozio_chiave = negozioChiave;
       if (nuovo) {
         const e = await creaElementoCatalogo(tipo, dati);
-        notifica('success', `${tipo === 'negozio' ? 'Negozio' : 'Articolo'} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
+        notifica('success', `${NOME_TIPO[tipo].singolare} «${e.nome}» aggiunto: resta anche quando i dati della guida vengono aggiornati.`);
       } else {
         await aggiornaElementoCatalogo(tipo, elemento.chiave, dati);
-        notifica('success', `${tipo === 'negozio' ? 'Negozio' : 'Articolo'} corretto: «Ripristina» rimette i dati della guida.`);
+        notifica('success', `${NOME_TIPO[tipo].singolare} corretto: «Ripristina» rimette i dati della guida.`);
       }
       onSalvato();
     } catch (err) {
@@ -244,9 +326,7 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
     }
   };
 
-  const titolo = nuovo
-    ? (tipo === 'negozio' ? 'Nuovo negozio' : 'Nuovo articolo')
-    : `${tipo === 'negozio' ? 'Negozio' : 'Articolo'}: ${elemento.nome}`;
+  const titolo = nuovo ? NOME_TIPO[tipo].nuovo : `${NOME_TIPO[tipo].singolare}: ${elemento.nome}`;
 
   return (
     <Modal
@@ -303,7 +383,11 @@ export function ModuloCatalogo({ tipo, elemento, negozioChiave, onChiudi, onSalv
             tabella (`doti_json`) e il modulo non lo mostrava: si potevano aggiungere senza poter
             dire che cosa alzano. */}
         {tipo === 'attivita' && <EditorDoti doti={doti} onCambia={setDoti} disabilitato={occupato} />}
-        <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato}/>
+        {tipo === 'domanda' && <EditorRisposte risposte={risposte} onCambia={setRisposte} disabilitato={occupato} />}
+        {/* Le condizioni valgono per quel che compare e sparisce col procedere della partita. Una
+            domanda in classe e una riga del cruciverba hanno già il loro giorno, che è la
+            condizione: mostrare l'editor lì vorrebbe dire offrire un campo che non viene salvato. */}
+        {CON_CONDIZIONI.has(tipo) && <CondizioniEditor condizioni={condizioni} onCambia={setCondizioni} disabilitato={occupato}/>}
         {!regoleValide&&<p role="alert">Completa o rimuovi i gruppi vuoti prima di salvare.</p>}
         {!nuovo && elemento.origine === 'seed' && (
           <div className="flex justify-end">

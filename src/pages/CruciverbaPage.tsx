@@ -14,8 +14,9 @@ import type { CruciverbaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
+import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 
-function Cruciverba({ c, partitaId, onCambiato }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void }) {
+function Cruciverba({ c, partitaId, onCambiato, onCorretto }: { c: CruciverbaDto; partitaId: number | null; onCambiato: (c: CruciverbaDto) => void; onCorretto: () => void }) {
   const [mostra, setMostra] = useState(false);
   const [occupato, setOccupato] = useState(false);
   const cambia = async (fatto: boolean) => {
@@ -32,6 +33,8 @@ function Cruciverba({ c, partitaId, onCambiato }: { c: CruciverbaDto; partitaId:
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {mostra || c.fatto ? <span><strong>Risposta:</strong> {c.risposta}{c.rispostaEn && c.rispostaEn !== c.risposta ? <span className="text-text-muted"> ({c.rispostaEn})</span> : null}</span> : <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Mostra la risposta" onClick={() => setMostra(true)} />}
+        {/* La risposta che non torna si corregge qui, e resta anche dopo un aggiornamento dei dati. */}
+        {c.chiave && <span className="ml-auto"><CorreggiElemento tipo="cruciverba" chiave={c.chiave} onSalvato={onCorretto} /></span>}
       </div>
     </li>
   );
@@ -51,9 +54,12 @@ export function CruciverbaPage() {
       {d && (
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Cruciverba di Leblanc" sottotitolo={<>{d.totale} cruciverba sul tavolo di Leblanc (la sera, senza consumare tempo): ogni risposta esatta vale una nota di Conoscenza.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.risolti} risolti.` : ' Attiva una partita per spuntare quelli risolti.'}</>} />
-          {partitaId && <label className="flex items-center gap-2 text-[13px] touch self-start"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da fare</label>}
+          <div className="flex flex-wrap items-center gap-2">
+            {partitaId && <label className="flex items-center gap-2 text-[13px] touch"><input type="checkbox" className="w-5 h-5" checked={soloDaFare} onChange={(e) => setSoloDaFare(e.target.checked)} /> Solo da fare</label>}
+            <AggiungiAlCatalogo tipo="cruciverba" titolo="Aggiungi un cruciverba" className="ml-auto" onSalvato={() => void dati.ricarica()} />
+          </div>
           <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Cruciverba">
-            {visibili.map((c) => <Cruciverba key={c.giorno} c={c} partitaId={partitaId} onCambiato={aggiorna} />)}
+            {visibili.map((c) => <Cruciverba key={c.giorno} c={c} partitaId={partitaId} onCambiato={aggiorna} onCorretto={() => void dati.ricarica()} />)}
           </ul>
         </div>
       )}

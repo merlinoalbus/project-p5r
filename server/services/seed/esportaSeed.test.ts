@@ -14,7 +14,7 @@ import path from 'node:path';
 import { closeDb, initDb } from '../../db/dbService.js';
 import { runMigrations } from '../../db/migrationRunner.js';
 import { caricaSeed } from './caricaSeed.js';
-import { esportaAttivitaSeed, esportaNegoziSeed } from './esportaSeed.js';
+import { esportaAttivitaSeed, esportaCruciverbaSeed, esportaDomandeSeed, esportaNegoziSeed } from './esportaSeed.js';
 import type { AttivitaSeed, NegoziSeed } from '../../../shared/seed.js';
 
 const DIR_SEED = path.resolve(import.meta.dirname, '../../../data/seed');
@@ -144,5 +144,40 @@ describe('esportaAttivitaSeed', () => {
     expect(gioco?.doti, 'le Doti dichiarate viaggiano nel seed').toEqual([{ dote: 'coraggio', note: 3, condizione: null }]);
     expect(gioco?.sessioni, 'tre round, non il predefinito').toBe(3);
     expect(seed.libri.some((l) => l.chiave === 'il-magnifico-ladro'), 'la riga nascosta resta fuori').toBe(false);
+  });
+});
+
+describe('esportaDomandeSeed e esportaCruciverbaSeed', () => {
+  afterEach(() => closeDb());
+  const apri = () => { const db = initDb(':memory:'); runMigrations(db); caricaSeed(db, DIR_SEED); return db; };
+  const letto = (f: string) => JSON.parse(fs.readFileSync(path.join(DIR_SEED, f), 'utf8')) as Record<string, unknown>;
+
+  it('senza correzioni l’esportazione è identica ai file che ci sono già', () => {
+    apri();
+    const domande = letto('domande.json');
+    const cruciverba = letto('cruciverba.json');
+    expect(JSON.stringify(esportaDomandeSeed(domande))).toBe(JSON.stringify(domande));
+    expect(JSON.stringify(esportaCruciverbaSeed(cruciverba))).toBe(JSON.stringify(cruciverba));
+  });
+
+  it('porta nel seed la risposta corretta e lascia fuori quel che è nascosto', () => {
+    const db = apri();
+    // La risposta di una domanda della guida, corretta: è il caso per cui serve tutto questo.
+    db.prepare("UPDATE domanda SET risposte_json = ?, origine = 'utente' WHERE chiave = '04-12'")
+      .run(JSON.stringify([{ ordine: 1, testo: 'La risposta giusta davvero' }]));
+    db.prepare("UPDATE cruciverba SET risposta = 'Trimestri', origine = 'utente' WHERE data = '04-18'").run();
+    db.prepare("UPDATE domanda SET nascosto = 1 WHERE chiave = '04-19'").run();
+
+    const domande = esportaDomandeSeed(letto('domande.json'));
+    const lista = domande.domande as Array<Record<string, unknown>>;
+    const corretta = lista.find((d) => d.data === '04-12');
+    expect(corretta?.risposte).toEqual([{ ordine: 1, testo: 'La risposta giusta davvero' }]);
+    expect(lista.some((d) => d.data === '04-19')).toBe(false);
+    // Le altre due parti del file — esami e premi — restano dov'erano, non si rifanno dal database.
+    expect(domande.esami).toBeDefined();
+    expect(domande.premi).toBeDefined();
+
+    const cruci = esportaCruciverbaSeed(letto('cruciverba.json'));
+    expect((cruci.cruciverba as Array<Record<string, unknown>>).find((c) => c.data === '04-18')?.risposta).toBe('Trimestri');
   });
 });
