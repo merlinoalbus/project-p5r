@@ -28,12 +28,11 @@ function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
   return <span className="flex flex-wrap gap-1">{doti.map((d, i) => <span key={i} className="chip chip--attivo" title={d.condizione ?? undefined}>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}{d.note !== null ? ` ${'♪'.repeat(Math.min(3, d.note))}` : ''}</span>)}</span>;
 }
 
-function Attivita({ a }: { a: AttivitaDto }) {
-  const [aperta, setAperta] = useState(false);
+function Attivita({ a, aperta, onApri }: { a: AttivitaDto; aperta: boolean; onApri: () => void }) {
   const sugg = useSuggerimenti();
   return (
     <li className={`card flex flex-col gap-1 text-[13px] ${classiSuggerito(sugg.evidenziato('attivita', a.chiave))}`}>
-      <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={() => setAperta((x) => !x)} aria-expanded={aperta}>
+      <button type="button" className="text-left flex flex-wrap items-center gap-2 touch" onClick={onApri} aria-expanded={aperta}>
         <strong className="text-[15px]">{a.nome}</strong>
         <span className="chip">{NOME_TIPO_ATTIVITA[a.tipo] ?? a.tipo}</span>
         {sugg.evidenziato('attivita', a.chiave) && <TargaSuggerito motivo={sugg.motivo('attivita', a.chiave)} compatta />}
@@ -50,7 +49,6 @@ function Attivita({ a }: { a: AttivitaDto }) {
       </div>
       {aperta && (
         <div className="flex flex-col gap-1">
-          {a.luogoChiave && <DoveSiTrova tipo="attivita" chiave={a.chiave} titolo={a.nome} altezza={240} />}
           {a.doti.some((d) => d.condizione) && <ul className="m-0 pl-4">{a.doti.filter((d) => d.condizione).map((d, i) => <li key={i}><strong>{d.dote ? NOME_DOTE[d.dote] : 'Dote variabile'}:</strong> {d.condizione}</li>)}</ul>}
           {a.altriEffetti && <p className="m-0"><strong>Altri effetti:</strong> {a.altriEffetti}</p>}
           {a.regole && <p className="m-0"><strong>Come funziona:</strong> {a.regole}</p>}
@@ -70,6 +68,7 @@ export function AttivitaPage() {
   const [params, setParams] = useSearchParams();
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'attivita') as Scheda;
   const [dote, setDote] = useState('');
+  const [selezionata, setSelezionata] = useState<string | null>(null);
   const d = dati.dati;
   const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
@@ -89,8 +88,7 @@ export function AttivitaPage() {
               {Object.entries(NOME_DOTE).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
             </select>
           </div>
-          {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
-          {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
+          {(() => { const elenco = scheda === 'attivita' ? attivitaVisibili : lavoriVisibili; const attiva = elenco.find((a) => a.chiave === selezionata) ?? null; return <>{attiva?.luogoChiave && <DoveSiTrova tipo="attivita" chiave={attiva.chiave} titolo={attiva.nome} altezza={240} />}<ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label={scheda === 'attivita' ? 'Attività' : 'Lavori'}>{elenco.map((a) => <Attivita key={a.chiave} a={a} aperta={a.chiave === selezionata} onApri={() => setSelezionata((x) => x === a.chiave ? null : a.chiave)} />)}</ul></>; })()}
         </div>
       )}
     </PageState>

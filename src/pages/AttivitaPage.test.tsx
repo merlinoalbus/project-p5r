@@ -14,6 +14,7 @@ import type { AttivitaDto, AttivitaTutteDto, LibroDto, PartitaDto } from '../typ
 const { getAttivita, impostaLettura } = vi.hoisted(() => ({ getAttivita: vi.fn(), impostaLettura: vi.fn() }));
 vi.mock('../services/api', () => ({ getAttivita, impostaLettura }));
 vi.mock('../stores/notificationStore', () => ({ notifica: vi.fn() }));
+vi.mock('../components/mappe/DoveSiTrova', () => ({ DoveSiTrova: ({ titolo }: { titolo: string }) => <div>Dove: {titolo}</div> }));
 
 const att = (chiave: string, nome: string, tipo: AttivitaDto['tipo'], dote: AttivitaDto['doti'][number]['dote']): AttivitaDto => ({ chiave, nome, tipo, luogo: 'Kichijoji, Penguin Sniper', luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, sblocco: '5 giugno', sessioni: null, doti: [{ dote, note: 1, condizione: 'una nota a sessione' }], altriEffetti: null, regole: 'Regole.', premi: null, paga: null, fonte: 'https://www.allgamestaff.it/x', verificato: true });
 const libro = (chiave: string, nome: string, dote: LibroDto['dote']): LibroDto => ({ chiave, nome, nomeIt: nome, dove: 'Libreria Taiheido', prezzo: 700, disponibileDal: '18 aprile', dote, note: 3, sblocca: null, sessioni: 2, dettagli: null, fonte: 'https://www.allgamestaff.it/libri', verificato: true, posizioni: [], totaleSessioni: 2, progresso: 0, fatto: false });
@@ -60,5 +61,16 @@ describe('AttivitaPage', () => {
       <Route path="/guida/film" element={<div>Pagina Film autonoma</div>} />
     </Routes></MemoryRouter>);
     expect(await screen.findByText('Pagina Film autonoma')).toBeInTheDocument();
+  });
+
+  it('mantiene un solo pannello posizione e lo sostituisce cambiando attività', async () => {
+    getAttivita.mockResolvedValue(dati);
+    render(<MemoryRouter><AttivitaPage /></MemoryRouter>);
+    await screen.findByText('Freccette');
+    fireEvent.click(screen.getByRole('button', { name: /Freccette/ }));
+    expect(screen.getByText('Dove: Freccette')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Bagno pubblico/ }));
+    expect(screen.queryByText('Dove: Freccette')).toBeNull();
+    expect(screen.getByText('Dove: Bagno pubblico')).toBeInTheDocument();
   });
 });
