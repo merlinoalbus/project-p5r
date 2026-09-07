@@ -1612,3 +1612,38 @@ elenca i nomi e tiene il perché sul passaggio del mouse: da quando le condizion
 date, scriverle per esteso faceva venti righe di testo.
 
 **Verde:** 583 test, typecheck e lint puliti.
+
+---
+
+# Verifica del candidato di Codex — `candidato/lotto-b-negozi-contesto-v2`
+
+Fatta come si deve: il **tag** in un worktree isolato (`C:\Repository\p5r-verifica`), con un
+backend suo su una porta sua (3103) e un database creato da zero dal seed. Non ho toccato un file
+del lotto B.
+
+**Esito: PASS.** Tutto quello che aveva dichiarato è vero, e l'ho misurato invece di crederci.
+
+| dichiarato | misurato |
+|---|---|
+| con partita 48 negozi / 380 articoli | 48 e 380 (60 e 575 senza partita) |
+| nessun bloccato reso | 0 su elenco e 0 su ricerca |
+| ricerca `380/300` | `totale: 380`, `articoli: 300` — il tetto è sui resi, il totale no |
+| negozio bloccato assente | `GET /compendio/negozi/37-gradi-celsius?partita` → **404**, senza partita → 200 |
+| acquisto diretto impedito | `PUT /partite/:id/acquisti` su `untouchable/kogatana-nera` → **404
+  `articolo-non-disponibile`**; su un articolo disponibile → 200 |
+| una sola `DoveSiTrova` in `NegozioPage` | una, `tipo="negozio"` con la chiave del negozio |
+
+Typecheck e lint puliti sul suo albero; le sue quattro suite mirate 23/23. La suite completa dà
+**578/580**, e i due rossi sono **i due della base**, non suoi: il conteggio 84/82 della Città e la
+vecchia attesa del Dedalo Memento nell'albero delle mappe. Sono esattamente i due test che ho
+corretto io nel commit `20c3d04` — quindi spariscono da soli quando i due rami si incontrano, e la
+diagnosi di Codex era giusta.
+
+Due osservazioni, nessuna delle quali cambia l'esito:
+
+1. `ricercaArticoli` con una partita toglie il `LIMIT 300` dalla SQL e filtra in memoria, poi taglia
+   a 300. È **necessario** — contare prima di filtrare darebbe un totale che comprende i bloccati,
+   che è il difetto del v1 — e su 575 articoli il costo è nulla. Va tenuto d'occhio se il catalogo
+   crescesse di un ordine di grandezza.
+2. Il conteggio degli articoli per negozio ora fa una lettura sola per tutta la pagina invece di
+   una per negozio: è meglio di prima, non peggio.
