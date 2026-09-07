@@ -2307,3 +2307,45 @@ in poco.
 **Verde:** tre cicli typecheck + lint + suite completa (631/631) e `npm run build`, più le prove
 runtime elencate sopra. Dati di prova ripuliti: due partite create ed eliminate, nessun residuo in
 `progresso_film_partita`, `progresso_videogioco_partita`, `lettura_partita`.
+
+## Aggiornamento: `candidato/lotto-b-v4` — **PASS**, e la prova che mancava
+
+Fra il mio verbale sul v3 e adesso Codex ha pubblicato due correzioni, tutte e due nate dal suo
+validator, e la seconda merita di essere raccontata perché **la mia verifica del v3 non l'avrebbe
+mai trovata**.
+
+Il v4 (`b1ce57d`) cambia **una riga di dati**: in `data/seed/negozi.json` la condizione di «Segreti
+di gioco» era ancora «dopo aver giocato a un videogioco almeno una volta», mentre la migrazione 050
+la riscriveva in «dopo il completamento di un videogioco». Su un database esistente la migrazione
+correggeva il testo e tutto tornava — ed è esattamente lo scenario in cui io avevo provato il v3,
+trovandolo giusto. **Su un'installazione da zero il seed vince e la migrazione non passa mai**,
+quindi la condizione sarebbe rimasta quella vecchia: «giocato almeno una volta» invece di
+«completato».
+
+Un difetto che si vede solo installando da zero, e che ha la caratteristica peggiore: **si comporta
+bene in tutti i database che esistono già**, cioè in tutti quelli su cui si prova.
+
+Così l'ho verificato, e questa è la prova che al v3 mancava:
+
+```
+DATA_DIR=<cartella vuota>  →  50 migrazioni, seed caricato, database nuovo
+
+hinokuniya/segreti-di-gioco
+  condizione : dopo il completamento di un videogioco
+  strutturata: [{"tipo":"stato","chiave":"videogioco-completato","confronto":"almeno","valore":1}]
+hinokuniya/anima-da-cineasta
+  condizione : dopo essere andati al cinema o aver visto un DVD almeno una volta
+  strutturata: [{"tipo":"stato","chiave":"visione-film-dvd-completata","confronto":"almeno","valore":1}]
+```
+
+E su quella stessa installazione appena nata, lo sblocco si comporta come deve: requisito **rosso**
+senza videogiochi completati, **verde** appena uno arriva a 3 round su 3. Il parser delle condizioni
+traduce la frase del seed senza bisogno della migrazione, che resta solo per chi aggiorna.
+
+**Verdetto sul v4: PASS.** Tre cicli typecheck + lint + suite + build, **631/631** ogni volta.
+Restano valide tutte le prove del v3 — il v4 ne differisce per una riga di dati — e **resta il
+rilievo su `VideogiochiPage`**, che è di forma e non di comportamento, e che non blocca.
+
+**La lezione, e vale per me:** avevo provato lo sblocco su un database migrato e l'avevo dichiarato
+giusto. Era giusto **lì**. Da adesso, quando un candidato tocca sia il seed sia una migrazione, la
+verifica si fa su tutti e due i cammini — `DATA_DIR` su una cartella vuota costa dieci secondi.
