@@ -2794,3 +2794,33 @@ Kamoshida, Libri, Film, Richieste: **zero errori in console**, zero `role="alert
 scorrimento orizzontale a nessuna larghezza, e nessun errore nei log di BE e FE.
 
 **Suite.** 671 test, typecheck e lint puliti. Ventidue commit sul ramo.
+
+### `candidato/lotto-b-v17` — la prima regressione silenziosa (7 settembre 2026, sera)
+
+Codex ha ribasato: base `7fc4012`, l'ultimo commit di `main`, zero commit indietro. La base è
+quindi corretta, e il suo `galaxy-task-validator` ha dato PASS. **Respinto lo stesso**, e questo è
+il caso che vale la pena ricordare: il file non è stato ribasato, è stato **riscritto sopra**.
+
+Conteggi su `src/pages/VideogiochiPage.tsx`, non impressioni:
+
+| marcatore | `main` prima | `lotto-b-v17` | ramo `lavoro/verifica-lotto-b` |
+|---|---:|---:|---:|
+| `AggiungiAlCatalogo` | 2 | **0** | 2 |
+| `CorreggiElemento` | 2 | **0** | 2 |
+| gruppo dei completati | sì | **no** | sì |
+| `ChipDisponibilita` | sì | **no** | sì |
+| `IconaCategoria` | 2 | **0** | 2 |
+| pulsante «Completa»/«Azzera» | assente | **presente** | assente |
+| coda dei round | assente | presente | presente |
+| `DoveSiTrova` | assente | presente | presente |
+
+Le ultime due righe sono il contributo di Codex, già integrato con la sua attribuzione; le prime
+cinque sono quello che il merge avrebbe portato via, compreso il rientro del pulsante «Completa»
+che l'utente aveva chiesto esplicitamente di togliere.
+
+**La lezione, che è più importante del candidato.** Finché il merge-base era vecchio, il difetto si
+vedeva dal merge-base. Con la base giusta la regressione diventa invisibile sia al gate del
+candidato — che gira su un albero coerente con sé stesso — sia a chi guarda solo la base. L'unico
+controllo che la vede è `git diff github/main -- <file>` **letto sulle righe tolte**: se spariscono
+righe che l'autore del candidato non ha scritto, non è un rebase, è una sovrascrittura. Regola
+aggiunta al protocollo dei candidati.
