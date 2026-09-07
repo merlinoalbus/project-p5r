@@ -146,11 +146,11 @@ Aggiornato il 7 settembre 2026.
    assegnato a Codex. Il **Covo dei Ladri come pagina propria** l'ho preso io, dichiarandolo nel
    canale prima di cominciare: sono file nuovi, non tocca niente di suo, ed è già un cartellino
    sulla mia mappa di Tokyo. Consegnato come candidato, da verificare come tutti gli altri.
-2. **Grafica**: la sagoma del Covo dei Ladri (voce 4) è l'unica voce aperta, e va generata da
-   Codex. La metà applicativa è pronta da prima che il file esista: quando arriva, il Covo diventa
-   una figura senza che nessuno tocchi il codice. ~~La decisione sugli otto colori di spillo
-   troppo chiari~~ è **chiusa**: l'utente ha scelto di lasciarli come sono
-   (`docs/DECISIONI.md`, 7 settembre).
+2. **Grafica**: resta aperta **una sola voce**, la 5 — la piastrella `guida/covo.png` — e va
+   generata da Codex. ~~La voce 4, la sagoma del Covo per la mappa~~ è **chiusa senza generare
+   niente**: su rilievo di Codex è saltato fuori che l'originale esisteva (Luogo 022), ed è stato
+   ritagliato invece che disegnato. ~~La decisione sugli otto colori di spillo troppo chiari~~ è
+   **chiusa**: l'utente ha scelto di lasciarli come sono (`docs/DECISIONI.md`, 7 settembre).
 3. ~~**Un confine da decidere insieme**: se «bloccato = assente» valga anche per le schede dei
    quartieri o solo per i loro cartellini sulla mappa.~~ **Chiuso, e senza bisogno di decidere
    niente di nuovo: i due lotti si sono incontrati sulla stessa regola.** Il contratto di Codex
@@ -164,6 +164,15 @@ Aggiornato il 7 settembre 2026.
    Resta da confermare a Codex che la legga com'io la leggo — chiesto nel canale.
 4. **L'integrazione**: il lotto B verificato può entrare in `lavoro/atlante-mondo`, così c'è
    un'istanza sola che mostra tutto invece di due mondi separati su una porta sola.
+5. **Una lacuna dell'atlante, non del piano — mia, trovata verificando i Libri di Codex.** La
+   guida conosce **sei** luoghi dentro Shujin Academy — biblioteca, cancello, corridoio del 2°
+   piano, infermeria, aula, distributori — e la mappa dell'atlante ne ha **due** come spilli. Per
+   questo il pannello «dove si trova» dei libri della biblioteca scolastica apre la mappa giusta
+   senza poterci puntare il dito: `accesso/luogo/shujin-academy/biblioteca-shujin` risponde
+   `spillo: null`. Non è un difetto del lotto B né una voce del piano, ed è scritto qui perché è
+   lavoro dell'atlante che qualcuno prima o poi deve fare — con una avvertenza: le posizioni degli
+   spilli non si inventano, e per gli interni di Shujin va prima cercata una fonte, come per tutto
+   il resto.
 
 ## 7. Domande aperte a Codex
 
