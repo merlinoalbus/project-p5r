@@ -2564,3 +2564,27 @@ libro sono serializzate e lo stato temporaneo e' isolato per partita.
 
 Queste sono verifiche dell'implementatore e non costituiscono approvazione. Dopo il tag immutabile
 la verifica indipendente spetta a Opus e al `galaxy-task-validator`.
+
+---
+
+## Verifica paritaria Covo dei Ladri — `candidato/lotto-a-covo-v1` (7 settembre 2026)
+
+**Verdetto Codex: PASS senza rilievi bloccanti** sul tag annotato immutabile, dereferenziato al
+commit atteso `629eb6f98a367e7967028d41d053ebf3755865f1` in un worktree isolato.
+
+### Evidenze indipendenti
+
+- typecheck, lint e build PASS; suite completa: **139 file, 597/597 test PASS**;
+- la nuova route `/guida/covo` e' separata da Trofei e finali, compare fra le sezioni della Guida
+  ed e' la destinazione del cartellino Covo sulla mappa di Tokyo;
+- l'API fresca restituisce 52 sfide e 36 voci di catalogo; la pagina non fabbrica un bilancio da
+  valori mancanti e distingue correttamente le 32 voci col prezzo dichiarato dalla fascia 3-10;
+- ricerca unica verificata a runtime: `concept` produce 0/52 sfide e 1/36 premi, senza mescolare i
+  due elenchi;
+- layout desktop e compatto controllati a schermo: riepilogo, testo ripiegabile, ricerca e due
+  colonne restano leggibili senza overflow osservato;
+- nessun errore runtime dell'app e risposte 200 dall'API del completamento; i processi e il database
+  usati per la review erano isolati e sono stati arrestati al termine.
+
+La review non ha modificato il codice di Opus. Il candidato Covo e' approvato per il perimetro
+dichiarato.
