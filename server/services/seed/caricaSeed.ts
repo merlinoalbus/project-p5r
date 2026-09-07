@@ -27,7 +27,7 @@ import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
 import type {
-  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed, RequisitiRangoSeed,
+  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, LibriPosizioniSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed, RequisitiRangoSeed,
 } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
@@ -38,7 +38,7 @@ import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'libri-posizioni.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -70,6 +70,7 @@ interface SeedCompleto {
   battaglia: BattagliaSeed;
   citta: CittaSeed;
   attivita: AttivitaSeed;
+  libriPosizioni: LibriPosizioniSeed;
   cruciverba: CruciverbaSeed;
   negozi: NegoziSeed;
   percorso: PercorsoSeed;
@@ -128,6 +129,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     battaglia: JSON.parse(contenuti['battaglia.json']) as BattagliaSeed,
     citta: JSON.parse(contenuti['citta.json']) as CittaSeed,
     attivita: JSON.parse(contenuti['attivita.json']) as AttivitaSeed,
+    libriPosizioni: JSON.parse(contenuti['libri-posizioni.json']) as LibriPosizioniSeed,
     cruciverba: JSON.parse(contenuti['cruciverba.json']) as CruciverbaSeed,
     negozi: JSON.parse(contenuti['negozi.json']) as NegoziSeed,
     percorso: JSON.parse(contenuti['percorso.json']) as PercorsoSeed,
@@ -512,6 +514,28 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
       for (const a of n.articoli) {
         chiaviArticoli.add(a.chiave);
         insArt.run({ chiave: a.chiave, negozio_chiave: n.chiave, ordine: a.ordine, nome: a.nome, nome_it: a.nomeIt, categoria: a.categoria, per: a.per, prezzo: a.prezzo, effetto: a.effetto, statistiche: a.statistiche, disponibile_dal: a.disponibileDal, condizione: a.condizione, nota: a.nota, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
+      }
+    }
+    // Provenienze territoriali dei libri: dati strutturati, mai dedotti dalla prosa di `dove`.
+    // I test di upgrade eseguono volontariamente il seed su schemi storici: prima della 047 il
+    // catalogo continua a caricarsi, ma il nuovo dato viene rimandato alla migrazione completa.
+    const haPosizioniLibro = (db.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table' AND name='libro_posizione'").get() as { n: number }).n === 1;
+    if (haPosizioniLibro) {
+      const chiaviMappate = new Set(Object.keys(seed.libriPosizioni.libri));
+      if (chiaviMappate.size !== chiaviLibri.size || [...chiaviLibri].some((k) => !chiaviMappate.has(k))) {
+        throw new Error(`Seed posizioni libri: attese ${chiaviLibri.size} chiavi, ricevute ${chiaviMappate.size}; ogni libro deve avere una voce, anche vuota.`);
+      }
+      const esistePosizione = (tipo: string, chiave: string): boolean => {
+        const tabella = tipo === 'quartiere' ? 'quartiere' : tipo === 'luogo' ? 'luogo' : tipo === 'negozio' ? 'negozio' : tipo === 'attivita' ? 'attivita' : null;
+        return !!tabella && !!db.prepare(`SELECT 1 FROM ${tabella} WHERE chiave = ?`).get(chiave);
+      };
+      db.prepare('DELETE FROM libro_posizione').run();
+      const insPosLibro = db.prepare('INSERT INTO libro_posizione (libro_chiave, ordine, tipo, chiave, etichetta) VALUES (?, ?, ?, ?, ?)');
+      for (const [libro, posizioni] of Object.entries(seed.libriPosizioni.libri)) {
+        posizioni.forEach((p, ordine) => {
+          if (!esistePosizione(p.tipo, p.chiave)) throw new Error(`Seed posizioni libri: riferimento ${p.tipo}/${p.chiave} inesistente per '${libro}'.`);
+          insPosLibro.run(libro, ordine, p.tipo, p.chiave, p.etichetta);
+        });
       }
     }
     // orfani: solo le righe del seed. Quelle create o modificate dall'utente (origine 'utente') restano, anche quando il seed cambia (16.1)

@@ -25,6 +25,7 @@ import { AccessoMondoPage } from './pages/AccessoMondoPage';
 import { EditorMappaPage } from './pages/EditorMappaPage';
 import { QuartierePage } from './pages/QuartierePage';
 import { AttivitaPage } from './pages/AttivitaPage';
+import { LibriPage } from './pages/LibriPage';
 import { CruciverbaPage } from './pages/CruciverbaPage';
 import { NegoziPage } from './pages/NegoziPage';
 import { PercorsoPage } from './pages/PercorsoPage';
@@ -68,6 +69,7 @@ export const router = createBrowserRouter([
       { path: 'guida/citta', element: <CittaPage /> },
       { path: 'guida/citta/:chiave', element: <QuartierePage /> },
       { path: 'guida/attivita', element: <AttivitaPage /> },
+      { path: 'guida/libri', element: <LibriPage /> },
       { path: 'guida/cruciverba', element: <CruciverbaPage /> },
       { path: 'guida/completamento', element: <CompletamentoPage /> },
       { path: 'guida/covo', element: <CovoPage /> },

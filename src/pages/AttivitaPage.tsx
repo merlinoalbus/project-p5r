@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { getAttivita, impostaLettura } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -20,7 +20,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
-const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['libri', 'Libri'], ['film', 'Film e DVD']] as const;
+const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['film', 'Film e DVD']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
@@ -113,11 +113,12 @@ export function AttivitaPage() {
   const perDote = <T extends { dote: string | null }>(xs: T[]) => xs.filter((x) => !dote || x.dote === dote);
   const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
+  if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori, studio, libri e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.libriLetti} libri letti, ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare libri letti e film visti.'}</>} />
+          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori, studio e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare i film visti.'}</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <FilaScorrevole role="tablist" aria-label="Sezioni">
               {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={18} />{l}</button>)}
@@ -129,7 +130,6 @@ export function AttivitaPage() {
           </div>
           {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
           {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
-          {scheda === 'libri' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Libri">{perDote(d.libri).map((l) => <Lettura key={l.chiave} x={l} tipo="libro" partitaId={partitaId} onCambiata={(x) => aggiorna(x, 'libro')} />)}</ul>}
           {scheda === 'film' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Film">{perDote(d.film).map((f) => <Lettura key={f.chiave} x={f} tipo="film" partitaId={partitaId} onCambiata={(x) => aggiorna(x, 'film')} />)}</ul>}
         </div>
       )}

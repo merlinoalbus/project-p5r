@@ -162,6 +162,12 @@ export interface AttivitaSeed {
   film: Array<{ chiave: string; ordine: number; nome: string; nomeIt: string | null; dove: 'cinema' | 'dvd'; periodo: string; dote: string | null; note: number | null; prezzo: number | null; dettagli: string | null; fonte: string; verificato: boolean }>;
 }
 
+export type TipoPosizioneLibroSeed = 'quartiere' | 'luogo' | 'negozio' | 'attivita';
+export interface LibriPosizioniSeed {
+  fonti: string[];
+  libri: Record<string, Array<{ tipo: TipoPosizioneLibroSeed; chiave: string; etichetta: string }>>;
+}
+
 /** Richieste dei Mementos e Jose (guida allgamestaff). */
 export interface MementosSeed {
   richieste: Array<{ chiave: string; nome: string; committente: string; disponibileDal: string; scadenza: string; area: string; areaChiave: string | null; piano: string; bersaglio: { nome: string; livello: number | null; formaDemoniaca: string; debolezze: string[]; resistenze: string[]; vulnerabileConfusione: boolean }; ricompense: string[]; confidente: { chiave: string; rango?: number | null } | null; note: string; fonte: string }>;
