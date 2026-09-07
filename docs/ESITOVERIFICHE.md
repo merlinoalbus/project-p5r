@@ -2397,3 +2397,44 @@ Lotto A con rilievo a Opus. Confermati anche candidato e gate separati per ciasc
 
 La soluzione del Lotto B e' quindi approvata a partire da `NegozioPage`, ma l'implementazione
 resta subordinata alla chiusura verificata dei punti precedenti nell'ordine globale concordato.
+
+---
+
+## Rivalidazione corretta — `candidato/lotto-a-mondo` (7 settembre 2026)
+
+**Verdetto:** **PASS con WARN non bloccanti** sul tag annotato immutabile
+`candidato/lotto-a-mondo` (`f7a8ce0`, oggetto tag `8092ce6`). La precedente ipotesi di FAIL e'
+ritirata: l'utente ha ribadito che quartieri e Palazzi bloccati devono essere assenti come figure
+attive sulla mappa di Tokyo, mentre catalogo informativo, nomi, schede/deep link, selettori e
+comando «Mostra anche i non ancora disponibili» devono restare consultabili.
+
+### Evidenze indipendenti
+
+- il giorno 11 aprile la mappa rende soltanto Yongen-Jaya, Shibuya e Shujin Academy e nessun
+  Palazzo; le schede informative degli altri quartieri restano correttamente presenti;
+- tutte le nove finestre dei Palazzi sono uniche e complete: ciascun Palazzo e' presente agli
+  estremi inclusivi e assente subito prima; Iweleth resta aperto dal 24 dicembre;
+- le condizioni alternative usano `modo: 'almeno-una'` e diventano verdi quando almeno una
+  condizione e' soddisfatta;
+- Mementos e' escluso da Citta', indice Palazzi e indice Mappe, ma conserva correttamente la pagina
+  autonoma e i collegamenti dalle Richieste;
+- Citta' monta una sola `MappaTokyo`; `/guida/mappe/tokyo` reindirizza a `/guida/citta`; card e
+  mappa riusano le sagome originali `asset/mappe/lmap/tokyo/<chiave>.png`;
+- la scheda Palazzo usa layout adattivo, navigatore aree e planimetrie native collegate; l'API
+  restituisce sempre `mappe` come array;
+- checkout temporaneo del tag: 47/47 test mirati, typecheck, lint e build PASS; suite completa
+  **583/583 PASS**.
+
+### WARN non bloccanti
+
+1. Nel tag verificato `soloPalazzi` usa ancora il filtro negativo `tipo !== 'mementos'`: sui dati
+   correnti e' corretto, ma un futuro terzo tipo entrerebbe impropriamente. Il ramo successivo di
+   Opus contiene gia' la forma positiva `tipo === 'palazzo'`.
+2. `MappaTokyo` mostra un futuro Palazzo privo di record finestra (`!f`): sui nove dati correnti
+   non accade. Preferibile fail-closed o un vincolo di completezza del seed.
+3. Il badge del navigatore aree guarda i campi legacy `mappa/pianta` e non `mappe.length`; le
+   planimetrie native si aprono comunque, ma il simbolo puo' non annunciarle.
+
+Il validatore non ha modificato file. Il candidato e' approvato per il perimetro dichiarato; il
+prossimo candidato Lotto A dovra' inoltre ripristinare i toggle/deep link informativi rimossi per
+errore su mia precedente richiesta, mantenendo il filtro positivo.
