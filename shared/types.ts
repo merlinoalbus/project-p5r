@@ -1429,6 +1429,13 @@ export interface DungeonRiassuntoDto {
   esauribili: number;
   /** Punti con uno stato nella partita (null senza partita). */
   gestiti: number | null;
+  /** I punti che si raccolgono davvero — forzieri, forzieri chiusi, oggetti, Semi della Bramosia —
+   *  secondo `shared/puntiDungeon.ts`. È il denominatore della percentuale: sicure, scorciatoie,
+   *  enigmi, boss e incontri si attraversano, non si prendono, e contarli faceva rispondere alla
+   *  percentuale una domanda diversa da quella per cui la si guarda. */
+  collezionabili: number;
+  /** Collezionabili già segnati nella partita (null senza partita). */
+  collezionabiliGestiti: number | null;
 }
 
 /** Pianta dell'area pubblicata da una guida: solo collegamento e credito; l'immagine si scarica nell'istanza al primo uso. */

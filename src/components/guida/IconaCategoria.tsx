@@ -5,6 +5,7 @@
 import type { ReactNode } from 'react';
 import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../shared/icons';
 import { IconBussola, IconCuore, IconFilm, IconGioco, IconGoccia, IconNegozio, IconScudo, IconValigetta } from '../shared/iconeGuida';
+import { AssetImg } from '../shared/AssetImg';
 
 const ICONE: Record<string, (size: number) => ReactNode> = {
   // negozi
@@ -30,12 +31,21 @@ interface Props {
   className?: string;
 }
 
-/** Cartiglio rosso a taglio diagonale con l'icona della categoria (stella se sconosciuta). */
+/** Cartiglio rosso a taglio diagonale con l'icona della categoria (stella se sconosciuta).
+ *
+ * **La figura disegnata a mano è la riserva, non il traguardo.** Prima qui c'era solo l'SVG in
+ * codice — il libretto bianco sui libri, la pellicola sui film, il pad sui videogiochi — e non
+ * c'era nessun modo di sostituirlo con la grafica vera: l'asset non veniva nemmeno cercato.
+ * Adesso si cerca `ui/categoria-<chiave>` come per le icone d'azione, e finché Codex non l'ha
+ * consegnata resta l'SVG. Le chiavi sono il censimento: aggiungerne una qui vuol dire aggiungere
+ * una riga a `docs/grafica/fabbisogno.md`. */
 export function IconaCategoria({ categoria, dimensione = 28, etichetta, className }: Props) {
   const icona = ICONE[categoria] ?? ICONE.altro;
+  const lato = Math.round(dimensione * 0.6);
   return (
     <span className={`icona-categoria ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} role={etichetta ? 'img' : undefined} aria-label={etichetta} aria-hidden={etichetta ? undefined : true}>
-      {icona(Math.round(dimensione * 0.6))}
+      <AssetImg nome={`ui/categoria-${categoria}`} alt="" decorativa className="object-contain"
+        style={{ width: lato, height: lato }} fallback={icona(lato)} />
     </span>
   );
 }

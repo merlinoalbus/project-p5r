@@ -19,16 +19,18 @@ import { StoricoPartita } from '../components/partita/StoricoPartita';
 import { ObiettiviPartita } from '../components/partita/ObiettiviPartita';
 import { PianiSalvati } from '../components/partita/PianiSalvati';
 import { CicliSalvati } from '../components/partita/CicliSalvati';
+import { LettureEGiochi } from '../components/partita/LettureEGiochi';
 import { OggiPartita } from '../components/partita/OggiPartita';
 import { ScuolaOggi } from '../components/partita/ScuolaOggi';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 
-type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'confidenti' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
+type Scheda = 'oggi' | 'riepilogo' | 'doti' | 'confidenti' | 'letture' | 'scorta' | 'compendio' | 'obiettivi' | 'piani' | 'cicli' | 'storico';
 
 const SCHEDE: Array<{ k: Scheda; l: string }> = [
   { k: 'oggi', l: 'Oggi' },
   { k: 'doti', l: 'Doti sociali' },
   { k: 'confidenti', l: 'Confidenti' },
+  { k: 'letture', l: 'Letture e giochi' },
   { k: 'scorta', l: 'Scorta' },
   { k: 'compendio', l: 'Compendio personale' },
   { k: 'obiettivi', l: 'Obiettivi' },
@@ -68,14 +70,22 @@ export function PartitaPage() {
           </IntestazionePagina>
           <FilaScorrevole role="tablist" aria-label="Schede della partita">
             {SCHEDE.map((s) => (
-              <button key={s.k} type="button" className={`chip chip--icona touch ${scheda === s.k ? 'chip--attivo' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k}><IconaScheda chiave={s.k} dimensione={16} />{s.l}</button>
+              // Prima l'immagine, poi la parola: erano pastiglie di testo con un'iconcina da 16 px
+              // accanto, e in dieci schede si leggevano tutte uguali. Ora l'icona e' il segno che
+              // si riconosce da lontano — 28 px — e l'etichetta sta sotto, piu' piccola. Resta
+              // scritta: un'icona sola non dice «Piani salvati» a nessuno la prima volta.
+              <button key={s.k} type="button" className={`piastrella-scheda touch ${scheda === s.k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams({ scheda: s.k })} aria-pressed={scheda === s.k} title={s.l}>
+                <IconaScheda chiave={s.k} dimensione={28} />
+                <span>{s.l}</span>
+              </button>
             ))}
           </FilaScorrevole>
           {scheda === 'oggi' && <div className="md:flex-1 md:min-h-0 riempi-figli"><OggiPartita key={attiva.id} partita={attiva} riempi /></div>}
           {scheda === 'riepilogo' && <RiepilogoPartita key={attiva.id} partita={attiva} />}
           {scheda === 'doti' && <div className="md:flex-1 md:min-h-0 riempi-figli"><DotiSociali partitaId={attiva.id} /></div>}
           {scheda === 'confidenti' && <ConfidentiPartita partitaId={attiva.id} />}
-          {scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
+                    {scheda === 'letture' && <LettureEGiochi key={attiva.id} partitaId={attiva.id} />}
+{scheda === 'scorta' && <ScortaPersona partitaId={attiva.id} />}
           {scheda === 'compendio' && <CompendioPersonale partitaId={attiva.id} />}
           {scheda === 'obiettivi' && <ObiettiviPartita key={attiva.id} partitaId={attiva.id} />}
           {scheda === 'piani' && <PianiSalvati key={attiva.id} partitaId={attiva.id} />}

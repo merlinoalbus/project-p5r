@@ -12,6 +12,7 @@ import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { NOME_DOTE } from '../utils/citta';
 import type { FilmDto, FilmDvdDto } from '../types';
 
@@ -35,6 +36,7 @@ export function FilmPage() {
   const [dote, setDote] = useState('');
   const [selezionato, setSelezionato] = useState<string | null>(null);
   const [posizioneSelezionata, setPosizioneSelezionata] = useState(0);
+  const [mostraFatti, setMostraFatti] = useState(false);
   const [desiderati, setDesiderati] = useState<Record<string, number>>({});
   const [occupati, setOccupati] = useState<Record<string, boolean>>({});
   const pannelloRef = useRef<HTMLElement | null>(null);
@@ -115,6 +117,44 @@ export function FilmPage() {
   const posizione = filmSelezionato?.posizioni[posizioneSelezionata] ?? null;
   useEffect(() => { if (filmSelezionato) pannelloRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }); }, [filmSelezionato]);
   const d = dati.dati;
+  const completatoFilm = (film: FilmDto) => {
+    const progresso = partitaId ? desiderati[chiaveCoda(partitaId, film.chiave)] ?? film.progresso : film.progresso;
+    return film.dove === 'cinema' ? progresso > 0 : progresso >= film.totaleSessioni;
+  };
+  const daFare = visibili.filter((f) => !completatoFilm(f));
+  const fatti = visibili.filter(completatoFilm);
+
+  /** La scheda di un titolo: la stessa nei due gruppi, quindi scritta una volta sola. */
+  const scheda = (film: FilmDto) => {
+    const titolo = nomeFilm(film);
+    const coda = partitaId ? chiaveCoda(partitaId, film.chiave) : film.chiave;
+    const progresso = partitaId ? desiderati[coda] ?? film.progresso : film.progresso;
+    const iniziato = progresso > 0;
+    const completato = film.dove === 'cinema' ? iniziato : progresso >= film.totaleSessioni;
+    const percentuale = film.dove === 'cinema' ? Number(iniziato) * 100 : Math.round((progresso / film.totaleSessioni) * 100);
+    return <li key={film.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${completato ? 'border-success/50' : ''}`}>
+      <div className="flex items-start gap-3">
+        <IconaCategoria categoria="film" dimensione={44} />
+        <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2>{film.nomeIt && film.nomeIt !== film.nome && <p className="m-0 text-xs text-text-muted">{film.nome}</p>}<p className="m-0 text-xs text-text-secondary">{film.periodo}</p></div>
+        <span className={`chip ${completato ? 'chip--attivo' : ''}`}>{completato ? 'Completato' : iniziato ? 'In corso' : film.dove === 'cinema' ? 'Da vedere' : 'Da iniziare'}</span>
+      </div>
+      <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{film.dove === 'cinema' ? `${progresso} ${progresso === 1 ? 'visione' : 'visioni'}` : `${progresso} di ${film.totaleSessioni} sessioni`}</span><span>{film.dove === 'cinema' ? 'Cinema' : 'DVD'}</span></div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={film.dove === 'cinema' ? Math.max(1, progresso) : film.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
+      {/* Due pulsanti larghi uguali: il gesto è la visione. In mezzo c'era «Completa», grande il
+          triplo, per una cosa che «+» fa comunque — e che al cinema vuol dire una sola visione. */}
+      {partitaId && <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${titolo}`}>
+        <button type="button" className="btn btn-secondary touch text-[18px]" disabled={progresso === 0} onClick={() => accoda(film, progresso - 1)} aria-label={`Togli una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`}>−</button>
+        <button type="button" className="btn btn-primary touch text-[18px]" disabled={film.dove === 'dvd' && progresso >= film.totaleSessioni} onClick={() => accoda(film, progresso + 1)} aria-label={`Aggiungi una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`}>+</button>
+        {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
+      </div>}
+      <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Effetto</dt><dd className="m-0">{film.dote ? `${NOME_DOTE[film.dote]}${film.note ? ` ${'♪'.repeat(Math.min(4, film.note))}` : ''}` : 'Bonus speciale'}</dd>{film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{film.prezzo.toLocaleString('it-IT')} ¥</dd></>}</dl>
+      {film.dettagli && <p className="m-0 text-xs text-text-secondary">{film.dettagli}</p>}
+      <div className="mt-auto flex flex-wrap items-center gap-2">
+        <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => { setSelezionato(film.chiave); setPosizioneSelezionata(0); }} aria-label={`Mostra posizione di ${titolo}`}>Mostra posizione</button>
+        <CorreggiElemento tipo="film" chiave={film.chiave} onSalvato={() => void dati.ricarica()} />
+        <a href={film.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>
+      </div>
+    </li>;
+  };
 
   return <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
     {d && <div className="flex flex-col gap-4">
@@ -142,34 +182,24 @@ export function FilmPage() {
         {posizione ? <DoveSiTrova tipo={posizione.tipo} chiave={posizione.chiave} titolo={posizione.etichetta} altezza={300} /> : <div className="card"><h3 className="m-0 text-base">Posizione non disponibile</h3><p className="mb-0 text-sm text-text-secondary">Non esiste ancora un punto territoriale verificato per questo titolo.</p></div>}
       </section>}
 
-      <p className="m-0 text-sm text-text-secondary">{visibili.length} titoli mostrati</p>
-      <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Film e DVD">
-        {visibili.map((film) => {
-          const titolo = nomeFilm(film);
-          const coda = partitaId ? chiaveCoda(partitaId, film.chiave) : film.chiave;
-          const progresso = partitaId ? desiderati[coda] ?? film.progresso : film.progresso;
-          const iniziato = progresso > 0;
-          const completato = film.dove === 'cinema' ? iniziato : progresso >= film.totaleSessioni;
-          const percentuale = film.dove === 'cinema' ? Number(iniziato) * 100 : Math.round((progresso / film.totaleSessioni) * 100);
-          return <li key={film.chiave} className={`card relative flex min-w-0 flex-col gap-3 overflow-hidden ${completato ? 'border-success/50' : ''}`}>
-            <div className="flex items-start gap-3">
-              <IconaCategoria categoria="film" dimensione={44} />
-              <div className="min-w-0 flex-1"><h2 className="m-0 text-lg leading-tight">{titolo}</h2>{film.nomeIt && film.nomeIt !== film.nome && <p className="m-0 text-xs text-text-muted">{film.nome}</p>}<p className="m-0 text-xs text-text-secondary">{film.periodo}</p></div>
-              <span className={`chip ${completato ? 'chip--attivo' : ''}`}>{completato ? 'Completato' : iniziato ? 'In corso' : film.dove === 'cinema' ? 'Da vedere' : 'Da iniziare'}</span>
-            </div>
-            <div><div className="mb-1 flex justify-between text-xs text-text-secondary"><span>{film.dove === 'cinema' ? `${progresso} ${progresso === 1 ? 'visione' : 'visioni'}` : `${progresso} di ${film.totaleSessioni} sessioni`}</span><span>{film.dove === 'cinema' ? 'Cinema' : 'DVD'}</span></div><div className="visore-mappa__progresso" role="progressbar" aria-label={`Progresso ${titolo}`} aria-valuemin={0} aria-valuemax={film.dove === 'cinema' ? Math.max(1, progresso) : film.totaleSessioni} aria-valuenow={progresso}><span className="visore-mappa__progresso-barra" style={{ width: `${percentuale}%` }} /></div></div>
-            {partitaId && <div className="grid grid-cols-[44px_1fr_44px] gap-2" aria-label={`Avanzamento ${titolo}`}>
-              <button type="button" className="btn btn-ghost touch" disabled={progresso === 0} onClick={() => accoda(film, progresso - 1)} aria-label={`Togli una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`}>−</button>
-              <button type="button" className="btn btn-secondary touch" onClick={() => accoda(film, completato ? 0 : film.totaleSessioni)} aria-label={`${completato ? 'Azzera' : film.dove === 'cinema' ? 'Segna prima visione' : 'Completa'} ${titolo}`}>{completato ? 'Azzera' : film.dove === 'cinema' ? 'Prima visione' : 'Completa'}</button>
-              <button type="button" className="btn btn-ghost touch" disabled={film.dove === 'dvd' && progresso >= film.totaleSessioni} onClick={() => accoda(film, progresso + 1)} aria-label={`Aggiungi una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`}>+</button>
-              {occupati[coda] && <span className="col-span-3 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
-            </div>}
-            <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Effetto</dt><dd className="m-0">{film.dote ? `${NOME_DOTE[film.dote]}${film.note ? ` ${'♪'.repeat(Math.min(4, film.note))}` : ''}` : 'Bonus speciale'}</dd>{film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{film.prezzo.toLocaleString('it-IT')} ¥</dd></>}</dl>
-            {film.dettagli && <p className="m-0 text-xs text-text-secondary">{film.dettagli}</p>}
-            <div className="mt-auto flex flex-wrap gap-2"><button type="button" className="btn btn-ghost btn-sm touch" onClick={() => { setSelezionato(film.chiave); setPosizioneSelezionata(0); }} aria-label={`Mostra posizione di ${titolo}`}>Mostra posizione</button><a href={film.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a></div>
-          </li>;
-        })}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="m-0 text-sm text-text-secondary">{visibili.length} titoli mostrati{fatti.length > 0 ? ` · ${daFare.length} da vedere` : ''}</p>
+        {/* Il catalogo si corregge mentre si gioca, e non solo nei Negozi: rilievo dell'utente. */}
+        <AggiungiAlCatalogo tipo="film" titolo="Aggiungi un film o un DVD" onSalvato={() => void dati.ricarica()} />
+      </div>
+      <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Film e DVD da vedere">
+        {daFare.map(scheda)}
       </ul>
+      {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">Nessun titolo da vedere con questi filtri.</p>}
+      {/* I completati in un gruppo chiuso: in partita si guarda quel che manca. */}
+      {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Film e DVD completati">
+        <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)}>
+          {mostraFatti ? 'Nascondi' : 'Mostra'} i completati · {fatti.length}
+        </button>
+        {mostraFatti && <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Film e DVD già completati">
+          {fatti.map(scheda)}
+        </ul>}
+      </section>}
     </div>}
   </PageState>;
 }

@@ -5,7 +5,7 @@
 // Test RichiestePage — elenco con filtri per stato e Dedalo, dettagli, stato per partita, sezione Jose
 // ============================================================
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { RichiestePage } from './RichiestePage';
 import { usePartitaStore } from '../stores/partitaStore';
@@ -26,17 +26,25 @@ describe('RichiestePage', () => {
     render(<MemoryRouter><RichiestePage /></MemoryRouter>);
     expect(await screen.findByText('Un ex piuttosto appiccicoso')).toBeInTheDocument();
     expect(getRichieste).toHaveBeenCalledWith(7);
-    expect(screen.getByText('Ryuji rango 2')).toBeInTheDocument();
+    expect(screen.getByText(/rango 2/)).toBeInTheDocument();
+    // Jose sta in un foglio suo: non piu' in coda alle Richieste, dove lo si trovava solo
+    // scorrendo fino in fondo (richiesta dell'utente).
+    expect(screen.queryByRole('heading', { name: 'Jose: fiori, timbri e scambi' })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Jose: fiori e scambi' }));
     expect(screen.getByRole('heading', { name: 'Jose: fiori, timbri e scambi' })).toBeInTheDocument();
     expect(screen.getByText('Fiala')).toBeInTheDocument();
+    expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Le Richieste' }));
+    expect(screen.getByText('Un ex piuttosto appiccicoso')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('combobox', { name: 'Dedalo' }), { target: { value: 'Dedalo di Aiyatsbus' } });
     expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
     fireEvent.change(screen.getByRole('combobox', { name: 'Dedalo' }), { target: { value: '' } });
-    fireEvent.click(screen.getByRole('button', { name: /Un ex piuttosto appiccicoso/ }));
-    expect(screen.getByRole('link', { name: 'Apri il Dedalo' })).toHaveAttribute('href', '/guida/dungeon/mementos?area=mementos-01-qimranut');
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Completata' })); });
+    // I comandi e il collegamento al Dedalo stanno sulla carta, non dentro una piega da aprire.
+    const carta = within(screen.getByText('Un ex piuttosto appiccicoso').closest('li')!);
+    expect(carta.getByRole('link', { name: 'Apri il Dedalo' })).toHaveAttribute('href', '/guida/dungeon/mementos?area=mementos-01-qimranut');
+    await act(async () => { fireEvent.click(carta.getByRole('button', { name: 'Completata' })); });
     expect(impostaStatoRichiesta).toHaveBeenCalledWith(7, 'a', 'completata');
-    expect(await screen.findByText(/1 completate/)).toBeInTheDocument();
+    expect(await within(screen.getByText('Un ex piuttosto appiccicoso').closest('li')!).findByText('completata')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Da fare' }));
     expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
     expect(screen.getByText('Bullismo sui bulli')).toBeInTheDocument();
