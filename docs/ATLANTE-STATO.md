@@ -1647,3 +1647,45 @@ Due osservazioni, nessuna delle quali cambia l'esito:
    crescesse di un ordine di grandezza.
 2. Il conteggio degli articoli per negozio ora fa una lettura sola per tutta la pagina invece di
    una per negozio: è meglio di prima, non peggio.
+
+---
+
+# Il lotto A è chiuso — `candidato/lotto-a-mondo-v2`
+
+Tutte le pagine del mondo sono rifatte e verificate a schermo. Il tag precedente
+(`candidato/lotto-a-mondo`) è superato: **si giudica questo**.
+
+| pagina | cosa è cambiato |
+|---|---|
+| `CittaPage` | una sola Tokyo; schede e mappa si accendono a vicenda; sagome al posto delle miniature vuote; i quartieri chiusi restano un pallino |
+| `MappaTokyo` | riquadro definito, zoom e trascinamento; zero sovrapposizioni misurate; il clic apre l'ingresso configurato |
+| `DungeonPage` | «Palazzi», nove schede, niente collegamento ridondante fuori dal riquadro |
+| `DungeonDettaglioPage` | rifatta: linea del tempo, aree come elenco, tre colonne progressive — e la mappa dell'area, che non compariva mai |
+| `MappaPage` | indice a griglia con anteprime; il ramo «senza planimetria» non è più tre collegamenti nudi |
+| `QuartierePage` | mappa e luoghi affiancati; l'ingresso è la didascalia della mappa |
+| `AccessoMondoPage` | dice che cosa si cerca; ogni scelta porta l'anteprima della planimetria |
+| `VisoreMappa` | quel che è bloccato non c'è, e non c'è modo di riaprirlo |
+
+E i due rilievi di Codex chiusi: filtro positivo `tipo === 'palazzo'`, e le riaperture dei
+bloccati — comprese quella da indirizzo, che lui non aveva nominato ma c'era.
+
+**585 test verdi, typecheck e lint puliti.** Verificato nel browser a 375, 768, 1280 e 1440 px.
+
+## Quel che resta, e non è nascosto
+
+1. **Il Covo dei Ladri non ha una figura sulla mappa** — voce 4 di `docs/grafica/fabbisogno.md`,
+   prompt scritto, da verificare a Codex e poi da generare. Quando arriva va rifatta la prova
+   delle sovrapposizioni, perché il riquadro del Covo cambia.
+2. **Gli otto colori di spillo troppo chiari** — non è grafica, è una riga di `shared/spilli.ts`,
+   ed è una scelta dell'utente.
+3. **Un confine da chiarire con Codex.** Lui ha riportato la regola dell'utente come «una voce
+   bloccata non deve comparire affatto: né lista, né ricerca, né azione di mappa/pin», e per
+   negozi e articoli l'ha applicata così. Io per i **quartieri** ho tenuto la scheda in elenco con
+   scritto «Non ancora aperto», e li ho tolti solo dalla mappa — che è la lettera di quel che
+   l'utente ha chiesto a me («non va visualizzato **in mappa**»). La ragione è che un quartiere non
+   è merce: sapere che Kichijoji esiste e apre il 5 giugno è metà del motivo per cui si consulta
+   una guida, mentre un articolo che non puoi comprare è solo rumore. Se la regola vale uguale per
+   tutti, tolgo anche le schede — ma è una decisione, non un dettaglio, e la lascio all'utente.
+4. **`OggiMappa`** monta ancora il visore dell'atlante su `tokyo` dentro la pagina Partita. Codex
+   dice di tenerlo perché lì è operativo e contestuale all'azione del giorno, non una seconda
+   rappresentazione editoriale. **Sono d'accordo con lui** e chiudo il rilievo che avevo aperto io.
