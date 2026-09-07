@@ -23,6 +23,7 @@ import { runMigrations } from './db/migrationRunner.js';
 import { createApp } from './bootstrap.js';
 import { caricaSeed } from './services/seed/caricaSeed.js';
 import { sincronizzaCondizioniLetture } from './db/migrations/052_condizioni_letture_attivita.js';
+import { traduciNomiSpilli } from './db/migrations/053_nomi_spilli_in_italiano.js';
 
 try {
   initDb();
@@ -50,6 +51,10 @@ try {
   // centosei righe, la riscrittura è idempotente e tocca solo quelle della guida: si rifà a ogni
   // avvio, e le condizioni scritte da te restano come le hai scritte.
   sincronizzaCondizioniLetture(initDb());
+  // Stesso motivo, altro dato: gli spilli che l'estrazione non ha saputo identificare portano il
+  // nome giapponese dello sprite, e un reseed dell'atlante lo riporterebbe.
+  const tradotti = traduciNomiSpilli(initDb());
+  if (tradotti > 0) logger.info({ spilli: tradotti }, 'nomi degli spilli non identificati resi in italiano');
 } catch (err) {
   console.error('[project-p5r] FATALE: caricamento del seed fallito:', err);
   process.exit(1);
