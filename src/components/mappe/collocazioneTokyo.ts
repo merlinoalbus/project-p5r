@@ -144,7 +144,7 @@ export const RADICI_TOKYO: Record<string, Collocazione> = {
  *
  * Sta nell'angolo libero in basso a sinistra e non addosso a Yongen-Jaya, dove copriva Chinatown:
  * è un rifugio, non una fermata, e l'utente ha detto che può stare in un'area sgombra. */
-export const COVO_TOKYO: Collocazione = { x: 13, y: 92, scala: 4.6 };
+export const COVO_TOKYO: Collocazione = { x: 13, y: 89.5, scala: 4.6 };
 
 /** I quartieri che stanno sulla mappa del gioco ma non sono una scheda dell'app.
  *

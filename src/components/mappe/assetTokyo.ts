@@ -33,7 +33,23 @@ export function assetPalazzo(chiave: string): string {
   return `/asset/palazzi/${encodeURIComponent(chiave)}.png`;
 }
 
-/** Ripiego neutro: l'immagine sparisce, non ne compare un'altra. */
+/** Il Covo dei Ladri, la soffitta del Leblanc.
+ *
+ * È l'unico elemento della mappa senza una figura originale, e non è una dimenticanza: nel gioco
+ * il Covo è una schermata del menu di Royal, non una fermata della metropolitana, quindi nel
+ * foglio degli sprite non c'è e non ci può essere — verificato sui 160 elementi nominati di
+ * `P5_MAPDATA.SPD`. La sagoma è la voce 4 di `docs/grafica/fabbisogno.md`, e finché non arriva
+ * questo indirizzo punta a un file che non esiste: l'immagine si toglie da sola e resta la targa,
+ * che è quel che c'era prima. */
+export function assetCovoLadri(): string {
+  return `${BASE_TOKYO}/covo-dei-ladri.png`;
+}
+
+/** Ripiego neutro: l'immagine sparisce **dal flusso**, non ne compare un'altra.
+ *
+ * `display: none` e non `visibility: hidden`, che lascerebbe il posto vuoto: sul cartellino la
+ * figura sta sopra la targa, e uno spazio riservato a un'immagine che non c'è si vede come un
+ * buco. Così invece la targa sale al suo posto e il cartellino resta un cartellino. */
 export function nascondiSagomaAssente(e: SyntheticEvent<HTMLImageElement>): void {
-  e.currentTarget.style.visibility = 'hidden';
+  e.currentTarget.style.display = 'none';
 }
