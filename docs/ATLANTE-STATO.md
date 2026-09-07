@@ -1382,3 +1382,36 @@ Comandi per rifarlo:
 npm run typecheck && npm run lint && npm test -- --run
 npx vitest run src/pages/DungeonPage.test.tsx src/pages/GuidaPage.test.tsx
 ```
+
+---
+
+# Punto 2 — la Città mostrava Tokyo due volte
+
+`CittaPage` montava in fila `MappaTokyo` **e** `MappaIncorporata chiave="tokyo"`: la stessa città
+due volte, con due interazioni e due gerarchie visive, e nessun modo di capire quale delle due
+risposte valesse. La seconda è via. `MappaTokyo` **è** la mappa di Tokyo, non un di più.
+
+E `Mappe → Tokyo` non apre più il visore alternativo. Sono due cose, non una:
+
+- la **voce dell'indice** punta a `/guida/citta`, così il collegamento non rimbalza sotto gli occhi
+  di chi lo clicca;
+- la **rotta** `/guida/mappe/tokyo` reindirizza comunque, prima e dopo `RisolviMappa`, perché i
+  modi di arrivarci sono tanti — le briciole del visore, «Torna a Tokyo», un indirizzo salvato — e
+  devono finire tutti nello stesso posto. Il nodo `tokyo` dell'atlante resta: è il genitore dei
+  quartieri, e senza di lui l'albero non sta in piedi. Non è più una *destinazione*, è un ramo.
+
+Due test di `MappaPage` usavano Tokyo come esempio di una regola che non parla di Tokyo (il
+contenitore senza immagine; l'asset senza dimensioni registrate): spostati su
+`dungeon-kamoshida`, così la regola resta coperta e l'esempio non mente.
+
+**Resta aperto, e lo segnalo invece di allargare da solo lo scope:** `src/components/partita/
+OggiMappa.tsx` (via `useOggi`) monta ancora il visore dell'atlante sulla chiave `tokyo` dentro la
+pagina Partita, con «Torna a Tokyo». È la stessa duplicazione, in un'altra pagina. Lì però il
+visore serve a qualcosa che `MappaTokyo` oggi non fa — gli spilli del giorno — quindi va deciso,
+non tolto d'ufficio.
+
+**Verificato a schermo:** `/guida/citta` ha una sola mappa di Tokyo e nessun `visore-mappa`;
+`Mappe → Tokyo` ha `href="/guida/citta"`; `/guida/mappe/tokyo` digitato a mano finisce su
+`/guida/citta`.
+
+**Verde:** 578 test, typecheck e lint puliti.
