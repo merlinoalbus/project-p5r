@@ -2070,3 +2070,76 @@ script scarta i pezzi non resi e li dichiara a parte (`nonResi`).
 
 **Verde:** tre cicli consecutivi typecheck + lint + suite completa, **601/601** ogni volta, più
 `npm run build`.
+
+---
+
+# Verifica del candidato `candidato/lotto-b-libri-v1` di Codex
+
+Commit `4e31e40`, verificato in sola lettura nel worktree `C:\Repository\p5r-verifica` con backend e
+frontend propri (3103 e 5275), su un database separato. **Verdetto: PASS.**
+
+## Il contratto, punto per punto
+
+| punto dichiarato | esito |
+|---|---|
+| 46 volumi, pagina autonoma `/guida/libri` | **passa** — 46 righe rese, titolo, KPI, filtri per stato e per Dote |
+| avanzamento a sessioni persistente | **passa** — `+`, `−` e «Completa» scrivono, e il valore sopravvive al ricaricamento |
+| completamento canonico **solo al totale** | **passa** — a 1 di 2 lo stato è «In corso» e i completati restano 0; a 2 di 2 diventa «Completato» e il contatore sale |
+| revoca e ricompletamento | **passa** — da 2 a 1 torna «In corso» e il KPI scende; da 1 a 2 risale. Nessuna traccia rimasta |
+| idempotenza | **passa** — la stessa scrittura ripetuta non cambia nulla, e 20 richieste concorrenti sullo stesso libro convergono a uno stato coerente |
+| isolamento per partita | **passa** — completato nella partita 5, la partita 6 resta a 0 |
+| limiti | **passa** — avanzamento 3 su 2 → `avanzamento-non-valido` col messaggio giusto; −1 respinto dalla validazione |
+| provenienze territoriali col pannello | **passa** — 11 posizioni su 17 campionate risolvono a uno spillo reale, e l'ancora porta il pin: `?spillo=205`, `?spillo=1760` |
+| redirect dal vecchio tab | **passa** — `/guida/attivita?scheda=libri` → `/guida/libri` |
+| le 46 righe sommano a 74 e non 75 | **passa, e va dato atto**: la discrepanza è dichiarata invece che aggiustata. La somma misurata sull'API è 74 |
+| adattamento | **passa** — 375, 768 e 1440 px senza scorrimento orizzontale |
+
+## Tre cose trovate, e **due sono mie**
+
+Il punto della verifica incrociata è questo: guardando il suo lavoro sono venuti fuori difetti del
+mio.
+
+**1. «MODIFICA MAPPA» dentro una pagina di lettura — difetto mio, corretto.** Nel pannello «Mostra
+posizione» dei Libri compariva un pulsante che porta all'editor dell'atlante. Il primo istinto è
+stato scriverlo come rilievo per Codex; poi ho guardato da dove viene, ed è
+`MappaIncorporata` — **mio**, usato attraverso `DoveSiTrova` — **mio**. In `CittaPage` l'avevo già
+tolto, ma per un'altra strada (togliendo del tutto quel visore), quindi il difetto era rimasto in
+piedi ovunque si usi il pannello: Libri, Negozi, Attività.
+
+Corretto con `conEditor`, predefinito `true`. Le pagine dell'atlante — Quartiere, Palazzo — tengono
+il pulsante, perché lì si sta curando la mappa; `DoveSiTrova` lo spegne, perché lì il visore è
+**citato** dentro un'altra pagina e chi legge dove si compra un libro non sta curando l'atlante.
+Verificato a schermo: `/guida/citta/shibuya` e `/guida/dungeon/kamoshida` hanno ancora il
+collegamento, `/guida/negozi/libreria-taiheido` e `/guida/negozi/untouchable` non ce l'hanno più.
+
+**2. La biblioteca della Shujin non è uno spillo — lacuna dell'atlante, mia.** Per i libri della
+biblioteca scolastica il pannello apre la mappa di Shujin senza pin, perché
+`/api/mappe/accesso/luogo/shujin-academy/biblioteca-shujin` risponde `spillo: null`: su quella
+mappa esistono due soli spilli, il passaggio al Palazzo e i distributori. Il pannello si comporta
+bene — mostra la mappa giusta e la intitola «Biblioteca della Shujin Academy» — ma l'ancora non
+c'è perché nell'atlante non c'è il posto. **Non è un difetto dei Libri**, è una voce mancante
+dell'atlante, e la registro qui come lavoro mio.
+
+**3. La suite non regge due esecuzioni contemporanee — difetto condiviso, dell'infrastruttura.**
+La prima esecuzione della suite sul suo tag ha dato **603/604**; le quattro successive 604/604.
+Invece di archiviarlo come «rumore» l'ho riprodotto: due suite in parallelo fanno fallire
+`caricaSeed.test.ts` e `mappe-editor.test.ts` con `Test timed out in 5000ms`. Sono test che
+caricano il seed intero (232 Persona, 525 skill) e da soli stanno sui 3,6 s: sotto carico doppio
+sforano.
+
+**Non è suo**: l'ho riprodotto anche sul mio ramo, che i Libri non ce li ha, e lì cade
+`conservazione.test.ts` per la stessa ragione. È un difetto che ci riguarda tutti e due, e ha una
+conseguenza pratica: **«tre cicli verdi» non è una prova se l'altro sta girando la sua suite nello
+stesso momento.** Il rimedio è un `testTimeout` più largo per i test che caricano il seed, in
+`vitest.config.ts` — file condiviso, quindi lo propongo invece di cambiarlo.
+
+**Una nota di metodo, sull'infrastruttura condivisa.** `vite.config.ts` ha il bersaglio del proxy
+scritto fisso su `localhost:3101`. Avviando il frontend di verifica con la configurazione normale,
+avrei interrogato — e potenzialmente modificato — **il backend di Codex**, che in quel momento
+stava lavorando proprio su 3101. Me ne sono accorto perché il proxy ha risposto con dati che non
+erano del mio database. Ho fermato subito e sono ripartito con una configurazione separata, e
+propongo che quel bersaglio diventi una variabile d'ambiente: finché è una costante, la verifica in
+parallelo dipende dal fatto che nessuno dei due se ne dimentichi.
+
+**Verde sul mio ramo dopo la correzione:** tre cicli typecheck + lint + suite completa, 601/601
+ogni volta, più `npm run build`.

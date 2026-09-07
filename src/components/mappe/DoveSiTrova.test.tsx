@@ -64,6 +64,10 @@ describe('DoveSiTrova', () => {
     expect(argomentiVisore).toHaveLength(1);
     expect(argomentiVisore[0]).toMatchObject({
       chiave: 'citta-shibuya', spilloIniziale: 42, puntoIniziale: { x: 31.5, y: 62.25, zoom: 3 },
+      // Senza l'editor: il visore qui è citato dentro un'altra pagina, e «Modifica mappa» invita a
+      // curare l'atlante da dove si sta leggendo un libro o un negozio. Difetto visto a schermo
+      // nella pagina Libri di Codex, ma il pulsante veniva da questo componente.
+      conEditor: false,
     });
     expect(screen.getByRole('link', { name: /Apri sull’atlante/ }))
       .toHaveAttribute('href', '/guida/mappe/citta-shibuya?spillo=42&x=31.5&y=62.25&zoom=3');
