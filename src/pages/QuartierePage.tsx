@@ -111,7 +111,13 @@ export function QuartierePage() {
 
           <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <section className="flex flex-col gap-1.5 xl:sticky xl:top-2" aria-label={`Mappa di ${q.nome}`}>
-              {(q.ingresso?.mappa || q.mappaChiave) && <MappaIncorporata chiave={q.ingresso?.mappa ?? q.mappaChiave ?? ''} puntoIniziale={q.ingresso} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(420px, min(64vh, 740px))" />}
+              {/* La mappa si apre **adattata e centrata**, come tutte le altre.
+                  Prima riceveva `puntoIniziale={q.ingresso}` e partiva ingrandita su quel punto:
+                  ma l'ingresso serve a chi **arriva** cliccando il quartiere sulla mappa di Tokyo
+                  — è lì che si vuole atterrare sul posto giusto — non a chi è già dentro la
+                  pagina del quartiere e vuole vederlo tutto. Quale planimetria mostrare resta
+                  deciso dall'ingresso; da dove guardarla, no. */}
+              {(q.ingresso?.mappa || q.mappaChiave) && <MappaIncorporata chiave={q.ingresso?.mappa ?? q.mappaChiave ?? ''} versione={scaricata ? download.dati?.byte ?? 0 : 0} altezza="max(420px, min(64vh, 740px))" />}
               <div className="flex flex-wrap items-center gap-2 text-[12px] text-text-muted">
                 {q.ingresso ? <span>Si apre su <strong className="text-text-secondary">{q.ingresso.nome}</strong>, nel punto che hai scelto.</span> : q.pianta ? (
                   <span>Mappa da <a href={q.pianta.pagina ?? q.pianta.url} target="_blank" rel="noreferrer" className="credito">{q.pianta.fonte}</a>, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}. Spilli e immagine si modificano dall’editor.</span>
