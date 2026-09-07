@@ -124,8 +124,13 @@ export const LINEE_TOKYO: Linea[] = [
  * 38 sovrapposizioni contate all'inizio — targhe l'una sull'altra e sopra i quartieri. La prova si
  * rifà con lo script in `docs/MAPPE.md`.
  *
- * `dungeon-mementos` non c'è più: i Memento sono fuori dall'atlante e non hanno un ingresso sulla
- * mappa di viaggio. */
+ * **`dungeon-mementos` è tornato.** L'avevo tolto scrivendo che «i Memento non hanno un ingresso
+ * sulla mappa di viaggio»: vero, e irrilevante, perché non ce l'hanno nemmeno i cinque Palazzi del
+ * Meta-Nav qui sotto né il Covo, e stanno tutti sulla mappa. L'utente li aveva chiesti per nome —
+ * «il Covo dei Ladri e i mementos possono essere posizionati in aree libere» — la loro finestra è
+ * già in `finestre-dungeon.json` (dal 9 maggio, e non si chiude) e la sagoma esiste. Stanno
+ * accanto a Iweleth sul bordo, che è il posto di ciò che si apre col Meta-Nav e non da una
+ * fermata. Il perché della confusione è scritto in `src/utils/palazzi.ts`. */
 export const RADICI_TOKYO: Record<string, Collocazione> = {
   // i quattro con un posto dichiarato, accanto al loro quartiere
   'dungeon-kamoshida': { x: 53.5, y: 43, scala: 4.5 },
@@ -138,6 +143,8 @@ export const RADICI_TOKYO: Record<string, Collocazione> = {
   'dungeon-shido': { x: 84, y: 5, scala: 4.2 },
   'dungeon-maruki': { x: 93, y: 5, scala: 4.2 },
   'dungeon-iweleth': { x: 93, y: 17, scala: 4.2 },
+  // i Memento, che col Meta-Nav si aprono da ovunque: accanto a Iweleth, nello stesso gruppo
+  'dungeon-mementos': { x: 82.5, y: 17, scala: 4.2 },
 };
 
 /** Il Covo dei Ladri: la soffitta del Leblanc, a Yongen-Jaya.

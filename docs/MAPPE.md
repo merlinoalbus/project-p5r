@@ -288,16 +288,20 @@ window.__misuraTokyo = () => {
     if (figli.length === 0) { pezzi.push({ nome, tipo: 'targa', r: a.getBoundingClientRect() }); continue; }
     for (const c of figli) pezzi.push({ nome, tipo: c.tagName === 'IMG' ? 'figura' : 'targa', r: c.getBoundingClientRect() });
   }
+  // I disegni che ancora non esistono si nascondono da soli (`nascondiSagomaAssente`) e misurano
+  // 0×0 all'origine: contarli fa apparire un «fuori dalla tela» che non c'è. È successo con la
+  // sagoma del Covo, che arriva dalla voce 4 di `docs/grafica/fabbisogno.md`.
+  const vivi = pezzi.filter((p) => p.r.width > 0 && p.r.height > 0);
   const sovr = [];
-  for (let i = 0; i < pezzi.length; i++) for (let j = i + 1; j < pezzi.length; j++) {
-    const A = pezzi[i], B = pezzi[j];
+  for (let i = 0; i < vivi.length; i++) for (let j = i + 1; j < vivi.length; j++) {
+    const A = vivi[i], B = vivi[j];
     if (A.nome === B.nome) continue;
     const w = Math.min(A.r.right, B.r.right) - Math.max(A.r.left, B.r.left);
     const h = Math.min(A.r.bottom, B.r.bottom) - Math.max(A.r.top, B.r.top);
     if (w > 1 && h > 1) sovr.push(`${A.nome}/${A.tipo} × ${B.nome}/${B.tipo} = ${Math.round(w)}×${Math.round(h)}px`);
   }
-  const fuori = pezzi.filter((p) => p.r.left < b.left - 1 || p.r.right > b.right + 1 || p.r.top < b.top - 1 || p.r.bottom > b.bottom + 1);
-  return { larghezza: Math.round(b.width), pezzi: pezzi.length, sovrapposizioni: sovr.length, elenco: sovr, fuoriDallaTela: fuori.map((p) => `${p.nome}/${p.tipo}`) };
+  const fuori = vivi.filter((p) => p.r.left < b.left - 1 || p.r.right > b.right + 1 || p.r.top < b.top - 1 || p.r.bottom > b.bottom + 1);
+  return { larghezza: Math.round(b.width), pezzi: vivi.length, nonResi: pezzi.length - vivi.length, sovrapposizioni: sovr.length, elenco: sovr, fuoriDallaTela: fuori.map((p) => `${p.nome}/${p.tipo}`) };
 };
 window.__misuraTokyo();
 ```
@@ -322,6 +326,12 @@ if (!window.__patchMisura) {
 
 Poi si ricarica la pagina e si rimisura. **Atteso: `sovrapposizioni: 0` e `fuoriDallaTela: []`** a
 375, 820, 1280 e 1440 px di finestra.
+
+Ultima misura: 7 settembre 2026, con i Memento rimessi sulla mappa — 53 pezzi resi (`nonResi: 1`,
+la sagoma del Covo che ancora non c'è), **0 sovrapposizioni e 0 fuori dalla tela a tutte e quattro
+le larghezze**. La patch va applicata **senza ricaricare** con un `location.reload()`, che la
+cancellerebbe: si naviga altrove e si torna, così le chiamate ripartono attraverso il `fetch`
+sostituito.
 
 Perché una sola tabella di posizioni basta a tutte le larghezze: il corpo delle targhe è in `cqw`,
 cioè in frazioni della tela, e non in pixel a scaglioni. Con una misura fissa la targa cresceva in

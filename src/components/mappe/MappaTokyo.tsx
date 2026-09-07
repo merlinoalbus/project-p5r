@@ -255,8 +255,10 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       const f = d.finestra;
       segni.push({
         chiave: `dungeon-${d.chiave}`, nome: d.nome, targa: nomeSullaTarga(d.nome),
-        // I Palazzi non stanno nel foglio della mappa di viaggio — nel gioco lì non compaiono — e
-        // tengono la loro illustrazione, che l'utente ha chiesto di lasciare com'è.
+        // Le radici del Metaverso — i nove Palazzi e i Memento — non stanno nel foglio della mappa
+        // di viaggio, perché nel gioco lì non compaiono, e tengono la loro illustrazione, che
+        // l'utente ha chiesto di lasciare com'è. La targa scura le distingue dai quartieri: sono
+        // posti dell'altro mondo, non fermate del treno.
         src: assetPalazzo(d.chiave), dove, palazzo: true,
         href: `/guida/mondo/dungeon/${encodeURIComponent(d.chiave)}`,
         presente: !dataGioco || !f || dentroFinestra(dataGioco, f.dal, f.al),

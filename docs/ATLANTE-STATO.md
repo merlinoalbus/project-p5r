@@ -2006,3 +2006,67 @@ lunghi e due colonne strette sarebbero peggio di due elenchi.
 
 **Verde:** tre cicli consecutivi typecheck + lint + suite completa, **597/597** ogni volta, più
 `npm run build`.
+
+---
+
+# I Memento tornano sulla mappa di Tokyo: una regola che si smentiva da sola
+
+Rileggendo il piano per capire che cosa restasse davvero aperto ho trovato una mia decisione che
+contraddice un'istruzione esplicita dell'utente. Le sue parole, del 6 settembre:
+
+> nella mappa di tokyo aggiungi i PNG posizionati a dovere dei palazzi quando attivi e del covo
+> fantasma e **delle altre mappe root quando attive**
+>
+> Il Covo dei Ladri e **i mementos** possono essere posizionati in aree libere dal resto delle
+> linee di tokio
+
+I Memento non c'erano. Li avevo tolti io, con questa motivazione scritta in
+`collocazioneTokyo.ts`: «i Memento sono fuori dall'atlante e non hanno un ingresso sulla mappa di
+viaggio».
+
+**La motivazione è vera e non regge**, perché vale identica per cose che sulla mappa ci sono: i
+cinque Palazzi del Meta-Nav non hanno un ingresso su nessuna fermata — è scritto tre righe sopra,
+ed è il motivo per cui stanno sul bordo di nord-est — e il Covo nemmeno, che si apre da menu. Una
+regola che esclude i Memento e ammette quei sei non è una regola: è un'eccezione travestita.
+
+## Come ci sono arrivato: un filtro usato per due domande diverse
+
+La causa tecnica è precisa. `soloPalazzi` era nato per l'**elenco** dei Palazzi, dove i Memento
+giustamente non stanno: non si visitano per aree, i piani sono generati a ogni discesa, e chi ci
+arrivava dall'indice trovava planimetrie di strutture fisse senza contesto. Poi `CittaPage` ha
+riusato lo stesso filtro per decidere **il contenuto della mappa**, che risponde a tutt'altra
+domanda: non «cosa posso visitare per aree» ma «dove posso andare oggi».
+
+Un solo filtro per due domande dà la risposta giusta a una e sbagliata all'altra, e la sbagliata
+non si vede: la mappa continuava a funzionare, semplicemente senza un pezzo.
+
+Ora i filtri sono due, entrambi per inclusione, entrambi condivisi: `soloPalazzi` per l'elenco,
+`radiciMetaverso` per la mappa. Il perché sta scritto in `src/utils/palazzi.ts`, dove chiunque
+riapra il file trova la distinzione prima del codice.
+
+## Il resto c'era già
+
+Non ho dovuto inventare nulla: la finestra dei Memento è in `finestre-dungeon.json` da sempre
+(**dal 9 maggio, e non si chiude**), la sagoma è `public/asset/palazzi/mementos.png`, e
+`/api/mappe/accesso/dungeon/mementos` risolve già alla mappa `memento`. Mancava solo la
+collocazione, che ho messo accanto a Iweleth — nel gruppo di ciò che si apre col Meta-Nav e non da
+una fermata — a `x 82.5, y 17`.
+
+## Prove
+
+**La finestra, misurata al giorno esatto** sulla partita di prova: al 05-08 il cartellino non c'è,
+al 05-09 c'è, con targa «MEMENTO» e collegamento `/guida/mondo/dungeon/mementos`. La partita è
+stata rimessa al 04-11, com'era. La stessa cosa è ora fissata da una prova in
+`CittaPage.test.tsx`, che monta la pagina ai due giorni e controlla tutte e due le direzioni.
+
+**Le sovrapposizioni, rifatte nel caso peggiore** (tutte le date tolte, 27 cartellini, 53 pezzi
+resi): **0 sovrapposizioni e 0 fuori dalla tela a 375, 820, 1280 e 1440 px**.
+
+Nel rifarle ho corretto anche lo script di `docs/MAPPE.md`: contava fra i pezzi anche i disegni
+**non ancora esistenti**, che si nascondono da soli e misurano 0×0 all'origine, e per questo
+segnalava la sagoma del Covo come «fuori dalla tela». Era un falso positivo, e un falso positivo in
+uno strumento di misura è peggio di nessuno strumento: la prossima persona lo insegue. Ora lo
+script scarta i pezzi non resi e li dichiara a parte (`nonResi`).
+
+**Verde:** tre cicli consecutivi typecheck + lint + suite completa, **601/601** ogni volta, più
+`npm run build`.
