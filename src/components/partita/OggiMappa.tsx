@@ -58,7 +58,7 @@ export function OggiMappa({ oggi, riempi }: Props) {
           quartieri={quartieri.dati ?? []}
           dungeon={dungeon.dati ?? []}
           dataGioco={attiva?.dataGioco ?? null}
-          onApri={(href) => { const k = chiaveMappaDaHref(href); if (k) oggi.apriMappa(k); }}
+          onApri={(href) => { const k = chiaveMappaDaHref(href); if (!k) return false; oggi.apriMappa(k); return true; }}
         />
       ) : (
         <MappaIncorporata

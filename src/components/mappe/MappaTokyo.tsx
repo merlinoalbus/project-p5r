@@ -58,9 +58,15 @@ interface Props {
    *  scheda corrispondente, perché mappa e schede sono **una** selezione vista in due modi. */
   evidenziato?: string | null;
   onEvidenzia?: (chiave: string | null) => void;
-  /** Se c'e', il clic su un cartellino non cambia pagina: chiama questa con l'indirizzo, e chi
-   *  ospita la mappa decide che farne (la scheda «Oggi» ci scende di livello senza uscire). */
-  onApri?: (href: string) => void;
+  /** Se c'e', il clic su un cartellino passa di qui prima di cambiare pagina: chi ospita la mappa
+   *  decide che farne (la scheda «Oggi» ci scende di livello senza uscire).
+   *
+   *  **Restituisce `true` solo se l'ha davvero gestito.** Non tutti i posti della mappa hanno una
+   *  planimetria d'atlante da aprire lì dentro: il Covo dei Ladri porta alla sua pagina della
+   *  guida, i Memento e i Palazzi alla loro scheda. Quando l'ospite risponde `false` il clic
+   *  resta quello di un collegamento normale e la pagina cambia — prima veniva annullato comunque
+   *  e quei cartellini non facevano niente. */
+  onApri?: (href: string) => boolean;
   className?: string;
 }
 
@@ -96,7 +102,7 @@ interface Segno {
  * calendario, o fermate che la guida non ha come scheda — restano il solo pallino bianco della
  * rete: una figura con la targa dice «vieni qui», e dirlo a proposito di un posto dove non si può
  * entrare è una promessa che la mappa non mantiene. Il nome resta comunque, sul pallino. */
-function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string) => void }) {
+function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string) => boolean }) {
   const filtro = acceso ? CONTORNO_ORO : CONTORNO;
   // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
   // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
@@ -106,7 +112,7 @@ function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: bool
   // del giorno.
   return <Link
     to={s.href}
-    onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); onApri(s.href); } } : undefined}
+    onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0 && onApri(s.href)) e.preventDefault(); } : undefined}
     className={`group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
     style={{ left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` }}
     title={s.quando ? `${s.nome} — ${s.quando}` : s.nome}
