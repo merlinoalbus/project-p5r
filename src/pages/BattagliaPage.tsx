@@ -15,6 +15,7 @@ import type { BattagliaDto, OmbraDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { ElementoChip } from '../components/compendio/ElementoChip';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { FregioSezione } from '../components/shared/FregioSezione';
 import { chiaveElementoDaTesto } from '../utils/elementiGuida';
 
 /** Le cinque schede, ognuna con la sua icona.
@@ -133,7 +134,8 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
   const n = d.negoziazione;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card flex flex-col gap-2">
+      <section className="card card--con-fregio flex flex-col gap-2">
+        <FregioSezione chiave="battaglia-negoziazione" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
         <Dati colonne={2}>
@@ -163,7 +165,8 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
           </section>
         ))}
       </div>
-      <section className="card flex flex-col gap-1">
+      <section className="card card--con-fregio flex flex-col gap-1">
+        <FregioSezione chiave="battaglia-regole" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Regole</h2>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
         {n.incertezze && <p className="m-0 text-text-muted text-[12px]">{n.incertezze}</p>}
@@ -184,7 +187,8 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
           <tbody>{d.tecnico.stati.map((s) => <tr key={s.stato}><td data-etichetta="Stato"><strong>{s.stato}</strong></td><td data-etichetta="Tecnico con">{s.elementi.join(', ')}</td><td data-etichetta="Effetto" className="text-text-secondary">{effetti.get(s.stato) ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
-      <section className="card flex flex-col gap-2">
+      <section className="card card--con-fregio flex flex-col gap-2">
+        <FregioSezione chiave="battaglia-tecnico" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Esiti del colpo</h2>
         <Dati>
           {Object.entries(d.sistema.esitiColpo).map(([k, v]) => <Voce key={k} titolo={k === 'block' ? 'Block' : k.charAt(0).toUpperCase() + k.slice(1)}>{v}</Voce>)}
@@ -201,7 +205,8 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card flex flex-col gap-2">
+      <section className="card card--con-fregio flex flex-col gap-2">
+        <FregioSezione chiave="battaglia-staffetta" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Staffetta</h2>
         <p className="m-0">{s.cosaE}</p>
         <Dati>
@@ -217,7 +222,8 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         </div>
         <Fonte url={s.urlFonte} />
       </section>
-      <section className="card flex flex-col gap-2">
+      <section className="card card--con-fregio flex flex-col gap-2">
+        <FregioSezione chiave="battaglia-speciali" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2>
         <p className="m-0">{sp.meccanica}</p>
         <Dati colonne={2}>
@@ -232,7 +238,8 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         </div>
         <Fonte url={sp.urlFonte} />
       </section>
-      <section className="card flex flex-col gap-2">
+      <section className="card card--con-fregio flex flex-col gap-2">
+        <FregioSezione chiave="battaglia-assalto" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2>
         <Dati>
           <Voce titolo="Rapina">{a.rapina}</Voce>
@@ -251,43 +258,53 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card flex flex-col gap-1">
-        <h2 className="m-0 text-[15px] font-semibold">Ombre sciagura <span className="text-text-muted font-normal text-[12px]">({o.nomeOriginale})</span></h2>
+      <section className="card card--con-fregio flex flex-col gap-1">
+        <FregioSezione chiave="battaglia-ombre-sciagura" />
+        <h2 className="m-0 font-display text-[15px] uppercase leading-none">Ombre sciagura <span className="text-text-muted text-[12px] normal-case">({o.nomeOriginale})</span></h2>
         <p className="m-0">{o.cosaSono}</p>
-        <Voce titolo="Come riconoscerle">{o.comeRiconoscerle}</Voce>
         <ul className="m-0 pl-4">{o.caratteristiche.map((c) => <li key={c}>{c}</li>)}</ul>
-        <Voce titolo="Nel loro turno">{o.comportamentoInBattaglia.turnoProprio}</Voce>
-        <Voce titolo="Quando attaccate">{o.comportamentoInBattaglia.quandoAttaccate}</Voce>
-        <Voce titolo="Come neutralizzarle">{o.comportamentoInBattaglia.comeNeutralizzarle}</Voce>
-        <Voce titolo="Stati che le immobilizzano">{o.effettiStati.immobilizzanti.join(', ')}</Voce>
-        <Voce titolo="Soggiogamento">{o.effettiStati.soggiogamento}</Voce>
-        <Voce titolo="Furia">{o.effettiStati.furia}</Voce>
-        <Voce titolo="Esplosione alla sconfitta">{o.esplosioneAllaSconfitta.descrizione} {o.esplosioneAllaSconfitta.potenza} {o.esplosioneAllaSconfitta.eccezioni}</Voce>
-        <Voce titolo="Ricompense">{o.ricompense}</Voce>
-        <Voce titolo="Dove">{o.doveCompaiono}</Voce>
+        <Dati>
+          <Voce titolo="Come riconoscerle">{o.comeRiconoscerle}</Voce>
+          <Voce titolo="Nel loro turno">{o.comportamentoInBattaglia.turnoProprio}</Voce>
+          <Voce titolo="Quando attaccate">{o.comportamentoInBattaglia.quandoAttaccate}</Voce>
+          <Voce titolo="Come neutralizzarle">{o.comportamentoInBattaglia.comeNeutralizzarle}</Voce>
+          <Voce titolo="Stati che le immobilizzano">{o.effettiStati.immobilizzanti.join(', ')}</Voce>
+          <Voce titolo="Soggiogamento">{o.effettiStati.soggiogamento}</Voce>
+          <Voce titolo="Furia">{o.effettiStati.furia}</Voce>
+          <Voce titolo="Esplosione alla sconfitta">{o.esplosioneAllaSconfitta.descrizione} {o.esplosioneAllaSconfitta.potenza} {o.esplosioneAllaSconfitta.eccezioni}</Voce>
+          <Voce titolo="Ricompense">{o.ricompense}</Voce>
+          <Voce titolo="Dove">{o.doveCompaiono}</Voce>
+        </Dati>
         <p className="m-0 text-text-muted text-[12px]">{o.incertezze}</p>
         <Fonte url={o.urlFonte} />
       </section>
-      <section className="card flex flex-col gap-1">
-        <h2 className="m-0 text-[15px] font-semibold">{m.categoria}</h2>
-        <Voce titolo="Dove e quando">{m.dove}</Voce>
-        <Voce titolo="Segnali">{m.comeSiManifesta}</Voce>
-        <Voce titolo="Livello consigliato">{m.livelloConsigliato}</Voce>
-        <Voce titolo="Abilità">{m.abilita.join('; ')}</Voce>
-        <Voce titolo="Immunità">{m.immunita.join(', ')}</Voce>
-        <Voce titolo="Debolezze">{m.debolezze && m.debolezze.length > 0 ? <span className="flex flex-wrap items-center gap-1.5">{m.debolezze.map((d) => <ChipElementoGuida key={d} testo={d} />)}</span> : 'nessuna'}</Voce>
+      <section className="card card--con-fregio flex flex-col gap-1">
+        <FregioSezione chiave="battaglia-mietitore" />
+        <h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2>
+        <Dati>
+          <Voce titolo="Dove e quando">{m.dove}</Voce>
+          <Voce titolo="Segnali">{m.comeSiManifesta}</Voce>
+          <Voce titolo="Livello consigliato">{m.livelloConsigliato}</Voce>
+          <Voce titolo="Abilità">{m.abilita.join('; ')}</Voce>
+          <Voce titolo="Immunità">{m.immunita.join(', ')}</Voce>
+          <Voce titolo="Debolezze">{m.debolezze && m.debolezze.length > 0 ? <span className="flex flex-wrap items-center gap-1.5">{m.debolezze.map((d) => <ChipElementoGuida key={d} testo={d} />)}</span> : 'nessuna'}</Voce>
+          <Voce titolo="Ricompense">{m.ricompense}</Voce>
+        </Dati>
+        {/* La strategia è una sequenza: resta numerata, che è la sua forma. */}
         <ol className="m-0 pl-4">{m.strategia.map((s) => <li key={s}>{s}</li>)}</ol>
-        <Voce titolo="Ricompense">{m.ricompense}</Voce>
         <Fonte url={m.urlFonte} />
       </section>
-      <section className="card flex flex-col gap-1">
-        <h2 className="m-0 text-[15px] font-semibold">{t.categoria}</h2>
+      <section className="card card--con-fregio flex flex-col gap-1">
+        <FregioSezione chiave="battaglia-demoni-tesoro" />
+        <h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2>
         <p className="m-0">{t.cosaSono}</p>
-        <Voce titolo="Come compaiono">{t.comeCompaiono}</Voce>
-        <Voce titolo="Prima comparsa">{t.primaComparsa}</Voce>
-        <Voce titolo="Comportamento">{t.comportamento}</Voce>
-        <Voce titolo="Resistenze">{t.resistenzeGenerali}</Voce>
-        {t.tecnicheConsigliate.length > 0 && <Voce titolo="Tecniche consigliate">{t.tecnicheConsigliate.join('; ')}</Voce>}
+        <Dati>
+          <Voce titolo="Come compaiono">{t.comeCompaiono}</Voce>
+          <Voce titolo="Prima comparsa">{t.primaComparsa}</Voce>
+          <Voce titolo="Comportamento">{t.comportamento}</Voce>
+          <Voce titolo="Resistenze">{t.resistenzeGenerali}</Voce>
+          {t.tecnicheConsigliate.length > 0 && <Voce titolo="Tecniche consigliate">{t.tecnicheConsigliate.join('; ')}</Voce>}
+        </Dati>
         <div className="overflow-x-auto">
           <table className="tabella tabella--adattiva text-[12px]">
             <thead><tr><th>Demone del Tesoro</th><th>Livello</th><th>Arcano</th><th>Dove</th></tr></thead>

@@ -42,13 +42,13 @@ describe('LibriPage', () => {
     await waitFor(() => expect(impostaProgressoLibro).toHaveBeenCalledTimes(2));
     await act(async () => risolviSeconda({ ...base, progresso: 2, fatto: true }));
     // Finito, il libro esce dai «da leggere» e va nel gruppo dei completati, che è chiuso.
-    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati/ }));
     expect(screen.getByText('Completato')).toBeInTheDocument();
     expect(screen.getByText('2 di 2 sessioni')).toBeInTheDocument();
 
     vista.unmount();
     render(<MemoryRouter><LibriPage /></MemoryRouter>);
-    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati · 1/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /Mostra i completati/ }));
     expect(screen.getByText('2 di 2 sessioni')).toBeInTheDocument();
     expect(persistito).toBe(2);
   });

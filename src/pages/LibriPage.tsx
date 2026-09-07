@@ -9,6 +9,8 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione } from '../components/shared/IconaAzione';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
@@ -133,14 +135,17 @@ export function LibriPage() {
           lettura per farne uno che si fa una volta e che «+» fa comunque in due tocchi. Con
           quattro sessioni al massimo, non serviva. */}
       {partitaId && <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${titolo}`}>
-        <button type="button" className="btn btn-secondary touch text-[18px]" disabled={progresso === 0} onClick={() => accoda(libro, progresso - 1)} aria-label={`Togli una sessione a ${titolo}`}>−</button>
-        <button type="button" className="btn btn-primary touch text-[18px]" disabled={progresso >= libro.totaleSessioni} onClick={() => accoda(libro, progresso + 1)} aria-label={`Aggiungi una sessione a ${titolo}`}>+</button>
+        <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
+          disabled={progresso === 0} onClick={() => accoda(libro, progresso - 1)} aria-label={`Togli una sessione a ${titolo}`} />
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Sessione"
+          disabled={progresso >= libro.totaleSessioni} onClick={() => accoda(libro, progresso + 1)} aria-label={`Aggiungi una sessione a ${titolo}`} />
         {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
       <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Dove</dt><dd className="m-0">{libro.dove}</dd><dt className="text-text-muted">Effetto</dt><dd className="m-0">{libro.sblocca ?? (libro.dote ? `${NOME_DOTE[libro.dote]}${libro.note ? ` ${'♪'.repeat(Math.min(4, libro.note))}` : ''}` : 'Bonus speciale')}</dd>{libro.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{libro.prezzo === 0 ? 'Gratis' : `${libro.prezzo.toLocaleString('it-IT')} ¥`}</dd></>}</dl>
       {libro.dettagli && <p className="m-0 text-xs text-text-secondary">{libro.dettagli}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-2">
-        <button type="button" className="btn btn-ghost btn-sm touch" onClick={() => { setSelezionato(libro.chiave); setFonteSelezionata(0); }}>Mostra posizione</button>
+        <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="posizione" dimensione={20} />} titolo="Mostra posizione"
+          onClick={() => { setSelezionato(libro.chiave); setFonteSelezionata(0); }} />
         <CorreggiElemento tipo="libro" chiave={libro.chiave} onSalvato={() => void dati.ricarica()} />
         <a href={libro.fonte} target="_blank" rel="noreferrer" className="credito self-center">fonte</a>
       </div>
@@ -189,9 +194,9 @@ export function LibriPage() {
       </ul>
       {daFare.length === 0 && <p className="m-0 text-sm text-text-muted" role="status">Nessun libro da leggere con questi filtri.</p>}
       {fatti.length > 0 && <section className="flex flex-col gap-3" aria-label="Libri completati">
-        <button type="button" className="btn btn-ghost btn-sm touch self-start" aria-expanded={mostraFatti} onClick={() => setMostraFatti((v) => !v)}>
-          {mostraFatti ? 'Nascondi' : 'Mostra'} i completati · {fatti.length}
-        </button>
+        <PulsanteVisivo tono="fantasma" compatto className="self-start" icona={<IconaAzione chiave="completati" dimensione={20} />}
+          titolo={`${mostraFatti ? 'Nascondi' : 'Mostra'} i completati`} dettaglio={fatti.length}
+          attivo={mostraFatti} onClick={() => setMostraFatti((v) => !v)} />
         {mostraFatti && <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-3" aria-label="Libri già completati">
           {fatti.map(scheda)}
         </ul>}
