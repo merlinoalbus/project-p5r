@@ -3,16 +3,15 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { getAttivita, impostaLettura } from '../services/api';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { getAttivita } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { usePartitaStore } from '../stores/partitaStore';
-import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { NOME_DOTE, NOME_FASCIA, NOME_TIPO_ATTIVITA } from '../utils/citta';
-import type { AttivitaDto, AttivitaTutteDto, FilmDto, LibroDto } from '../types';
+import type { AttivitaDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
@@ -20,7 +19,7 @@ import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
 
-const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori'], ['libri', 'Libri'], ['film', 'Film e DVD']] as const;
+const SCHEDE = [['attivita', 'Attività'], ['lavori', 'Lavori']] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Doti({ doti }: { doti: AttivitaDto['doti'] }) {
@@ -61,41 +60,6 @@ function Attivita({ a }: { a: AttivitaDto }) {
   );
 }
 
-function Lettura({ x, tipo, partitaId, onCambiata }: { x: LibroDto | FilmDto; tipo: 'libro' | 'film'; partitaId: number | null; onCambiata: (x: LibroDto | FilmDto) => void }) {
-  const [occupato, setOccupato] = useState(false);
-  const sugg = useSuggerimenti();
-  const categoria = tipo === 'libro' ? 'libri' : 'film';
-  const cambia = async (fatto: boolean) => {
-    if (!partitaId) return;
-    setOccupato(true);
-    try { onCambiata(await impostaLettura(partitaId, tipo, x.chiave, fatto)); } catch (err) { notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.'); } finally { setOccupato(false); }
-  };
-  const libro = tipo === 'libro' ? (x as LibroDto) : null;
-  const film = tipo === 'film' ? (x as FilmDto) : null;
-  return (
-    <li className={`card flex flex-col gap-1 text-[13px] ${x.fatto ? 'opacity-70' : ''} ${classiSuggerito(sugg.evidenziato(categoria, x.chiave))}`}>
-      <div className="flex flex-wrap items-center gap-2">
-        {partitaId && <input type="checkbox" className="w-5 h-5" checked={x.fatto} disabled={occupato} onChange={(e) => void cambia(e.target.checked)} aria-label={`${x.nomeIt ?? x.nome} ${tipo === 'libro' ? 'letto' : 'visto'}`} />}
-        <strong className={`text-[15px] ${x.fatto ? 'line-through' : ''}`}>{x.nomeIt ?? x.nome}</strong>
-        {sugg.evidenziato(categoria, x.chiave) && <TargaSuggerito motivo={sugg.motivo(categoria, x.chiave)} compatta />}
-        {x.nomeIt && x.nomeIt !== x.nome && <span className="text-text-muted text-[12px]">({x.nome})</span>}
-        {x.dote && <span className="chip chip--attivo">{NOME_DOTE[x.dote]}{x.note !== null ? ` ${'♪'.repeat(Math.min(3, x.note))}` : ''}</span>}
-        {film && <span className="chip">{film.dove === 'cinema' ? 'Cinema' : 'DVD'}</span>}
-        {!x.verificato && <span className="chip text-[11px]" title="Dato da fonte secondaria">da fonte secondaria</span>}
-      </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-secondary">
-        {libro && libro.dove && <span><strong className="text-text">Dove:</strong> {libro.dove}</span>}
-        {libro && libro.disponibileDal && <span><strong className="text-text">Dal:</strong> {libro.disponibileDal}</span>}
-        {film && film.periodo && <span><strong className="text-text">Periodo:</strong> {film.periodo}</span>}
-        {x.prezzo !== null && <span><strong className="text-text">Prezzo:</strong> {x.prezzo === 0 ? 'gratis' : `${x.prezzo.toLocaleString('it-IT')} ¥`}</span>}
-        {libro && libro.sessioni !== null && <span><strong className="text-text">Sessioni:</strong> {libro.sessioni}</span>}
-        {libro && libro.sblocca && <span><strong className="text-text">Sblocca:</strong> {libro.sblocca}</span>}
-      </div>
-      {x.dettagli && <p className="m-0 text-[12px] text-text-muted">{x.dettagli}</p>}
-    </li>
-  );
-}
-
 export function AttivitaPage() {
   useDocumentTitle('Attività e Doti sociali');
   const attiva = usePartitaStore((s) => s.attiva);
@@ -105,19 +69,15 @@ export function AttivitaPage() {
   const scheda = (SCHEDE.some(([k]) => k === params.get('scheda')) ? params.get('scheda') : 'attivita') as Scheda;
   const [dote, setDote] = useState('');
   const d = dati.dati;
-  const aggiorna = (x: LibroDto | FilmDto, tipo: 'libro' | 'film') => {
-    if (!d) return;
-    const nuovo: AttivitaTutteDto = tipo === 'libro' ? { ...d, libri: d.libri.map((l) => (l.chiave === x.chiave ? (x as LibroDto) : l)) } : { ...d, film: d.film.map((f) => (f.chiave === x.chiave ? (x as FilmDto) : f)) };
-    dati.imposta({ ...nuovo, libriLetti: nuovo.libri.filter((l) => l.fatto).length, filmVisti: nuovo.film.filter((f) => f.fatto).length });
-  };
-  const perDote = <T extends { dote: string | null }>(xs: T[]) => xs.filter((x) => !dote || x.dote === dote);
   const attivitaVisibili = useMemo(() => (d?.attivita ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
   const lavoriVisibili = useMemo(() => (d?.lavori ?? []).filter((a) => !dote || a.doti.some((x) => x.dote === dote)), [d, dote]);
+  if (params.get('scheda') === 'libri') return <Navigate to="/guida/libri" replace />;
+  if (params.get('scheda') === 'film') return <Navigate to="/guida/film" replace />;
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && (
         <div className="flex flex-col gap-3">
-          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori, studio, libri e film con le note (♪) delle Doti che alzano, dove e quando farli.{partitaId ? ` Nella partita «${attiva?.nome}»: ${d.libriLetti} libri letti, ${d.filmVisti} film visti.` : ' Attiva una partita per spuntare libri letti e film visti.'}</>} />
+          <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori e studio con le note (♪) delle Doti che alzano, dove e quando farli.</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <FilaScorrevole role="tablist" aria-label="Sezioni">
               {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={18} />{l}</button>)}
@@ -129,8 +89,6 @@ export function AttivitaPage() {
           </div>
           {scheda === 'attivita' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Attività">{attivitaVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
           {scheda === 'lavori' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Lavori">{lavoriVisibili.map((a) => <Attivita key={a.chiave} a={a} />)}</ul>}
-          {scheda === 'libri' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Libri">{perDote(d.libri).map((l) => <Lettura key={l.chiave} x={l} tipo="libro" partitaId={partitaId} onCambiata={(x) => aggiorna(x, 'libro')} />)}</ul>}
-          {scheda === 'film' && <ul className="m-0 p-0 list-none flex flex-col gap-2" aria-label="Film">{perDote(d.film).map((f) => <Lettura key={f.chiave} x={f} tipo="film" partitaId={partitaId} onCambiata={(x) => aggiorna(x, 'film')} />)}</ul>}
         </div>
       )}
     </PageState>

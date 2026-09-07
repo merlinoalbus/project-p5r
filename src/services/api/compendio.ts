@@ -3,9 +3,10 @@
 // ============================================================
 
 import type {
-  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
+  ArcanaDto, CalendarioDto, ConfidenteDettaglioDto, AttivitaTutteDto, BattagliaDto, CompletamentoDto, CruciverbaTuttiDto, FilmDvdDto, LibriDto, NegozioDettaglioDto, NegozioRiassuntoDto, PercorsoGiornoDto, PercorsoIndiceDto, OggettiGuidaDto, PersonaggiDto, RicercaArticoliDto, SfideDto, DungeonDettaglioDto, QuartiereDettaglioDto, QuartiereRiassuntoDto, DungeonRiassuntoDto, RichiesteDto, ConfidenteDto, DomandeDto, GlossarioDto, OggettoDto, PersonaDettaglioDto, PersonaRiassuntoDto, RegoleFusioneDto, SkillDettaglioDto, SkillRiassuntoDto, TermineDto,
 } from '../../types';
 import { apiDelete, apiPut, apiGet, queryString } from './_helpers';
+import type { VideogiochiDto } from '../../types';
 
 /** Filtri dell'elenco Persona (stessi nomi della query API). */
 export interface FiltriPersona {
@@ -56,6 +57,11 @@ export const getQuartieri = (partita?: number): Promise<QuartiereRiassuntoDto[]>
 export const getQuartiere = (chiave: string): Promise<QuartiereDettaglioDto> => apiGet(`/compendio/citta/${encodeURIComponent(chiave)}`);
 /** Attività, lavori, libri e film (con letture della partita se indicata). */
 export const getAttivita = (partita?: number): Promise<AttivitaTutteDto> => apiGet(`/compendio/attivita${queryString({ partita })}`);
+/** Catalogo dei libri con avanzamento per sessioni nella partita. */
+export const getLibri = (partita?: number): Promise<LibriDto> => apiGet(`/compendio/libri${queryString({ partita })}`);
+/** Catalogo cinema e DVD con visioni e avanzamento per partita. */
+export const getFilm = (partita?: number): Promise<FilmDvdDto> => apiGet(`/compendio/film${queryString({ partita })}`);
+export const getVideogiochi = (partita?: number): Promise<VideogiochiDto> => apiGet(`/compendio/videogiochi${queryString({ partita })}`);
 /** Aiuto in battaglia: sezioni della guida e indice delle Ombre. */
 export const getBattaglia = (): Promise<BattagliaDto> => apiGet('/compendio/battaglia');
 /** Richieste dei Mementos e dati di Jose (stato per partita se indicata). */
