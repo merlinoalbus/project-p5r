@@ -27,8 +27,15 @@ describe('RichiestePage', () => {
     expect(await screen.findByText('Un ex piuttosto appiccicoso')).toBeInTheDocument();
     expect(getRichieste).toHaveBeenCalledWith(7);
     expect(screen.getByText(/rango 2/)).toBeInTheDocument();
+    // Jose sta in un foglio suo: non piu' in coda alle Richieste, dove lo si trovava solo
+    // scorrendo fino in fondo (richiesta dell'utente).
+    expect(screen.queryByRole('heading', { name: 'Jose: fiori, timbri e scambi' })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Jose: fiori e scambi' }));
     expect(screen.getByRole('heading', { name: 'Jose: fiori, timbri e scambi' })).toBeInTheDocument();
     expect(screen.getByText('Fiala')).toBeInTheDocument();
+    expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: 'Le Richieste' }));
+    expect(screen.getByText('Un ex piuttosto appiccicoso')).toBeInTheDocument();
     fireEvent.change(screen.getByRole('combobox', { name: 'Dedalo' }), { target: { value: 'Dedalo di Aiyatsbus' } });
     expect(screen.queryByText('Un ex piuttosto appiccicoso')).toBeNull();
     fireEvent.change(screen.getByRole('combobox', { name: 'Dedalo' }), { target: { value: '' } });

@@ -18,6 +18,7 @@
 // ============================================================
 
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getRichieste, impostaStatoRichiesta } from '../services/api';
 import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -26,6 +27,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import type { RichiestaDto, StatoRichiesta } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
+import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
@@ -35,6 +37,8 @@ import { TargaSuggerito } from '../components/shared/Suggerito';
 import { coloreElemento } from '../utils/elementi';
 
 type Filtro = 'tutte' | 'da-fare' | 'accettate' | 'completate';
+/** I due fogli della pagina: le Richieste, e la bottega di Jose. */
+type Foglio = 'richieste' | 'jose';
 
 /** Dal nome italiano dell'elemento, come lo scrive la guida, alla chiave del colore.
  *
@@ -83,7 +87,7 @@ function Richiesta({ r, partitaId, onCambiata }: { r: RichiestaDto; partitaId: n
   return (
     <li className={`card flex min-w-0 flex-col gap-2 ${r.stato === 'completata' ? 'border-success/40 opacity-70' : ''} ${classiSuggerito(sugg.evidenziato('richieste', r.chiave))}`}>
       <div className="flex items-start gap-2.5">
-        <IconaCategoria categoria="richieste" dimensione={36} />
+        <IconaCategoria categoria="richiesta" dimensione={36} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <h3 className="m-0 text-[16px] leading-tight">{r.nome}</h3>
           <span className="text-[12px] text-text-muted">{r.area}{r.piano ? ` · ${r.piano}` : ''}</span>
@@ -144,6 +148,9 @@ export function RichiestePage() {
   const dati = useCarica(() => getRichieste(partitaId ?? undefined), [partitaId]);
   const [filtro, setFiltro] = useState<Filtro>('tutte');
   const [area, setArea] = useState<string | null>(null);
+  // Il foglio sta nell'indirizzo: così un collegamento a Jose porta a Jose.
+  const [params, setParams] = useSearchParams();
+  const foglio: Foglio = params.get('foglio') === 'jose' ? 'jose' : 'richieste';
   const d = dati.dati;
   const aree = useMemo(() => [...new Set((d?.richieste ?? []).map((r) => r.area))], [d]);
   const visibili = useMemo(() => (d?.richieste ?? [])
@@ -159,6 +166,18 @@ export function RichiestePage() {
         <div className="flex flex-col gap-4">
           <IntestazionePagina titolo="Richieste dei Mementos" sottotitolo={<>{d.totale} Richieste dalla guida allgamestaff: committente, date, Dedalo e area, bersaglio con debolezze, ricompense e Confidente collegato.{partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare accettate e completate.'}</>} />
 
+          {/* **Jose è un foglio a parte**, non una coda in fondo alle Richieste: i suoi fiori, i
+              timbri e la tabella degli scambi sono un'altra faccenda, e messi sotto trentatré
+              carte si trovavano solo scorrendo fino in fondo. Richiesta dell'utente. */}
+          {d.jose && <FilaScorrevole role="tablist" aria-label="Fogli">
+            {([['richieste', 'Le Richieste'], ['jose', 'Jose: fiori e scambi']] as Array<[Foglio, string]>).map(([k, l]) => (
+              <button key={k} type="button" role="tab" aria-selected={foglio === k}
+                className={`chip touch ${foglio === k ? 'chip--attivo' : ''}`}
+                onClick={() => setParams(k === 'richieste' ? {} : { foglio: k }, { replace: true })}>{l}</button>
+            ))}
+          </FilaScorrevole>}
+
+          {foglio === 'richieste' && <>
           {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo delle Richieste">
             <div className="kpi-tile"><span className="kpi-value">{d.totale}</span><span className="kpi-label">in tutto</span></div>
             <div className="kpi-tile"><span className="kpi-value">{d.totale - d.completate - accettate}</span><span className="kpi-label">da fare</span></div>
@@ -182,25 +201,40 @@ export function RichiestePage() {
             {visibili.length === 0 && <li className="text-[13px] text-text-muted" role="status">Nessuna Richiesta con questi filtri.</li>}
             {visibili.map((r) => <Richiesta key={r.chiave} r={r} partitaId={partitaId} onCambiata={aggiorna} />)}
           </ul>
+          </>}
 
-          {d.jose && (
-            <section className="card flex flex-col gap-2 text-[13px]">
-              <h2 className="m-0 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
-              <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
-              <div className="grid gap-1 md:grid-cols-2">
-                {d.jose.fiori && <p className="m-0"><strong>Fiori:</strong> {typeof d.jose.fiori === 'string' ? d.jose.fiori : d.jose.fiori.descrizione}</p>}
-                {d.jose.timbri && <p className="m-0"><strong>Timbri:</strong> {typeof d.jose.timbri === 'string' ? d.jose.timbri : d.jose.timbri.descrizione}</p>}
-              </div>
-              {d.jose.bossSegreto && <p className="m-0"><strong>Boss segreto:</strong> {d.jose.bossSegreto.nome} — {d.jose.bossSegreto.condizione}</p>}
-              {d.jose.scambi.length > 0 && (
-                <div className="overflow-x-auto">
-                  <table className="tabella tabella--adattiva text-[12px]">
-                    <thead><tr><th>Oggetto</th><th>Fiori</th><th>Effetto</th><th>Requisito</th></tr></thead>
-                    <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td data-etichetta="Oggetto"><strong>{s.nome}</strong></td><td data-etichetta="Fiori" className="tabular-nums">{s.costo}</td><td data-etichetta="Effetto">{s.effetto}</td><td data-etichetta="Requisito">{s.requisito}</td></tr>)}</tbody>
-                  </table>
+          {foglio === 'jose' && d.jose && (
+            <div className="flex flex-col gap-3 text-[13px]">
+              <section className="card flex flex-col gap-2">
+                <h2 className="m-0 font-display text-[17px] uppercase leading-none">Jose: fiori, timbri e scambi</h2>
+                <p className="m-0 text-text-secondary">{d.jose.introduzione}</p>
+                <div className="grid gap-1.5 md:grid-cols-2">
+                  {d.jose.fiori && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2">
+                    <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Fiori</span>
+                    <span>{typeof d.jose.fiori === 'string' ? d.jose.fiori : d.jose.fiori.descrizione}</span>
+                  </div>}
+                  {d.jose.timbri && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2">
+                    <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Timbri</span>
+                    <span>{typeof d.jose.timbri === 'string' ? d.jose.timbri : d.jose.timbri.descrizione}</span>
+                  </div>}
+                  {d.jose.bossSegreto && <div className="flex flex-col gap-0.5 rounded-md bg-white/[0.04] px-2.5 py-2 md:col-span-2">
+                    <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">Boss segreto</span>
+                    <span><strong>{d.jose.bossSegreto.nome}</strong> — {d.jose.bossSegreto.condizione}</span>
+                  </div>}
                 </div>
+              </section>
+              {d.jose.scambi.length > 0 && (
+                <section className="card flex flex-col gap-2" aria-label="Scambi con Jose">
+                  <h3 className="m-0 font-display text-[15px] uppercase leading-none">Che cosa dà, e per quanti fiori</h3>
+                  <div className="overflow-x-auto">
+                    <table className="tabella tabella--adattiva text-[12px]">
+                      <thead><tr><th>Oggetto</th><th>Fiori</th><th>Effetto</th><th>Requisito</th></tr></thead>
+                      <tbody>{d.jose.scambi.map((s, i) => <tr key={i}><td data-etichetta="Oggetto"><strong>{s.nome}</strong></td><td data-etichetta="Fiori" className="tabular-nums">{s.costo}</td><td data-etichetta="Effetto">{s.effetto}</td><td data-etichetta="Requisito">{s.requisito}</td></tr>)}</tbody>
+                    </table>
+                  </div>
+                </section>
               )}
-            </section>
+            </div>
           )}
         </div>
       )}
