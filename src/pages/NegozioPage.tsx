@@ -39,9 +39,8 @@ export function NegozioPage() {
   const [nascondiAcquistati, setNascondiAcquistati] = useState(false);
   const categorie = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.categoria))], [n]);
   const destinatari = useMemo(() => [...new Set((n?.articoliElenco ?? []).map((a) => a.per).filter((p): p is string => !!p && p !== 'tutti'))], [n]);
-  // Difesa lato client: il backend non invia i bloccati con una partita attiva, e la scheda non
-  // offre alcun comando per riaprirli se una risposta obsoleta dovesse ancora contenerli.
-  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato) && (!partitaId || a.disponibilita?.stato !== 'bloccato')), [n, categoria, per, nascondiAcquistati, partitaId]);
+  // Anche un articolo non ancora acquistabile resta consultabile con condizioni e semaforo.
+  const visibili = useMemo(() => (n?.articoliElenco ?? []).filter((a) => (!categoria || a.categoria === categoria) && (!per || a.per === per || a.per === 'tutti') && (!nascondiAcquistati || !a.acquistato)), [n, categoria, per, nascondiAcquistati]);
   return (
     <PageState isLoading={dati.caricamento && !n} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {n && (

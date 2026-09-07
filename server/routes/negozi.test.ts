@@ -54,7 +54,7 @@ describe('API negozi e inventario', () => {
     expect((await request(app).get('/api/compendio/articoli?categoria=astronave')).status).toBe(400);
 
     const id = ((await request(app).post('/api/partite').send({ nome: 'Acquisti' })).body.data as { id: number }).id;
-    const acquistabile = ((await request(app).get(`/api/compendio/negozi/untouchable?partita=${id}`)).body.data as NegozioDettaglioDto).articoliElenco[0];
+    const acquistabile = ((await request(app).get(`/api/compendio/negozi/untouchable?partita=${id}`)).body.data as NegozioDettaglioDto).articoliElenco.find((x) => x.disponibilita?.stato !== 'bloccato')!;
     expect(acquistabile).toBeDefined();
     let a = (await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: acquistabile.chiave, fatto: true })).body.data as ArticoloDto;
     expect(a.acquistato).toBe(true);
@@ -78,7 +78,7 @@ describe('API negozi e inventario', () => {
     expect(dopo.articoliElenco).toHaveLength(schedaTakemiPrima.articoliElenco.length);
   });
 
-  it('con una partita gli articoli bloccati sono assenti da elenco, scheda e ricerca e i conteggi restano coerenti', async () => {
+  it('con una partita il catalogo resta completo e distingue gli articoli non ancora acquistabili', async () => {
     const db = getDb();
     db.exec(`CREATE TEMP TABLE backup_condizioni_articoli_negozi_test AS
       SELECT chiave, condizioni_json FROM articolo WHERE negozio_chiave = 'untouchable'`);
@@ -90,16 +90,23 @@ describe('API negozi e inventario', () => {
       const id = ((await request(app).post('/api/partite').send({ nome: 'Visibilità inventario' })).body.data as { id: number }).id;
       const elenco = (await request(app).get(`/api/compendio/negozi?partita=${id}`)).body.data as NegozioRiassuntoDto[];
       const untouchable = elenco.find((n) => n.chiave === 'untouchable');
-      expect(untouchable).toMatchObject({ articoli: 1, verificati: 1, disponibilita: { stato: 'disponibile' } });
+      expect(untouchable).toMatchObject({ articoli: 218, verificati: 212, disponibilita: { stato: 'disponibile' } });
 
       const scheda = (await request(app).get(`/api/compendio/negozi/untouchable?partita=${id}`)).body.data as NegozioDettaglioDto;
-      expect(scheda).toMatchObject({ articoli: 1, verificati: 1 });
-      expect(scheda.articoliElenco.map((a) => a.chiave)).toEqual(['untouchable/kogatana-nera']);
+      expect(scheda).toMatchObject({ articoli: 218, verificati: 212 });
+      expect(scheda.articoliElenco).toHaveLength(218);
+      expect(scheda.articoliElenco.find((a) => a.chiave === 'untouchable/kogatana-nera')?.disponibilita?.stato).toBe('disponibile');
+      expect(scheda.articoliElenco.filter((a) => a.disponibilita?.stato === 'bloccato')).toHaveLength(217);
 
       const ricerca = (await request(app).get(`/api/compendio/articoli?q=Untouchable&partita=${id}`)).body.data as RicercaArticoliDto;
-      expect(ricerca.totale).toBe(1);
-      expect(ricerca.articoli.map((a) => a.chiave)).toEqual(['untouchable/kogatana-nera']);
-      expect(ricerca.articoli.every((a) => a.disponibilita?.stato !== 'bloccato')).toBe(true);
+      expect(ricerca.totale).toBe(218);
+      expect(ricerca.articoli).toHaveLength(218);
+      expect(ricerca.articoli.filter((a) => a.disponibilita?.stato === 'bloccato')).toHaveLength(217);
+
+      const bloccato = ricerca.articoli.find((a) => a.disponibilita?.stato === 'bloccato')!;
+      const risposta = await request(app).put(`/api/partite/${id}/acquisti`).send({ articolo: bloccato.chiave, fatto: true });
+      expect(risposta.status).toBe(409);
+      expect(risposta.body.error?.code).toBe('articolo-non-disponibile');
     } finally {
       db.exec(`UPDATE articolo SET condizioni_json = (
         SELECT b.condizioni_json FROM backup_condizioni_articoli_negozi_test b WHERE b.chiave = articolo.chiave
@@ -132,15 +139,15 @@ describe('API negozi e inventario', () => {
     }
   });
 
-  it('disponibilità con la partita: i requisiti del Confidente del negozio nascondono gli articoli non ancora ottenibili', async () => {
+  it('disponibilità con la partita: i requisiti del Confidente marcano ma non nascondono gli articoli', async () => {
     const id = ((await request(app).post('/api/partite').send({ nome: 'Disponibilità' })).body.data as { id: number }).id;
     const scheda = (await request(app).get(`/api/compendio/negozi/clinica-takemi?partita=${id}`)).body.data as NegozioDettaglioDto;
     const catalogo = ((await request(app).get('/api/compendio/negozi/clinica-takemi')).body.data as NegozioDettaglioDto).articoliElenco;
     const conRango = catalogo.filter((a) => /^Rango Confidente \d+$/.test(a.condizione ?? ''));
     expect(conRango.length).toBeGreaterThan(0);
-    expect(scheda.articoliElenco.some((a) => conRango.some((c) => c.chiave === a.chiave))).toBe(false);
+    expect(scheda.articoliElenco.some((a) => conRango.some((c) => c.chiave === a.chiave && a.disponibilita?.stato === 'bloccato'))).toBe(true);
     const ricerca = (await request(app).get(`/api/compendio/articoli?q=Takemedic&partita=${id}`)).body.data as RicercaArticoliDto;
-    expect(ricerca.articoli.some((a) => conRango.some((c) => c.chiave === a.chiave))).toBe(false);
+    expect(ricerca.articoli.some((a) => conRango.some((c) => c.chiave === a.chiave && a.disponibilita?.stato === 'bloccato'))).toBe(true);
     // senza partita nessuna disponibilità; l'elenco dei negozi con la partita la porta
     expect(catalogo[0].disponibilita).toBeUndefined();
     const elenco = (await request(app).get(`/api/compendio/negozi?partita=${id}`)).body.data as NegozioRiassuntoDto[];
