@@ -389,3 +389,21 @@ browser ripiegava su un'altra famiglia — «LA CITTÀ» usciva con la À sottil
 pesanti, in ogni titolo dell'app. Non è un disegno da commissionare: le lettere si costruiscono dal
 font stesso, ed è quello che fa `scripts/font-italiano.py` (base + accento, più « » — … ’ “ ” ° •).
 I file caricati nell'istanza sono già passati di lì; un font nuovo va passato prima di caricarlo.
+
+---
+
+## Controllo del 7 settembre 2026, sera: nessun pulsante senza la sua figura
+
+La regola dell'utente — «pulsanti senza componente grafico non devono essercene», in ogni pagina e
+sottopagina — è stata verificata contando, non a occhio:
+
+- **57 chiavi d'azione** usate nelle pagine (`IconaAzione chiave="…"`); **74** hanno la riserva SVG
+  dichiarata in `IconaAzione.tsx`. Chiavi usate **senza** riserva: **zero**.
+- Chiavi usate senza un asset consegnato (né su `main` né nella PR #39): **zero** — le cinque che
+  la prima passata segnalava (`confidenti`, `doti`, `obiettivi`, `riepilogo`, `scorta`) sono chiavi
+  di `IconaScheda`, e i loro `ui/scheda-*.png` ci sono.
+- **11 fregi su 11** montati nelle pagine e corrispondenti uno a uno al censimento §23: nessuna
+  chiave censita che nessuno usa, nessuna usata che nessuno ha censito.
+- Le **22 categorie** della §22 sono consegnate (PR #39); restano le **11 della §24**, che finché
+  non arrivano hanno riserve SVG **distinte fra loro** — verificato da un test, perché prima
+  «richiesta», «esame» e «libro» condividevano lo stesso segno.
