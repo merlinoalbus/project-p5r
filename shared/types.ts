@@ -1214,8 +1214,21 @@ export interface LibroDto {
   dettagli: string | null;
   fonte: string;
   verificato: boolean;
-  /** Letto nella partita. */
+  /** Provenienze mappabili verificate; può essere vuoto quando il premio non ha un luogo fisico. */
+  posizioni: Array<{ tipo: 'quartiere' | 'luogo' | 'negozio' | 'attivita'; chiave: string; etichetta: string }>;
+  /** Numero di sessioni richieste, sempre almeno uno. */
+  totaleSessioni: number;
+  /** Sessioni registrate nella partita, fra zero e `totaleSessioni`. */
+  progresso: number;
+  /** Completamento canonico nella partita: non deriva dal solo progresso. */
   fatto: boolean;
+}
+
+export interface LibriDto {
+  libri: LibroDto[];
+  completati: number;
+  sessioniFatte: number;
+  sessioniTotali: number;
 }
 
 export interface FilmDto {

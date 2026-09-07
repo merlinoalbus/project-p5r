@@ -76,6 +76,8 @@ export const impostaCruciverba = (id: number, data: string, fatto: boolean): Pro
 
 /** Libro letto / film visto nella partita. */
 export const impostaLettura = (id: number, tipo: TipoLettura, chiave: string, fatto: boolean): Promise<LibroDto | FilmDto> => apiPut(`/partite/${id}/letture`, { tipo, chiave, fatto });
+/** Registra quante sessioni di un libro sono state completate. */
+export const impostaProgressoLibro = (id: number, chiave: string, avanzamento: number): Promise<LibroDto> => apiPut(`/partite/${id}/letture`, { tipo: 'libro', chiave, avanzamento });
 
 /** Stato di una Richiesta dei Mementos nella partita (null = riaperta). */
 export const impostaStatoRichiesta = (id: number, richiesta: string, stato: StatoRichiesta | null): Promise<RichiestaDto> => apiPut(`/partite/${id}/richieste`, { richiesta, stato });
