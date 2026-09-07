@@ -69,18 +69,36 @@ describe('DoveSiTrova', () => {
       .toHaveAttribute('href', '/guida/mappe/citta-shibuya?spillo=42&x=31.5&y=62.25&zoom=3');
   });
 
-  it('più destinazioni: non ne sceglie nessuna e le elenca tutte', async () => {
+  it('più destinazioni: non ne sceglie nessuna, e ciascuna si distingue dall’altra', async () => {
+    // Il caso vero che l'ha fatto emergere: Untouchable sta in **due punti di Shibuya**, e lo
+    // spillo si chiama uguale in tutti e due. Etichettando con il nome dello spillo venivano
+    // fuori due pastiglie identiche e sceglierne una era tirare a indovinare. A distinguere due
+    // posti è la mappa, non lo spillo.
     monta({ entita: { tipo: 'negozio', chiave: 'untouchable' }, esito: 'multipla', destinazioni: [
       destinazione(),
-      destinazione({ mappa: 'citta-shinjuku', nomeMappa: 'Shinjuku', spillo: 7, nomeSpillo: 'Untouchable (Shinjuku)' }),
+      destinazione({ mappa: 'shibuya-central-street', nomeMappa: 'Shibuya › Central Street', spillo: 7 }),
     ] });
     await screen.findByText(/In 2 posti diversi/);
     // Nessun visore: mostrarne uno vorrebbe dire aver scelto, e la scelta non è del componente.
     expect(screen.queryByTestId('visore')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Untouchable' }))
+    const scelte = screen.getAllByRole('link');
+    expect(scelte).toHaveLength(2);
+    const etichette = scelte.map((a) => a.textContent);
+    expect(new Set(etichette).size).toBe(2);
+    expect(screen.getByRole('link', { name: /^Shibuya · Untouchable$/ }))
       .toHaveAttribute('href', '/guida/mappe/citta-shibuya?spillo=42&x=31.5&y=62.25&zoom=3');
-    expect(screen.getByRole('link', { name: 'Untouchable (Shinjuku)' }))
-      .toHaveAttribute('href', '/guida/mappe/citta-shinjuku?spillo=7&x=31.5&y=62.25&zoom=3');
+    expect(screen.getByRole('link', { name: /^Shibuya › Central Street · Untouchable$/ }))
+      .toHaveAttribute('href', '/guida/mappe/shibuya-central-street?spillo=7&x=31.5&y=62.25&zoom=3');
+  });
+
+  it('quando lo spillo si chiama come la mappa non lo ripete', async () => {
+    monta({ entita: { tipo: 'quartiere', chiave: 'shibuya' }, esito: 'multipla', destinazioni: [
+      destinazione({ nomeSpillo: 'Shibuya' }),
+      destinazione({ mappa: 'citta-shinjuku', nomeMappa: 'Shinjuku', spillo: 7, nomeSpillo: 'Shinjuku' }),
+    ] });
+    await screen.findByText(/In 2 posti diversi/);
+    expect(screen.getByRole('link', { name: 'Shibuya' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Shinjuku' })).toBeInTheDocument();
   });
 
   it('nessuna destinazione: lo dice, e non inventa né mappa né collegamento', async () => {
