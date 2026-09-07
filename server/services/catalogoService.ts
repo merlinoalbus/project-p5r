@@ -19,11 +19,40 @@ import { slug } from '../../shared/slug.js';
 import type { ElementoCatalogoDto, RiepilogoCatalogoDto, TipoCatalogo } from '../../shared/types.js';
 
 /** Colonne scrivibili dall'utente, per tabella: quello che il modulo dell'interfaccia mostra e che i pacchetti trasportano. */
-const CAMPI = {
-  negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'] as const,
-  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte'] as const,
+const CAMPI: Record<TipoCatalogo, readonly string[]> = {
+  negozio: ['condizioni_json', 'nome', 'luogo', 'luogo_chiave', 'tipo', 'gestore', 'confidente_chiave', 'orari', 'sblocco', 'note', 'fonte'],
+  articolo: ['condizioni_json', 'negozio_chiave', 'nome', 'nome_it', 'categoria', 'per', 'prezzo', 'effetto', 'statistiche', 'disponibile_dal', 'condizione', 'nota', 'fonte'],
+  libro: ['nome', 'nome_it', 'dove', 'prezzo', 'disponibile_dal', 'dote', 'note', 'sblocca', 'sessioni', 'dettagli', 'fonte'],
+  film: ['nome', 'nome_it', 'dove', 'periodo', 'dote', 'note', 'prezzo', 'sessioni', 'dettagli', 'fonte'],
+  attivita: ['nome', 'tipo', 'luogo', 'luogo_chiave', 'fascia', 'costo', 'sblocco', 'sessioni', 'doti_json', 'altri_effetti', 'regole', 'premi', 'paga', 'fonte'],
 };
-const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'articolo' };
+const TABELLA: Record<TipoCatalogo, string> = { negozio: 'negozio', articolo: 'articolo', libro: 'libro', film: 'film', attivita: 'attivita' };
+
+/** Quel che cambia da un tipo all'altro, raccolto in un posto solo.
+ *
+ * Prima erano `if (tipo === 'articolo')` sparsi in cinque funzioni: con due tipi si leggevano
+ * ancora, con cinque sarebbero diventati il posto dove si dimentica un caso. Qui si vede a colpo
+ * d'occhio che cosa ha ogni tabella, e aggiungerne una è una riga.
+ *
+ * - `condizioniDa`: i campi in prosa da cui si ricavano le condizioni, per le sole tabelle che
+ *   hanno `condizioni_json`. Le altre non ne hanno, e non se ne inventano;
+ * - `haVerificato`: la colonna che distingue il dato della guida da quello di fonte secondaria.
+ *   Una riga aggiunta a mano parte da «non verificata», che è la verità;
+ * - `padre`: il riferimento che deve esistere davvero — un articolo senza il suo negozio, o
+ *   un'attività in un quartiere inventato, sparirebbe dalle pagine senza dire perché;
+ * - `raggruppaOrdinePer`: dove l'ordine è relativo al genitore invece che globale. */
+const PROFILO: Record<TipoCatalogo, {
+  condizioniDa?: (d: Record<string, unknown>) => Array<string | null>;
+  haVerificato: boolean;
+  padre?: { campo: string; tabella: string; codice: string; nome: string };
+  raggruppaOrdinePer?: string;
+}> = {
+  negozio: { condizioniDa: (d) => [d.sblocco as string | null], haVerificato: false },
+  articolo: { condizioniDa: (d) => [d.disponibile_dal as string | null, d.condizione as string | null], haVerificato: true, padre: { campo: 'negozio_chiave', tabella: 'negozio', codice: 'negozio-sconosciuto', nome: 'Il negozio' }, raggruppaOrdinePer: 'negozio_chiave' },
+  libro: { haVerificato: true },
+  film: { haVerificato: true },
+  attivita: { haVerificato: true, padre: { campo: 'luogo_chiave', tabella: 'quartiere', codice: 'quartiere-sconosciuto', nome: 'Il quartiere' } },
+};
 
 type Riga = Record<string, unknown> & { chiave: string; origine: string; nascosto: number; seed_json: string | null; updated_at: string | null };
 
@@ -46,6 +75,8 @@ function dto(tipo: TipoCatalogo, r: Riga): ElementoCatalogoDto {
 /** Chiave libera a partire dal nome: `u-<slug>` (articolo: `<negozio>/u-<slug>`), con suffisso numerico se già presa. */
 function chiaveLibera(tipo: TipoCatalogo, nome: string, negozio?: string): string {
   const base = slug(nome) || 'senza-nome';
+  // Le chiavi degli articoli sono annidate sotto il negozio (`untouchable/pugnale`), quindi anche
+  // quelle aggiunte lo sono; per gli altri tipi la chiave è piatta.
   const prefisso = tipo === 'articolo' ? `${negozio}/u-` : 'u-';
   let chiave = `${prefisso}${base}`.slice(0, 190);
   for (let i = 2; prepared(`SELECT 1 FROM ${TABELLA[tipo]} WHERE chiave = ?`).get(chiave); i++) {
@@ -61,8 +92,11 @@ function verificaRiferimenti(tipo: TipoCatalogo, dati: Record<string, unknown>):
   if (tipo === 'negozio') {
     if (dati.luogo_chiave != null && !esiste('quartiere', dati.luogo_chiave)) throw httpErrors.badRequest('quartiere-sconosciuto', `Il quartiere '${String(dati.luogo_chiave)}' non esiste.`);
     if (dati.confidente_chiave != null && !esiste('confidente', dati.confidente_chiave)) throw httpErrors.badRequest('confidente-sconosciuto', `Il Confidente '${String(dati.confidente_chiave)}' non esiste.`);
-  } else if (dati.negozio_chiave != null && !esiste('negozio', dati.negozio_chiave)) {
-    throw httpErrors.badRequest('negozio-sconosciuto', `Il negozio '${String(dati.negozio_chiave)}' non esiste.`);
+    return;
+  }
+  const padre = PROFILO[tipo].padre;
+  if (padre && dati[padre.campo] != null && !esiste(padre.tabella, dati[padre.campo])) {
+    throw httpErrors.badRequest(padre.codice, `${padre.nome} '${String(dati[padre.campo])}' non esiste.`);
   }
 }
 
@@ -88,8 +122,9 @@ export function leggiElemento(tipo: TipoCatalogo, chiave: string): ElementoCatal
 }
 
 function ordineSuccessivo(tipo: TipoCatalogo, dati: Record<string, unknown>): number {
-  if (tipo === 'articolo') return ((prepared('SELECT MAX(ordine) AS m FROM articolo WHERE negozio_chiave = ?').get(dati.negozio_chiave) as { m: number | null }).m ?? 0) + 1;
-  return ((prepared('SELECT MAX(ordine) AS m FROM negozio').get() as { m: number | null }).m ?? 0) + 1;
+  const per = PROFILO[tipo].raggruppaOrdinePer;
+  if (per) return ((prepared(`SELECT MAX(ordine) AS m FROM ${TABELLA[tipo]} WHERE ${per} = ?`).get(dati[per]) as { m: number | null }).m ?? 0) + 1;
+  return ((prepared(`SELECT MAX(ordine) AS m FROM ${TABELLA[tipo]}`).get() as { m: number | null }).m ?? 0) + 1;
 }
 
 /** Crea una riga del catalogo (origine «utente»): la chiave nasce dal nome e non collide mai con quelle del seed. */
@@ -100,13 +135,23 @@ export function creaElemento(tipo: TipoCatalogo, dati: Record<string, unknown>):
   verificaRiferimenti(tipo, dati);
   const chiave = chiaveLibera(tipo, nome, typeof dati.negozio_chiave === 'string' ? dati.negozio_chiave : undefined);
   const adesso = nowIso();
-  const colonne = ['chiave', 'ordine', ...CAMPI[tipo], 'origine', 'nascosto', 'updated_at'];
+  // Si scrivono **solo le colonne che il modulo ha davvero compilato**: quelle lasciate vuote le
+  // riempie il valore predefinito della tabella. Scrivendo `null` su tutte, come si faceva prima,
+  // si scavalca il predefinito — e con `attivita.sessioni`, che è `NOT NULL DEFAULT 1`, la
+  // creazione falliva con un errore di vincolo che l'utente si vedeva come «errore interno».
   const valori: Record<string, unknown> = { chiave, ordine: ordineSuccessivo(tipo, dati), origine: 'utente', nascosto: 0, updated_at: adesso };
-  for (const c of CAMPI[tipo]) valori[c] = dati[c] ?? null;
-  valori.condizioni_json ??= JSON.stringify(migraTestiCondizioni((tipo==='negozio'?[dati.sblocco]:[dati.disponibile_dal,dati.condizione]) as Array<string|null>,dati.confidente_chiave as string|null));
-  if (tipo === 'articolo') valori.verificato = 0;
-  const extra = tipo === 'articolo' ? ', verificato' : '';
-  const extraVal = tipo === 'articolo' ? ', @verificato' : '';
+  const compilate = CAMPI[tipo].filter((c) => dati[c] !== undefined);
+  for (const c of compilate) valori[c] = dati[c] ?? null;
+  const colonne = ['chiave', 'ordine', ...compilate, 'origine', 'nascosto', 'updated_at'];
+  const daProsa = PROFILO[tipo].condizioniDa;
+  if (daProsa && valori.condizioni_json === undefined) {
+    valori.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsa(dati), dati.confidente_chiave as string | null));
+    colonne.push('condizioni_json');
+  }
+  // Una riga che aggiungi tu non viene dalla guida: parte «non verificata», e la scheda lo dice.
+  if (PROFILO[tipo].haVerificato) valori.verificato = 0;
+  const extra = PROFILO[tipo].haVerificato ? ', verificato' : '';
+  const extraVal = PROFILO[tipo].haVerificato ? ', @verificato' : '';
   prepared(`INSERT INTO ${TABELLA[tipo]} (${colonne.join(', ')}${extra}) VALUES (${colonne.map((c) => `@${c}`).join(', ')}${extraVal})`).run(valori);
   return dto(tipo, riga(tipo, chiave));
 }
@@ -148,7 +193,8 @@ export function eliminaElemento(tipo: TipoCatalogo, chiave: string): { esito: 'e
   }
   const originale = r.seed_json ? (JSON.parse(r.seed_json) as Record<string, unknown>) : null;
   if (!originale) throw httpErrors.badRequest('riga-del-seed', 'Questa riga arriva dai dati della guida e non è stata modificata: non c\'è nulla da ripristinare. Usa «Nascondi» se non vuoi vederla.');
-  if(originale.condizioni_json == null)originale.condizioni_json=JSON.stringify(migraTestiCondizioni((tipo==='negozio'?[originale.sblocco]:[originale.disponibile_dal,originale.condizione]) as Array<string|null>,originale.confidente_chiave as string|null));
+  const daProsaRip = PROFILO[tipo].condizioniDa;
+  if (daProsaRip && originale.condizioni_json == null) originale.condizioni_json = JSON.stringify(migraTestiCondizioni(daProsaRip(originale), originale.confidente_chiave as string | null));
   const set = CAMPI[tipo].map((c) => `${c} = @${c}`);
   const valori: Record<string, unknown> = { chiave, ...Object.fromEntries(CAMPI[tipo].map((c) => [c, originale[c] ?? null])) };
   prepared(`UPDATE ${TABELLA[tipo]} SET ${set.join(', ')}, origine = 'seed', nascosto = 0, seed_json = NULL, updated_at = NULL WHERE chiave = @chiave`).run(valori);
