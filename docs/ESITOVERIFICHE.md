@@ -2030,3 +2030,42 @@ Untouchable risolve oggi due ancore gerarchiche, Shibuya e Central Street, entra
 `Untouchable`. Il ramo `multipla` di `DoveSiTrova` le presenta quindi come due pulsanti omonimi.
 La pagina non inventa quale sia la destinazione corretta; il Lotto A deve distinguere le etichette
 oppure eliminare la duplicazione nel risolutore/dati, mantenendo un solo proprietario dei file.
+
+## Lotto B — candidato NegoziPage con inventario contestuale (7 settembre 2026)
+
+**Proprietario implementazione:** Codex. **Verificatori richiesti:** Opus e
+`galaxy-task-validator`, entrambi in sola lettura sul tag candidato.
+
+### Modifica
+
+- Ogni scheda negozio apre come destinazione primaria la rotta canonica
+  `/guida/negozi/:chiave`; la posizione e' un comando separato, esplicito e richiudibile.
+- La pagina monta al massimo una sola `DoveSiTrova`: scegliendo un altro negozio la sostituisce;
+  cambiando ricerca o filtri la nasconde se la selezione non appartiene piu' ai risultati correnti.
+- Con una partita attiva, negozi e articoli con `disponibilita.stato === 'bloccato'` sono assenti
+  da elenco, ricerca, conteggi e comandi di posizione. Compaiono soltanto quando il motore li
+  restituisce disponibili.
+- Le condizioni alternative restano valutate dal motore come OR tramite `gruppo` con
+  `modo: 'almeno-una'`: una qualunque condizione soddisfatta rende la voce visibile. La suite
+  completa include la prova del valutatore; la pagina consuma esclusivamente lo stato finale.
+- L'azione `Aggiungi un negozio` e' separata dall'intestazione per non comprimere il sottotitolo
+  su mobile; catalogo, filtri, acquisti e suggerimenti restano invariati.
+
+### Evidenze dell'implementatore
+
+- tre cicli mirati: 12/12 test PASS, `typecheck` PASS, `lint` PASS e build Vite PASS;
+- runtime reale con partita al giorno 11 aprile: API 60 negozi, 12 bloccati, UI 48 visibili;
+  la ricerca `37 Gradi` non rende ne' il negozio bloccato ne' una posizione residua;
+- controllo a schermo desktop, tablet 900x900 e mobile 390x844: griglie e controlli leggibili,
+  una sola mappa contestuale, apertura/chiusura corretta e nessuno sbordo osservato;
+- suite completa ripetuta tre volte: risultato stabile 575/577. Restano esclusivamente i due
+  fallimenti gia' riprodotti sulla base (`citta.test.ts`: 84 attesi, 82 reali;
+  `mappe-editor.test.ts`: vecchia attesa del Dedalo Memento nell'albero).
+
+### Vincolo di integrazione assegnato a Opus
+
+La nuova gestione dei libri e' di proprieta' Opus: l'avanzamento parziale non completa il
+requisito `lettura`; solo l'ultima parte/sessione lo rende vero. Fino ad allora l'entita' collegata
+deve restare assente anche da pin, ricerca e collegamenti indiretti. Se lo sblocco ammette
+alternative, basta una qualsiasi condizione vera. I Palazzi, inoltre, compaiono in mappa soltanto
+nella rispettiva finestra di apertura e sono assenti fuori periodo.
