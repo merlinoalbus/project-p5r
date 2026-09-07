@@ -1998,3 +1998,35 @@ fantasma quando il layout ricalcola. Non e' ammesso mantenere questo doppio targ
 5. aggiornare test di `DungeonPage`, `GuidaPage`, testi di `MappaPage` e snapshot/accessibilita':
    nessun testo «Palazzi e Dedali», nessuna card Mementos, una sola CTA primaria per card e nessun
    elemento azione fuori dal suo perimetro.
+
+## Lotto B — candidato NegozioPage con posizione contestuale (7 settembre 2026)
+
+**Proprietario implementazione:** Codex. **Verificatori richiesti:** Opus e
+`galaxy-task-validator`, entrambi in sola lettura sul tag candidato.
+
+### Modifica
+
+- `NegozioPage` sostituisce il collegamento compatto nell'intestazione con una sola istanza di
+  `DoveSiTrova`, alimentata da `tipo="negozio"` e dalla chiave della scheda.
+- Il componente condiviso conserva il contratto gia' verificato: mappa incorporata per una
+  destinazione unica, scelta esplicita per destinazioni multiple, messaggio informativo per una
+  voce senza luogo e degradazione silenziosa se il risolutore non risponde.
+- Il test di pagina impedisce regressioni su numero di istanze, tipo, chiave e altezza, oltre a
+  mantenere le prove esistenti su filtri, disponibilita' e acquisti.
+
+### Evidenze dell'implementatore
+
+- tre cicli: `typecheck` PASS, `lint` PASS, build Vite PASS e 8/8 test mirati PASS;
+- controllo runtime reale su desktop 1440x900, tablet 900x900 e mobile 390x844: nessuno sbordo,
+  controlli e prodotti restano leggibili, una sola sezione `Dove si trova`;
+- suite completa ripetuta tre volte: risultato stabile 572/574. I due fallimenti sono esterni al
+  diff e gia' nella base `github/main` (`citta.test.ts`: 84 attesi, 82 reali;
+  `mappe-editor.test.ts`: attesa obsoleta del Dedalo Memento nell'albero). Non vengono sanati nel
+  Lotto B e sono consegnati a Opus come rilievi della base/Lotto A.
+
+### Rilievo di integrazione per Opus
+
+Untouchable risolve oggi due ancore gerarchiche, Shibuya e Central Street, entrambe etichettate
+`Untouchable`. Il ramo `multipla` di `DoveSiTrova` le presenta quindi come due pulsanti omonimi.
+La pagina non inventa quale sia la destinazione corretta; il Lotto A deve distinguere le etichette
+oppure eliminare la duplicazione nel risolutore/dati, mantenendo un solo proprietario dei file.
