@@ -14,8 +14,12 @@ import { normalizzaTesto } from '../utils/testo';
 import type { SfideDto } from '../types';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { AssetImg } from '../components/shared/AssetImg';
+import { IconaScheda } from '../components/shared/IconaAzione';
 
-const SCHEDE = [['battaglie', 'Battaglie Sfida'], ['boss', 'Boss segreti'], ['magnate', 'Magnate'], ['tratti', 'Tratti']] as const;
+const SCHEDE = [
+  ['battaglie', 'Battaglie Sfida', 'sfide-battaglia'], ['boss', 'Boss segreti', 'boss'],
+  ['magnate', 'Magnate', 'magnate'], ['tratti', 'Tratti', 'tratti'],
+] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 
 function Fonte({ url }: { url: string | null | undefined }) {
@@ -135,7 +139,13 @@ export function SfidePage() {
         <div className="flex flex-col gap-3">
           <IntestazionePagina titolo="Battaglie Sfida, boss segreti e tratti" sottotitolo={<>Le {d.battaglieSfida.elenco.length} Battaglie Sfida con regole, nemici e ricompense; i boss segreti (Jose, Gemelle Custodi, Lavenza) con mosse e strategia; Magnate; i {d.tratti.elenco.length} tratti delle Persona con l'effetto in italiano. Le domande del game show in TV sono in <Link to="/guida/domande">Domande in classe ed esami</Link>.</>} />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
-            {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'battaglie' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
+            {SCHEDE.map(([k, l, icona]) => (
+              <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
+                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
+                onClick={() => setParams(k === 'battaglie' ? {} : { scheda: k }, { replace: true })}>
+                <IconaScheda chiave={icona} dimensione={28} /><span>{l}</span>
+              </button>
+            ))}
           </FilaScorrevole>
           {scheda === 'battaglie' && <SchedaBattaglie d={d} />}
           {scheda === 'boss' && <SchedaBoss d={d} />}

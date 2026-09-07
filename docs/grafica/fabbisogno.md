@@ -357,6 +357,7 @@ censimento**, perché la riserva non diventi il traguardo.
 | icone di categoria | `ui/categoria-<chiave>` | 22 | §22 | consegnate il 2026-09-07 (`grafica-categorie-finali-v1`) |
 | fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | consegnati il 2026-09-07 (`grafica-decori-finali-v1`) |
 | icone di categoria delle azioni del giorno | `ui/categoria-<chiave>` | 11 | §24 | **da consegnare** |
+| figure delle schede a tessera | `ui/scheda-<chiave>` | 13 | §25 | **da consegnare** |
 
 Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che
 prima erano scritte nude — «+», «−», «Mostra i completati», «Dettagli», le due viste di un'area,

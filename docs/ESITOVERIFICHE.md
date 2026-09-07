@@ -2862,3 +2862,25 @@ stesso, i suoi test passano, la sua base è giusta. La vede solo il confronto co
 `git diff github/main -- <file> | grep '^-'` — letto sulle **righe tolte**. Se fra quelle c'è codice
 che l'autore del candidato non ha scritto, non è un rebase riuscito. Questa riga entra nel
 protocollo dei candidati accanto al controllo del merge-base, che da solo non basta più.
+
+### Le barre delle viste diventano tessere (7 settembre 2026, sera)
+
+Rilievo dell'utente su due schermate a confronto: «rapporto grafica/testo pessimo… va dato più
+spazio all'immagine, come nel secondo screen… questo su tutti i pulsanti». Il secondo screenshot era
+la barra della Partita, che avevo già rifatto a tessere — figura da 28 px sopra, etichetta sotto — e
+che quindi è il modello, non una cosa da inventare.
+
+Convertite **sette barre**: Fusione (8 viste, era il caso segnalato), Oggetti (7), Trofei e finali
+(6), Sfide (4), Aiuto in battaglia (5), Attività (2), Richieste (2). Restano pastiglie i **filtri**
+— elementi delle skill, gruppi dei personaggi, stato delle letture — perché non scelgono una vista e
+sono molti: a tessera occuperebbero mezza pagina.
+
+Le barre di Oggetti, Trofei, Sfide e Richieste erano di **solo testo**: hanno ricevuto una figura
+ciascuna, con la riserva SVG in codice e la riga nel censimento §25, secondo la regola che una
+chiave nuova nasce con tutte e due. Verificato: 7+6+4+5+2+2+11 tessere, **tutte con la loro figura**,
+nessuno scorrimento orizzontale a 375 px, 671 test verdi.
+
+**Fabbisogno grafico aggiornato**: consegnate e integrate §21, §22 e §23; da generare **24
+immagini** — le 11 della §24 (i tipi di azione della Guida del giorno) e le 13 della §25 (le figure
+delle tessere). Richiesta a Codex con l'ordine di priorità: prima le sette che si vedono a ogni
+partita.
