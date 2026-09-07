@@ -174,6 +174,17 @@ export function LibriPage() {
         <div className="kpi-tile"><span className="kpi-value">{d.sessioniTotali}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni totali</span></div>
       </section>
 
+      {/* Senza questa riga i numeri calerebbero da soli fra una visita e l'altra — un libro da tre
+          sessioni che all'improvviso ne chiede due — e sembrerebbe un errore dell'app invece che
+          l'effetto di un libro che hai letto tu. */}
+      {d.letturaRapida && (
+        <p className="m-0 flex items-center gap-2 rounded-md bg-success/10 px-3 py-2 text-[13px] text-text-secondary" role="status">
+          <IconaAzione chiave="libro" dimensione={18} />
+          <span>Hai letto <strong>Lettura rapida</strong>: leggi al doppio della velocità, quindi ogni altro libro
+          chiede metà sessioni, arrotondate per eccesso. I totali qui sopra ne tengono già conto.</span>
+        </p>
+      )}
+
       <section className="pannello-filtri grid gap-2 md:grid-cols-[minmax(220px,1fr)_auto_auto]" aria-label="Filtri libri">
         <input className="form-input" type="search" value={ricerca} onChange={(e) => setRicerca(e.target.value)} placeholder="Cerca titolo, luogo o beneficio…" aria-label="Cerca libri" />
         <select className="form-input" value={stato} onChange={(e) => setStato(e.target.value as StatoFiltro)} aria-label="Stato lettura">

@@ -18,6 +18,11 @@ const ALIAS: Record<string, string> = {
   arma: 'armi', protezione: 'protezioni', accessorio: 'accessori', regalo: 'regali', materiale: 'materiali', abito: 'abiti',
   libro: 'libri', lettura: 'libri', lavoro: 'lavori', 'mini-gioco': 'minigiochi', videogioco: 'minigiochi',
   ambulante: 'misto', consumabile: 'oggetti',
+  // Le categorie nuove degli articoli in vendita. Quasi tutte hanno già la figura col loro stesso
+  // nome — `cura`, `sp`, `battaglia`, `stato`, `esplorazione`, `film`, `dvd`, `cibo` — e non hanno
+  // bisogno di stare qui; `libro` e `videogioco` erano già tradotti sopra. Resta l'oggetto chiave,
+  // che il file scrive al plurale.
+  'oggetto-chiave': 'oggetti-chiave',
   // Le categorie dell'archivio degli equipaggiamenti sono le chiavi inglesi del dataset (`Weapon`,
   // `Gun`, `Protector`, `Accessory`), come per le skill: il nome italiano lo dà la tabella
   // `traduzione`, e qui si dà loro la figura. Un'arma da fuoco e una da mischia condividono la

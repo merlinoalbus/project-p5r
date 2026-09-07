@@ -1255,6 +1255,10 @@ export interface LibriDto {
   completati: number;
   sessioniFatte: number;
   sessioniTotali: number;
+  /** «Lettura rapida» è già stato letto in questa partita, quindi ogni altro libro chiede metà
+   *  sessioni (arrotondate per eccesso). Va detto a chi legge: senza, i totali calerebbero da soli
+   *  fra una visita e l'altra e sembrerebbe un errore dell'app. */
+  letturaRapida: boolean;
 }
 
 export interface FilmDto {

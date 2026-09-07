@@ -18,7 +18,7 @@ const base: LibroDto = {
   posizioni: [{ tipo: 'negozio', chiave: 'libreria-taiheido', etichetta: 'Libreria Taiheido' }],
   totaleSessioni: 2, progresso: 0, fatto: false, condizioni: null, disponibilita: null,
 };
-const dto = (libro: LibroDto): LibriDto => ({ libri: [libro], completati: Number(libro.fatto), sessioniFatte: libro.progresso, sessioniTotali: 2 });
+const dto = (libro: LibroDto): LibriDto => ({ libri: [libro], completati: Number(libro.fatto), sessioniFatte: libro.progresso, sessioniTotali: 2, letturaRapida: false });
 
 describe('LibriPage', () => {
   beforeEach(() => { vi.clearAllMocks(); usePartitaStore.setState({ attiva: { id: 7, nome: 'Royal' } as PartitaDto }); });

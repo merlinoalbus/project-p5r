@@ -37,7 +37,12 @@ export const datiArticolo = z.object({
   negozio_chiave: z.string().min(1).max(200),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
-  categoria: z.enum(['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo', 'altro']).default('altro'),
+  // Le categorie di un articolo sono i tipi di cosa che un negozio può vendere, e le prime nove non
+  // li coprivano: libri, DVD e videogiochi finivano in «altro», e i quattro consumabili che l'app
+  // distingue dappertutto — cura, SP, battaglia, stato — sparivano dentro «consumabile».
+  // Le etichette italiane stanno in `src/utils/negozi.ts`, le figure in `ui/categoria-*`.
+  categoria: z.enum(['arma', 'protezione', 'accessorio', 'abito', 'consumabile', 'regalo', 'materiale', 'cibo',
+    'cura', 'sp', 'battaglia', 'stato', 'esplorazione', 'oggetto-chiave', 'libro', 'film', 'dvd', 'videogioco', 'altro']).default('altro'),
   per: testo(80).nullable().optional(),
   prezzo: z.number().int().min(0).max(9_999_999).nullable().optional(),
   effetto: testo(600).nullable().optional(),
