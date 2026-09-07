@@ -146,8 +146,11 @@ Aggiornato il 7 settembre 2026.
    assegnato a Codex. Il **Covo dei Ladri come pagina propria** l'ho preso io, dichiarandolo nel
    canale prima di cominciare: sono file nuovi, non tocca niente di suo, ed è già un cartellino
    sulla mia mappa di Tokyo. Consegnato come candidato, da verificare come tutti gli altri.
-2. **Grafica**: la sagoma del Covo dei Ladri (voce 4), e la decisione sugli otto colori di spillo
-   troppo chiari — che non è grafica ma una riga di `shared/spilli.ts`.
+2. **Grafica**: la sagoma del Covo dei Ladri (voce 4) è l'unica voce aperta, e va generata da
+   Codex. La metà applicativa è pronta da prima che il file esista: quando arriva, il Covo diventa
+   una figura senza che nessuno tocchi il codice. ~~La decisione sugli otto colori di spillo
+   troppo chiari~~ è **chiusa**: l'utente ha scelto di lasciarli come sono
+   (`docs/DECISIONI.md`, 7 settembre).
 3. ~~**Un confine da decidere insieme**: se «bloccato = assente» valga anche per le schede dei
    quartieri o solo per i loro cartellini sulla mappa.~~ **Chiuso, e senza bisogno di decidere
    niente di nuovo: i due lotti si sono incontrati sulla stessa regola.** Il contratto di Codex
