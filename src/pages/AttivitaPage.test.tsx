@@ -67,8 +67,12 @@ describe('AttivitaPage', () => {
     getAttivita.mockResolvedValue(dati);
     render(<MemoryRouter><AttivitaPage /></MemoryRouter>);
     await screen.findByText('Freccette');
+    expect(screen.queryByText('Dove: Freccette')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /Freccette/ }));
     expect(screen.getByText('Dove: Freccette')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Freccette/ }));
+    expect(screen.queryByText('Dove: Freccette')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Freccette/ }));
     fireEvent.click(screen.getByRole('button', { name: /Bagno pubblico/ }));
     expect(screen.queryByText('Dove: Freccette')).toBeNull();
     expect(screen.getByText('Dove: Bagno pubblico')).toBeInTheDocument();
