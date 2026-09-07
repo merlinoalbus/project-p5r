@@ -2484,3 +2484,47 @@ ha confermato chip «Non ancora», posizione informativa, checkbox disabilitata 
 acquistabile». Nessuna regressione del Lotto A integrato e nessun file modificato dal validatore.
 
 Resta necessaria la verifica paritaria di Opus prima di considerare chiuso il pezzo Lotto B.
+
+### Gate paritario di Opus sul candidato Lotto B v3
+
+**Verdetto Opus: PASS.** La verifica e' stata eseguita sul tag in un worktree isolato con database
+nuovo: 60 negozi e 575 articoli sia con sia senza partita, 12 negozi correttamente dichiarati
+`bloccato`, scheda bloccata in 200, ricerca con totale 575 prima del limite di 300, acquisto
+bloccato respinto con 409 e deselezione di un acquisto preesistente consentita. Typecheck, lint e
+suite completa hanno chiuso con **591/591 test PASS**. Opus ha inoltre verificato a schermo la
+separazione fra i due piani: la scheda del negozio resta consultabile, mentre il relativo pin
+sparisce dalla mappa e torna soltanto tramite il comando esplicito, marcato come non disponibile.
+
+Il pezzo `Negozi e catalogo` del Lotto B e' pertanto chiuso. Non equivale alla chiusura dell'intero
+Lotto B: restano le categorie inventario 5.2, Attivita' e doti sociali, Covo dei Ladri e le nuove
+sezioni Libri / Film-DVD / Videogiochi con avanzamento per sessioni.
+
+---
+
+## Verifica finale Lotto A — `candidato/lotto-a-mondo-v3` (7 settembre 2026)
+
+**Verdetto: PASS senza rilievi** sul tag annotato immutabile `candidato/lotto-a-mondo-v3`,
+dereferenziato localmente e sul remoto al commit
+`300d0f0a2a12a56d6278a2a76ae4c1a3e7ce01cc`.
+
+### Evidenze indipendenti
+
+- typecheck, lint e build PASS; suite completa: **138 file, 587/587 test PASS**;
+- all'11 aprile risultano disponibili soltanto 3 quartieri su 23; i 20 bloccati hanno tutti una
+  motivazione, mentre una partita portata a fine gioco rende raggiungibili tutti i 23;
+- OR reale riprodotto su Harajuku: basta alternativamente la lettura di `Vague` oppure la data del
+  3 agosto;
+- i pin bloccati sono nascosti per impostazione predefinita, il comando li ripristina marcati e un
+  deep link non li rivela ne' centra occultamente;
+- AND live riprodotto su Libreria Taiheido il 20 aprile: modificando soltanto il catalogo del
+  negozio a `dal 1 dicembre`, lo spillo passa da disponibile a bloccato, mantiene verdi le proprie
+  condizioni e aggiunge il requisito rosso `Negozio: dal 1 dicembre`; il ripristino del catalogo
+  riporta lo spillo a disponibile;
+- verificate le nove finestre Palazzo/Iweleth con estremi inclusivi e Mementos esclusi;
+- la correzione zoom/pan evita aggiornamenti di stato annidati, limita il pan alla cornice e
+  applica l'arrivo dopo il fit definitivo.
+
+Il `galaxy-task-validator` ha ripetuto le verifiche in sola lettura e ha emesso PASS senza WARN o
+richieste correttive. Nessun file sorgente e' stato modificato durante la review. Il ramo Lotto B
+e' stato quindi allineato in fast-forward al commit unificato `516d17b`, che contiene entrambi i
+lotti approvati fino a questo punto.
