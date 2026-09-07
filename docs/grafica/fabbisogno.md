@@ -356,10 +356,10 @@ censimento**, perché la riserva non diventi il traguardo.
 | icone delle azioni nuove | `ui/azione-<chiave>` | 6 | §21 | consegnate il 2026-09-07 (`grafica-azioni-v1`) |
 | icone di categoria | `ui/categoria-<chiave>` | 22 | §22 | consegnate il 2026-09-07 (`grafica-categorie-finali-v1`) |
 | fregi decorativi delle sezioni | `decori/<chiave>` | 11 | §23 | consegnati il 2026-09-07 (`grafica-decori-finali-v1`) |
-| icone di categoria delle azioni del giorno | `ui/categoria-<chiave>` | 11 | §24 | **da consegnare** |
-| figure delle schede a tessera | `ui/scheda-<chiave>` | 13 | §25 | **da consegnare** |
+| icone di categoria delle azioni del giorno | `ui/categoria-<chiave>` | 11 | §24 | consegnate il 2026-09-08 (`grafica-icone-giorno-v3`) |
+| figure delle schede a tessera | `ui/scheda-<chiave>` | 13 | §25 | consegnate il 2026-09-08 (`grafica-tessere-v2`) |
 | illustrazioni delle attività e dei lavori | `attivita/<chiave>` | 23 | §26 | **da consegnare** |
-| segni per gli elementi rimasti spogli | `ui/segno-<chiave>` | 12 + 1 | §27 | **da consegnare** (compresa `scheda-letture`, mai censita) |
+| segni per gli elementi rimasti spogli | `ui/segno-<chiave>` | 12 + 1 | §27 | consegnati il 2026-09-08 (`grafica-extra-segni-v1`), compresa `scheda-letture` |
 
 Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che
 prima erano scritte nude — «+», «−», «Mostra i completati», «Dettagli», le due viste di un'area,

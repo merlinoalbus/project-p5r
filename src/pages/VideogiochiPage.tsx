@@ -28,15 +28,15 @@ import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
 import { NOME_DOTE } from '../utils/citta';
 import type { VideogiocoDto } from '../types';
 
-function Numero({ valore, etichetta }: { valore: number | string; etichetta: string }) {
+function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
   return (
     <span className="card flex flex-col gap-0.5 px-3 py-2">
       <span className="font-display text-[21px] leading-none tabular-nums">{valore}</span>
-      <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">{etichetta}</span>
+      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
     </span>
   );
 }
@@ -188,9 +188,9 @@ export function VideogiochiPage() {
             sottotitolo={`I giochi retro della soffitta e delle sale di Akihabara: ogni round alza una Dote, e i contenuti collegati si sbloccano solo a gioco finito.${partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare i round.'}`} />
 
           <div className="flex flex-wrap gap-2">
-            <Numero valore={giochi.length} etichetta="Giochi" />
-            <Numero valore={giochi.filter((g) => g.fatto).length} etichetta="Completati" />
-            <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" />
+            <Numero valore={giochi.length} etichetta="Giochi" segno="iniziati" />
+            <Numero valore={giochi.filter((g) => g.fatto).length} etichetta="Completati" segno="completati" />
+            <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" segno="round" />
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

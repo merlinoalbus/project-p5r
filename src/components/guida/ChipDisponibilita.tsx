@@ -8,7 +8,7 @@
 // ============================================================
 
 import type { DisponibilitaDto } from '../../types';
-import { IconaAzione } from '../shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 import { motiviDisponibilita } from '../../utils/disponibilita';
 
 export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilita: DisponibilitaDto | undefined; compatto?: boolean }) {
@@ -23,7 +23,7 @@ export function ChipDisponibilita({ disponibilita: d, compatto }: { disponibilit
   }
   return (
     <span className={`chip chip--icona ${compatto ? 'text-[11px]' : ''}`} title={motivi} aria-label={`Da verificare: ${motivi}`}>
-      <IconaAzione chiave="aperti" dimensione={compatto ? 12 : 14} />Da verificare
+      <IconaSegno chiave="da-verificare" dimensione={compatto ? 12 : 14} />Da verificare
     </span>
   );
 }
