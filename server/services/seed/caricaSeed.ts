@@ -1,5 +1,6 @@
 import { sincronizzaDateQuartieri } from '../../db/migrations/037_sblocco_quartieri.js';
 import { sincronizzaCondizioniCatalogo } from '../../db/migrations/036_condizioni_procedurali.js';
+import { sincronizzaCondizioniLetture } from '../../db/migrations/052_condizioni_letture_attivita.js';
 // ============================================================
 // caricaSeed — carica il compendio Royal da data/seed nel DB (idempotente)
 // ============================================================
@@ -699,6 +700,9 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     for (const tm of t.termini ?? []) tr('termine', tm.chiave, tm.nome, { categoria: tm.categoria, definizione: tm.definizione ?? null, fonte: tm.fonte ?? null });
 
     sincronizzaCondizioniCatalogo(db);
+    // Le stesse regole per libri, film e attivita': la loro disponibilita' era prosa e nessuno la
+    // leggeva, e l'editor delle condizioni sulle loro schede scriveva in un campo che non c'era.
+    sincronizzaCondizioniLetture(db);
     // Le condizioni scritte nel seed vincono su quelle ricavate dalla prosa, e si applicano
     // **dopo** la sincronizzazione, che altrimenti le sovrascriverebbe. È il campo che rende
     // fedele l'esportazione: una condizione costruita nell'editor — un gruppo «almeno una», un

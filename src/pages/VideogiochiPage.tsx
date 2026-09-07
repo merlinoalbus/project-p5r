@@ -24,6 +24,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { NOME_DOTE } from '../utils/citta';
 import type { VideogiocoDto } from '../types';
@@ -48,7 +49,10 @@ function Scheda({ g, partitaId, occupato, onCambia, onCorretto }: { g: Videogioc
           <h3 className="m-0 text-lg leading-tight">{g.nome}</h3>
           <p className="m-0 text-xs text-text-secondary">{g.luogo}</p>
         </div>
-        <span className={`chip ${g.fatto ? 'chip--attivo' : ''}`}>{g.fatto ? 'Completato' : g.iniziato ? 'In corso' : 'Da giocare'}</span>
+        <span className="flex flex-col items-end gap-1">
+          <span className={`chip ${g.fatto ? 'chip--attivo' : ''}`}>{g.fatto ? 'Completato' : g.iniziato ? 'In corso' : 'Da giocare'}</span>
+          <ChipDisponibilita disponibilita={g.disponibilita ?? undefined} compatto />
+        </span>
       </div>
 
       <div>

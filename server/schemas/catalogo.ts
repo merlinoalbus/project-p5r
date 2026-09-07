@@ -50,6 +50,9 @@ export const datiArticolo = z.object({
 
 /** Campi di un libro scrivibili dall'utente. */
 export const datiLibro = z.object({
+  // Le condizioni valgono anche qui. L'editor le mostrava già e finivano nel nulla, perché la
+  // colonna non esisteva (migrazione 052): sono la disponibilità, «dal 18 aprile».
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
   dove: testo(300).default(''),
@@ -67,6 +70,7 @@ export const datiLibro = z.object({
 
 /** Campi di un film o DVD scrivibili dall'utente. */
 export const datiFilm = z.object({
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   nome_it: testo(160).nullable().optional(),
   dove: z.enum(['cinema', 'dvd']).default('cinema'),
@@ -81,6 +85,7 @@ export const datiFilm = z.object({
 
 /** Campi di un'attivita' (compresi lavori e videogiochi) scrivibili dall'utente. */
 export const datiAttivita = z.object({
+  condizioni_json: z.array(condizioneSpillo).max(20).transform((v) => JSON.stringify(v)).optional(),
   nome: testo(160).min(1),
   tipo: testo(60).default('altro'),
   luogo: testo(300).default(''),

@@ -1210,6 +1210,11 @@ export interface AttivitaDto {
   paga: string | null;
   fonte: string;
   verificato: boolean;
+  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+   *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface LibroDto {
@@ -1234,6 +1239,11 @@ export interface LibroDto {
   progresso: number;
   /** Completamento canonico nella partita: non deriva dal solo progresso. */
   fatto: boolean;
+  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+   *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface LibriDto {
@@ -1264,6 +1274,11 @@ export interface FilmDto {
   iniziato: boolean;
   /** Fruizione completata: una visione al cinema o tutte le sessioni richieste da un DVD. */
   fatto: boolean;
+  /** La disponibilità scritta dalla guida, tradotta in regola (migrazione 052): «dal 18 aprile»,
+   *  «dal 24 aprile», «5 giugno, evento con Ryuji». Null dove la guida non dice niente. */
+  condizioni: CondizioneSpilloDto[] | null;
+  /** Se la riga, al punto in cui è la partita, è già disponibile. Null senza partita. */
+  disponibilita: DisponibilitaDto | null;
 }
 
 export interface FilmDvdDto {
