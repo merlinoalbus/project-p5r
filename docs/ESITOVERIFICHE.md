@@ -2704,3 +2704,32 @@ l'ha sulla mappa della scuola. Restano senza punto `biblioteca-shujin`, `cancell
 dedicata («Biblioteca», «Cancello della scuola») e il collegamento si può fare senza inventare
 coordinate; per infermeria e corridoio no, e **non si inventano**: andrebbero posizionati su una
 planimetria dei piani con una prova, che è lavoro dell'atlante.
+
+### Domande e cruciverba correggibili — verifica (7 settembre 2026)
+
+- **Il difetto era reale e misurato**: 78 domande e 38 righe di cruciverba erano le uniche famiglie
+  consultate *durante* il gioco a restare di sola lettura. L'identità delle domande era la
+  posizione nel file: aggiungerne una a maggio avrebbe fatto scalare tutte le successive e una
+  correzione sarebbe finita sulla domanda sbagliata. La chiave ora è il giorno; verificato che le
+  chiavi restano uniche (78 su 78, cinque giorni con due domande).
+- **Round trip completo via API**, non solo unità: correzione con risposta a due passaggi →
+  comparsa in `/api/compendio/domande` → **reseed forzato** che non la riporta indietro →
+  «Ripristina» che rimette la riga della guida. Lo stesso per il cruciverba. Coperto da un test
+  nuovo in `server/routes/catalogo.test.ts`.
+- **Regressione trovata e chiusa durante la verifica**: `organizzazioneMappe.test.ts` ferma le
+  migrazioni alla 41 e poi carica il seed; il caricatore nuovo dava per scontate le colonne della
+  055 e falliva. Ora guarda che colonne ci sono davvero (`colonneDi`) e sullo schema vecchio torna
+  al comportamento di prima. È la stessa cosa che serve a un ripristino da un backup più vecchio.
+- **Esportazione**: quattro file su quattro identici byte per byte a tavolo pulito. L'ultima
+  differenza era l'a-capo finale, che `negozi.json` e `attivita.json` hanno e gli altri due no: si
+  prende dal file invece di imporlo, come già si faceva per il rientro.
+- Verifica nel browser: 83 pulsanti «Correggi» sulle domande (78 righe più le cinque «prossime»
+  ripetute in cima), 38 sul cruciverba, il modulo si apre con le risposte già dentro e senza
+  l'editor delle condizioni, che per queste due tabelle non avrebbe niente da salvare.
+
+### Consegne grafiche — stato al 7 settembre 2026, sera
+
+`candidato/grafica-decori-ottimizzati-v2` ha gli stessi blob di v1 (diff vuoto fra i tag): il PASS
+vale per entrambi. **PR #39** raccoglie finalmente tutto il lavoro grafico — 22 icone di categoria e
+11 fregi già alleggeriti (10,0 → 3,3 MB) — ed è `CLEAN`. Il fabbisogno censito resta scoperto solo
+per la §24 (le undici icone dei tipi di azione della Guida del giorno).
