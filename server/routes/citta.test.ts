@@ -90,12 +90,13 @@ describe('API città e attività', () => {
     expect(a.attivita.length).toBeGreaterThanOrEqual(20);
     expect(a.lavori).toHaveLength(4);
     expect(a.libri).toHaveLength(46);
-    expect(a.film).toHaveLength(21);
+    expect(a.film).toHaveLength(30);
     expect(a.attivita.find((x) => x.chiave === 'freccette')).toMatchObject({ luogoChiave: 'kichijoji', fascia: 'sera', costo: 800, doti: [{ dote: 'perizia', note: 1, condizione: expect.any(String) }], verificato: true });
     expect(a.lavori.every((x) => x.tipo === 'lavoro' && x.doti.length > 0)).toBe(true);
     expect(a.libri.filter((l) => l.dote !== null).length).toBeGreaterThanOrEqual(20);
     expect(a.libri.every((l) => l.fonte.startsWith('http') && !l.fatto)).toBe(true);
     expect(a.film.filter((f) => f.dove === 'dvd')).toHaveLength(12);
+    expect(a.film.filter((f) => f.dove === 'cinema')).toHaveLength(18);
     expect(a).toMatchObject({ libriLetti: 0, filmVisti: 0 });
     expect((await request(app).get('/api/compendio/attivita?partita=99999')).status).toBe(404);
 

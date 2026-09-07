@@ -59,7 +59,7 @@ describe('API Libri', () => {
     expect((await request(app).put(url).send({ tipo: 'libro', chiave: 'il-magnifico-ladro', fatto: true, avanzamento: 2 })).status).toBe(400);
     expect((await request(app).put(url).send({ tipo: 'libro', chiave: 'il-magnifico-ladro', avanzamento: 1.5 })).status).toBe(400);
     expect((await request(app).put(url).send({ tipo: 'libro', chiave: 'il-magnifico-ladro', avanzamento: 3 })).status).toBe(400);
-    expect((await request(app).put(url).send({ tipo: 'film', chiave: 'x', avanzamento: 1 })).status).toBe(400);
+    expect((await request(app).put(url).send({ tipo: 'film', chiave: 'x', avanzamento: 1 })).status).toBe(404);
   });
 
   it('clampa un progresso quando il seed riduce il totale senza dichiararlo completato', async () => {
