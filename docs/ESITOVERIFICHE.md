@@ -2779,3 +2779,18 @@ precedente. Esito consolidato:
 tutti e tre lo stesso libretto e «trama» la stessa stella di «dote» — quattro azioni diverse, due
 segni, a 40 px nella schermata più usata dell'app. Ora sono tredici segni distinti, con un test che
 lo tiene fermo. Restano riserve: le figure vere sono la §24, l'ultima cosa aperta del fabbisogno.
+
+### Passata finale sul ramo `lavoro/verifica-lotto-b` (7 settembre 2026, sera)
+
+**Installazione da zero.** Migrazioni 1→55 su un database vuoto più il caricamento del seed: 78
+domande e 38 righe di cruciverba tutte con la loro chiave, **zero** spilli col nome giapponese (233
+tradotti al volo), 3 luoghi collegati alla planimetria che porta il loro nome, 223 equipaggiamenti e
+575 articoli. È la garanzia che conta: quello che ho aggiunto non serve solo a questa istanza, vale
+per una installazione nuova.
+
+**Runtime.** Undici pagine toccate percorse a 1200, 600 e 375 px — Equipaggiamento, Domande,
+Cruciverba, Videogiochi, Attività, Negozi filtrati per categoria, indice delle Mappe, Palazzo di
+Kamoshida, Libri, Film, Richieste: **zero errori in console**, zero `role="alert"`, nessuno
+scorrimento orizzontale a nessuna larghezza, e nessun errore nei log di BE e FE.
+
+**Suite.** 671 test, typecheck e lint puliti. Ventidue commit sul ramo.
