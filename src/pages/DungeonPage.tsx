@@ -1,6 +1,14 @@
 // ============================================================
-// DungeonPage — Palazzi e Dedali come schede visive: emblema, anello di avanzamento nella partita, date e livello in breve (Fase 7.1, grafica 11.4)
+// DungeonPage — i Palazzi come schede visive: emblema, anello di avanzamento nella partita, date e livello in breve (Fase 7.1, grafica 11.4)
 // ============================================================
+//
+// Si chiamava «Palazzi e Dedali» e ne elencava dieci. I Dedali erano due — Iweleth e i Memento —
+// e i due non si somigliano affatto: Iweleth si visita per aree come un Palazzo, e le sue mappe
+// esistono; i Memento non hanno aree fisse, i piani sono generati a ogni discesa, e la loro pagina
+// li disegna per intero. Tenerli nello stesso elenco prometteva la stessa cosa a proposito di due
+// posti diversi. Ora la sezione è **Palazzi**, Iweleth ci sta dentro perché si comporta come loro,
+// e i Memento si raggiungono da `/guida/dungeon/mementos` e dalle Richieste. Il filtro è
+// `soloPalazzi`, condiviso con la mappa di Tokyo.
 
 import { Link } from 'react-router-dom';
 import { getDungeons } from '../services/api';
@@ -18,18 +26,19 @@ import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
 import { schedaAccessoMondo } from '../utils/accessoMondo';
+import { soloPalazzi } from '../utils/palazzi';
 
 export function DungeonPage() {
-  useDocumentTitle('Palazzi e Dedali');
+  useDocumentTitle('Palazzi');
   const attiva = usePartitaStore((s) => s.attiva);
-  const dati = useCarica(() => getDungeons(attiva?.id), [attiva?.id]);
+  const dati = useCarica(async () => soloPalazzi(await getDungeons(attiva?.id)), [attiva?.id]);
   const sugg = useSuggerimenti();
   return (
     <PageState isLoading={dati.caricamento && !dati.dati} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {dati.dati && (
         <div className="flex flex-col gap-4">
-          <IntestazionePagina titolo="Palazzi e Dedali" sottotitolo="Aree e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le piante delle aree si scaricano al primo accesso e portano gli spilli preposizionati." />
-          <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Dungeon">
+          <IntestazionePagina titolo="Palazzi" sottotitolo="I nove Palazzi e il Dedalo di Iweleth: aree e punti di interesse dalla guida allgamestaff (sicure, forzieri, Volontà, enigmi, mini-boss e boss con debolezze). Con una partita attiva segni ciò che hai ottenuto o esaurito; le piante delle aree si scaricano al primo accesso e portano gli spilli preposizionati." />
+          <ul className="m-0 p-0 list-none grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Palazzi">
             {dati.dati.map((d) => {
               const quota = d.gestiti !== null && d.punti > 0 ? d.gestiti / d.punti : null;
               return (
