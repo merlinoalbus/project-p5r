@@ -2759,3 +2759,23 @@ l'interfaccia e passa sulla `main` di adesso.
 **Regola di processo che ne esce:** un candidato con merge-base vecchio non si giudica solo sul
 contenuto. `git log --oneline github/main -- <file>` prima di aprire un lotto costa niente e dice
 se qualcuno ci ha lavorato.
+
+### Lotto B v7, v8 e v9 — un candidato che si ripete (7 settembre 2026, sera)
+
+Cinque candidati (`lotto-b-v5` … `v9`) con lo **stesso merge-base** `b1ce57d`, ognuno che rifà il
+precedente. Esito consolidato:
+
+- **integrato**: coda dei round e `DoveSiTrova` (commit `8dbd355`, con una correzione al lavoro di
+  Codex), il test API dei videogiochi tale e quale, la matrice degli inventari 5.2 (`bc789ff`),
+  completata con l'archivio dei 223 equipaggiamenti che le mancava;
+- **respinto con la ragione**: `InventariPage`. La pagina dei Negozi fa già la stessa cosa — stessa
+  `ricercaArticoli`, stessa `ArticoliTabella`, selettore «Categoria» già presente — e sarebbe stata
+  la terza porta sugli stessi scaffali. Il bisogno però era reale: quel filtro **non era
+  raggiungibile**, perché viveva solo nello stato del componente. Risolto dove stava il buco
+  (`6cac69a`): i filtri stanno nell'indirizzo, `/guida/negozi?categoria=arma` apre l'elenco già
+  filtrato, e la riga della matrice diventa un collegamento vero.
+
+**Riserve SVG distinte per i tipi di azione** (`123b3a3`): «richiesta», «esame» e «libro» avevano
+tutti e tre lo stesso libretto e «trama» la stessa stella di «dote» — quattro azioni diverse, due
+segni, a 40 px nella schermata più usata dell'app. Ora sono tredici segni distinti, con un test che
+lo tiene fermo. Restano riserve: le figure vere sono la §24, l'ultima cosa aperta del fabbisogno.
