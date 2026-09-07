@@ -281,3 +281,46 @@ il file arriva in `public/asset/guida/covo.png` il plugin lo mette nel manifest 
 usa **senza che nessuno tocchi il codice**, esattamente come per le altre sedici. C'è una prova che
 lo garantisce, in `src/pages/GuidaPage.test.tsx`: monta l'indice con e senza manifest e conta le
 riserve, quindi si accorge se una piastrella smettesse di accettare la propria illustrazione.
+
+
+---
+
+## Il censimento dell'interfaccia: fatto, e non manca nient'altro
+
+La Fase 6.2 chiede la grafica per **tutte** le parti d'interfaccia dove manca, non solo per le
+sezioni rifatte. Censito il 7 settembre 2026, contando i file presenti contro le chiavi che il
+codice cerca davvero — **non contro quelle che uno si aspetta**: ogni riga è stata misurata
+leggendo il registro nel sorgente e la cartella, e dove le due liste non combaciano è scritto in
+quale delle due manca qualcosa. Le sagome dei quartieri e i tipi di spillo combaciano esattamente,
+in tutte e due le direzioni: nessuna chiave senza file e nessun file orfano.
+
+| famiglia | chiave nel codice | chiavi | file | mancanti |
+|---|---|---|---|---|
+| icone azione | `ui/azione-<chiave>` | 48 | 48 | — |
+| icone scheda | `ui/scheda-<chiave>` | 8 | 18 | — |
+| spilli della mappa | `ui/spillo-<tipo>` | 37 | 37 | — |
+| piastrelle della Guida | `guida/<chiave>` | 17 | 16 | **`covo`** → voce 5 |
+| sfondi di sezione e identità | `sfondi/…`, `identita/…` | 7 | 7 | — |
+| sagome dei quartieri | `mappe/lmap/tokyo/<chiave>` | 29 | 29 | — |
+| illustrazioni dei Palazzi e Memento | `palazzi/<chiave>` | 10 | 10 | — |
+| Covo sulla mappa | `mappe/lmap/tokyo/covo-dei-ladri` | 1 | 0 | **voce 4** |
+
+Restano aperte **solo le voci 4 e 5**, tutte e due il Covo dei Ladri.
+
+### Un conteggio sbagliato, e come si è visto che lo era
+
+Il primo passaggio di questo censimento aveva prodotto una voce 6 — *«le otto icone della Fusione
+mancano»* — con otto prompt già scritti. **Era falsa**, e la causa merita di stare qui perché è un
+errore facile da rifare: in `IconaAzione.tsx` convivono **due** registri, `RISERVA_AZIONE` che
+cerca `ui/azione-<chiave>` e `RISERVA_SCHEDA` che cerca `ui/scheda-<chiave>`. Avevo raccolto le
+chiavi di tutti e due con una sola espressione regolare e le avevo confrontate con i soli file
+`azione-*`: le otto chiavi della Fusione risultavano senza file perché i loro file si chiamano
+`scheda-fusione-*.png` **e ci sono tutti**.
+
+La differenza fra il conteggio sbagliato e quello giusto è un `indexOf` che separa i due blocchi
+prima di leggerli. Il conteggio sbagliato avrebbe fatto generare a Codex otto immagini inutili, e
+avrebbe messo in `public/asset/ui/` otto file con il nome sbagliato, che nessuno avrebbe caricato:
+sarebbero rimasti lì a far credere che il lavoro fosse fatto.
+
+**La regola che ne esce**, sorella di quella dei Memento: prima di dichiarare che un asset manca,
+si guarda **con che nome il codice lo cerca**, non con che nome ce lo si aspetta.
