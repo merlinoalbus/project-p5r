@@ -1190,6 +1190,8 @@ export interface AttivitaDto {
   fascia: 'giorno' | 'sera' | 'entrambe' | null;
   costo: number | null;
   sblocco: string | null;
+  /** Round richiesti per completare un videogioco; null per le altre attività. */
+  sessioni: number | null;
   /** `dote` nulla = effetto su una Dote variabile/non confermata, spiegato in `condizione`. */
   doti: Array<{ dote: DoteChiave | null; note: number | null; condizione: string | null }>;
   altriEffetti: string | null;
@@ -1243,11 +1245,45 @@ export interface FilmDto {
   dettagli: string | null;
   fonte: string;
   verificato: boolean;
-  /** Visto nella partita. */
+  posizioni: Array<{ tipo: 'quartiere' | 'luogo' | 'negozio' | 'attivita'; chiave: string; etichetta: string; ruolo: 'cinema' | 'noleggio' | 'visione' }>;
+  /** Prima visione al cinema o sessioni necessarie a completare un DVD. */
+  totaleSessioni: number;
+  /** Visioni registrate; al cinema può superare `totaleSessioni`, per contare le rivisioni. */
+  progresso: number;
+  /** Almeno una visione/sessione registrata. */
+  iniziato: boolean;
+  /** Fruizione completata: una visione al cinema o tutte le sessioni richieste da un DVD. */
   fatto: boolean;
 }
 
-export type TipoLettura = 'libro' | 'film';
+export interface FilmDvdDto {
+  film: FilmDto[];
+  iniziati: number;
+  completati: number;
+  /** Sessioni utili al completamento, senza contare le rivisioni eccedenti al cinema. */
+  sessioniCompletamentoFatte: number;
+  sessioniObiettivo: number;
+  /** Tutte le visioni registrate, comprese le rivisioni al cinema. */
+  visioniRegistrate: number;
+}
+
+export interface VideogiocoDto extends AttivitaDto {
+  tipo: 'videogioco';
+  totaleRound: number;
+  progresso: number;
+  iniziato: boolean;
+  fatto: boolean;
+}
+
+export interface VideogiochiDto {
+  videogiochi: VideogiocoDto[];
+  iniziati: number;
+  completati: number;
+  roundFatti: number;
+  roundObiettivo: number;
+}
+
+export type TipoLettura = 'libro' | 'film' | 'videogioco';
 
 export interface AttivitaTutteDto {
   attivita: AttivitaDto[];
@@ -1255,6 +1291,7 @@ export interface AttivitaTutteDto {
   libri: LibroDto[];
   film: FilmDto[];
   libriLetti: number;
+  /** Titoli con almeno una sessione/visione registrata, anche se non ancora completati. */
   filmVisti: number;
 }
 

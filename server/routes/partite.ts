@@ -110,7 +110,7 @@ router.put('/:id/cruciverba', validate({ params: paramsPartita, body: bodyCruciv
   res.json(impostaCruciverba(Number(req.params.id), b.data, b.fatto));
 });
 router.put('/:id/letture', validate({ params: paramsPartita, body: bodyLettura }), (req, res) => {
-  const b = req.body as { tipo: 'libro' | 'film'; chiave: string; fatto?: boolean; avanzamento?: number };
+  const b = req.body as { tipo: 'libro' | 'film' | 'videogioco'; chiave: string; fatto?: boolean; avanzamento?: number };
   const modifica = b.avanzamento === undefined ? { fatto: b.fatto as boolean } : { avanzamento: b.avanzamento };
   res.json(impostaLettura(Number(req.params.id), b.tipo, b.chiave, modifica));
 });

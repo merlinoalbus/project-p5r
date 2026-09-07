@@ -171,9 +171,12 @@ export const bodyAcquisto = z.object({ articolo: z.string().min(1).max(200), fat
 export const bodyCruciverba = z.object({ data: z.string().regex(/^\d{2}-\d{2}$/), fatto: z.boolean() });
 const chiaveLettura = z.string().min(1).max(160);
 export const bodyLettura = z.union([
+  z.object({ tipo: z.literal('videogioco'), chiave: chiaveLettura, fatto: z.boolean(), avanzamento: z.never().optional() }).strict(),
+  z.object({ tipo: z.literal('videogioco'), chiave: chiaveLettura, avanzamento: z.number().int().nonnegative(), fatto: z.never().optional() }).strict(),
   z.object({ tipo: z.literal('libro'), chiave: chiaveLettura, fatto: z.boolean(), avanzamento: z.never().optional() }).strict(),
   z.object({ tipo: z.literal('libro'), chiave: chiaveLettura, avanzamento: z.number().int().nonnegative(), fatto: z.never().optional() }).strict(),
   z.object({ tipo: z.literal('film'), chiave: chiaveLettura, fatto: z.boolean(), avanzamento: z.never().optional() }).strict(),
+  z.object({ tipo: z.literal('film'), chiave: chiaveLettura, avanzamento: z.number().int().nonnegative(), fatto: z.never().optional() }).strict(),
 ]);
 export const bodyStatoRichiesta = z.object({ richiesta: z.string().min(1).max(120), stato: z.enum(['accettata', 'completata']).nullable() });
 export const bodyStatoPunto = z.object({ punto: z.string().min(1).max(200), stato: z.enum(['ottenuto', 'esaurito']).nullable() });

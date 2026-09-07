@@ -27,7 +27,7 @@ import type { AppDatabase } from '../../db/dbService.js';
 import { nowIso } from '../../db/dbService.js';
 import { config } from '../../config.js';
 import type {
-  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, LibriPosizioniSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed, RequisitiRangoSeed,
+  AttivitaSeed, BattagliaSeed, CalendarioSeed, CittaSeed, CompletamentoSeed, CruciverbaSeed, FilmPosizioniSeed, LibriPosizioniSeed, MappeCittaSeed, MappeSeed, NegoziSeed, OggettiGuidaSeed, PercorsoSeed, PersonaggiSeed, SfideSeed, ConfidenteDettaglioSeed, ConfidenteSeed, DomandeSeed, DungeonSeed, MementosSeed, DoteSeed, FusioneSeed, OggettoSeed, PersonaSeed, SkillSeed, TraduzioniSeed, DescrizionePersonaSeed, RequisitiRangoSeed,
 } from '../../../shared/seed.js';
 import { invalidaCacheTraduzioni } from '../traduzioniService.js';
 import { invalidaMotoreFusione } from '../fusione/motoreFusione.js';
@@ -38,7 +38,7 @@ import { importaMappe } from '../mappe/mappeService.js';
 import type { EsportazioneMappeDto } from '../../../shared/types.js';
 
 /** File del seed letti dal caricatore (versione.json è solo informativo). */
-const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'libri-posizioni.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
+const FILE_SEED = ['persona.json', 'skill.json', 'oggetti.json', 'fusione.json', 'traduzioni.json', 'confidenti.json', 'confidenti-dettaglio.json', 'domande.json', 'calendario.json', 'dungeon.json', 'mementos.json', 'battaglia.json', 'citta.json', 'attivita.json', 'libri-posizioni.json', 'film-posizioni.json', 'cruciverba.json', 'negozi.json', 'percorso.json', 'completamento.json', 'sfide.json', 'mappe.json', 'mappe-citta.json', 'personaggi.json', 'oggetti-guida.json', 'oggetti-crosswalk.json', 'oggetti-negozi.json', 'finestre-dungeon.json', 'sblocco-quartieri.json', 'doti.json', 'descrizioni-persona.json', 'confidenti-requisiti.json', 'mappe-editor.json'] as const;
 
 /** Esito del caricamento. */
 export interface EsitoSeed {
@@ -71,6 +71,7 @@ interface SeedCompleto {
   citta: CittaSeed;
   attivita: AttivitaSeed;
   libriPosizioni: LibriPosizioniSeed;
+  filmPosizioni: FilmPosizioniSeed;
   cruciverba: CruciverbaSeed;
   negozi: NegoziSeed;
   percorso: PercorsoSeed;
@@ -130,6 +131,7 @@ function leggiSeed(seedDir: string): SeedCompleto {
     citta: JSON.parse(contenuti['citta.json']) as CittaSeed,
     attivita: JSON.parse(contenuti['attivita.json']) as AttivitaSeed,
     libriPosizioni: JSON.parse(contenuti['libri-posizioni.json']) as LibriPosizioniSeed,
+    filmPosizioni: JSON.parse(contenuti['film-posizioni.json']) as FilmPosizioniSeed,
     cruciverba: JSON.parse(contenuti['cruciverba.json']) as CruciverbaSeed,
     negozi: JSON.parse(contenuti['negozi.json']) as NegoziSeed,
     percorso: JSON.parse(contenuti['percorso.json']) as PercorsoSeed,
@@ -465,14 +467,18 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     }
     for (const r of db.prepare('SELECT chiave FROM luogo').all() as Array<{ chiave: string }>) if (!chiaviLuoghi.has(r.chiave)) db.prepare('DELETE FROM luogo WHERE chiave = ?').run(r.chiave);
     for (const r of db.prepare('SELECT chiave FROM quartiere').all() as Array<{ chiave: string }>) if (!chiaviQuartieri.has(r.chiave)) db.prepare('DELETE FROM quartiere WHERE chiave = ?').run(r.chiave);
-    const insA = db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
+    const haSessioniAttivita = (db.prepare("SELECT COUNT(*) n FROM pragma_table_info('attivita') WHERE name='sessioni'").get() as { n: number }).n === 1;
+    const insA = haSessioniAttivita ? db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, sessioni, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
+      VALUES (@chiave, @ordine, @nome, @tipo, @luogo, @luogo_chiave, @fascia, @costo, @sblocco, @sessioni, @doti_json, @altri_effetti, @regole, @premi, @paga, @fonte, @verificato)
+      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, tipo = excluded.tipo, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, fascia = excluded.fascia, costo = excluded.costo, sblocco = excluded.sblocco,
+        sessioni = excluded.sessioni, doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato`) : db.prepare(`INSERT INTO attivita (chiave, ordine, nome, tipo, luogo, luogo_chiave, fascia, costo, sblocco, doti_json, altri_effetti, regole, premi, paga, fonte, verificato)
       VALUES (@chiave, @ordine, @nome, @tipo, @luogo, @luogo_chiave, @fascia, @costo, @sblocco, @doti_json, @altri_effetti, @regole, @premi, @paga, @fonte, @verificato)
       ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, tipo = excluded.tipo, luogo = excluded.luogo, luogo_chiave = excluded.luogo_chiave, fascia = excluded.fascia, costo = excluded.costo, sblocco = excluded.sblocco,
         doti_json = excluded.doti_json, altri_effetti = excluded.altri_effetti, regole = excluded.regole, premi = excluded.premi, paga = excluded.paga, fonte = excluded.fonte, verificato = excluded.verificato`);
     const chiaviAttivita = new Set<string>();
     for (const a of seed.attivita.attivita) {
       chiaviAttivita.add(a.chiave);
-      insA.run({ chiave: a.chiave, ordine: a.ordine, nome: a.nome, tipo: a.tipo, luogo: a.luogo, luogo_chiave: a.luogoChiave && chiaviQuartieri.has(a.luogoChiave) ? a.luogoChiave : null, fascia: a.fascia, costo: a.costo, sblocco: a.sblocco, doti_json: JSON.stringify(a.doti), altri_effetti: a.altriEffetti, regole: a.regole, premi: a.premi, paga: a.paga, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
+      insA.run({ chiave: a.chiave, ordine: a.ordine, nome: a.nome, tipo: a.tipo, luogo: a.luogo, luogo_chiave: a.luogoChiave && chiaviQuartieri.has(a.luogoChiave) ? a.luogoChiave : null, fascia: a.fascia, costo: a.costo, sblocco: a.sblocco, sessioni: a.sessioni ?? 1, doti_json: JSON.stringify(a.doti), altri_effetti: a.altriEffetti, regole: a.regole, premi: a.premi, paga: a.paga, fonte: a.fonte, verificato: a.verificato ? 1 : 0 });
     }
     for (const r of db.prepare('SELECT chiave FROM attivita').all() as Array<{ chiave: string }>) if (!chiaviAttivita.has(r.chiave)) db.prepare('DELETE FROM attivita WHERE chiave = ?').run(r.chiave);
     const insLib = db.prepare(`INSERT INTO libro (chiave, ordine, nome, nome_it, dove, prezzo, disponibile_dal, dote, note, sblocca, sessioni, dettagli, fonte, verificato)
@@ -481,12 +487,35 @@ export function caricaSeed(db: AppDatabase, seedDir: string = config.seedDir, fo
     const chiaviLibri = new Set<string>();
     for (const l of seed.attivita.libri) { chiaviLibri.add(l.chiave); insLib.run({ chiave: l.chiave, ordine: l.ordine, nome: l.nome, nome_it: l.nomeIt, dove: l.dove, prezzo: l.prezzo, disponibile_dal: l.disponibileDal, dote: l.dote, note: l.note, sblocca: l.sblocca, sessioni: l.sessioni, dettagli: l.dettagli, fonte: l.fonte, verificato: l.verificato ? 1 : 0 }); }
     for (const r of db.prepare('SELECT chiave FROM libro').all() as Array<{ chiave: string }>) if (!chiaviLibri.has(r.chiave)) db.prepare('DELETE FROM libro WHERE chiave = ?').run(r.chiave);
-    const insFilm = db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, dettagli, fonte, verificato)
-      VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @dettagli, @fonte, @verificato)
-      ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`);
+    const haSessioniFilm = (db.prepare("SELECT COUNT(*) n FROM pragma_table_info('film') WHERE name='sessioni'").get() as { n: number }).n === 1;
+    const insFilm = haSessioniFilm
+      ? db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, sessioni, dettagli, fonte, verificato)
+          VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @sessioni, @dettagli, @fonte, @verificato)
+          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, sessioni = excluded.sessioni, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`)
+      : db.prepare(`INSERT INTO film (chiave, ordine, nome, nome_it, dove, periodo, dote, note, prezzo, dettagli, fonte, verificato)
+          VALUES (@chiave, @ordine, @nome, @nome_it, @dove, @periodo, @dote, @note, @prezzo, @dettagli, @fonte, @verificato)
+          ON CONFLICT(chiave) DO UPDATE SET ordine = excluded.ordine, nome = excluded.nome, nome_it = excluded.nome_it, dove = excluded.dove, periodo = excluded.periodo, dote = excluded.dote, note = excluded.note, prezzo = excluded.prezzo, dettagli = excluded.dettagli, fonte = excluded.fonte, verificato = excluded.verificato`);
     const chiaviFilm = new Set<string>();
-    for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, prezzo: f.prezzo, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
+    for (const f of seed.attivita.film) { chiaviFilm.add(f.chiave); insFilm.run({ chiave: f.chiave, ordine: f.ordine, nome: f.nome, nome_it: f.nomeIt, dove: f.dove, periodo: f.periodo, dote: f.dote, note: f.note, prezzo: f.prezzo, sessioni: f.sessioni, dettagli: f.dettagli, fonte: f.fonte, verificato: f.verificato ? 1 : 0 }); }
     for (const r of db.prepare('SELECT chiave FROM film').all() as Array<{ chiave: string }>) if (!chiaviFilm.has(r.chiave)) db.prepare('DELETE FROM film WHERE chiave = ?').run(r.chiave);
+    if (haSessioniFilm) {
+      const chiaviMappate = new Set(Object.keys(seed.filmPosizioni.film));
+      if (chiaviMappate.size !== chiaviFilm.size || [...chiaviFilm].some((k) => !chiaviMappate.has(k))) {
+        throw new Error(`Seed posizioni film: attese ${chiaviFilm.size} chiavi, ricevute ${chiaviMappate.size}; ogni film deve avere una voce.`);
+      }
+      const esistePosizioneFilm = (tipo: string, chiave: string): boolean => {
+        const tabella = tipo === 'quartiere' ? 'quartiere' : tipo === 'luogo' ? 'luogo' : tipo === 'negozio' ? 'negozio' : tipo === 'attivita' ? 'attivita' : null;
+        return !!tabella && !!db.prepare(`SELECT 1 FROM ${tabella} WHERE chiave = ?`).get(chiave);
+      };
+      db.prepare('DELETE FROM film_posizione').run();
+      const insPosFilm = db.prepare('INSERT INTO film_posizione (film_chiave, ordine, tipo, chiave, etichetta, ruolo) VALUES (?, ?, ?, ?, ?, ?)');
+      for (const [film, posizioni] of Object.entries(seed.filmPosizioni.film)) {
+        posizioni.forEach((p, ordine) => {
+          if (!esistePosizioneFilm(p.tipo, p.chiave)) throw new Error(`Seed posizioni film: riferimento ${p.tipo}/${p.chiave} inesistente per '${film}'.`);
+          insPosFilm.run(film, ordine, p.tipo, p.chiave, p.etichetta, p.ruolo);
+        });
+      }
+    }
 
     // ---- Cruciverba (Fase 7.5): upsert per data, rimozione orfani; le spunte per partita restano ----
     const insC = db.prepare(`INSERT INTO cruciverba (data, ordine, indizio, risposta, risposta_en, fonte) VALUES (@data, @ordine, @indizio, @risposta, @risposta_en, @fonte)
