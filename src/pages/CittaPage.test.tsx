@@ -39,6 +39,22 @@ describe('CittaPage', () => {
     const cartellino = within(tokyo).getByTitle('Shibuya');
     expect(cartellino).toHaveAttribute('href', '/guida/mappe/citta-shibuya');
   });
+
+  it('la scheda del quartiere mostra la stessa sagoma della mappa composta', async () => {
+    // Shujin è il caso che smaschera una tabella di corrispondenza inventata: la chiave del
+    // quartiere è `shujin-academy` ed è anche il nome del file. Se la scheda cercasse
+    // `citta-shujin-academy` — la vecchia anteprima del nodo d'atlante — resterebbe vuota.
+    api.getQuartieri.mockResolvedValue([
+      { chiave: 'shibuya', nome: 'Shibuya', mappaChiave: 'citta-shibuya', luoghi: 11, verificati: 11, sblocco: null, descrizione: 'Il centro.' },
+      { chiave: 'shujin-academy', nome: 'Shujin Academy', mappaChiave: null, luoghi: 4, verificati: 4, sblocco: null, descrizione: '' },
+    ] as QuartiereRiassuntoDto[]);
+    render(<MemoryRouter><CittaPage /></MemoryRouter>);
+    const schede = within(await screen.findByRole('list', { name: 'Quartieri' }));
+    expect(schede.getByAltText('Sagoma di Shibuya sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shibuya.png');
+    expect(schede.getByAltText('Sagoma di Shujin Academy sulla mappa di Tokyo')).toHaveAttribute('src', '/asset/mappe/lmap/tokyo/shujin-academy.png');
+    // niente più anteprime del nodo d'atlante nella griglia
+    expect(document.querySelector('.miniatura-mappa')).toBeNull();
+  });
 });
 
 describe('QuartierePage', () => {

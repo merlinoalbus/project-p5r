@@ -16,8 +16,8 @@ import { useCarica } from '../hooks/useCarica';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
-import { MiniaturaMappa } from '../components/guida/MiniaturaMappa';
 import { MappaTokyo } from '../components/mappe/MappaTokyo';
+import { SagomaQuartiere } from '../components/mappe/SagomaQuartiere';
 import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
@@ -49,7 +49,9 @@ export function CittaPage() {
             {q.map((x) => (
               <li key={x.chiave}>
                 <Link to={`/guida/mondo/quartiere/${encodeURIComponent(x.chiave)}`} className={`card card--cliccabile piastrella no-underline text-text flex gap-3 h-full ${classiSuggerito(sugg.evidenziato('quartieri', x.chiave))}`}>
-                  <MiniaturaMappa chiave={x.mappaChiave ?? ''} etichetta={x.nome} larghezza={112} altezza={84} className="shrink-0" />
+                  {/* La stessa sagoma della mappa qui sopra, non l'anteprima del nodo d'atlante:
+                      quella per quasi tutti i quartieri non esiste e lasciava riquadri vuoti. */}
+                  <SagomaQuartiere chiave={x.chiave} nome={x.nome} />
                   <span className="flex flex-col gap-1 min-w-0">
                   <span className="font-display uppercase text-[20px] leading-none">{x.nome}</span>
                   {sugg.evidenziato('quartieri', x.chiave) && <TargaSuggerito motivo={sugg.motivo('quartieri', x.chiave)} compatta />}
