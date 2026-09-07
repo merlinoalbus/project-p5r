@@ -1689,3 +1689,47 @@ bloccati — comprese quella da indirizzo, che lui non aveva nominato ma c'era.
 4. **`OggiMappa`** monta ancora il visore dell'atlante su `tokyo` dentro la pagina Partita. Codex
    dice di tenerlo perché lì è operativo e contestuale all'azione del giorno, non una seconda
    rappresentazione editoriale. **Sono d'accordo con lui** e chiudo il rilievo che avevo aperto io.
+
+---
+
+# Fase 7.1 — quel che attraversa il confine fra i due lotti
+
+Il piano dice che la revisione finale non è una seconda revisione di tutto: se ciascuno ha
+verificato il lotto dell'altro, resta da guardare **solo ciò che passa da una parte all'altra**.
+Sono tre cose, e le ho controllate tutte e tre.
+
+## 1. I collegamenti verso il mondo, da ogni sezione
+
+Prova eseguita nel browser: raccolti tutti gli `href` verso `/guida/mondo/…`, `/guida/mappe/…`,
+`/guida/citta/…`, `/guida/dungeon/…` e `/guida/negozi/…` dalle cinque sezioni che li producono —
+Città, Palazzi, Negozi, Mappe, Attività — e interrogata l'API dietro a ciascuno.
+
+**450 collegamenti, 450 controllati, 0 rotti.** Non «sembrano giusti»: ognuno è stato chiesto al
+servizio che lo deve risolvere. È la prova che conta, perché un href verso una chiave che non
+esiste è indistinguibile da uno buono finché non lo si clicca.
+
+Le nove sezioni della Guida aprono tutte senza errori e senza scorrimento orizzontale.
+
+## 2. Il pezzo condiviso che ho corretto, e che tocca le sue pagine
+
+`DoveSiTrova` è mio ma lo usa lui, in `NegozioPage` e in `NegoziPage`. Il rilievo dei due pulsanti
+omonimi era suo, ed era codice mio: adesso l'etichetta è il nome della mappa. La correzione arriva
+gratis anche alle sue pagine, ed è il motivo per cui le fondamenta comuni si scrivono prima.
+
+Lo stesso vale per gli **spilli**: la ricostruzione dello spillo attorno alla figura (`IconaSpillo`,
+mio) si vede nel popup del negozio dentro il visore, che è roba sua.
+
+## 3. La regola «bloccato = assente», che è l'unica cosa su cui non siamo allineati
+
+Lui la applica a negozi e articoli in modo pieno: spariscono da elenco, ricerca, conteggi e
+acquisto diretto. Io per i **quartieri** ho tolto il cartellino dalla mappa e ho tenuto la scheda
+in elenco con scritto «Non ancora aperto».
+
+Non è una svista, è una lettura diversa di due parole diverse dell'utente: a lui ha detto «non deve
+comparire affatto», a me «non va visualizzato **in mappa**». E c'è una ragione di merito: un
+quartiere non è merce. Sapere che Kichijoji esiste e apre il 5 giugno è metà del motivo per cui si
+consulta una guida; un articolo che non puoi ancora comprare è solo rumore in una lista di prezzi.
+
+**Resta aperta e va decisa**, perché due letture diverse nella stessa app si vedono. Se la regola è
+una sola, tolgo anche le schede: è mezz'ora di lavoro, non è quello il problema. Il problema è
+sceglierla, e l'ho scritta qui e nel canale invece di decidere da solo.

@@ -126,13 +126,30 @@ fondamenta condivise (A scrive, B verifica)
 
 ## 6. Stato
 
+Aggiornato il 7 settembre 2026.
+
 | | |
 |---|---|
-| fondamenta condivise | in corso — `DoveSiTrova` fatto, typecheck pulito, **da verificare a Codex** |
-| lotto A | non iniziato |
-| lotto B | non iniziato |
-| 6.1 pin | non iniziato |
-| `docs/grafica/fabbisogno.md` | non ancora creato |
+| fondamenta condivise | **fatto** — `DoveSiTrova` scritto da Claude, verificato da Codex e corretto sul suo rilievo (due destinazioni omonime); lo usano tutte e due le parti |
+| lotto A — le pagine del mondo | **fatto**, tag `candidato/lotto-a-mondo-v2`: Città, MappaTokyo, Palazzi, scheda del Palazzo, Mappe (indice e dettaglio), Quartiere, Accesso al mondo, visore. Da verificare a Codex |
+| lotto B — gli inventari | **in corso** — `candidato/lotto-b-negozio-posizione-v1` e `candidato/lotto-b-negozi-contesto-v2`, il secondo **verificato PASS da Claude** il 7 settembre |
+| 6.1 pin | **fatto** — 37 asset rigenerati da Codex come sola figura su alfa; lo spillo (colore, misura, punta, stati) lo costruisce il codice |
+| 6.2 grafica mancante | **in corso** — `docs/grafica/fabbisogno.md`: voce 1 consegnata (Shujin), 2 e 3 ritirate (i pezzi dei Memento c'erano già), 4 aperta (il Covo dei Ladri) |
+| 7.1 revisione incrociata | **in corso** — ciascuno verifica i candidati dell'altro; resta quel che attraversa il confine |
+
+### Quel che manca, scritto per non doverlo ricostruire a memoria
+
+1. **Lotto B**: 5.2 (gli altri tipi di oggetti delle guide), `AttivitaPage` e le doti, il Covo dei
+   Ladri come pagina propria, e le tre nuove sezioni Libri / Film-DVD / Videogiochi con il
+   progresso per sessioni, che l'utente ha assegnato a Codex.
+2. **Grafica**: la sagoma del Covo dei Ladri (voce 4), e la decisione sugli otto colori di spillo
+   troppo chiari — che non è grafica ma una riga di `shared/spilli.ts`.
+3. **Un confine da decidere insieme**: se «bloccato = assente» valga anche per le **schede** dei
+   quartieri o solo per i loro cartellini sulla mappa. Oggi negozi e articoli spariscono del tutto;
+   i quartieri restano in elenco con scritto «Non ancora aperto». Le due letture sono in
+   `docs/ATLANTE-STATO.md` e nel canale; se non ci si accorda, decide l'utente.
+4. **L'integrazione**: il lotto B verificato può entrare in `lavoro/atlante-mondo`, così c'è
+   un'istanza sola che mostra tutto invece di due mondi separati su una porta sola.
 
 ## 7. Domande aperte a Codex
 
