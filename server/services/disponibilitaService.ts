@@ -201,8 +201,18 @@ export function statoDisponibilitaPartita(partitaId: number): StatoDisponibilita
   const doti = new Map(dotiSociali(partitaId).map((d) => [d.chiave, d.rango]));
   const st = statoPartitaSemafori(partitaId, ranghi, doti);
   const giorno = st.dataGioco ? (prepared('SELECT giorno_settimana FROM giorno_calendario WHERE data = ?').get(st.dataGioco) as { giorno_settimana: string | null } | undefined)?.giorno_settimana ?? null : null;
+  const fatti = new Map((prepared('SELECT f.chiave,f.nome,p.valore FROM fatto_gioco f LEFT JOIN fatto_partita p ON p.fatto_chiave=f.chiave AND p.partita_id=?').all(partitaId) as Array<{chiave:string;nome:string;valore:number|null}>).map(f=>[f.chiave,f]));
+  const visioniCompletate = prepared(`
+    SELECT COUNT(*) AS valore
+    FROM progresso_film_partita p
+    JOIN film f ON f.chiave = p.film_chiave
+    WHERE p.partita_id = ? AND p.avanzamento >= f.sessioni
+  `).get(partitaId) as { valore: number };
+  fatti.set('visione-film-dvd-completata', { chiave: 'visione-film-dvd-completata', nome: 'Film o DVD completati', valore: visioniCompletate.valore });
+  const videogiochiCompletati = prepared(`SELECT COUNT(*) AS valore FROM progresso_videogioco_partita p JOIN attivita a ON a.chiave = p.videogioco_chiave WHERE p.partita_id = ? AND a.tipo = 'videogioco' AND p.avanzamento >= a.sessioni`).get(partitaId) as { valore: number };
+  fatti.set('videogioco-completato', { chiave: 'videogioco-completato', nome: 'Videogiochi completati', valore: videogiochiCompletati.valore });
   return { ...st, partitaId,
-    fatti: new Map((prepared('SELECT f.chiave,f.nome,p.valore FROM fatto_gioco f LEFT JOIN fatto_partita p ON p.fatto_chiave=f.chiave AND p.partita_id=?').all(partitaId) as Array<{chiave:string;nome:string;valore:number|null}>).map(f=>[f.chiave,f])),
+    fatti,
     articoliOttenuti: new Set((prepared('SELECT articolo_chiave FROM acquisto_partita WHERE partita_id=?').all(partitaId) as Array<{articolo_chiave:string}>).map(a=>a.articolo_chiave)),
     letture: new Set((prepared('SELECT tipo,chiave FROM lettura_partita WHERE partita_id=?').all(partitaId) as Array<{tipo:string;chiave:string}>).map(a=>a.tipo+'/'+a.chiave)),
     giornoSettimana: giorno ? piatto(giorno) : null, sbloccoQuartieri: sbloccoQuartieri() };

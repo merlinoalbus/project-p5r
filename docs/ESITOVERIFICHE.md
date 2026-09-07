@@ -2528,3 +2528,80 @@ Il `galaxy-task-validator` ha ripetuto le verifiche in sola lettura e ha emesso 
 richieste correttive. Nessun file sorgente e' stato modificato durante la review. Il ramo Lotto B
 e' stato quindi allineato in fast-forward al commit unificato `516d17b`, che contiene entrambi i
 lotti approvati fino a questo punto.
+
+---
+
+## Preparazione candidato Lotto B — Libri e avanzamento lettura (7 settembre 2026)
+
+Primo modulo delle nuove sezioni inventario: `/guida/libri` espone i **46 libri** del catalogo
+Royal separatamente dalla pagina Attivita'. Per ciascun volume mostra provenienza, beneficio,
+prezzo, numero di sessioni e posizione territoriale strutturata; con una partita attiva consente
+di registrare l'avanzamento per sessioni, azzerarlo o completarlo.
+
+Il completamento canonico resta in `lettura_partita`: un avanzamento parziale non attiva bonus o
+sblocchi, mentre il raggiungimento del totale crea il completamento e il relativo evento. Ridurre
+il progresso revoca il completamento; completare nuovamente produce un nuovo evento, mentre una
+richiesta duplicata sullo stato gia' completo resta idempotente. Le richieste rapide dello stesso
+libro sono serializzate e lo stato temporaneo e' isolato per partita.
+
+### Evidenze dell'implementatore
+
+- migrazione fresca e upgrade da schema 46 verificati, incluso backfill dei soli libri gia'
+  completati e cancellazione a cascata con la partita;
+- API: 46 libri, **74 sessioni complessive** derivate dalle 46 righe canoniche, 48 associazioni di
+  posizione; validazione esclusiva fra `fatto` e `avanzamento`, limite massimo e film invariati;
+- la fonte AllGameStaff dichiara 75 slot nel testo introduttivo, ma le sessioni delle 46 righe
+  della tabella sommano a 74 (23x1 + 18x2 + 5x3): l'app non inventa una sessione per colmare la
+  discordanza editoriale;
+- runtime isolato verificato su backend 3102 e frontend 5274: avanzamento 1/2, completamento 2/2,
+  persistenza dopo reload, pannello posizione contestuale e redirect della vecchia URL
+  `/guida/attivita?scheda=libri` verso `/guida/libri`;
+- controllo visuale desktop e compatto senza overflow; nessun errore runtime dell'app. Gli errori
+  registrati da Chrome provenivano esclusivamente da un'estensione `chrome-extension://`;
+- dopo l'ultima modifica sono stati eseguiti tre cicli consecutivi completi: typecheck PASS, lint
+  PASS, build PASS e **604/604 test PASS** in ciascun ciclo. Resta il solo avviso Vite gia' noto
+  sulla dimensione del chunk, non bloccante.
+
+Queste sono verifiche dell'implementatore e non costituiscono approvazione. Dopo il tag immutabile
+la verifica indipendente spetta a Opus e al `galaxy-task-validator`.
+
+---
+
+## Verifica paritaria Covo dei Ladri — `candidato/lotto-a-covo-v1` (7 settembre 2026)
+
+**Verdetto Codex: PASS senza rilievi bloccanti** sul tag annotato immutabile, dereferenziato al
+commit atteso `629eb6f98a367e7967028d41d053ebf3755865f1` in un worktree isolato.
+
+### Evidenze indipendenti
+
+- typecheck, lint e build PASS; suite completa: **139 file, 597/597 test PASS**;
+- la nuova route `/guida/covo` e' separata da Trofei e finali, compare fra le sezioni della Guida
+  ed e' la destinazione del cartellino Covo sulla mappa di Tokyo;
+- l'API fresca restituisce 52 sfide e 36 voci di catalogo; la pagina non fabbrica un bilancio da
+  valori mancanti e distingue correttamente le 32 voci col prezzo dichiarato dalla fascia 3-10;
+- ricerca unica verificata a runtime: `concept` produce 0/52 sfide e 1/36 premi, senza mescolare i
+  due elenchi;
+- layout desktop e compatto controllati a schermo: riepilogo, testo ripiegabile, ricerca e due
+  colonne restano leggibili senza overflow osservato;
+- nessun errore runtime dell'app e risposte 200 dall'API del completamento; i processi e il database
+  usati per la review erano isolati e sono stati arrestati al termine.
+
+La review non ha modificato il codice di Opus. Il candidato Covo e' approvato per il perimetro
+dichiarato.
+
+## Gate `galaxy-task-validator` sul candidato Libri v1
+
+**Verdetto: PASS**, sul tag annotato remoto `candidato/lotto-b-libri-v1` (oggetto tag
+`4fa5fd49750e5c441d70c70838aa51e21552aca3`), dereferenziato al commit atteso
+`4e31e40c72c0d15e4c4aa23f5422335ac13b4807`.
+
+Il validatore ha ripetuto typecheck, lint, build, 18/18 test mirati e l'intera suite (**141 file,
+604/604 PASS**), oltre a migrazione, backfill, cascata, semantica del completamento, revoca,
+ricompletamento, idempotenza, regressioni film/percorso, 46 libri, 74 sessioni, 48 riferimenti e
+coda UI isolata per partita. La prova runtime e' passata a 1440x900, 1024x768 e 390x844, con
+pannello posizione unico e console pulita.
+
+Raccomandazione non bloccante: rendere autonomi i nomi accessibili dei comandi ripetuti includendo
+il titolo del libro (`Aggiungi una sessione a ...`, `Azzera ...`, `Mostra posizione di ...`). Il
+contenitore espone gia' il titolo, quindi il candidato resta approvato; la rifinitura andra'
+inclusa in un candidato successivo, senza spostare il tag immutabile v1.
