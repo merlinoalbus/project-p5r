@@ -12,6 +12,7 @@ import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import type { CompletamentoDto, TrofeoDto } from '../types';
+import { IconaScheda } from '../components/shared/IconaAzione';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
@@ -21,7 +22,10 @@ import { IconMedaglia } from '../components/shared/iconeGuida';
 // capitolo dei trofei — è un'area con una valuta propria, 52 sfide che la guadagnano e 36 premi
 // che la spendono — e schiacciata in una scheda non si poteva né cercare né contare. Qui resta un
 // rimando in cima, così chi la cercava dov'era la trova lo stesso.
-const SCHEDE = [['trofei', 'Trofei'], ['finali', 'Finali'], ['dlc', 'DLC'], ['meteo', 'Meteo'], ['ng', 'Nuova Partita+'], ['tempo', 'Tempo e fasce']] as const;
+const SCHEDE = [
+  ['trofei', 'Trofei', 'trofei'], ['finali', 'Finali', 'finali'], ['dlc', 'DLC', 'dlc'],
+  ['meteo', 'Meteo', 'meteo'], ['ng', 'Nuova Partita+', 'nuova-partita'], ['tempo', 'Tempo e fasce', 'tempo'],
+] as const;
 type Scheda = (typeof SCHEDE)[number][0];
 const NOME_TIPO_TROFEO: Record<TrofeoDto['tipo'], string> = { bronzo: 'Bronzo', argento: 'Argento', oro: 'Oro', platino: 'Platino' };
 
@@ -107,7 +111,13 @@ export function CompletamentoPage() {
               dov'era lo trova lo stesso, invece di concludere che è sparito. */}
           <CollegamentoVisivo to="/guida/covo" tono="secondario" compatto className="self-start" icona={<IconaAzione chiave="scheda" dimensione={20} />} titolo="Covo dei Ladri" dettaglio="sfide, premi e Medaglie P" />
           <FilaScorrevole role="tablist" aria-label="Sezioni">
-            {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true })}>{l}</button>)}
+            {SCHEDE.map(([k, l, icona]) => (
+              <button key={k} type="button" role="tab" aria-selected={scheda === k} title={l}
+                className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`}
+                onClick={() => setParams(k === 'trofei' ? {} : { scheda: k }, { replace: true })}>
+                <IconaScheda chiave={icona} dimensione={28} /><span>{l}</span>
+              </button>
+            ))}
           </FilaScorrevole>
           {scheda === 'trofei' && (
             <div className="flex flex-col gap-2">

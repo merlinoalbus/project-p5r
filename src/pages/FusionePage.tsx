@@ -89,7 +89,10 @@ export function FusionePage() {
       <PannelloVelluto velluto={velluto.dati ?? null} onCambiaAllarme={(v) => void cambiaAllarme(v)} />
       <FilaScorrevole role="tablist" aria-label="Sezioni della fusione">
         {visteMostrate.map(([k, l, icona]) => (
-          <button key={k} type="button" className={`chip chip--icona touch ${vista === k ? 'chip--attivo' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k}><IconaScheda chiave={icona} dimensione={16} />{l}</button>
+          // L'immagine sopra la parola, come nelle schede della Partita: l'iconcina da 16 px
+          // accanto a un'etichetta lunga era un dettaglio che spariva, e otto pastiglie di testo
+          // si leggevano tutte uguali. Rilievo dell'utente: «rapporto grafica/testo pessimo».
+          <button key={k} type="button" className={`piastrella-scheda touch ${vista === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setVista(k)} aria-pressed={vista === k} title={l}><IconaScheda chiave={icona} dimensione={28} /><span>{l}</span></button>
         ))}
       </FilaScorrevole>
 

@@ -410,3 +410,37 @@ merda»). Il numero fra parentesi è quante volte quel tipo compare nel percorso
 
 Vanno tenute **distinte fra loro e dalle §22**: `velluto` (chiave) non è `oggetti-chiave` (chiave tozza a corona) e nessuna delle due è
 `categoria-armi`; `esame` (foglio + matita + spunta) non è `studio` (quaderno aperto con penna); `palazzo` (castello) non è `protezioni` (scudo).
+
+## 25. Figure delle schede a tessera (13) — `ui/scheda-<chiave>.png` e `ui/categoria-<chiave>.png` (128×128, trasparente) — richieste il 2026-09-07
+Stesse regole della §16 e della §22: 128×128 trasparente, bianco/grigio/nero/rosso, **niente oro**, nessun testo, un solo
+soggetto pieno leggibile a 28 px.
+
+**Perché servono.** Le barre che scelgono la vista di una pagina — Fusione, Oggetti, Trofei e finali, Sfide, Richieste — erano
+pastiglie di testo con un'iconcina da 16 px accanto, o senza niente. Rilievo dell'utente: «rapporto grafica/testo pessimo… va
+dato più spazio all'immagine, come nel secondo screen… questo su tutti i pulsanti». Ora sono tessere con la **figura sopra e
+l'etichetta sotto**, come le schede della Partita, e a 28 px la figura è il segno che si riconosce da lontano. Ognuna ha già la
+sua riserva SVG: queste immagini la sostituiscono.
+| File | Scheda | Soggetto |
+|---|---|---|
+| `scheda-trofei.png` | Trofei e finali → Trofei | coppa a due manici su base bassa |
+| `scheda-finali.png` | → Finali | maschera che si solleva, con la cordicella |
+| `scheda-dlc.png` | → DLC | pacchetto con la freccia che scende dentro |
+| `scheda-meteo.png` | → Meteo | nuvola con un raggio che esce da dietro |
+| `scheda-nuova-partita.png` | → Nuova Partita+ | freccia che gira in cerchio con una stella nel mezzo |
+| `scheda-tempo.png` | → Tempo e fasce | clessidra con la sabbia a metà |
+| `scheda-sfide-battaglia.png` | Sfide → Battaglie Sfida | due lame incrociate dentro un cerchio spezzato |
+| `scheda-boss.png` | → Boss segreti | sagoma incappucciata con due occhi accesi |
+| `scheda-magnate.png` | → Magnate | cilindro con la moneta appoggiata al bordo |
+| `scheda-tratti.png` | → Tratti | gemma sfaccettata con un bagliore |
+| `scheda-jose.png` | Richieste → foglio di Jose | cappello tondo con un fiore infilato nella fascia |
+| `scheda-personalizzazione.png` | Oggetti → Personalizzazione armi | lima e pugnale incrociati |
+| `scheda-scambi.png` | Oggetti → Scambi | due frecce che si scambiano attorno a un fiore |
+
+Le tre della Guida che restano — `categoria-oggetti-chiave` (scheda «Chiave e materiali») e `categoria-richiesta` (foglio
+delle Richieste) — sono già nella §24 e non si ripetono qui.
+
+**Riepilogo di quel che manca, in un posto solo (2026-09-07, sera).** Consegnate e integrate: §21 (6 azioni), §22 (22
+categorie), §23 (11 fregi). **Da generare: 24 immagini** — le 11 della §24 e le 13 di questa §25. Nell'ordine in cui pesano
+per chi gioca: prima `categoria-confidente`, `categoria-dote`, `categoria-attivita`, `categoria-trama`, `categoria-acquisto`,
+`categoria-esame`, `categoria-palazzo` (la Guida del giorno le mostra a 40 px a ogni partita), poi le tredici delle tessere,
+infine `categoria-altro`, `categoria-velluto`, `categoria-richiesta`, `categoria-oggetti-chiave`.

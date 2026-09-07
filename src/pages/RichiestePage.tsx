@@ -32,6 +32,7 @@ import { FregioSezione } from '../components/shared/FregioSezione';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
+import { IconaScheda } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
@@ -171,10 +172,13 @@ export function RichiestePage() {
               timbri e la tabella degli scambi sono un'altra faccenda, e messi sotto trentatré
               carte si trovavano solo scorrendo fino in fondo. Richiesta dell'utente. */}
           {d.jose && <FilaScorrevole role="tablist" aria-label="Fogli">
-            {([['richieste', 'Le Richieste'], ['jose', 'Jose: fiori e scambi']] as Array<[Foglio, string]>).map(([k, l]) => (
-              <button key={k} type="button" role="tab" aria-selected={foglio === k}
-                className={`chip touch ${foglio === k ? 'chip--attivo' : ''}`}
-                onClick={() => setParams(k === 'richieste' ? {} : { foglio: k }, { replace: true })}>{l}</button>
+            {([['richieste', 'Le Richieste', 'richiesta'], ['jose', 'Jose: fiori e scambi', 'jose']] as Array<[Foglio, string, string]>).map(([k, l, icona]) => (
+              <button key={k} type="button" role="tab" aria-selected={foglio === k} title={l}
+                className={`piastrella-scheda touch ${foglio === k ? 'piastrella-scheda--attiva' : ''}`}
+                onClick={() => setParams(k === 'richieste' ? {} : { foglio: k }, { replace: true })}>
+                {k === 'richieste' ? <IconaCategoria categoria={icona} dimensione={28} /> : <IconaScheda chiave="jose" dimensione={28} />}
+                <span>{l}</span>
+              </button>
             ))}
           </FilaScorrevole>}
 

@@ -106,7 +106,7 @@ export function AttivitaPage() {
           <IntestazionePagina titolo="Attività e Doti sociali" sottotitolo={<>Mini-giochi, lavori e studio con le note (♪) delle Doti che alzano, dove e quando farli.</>} />
           <div className="flex flex-wrap items-center gap-1.5">
             <FilaScorrevole role="tablist" aria-label="Sezioni">
-              {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`chip touch ${scheda === k ? 'chip--attivo' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={18} />{l}</button>)}
+              {SCHEDE.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={scheda === k} className={`piastrella-scheda touch ${scheda === k ? 'piastrella-scheda--attiva' : ''}`} onClick={() => setParams(k === 'attivita' ? {} : { scheda: k }, { replace: true })} title={l}><IconaCategoria categoria={k === 'attivita' ? 'minigiochi' : k} dimensione={28} /><span>{l}</span></button>)}
             </FilaScorrevole>
             <select className="form-input w-auto ml-auto" value={dote} onChange={(e) => setDote(e.target.value)} aria-label="Dote">
               <option value="">Tutte le Doti</option>
