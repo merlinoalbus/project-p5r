@@ -185,7 +185,11 @@ export function DungeonDettaglioPage() {
   // Quale delle due viste dell'area si sta guardando. Dove l'atlante non ha una planimetria
   // navigabile resta solo la pianta della guida, e non c'è niente da scegliere.
   const [vista, setVista] = useState<'gioco' | 'guida'>('gioco');
-  const vistaGuida = !mappaScelta || vista === 'guida';
+  // «Come la disegna il gioco» esiste dove c'è una planimetria d'atlante e, nei Memento, sempre:
+  // lì il disegno è il pezzo del pozzo. Dove non c'è nulla del gioco resta la pianta della guida,
+  // che è anche l'unico posto da cui si importa un'immagine propria.
+  const vistaGiocoDisponibile = !!mappaScelta || d?.tipo === 'mementos';
+  const vistaGuida = !vistaGiocoDisponibile || vista === 'guida';
   const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); setVista('gioco'); };
   // La percentuale conta **quel che si raccoglie**: forzieri, forzieri chiusi, oggetti e Semi
   // della Bramosia. Prima era «punti gestiti su punti totali», e fra i punti totali ci sono le
@@ -313,26 +317,28 @@ export function DungeonDettaglioPage() {
                       spiegava da dove viene, e sotto la planimetria del gioco, grande. La
                       miniatura non si legge e il paragrafo occupava il posto della mappa. Sono
                       due viste della stessa area: si sceglie quale guardare. */}
-                  {mappaScelta && (
+                  {vistaGiocoDisponibile && (
                     <div className="flex gap-1" role="tablist" aria-label="Come guardare l’area">
-                      <button type="button" role="tab" aria-selected={vista === 'gioco'} onClick={() => setVista('gioco')}
-                        className={`chip touch text-[11px] ${vista === 'gioco' ? 'chip--attivo' : ''}`}>Planimetria del gioco</button>
-                      <button type="button" role="tab" aria-selected={vista === 'guida'} onClick={() => setVista('guida')}
-                        className={`chip touch text-[11px] ${vista === 'guida' ? 'chip--attivo' : ''}`}>Pianta della guida</button>
+                      <button type="button" role="tab" aria-selected={!vistaGuida} onClick={() => setVista('gioco')}
+                        className={`chip touch text-[11px] ${!vistaGuida ? 'chip--attivo' : ''}`}>{memento ? 'Come la disegna il gioco' : 'Planimetria del gioco'}</button>
+                      <button type="button" role="tab" aria-selected={vistaGuida} onClick={() => setVista('guida')}
+                        className={`chip touch text-[11px] ${vistaGuida ? 'chip--attivo' : ''}`}>Pianta della guida</button>
                     </div>
                   )}
                 </div>
                 {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
+                {/* **Il pezzo con cui il gioco disegna il dedalo nel pozzo**, e non una pianta: i
+                    piani dei Memento si generano a ogni discesa. Prima compariva solo dove la
+                    guida non pubblicava niente, e così il Dedalo di Iweleth — l'unico che una
+                    pianta ce l'ha — si presentava con un foglio bianco in mezzo a otto
+                    raffigurazioni rosse: nove pagine sorelle, una diversa. Ora la raffigurazione
+                    è la vista predefinita per tutti e nove, e la pianta della guida sta nella sua
+                    scheda dove c'è. */}
+                {memento && !vistaGuida && <span className="flex h-[min(46vh,420px)] w-full items-center justify-center overflow-hidden rounded bg-[#8d0012]">
+                  <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`} className="max-h-full max-w-full object-contain" />
+                </span>}
                 <div className={`flex flex-wrap items-center gap-2 ${vistaGuida ? '' : 'hidden'}`}>
-                  {/* Per un dedalo dei Memento non esiste una pianta — i piani sono generati a ogni
-                      visita — e la miniatura restava le iniziali. Al suo posto va il pezzo con cui
-                      il gioco lo disegna nel pozzo: non è una pianta, è la sua raffigurazione. */}
-                  {memento && !area.mappa && !area.pianta
-                    ? <span className="flex h-[220px] w-full items-center justify-center overflow-hidden rounded bg-[#8d0012]">
-                        <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`}
-                          className="max-h-full max-w-full object-contain" />
-                      </span>
-                    : <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={420} forma="orizzontale" modificabile className="mx-auto" />}
+                  <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={420} forma="orizzontale" modificabile className="mx-auto" />
                   <span className="min-w-[200px] flex-1 text-[11px] text-text-muted">
                     {fonteUsata ? (
                       <>
@@ -374,8 +380,8 @@ export function DungeonDettaglioPage() {
                   <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(420px, min(62vh, 720px))" onCambiato={() => void dati.ricarica()} />
                   <p className="m-0 text-[11px] text-text-muted">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
                 </>}
-                {!mappaScelta && <p className="m-0 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
-                  Per quest’area l’atlante non ha una planimetria navigabile{memento ? ': i piani dei Memento si generano a ogni discesa' : ''}. I punti restano qui accanto, e la pianta della guida è qui sopra.
+                {!mappaScelta && !memento && <p className="m-0 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
+                  Per quest’area l’atlante non ha una planimetria navigabile. I punti restano qui accanto, e la pianta della guida è qui sopra.
                 </p>}
               </section>
 
