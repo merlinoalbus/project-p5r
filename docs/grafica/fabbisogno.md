@@ -359,7 +359,7 @@ censimento**, perché la riserva non diventi il traguardo.
 | icone di categoria delle azioni del giorno | `ui/categoria-<chiave>` | 11 | §24 | **da consegnare** |
 | figure delle schede a tessera | `ui/scheda-<chiave>` | 13 | §25 | **da consegnare** |
 | illustrazioni delle attività e dei lavori | `attivita/<chiave>` | 23 | §26 | **da consegnare** |
-| segni per gli elementi rimasti spogli | `ui/segno-<chiave>` | 12 | §27 | **da consegnare** |
+| segni per gli elementi rimasti spogli | `ui/segno-<chiave>` | 12 + 1 | §27 | **da consegnare** (compresa `scheda-letture`, mai censita) |
 
 Le sei azioni sono `piu`, `meno`, `completati`, `dettagli`, `pianta`, `posizione`: sono i gesti che
 prima erano scritte nude — «+», «−», «Mostra i completati», «Dettagli», le due viste di un'area,

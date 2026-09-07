@@ -703,5 +703,13 @@ negozi e articoli presi da fonti secondarie.
 |---|---|---|
 | `segno-da-verificare.png` | chip «Da verificare», «da fonte secondaria» | lente d'ingrandimento su un punto interrogativo |
 
+**Una tessera scoperta, e la sua è una svista vecchia.** `ui/scheda-letture.png` — la scheda
+«Letture e giochi» della Partita — non è mai stata censita: la chiave è nata nel codice quando la
+scheda è stata aggiunta, e la §16 elenca le altre diciotto ma non lei. È l'unica delle trentuno
+tessere dell'app a mostrare ancora la riserva.
+| File | Scheda | Soggetto |
+|---|---|---|
+| `scheda-letture.png` | Partita → «Letture e giochi» | libro chiuso con un pad appoggiato sopra |
+
 Ognuno di questi nasce con la sua riserva SVG in codice: se l'immagine non arriva, il segno c'è
 lo stesso e la tessera non resta vuota.
