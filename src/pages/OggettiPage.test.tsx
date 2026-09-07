@@ -160,6 +160,9 @@ describe('scheda Equipaggiamento', () => {
     };
     expect(await per('Paradiso perduto')).toEqual(['Protagonista']);
     expect(await per('Reggiseno arcangelo')).toEqual(['Ann', 'Makoto', 'Futaba', 'Haru', 'Sumire/Kasumi']);
-    expect(await per('Portaf. del supporto')).toHaveLength(10);
+    // Senza vincolo si scrive «Tutti»: dieci volti ripetuti su 125 accessori non dicono niente e
+    // riempivano la pagina di 1474 immagini.
+    expect(await per('Portaf. del supporto')).toEqual([]);
+    expect((await riga('Portaf. del supporto')).getByText('Tutti')).toBeInTheDocument();
   });
 });
