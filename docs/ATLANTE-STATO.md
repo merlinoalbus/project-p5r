@@ -1816,3 +1816,22 @@ apre nemmeno lì, la sua regola è sbagliata.
 `yokohama-chinatown: Ancora da completare nella Guida`. Rimessa la chiave giusta, torna verde.
 
 **Verde:** 587 test, typecheck e lint puliti.
+
+## Verifica a schermo dell'AND, fatta come si deve
+
+Non basta un test verde: volevo **vedere** il pin sparire. Ho chiuso la Clinica Takemi nel
+catalogo — condizione `data dal 12-01`, con la partita all'11 aprile — **senza toccare lo spillo**,
+che continua a portare la sua copia vecchia.
+
+| momento | esito |
+|---|---|
+| prima | 16 spilli su Yongen-Jaya, «Confidente: Clinica Medica Takemi» presente, 1 bloccato nascosto |
+| chiuso il negozio nel catalogo | **15 spilli**, Takemi sparito, il contatore passa a **2** |
+| premuto «Mostra anche i non ancora disponibili» | 17 spilli, e Takemi torna col nome «Clinica Medica Takemi **(non ancora disponibile)**», goccia `grayscale(1)` e bordo `dashed` |
+| ripristinato il catalogo | 16 spilli, Takemi normale, contatore di nuovo a 1 |
+
+Il dato di prova è stato rimesso com'era. Il pin non è mai stato modificato: è l'AND con la
+disponibilità viva a farlo sparire e tornare, che è esattamente quel che Codex chiedeva.
+
+Anche il pin marcato è verificato **nei fatti** e non solo nel test: grigio, tratteggiato, e col
+motivo scritto nel nome accessibile.

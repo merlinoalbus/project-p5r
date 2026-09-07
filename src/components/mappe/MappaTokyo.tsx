@@ -189,13 +189,19 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     return { x: Math.max(-mx, Math.min(mx, p.x)), y: Math.max(-my, Math.min(my, p.y)) };
   }, []);
 
+  /** Un solo calcolo, fuori dagli aggiornatori di stato.
+   *
+   * La prima stesura chiamava `setPan` **dentro** l'aggiornatore di `setZoom`, per avere lo zoom
+   * precedente a portata di mano. È una scrittura che sembra comoda e non lo è: React può
+   * eseguire un aggiornatore più di una volta — lo fa apposta in modalità severa — e ogni
+   * esecuzione in più rifà lo spostamento, che finisce moltiplicato due volte. Gli aggiornatori
+   * devono essere puri; il valore precedente si legge dallo stato, che qui basta e avanza. */
   const cambiaZoom = useCallback((fattore: number) => {
-    setZoom((z) => {
-      const nuovo = Math.min(ZOOM_MAX, Math.max(1, z * fattore));
-      setPan((p) => limita({ x: p.x * (nuovo / z), y: p.y * (nuovo / z) }, nuovo));
-      return nuovo;
-    });
-  }, [limita]);
+    const nuovo = Math.min(ZOOM_MAX, Math.max(1, zoom * fattore));
+    if (nuovo === zoom) return;
+    setZoom(nuovo);
+    setPan(limita({ x: pan.x * (nuovo / zoom), y: pan.y * (nuovo / zoom) }, nuovo));
+  }, [limita, zoom, pan]);
 
   const adatta = useCallback(() => { setZoom(1); setPan({ x: 0, y: 0 }); }, []);
 
