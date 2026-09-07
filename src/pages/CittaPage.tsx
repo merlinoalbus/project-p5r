@@ -60,10 +60,16 @@ export function CittaPage() {
               tutte sotto la piega: si vedeva l'una o le altre, mai le due cose insieme — ed è
               proprio guardando la scheda che si vuole vedere accendersi la sagoma. Sotto i 1280
               px restano impilate, perché due colonne strette non le legge nessuno. */}
-          <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(320px,26rem)]">
+          {/* Due colonne dal desktop in su — mappa a sinistra, schede a destra — e **in fila, non
+              in griglia**: la mappa è larga quanto la impone il suo tetto d'altezza, e in una
+              colonna di griglia più larga di lei restava centrata, lasciando un vuoto di 200 px
+              fra sé e le schede. In fila prende la sua misura e tutto il resto va alle schede.
+              Sotto il desktop si impila: due colonne su un tablet in verticale darebbero una
+              mappa piccola e schede strette, cioè il peggio di tutti e due. */}
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start">
             <MappaTokyo quartieri={q} dungeon={dungeon.dati ?? []} dataGioco={attiva?.dataGioco ?? null}
-              evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2" />
-            <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:grid-cols-1 xl:max-h-[calc(68vh+2.5rem)] xl:overflow-y-auto xl:pr-1" aria-label="Quartieri">
+              evidenziato={acceso} onEvidenzia={setAcceso} className="xl:sticky xl:top-2 xl:shrink-0" />
+            <ul className="m-0 p-0 list-none grid gap-2 sm:grid-cols-2 xl:flex-1 xl:min-w-[340px] xl:grid-cols-1 2xl:grid-cols-2 xl:max-h-[calc(68vh+2.5rem)] xl:overflow-y-auto xl:pr-1" aria-label="Quartieri">
             {q.map((x) => {
               const aperto = quartiereAperto(x, attiva?.dataGioco ?? null);
               const suggerito = sugg.evidenziato('quartieri', x.chiave);
