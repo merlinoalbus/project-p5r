@@ -1892,3 +1892,22 @@ davvero, che era la domanda vera:
 
 I due piani del contratto convivono come dovevano: un negozio bloccato **si legge** nella sua
 scheda e **non compare** come pin sulla mappa, e il comando lo riporta marcato.
+
+## E la verifica a schermo delle sue pagine, che mi mancava
+
+Del lotto B avevo verificato l'**API** e i **test**; le sue pagine le avevo solo contate. L'utente
+ha chiesto se le avessi verificate davvero, e la risposta onesta era «per metà». Chiusa adesso, sul
+ramo unito, cioè nella condizione in cui le userà davvero.
+
+| prova | esito |
+|---|---|
+| `/guida/negozi` | 60 carte, «60 negozi con 575 articoli»; **12 marcate «Non ancora»** e 23 «Da verificare»: lo stato si dichiara |
+| `/guida/negozi/37-gradi-celsius` (bloccato) | la pagina **si apre**, una sola `DoveSiTrova`, lo stato dichiarato, e **tutte e 10 le spunte d'acquisto disattivate** |
+| `/guida/negozi/untouchable` | 218 spunte, **57 disattivate** (gli articoli bloccati); comprato «Pugnale della tormenta» e tolta la spunta: 200 e 200, e il dato è tornato com'era |
+| a 375 px | `/guida/negozi` e la scheda: nessuno scorrimento orizzontale, nessun errore |
+
+L'azione vietata è vietata **due volte**, e le due difese sono indipendenti: la spunta è disattivata
+nell'interfaccia, e il backend risponde 409 a chi ci arriva lo stesso. È la cosa giusta, perché
+un'interfaccia che disabilita un pulsante non è una regola: è un suggerimento.
+
+Il dato di prova (l'acquisto del Pugnale) è stato rimesso com'era.
