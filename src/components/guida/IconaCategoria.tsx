@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { IconBolt, IconBook, IconHome, IconMask, IconStar } from '../shared/icons';
 import { IconBussola, IconChiave, IconCuore, IconFilm, IconGioco, IconGoccia, IconNegozio, IconScudo, IconValigetta } from '../shared/iconeGuida';
 import { useAsset } from '../../stores/assetStore';
+import { chiaveCategoria } from '../../utils/categorie';
 
 const ICONE: Record<string, (size: number) => ReactNode> = {
   // negozi
@@ -48,8 +49,9 @@ interface Props {
  * Le chiavi sono il censimento: aggiungerne una qui vuol dire aggiungere una riga a
  * `docs/grafica/fabbisogno.md`. */
 export function IconaCategoria({ categoria, dimensione = 28, etichetta, className }: Props) {
-  const icona = ICONE[categoria] ?? ICONE.altro;
-  const url = useAsset(`ui/categoria-${categoria}`);
+  const chiave = chiaveCategoria(categoria);
+  const icona = ICONE[chiave] ?? ICONE[categoria] ?? ICONE.altro;
+  const url = useAsset(`ui/categoria-${chiave}`);
   const comune = { role: etichetta ? ('img' as const) : undefined, 'aria-label': etichetta, 'aria-hidden': etichetta ? undefined : true };
   if (url) {
     return (
