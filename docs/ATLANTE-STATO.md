@@ -1502,3 +1502,50 @@ ottenere quello che già facevano.
 figura dentro, nessuna figura nuda; i 37 tipi guardati tutti insieme in un pannello di prova.
 
 **Verde:** 581 test, typecheck e lint puliti.
+
+---
+
+# Punto 4 — la scheda di un Palazzo, rifatta
+
+Era «una scheda con delle liste»: un blocco di testo in cima, diciotto pastiglie in fila da
+scorrere per scegliere l'area, e due colonne che sotto i 1024 px diventavano un nastro lunghissimo.
+
+**L'intestazione dice il tempo invece di elencarlo.** In Persona 5 un Palazzo *è* una scadenza: si
+apre un giorno, conviene rubare il Tesoro entro un altro, e il giorno dopo la scadenza è finita la
+partita. Erano tre pastiglie sparse fra le altre e, sotto, le stesse tre date ripetute per esteso.
+Ora sono una **linea del tempo** in tre tappe — si apre → furto consigliato → scade — e la prosa
+della guida resta ripiegata sotto, dov'è una spiegazione e non il dato. L'emblema torna una seconda
+volta, enorme e al 7% di opacità, come fondo della scheda.
+
+**Le aree sono un elenco, non una fila da scorrere.** Diciotto pastiglie in orizzontale nascondono
+la diciottesima e non dicono a che punto si è in nessuna. Da 1024 px in su sono una colonna a
+sinistra col numero, il nome e quanti punti restano; sotto tornano una fila scorrevole, che su un
+telefono è la forma giusta.
+
+**Il tre colonne è progressivo:** oltre 1280 px aree · mappa · punti; fra 1024 e 1280 aree a lato e
+i punti sotto la mappa; sul telefono tutto in colonna. E la lista dei punti non ha più
+`max-h-[70vh]`, che su un telefono creava una finestrella da far scorrere dentro una pagina che già
+scorreva.
+
+## E il difetto vero: la mappa dell'area non compariva mai
+
+Non è un dettaglio di stile, ed è la cosa che questa pagina prometteva dalla Fase 7.1. La scheda
+montava `MappaIncorporata chiave={area.chiave}`, ma **la chiave di un'area della guida non è un
+nodo dell'atlante**: interrogato su quella, `risolviPercorsoMappa` risponde `tipo: 'guida'` — ed è
+corretto, dal suo punto di vista — e `MappaIncorporata` per quel caso rende un riquadro con dentro
+un collegamento. Risultato: su **tutte** le aree di **tutti** i Palazzi, al posto del visore c'era
+una scheda vuota. È il difetto che si vede nella schermata che l'utente aveva mandato.
+
+Il legame però esiste ed è dichiarato: `mappa_entita` lega **72 aree su 116** alla loro planimetria
+nativa. Mancava solo che qualcuno lo leggesse. Ora `AreaDungeonDto` porta `mappe: [{chiave, nome}]`
+— una lettura sola per Palazzo, non una per area — e la scheda monta il visore vero, con gli spilli
+e lo zoom. Quando un'area ha due planimetrie (una porzione e la pianta intera) si sceglie da un
+menu; quando non ne ha nessuna — i piani dei Memento, e le aree che il pacchetto nativo non copre —
+**si dice**, invece di mostrare un riquadro muto.
+
+**Verificato a schermo:** su `/guida/dungeon/kamoshida` il visore c'è, con la planimetria del
+Cancello del castello e i suoi spilli; su `/guida/dungeon/mementos` compare l'avviso e non il
+riquadro vuoto; a 1280, 768 e 375 px nessuno scorrimento orizzontale e nessuna carta fuori dal
+contenitore; la colonna delle aree c'è da 1024 px in su e la fila scorrevole sotto.
+
+**Verde:** 582 test (581 + 1 sul contratto nuovo), typecheck e lint puliti.

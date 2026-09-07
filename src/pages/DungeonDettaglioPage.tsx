@@ -1,5 +1,30 @@
 // ============================================================
-// DungeonDettaglioPage — scheda di un Palazzo/Dedalo: aree, punti di interesse con stato per partita, mappa interattiva (Fase 7.1)
+// DungeonDettaglioPage — la scheda di un Palazzo
+// ============================================================
+//
+// È la pagina che si apre cliccando una carta in «Palazzi», ed è stata rifatta perché era una
+// scheda con delle liste: un blocco di testo in cima, una fila di diciotto pastiglie da scorrere
+// per scegliere l'area, e due colonne che sotto i 1024 px diventavano un nastro lunghissimo.
+//
+// Tre cose sono cambiate, e ognuna risolve un problema che si vedeva usandola.
+//
+// **L'intestazione dice il tempo, non lo elenca.** In Persona 5 un Palazzo è una scadenza: si apre
+// un giorno, conviene rubare il Tesoro entro un altro, e il giorno dopo la scadenza è finita la
+// partita. Prima erano tre pastiglie in fila fra le altre, e sotto le stesse tre date ripetute per
+// esteso. Ora sono una **linea del tempo** in tre tappe, dove si legge in un colpo d'occhio a che
+// punto si è; la prosa della guida resta, ripiegata, sotto.
+//
+// **Le aree sono un elenco, non una fila da scorrere.** Diciotto pastiglie in orizzontale
+// nascondono la diciottesima e non dicono a che punto si è in ciascuna. Da 1024 px in su sono una
+// colonna fissa a sinistra, con il numero, il nome e quanti punti restano; sotto restano una fila
+// scorrevole, che su un telefono è la forma giusta.
+//
+// **Il tre colonne è progressivo.** Oltre i 1280 px: aree, mappa, punti. Fra 1024 e 1280: aree a
+// lato, e sotto la mappa i punti. Sul telefono: aree, mappa, punti, uno sotto l'altro — e la lista
+// dei punti non ha più un'altezza fissa che creava un secondo scorrimento dentro la pagina.
+//
+// I Memento restano il caso a parte che sono: non hanno aree fisse — i piani si generano a ogni
+// discesa — e al posto della colonna delle aree c'è il pozzo disegnato, con la stessa selezione.
 // ============================================================
 
 import { useMemo, useState } from 'react';
@@ -20,7 +45,7 @@ import { AnelloAvanzamento } from '../components/shared/AnelloAvanzamento';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
 import { dataBreve } from '../utils/testoBreve';
 import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
-import type { AreaDungeonDto, PuntoInteresseDto, StatoPunto } from '../types';
+import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../types';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
 import { IconaAzione } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
@@ -43,6 +68,65 @@ function Dettagli({ d }: { d: Record<string, unknown> }) {
   );
 }
 
+/** Le tre date di un Palazzo come una linea, non come tre pastiglie sparse.
+ *
+ * Sono una sequenza — si apre, conviene rubare, scade — e messe in fila si legge la finestra
+ * invece di leggere tre fatti separati. La data breve sta in grande, la prosa della guida nel
+ * `title`: «12 Aprile (Martedì) — prima infiltrazione esplorativa» è la spiegazione, non
+ * l'informazione che serve quando si guarda la pagina di corsa. */
+function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
+  const tappe = [
+    { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text' },
+    { chiave: 'furto', etichetta: 'Furto consigliato', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]' },
+    { chiave: 'scadenza', etichetta: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary' },
+  ].filter((t) => !!t.valore);
+  if (tappe.length === 0) return null;
+  return (
+    <ol className="m-0 flex list-none flex-wrap items-stretch gap-1.5 p-0" aria-label="Finestra del Palazzo">
+      {tappe.map((t, i) => (
+        <li key={t.chiave} className="flex items-stretch gap-1.5">
+          {i > 0 && <span aria-hidden className="self-center text-text-muted">→</span>}
+          <span className={`flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 ${t.tono}`} title={t.valore!}>
+            <span className="text-[10px] uppercase tracking-[0.08em] opacity-80">{t.etichetta}</span>
+            <span className="font-display text-[17px] leading-none">{dataBreve(t.valore!)}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** Una voce dell'elenco delle aree: numero, nome, e quanto ne resta. */
+function VoceArea({ a, scelta, suggerita, onScegli, compatta }: {
+  a: AreaDungeonDto; scelta: boolean; suggerita: boolean; onScegli: () => void; compatta?: boolean;
+}) {
+  const gestiti = a.punti.filter((p) => p.stato).length;
+  const restano = a.punti.length - gestiti;
+  if (compatta) {
+    return (
+      <button type="button" role="tab" aria-selected={scelta} onClick={onScegli} title={a.descrizione}
+        className={`chip touch shrink-0 ${scelta ? 'chip--attivo' : ''} ${classiSuggerito(suggerita, 'chip')}`}>
+        {a.ordine + 1}. {a.nome}{a.mappa ? ' 🗺' : ''}
+      </button>
+    );
+  }
+  return (
+    <button type="button" role="tab" aria-selected={scelta} onClick={onScegli} title={a.descrizione}
+      className={`touch flex w-full items-start gap-2 rounded-md border px-2 py-2 text-left transition-colors ${
+        scelta ? 'border-primary bg-primary-bg text-text' : 'border-transparent text-text-secondary hover:border-border hover:text-text'
+      } ${classiSuggerito(suggerita)}`}>
+      <span className={`mt-[1px] w-6 shrink-0 text-right font-display text-[15px] leading-tight ${scelta ? 'text-primary' : 'text-text-muted'}`}>{a.ordine + 1}</span>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-[13px] font-semibold leading-tight">{a.nome}</span>
+        <span className="text-[11px] text-text-muted">
+          {a.punti.length === 0 ? 'nessun punto' : restano > 0 ? `${restano} da vedere su ${a.punti.length}` : `${a.punti.length} punti · tutti gestiti`}
+          {a.mappa || a.pianta ? ' · pianta' : ''}
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export function DungeonDettaglioPage() {
   const sugg = useSuggerimenti();
   const { chiave = '' } = useParams();
@@ -51,7 +135,7 @@ export function DungeonDettaglioPage() {
   const attiva = usePartitaStore((s) => s.attiva);
   const partitaId = attiva?.id ?? null;
   const dati = useCarica(() => getDungeon(chiave, partitaId ?? undefined), [chiave, partitaId]);
-  useDocumentTitle(dati.dati ? dati.dati.nome : 'Dungeon');
+  useDocumentTitle(dati.dati ? dati.dati.nome : 'Palazzo');
   const d = dati.dati;
   const areaChiave = params.get('area') ?? d?.aree[0]?.chiave ?? null;
   const area: AreaDungeonDto | null = useMemo(() => d?.aree.find((a) => a.chiave === areaChiave) ?? d?.aree[0] ?? null, [d, areaChiave]);
@@ -85,137 +169,200 @@ export function DungeonDettaglioPage() {
       notifica('error', err instanceof Error ? err.message : 'Aggiornamento fallito.');
     }
   };
+  // Quale planimetria dell'area si sta guardando. Quasi sempre ce n'è una sola; qualche area ne
+  // ha due (una porzione e la pianta intera) e allora si sceglie. La scelta si azzera cambiando
+  // area, altrimenti resterebbe una chiave che appartiene a un'altra.
+  const [piantaScelta, setPianta] = useState<string | null>(null);
+  const mappaScelta = area && area.mappe.some((m) => m.chiave === piantaScelta) ? piantaScelta : area?.mappe[0]?.chiave ?? null;
+  const scegliArea = (k: string) => { setParams({ area: k }); setSelezionato(null); setPianta(null); };
+  const quota = d && d.gestiti !== null && d.punti > 0 ? d.gestiti / d.punti : null;
+  const memento = d?.tipo === 'mementos';
+
   return (
     <PageState isLoading={dati.caricamento && !d} error={dati.errore} onRetry={() => void dati.ricarica()}>
       {d && area && (
         <div className="flex flex-col gap-4">
           <button type="button" className="btn btn-ghost self-start -ml-2" onClick={() => navigate(-1)}><IconChevronLeft size={18} /> Indietro</button>
-          <div className="card flex gap-4">
-            <div className="flex flex-col items-center gap-2 shrink-0">
-              <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={96} />
-              {d.gestiti !== null && d.punti > 0 && (
-                <AnelloAvanzamento quota={d.gestiti / d.punti} dimensione={60} spessore={4} etichetta={`Avanzamento in ${d.nome}: ${d.gestiti} punti gestiti su ${d.punti}`}>
-                  <span className="font-display text-[16px] leading-none tabular-nums">{Math.round((d.gestiti / d.punti) * 100)}%</span>
-                </AnelloAvanzamento>
-              )}
-            </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="titolo-display m-0">{d.nome}</h1>
-                {d.sovrano && <span className="chip">{d.sovrano}</span>}
-                {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
-                <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" compatto />
+
+          {/* ---- Intestazione: l'emblema grande, il nome, il tempo ---- */}
+          <header className="card relative overflow-hidden">
+            {/* L'emblema una seconda volta, enorme e appena visibile: fa da fondo alla scheda senza
+                aggiungere un'immagine che non c'è. È decorativo, quindi non lo legge nessuno. */}
+            <span aria-hidden className="pointer-events-none absolute -right-10 -top-16 hidden opacity-[0.07] sm:block">
+              <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={280} />
+            </span>
+            <div className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-5">
+              <div className="flex shrink-0 items-center gap-3 sm:flex-col">
+                <EmblemaDungeon chiave={d.chiave} nome={d.nome} arcanaSovrano={d.arcanaSovrano} dimensione={96} />
+                {quota !== null && (
+                  <AnelloAvanzamento quota={quota} dimensione={64} spessore={5} etichetta={`Avanzamento in ${d.nome}: ${d.gestiti} punti gestiti su ${d.punti}`}>
+                    <span className="font-display text-[17px] leading-none tabular-nums">{Math.round(quota * 100)}%</span>
+                  </AnelloAvanzamento>
+                )}
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {d.date.sblocco && <span className="chip" title={d.date.sblocco}>Sblocco {dataBreve(d.date.sblocco)}</span>}
-                {d.date.scadenza && <span className="chip chip--attivo" title={d.date.scadenza}>Scadenza {dataBreve(d.date.scadenza)}</span>}
-                {d.date.furtoConsigliato && <span className="chip" title={d.date.furtoConsigliato}>Furto consigliato {dataBreve(d.date.furtoConsigliato)}</span>}
-                <span className="chip">{d.aree.length} aree · {d.punti} punti · {d.esauribili} esauribili{d.gestiti !== null ? ` · ${d.gestiti} gestiti` : ''}</span>
+              <div className="flex min-w-0 flex-1 flex-col gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <h1 className="titolo-display m-0 break-words">{d.nome}</h1>
+                  <div className="flex flex-wrap items-center gap-2 text-[13px] text-text-secondary">
+                    {d.sovrano && <span className="break-words">{d.sovrano}</span>}
+                    {d.arcanaSovranoNome && <span className="chip chip--attivo">{d.arcanaSovranoNome}</span>}
+                  </div>
+                </div>
+                <LineaDelTempo date={d.date} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <CollegamentoMappa tipo="dungeon" chiave={d.chiave} testo="Mappa del Palazzo" />
+                  <span className="chip">{d.aree.length} aree</span>
+                  <span className="chip">{d.punti} punti</span>
+                  <span className="chip">{d.esauribili} esauribili</span>
+                  {d.gestiti !== null && <span className="chip">{d.gestiti} gestiti</span>}
+                </div>
+                {/* La prosa della guida sotto le date, ripiegata: è la spiegazione, non il dato. */}
+                <div className="flex flex-col gap-1">
+                  {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="text-[13px] text-text-secondary" />}
+                  {d.date.sblocco && d.date.sblocco !== dataBreve(d.date.sblocco) && <TestoRipiegabile testo={`Si apre: ${d.date.sblocco}`} massimo={90} className="text-[12px] text-text-muted" />}
+                  {d.date.scadenza && d.date.scadenza !== dataBreve(d.date.scadenza) && <TestoRipiegabile testo={`Scade: ${d.date.scadenza}`} massimo={90} className="text-[12px] text-text-muted" />}
+                  {d.date.furtoConsigliato && d.date.furtoConsigliato !== dataBreve(d.date.furtoConsigliato) && <TestoRipiegabile testo={`Furto consigliato: ${d.date.furtoConsigliato}`} massimo={90} className="text-[12px] text-text-muted" />}
+                  {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
+                </div>
               </div>
-              {d.livelloConsigliato && <TestoRipiegabile testo={`Livello consigliato: ${d.livelloConsigliato}`} massimo={120} className="text-[13px] text-text-secondary" />}
-              {d.date.sblocco && d.date.sblocco !== dataBreve(d.date.sblocco) && <TestoRipiegabile testo={`Sblocco: ${d.date.sblocco}`} massimo={90} className="text-[12px] text-text-muted" />}
-              {d.date.scadenza && d.date.scadenza !== dataBreve(d.date.scadenza) && <TestoRipiegabile testo={`Scadenza: ${d.date.scadenza}`} massimo={90} className="text-[12px] text-text-muted" />}
-              {d.date.furtoConsigliato && d.date.furtoConsigliato !== dataBreve(d.date.furtoConsigliato) && <TestoRipiegabile testo={`Furto consigliato: ${d.date.furtoConsigliato}`} massimo={90} className="text-[12px] text-text-muted" />}
-              {d.note && <TestoRipiegabile testo={d.note} massimo={140} className="text-[12px] text-text-muted whitespace-pre-wrap" />}
             </div>
-          </div>
+          </header>
 
           {/* I Memento non sono un Palazzo con delle aree: sono una discesa di nove dedali, e il
-              gioco li presenta così. Sopra le schede, la discesa disegnata con i suoi elementi. */}
-          {d.tipo === 'mementos' && <MappaMemento aree={d.aree} selezionata={area.chiave}
-            onSeleziona={(k) => { setParams({ area: k }); setSelezionato(null); }} />}
+              gioco li presenta così. Al posto della colonna delle aree, il pozzo disegnato. */}
+          {memento && <MappaMemento aree={d.aree} selezionata={area.chiave} onSeleziona={scegliArea} />}
 
-          <FilaScorrevole className="items-center" role="tablist" aria-label="Aree">
-            {d.aree.map((a) => (
-              <button key={a.chiave} type="button" role="tab" className={`chip touch ${a.chiave === area.chiave ? 'chip--attivo' : ''} ${classiSuggerito(sugg.evidenziato('aree', a.chiave), 'chip')}`} aria-selected={a.chiave === area.chiave} onClick={() => { setParams({ area: a.chiave }); setSelezionato(null); }} title={a.descrizione}>
-                {a.ordine + 1}. {a.nome}{a.mappa ? ' 🗺' : ''}
-              </button>
-            ))}
-          </FilaScorrevole>
+          <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[248px_minmax(0,1fr)]">
+            {/* ---- Le aree: colonna da 1024 px in su, fila scorrevole sotto ---- */}
+            {!memento && (
+              <nav className="contents lg:block" aria-label="Aree del Palazzo">
+                <FilaScorrevole className="items-center lg:hidden" role="tablist" aria-label="Aree">
+                  {d.aree.map((a) => <VoceArea key={a.chiave} a={a} compatta scelta={a.chiave === area.chiave} suggerita={sugg.evidenziato('aree', a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
+                </FilaScorrevole>
+                <div className="card hidden max-h-[min(70vh,720px)] flex-col gap-0.5 overflow-y-auto p-1.5 lg:flex" role="tablist" aria-label="Aree">
+                  {d.aree.map((a) => <VoceArea key={a.chiave} a={a} scelta={a.chiave === area.chiave} suggerita={sugg.evidenziato('aree', a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
+                </div>
+              </nav>
+            )}
+            {memento && (
+              <FilaScorrevole className="items-center lg:hidden" role="tablist" aria-label="Dedali">
+                {d.aree.map((a) => <VoceArea key={a.chiave} a={a} compatta scelta={a.chiave === area.chiave} suggerita={sugg.evidenziato('aree', a.chiave)} onScegli={() => scegliArea(a.chiave)} />)}
+              </FilaScorrevole>
+            )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">
-            <section className="card flex flex-col gap-2">
-              <h2 className="m-0 text-[15px] font-semibold">{area.nome}</h2>
-              {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Per un dedalo dei Memento non esiste una pianta — i piani sono generati a ogni
-                    visita — e la miniatura restava le iniziali. Al suo posto va il pezzo con cui
-                    il gioco lo disegna nel pozzo: non è una pianta, è la sua raffigurazione. */}
-                {d.tipo === 'mementos' && !area.mappa && !area.pianta
-                  ? <span className="flex h-[64px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded bg-[#8d0012]">
-                      <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`}
-                        className="max-h-full max-w-full object-contain" />
-                    </span>
-                  : <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />}
-                <span className="text-[12px] text-text-muted flex-1 min-w-[200px]">
-                  {fonteUsata ? (
-                    <>
-                      Pianta scaricata da <a href={fonteUsata.pagina ?? fonteUsata.url} target="_blank" rel="noreferrer" className="credito">{fonteUsata.fonte}</a>{area.pianta && fonteUsata.url === area.pianta.url && area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}{area.pianta && fonteUsata.url !== area.pianta.url ? ' (fonte alternativa: la principale non era raggiungibile)' : ''}, nella tua istanza. Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
-                    </>
-                  ) : area.mappa && !area.pianta ? (
-                    <>Immagine della pianta importata da te. Gli spilli si spostano in modalità «posiziona».</>
-                  ) : area.mappa ? (
-                    <>Immagine della pianta importata da te (la guida <a href={area.pianta!.pagina ?? area.pianta!.url} target="_blank" rel="noreferrer" className="credito">{area.pianta!.fonte}</a> ne pubblica una). Gli spilli si spostano in modalità «posiziona».</>
-                  ) : area.pianta ? (
-                    <>
-                      Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="credito">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
-                    </>
-                  ) : (
-                    d.tipo === 'mementos' ? (
-                    <>I piani dei Memento sono generati a ogni visita e nessuna guida ne pubblica una pianta. Qui sotto c’è il pezzo con cui il gioco disegna questo dedalo nel pozzo: non è una pianta, è la sua raffigurazione. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
-                    ) : (
-                    <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
-                    )
-                  )}
-                </span>
-                {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
-                <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
-              </div>
-              <MappaIncorporata chiave={area.chiave} versione={`${mappaVersione}-${versioneStati}-${scaricata ? download.dati?.byte ?? 0 : 0}`} altezza="max(480px, calc(100vh - 240px))" onCambiato={() => void dati.ricarica()} />
-              <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                <button type="button" className={`chip touch ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Mostra anche i gestiti ({gestitiArea})</button>
-                <span className="text-text-muted">Spilli e immagine della pianta si modificano dall'editor («Modifica mappa» nel visore).</span>
-              </div>
-            </section>
-
-            <aside className="card flex flex-col gap-2">
-              <div className="flex flex-wrap gap-1" aria-label="Filtri per tipo">
-                {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
-                  <button key={tp} type="button" className={`chip touch text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
-                    <span className="inline-block w-2.5 h-2.5 rounded-full mr-1 align-middle" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />{NOME_TIPO[tp]} ({area.punti.filter((p) => p.tipo === tp).length})
-                  </button>
-                ))}
-                {filtro.size > 0 && <button type="button" className="chip touch text-[11px]" onClick={() => setFiltro(new Set())}>Tutti</button>}
-              </div>
-              <ul className="m-0 p-0 list-none flex flex-col divide-y divide-border-light max-h-[70vh] overflow-y-auto" aria-label={`Punti di interesse di ${area.nome}`}>
-                {puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessun punto con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} gestiti nascosti)` : ''}.</li>}
-                {puntiVisibili.map((p) => (
-                  <li key={p.chiave} className={`py-2 flex flex-col gap-1 text-[13px] rounded-md px-1 ${p.chiave === selezionato ? 'bg-primary-bg' : ''} ${p.stato ? 'opacity-60' : ''}`}>
-                    <button type="button" className="text-left flex items-start gap-2 touch" onClick={() => setSelezionato(p.chiave === selezionato ? null : p.chiave)} aria-expanded={p.chiave === selezionato}>
-                      <span className="mt-1 inline-block w-3 h-3 rounded-full shrink-0" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
-                      <span className="flex-1 min-w-0">
-                        <span className="font-semibold">{p.nome}</span>
-                        <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}</span>
+            {/* ---- L'area scelta: mappa e punti ---- */}
+            <div className={`grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_352px] ${memento ? 'lg:col-span-2' : ''}`}>
+              <section className="card flex flex-col gap-2.5">
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <h2 className="m-0 font-display text-[19px] uppercase leading-none">{area.nome}</h2>
+                  <span className="text-[12px] text-text-muted">area {area.ordine + 1} di {d.aree.length}</span>
+                </div>
+                {area.descrizione && <p className="m-0 text-[13px] text-text-secondary">{area.descrizione}</p>}
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Per un dedalo dei Memento non esiste una pianta — i piani sono generati a ogni
+                      visita — e la miniatura restava le iniziali. Al suo posto va il pezzo con cui
+                      il gioco lo disegna nel pozzo: non è una pianta, è la sua raffigurazione. */}
+                  {memento && !area.mappa && !area.pianta
+                    ? <span className="flex h-[64px] w-[96px] shrink-0 items-center justify-center overflow-hidden rounded bg-[#8d0012]">
+                        <img src={urlStratoDedalo(area.ordine)} alt={`${area.nome}, come lo disegna il gioco`}
+                          className="max-h-full max-w-full object-contain" />
                       </span>
-                    </button>
-                    {p.chiave === selezionato && (
-                      <div className="flex flex-col gap-1.5 pl-5">
-                        {p.descrizione && <p className="m-0 text-text-secondary">{p.descrizione}</p>}
-                        <Dettagli d={p.dettagli} />
-                        {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
-                        <div className="flex flex-wrap gap-1.5">
-                          {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
-                          {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
-                          {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
-                        </div>
-                        {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti ottenuti.</span>}
-                      </div>
+                    : <ImmagineEntita key={`${area.chiave}-${mappaVersione}-${scaricata ? 's' : 'n'}`} ambito="mappa" chiave={area.chiave} etichetta={`Mappa: ${area.nome}`} dimensione={96} forma="orizzontale" modificabile />}
+                  <span className="min-w-[200px] flex-1 text-[12px] text-text-muted">
+                    {fonteUsata ? (
+                      <>
+                        Pianta scaricata da <a href={fonteUsata.pagina ?? fonteUsata.url} target="_blank" rel="noreferrer" className="credito">{fonteUsata.fonte}</a>{area.pianta && fonteUsata.url === area.pianta.url && area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}{area.pianta && fonteUsata.url !== area.pianta.url ? ' (fonte alternativa: la principale non era raggiungibile)' : ''}, nella tua istanza. Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
+                      </>
+                    ) : area.mappa && !area.pianta ? (
+                      <>Immagine della pianta importata da te. Gli spilli si spostano in modalità «posiziona».</>
+                    ) : area.mappa ? (
+                      <>Immagine della pianta importata da te (la guida <a href={area.pianta!.pagina ?? area.pianta!.url} target="_blank" rel="noreferrer" className="credito">{area.pianta!.fonte}</a> ne pubblica una). Gli spilli si spostano in modalità «posiziona».</>
+                    ) : area.pianta ? (
+                      <>
+                        Pianta dalla guida <a href={area.pianta.pagina ?? area.pianta.url} target="_blank" rel="noreferrer" className="credito">{area.pianta.fonte}</a>{area.pianta.copertura === 'dungeon' ? ' (pianta dell’intero piano)' : ''}, scaricata nella tua istanza al primo uso{download.caricamento && !scaricata ? ' (scaricamento in corso…)' : ''}{download.errore ? '. Scaricamento non riuscito: riprova o importa un’immagine tua.' : '.'} Puoi sostituirla con una tua immagine; gli spilli si spostano in modalità «posiziona».
+                      </>
+                    ) : memento ? (
+                      <>I piani dei Memento sono generati a ogni visita e nessuna guida ne pubblica una pianta. Qui sopra c’è il pezzo con cui il gioco disegna questo dedalo nel pozzo: non è una pianta, è la sua raffigurazione. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
+                    ) : (
+                      <>Nessuna pianta pubblicata per quest’area{area.piantaAssente ? `: ${area.piantaAssente}` : ''}. Puoi importare una tua immagine (file o URL); resta nella tua istanza.</>
                     )}
-                  </li>
-                ))}
-              </ul>
-            </aside>
+                  </span>
+                  {download.errore && area.pianta && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="riprova" dimensione={20} />} titolo="Riprova" onClick={() => void download.ricarica()} />}
+                  <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="ricalcola" dimensione={20} />} titolo="Ricarica mappa" onClick={() => setMappaVersione((v) => v + 1)} />
+                </div>
+                {/* Il visore vuole la chiave di un **nodo dell'atlante**, e la chiave dell'area
+                    della guida non lo è: interrogato su quella, il risolutore risponde «contenuto
+                    di guida» — giusto per lui — e qui compariva un riquadro vuoto con dentro un
+                    collegamento, su tutte le aree di tutti i Palazzi. La planimetria però esiste,
+                    ed è dichiarata in `mappa_entita`: adesso l'API la porta in `area.mappe` e la
+                    scheda la monta. Dove non c'è (i piani dei Memento, e le aree che il pacchetto
+                    nativo non copre) si dice, invece di mostrare un riquadro che non spiega. */}
+                {mappaScelta
+                  ? <>
+                      {area.mappe.length > 1 && (
+                        <label className="flex flex-wrap items-center gap-2 text-[12px] text-text-secondary">
+                          Planimetria
+                          <select className="form-input max-w-full" value={mappaScelta} onChange={(e) => setPianta(e.target.value)}>
+                            {area.mappe.map((m) => <option key={m.chiave} value={m.chiave}>{m.nome}</option>)}
+                          </select>
+                        </label>
+                      )}
+                      <MappaIncorporata chiave={mappaScelta} versione={`${mappaVersione}-${versioneStati}`} altezza="max(420px, min(62vh, 720px))" onCambiato={() => void dati.ricarica()} />
+                      <p className="m-0 text-[12px] text-text-muted">Spilli e immagine della pianta si modificano dall’editor («Modifica mappa» nel visore).</p>
+                    </>
+                  : <p className="m-0 rounded-md bg-white/[0.04] px-3 py-2 text-[12px] text-text-muted" role="status">
+                      Per quest’area l’atlante non ha una planimetria navigabile{memento ? ': i piani dei Memento si generano a ogni discesa' : ''}. I punti restano qui accanto, e la pianta della guida è qui sopra.
+                    </p>}
+              </section>
+
+              <aside className="card flex flex-col gap-2" aria-label={`Punti di interesse di ${area.nome}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="m-0 font-display text-[15px] uppercase leading-none">Punti · {puntiVisibili.length}</h3>
+                  <button type="button" className={`chip touch text-[11px] ${mostraGestiti ? 'chip--attivo' : ''}`} onClick={() => setMostraGestiti((v) => !v)} aria-pressed={mostraGestiti}>Anche i gestiti ({gestitiArea})</button>
+                </div>
+                <div className="flex flex-wrap gap-1" aria-label="Filtri per tipo">
+                  {TIPI.filter((tp) => area.punti.some((p) => p.tipo === tp)).map((tp) => (
+                    <button key={tp} type="button" className={`chip touch text-[11px] ${filtro.has(tp) ? 'chip--attivo' : ''}`} aria-pressed={filtro.has(tp)} onClick={() => setFiltro((f) => { const n = new Set(f); if (n.has(tp)) n.delete(tp); else n.add(tp); return n; })}>
+                      <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full align-middle" style={{ background: COLORE_TIPO[tp] }} aria-hidden="true" />{NOME_TIPO[tp]} ({area.punti.filter((p) => p.tipo === tp).length})
+                    </button>
+                  ))}
+                  {filtro.size > 0 && <button type="button" className="chip touch text-[11px]" onClick={() => setFiltro(new Set())}>Tutti</button>}
+                </div>
+                {/* Niente altezza fissa: era `max-h-[70vh]` con lo scorrimento suo, e su un
+                    telefono diventava una finestrella da far scorrere dentro una pagina che già
+                    scorreva. Da 1280 px in su, dove la colonna sta accanto alla mappa, si limita
+                    all'altezza della mappa; sotto, cresce quanto serve. */}
+                <ul className="m-0 flex list-none flex-col divide-y divide-border-light p-0 xl:max-h-[calc(62vh+40px)] xl:overflow-y-auto">
+                  {puntiVisibili.length === 0 && <li className="py-2 text-[13px] text-text-muted">Nessun punto con questi filtri{!mostraGestiti && gestitiArea > 0 ? ` (${gestitiArea} gestiti nascosti)` : ''}.</li>}
+                  {puntiVisibili.map((p) => (
+                    <li key={p.chiave} className={`flex flex-col gap-1 rounded-md px-1 py-2 text-[13px] ${p.chiave === selezionato ? 'bg-primary-bg' : ''} ${p.stato ? 'opacity-60' : ''}`}>
+                      <button type="button" className="touch flex items-start gap-2 text-left" onClick={() => setSelezionato(p.chiave === selezionato ? null : p.chiave)} aria-expanded={p.chiave === selezionato}>
+                        <span className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full" style={{ background: COLORE_TIPO[p.tipo] }} aria-hidden="true" />
+                        <span className="min-w-0 flex-1">
+                          <span className="font-semibold">{p.nome}</span>
+                          <span className="text-[12px] text-text-muted"> · {NOME_TIPO[p.tipo]}{p.esauribile ? ' · esauribile' : ''}{p.stato ? ` · ${p.stato}` : ''}</span>
+                        </span>
+                      </button>
+                      {p.chiave === selezionato && (
+                        <div className="flex flex-col gap-1.5 pl-5">
+                          {p.descrizione && <p className="m-0 text-text-secondary">{p.descrizione}</p>}
+                          <Dettagli d={p.dettagli} />
+                          {p.fonte && <a href={p.fonte} target="_blank" rel="noreferrer" className="credito">fonte</a>}
+                          <div className="flex flex-wrap gap-1.5">
+                            {partitaId && p.stato !== 'ottenuto' && <button type="button" className="btn btn-primary btn-sm" onClick={() => void cambiaStato(p, 'ottenuto')}>Ottenuto</button>}
+                            {partitaId && p.esauribile && p.stato !== 'esaurito' && <PulsanteVisivo tono="secondario" compatto icona={<IconaAzione chiave="esaurito" dimensione={20} />} titolo="Esaurito" onClick={() => void cambiaStato(p, 'esaurito')} />}
+                            {partitaId && p.stato && <PulsanteVisivo tono="fantasma" compatto icona={<IconaAzione chiave="riapri" dimensione={20} />} titolo="Riapri" onClick={() => void cambiaStato(p, null)} />}
+                          </div>
+                          {!partitaId && <span className="text-[12px] text-text-muted">Attiva una <Link to="/partita" className="text-primary">partita</Link> per segnare i punti ottenuti.</span>}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            </div>
           </div>
+
           {d.fonti.length > 0 && <p className="m-0 text-[11px] text-text-muted">Fonti: {d.fonti.map((f, i) => <a key={i} href={f} target="_blank" rel="noreferrer" className="credito">{new URL(f).hostname}{i < d.fonti.length - 1 ? ', ' : ''}</a>)}</p>}
         </div>
       )}

@@ -8,6 +8,7 @@ import { t } from './traduzioniService.js';
 import { registraEvento } from './storicoService.js';
 import type { AreaDungeonDto, DungeonDettaglioDto, DungeonRiassuntoDto, PiantaAreaDto, PuntoInteresseDto, StatoPunto } from '../../shared/types.js';
 import { importaImmagineDaUrl } from './immaginiService.js';
+import { chiaveMappa, nomePercorso } from './mappe/percorsiMappe.js';
 
 interface RigaDungeon { chiave: string; tipo: 'palazzo' | 'mementos'; ordine: number; nome: string; sovrano: string; arcana_sovrano: string; data_sblocco: string; data_scadenza: string; furto_consigliato: string; livello_consigliato: string; note: string; fonti_json: string }
 interface RigaArea { chiave: string; dungeon_chiave: string; ordine: number; nome: string; descrizione: string }
@@ -21,6 +22,32 @@ function statiPartita(partitaId: number | undefined): Map<string, StatoPunto> {
 
 function marcatori(): Map<string, { x: number; y: number }> {
   return new Map((prepared('SELECT punto_chiave, x, y FROM marcatore_mappa').all() as Array<{ punto_chiave: string; x: number; y: number }>).map((r) => [r.punto_chiave, { x: r.x, y: r.y }]));
+}
+
+/** Le planimetrie native dell'atlante legate a ogni area della guida.
+ *
+ * Il legame sta in `mappa_entita` (`entita_tipo = 'area'`) e lo scrive la sincronizzazione
+ * dell'atlante. La scheda del Palazzo non poteva trovarlo da sola: chiedeva la mappa alla chiave
+ * dell'area, e il risolutore per quella chiave risponde «contenuto di guida» — corretto per lui,
+ * inutile per chi voleva il visore. Una lettura sola per tutto il Palazzo, invece di una per area.
+ *
+ * Il nome è quello del percorso completo del nodo, lo stesso che si legge nell'albero delle mappe:
+ * quando un'area ha due planimetrie — «porzione occidentale» e «planimetria completa» — è l'unica
+ * cosa che le distingue. */
+function mappeDelleAree(dungeonChiave: string): Map<string, Array<{ chiave: string; nome: string }>> {
+  const righe = prepared(`SELECT e.entita_chiave AS area, m.chiave AS mappa
+    FROM mappa_entita e
+    JOIN mappa m ON m.chiave = e.mappa_chiave
+    JOIN dungeon_area a ON a.chiave = e.entita_chiave
+    WHERE e.entita_tipo = 'area' AND a.dungeon_chiave = ?
+    ORDER BY a.ordine, m.ordine, m.chiave`).all(dungeonChiave) as Array<{ area: string; mappa: string }>;
+  const out = new Map<string, Array<{ chiave: string; nome: string }>>();
+  for (const r of righe) {
+    const elenco = out.get(r.area) ?? [];
+    elenco.push({ chiave: chiaveMappa(r.mappa), nome: nomePercorso(r.mappa) });
+    out.set(r.area, elenco);
+  }
+  return out;
 }
 
 interface RigaPianta { area_chiave: string; url: string; pagina: string | null; fonte: string; licenza: string; larghezza: number | null; altezza: number | null; copertura: string; copre_aree_json: string | null; note: string; alternative_json: string }
@@ -111,8 +138,10 @@ export function dettaglioDungeon(chiave: string, partitaId?: number): DungeonDet
   const mappe = mappePresenti();
   const piante = pianteAree();
   const assenti = motiviAssenza();
+  const native = mappeDelleAree(chiave);
   const aree = (prepared('SELECT * FROM dungeon_area WHERE dungeon_chiave = ? ORDER BY ordine').all(chiave) as RigaArea[]).map((a): AreaDungeonDto => ({
     chiave: a.chiave, ordine: a.ordine, nome: a.nome, descrizione: a.descrizione, mappa: mappe.has(a.chiave), pianta: piantaDto(piante.get(a.chiave)), piantaScaricata: mappe.has(a.chiave) ? piantaScaricata(mappe.get(a.chiave), piantaDto(piante.get(a.chiave))) : null, piantaAssente: piante.has(a.chiave) ? null : (assenti.get(a.chiave) ?? null),
+    mappe: native.get(a.chiave) ?? [],
     punti: (prepared('SELECT * FROM punto_interesse WHERE area_chiave = ? ORDER BY ordine').all(a.chiave) as RigaPunto[]).map((p): PuntoInteresseDto => ({
       chiave: p.chiave, ordine: p.ordine, tipo: p.tipo, nome: p.nome, descrizione: p.descrizione, esauribile: p.esauribile === 1, dettagli: JSON.parse(p.dettagli_json) as Record<string, unknown>, fonte: p.fonte,
       stato: stati.get(p.chiave) ?? null, marcatore: marc.get(p.chiave) ?? null,
