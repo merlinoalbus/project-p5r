@@ -28,15 +28,15 @@ import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
 import { NOME_DOTE } from '../utils/citta';
 import type { VideogiocoDto } from '../types';
 
-function Numero({ valore, etichetta }: { valore: number | string; etichetta: string }) {
+function Numero({ valore, etichetta, segno }: { valore: number | string; etichetta: string; segno: ChiaveSegno }) {
   return (
     <span className="card flex flex-col gap-0.5 px-3 py-2">
       <span className="font-display text-[21px] leading-none tabular-nums">{valore}</span>
-      <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">{etichetta}</span>
+      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
     </span>
   );
 }
@@ -76,8 +76,10 @@ function Scheda({ g, partitaId, occupato, progresso, onCambia, onCorretto, onPos
           faceva in un tocco quello che «+» fa comunque, e toglieva spazio al gesto vero. */}
       {partitaId && (
         <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${g.nome}`}>
-          <button type="button" className="btn btn-secondary touch text-[18px]" disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`}>−</button>
-          <button type="button" className="btn btn-primary touch text-[18px]" disabled={progresso >= totale} onClick={() => onCambia(g, +1)} aria-label={`Aggiungi un round a ${g.nome}`}>+</button>
+          <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli"
+            disabled={progresso === 0} onClick={() => onCambia(g, -1)} aria-label={`Togli un round a ${g.nome}`} />
+          <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo="Round"
+            disabled={progresso >= totale} onClick={() => onCambia(g, +1)} aria-label={`Aggiungi un round a ${g.nome}`} />
           {occupato && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
         </div>
       )}
@@ -186,9 +188,9 @@ export function VideogiochiPage() {
             sottotitolo={`I giochi retro della soffitta e delle sale di Akihabara: ogni round alza una Dote, e i contenuti collegati si sbloccano solo a gioco finito.${partitaId ? ` Nella partita «${attiva?.nome}».` : ' Attiva una partita per segnare i round.'}`} />
 
           <div className="flex flex-wrap gap-2">
-            <Numero valore={giochi.length} etichetta="Giochi" />
-            <Numero valore={giochi.filter((g) => g.fatto).length} etichetta="Completati" />
-            <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" />
+            <Numero valore={giochi.length} etichetta="Giochi" segno="iniziati" />
+            <Numero valore={giochi.filter((g) => g.fatto).length} etichetta="Completati" segno="completati" />
+            <Numero valore={`${roundFatti}/${roundTotali}`} etichetta="Round" segno="round" />
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

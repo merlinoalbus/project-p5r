@@ -668,3 +668,52 @@ Questo elenco si rigenera dai dati, quindi resta vero anche quando una scheda vi
 - **Quando:** Di sera
 - **Costo:** gratuito
 - **Doti:** Conoscenza
+
+## 27. Segni per gli elementi rimasti spogli (12) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti e consegnati il 2026-09-08
+<!-- Consegnati da `candidato/grafica-extra-segni-v1`: 13 file 128×128 RGBA, nessuna altra riga toccata.
+     Agganciati in `IconaSegno` (`src/components/shared/IconaAzione.tsx`) e usati in Film, Libri,
+     Richieste, Videogiochi, Covo, Trofei, Compendio personale, la finestra del Palazzo e il
+     cartellino «Da verificare». Restano qui come specifica e tracciabilità. -->
+Ultimo giro sulle schermate che l'utente ha segnalato come «scarne a livello grafico»: pulsanti e
+riquadri fatti di sola scritta, dove una figura piccola cambia la leggibilità a colpo d'occhio.
+Regole comuni: 128×128 trasparente, bianco/grigio/nero/rosso, niente oro, nessun testo, un soggetto
+solo. L'app le mostra a **18–24 px** dentro pastiglie e tessere, quindi devono reggere piccole.
+
+**Le tessere dei numeri** (`Numero`, `.kpi-tile`) sono la voce più ripetuta: stanno su Film, Libri,
+Videogiochi, Covo dei Ladri, Richieste, Trofei e Home, e oggi sono un numero grande con
+un'etichetta minuscola sotto. Il segno va **accanto all'etichetta**, non al posto del numero.
+| File | Dove sta, e accanto a che testo | Soggetto |
+|---|---|---|
+| `segno-iniziati.png` | «Titoli iniziati», «Giochi» | segnalibro appena infilato in un foglio |
+| `segno-completati.png` | «Completati», «Risolti» | spunta dentro un cerchio spezzato |
+| `segno-sessioni.png` | «Sessioni obiettivo», «0/42» | clessidra bassa con due tacche |
+| `segno-visioni.png` | «Visioni registrate» | occhio con la ciglia marcata |
+| `segno-round.png` | «Round», «3/20» | pad con la freccia che gira |
+| `segno-medaglie.png` | «Medaglie P», «Prezzi 3-10» | medaglia con il nastro corto |
+| `segno-catalogo.png` | «Voci di catalogo», «36» | schedario con la linguetta alzata |
+| `segno-sfide.png` | «Sfide», «52» | pugno chiuso dentro un cerchio |
+
+**La finestra del Palazzo** (`LineaDelTempo`) è tre pastiglie in fila — «Si apre», «Furto
+consigliato», «Scade» — con la data sotto e nient'altro: il colore distingue, la forma no.
+| File | Tappa | Soggetto |
+|---|---|---|
+| `segno-si-apre.png` | «Si apre» | cancello socchiuso con la freccia che entra |
+| `segno-furto.png` | «Furto consigliato» | biglietto da visita con l'angolo strappato |
+| `segno-scade.png` | «Scade» | clessidra rovesciata con l'ultima sabbia |
+
+**Lo stato di una riga del catalogo**, che oggi è la sola scritta «Da verificare» accanto a nomi di
+negozi e articoli presi da fonti secondarie.
+| File | Dove | Soggetto |
+|---|---|---|
+| `segno-da-verificare.png` | chip «Da verificare», «da fonte secondaria» | lente d'ingrandimento su un punto interrogativo |
+
+**Una tessera scoperta, e la sua è una svista vecchia.** `ui/scheda-letture.png` — la scheda
+«Letture e giochi» della Partita — non è mai stata censita: la chiave è nata nel codice quando la
+scheda è stata aggiunta, e la §16 elenca le altre diciotto ma non lei. È l'unica delle trentuno
+tessere dell'app a mostrare ancora la riserva.
+| File | Scheda | Soggetto |
+|---|---|---|
+| `scheda-letture.png` | Partita → «Letture e giochi» | libro chiuso con un pad appoggiato sopra |
+
+Ognuno di questi nasce con la sua riserva SVG in codice: se l'immagine non arriva, il segno c'è
+lo stesso e la tessera non resta vuota.

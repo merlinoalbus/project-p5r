@@ -15,6 +15,8 @@ import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { ChipDisponibilita } from '../components/guida/ChipDisponibilita';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
 import { NOME_DOTE } from '../utils/citta';
+import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
+import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import type { FilmDto, FilmDvdDto } from '../types';
 
 type StatoFiltro = 'tutti' | 'da-iniziare' | 'in-corso' | 'completati';
@@ -148,8 +150,8 @@ export function FilmPage() {
       {/* Due pulsanti larghi uguali: il gesto è la visione. In mezzo c'era «Completa», grande il
           triplo, per una cosa che «+» fa comunque — e che al cinema vuol dire una sola visione. */}
       {partitaId && <div className="grid grid-cols-2 gap-2" aria-label={`Avanzamento ${titolo}`}>
-        <button type="button" className="btn btn-secondary touch text-[18px]" disabled={progresso === 0} onClick={() => accoda(film, progresso - 1)} aria-label={`Togli una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`}>−</button>
-        <button type="button" className="btn btn-primary touch text-[18px]" disabled={film.dove === 'dvd' && progresso >= film.totaleSessioni} onClick={() => accoda(film, progresso + 1)} aria-label={`Aggiungi una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`}>+</button>
+        <PulsanteVisivo tono="secondario" icona={<IconaAzione chiave="meno" dimensione={20} />} titolo="Togli" disabled={progresso === 0} onClick={() => accoda(film, progresso - 1)} aria-label={`Togli una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`} />
+        <PulsanteVisivo tono="primario" icona={<IconaAzione chiave="piu" dimensione={20} />} titolo={film.dove === 'cinema' ? "Visione" : "Sessione"} disabled={film.dove === 'dvd' && progresso >= film.totaleSessioni} onClick={() => accoda(film, progresso + 1)} aria-label={`Aggiungi una ${film.dove === 'cinema' ? 'visione' : 'sessione'} a ${titolo}`} />
         {occupati[coda] && <span className="col-span-2 text-center text-xs text-text-muted" role="status">Salvataggio…</span>}
       </div>}
       <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-sm"><dt className="text-text-muted">Effetto</dt><dd className="m-0">{film.dote ? `${NOME_DOTE[film.dote]}${film.note ? ` ${'♪'.repeat(Math.min(4, film.note))}` : ''}` : 'Bonus speciale'}</dd>{film.prezzo !== null && <><dt className="text-text-muted">Prezzo</dt><dd className="m-0">{film.prezzo.toLocaleString('it-IT')} ¥</dd></>}</dl>
@@ -169,10 +171,10 @@ export function FilmPage() {
         : <>Tutti i film al cinema e i DVD di Persona 5 Royal, con periodi, Doti e luoghi. Attiva una partita per registrarne le visioni.</>} />
 
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo film e DVD">
-        <div className="kpi-tile"><span className="kpi-value">{d.iniziati}</span><span className="kpi-label">titoli iniziati</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.completati}</span><span className="kpi-label">completati</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.sessioniCompletamentoFatte}/{d.sessioniObiettivo}</span><span className="kpi-label">sessioni obiettivo</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.visioniRegistrate}</span><span className="kpi-label">visioni registrate</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.iniziati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="iniziati" />titoli iniziati</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.completati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />completati</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.sessioniCompletamentoFatte}/{d.sessioniObiettivo}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni obiettivo</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.visioniRegistrate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="visioni" />visioni registrate</span></div>
       </section>
 
       <section className="pannello-filtri grid gap-2 md:grid-cols-[minmax(220px,1fr)_auto_auto_auto]" aria-label="Filtri film e DVD">

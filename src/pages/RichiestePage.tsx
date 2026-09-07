@@ -30,7 +30,7 @@ import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { FilaScorrevole } from '../components/shared/FilaScorrevole';
 import { SezioneConFregio } from '../components/shared/FregioSezione';
 import { PulsanteVisivo, CollegamentoVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { IconaCategoria } from '../components/guida/IconaCategoria';
 import { IconaScheda } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
@@ -184,10 +184,10 @@ export function RichiestePage() {
 
           {foglio === 'richieste' && <>
           {partitaId && <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo delle Richieste">
-            <div className="kpi-tile"><span className="kpi-value">{d.totale}</span><span className="kpi-label">in tutto</span></div>
-            <div className="kpi-tile"><span className="kpi-value">{d.totale - d.completate - accettate}</span><span className="kpi-label">da fare</span></div>
-            <div className="kpi-tile"><span className="kpi-value">{accettate}</span><span className="kpi-label">accettate</span></div>
-            <div className="kpi-tile"><span className="kpi-value">{d.completate}</span><span className="kpi-label">completate</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{d.totale}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="catalogo" />in tutto</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{d.totale - d.completate - accettate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sfide" />da fare</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{accettate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="iniziati" />accettate</span></div>
+            <div className="kpi-tile"><span className="kpi-value">{d.completate}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />completate</span></div>
           </section>}
 
           <div className="flex flex-wrap items-center gap-1.5">

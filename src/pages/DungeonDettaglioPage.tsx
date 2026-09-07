@@ -48,7 +48,7 @@ import { COLORE_TIPO, NOME_TIPO } from '../utils/dungeon';
 import { eCollezionabile } from '../../shared/puntiDungeon';
 import type { AreaDungeonDto, DungeonDettaglioDto, PuntoInteresseDto, StatoPunto } from '../types';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { CollegamentoMappa } from '../components/mappe/CollegamentoMappa';
@@ -77,9 +77,9 @@ function Dettagli({ d }: { d: Record<string, unknown> }) {
  * l'informazione che serve quando si guarda la pagina di corsa. */
 function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
   const tappe = [
-    { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text' },
-    { chiave: 'furto', etichetta: 'Furto consigliato', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]' },
-    { chiave: 'scadenza', etichetta: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary' },
+    { chiave: 'sblocco', etichetta: 'Si apre', valore: date.sblocco, tono: 'bg-white/10 text-text', segno: 'si-apre' as const },
+    { chiave: 'furto', etichetta: 'Furto consigliato', valore: date.furtoConsigliato, tono: 'bg-[#f5c542]/15 text-[#f5c542]', segno: 'furto' as const },
+    { chiave: 'scadenza', etichetta: 'Scade', valore: date.scadenza, tono: 'bg-primary/20 text-primary', segno: 'scade' as const },
   ].filter((t) => !!t.valore);
   if (tappe.length === 0) return null;
   return (
@@ -88,7 +88,9 @@ function LineaDelTempo({ date }: { date: DungeonDettaglioDto['date'] }) {
         <li key={t.chiave} className="flex items-stretch gap-1.5">
           {i > 0 && <span aria-hidden className="self-center text-text-muted">→</span>}
           <span className={`flex flex-col gap-0.5 rounded-md px-2.5 py-1.5 ${t.tono}`} title={t.valore!}>
-            <span className="text-[10px] uppercase tracking-[0.08em] opacity-80">{t.etichetta}</span>
+            {/* Le tre tappe si distinguevano solo per il colore, e il colore da solo non basta:
+                il segno dice quale tappa è anche a chi non lo vede. */}
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] opacity-80"><IconaSegno chiave={t.segno} dimensione={14} />{t.etichetta}</span>
             <span className="font-display text-[17px] leading-none">{dataBreve(t.valore!)}</span>
           </span>
         </li>

@@ -138,6 +138,9 @@ export function CompletamentoPage() {
                   const presi = dello.filter((t) => t.ottenuto).length;
                   return <div key={k} className="kpi-tile" style={{ borderLeft: `3px solid ${COLORE_TROFEO[k]}` }}>
                     <span className="kpi-value">{presi}<span className="text-text-muted">/{dello.length}</span></span>
+                    {/* Niente segno qui: sarebbe la stessa medaglia quattro volte di fila, e a
+                        distinguere i metalli ci pensa già la banda di colore a sinistra. Un segno
+                        identico ripetuto non aggiunge informazione, la diluisce. */}
                     <span className="kpi-label">{NOME_TIPO_TROFEO[k]}</span>
                   </div>;
                 })}
