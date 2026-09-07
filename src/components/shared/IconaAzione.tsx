@@ -1,5 +1,5 @@
 // ============================================================
-// IconaAzione / IconaScheda — icona di un'azione o di una scheda: asset `ui/azione-<chiave>` / `ui/scheda-<chiave>` (prompt §17 / §16), riserva SVG in codice
+// IconaAzione / IconaScheda / IconaSegno — icona di un'azione, di una scheda o di un dato: asset `ui/azione-<chiave>` / `ui/scheda-<chiave>` / `ui/segno-<chiave>` (prompt §17 / §16 / §27), riserva SVG in codice
 // ============================================================
 //
 // Le chiavi sono il censimento degli asset richiesti a Codex: aggiungere una chiave qui significa aggiungere una riga ai prompt.
@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import { AssetImg } from './AssetImg';
-import { IconAdatta, IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconCompletati, IconDettagli, IconElenco, IconEvoca, IconFiltro, IconGioca, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMaschera, IconMatita, IconMedaglia, IconMeno, IconMessaggio, IconNegozio, IconNuvola, IconOrologio, IconPersone, IconPianta, IconPiu, IconPodio, IconPosizione, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita, IconZoomMeno, IconZoomPiu } from './iconeGuida';
+import { IconAdatta, IconAlbero, IconAllarme, IconAltro, IconAnnullaCerchio, IconAppunti, IconApri, IconBersaglio, IconCarte, IconCerchio, IconCestino, IconCiclo, IconCompletati, IconDettagli, IconElenco, IconEvoca, IconFilm, IconFiltro, IconGioca, IconGioco, IconIndietro, IconLibro, IconLucchettoAperto, IconLucchettoChiuso, IconMappa, IconMaschera, IconMatita, IconMedaglia, IconMeno, IconMessaggio, IconNegozio, IconNuvola, IconOrologio, IconPersone, IconPianta, IconPiu, IconPodio, IconPosizione, IconRegalo, IconRicalcola, IconRicetta, IconRiepilogo, IconSpunta, IconStella, IconUscita, IconZoomMeno, IconZoomPiu } from './iconeGuida';
 
 export type ChiaveAzione = 'negozio' | 'regalo' | 'uscita' | 'annulla-ultimo' | 'sbloccato' | 'bloccato' | 'note' | 'modifica' | 'sms' | 'esame-primo' | 'esame-top10' | 'fortuna' | 'libro' | 'evoca' | 'esegui' | 'allarme' | 'elimina' | 'ricalcola' | 'riapri' | 'albero' | 'ricetta' | 'piano' | 'scheda' | 'raggiunto' | 'annulla' | 'tutti' | 'aperti' | 'obiettivo' | 'carica-altri' | 'seleziona' | 'deseleziona' | 'riprova' | 'registra' | 'accettata' | 'esaurito' | 'calendario' | 'adatta' | 'riduci' | 'ingrandisci' | 'mappa' | 'attiva' | 'chiudi' | 'url' | 'carica' | 'indietro' | 'filtri' | 'copia' | 'incolla'
   // Aggiunte col rifacimento delle pagine: **nessun pulsante di solo testo**, quindi ogni gesto
@@ -21,6 +21,16 @@ export type ChiaveScheda = 'oggi' | 'doti' | 'confidenti' | 'letture' | 'scorta'
   | 'trofei' | 'finali' | 'dlc' | 'meteo' | 'nuova-partita' | 'tempo'
   | 'sfide-battaglia' | 'boss' | 'magnate' | 'tratti'
   | 'jose' | 'personalizzazione' | 'scambi';
+
+/** I segni dei **dati**: non un gesto da fare né una scheda da aprire, ma il numero che si legge.
+ *
+ * Le tessere dei conteggi (`.kpi-tile` e i due `Numero` di Covo e Videogiochi), le tre pastiglie
+ * della finestra di un Palazzo e il cartellino «Da verificare» erano le ultime schermate di sole
+ * parole: un numero grande e un'etichetta minuscola tutta uguale alle altre. Il segno sta
+ * **accanto all'etichetta**, mai al posto del numero, e a 14–16 px basta a distinguere una
+ * tessera dall'altra prima di leggerla. */
+export type ChiaveSegno = 'iniziati' | 'completati' | 'sessioni' | 'visioni' | 'round' | 'medaglie' | 'catalogo' | 'sfide'
+  | 'si-apre' | 'furto' | 'scade' | 'da-verificare';
 
 const RISERVA_AZIONE: Record<ChiaveAzione, (dimensione: number) => ReactNode> = {
   'regalo': (d) => <IconRegalo size={d} />,
@@ -116,6 +126,24 @@ const RISERVA_SCHEDA: Record<ChiaveScheda, (dimensione: number) => ReactNode> = 
   scambi: (d) => <IconCiclo size={d} />,
 };
 
+const RISERVA_SEGNO: Record<ChiaveSegno, (dimensione: number) => ReactNode> = {
+  // «Titoli iniziati», «Giochi», «Accettate»: qualcosa di aperto e non finito.
+  iniziati: (d) => <IconLibro size={d} />,
+  completati: (d) => <IconCompletati size={d} />,
+  sessioni: (d) => <IconOrologio size={d} />,
+  visioni: (d) => <IconFilm size={d} />,
+  round: (d) => <IconGioco size={d} />,
+  medaglie: (d) => <IconMedaglia size={d} />,
+  catalogo: (d) => <IconElenco size={d} />,
+  sfide: (d) => <IconBersaglio size={d} />,
+  'si-apre': (d) => <IconLucchettoAperto size={d} />,
+  // Il biglietto del furto è la carta da visita dei Ladri: la stessa figura del mazzo.
+  furto: (d) => <IconCarte size={d} />,
+  scade: (d) => <IconAllarme size={d} />,
+  // Documento con la lente: è esattamente ciò che il cartellino dice, «va controllato».
+  'da-verificare': (d) => <IconDettagli size={d} />,
+};
+
 interface Props<C extends string> {
   chiave: C;
   /** Lato in px (default 24). Dentro un PulsanteVisivo/CollegamentoVisivo è ininfluente: il riquadro del pulsante impone la dimensione via CSS (40/32/48 px). */
@@ -131,4 +159,10 @@ export function IconaAzione({ chiave, dimensione = 24, className }: Props<Chiave
 /** Icona decorativa di una scheda della Partita. */
 export function IconaScheda({ chiave, dimensione = 16, className }: Props<ChiaveScheda>) {
   return <AssetImg nome={`ui/scheda-${chiave}`} alt="" decorativa className={`object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_SCHEDA[chiave](dimensione)} />;
+}
+
+/** Segno decorativo accanto all'etichetta di un dato: il testo resta e dice tutto, questo aiuta a
+ *  ritrovarlo. Dimensione piccola per scelta — è un contorno, non un'illustrazione. */
+export function IconaSegno({ chiave, dimensione = 15, className }: Props<ChiaveSegno>) {
+  return <AssetImg nome={`ui/segno-${chiave}`} alt="" decorativa className={`shrink-0 object-contain ${className ?? ''}`} style={{ width: dimensione, height: dimensione }} fallback={RISERVA_SEGNO[chiave](dimensione)} />;
 }

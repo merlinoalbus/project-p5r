@@ -669,7 +669,11 @@ Questo elenco si rigenera dai dati, quindi resta vero anche quando una scheda vi
 - **Costo:** gratuito
 - **Doti:** Conoscenza
 
-## 27. Segni per gli elementi rimasti spogli (12) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti il 2026-09-08
+## 27. Segni per gli elementi rimasti spogli (12) — `ui/segno-<chiave>.png` (128×128, trasparente) — richiesti e consegnati il 2026-09-08
+<!-- Consegnati da `candidato/grafica-extra-segni-v1`: 13 file 128×128 RGBA, nessuna altra riga toccata.
+     Agganciati in `IconaSegno` (`src/components/shared/IconaAzione.tsx`) e usati in Film, Libri,
+     Richieste, Videogiochi, Covo, Trofei, Compendio personale, la finestra del Palazzo e il
+     cartellino «Da verificare». Restano qui come specifica e tracciabilità. -->
 Ultimo giro sulle schermate che l'utente ha segnalato come «scarne a livello grafico»: pulsanti e
 riquadri fatti di sola scritta, dove una figura piccola cambia la leggibilità a colpo d'occhio.
 Regole comuni: 128×128 trasparente, bianco/grigio/nero/rosso, niente oro, nessun testo, un soggetto

@@ -9,7 +9,7 @@ import { useCarica } from '../../hooks/useCarica';
 import { notifica } from '../../stores/notificationStore';
 import { PageState } from '../shared/PageState';
 import { CampoRicerca } from '../shared/CampoRicerca';
-import { IconaAzione } from '../shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../shared/IconaAzione';
 
 interface Props {
   partitaId: number;
@@ -48,7 +48,7 @@ export function CompendioPersonale({ partitaId }: Props) {
     <PageState isLoading={tutte.caricamento || registrate.caricamento} error={tutte.errore ?? registrate.errore} onRetry={() => { void tutte.ricarica(); void registrate.ricarica(); }}>
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <div className="kpi-tile">
-          <span className="kpi-label">Completamento</span>
+          <span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />Completamento</span>
           <span className="kpi-value">{totale ? Math.round((fatte / totale) * 100) : 0}%</span>
           <span className="text-[12px] text-text-muted">{fatte} di {totale}</span>
         </div>

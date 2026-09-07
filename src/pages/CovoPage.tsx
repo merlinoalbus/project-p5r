@@ -28,6 +28,7 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { PageState } from '../components/shared/PageState';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { TestoRipiegabile } from '../components/shared/TestoRipiegabile';
+import { IconaSegno, type ChiaveSegno } from '../components/shared/IconaAzione';
 import type { CompletamentoDto } from '../types';
 
 type Covo = CompletamentoDto['covo'];
@@ -64,10 +65,10 @@ function medaglie(n: number): string {
   return `${n} ${n === 1 ? 'medaglia' : 'medaglie'}`;
 }
 
-function Numero({ etichetta, valore, nota, tono = '' }: { etichetta: string; valore: string; nota?: string; tono?: string }) {
+function Numero({ etichetta, valore, nota, tono = '', segno }: { etichetta: string; valore: string; nota?: string; tono?: string; segno: ChiaveSegno }) {
   return (
     <span className={`flex flex-col gap-0.5 rounded-md px-3 py-2 ${tono || 'bg-white/[0.05]'}`}>
-      <span className="text-[10px] uppercase tracking-[0.08em] text-text-muted">{etichetta}</span>
+      <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-text-muted"><IconaSegno chiave={segno} dimensione={14} />{etichetta}</span>
       <span className="font-display text-[21px] leading-none tabular-nums">{valore}</span>
       {nota && <span className="text-[11px] text-text-muted">{nota}</span>}
     </span>
@@ -93,13 +94,13 @@ export function CovoPage() {
 
           <section className="card flex flex-col gap-3" aria-label="Come funziona il Covo">
             <div className="flex flex-wrap gap-2">
-              <Numero etichetta="Sfide" valore={String(covo.sfide.length)}
+              <Numero etichetta="Sfide" valore={String(covo.sfide.length)} segno="sfide"
                 nota={c.guadagno !== null ? `${medaglie(c.guadagno)} in tutto` : 'valore della singola sfida non dichiarato'} />
-              <Numero etichetta="Voci di catalogo" valore={String(covo.premi.length)}
+              <Numero etichetta="Voci di catalogo" valore={String(covo.premi.length)} segno="catalogo"
                 nota={c.premiConPrezzo === covo.premi.length ? 'tutte con prezzo' : `${c.premiConPrezzo} con prezzo dichiarato`} />
               {c.minimo !== null && c.massimo !== null && (
                 <Numero etichetta="Prezzi" valore={c.minimo === c.massimo ? String(c.minimo) : `${c.minimo}–${c.massimo}`}
-                  nota="medaglie per elemento" tono="bg-primary/10" />
+                  nota="medaglie per elemento" tono="bg-primary/10" segno="medaglie" />
               )}
             </div>
             <p className="m-0 text-[13px] text-text-secondary">{covo.introduzione}</p>

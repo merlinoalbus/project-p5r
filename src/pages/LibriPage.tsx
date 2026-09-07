@@ -10,7 +10,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { notifica } from '../stores/notificationStore';
 import { PageState } from '../components/shared/PageState';
 import { PulsanteVisivo } from '../components/shared/PulsanteVisivo';
-import { IconaAzione } from '../components/shared/IconaAzione';
+import { IconaAzione, IconaSegno } from '../components/shared/IconaAzione';
 import { IntestazionePagina } from '../components/shared/IntestazionePagina';
 import { DoveSiTrova } from '../components/mappe/DoveSiTrova';
 import { AggiungiAlCatalogo, CorreggiElemento } from '../components/guida/AzioniCatalogo';
@@ -168,10 +168,10 @@ export function LibriPage() {
         : <>Tutti i 46 libri di Persona 5 Royal, con sessioni, benefici e provenienza. Attiva una partita per registrarne l’avanzamento.</>} />
 
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Riepilogo lettura">
-        <div className="kpi-tile"><span className="kpi-value">{d.completati}</span><span className="kpi-label">completati</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.libri.length - d.completati}</span><span className="kpi-label">da completare</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.sessioniFatte}</span><span className="kpi-label">sessioni fatte</span></div>
-        <div className="kpi-tile"><span className="kpi-value">{d.sessioniTotali}</span><span className="kpi-label">sessioni totali</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.completati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="completati" />completati</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.libri.length - d.completati}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="iniziati" />da completare</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.sessioniFatte}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni fatte</span></div>
+        <div className="kpi-tile"><span className="kpi-value">{d.sessioniTotali}</span><span className="kpi-label kpi-label--segno"><IconaSegno chiave="sessioni" />sessioni totali</span></div>
       </section>
 
       <section className="pannello-filtri grid gap-2 md:grid-cols-[minmax(220px,1fr)_auto_auto]" aria-label="Filtri libri">

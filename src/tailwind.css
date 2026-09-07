@@ -1024,6 +1024,10 @@
     letter-spacing: 0.05em;
     color: var(--color-text-muted);
   }
+  /* L'etichetta che porta il suo segno (§27). Classe a parte e non `.kpi-label` intera perché le
+     tessere compatte della Home tagliano l'etichetta con `text-overflow: ellipsis`, che su un
+     contenitore flex non funziona: chi non ha segno resta il blocco di testo che era. */
+  .kpi-label--segno { display: inline-flex; align-items: center; gap: 5px; }
 }
 
 /* ============================================================
