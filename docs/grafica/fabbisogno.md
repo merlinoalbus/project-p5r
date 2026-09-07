@@ -181,9 +181,12 @@ spilli nuovi uno accanto all'altro si vede che otto hanno una tinta troppo chiar
 figura anch'essa chiara — `forziere-raro` (#fde047), `terme` (#67e8f9), `casa` (#fdba74),
 `lavanderia` (#c4b5fd), `nemico` (#b0b0c0), `porta` (#a3a3a3), `nota` (#9ca3af), `scala` (#2dd4bf).
 
-Si leggono, ma sono il caso peggiore. **Si risolve in `shared/spilli.ts`, scurendo quegli otto
-senza toccare la grafica**: le figure vanno bene, è il fondo che non fa da fondo. Non l'ho fatto
-d'ufficio perché sono colori autorati e la scelta è dell'utente.
+Si leggono, ma sono il caso peggiore. Si sarebbe risolto in `shared/spilli.ts`, scurendo quegli
+otto senza toccare la grafica: le figure vanno bene, è il fondo che non fa da fondo.
+
+**Chiuso: l'utente ha deciso di lasciarli come sono**, ed è registrato in `docs/DECISIONI.md` alla
+data del 7 settembre 2026. Resta scritto qui perché non venga «corretto» d'iniziativa da chi
+rivede gli spilli fra sei mesi e li trova chiari: è una scelta, non una dimenticanza.
 
 ### La metà dell'app è già pronta, e non aspetta la generazione
 
@@ -211,3 +214,70 @@ più generosa di quella di prova.
 **Resta comunque da rifare la prova di `docs/MAPPE.md` quando il file vero arriva**: la simulazione
 usa la sagoma di Yongen-Jaya, e una figura con proporzioni diverse cambia i numeri. Ma se cambiano,
 cambiano di poco, e non si parte da zero.
+
+---
+
+## 5. Covo dei Ladri — illustrazione per la piastrella della Guida
+
+| | |
+|---|---|
+| **file** | `public/asset/guida/covo.png` |
+| **misura** | 256 × 256 px |
+| **sfondo** | trasparente, **alfa reale** attorno alla figura (come le altre sedici) |
+| **stato** | **`da verificare`** — prompt scritto da Claude il 7 settembre 2026, tocca a Codex leggerlo |
+| **serve a** | `src/components/guida/sezioniGuida.tsx`, chiave `guida/covo` |
+
+**Perché serve, e come l'ho scoperto.** Il Covo dei Ladri era la terza linguetta della pagina dei
+trofei e ora ha una pagina sua, quindi l'indice della Guida ha **diciassette** piastrelle. Le
+illustrazioni in `public/asset/guida/` sono **sedici**: manca esattamente questa, ed è la voce che
+il rifacimento ha creato. Senza il file la piastrella non si rompe — mostra la riserva vettoriale,
+la maschera — ma è l'unica dell'indice a non avere un disegno, e in una griglia si vede subito.
+
+**È una voce diversa dalla 4 e non la sostituisce.** La 4 è la *sagoma* per la mappa di Tokyo:
+nera piatta, ritagliata, appoggiata su fondo rosso. Questa è l'*illustrazione* della piastrella:
+a colori, con il contorno spesso, in mezzo alle altre sedici. Stesso soggetto, due mestieri
+diversi; generarne una sola lascerebbe l'altro posto vuoto.
+
+**Il riferimento è nel repository, e va guardato prima di generare.** È la regola che questo
+progetto ha imparato sbagliando: `public/asset/guida/dungeon.png` (la maschera sulla pietra
+spaccata), `public/asset/guida/completamento.png` (la coppa nell'alloro) e
+`public/asset/guida/citta.png` (il treno sotto il sole rosso). La resa deve stare in mezzo a
+quelle senza distinguersi: **contorno nero spesso e uniforme, campiture bianche, un solo accento
+rosso, nessuno sfondo, figura centrata con un piccolo margine e un sottile alone bianco esterno,
+come un adesivo ritagliato.**
+
+**Il soggetto.** Il Covo è la sala del menu di Royal dove i Ladri Fantasma tengono i trofei e
+spendono le Medaglie P. Le due cose che lo dicono a colpo d'occhio sono **la poltrona alta** dove
+siede Joker e **la medaglia**. Non la maschera: quella è già la piastrella dei Palazzi, e due
+piastrelle con lo stesso segno si confondono in una griglia — che è precisamente il difetto da
+evitare.
+
+**Prompt**
+
+> Illustrazione a icona in stile Persona 5 Royal, **contorno nero spesso e uniforme, campiture
+> bianche, un solo accento rosso**, su fondo completamente trasparente.
+>
+> Il soggetto: una **poltrona alta con lo schienale a ventaglio**, vista di tre quarti da davanti,
+> del tipo che sta in una sala da gioco — braccioli pieni, seduta imbottita, piedini corti. Sullo
+> schienale, in alto, una **medaglia rotonda** con un nastro corto, appoggiata come un fregio.
+> Dietro la poltrona, appena accennata, una **mensola con due o tre coppe e una cornice**, ridotte
+> a sagome semplici: si devono leggere come «trofei», non come oggetti distinti.
+>
+> **L'accento rosso è solo sulla medaglia e sul cuscino della seduta.** Tutto il resto è bianco
+> con il contorno nero. Nessun grigio, nessuna sfumatura, nessuna ombreggiatura morbida: le
+> ombre, se servono, sono macchie nere piatte.
+>
+> Il taglio è **grafico e spigoloso**, da adesivo: linee dritte, angoli netti, prospettiva forzata,
+> il tratto più spesso sul contorno esterno e più sottile nei dettagli interni.
+>
+> Nessuna cornice, nessun riquadro, nessun testo, nessuna scritta, nessuna maschera da ladro,
+> nessun personaggio. La figura occupa quasi tutta la tela, centrata, con un margine di poche
+> decine di pixel e un sottile alone bianco che la stacca dal fondo.
+
+### La metà dell'app è già pronta
+
+La piastrella esiste già in `sezioniGuida.tsx` con la chiave `covo` e la riserva vettoriale: quando
+il file arriva in `public/asset/guida/covo.png` il plugin lo mette nel manifest e la piastrella lo
+usa **senza che nessuno tocchi il codice**, esattamente come per le altre sedici. C'è una prova che
+lo garantisce, in `src/pages/GuidaPage.test.tsx`: monta l'indice con e senza manifest e conta le
+riserve, quindi si accorge se una piastrella smettesse di accettare la propria illustrazione.

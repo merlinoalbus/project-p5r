@@ -1676,8 +1676,8 @@ bloccati — comprese quella da indirizzo, che lui non aveva nominato ma c'era.
 1. **Il Covo dei Ladri non ha una figura sulla mappa** — voce 4 di `docs/grafica/fabbisogno.md`,
    prompt scritto, da verificare a Codex e poi da generare. Quando arriva va rifatta la prova
    delle sovrapposizioni, perché il riquadro del Covo cambia.
-2. **Gli otto colori di spillo troppo chiari** — non è grafica, è una riga di `shared/spilli.ts`,
-   ed è una scelta dell'utente.
+2. ~~**Gli otto colori di spillo troppo chiari**~~ — **chiuso**: l'utente ha scelto di lasciarli
+   come sono, ed è registrato in `docs/DECISIONI.md`.
 3. **Un confine da chiarire con Codex.** Lui ha riportato la regola dell'utente come «una voce
    bloccata non deve comparire affatto: né lista, né ricerca, né azione di mappa/pin», e per
    negozi e articoli l'ha applicata così. Io per i **quartieri** ho tenuto la scheda in elenco con
