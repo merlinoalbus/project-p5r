@@ -26,7 +26,7 @@
 // ============================================================
 
 import { Link } from 'react-router-dom';
-import { useCallback, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
 import { dataLeggibile } from '../../../shared/condizioniSpillo';
@@ -58,6 +58,9 @@ interface Props {
    *  scheda corrispondente, perché mappa e schede sono **una** selezione vista in due modi. */
   evidenziato?: string | null;
   onEvidenzia?: (chiave: string | null) => void;
+  /** Se c'e', il clic su un cartellino non cambia pagina: chiama questa con l'indirizzo, e chi
+   *  ospita la mappa decide che farne (la scheda «Oggi» ci scende di livello senza uscire). */
+  onApri?: (href: string) => void;
   className?: string;
 }
 
@@ -93,12 +96,17 @@ interface Segno {
  * calendario, o fermate che la guida non ha come scheda — restano il solo pallino bianco della
  * rete: una figura con la targa dice «vieni qui», e dirlo a proposito di un posto dove non si può
  * entrare è una promessa che la mappa non mantiene. Il nome resta comunque, sul pallino. */
-function Cartellino({ s, acceso, onEvidenzia }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void }) {
+function Cartellino({ s, acceso, onEvidenzia, onApri }: { s: Segno; acceso: boolean; onEvidenzia?: (k: string | null) => void; onApri?: (href: string) => void }) {
   const filtro = acceso ? CONTORNO_ORO : CONTORNO;
   // I cartellini si sfiorano: senza alzarlo, quello illuminato d'oro finisce sotto al vicino e
   // il bordo si vede a metà. `z-30` lo porta davanti, e la targa con lui.
+  // Resta un collegamento vero — si apre in una scheda nuova, si copia, lo legge uno screen reader
+  // come tale — ma chi ospita la mappa puo' intercettare il clic per scendere di livello **restando
+  // dov'e'**: nella scheda «Oggi» della partita cambiare pagina vorrebbe dire perdere il contesto
+  // del giorno.
   return <Link
     to={s.href}
+    onClick={onApri ? (e) => { if (!e.metaKey && !e.ctrlKey && !e.shiftKey && e.button === 0) { e.preventDefault(); onApri(s.href); } } : undefined}
     className={`group absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center no-underline hover:z-30 ${acceso ? 'z-30' : 'z-10'}`}
     style={{ left: `${s.dove.x}%`, top: `${s.dove.y}%`, width: `${s.dove.scala}%` }}
     title={s.quando ? `${s.nome} — ${s.quando}` : s.nome}
@@ -170,7 +178,7 @@ function Rete({ nomi }: { nomi: Map<string, string> }) {
 const ZOOM_MAX = 4;
 const ZOOM_PASSO = 1.4;
 
-export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, className = '' }: Props) {
+export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, onApri, className = '' }: Props) {
   // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
   // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
   const cornice = useRef<HTMLDivElement>(null);
@@ -203,7 +211,37 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
     setPan(limita({ x: pan.x * (nuovo / zoom), y: pan.y * (nuovo / zoom) }, nuovo));
   }, [limita, zoom, pan]);
 
+  /** Zoom attorno a un punto: quel punto resta fermo sotto il dito o sotto il cursore.
+   *
+   * La tela è trasformata con `translate(pan) scale(z)` e l'origine al centro, quindi un punto `p`
+   * della tela finisce in `p·z + pan`. Perché il punto sotto il cursore non si muova mentre `z`
+   * cambia in `z'`, lo spostamento deve diventare `s − (s − pan)·z'/z`, dove `s` è la posizione
+   * del cursore rispetto al centro del riquadro. Senza questo conto lo zoom parte sempre dal
+   * centro, e ingrandire un cartellino ai bordi lo spinge fuori dal riquadro. */
+  const zoomVerso = useCallback((fattore: number, sx: number, sy: number) => {
+    const nuovo = Math.min(ZOOM_MAX, Math.max(1, zoom * fattore));
+    if (nuovo === zoom) return;
+    const k = nuovo / zoom;
+    setZoom(nuovo);
+    setPan(limita({ x: sx - (sx - pan.x) * k, y: sy - (sy - pan.y) * k }, nuovo));
+  }, [limita, zoom, pan]);
+
   const adatta = useCallback(() => { setZoom(1); setPan({ x: 0, y: 0 }); }, []);
+
+  /** La rotellina, registrata a mano perché React la registra **passiva**: con un listener passivo
+   *  `preventDefault` non ha effetto e la pagina scorre mentre si cerca di ingrandire la mappa.
+   *  È lo stesso motivo, e la stessa soluzione, del visore dell'atlante. */
+  useEffect(() => {
+    const el = cornice.current;
+    if (!el) return;
+    const suRotella = (e: WheelEvent) => {
+      e.preventDefault();
+      const r = el.getBoundingClientRect();
+      zoomVerso(e.deltaY < 0 ? ZOOM_PASSO : 1 / ZOOM_PASSO, e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2);
+    };
+    el.addEventListener('wheel', suRotella, { passive: false });
+    return () => el.removeEventListener('wheel', suRotella);
+  }, [zoomVerso]);
 
   const iniziaTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
     // Solo quando c'è qualcosa da spostare, e mai partendo da un cartellino: lì il gesto è un clic.
@@ -296,6 +334,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         mai, e la collocazione verificata vale a ogni larghezza. */}
     <div ref={cornice}
       className={`mappa-tokyo ${zoom > 1 ? 'mappa-tokyo--spostabile' : ''}`}
+      onDoubleClick={adatta}
       onPointerDown={iniziaTrascinamento} onPointerMove={muoviTrascinamento}
       onPointerUp={fineTrascinamento} onPointerCancel={fineTrascinamento}
     >
@@ -312,7 +351,7 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
           <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
         </svg>
         <Rete nomi={nomiFermate} />
-        {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} />)}
+        {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} onApri={onApri} />)}
         {/* Il Covo è l'unico elemento della mappa senza figura, ed è la voce 4 di
             `docs/grafica/fabbisogno.md`: il prompt è scritto e la sagoma la genera Codex.
             Qui c'è **la metà che tocca a me**, scritta prima che il file esista: quando
@@ -324,14 +363,18 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
             src: assetCovoLadri(), dove: COVO_TOKYO, palazzo: false,
             href: '/guida/covo', presente: true,
             quando: 'la soffitta del Leblanc' }}
-          acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} />
+          acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} onApri={onApri} />
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
       <div className="visore-mappa__controlli">
         <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(ZOOM_PASSO)} disabled={zoom >= ZOOM_MAX} aria-label="Ingrandisci">+</button>
         <span className="visore-mappa__zoom" aria-live="polite">{Math.round(zoom * 100)}%</span>
         <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(1 / ZOOM_PASSO)} disabled={zoom <= 1} aria-label="Riduci">−</button>
-        <button type="button" className="visore-mappa__controllo" onClick={adatta} disabled={zoom === 1 && pan.x === 0 && pan.y === 0} aria-label="Adatta alla finestra">⤢</button>
+        {/* Sempre premibile, ma dice anche quando non c'e' niente da fare: a ingrandimento 1 e senza
+            spostamento la mappa e' gia' tutta nel riquadro, e premendo non succede nulla — il che,
+            senza una spiegazione, si legge come un pulsante rotto. */}
+        <button type="button" className="visore-mappa__controllo" onClick={adatta} aria-label="Adatta alla finestra"
+          title={zoom === 1 && pan.x === 0 && pan.y === 0 ? 'La mappa è già tutta nel riquadro' : 'Adatta alla finestra'}>⤢</button>
       </div>
     </div>
     {dataGioco && assenti.length > 0 && <p className="m-0 text-[12px] text-text-muted">
