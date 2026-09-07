@@ -2469,3 +2469,18 @@ state raccolte queste evidenze sull'albero integrato col Lotto A di Opus (`a7db7
 
 Queste sono verifiche dell'implementatore e non costituiscono approvazione del candidato. Dopo il
 tag immutabile la verifica indipendente spetta a Opus e al `galaxy-task-validator`.
+
+### Gate indipendente del candidato v3
+
+**Verdetto `galaxy-task-validator`: PASS.** Il tag annotato remoto `3245f3fe` e' stato
+dereferenziato al commit atteso `1f304867605dd29aeeebd0c5473d0bab6ef3f430` in un checkout
+pulito. Typecheck, lint, build e suite seriale hanno chiuso con **591/591 test PASS**.
+
+Il validatore ha inoltre riprodotto su database in memoria al 04-11: 60 negozi, somma canonica
+575, ricerca con `totale=575` e 300 righe; deep link 200 al negozio bloccato; articolo bloccato
+presente ma acquisto respinto con 409 `articolo-non-disponibile`; 404 riservato agli inesistenti;
+deselezione 200 di un acquisto gia' registrato anche quando l'articolo e' oggi bloccato. Nel DOM
+ha confermato chip «Non ancora», posizione informativa, checkbox disabilitata e testo «Non ancora
+acquistabile». Nessuna regressione del Lotto A integrato e nessun file modificato dal validatore.
+
+Resta necessaria la verifica paritaria di Opus prima di considerare chiuso il pezzo Lotto B.
