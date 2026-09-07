@@ -34,7 +34,7 @@ import { urlMappa } from '../../utils/navigazioneMappa';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
-import { assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
+import { assetCovoLadri, assetPalazzo, assetTokyoQuartiere, nascondiSagomaAssente } from './assetTokyo';
 
 /** Il contorno che segue la sagoma, non un riquadro: quattro ombre portate sull'alfa.
  *
@@ -307,13 +307,18 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
         </svg>
         <Rete nomi={nomiFermate} />
         {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} />)}
-        <Link to="/guida/completamento"
-          className={`absolute z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[2px] border-[max(1px,0.19cqw)] bg-black px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] no-underline shadow-[0_2px_8px_rgba(0,0,0,0.7)] hover:border-[#ffd23f] hover:text-[#ffd23f] ${
-            evidenziato === 'covo' ? 'border-[#ffd23f] text-[#ffd23f]' : 'border-white text-white'}`}
-          style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
-          onMouseEnter={() => onEvidenzia?.('covo')} onMouseLeave={() => onEvidenzia?.(null)}
-          onFocus={() => onEvidenzia?.('covo')} onBlur={() => onEvidenzia?.(null)}
-          title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
+        {/* Il Covo è l'unico elemento della mappa senza figura, ed è la voce 4 di
+            `docs/grafica/fabbisogno.md`: il prompt è scritto e la sagoma la genera Codex.
+            Qui c'è **la metà che tocca a me**, scritta prima che il file esista: quando
+            `covo-dei-ladri.png` arriva, il Covo diventa un cartellino come tutti gli altri senza
+            che nessuno debba toccare il codice; finché non c'è, resta la targa sola, che è quel
+            che c'era prima. Nessuna delle due parti deve aspettare l'altra per finire. */}
+        <Cartellino
+          s={{ chiave: 'covo', nome: 'Covo dei Ladri', targa: 'Covo dei Ladri',
+            src: assetCovoLadri(), dove: COVO_TOKYO, palazzo: false,
+            href: '/guida/completamento', presente: true,
+            quando: 'la soffitta del Leblanc' }}
+          acceso={evidenziato === 'covo'} onEvidenzia={onEvidenzia} />
       </div>
       {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
       <div className="visore-mappa__controlli">

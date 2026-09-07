@@ -184,3 +184,30 @@ figura anch'essa chiara — `forziere-raro` (#fde047), `terme` (#67e8f9), `casa`
 Si leggono, ma sono il caso peggiore. **Si risolve in `shared/spilli.ts`, scurendo quegli otto
 senza toccare la grafica**: le figure vanno bene, è il fondo che non fa da fondo. Non l'ho fatto
 d'ufficio perché sono colori autorati e la scelta è dell'utente.
+
+### La metà dell'app è già pronta, e non aspetta la generazione
+
+Scritta il 7 settembre 2026, **prima** che il file esista: `MappaTokyo` disegna già il Covo come un
+cartellino come tutti gli altri, con `assetCovoLadri()` che punta a
+`public/asset/mappe/lmap/tokyo/covo-dei-ladri.png`. Finché quel file non c'è, l'immagine si toglie
+da sola — `display: none`, non `visibility: hidden`, perché uno spazio riservato a un'immagine che
+non c'è si vede come un buco — e resta la sola targa, che è esattamente quel che c'era prima.
+
+**Quando Codex genera il file, il Covo diventa una figura senza che nessuno tocchi il codice.**
+Nessuna delle due parti aspetta l'altra per finire, che è il punto.
+
+La geometria è già verificata **nei due stati**, simulando l'arrivo della sagoma con una figura
+vera della stessa famiglia:
+
+| stato | 1280 px | 375 px |
+|---|---|---|
+| senza sagoma (oggi) | 0 sovrapposizioni, 0 fuori tela | 0 e 0 |
+| con la sagoma (domani) | 0 sovrapposizioni, 0 fuori tela | 0 e 0 |
+
+Il Covo è stato alzato da `y: 92` a `y: 89.5`: con la sola targa il margine dal fondo era di
+17 px, che una figura più alta avrebbe mangiato. Ora sono 35, e c'è spazio per una sagoma un po'
+più generosa di quella di prova.
+
+**Resta comunque da rifare la prova di `docs/MAPPE.md` quando il file vero arriva**: la simulazione
+usa la sagoma di Yongen-Jaya, e una figura con proporzioni diverse cambia i numeri. Ma se cambiano,
+cambiano di poco, e non si parte da zero.
