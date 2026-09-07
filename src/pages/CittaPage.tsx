@@ -24,7 +24,7 @@ import { usePartitaStore } from '../stores/partitaStore';
 import { useSuggerimenti } from '../stores/suggerimentiStore';
 import { classiSuggerito } from '../utils/suggerimenti';
 import { TargaSuggerito } from '../components/shared/Suggerito';
-import { soloPalazzi } from '../utils/palazzi';
+import { radiciMetaverso } from '../utils/palazzi';
 
 export function CittaPage() {
   const sugg = useSuggerimenti();
@@ -38,10 +38,12 @@ export function CittaPage() {
   // Su una mappa fatta di figure accostate, ritrovare «quale delle due è Ogikubo» è il lavoro che
   // il lettore stava facendo a mano.
   const [acceso, setAcceso] = useState<string | null>(null);
-  // I Palazzi servono alla mappa disegnata: portano la finestra in cui esistono, ed è quella a
-  // decidere se compaiono. Senza partita non decide nulla e si vedono tutti. `soloPalazzi` tiene
-  // fuori i Memento: non sono un luogo di Tokyo e non hanno un ingresso sulla mappa di viaggio.
-  const dungeon = useCarica(async () => soloPalazzi(await getDungeons()), []);
+  // Le radici del Metaverso servono alla mappa disegnata: portano la finestra in cui esistono, ed
+  // è quella a decidere se compaiono. Senza partita non decide nulla e si vedono tutte. Qui va
+  // `radiciMetaverso` e non `soloPalazzi`, che è il filtro dell'*elenco* dei Palazzi: sulla mappa
+  // ci stanno anche i Memento, che l'utente ha chiesto per nome e che dal 9 maggio sono un posto
+  // dove si può andare quanto gli altri.
+  const dungeon = useCarica(async () => radiciMetaverso(await getDungeons()), []);
   const q = dati.dati;
   return (
     <PageState isLoading={dati.caricamento && !q} error={dati.errore} onRetry={() => void dati.ricarica()}>
