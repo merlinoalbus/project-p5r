@@ -26,10 +26,11 @@
 // ============================================================
 
 import { Link } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import type { DungeonRiassuntoDto, QuartiereRiassuntoDto } from '../../types';
 import { dentroFinestra, quartiereAperto } from './aperturaTokyo';
 import { dataLeggibile } from '../../../shared/condizioniSpillo';
+import { urlMappa } from '../../utils/navigazioneMappa';
 import {
   COVO_TOKYO, LINEE_TOKYO, QUARTIERI_TOKYO, RADICI_TOKYO, SENZA_SCHEDA_TOKYO, type Collocazione,
 } from './collocazioneTokyo';
@@ -117,7 +118,7 @@ function Cartellino({ s, acceso, onEvidenzia }: { s: Segno; acceso: boolean; onE
         tornavano dodici sovrapposizioni che a 1020 px non c'erano: una collocazione buona a una
         larghezza e sbagliata all'altra. Legandola alla tela, le proporzioni non cambiano più e una
         sola tabella di posizioni vale a ogni larghezza. */}
-    <span className={`-mt-[6%] w-max max-w-[7em] text-center rounded-[2px] border-2 px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] shadow-[0_2px_6px_rgba(0,0,0,0.7)] group-hover:border-[#ffd23f] group-hover:text-[#ffd23f] ${
+    <span className={`-mt-[6%] w-max max-w-[7em] text-center rounded-[2px] border-[max(1px,0.19cqw)] px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] shadow-[0_2px_6px_rgba(0,0,0,0.7)] group-hover:border-[#ffd23f] group-hover:text-[#ffd23f] ${
       s.palazzo ? 'bg-[#8b0000]' : 'bg-black'} ${
       acceso ? 'border-[#ffd23f] text-[#ffd23f]' : 'border-white text-white'}`}>{s.targa}</span>
   </Link>;
@@ -166,7 +167,57 @@ function Rete({ nomi }: { nomi: Map<string, string> }) {
   </svg>;
 }
 
+const ZOOM_MAX = 4;
+const ZOOM_PASSO = 1.4;
+
 export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, onEvidenzia, className = '' }: Props) {
+  // Zoom e trascinamento. Il minimo è 1 — la mappa intera nel riquadro — perché la tela è già
+  // disegnata alla misura giusta: rimpicciolirla non aggiunge niente da vedere, ingrandirla sì.
+  const cornice = useRef<HTMLDivElement>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const trascinamento = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+
+  /** Lo spostamento non può portare la tela fuori dal riquadro: a zoom 1 non c'è margine, a zoom
+   *  maggiori il margine è quanto la tela sborda da ciascun lato. Senza questo, un trascinamento
+   *  lascia il riquadro vuoto e non c'è modo di capire dove si è finiti. */
+  const limita = useCallback((p: { x: number; y: number }, z: number) => {
+    const r = cornice.current?.getBoundingClientRect();
+    if (!r) return p;
+    const mx = Math.max(0, (r.width * z - r.width) / 2);
+    const my = Math.max(0, (r.height * z - r.height) / 2);
+    return { x: Math.max(-mx, Math.min(mx, p.x)), y: Math.max(-my, Math.min(my, p.y)) };
+  }, []);
+
+  const cambiaZoom = useCallback((fattore: number) => {
+    setZoom((z) => {
+      const nuovo = Math.min(ZOOM_MAX, Math.max(1, z * fattore));
+      setPan((p) => limita({ x: p.x * (nuovo / z), y: p.y * (nuovo / z) }, nuovo));
+      return nuovo;
+    });
+  }, [limita]);
+
+  const adatta = useCallback(() => { setZoom(1); setPan({ x: 0, y: 0 }); }, []);
+
+  const iniziaTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    // Solo quando c'è qualcosa da spostare, e mai partendo da un cartellino: lì il gesto è un clic.
+    if (zoom <= 1 || (e.target as HTMLElement).closest('a')) return;
+    trascinamento.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }, [zoom, pan]);
+
+  const muoviTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    const t = trascinamento.current;
+    if (!t) return;
+    setPan(limita({ x: t.px + (e.clientX - t.x), y: t.py + (e.clientY - t.y) }, zoom));
+  }, [limita, zoom]);
+
+  const fineTrascinamento = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
+    if (!trascinamento.current) return;
+    trascinamento.current = null;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+  }, []);
+
   const { presenti, assenti, nomiFermate } = useMemo(() => {
     const segni: Segno[] = [];
     for (const q of quartieri) {
@@ -175,10 +226,17 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
       segni.push({
         chiave: q.chiave, nome: q.nome, targa: q.nome, src: assetTokyoQuartiere(q.chiave), dove, palazzo: false,
         // Si entra **nella mappa** del quartiere, non nella sua scheda: da una mappa si passa a
-        // una mappa. Il risolutore resta il ripiego per i pochi che non hanno un nodo proprio.
-        href: q.mappaChiave
-          ? `/guida/mappe/${encodeURIComponent(q.mappaChiave)}`
-          : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
+        // una mappa. Quale mappa, e centrata dove, **lo decide chi cura la guida**: è l'ingresso
+        // configurato dalla scheda del quartiere («Configura ingresso da Città»), che porta la
+        // planimetria e il punto da centrare. Esisteva già ed era salvato, ma questa mappa lo
+        // ignorava e apriva sempre il nodo d'atlante del quartiere: si poteva scegliere il punto
+        // d'ingresso e non vederlo mai usato. Senza configurazione resta il nodo del quartiere, e
+        // il risolutore è il ripiego per i pochi che non ne hanno uno.
+        href: q.ingresso
+          ? urlMappa(q.ingresso.mappa, { x: q.ingresso.x, y: q.ingresso.y, zoom: q.ingresso.zoom })
+          : q.mappaChiave
+            ? urlMappa(q.mappaChiave)
+            : `/guida/mondo/quartiere/${encodeURIComponent(q.chiave)}`,
         presente: quartiereAperto(q, dataGioco),
         // Che cosa manca, detto come lo dice il valutatore: «Yusuke: rango 1 di 3». Quando la
         // condizione è una data si dice la data, che è più corta e più chiara.
@@ -215,35 +273,49 @@ export function MappaTokyo({ quartieri, dungeon = [], dataGioco, evidenziato, on
   }, [quartieri, dungeon, dataGioco]);
 
   return <div className={`flex flex-col gap-2 ${className}`}>
-    {/* Sotto una certa larghezza la mappa non si stringe: si scorre.
-        Rimpicciolirla ancora avrebbe fatto due danni insieme — targhe illeggibili e figure grandi
-        come un'unghia — per stare dentro uno schermo che comunque non le contiene. Un atlante di
-        carta lo si sposta sotto gli occhi, e su un telefono è quel che si fa: 680 px di minimo, e
-        il dito scorre. Le proporzioni restano le stesse del desktop, quindi la collocazione
-        verificata vale anche qui. */}
-    <div className="w-full overflow-x-auto">
-    <div
-      className="relative w-full min-w-[680px] overflow-hidden rounded-lg [container-type:inline-size]"
-      style={{ aspectRatio: '10 / 7', background: '#e2001a' }}
-      role="img"
-      aria-label={`Mappa di Tokyo con ${presenti.length} luoghi raggiungibili`}
+    {/* Il riquadro: bordo, fondo e proporzione fissa, come ogni altra mappa dell'app. Dentro, una
+        tela che si ingrandisce e si trascina — questa mappa era l'unica a non farlo, e su una tela
+        piena di sagome accostate lo zoom non è un lusso: è il modo di leggere le targhe piccole e
+        di separare due cartellini che si sfiorano.
+        Su uno schermo stretto la mappa si vede **tutta**, piccola, e si ingrandisce: prima si
+        allargava a forza a 680 px e si scorreva, ma quella larghezza minima su un telefono
+        schiacciava la tela — 680×231 invece di 680×476 — e le posizioni, che sono percentuali di
+        una tela 10:7, finivano tutte nel posto sbagliato. Così invece le proporzioni non cambiano
+        mai, e la collocazione verificata vale a ogni larghezza. */}
+    <div ref={cornice}
+      className={`mappa-tokyo ${zoom > 1 ? 'mappa-tokyo--spostabile' : ''}`}
+      onPointerDown={iniziaTrascinamento} onPointerMove={muoviTrascinamento}
+      onPointerUp={fineTrascinamento} onPointerCancel={fineTrascinamento}
     >
-      {/* Le macchie più scure sono la terraferma, come nella schermata del gioco: danno un fondo
-          alla rete invece di lasciarla galleggiare su un rosso piatto. */}
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden className="absolute inset-0 h-full w-full">
-        <path fill="#c00016" d="M14 22 L36 8 L58 12 L76 20 L88 34 L84 52 L92 62 L74 80 L52 78 L34 88 L16 66 L8 44 Z" />
-        <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
-      </svg>
-      <Rete nomi={nomiFermate} />
-      {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} />)}
-      <Link to="/guida/completamento"
-        className={`absolute z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[2px] border-2 bg-black px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] no-underline shadow-[0_2px_8px_rgba(0,0,0,0.7)] hover:border-[#ffd23f] hover:text-[#ffd23f] ${
-          evidenziato === 'covo' ? 'border-[#ffd23f] text-[#ffd23f]' : 'border-white text-white'}`}
-        style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
-        onMouseEnter={() => onEvidenzia?.('covo')} onMouseLeave={() => onEvidenzia?.(null)}
-        onFocus={() => onEvidenzia?.('covo')} onBlur={() => onEvidenzia?.(null)}
-        title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
-    </div>
+      <div
+        className="mappa-tokyo__tela"
+        style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+        role="img"
+        aria-label={`Mappa di Tokyo con ${presenti.length} luoghi raggiungibili`}
+      >
+        {/* Le macchie più scure sono la terraferma, come nella schermata del gioco: danno un fondo
+            alla rete invece di lasciarla galleggiare su un rosso piatto. */}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden className="absolute inset-0 h-full w-full">
+          <path fill="#c00016" d="M14 22 L36 8 L58 12 L76 20 L88 34 L84 52 L92 62 L74 80 L52 78 L34 88 L16 66 L8 44 Z" />
+          <path fill="#cc0a1c" d="M26 34 L46 26 L62 36 L58 56 L40 66 L26 56 Z" />
+        </svg>
+        <Rete nomi={nomiFermate} />
+        {presenti.map((s) => <Cartellino key={s.chiave} s={s} acceso={evidenziato === s.chiave} onEvidenzia={onEvidenzia} />)}
+        <Link to="/guida/completamento"
+          className={`absolute z-20 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[2px] border-[max(1px,0.19cqw)] bg-black px-[0.5em] py-[0.12em] font-display text-[1.65cqw] uppercase leading-[1.05] tracking-[0.05em] no-underline shadow-[0_2px_8px_rgba(0,0,0,0.7)] hover:border-[#ffd23f] hover:text-[#ffd23f] ${
+            evidenziato === 'covo' ? 'border-[#ffd23f] text-[#ffd23f]' : 'border-white text-white'}`}
+          style={{ left: `${COVO_TOKYO.x}%`, top: `${COVO_TOKYO.y}%` }}
+          onMouseEnter={() => onEvidenzia?.('covo')} onMouseLeave={() => onEvidenzia?.(null)}
+          onFocus={() => onEvidenzia?.('covo')} onBlur={() => onEvidenzia?.(null)}
+          title="Covo dei Ladri — la soffitta del Leblanc">Covo dei Ladri</Link>
+      </div>
+      {/* Gli stessi comandi del visore, nello stesso angolo: chi ha imparato lì li ritrova qui. */}
+      <div className="visore-mappa__controlli">
+        <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(ZOOM_PASSO)} disabled={zoom >= ZOOM_MAX} aria-label="Ingrandisci">+</button>
+        <span className="visore-mappa__zoom" aria-live="polite">{Math.round(zoom * 100)}%</span>
+        <button type="button" className="visore-mappa__controllo" onClick={() => cambiaZoom(1 / ZOOM_PASSO)} disabled={zoom <= 1} aria-label="Riduci">−</button>
+        <button type="button" className="visore-mappa__controllo" onClick={adatta} disabled={zoom === 1 && pan.x === 0 && pan.y === 0} aria-label="Adatta alla finestra">⤢</button>
+      </div>
     </div>
     {dataGioco && assenti.length > 0 && <p className="m-0 text-[12px] text-text-muted">
       {/* Non spariscono e basta: si dice **quali**, altrimenti la mappa sembra incompleta invece
