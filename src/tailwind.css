@@ -635,27 +635,35 @@
   .card--cliccabile { cursor: pointer; }
   .card--cliccabile:hover { border-color: var(--color-primary); }
 
-  /* ---- Fregio: la figura decorativa di una sezione di solo testo ----
+  /* ---- Fregio: l'illustrazione di una sezione, non il suo sfondo ----
    *
-   * Sta **dietro** al contenuto e non lo tocca: `pointer-events:none`, opacità bassa e una
-   * sfumatura che la fa sparire verso il testo, così nessuna riga diventa meno leggibile. La
-   * carta che lo ospita va marcata `.card--con-fregio` (posizione e ritaglio); il fregio si
-   * spegne sotto i 640 px, dove lo spazio serve tutto al contenuto. */
-  .card--con-fregio { position: relative; overflow: hidden; }
-  .card--con-fregio > *:not(.fregio-sezione) { position: relative; z-index: 1; }
-  .fregio-sezione { position: absolute; pointer-events: none; z-index: 0; display: none; }
-  @media (min-width: 640px) { .fregio-sezione { display: block; } }
-  .fregio-sezione--angolo { top: -8%; right: -2%; width: min(38%, 260px); aspect-ratio: 1; }
-  .fregio-sezione--banda { bottom: -10%; right: -4%; width: min(52%, 420px); aspect-ratio: 16 / 9; }
-  .fregio-sezione__immagine {
-    width: 100%; height: 100%; object-fit: contain; opacity: 0.16;
-    mask-image: linear-gradient(to left, #000 30%, transparent 100%);
+   * Prima stava **dietro** al testo, al 16% di opacità e sfumata: nascosta al punto che l'utente
+   * l'ha creduta non consegnata — «non vedo inserite le seguenti…» — mentre le undici immagini
+   * erano lì da ore. La correzione è la sua: «i decori li voglio non come sfondo dietro ma come
+   * immagini che spostano il contenuto di testo con opacità al 100%».
+   *
+   * Quindi il fregio **occupa il suo spazio**: la carta diventa una griglia a due colonne, il
+   * testo sta nella prima e l'illustrazione nella seconda, piena, alta quanto le serve. Sotto i
+   * 900 px le colonne diventano una: la figura sta in cima — è il primo figlio — e il testo sotto,
+   * che è come si legge su un telefono. Niente più `position: absolute`, niente opacità, niente
+   * maschera: era tutto lì per non disturbare il testo, e il testo adesso non c'è sotto. */
+  .card--con-fregio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .card--con-fregio > .fregio-sezione { justify-self: center; width: min(100%, 320px); }
+  @media (min-width: 900px) {
+    .card--con-fregio { grid-template-columns: minmax(0, 1fr) minmax(180px, 280px); column-gap: 20px; }
+    .card--con-fregio > *:not(.fregio-sezione) { grid-column: 1; }
+    /* La figura sta a destra e copre tutte le righe: cresce la carta, non la scavalca. */
+    .card--con-fregio > .fregio-sezione { grid-column: 2; grid-row: 1 / -1; align-self: start; width: 100%; }
   }
-  /* Finché l'immagine non c'è: una macchia del colore del tema, che alleggerisce comunque
-   * l'angolo senza fingere di essere un disegno. */
+  .fregio-sezione { display: block; }
+  .fregio-sezione--angolo { aspect-ratio: 1; }
+  .fregio-sezione--banda { aspect-ratio: 16 / 9; }
+  .fregio-sezione__immagine { width: 100%; height: 100%; object-fit: contain; }
+  /* Finché l'immagine non c'è: una macchia del colore del tema, che tiene lo spazio senza
+   * fingere di essere un disegno. */
   .fregio-sezione__riserva {
     display: block; width: 100%; height: 100%;
-    background: radial-gradient(circle at 70% 30%, color-mix(in oklab, var(--color-primary) 26%, transparent), transparent 62%);
+    background: radial-gradient(circle at 60% 40%, color-mix(in oklab, var(--color-primary) 26%, transparent), transparent 62%);
   }
 
   /* ---- Chip: etichetta a taglio diagonale (stessa tecnica dei pulsanti) ---- */

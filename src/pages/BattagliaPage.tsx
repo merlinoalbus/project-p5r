@@ -134,7 +134,7 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
   const n = d.negoziazione;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card card--con-fregio flex flex-col gap-2">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-negoziazione" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Quando e come</h2>
         <p className="m-0">{n.quandoSiPuoNegoziare}</p>
@@ -165,7 +165,7 @@ function SchedaNegoziazione({ d }: { d: BattagliaDto }) {
           </section>
         ))}
       </div>
-      <section className="card card--con-fregio flex flex-col gap-1">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-regole" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Regole</h2>
         <ul className="m-0 pl-4">{n.regole.map((r) => <li key={r}>{r}</li>)}</ul>
@@ -187,7 +187,7 @@ function SchedaTecnico({ d }: { d: BattagliaDto }) {
           <tbody>{d.tecnico.stati.map((s) => <tr key={s.stato}><td data-etichetta="Stato"><strong>{s.stato}</strong></td><td data-etichetta="Tecnico con">{s.elementi.join(', ')}</td><td data-etichetta="Effetto" className="text-text-secondary">{effetti.get(s.stato) ?? '—'}</td></tr>)}</tbody>
         </table>
       </div>
-      <section className="card card--con-fregio flex flex-col gap-2">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-tecnico" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Esiti del colpo</h2>
         <Dati>
@@ -205,7 +205,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
   const s = d.staffetta; const sp = d.speciali; const a = d.assaltoEHoldUp;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card card--con-fregio flex flex-col gap-2">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-staffetta" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Staffetta</h2>
         <p className="m-0">{s.cosaE}</p>
@@ -222,7 +222,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         </div>
         <Fonte url={s.urlFonte} />
       </section>
-      <section className="card card--con-fregio flex flex-col gap-2">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-speciali" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Speciali</h2>
         <p className="m-0">{sp.meccanica}</p>
@@ -238,7 +238,7 @@ function SchedaStaffetta({ d }: { d: BattagliaDto }) {
         </div>
         <Fonte url={sp.urlFonte} />
       </section>
-      <section className="card card--con-fregio flex flex-col gap-2">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-assalto" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Rapina, Assalto e Parla</h2>
         <Dati>
@@ -258,7 +258,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
   const o = d.ombreSciagura; const m = d.mietitore; const t = d.demoniTesoro;
   return (
     <div className="flex flex-col gap-3 text-[13px]">
-      <section className="card card--con-fregio flex flex-col gap-1">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-ombre-sciagura" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">Ombre sciagura <span className="text-text-muted text-[12px] normal-case">({o.nomeOriginale})</span></h2>
         <p className="m-0">{o.cosaSono}</p>
@@ -278,7 +278,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         <p className="m-0 text-text-muted text-[12px]">{o.incertezze}</p>
         <Fonte url={o.urlFonte} />
       </section>
-      <section className="card card--con-fregio flex flex-col gap-1">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-mietitore" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">{m.categoria}</h2>
         <Dati>
@@ -294,7 +294,7 @@ function SchedaNemici({ d }: { d: BattagliaDto }) {
         <ol className="m-0 pl-4">{m.strategia.map((s) => <li key={s}>{s}</li>)}</ol>
         <Fonte url={m.urlFonte} />
       </section>
-      <section className="card card--con-fregio flex flex-col gap-1">
+      <section className="card card--con-fregio">
         <FregioSezione chiave="battaglia-demoni-tesoro" />
         <h2 className="m-0 font-display text-[15px] uppercase leading-none">{t.categoria}</h2>
         <p className="m-0">{t.cosaSono}</p>

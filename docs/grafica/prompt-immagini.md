@@ -444,3 +444,39 @@ categorie), §23 (11 fregi). **Da generare: 24 immagini** — le 11 della §24 e
 per chi gioca: prima `categoria-confidente`, `categoria-dote`, `categoria-attivita`, `categoria-trama`, `categoria-acquisto`,
 `categoria-esame`, `categoria-palazzo` (la Guida del giorno le mostra a 40 px a ogni partita), poi le tredici delle tessere,
 infine `categoria-altro`, `categoria-velluto`, `categoria-richiesta`, `categoria-oggetti-chiave`.
+
+## 26. Illustrazioni delle attività e dei lavori (23) — `attivita/<chiave>.png` (256×256, trasparente) — richieste il 2026-09-07
+Una figura per ogni attività e per ogni lavoro, richiesta dell'utente: «mancano le immagini, 1 per ogni attività e 1 per ogni
+lavoro… devono essere legati al loro contesto». L'app le mostra **a 56 px nella riga dell'elenco** e più grandi nella scheda
+aperta. Regole comuni: 256×256 trasparente, bianco/grigio/nero/rosso, niente oro, nessun testo, un soggetto solo.
+
+**Il contesto è il requisito, non un di più.** Non l'oggetto astratto — non «una canna da pesca», ma *il laghetto di Ichigaya
+con la canna piegata*; non «dei manubri», ma *la mansarda di Leblanc con le assi a vista*. Ogni riga qui sotto porta il posto,
+il momento della giornata e la cosa che si fa: sono i tre appigli da cui deve nascere l'illustrazione, ed è quello che rende
+riconoscibile un'attività a chi sta giocando. Dove serve, la colonna «Contesto» dice anche chi c'entra (il Confidente che la
+sblocca), perché l'ambiente sia il suo e non uno generico.
+| File | Attività | Contesto (luogo · momento · legame) | Soggetto |
+|---|---|---|---|
+| `allenamento-camera-leblanc.png` | Allenamento in camera | mansarda di Leblanc · sera · dal 18 aprile, con la sedia fra scrivania e letto | manubri sul pavimento di assi, sotto la trave spiovente della soffitta |
+| `allenamento-palestra-protein-lovers.png` | Allenamento in palestra | Protein Lovers Gym, Shibuya · giorno e sera · rango 5 di Ryuji o 8 di Ann | bilanciere carico sul rack, con lo specchio della sala dietro |
+| `esperimenti-clinici-takemi.png` | Esperimenti clinici | ambulatorio Takemi, Yongen-Jaya · sera · Confidente dell'Eremita | lettino della clinica con la flebo e la cartella appesa |
+| `jazz-club-kichijoji.png` | Jazz Club | jazz club di Kichijoji · sera · rango 4 con Akechi, dal 26 giugno | sassofono nel cono di luce del palco, tavolini in ombra |
+| `tempio-vecchio-kichijoji.png` | Tempio Vecchio | Kichijoji · giorno · dal 6 giugno | campana del tempio con la corda, incenso che sale, alberi dietro |
+| `curry-leblanc.png` | Cucinare il curry | Leblanc · giorno e sera · rango 4 di Sojiro | pentola sul fornello del bancone, mestolo e vapore |
+| `caffe-leblanc.png` | Preparare il caffè | Leblanc · giorno e sera | sifone da caffè acceso sul bancone di legno, tazza pronta |
+| `lavoro-crossroads.png` | Bar Crossroads | quartiere a luci rosse, Shinjuku · sera · Confidente di Ohya | bottiglie in fila dietro il bancone stretto, un bicchiere davanti |
+| `lavoro-ore-no-beko.png` | Cameriere al Ore no Beko | Central Street, Shibuya · sera | ciotola di manzo fumante sul vassoio, bacchette di traverso |
+| `lavoro-triple-seven.png` | Commesso al Triple Seven | Central Street, Shibuya · giorno | scaffali del minimarket con la cassa e il cestello |
+| `lavoro-rafflesia.png` | Fioraio Rafflesia | centro commerciale sotterraneo, Shibuya · giorno · Fascino rango 2 | secchi di fiori davanti al banco del negozio |
+| `lettura-metropolitana.png` | Lettura in metropolitana | tragitto casa-scuola · giorno | libro aperto e maniglia del vagone che dondola sopra |
+| `bagno-pubblico-yongen-jaya.png` | Bagno pubblico (sento) | vicoli di Yongen-Jaya · sera | vasca fumante con secchiello e sgabello, piastrelle dietro |
+| `biliardo.png` | Biliardo | Penguin Sniper, Kichijoji · sera | stecca sul panno del tavolo, due bilie, lampada bassa sopra |
+| `freccette.png` | Freccette | Penguin Sniper, Kichijoji · sera · 5 giugno con Ryuji | tabellone con tre freccette piantate, luce del locale attorno |
+| `centro-battute-yongen-jaya.png` | Gabbie di Battuta | backstreets di Yongen-Jaya · giorno e sera | mazza appoggiata alla rete della gabbia, palla in volo |
+| `pesca-ichigaya.png` | Pesca al laghetto | laghetto di Ichigaya · giorno e sera · dal 6 luglio con Ryuji | canna piegata sul pontile, galleggiante nell'acqua ferma |
+| `sala-giochi-gun-about-akihabara.png` | Sala giochi: Gun About | sala giochi di Akihabara · giorno · Confidente della Torre | cabinato con la pistola nel supporto, schermo acceso |
+| `sfida-big-bang-burger.png` | Sfida Big Bang Burger | Central Street, Shibuya · giorno e sera · tre sfide progressive | hamburger altissimo sul vassoio, cronometro accanto |
+| `sfida-pesca-guardiano-ichigaya.png` | Sfida: Guardiano di Ichigaya | laghetto di Ichigaya · giorno e sera · Perizia rango 4 | pesce grosso che spacca l'acqua, lenza tesa |
+| `studio-biblioteca-scuola.png` | Angolo studio della biblioteca | biblioteca della Shujin · giorno · fino al 20 maggio | pila di libri sul tavolo lungo, lampada e scaffali dietro |
+| `studio-diner-shibuya.png` | Studio al Diner | Diner di Central Street, Shibuya · giorno e sera | quaderno e tazza sul tavolo del séparé, finestra dietro |
+| `studio-leblanc.png` | Studio serale | Leblanc · sera | quaderno aperto sul bancone, lampada bassa, sgabelli vuoti |
