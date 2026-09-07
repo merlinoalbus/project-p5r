@@ -330,3 +330,68 @@ non c'erano. Sotto i 680 px la tela non si stringe più: si scorre.
 
 Il perché di ogni scelta (nomi corti sulle targhe, targhe che vanno a capo, fermate chiuse ridotte
 al pallino) sta nei commenti di `src/components/mappe/MappaTokyo.tsx`.
+
+---
+
+## La prova che una mappa si apre adattata e centrata
+
+Richiesta dell'utente: «le mappe di default in apertura devono vedersi sempre adattate alla
+finestra e centrate». Il visore lo faceva già — `inquadraturaMappa` calcola lo zoom che fa stare
+tutto e la traslazione che mette il centro del contenuto al centro della tela — ma **la pagina di
+un quartiere lo scavalcava**, passando `puntoIniziale` con l'ingresso configurato: si apriva
+ingrandita su un punto invece che sul quartiere intero.
+
+L'ingresso serve a chi **arriva** cliccando il quartiere sulla mappa di Tokyo, non a chi è già
+dentro la pagina del quartiere. Quale planimetria mostrare resta deciso da lui; da dove guardarla,
+no.
+
+Da incollare nella console per rimisurarlo. Legge dove finisce davvero il disegno (l'alfa
+dell'immagine), non dove sta il riquadro che lo contiene:
+
+```js
+window.__inquadratura = async (percorso) => {
+  history.pushState({}, '', '/guida'); dispatchEvent(new PopStateEvent('popstate'));
+  await new Promise((r) => setTimeout(r, 600));
+  history.pushState({}, '', percorso); dispatchEvent(new PopStateEvent('popstate'));
+  await new Promise((r) => setTimeout(r, 4200));
+  const tela = document.querySelector('.visore-mappa__tela');
+  const liv = document.querySelector('.visore-mappa__livello');
+  if (!tela || !liv) return { percorso, errore: 'nessun visore' };
+  const img = liv.querySelector('img');
+  const rt = tela.getBoundingClientRect();
+  const m = /translate\(([-\d.]+)px, ([-\d.]+)px\) scale\(([\d.]+)\)/.exec(liv.style.transform) || [];
+  const [px, py, z] = [+m[1], +m[2], +m[3]];
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const cx = c.getContext('2d'); cx.drawImage(img, 0, 0);
+  const d = cx.getImageData(0, 0, c.width, c.height).data;
+  let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  for (let b = 0; b < c.height; b += 2) for (let a = 0; a < c.width; a += 2) {
+    if (d[(b * c.width + a) * 4 + 3] > 16) { if (a < x0) x0 = a; if (a > x1) x1 = a; if (b < y0) y0 = b; if (b > y1) y1 = b; }
+  }
+  const L = px + x0 * z, R = px + x1 * z, T = py + y0 * z, B = py + y1 * z;
+  return { percorso, zoom: +z.toFixed(3),
+    margini: { sx: Math.round(L), dx: Math.round(rt.width - R), sopra: Math.round(T), sotto: Math.round(rt.height - B) },
+    dentro: L >= -2 && T >= -2 && R <= rt.width + 2 && B <= rt.height + 2 };
+};
+await window.__inquadratura('/guida/citta/shibuya');
+```
+
+**Atteso:** `dentro: true` e i due margini orizzontali uguali a qualche pixel. Misure del
+7 settembre 2026:
+
+| percorso | zoom | margini sx/dx | sopra/sotto |
+|---|---|---|---|
+| `/guida/citta/shibuya` | 0.974 | 26 / 28 | 194 / 207 |
+| `/guida/citta/yongen-jaya` | 1.314 | 24 / 27 | 51 / 51 |
+| `/guida/dungeon/kamoshida` | 0.864 | 26 / 26 | 60 / 38 |
+| `/guida/mappe/citta-shibuya` | 1.871 | 270 / 274 | 24 / 26 |
+
+I margini verticali possono restare asimmetrici di qualche decina di pixel, e non è un difetto:
+l'inquadratura comprende **anche gli spilli**, non solo il disegno, perché uno spillo tagliato
+fuori è peggio di un disegno leggermente alto. Quando un pin sta fuori dalla sagoma, il riquadro
+si allarga da quel lato e il disegno si sposta di conseguenza.
+
+Restano fuori da questa regola, di proposito, i casi in cui il punto è **chiesto**: un indirizzo
+con `?spillo=` o con la terna `x/y/zoom`, e l'arrivo dalla mappa di Tokyo sull'ingresso configurato
+di un quartiere. Lì il lettore ha detto dove vuole guardare.

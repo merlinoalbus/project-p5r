@@ -55,8 +55,9 @@ beforeEach(() => {
 describe('MappaPage', () => {
   it('l’indice elenca le radici con le mappe figlie e i collegamenti al visore', async () => {
     monta('/guida/mappe');
-    // Tokyo porta alla mappa canonica della Città, non al visore della sua planimetria.
-    expect(await screen.findByRole('link', { name: 'Tokyo' })).toHaveAttribute('href', '/guida/citta');
+    // Tokyo porta alla mappa canonica della Città, non al visore della sua planimetria. Il nome
+    // accessibile della carta comprende ora anche il tipo e i conteggi, quindi si ancora l'inizio.
+    expect(await screen.findByRole('link', { name: /^Tokyo/ })).toHaveAttribute('href', '/guida/citta');
     expect(screen.getByRole('link', {name: 'Shibuya'})).not.toBeVisible();
     fireEvent.click(screen.getByLabelText('Mostra le mappe di Tokyo'));
     const tokyo = within(screen.getByRole('list', { name: 'Mappe di Tokyo' }));
@@ -95,7 +96,7 @@ it('un contenitore senza immagine apre i luoghi figli senza una finta planimetri
   monta('/guida/mappe/dungeon-kamoshida');
   expect(await screen.findByRole('heading',{name:'Palazzo di Kamoshida'})).toBeInTheDocument();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
-  expect(screen.getByRole('link',{name:'Ingresso'})).toBeInTheDocument();
+  expect(screen.getByRole('link',{name:/^Ingresso/})).toBeInTheDocument();
 });
 
 it('la planimetria di Tokyo non è più una destinazione: si finisce sulla mappa della Città',async()=>{
@@ -143,7 +144,7 @@ it('l’emblema del palazzo senza dimensioni lascia guida e planimetrie accessib
   const guida=await screen.findByRole('region',{name:'Contenuti della guida'});
   expect(guida).toBeVisible();
   expect(within(guida).getByText('Contenuto conservato')).toBeVisible();
-  expect(screen.getByRole('link',{name:'Ingresso'})).toBeVisible();
+  expect(screen.getByRole('link',{name:/^Ingresso/})).toBeVisible();
   expect(screen.queryByTestId('visore-mappa')).not.toBeInTheDocument();
   const summary=within(guida).getByText('Biblioteca');
   fireEvent.click(summary);
